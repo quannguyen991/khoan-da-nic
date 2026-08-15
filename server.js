@@ -23,6 +23,7 @@ const { dungTrang } = require('./src/safety-card-page');
 const { layKeHoachPhucHoi } = require('./src/analysis/recovery-adapters');
 const { taoSuKien, timHoSoCoTheGop, dungCauHoiGop, tinHieuCase, baLop, GIAI_DOAN } = require('./src/journey-engine');
 const { buocTiepTheo } = require('./src/kich-ban-di-tiep');
+const { tinLuaDao } = require('./src/tin-lua-dao');
 const KP = require('./src/khoan-proof');
 const KY = require('./src/khoan-proof-ky');
 const VR = require('./src/verified-request');
@@ -465,6 +466,29 @@ app.get('/api/kich-ban/:hoKichBan', chanDoc, (req, res) => {
     hoKichBan,
     giaiDoan,
     buoc: buocTiepTheo(hoKichBan, giaiDoan),
+  });
+});
+
+/**
+ * TIN LỪA ĐẢO TỪ BÁO THẬT.
+ *
+ * ⚠️ §11 — MỖI TIN MANG TÊN BÁO VÀ ĐƯỜNG DẪN GỐC. Danh sách tin cứng trước đây
+ * không có nguồn nào; đó đúng là "cảnh báo không có nguồn" mà §11 cấm.
+ *
+ * ⚠️ §4.3 — `chuaLayDuoc` KHÔNG RỖNG THÌ FRONTEND PHẢI HIỆN.
+ * Mất mạng, báo đổi địa chỉ, đường hầm chết — cả ba đều cho danh sách rỗng.
+ * Trả `[]` trơn là để màn hình nói "dạo này không có vụ lừa đảo nào".
+ *
+ * ⚠️ KHÔNG CHẶN ĐƯỜNG PHÂN TÍCH (§6.7). Có bộ nhớ đệm 30 phút trên đĩa và hạn
+ * giờ 8 giây mỗi tờ báo; không lượt `/api/analyze` nào chờ ở đây.
+ */
+app.get('/api/tin-lua-dao', chanDoc, async (req, res) => {
+  const d = await tinLuaDao();
+  return res.json({
+    tin: d.tin,
+    luc: d.luc,
+    chuaLayDuoc: d.chuaLayDuoc,
+    tuDem: d.tuDem,
   });
 });
 
