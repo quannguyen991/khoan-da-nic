@@ -9,7 +9,7 @@
  * Hàm thuần. Không mạng, không AI.
  */
 
-const { segmentsForScope } = require('./context-builder');
+const { segmentsForScope, boDau } = require('./context-builder');
 const { layPack } = require('./locale-pack-registry');
 const { laTinHieu } = require('./signal-registry');
 
@@ -20,16 +20,25 @@ const { laTinHieu } = require('./signal-registry');
  * ⚠️ "chuyển tiền ngay không sẽ bị bắt giữ" KHÔNG phải phủ định: ở đây `không`
  * nghĩa là "nếu không". Nên bỏ qua khi giữa chúng có `sẽ` hoặc dấu phẩy.
  */
-const PHU_DINH = /(không|đừng|chẳng|chớ|never|do not|cannot)\s*(cần|phải|nên|được|bao giờ)?\s*$/;
+/**
+ * ⚠️ VIẾT KHÔNG DẤU và so trên bản đã bỏ dấu.
+ *
+ * Từ khi cue bank chạy được trên tiếng Việt không dấu, hàng rào phủ định cũng
+ * phải chạy trên đó — nếu không thì "khong can gap" không được nhận là phủ định
+ * và MAN_URGENCY bật oan. Đúng lỗi đối xứng với chuyện cue bank có dấu.
+ *
+ * Hệ quả tốt: không dấu là ASCII nên `\b` hoạt động đúng.
+ */
+const PHU_DINH = /(khong|dung|chang|cho|never|do not|cannot)\s*(can|phai|nen|duoc|bao gio)?\s*$/;
+const KHONG_PHAI_PHU_DINH = /[,;]|\bse\b|\bthi\b/;
 
 function laPhuDinh(text, viTri) {
-  const truoc = text.slice(Math.max(0, viTri - 16), viTri);
+  const truoc = boDau(text.slice(Math.max(0, viTri - 16), viTri));
   const m = PHU_DINH.exec(truoc);
   if (!m) return false;
   // Chỉ xét đoạn GIỮA từ phủ định và cụm. Dấu phẩy đứng TRƯỚC từ phủ định là
   // chuyện khác: "Bác cứ bình tĩnh, không cần gấp đâu." vẫn là phủ định thật.
-  const giua = truoc.slice(m.index);
-  return !/[,;]|\bsẽ\b|\bthì\b/.test(giua);
+  return !KHONG_PHAI_PHU_DINH.test(truoc.slice(m.index));
 }
 
 /** C.5 — danh sách tắt vô điều kiện, so trên bản KHÔNG DẤU. */
@@ -65,6 +74,18 @@ function directPrecheck(ctx, opts = {}) {
 
       for (const mau of mauList) {
         const re = new RegExp(mau.pattern, 'i');
+        /**
+         * ⚠️ TIẾNG VIỆT KHÔNG DẤU LÀ CA THẬT, KHÔNG PHẢI CA HIẾM.
+         *
+         * SMS lừa đảo ở Việt Nam rất hay viết không dấu. Cue bank có dấu nên
+         * chúng trượt sạch: đo được câu "Bac chuyen het tien sang tai khoan an
+         * toan cua Bo Cong an ngay" chỉ 7 điểm, trong khi bản có dấu được 61.
+         *
+         * `boDau()` chỉ gỡ dấu tổ hợp và đổi đ→d — mọi ký tự cú pháp regex đều
+         * là ASCII nên không bị đụng tới. Bỏ dấu CẢ MẪU LẪN VĂN BẢN rồi so.
+         */
+        const mauKhongDau = boDau(mau.pattern);
+        const reKhongDau = mauKhongDau === mau.pattern ? null : new RegExp(mauKhongDau, 'i');
         const doanList = segmentsForScope(ctx, mau.scope);
 
         let batDuoc = null;
@@ -72,9 +93,13 @@ function directPrecheck(ctx, opts = {}) {
           if (biTatVoDieuKien(pack, signalId, doan.folded)) continue;
 
           // Khớp trên bản chuẩn hoá trước; nếu trượt thì thử các biến thể OCR.
-          const ungVien = [doan.normalized, ...doan.ocrVariants];
-          for (const chuoi of ungVien) {
-            const m = re.exec(chuoi);
+          const ungVien = [
+            { chuoi: doan.normalized, re },
+            ...(reKhongDau ? [{ chuoi: doan.folded, re: reKhongDau }] : []),
+            ...doan.ocrVariants.map((c) => ({ chuoi: c, re: reKhongDau || re })),
+          ];
+          for (const { chuoi, re: reDung } of ungVien) {
+            const m = reDung.exec(chuoi);
             if (!m) continue;
             if (laPhuDinh(chuoi, m.index)) continue;
             batDuoc = {

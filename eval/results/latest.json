@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "commitSha": "12116a5",
+    "commitSha": "3fd7eba",
     "analysisVersion": "1.0.0",
     "registryVersion": "1.0.0",
     "ruleVersion": "1.1.0",
@@ -18,24 +18,24 @@
     "tongMau": 445,
     "dat": 280,
     "tyLeDat": 0.6292134831460674,
-    "dangerousRecall": 0.6525821596244131,
+    "dangerousRecall": 0.6431924882629108,
     "soNguyHiem": 213,
-    "highRiskFP": 0.08783783783783784,
+    "highRiskFP": 0.07432432432432433,
     "soLanh": 148,
-    "fpTrenLatChat": 0.15178571428571427,
+    "fpTrenLatChat": 0.13392857142857142,
     "soLanhChat": 112,
-    "vuotTranToiDa": 0.060674157303370786,
-    "tutDuoiMucDo": 0.3101123595505618,
+    "vuotTranToiDa": 0.056179775280898875,
+    "tutDuoiMucDo": 0.3146067415730337,
     "confusion": {
-      "CHUA_THAY->CHUA_THAY": 118,
+      "CHUA_THAY->CHUA_THAY": 120,
       "CHUA_THAY->NGHI_NGO": 17,
-      "CHUA_THAY->CAO": 13,
+      "CHUA_THAY->CAO": 11,
       "NGHI_NGO->CHUA_THAY": 64,
       "NGHI_NGO->NGHI_NGO": 16,
       "NGHI_NGO->CAO": 4,
-      "CAO->CHUA_THAY": 21,
+      "CAO->CHUA_THAY": 23,
       "CAO->NGHI_NGO": 53,
-      "CAO->CAO": 139
+      "CAO->CAO": 137
     }
   },
   "parity": {
@@ -44,24 +44,24 @@
         "tongMau": 345,
         "dat": 222,
         "tyLeDat": 0.6434782608695652,
-        "dangerousRecall": 0.6275862068965518,
+        "dangerousRecall": 0.6137931034482759,
         "soNguyHiem": 145,
-        "highRiskFP": 0.08843537414965986,
+        "highRiskFP": 0.07482993197278912,
         "soLanh": 147,
-        "fpTrenLatChat": 0.15315315315315314,
+        "fpTrenLatChat": 0.13513513513513514,
         "soLanhChat": 111,
-        "vuotTranToiDa": 0.07536231884057971,
-        "tutDuoiMucDo": 0.2811594202898551,
+        "vuotTranToiDa": 0.06956521739130435,
+        "tutDuoiMucDo": 0.28695652173913044,
         "confusion": {
-          "CHUA_THAY->CHUA_THAY": 117,
+          "CHUA_THAY->CHUA_THAY": 119,
           "CHUA_THAY->NGHI_NGO": 17,
-          "CHUA_THAY->CAO": 13,
+          "CHUA_THAY->CAO": 11,
           "NGHI_NGO->CHUA_THAY": 43,
           "NGHI_NGO->NGHI_NGO": 7,
           "NGHI_NGO->CAO": 3,
-          "CAO->CHUA_THAY": 19,
+          "CAO->CHUA_THAY": 21,
           "CAO->NGHI_NGO": 35,
-          "CAO->CAO": 91
+          "CAO->CAO": 89
         }
       },
       "en": {
@@ -113,7 +113,7 @@
         }
       }
     },
-    "lechRecall": 0.06938349007314526,
+    "lechRecall": 0.08317659352142115,
     "lechFP": null
   },
   "mauThat": {
@@ -132,5 +132,5 @@
     "theoStatus": {},
     "viDu": null
   },
-  "thoiGianGiay": 0.3
+  "thoiGianGiay": 1.1
 }

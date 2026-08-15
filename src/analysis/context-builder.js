@@ -206,11 +206,39 @@ const KHUNG_GIAO_DUC = new RegExp([
   'scammers?\\b[^.]{0,40}\\b(may|might|will|often|can)',
   'fraudsters?\\b', 'warns?\\s+(that|you)', 'be (aware|careful)',
   'if\\s+(someone|anyone|a caller)',
-  'không bao giờ\\s+(yêu cầu|hỏi|đòi|gọi|nhắn|cử)',
-  'kẻ (lừa đảo|gian)', 'lừa đảo thường',
-  '^\\s*(cảnh báo|lưu ý)',
-  'đừng\\b[^.]{0,60}\\bhãy\\b',
-  '^\\s*không\\s+(cài|chuyển|đọc|bấm|tải)',
+  /**
+   * ⚠️ KHUNG TIẾNG VIỆT VIẾT KHÔNG DẤU, và khớp trên bản đã bỏ dấu.
+   *
+   * Lý do: `warn-01` là "Cong an TP Ha Noi canh bao: …" — tiếng Việt KHÔNG DẤU,
+   * thứ rất phổ biến trong tin nhắn thật. Mọi khung có dấu đều trượt sạch, và
+   * một bài cảnh báo của công an bị chấm 54 điểm.
+   *
+   * Hệ quả tốt: không dấu là ASCII, nên `\b` hoạt động ĐÚNG trở lại. Cả lớp lỗi
+   * `\b` không nhận chữ có dấu biến mất khỏi khu vực này.
+   *
+   * Đây đúng cách C.5 đã làm cho danh sách tắt: "dạng không dấu — chuẩn hoá
+   * trước khi so".
+   */
+  'khong bao gio\\s+(yeu cau|hoi|doi|goi|nhan|cu)',
+  'khong co\\b[^.]{0,30}\\bnao\\b[^.]{0,20}(yeu cau|doi|hoi)',
+  'ke (lua dao|gian)', 'lua dao thuong',
+  '^\\s*(canh bao|luu y|thong bao)\\b',
+  'dung\\b[^.]{0,60}\\b(hay|nhe|dap may|tat may)\\b',
+  'dung ai\\b', 'khong ai\\b[^.]{0,20}(nen|duoc)\\b',
+  '^\\s*khong\\s+(cai|chuyen|doc|bam|tai)\\b',
+  // Cơ quan / tổ chức đứng TRƯỚC động từ cảnh báo.
+  '(cong an|canh sat|co quan|ngan hang|to dan pho|bo|cuc|chi cuc)[^.]{0,40}'
+    + '(canh bao|khuyen cao|luu y|thong bao)',
+  // Khung TƯỜNG THUẬT về nạn nhân hoặc về kẻ giả danh.
+  '(nan nhan|nguoi bi hai|bi hai)\\b[^.]{0,30}(duoc|bi)\\s+(yeu cau|du|lua)',
+  'co nguoi\\b[^.]{0,20}(gia danh|mao danh|xung la)',
+  'theo (co quan|cong an|bao|nguon tin)',
+  // Cấu trúc ĐIỀU KIỆN — tương đương "if someone … hang up" của tiếng Anh.
+  '\\bai\\b[^.]{0,60}\\bthi\\b[^.]{0,40}(lua dao|ke gian|dung|khong nen|hay|dap may|tat may|cup may)',
+  '(neu|he)\\s[^.]{0,60}(thi\\s[^.]{0,40})?(lua dao|dung|khong nen|hay|dap may|tat may|cup may)',
+  // GỌI THẲNG TÊN là lừa đảo — không ai vừa lừa vừa tự khai mình đang lừa.
+  '(chac chan|dung) la lua dao', 'la (tro|chieu|thu doan) lua',
+  'khong co (cai gi|thu gi|khai niem)',
 
   /**
    * ⚠️ BỐN KHUNG GIÁO DỤC TIẾNG VIỆT BỔ SUNG 15/8/2026.
@@ -226,18 +254,14 @@ const KHUNG_GIAO_DUC = new RegExp([
    * C.1: hàng rào là CẤU TRÚC, không phải danh sách từ khoá.
    */
   // 1. Cơ quan đứng TRƯỚC động từ cảnh báo: "Công an TP Hà Nội cảnh báo: …"
-  '(công an|cảnh sát|cơ quan|ngân hàng|bộ|cục|chi cục)[^.]{0,40}(cảnh báo|khuyến cáo|lưu ý)',
   // 2. Khung TƯỜNG THUẬT về nạn nhân: "nạn nhân được yêu cầu chuyển…"
   '(nạn nhân|người bị hại|bị hại)\\b[^.]{0,30}(được|bị)\\s+(yêu cầu|dụ|lừa)',
-  'theo (cơ quan|công an|báo|nguồn tin)',
   // 3. Cấu trúc ĐIỀU KIỆN — tương đương "if someone … hang up" của tiếng Anh
   // ⚠️ KHÔNG đặt `\b` sau `thì` — `ì` không phải ký tự chữ trong JavaScript nên
   // `\bthì\b` KHÔNG BAO GIỜ khớp. Đây là lần thứ tư lỗi này cắn trong dự án.
   '\\bai\\b[^.]{0,60}\\bthì[^.]{0,40}(lừa đảo|kẻ gian|đừng|không nên|hãy)',
   '(nếu|hễ)\\s[^.]{0,60}(thì\\s[^.]{0,30})?(lừa đảo|đừng|không nên|hãy|cúp máy)',
   // 4. GỌI THẲNG TÊN là lừa đảo — không ai vừa lừa vừa tự khai mình đang lừa
-  '(chắc chắn|đúng) là lừa đảo', 'là (trò|chiêu|thủ đoạn) lừa',
-  'không có (cái gì|thứ gì|khái niệm)',
 ].join('|'), 'g');
 
 const KHUNG_THONG_BAO = new RegExp([
@@ -283,9 +307,13 @@ const KHUNG_MENH_LENH = new RegExp([
  * Trả về vị trí sớm nhất của một khung giáo dục, hoặc -1.
  * C.1: khung này chi phối MỌI động từ rủi ro đứng SAU nó.
  */
+/**
+ * ⚠️ Khớp trên bản KHÔNG DẤU. Bỏ dấu giữ nguyên độ dài chuỗi (chỉ gỡ dấu tổ hợp
+ * và đổi đ→d), nên chỉ số trả về vẫn dùng được để so với vị trí động từ rủi ro.
+ */
 function viTriKhungGiaoDuc(n) {
   KHUNG_GIAO_DUC.lastIndex = 0;
-  const m = KHUNG_GIAO_DUC.exec(n);
+  const m = KHUNG_GIAO_DUC.exec(boDau(n));
   return m ? m.index : -1;
 }
 
