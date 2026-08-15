@@ -36,6 +36,41 @@ module.exports = {
       { pattern: 'chuyển\\b[^.]{0,40}(tiền|triệu|đồng|khoản|vào tài khoản|sang tài khoản)', scope: 'action' },
       { pattern: '\\bchuyển khoản\\b', scope: 'action' },
       { pattern: '\\b(nộp|gửi)\\b[^.]{0,24}(tiền|triệu|đồng)\\b', scope: 'action' },
+      /**
+       * ⚠️ BỐN ĐỘNG TỪ "ĐƯA TIỀN VÀO" CÒN THIẾU — vá 15/8/2026.
+       *
+       * Đo được trong 23 ca `CAO → CHUA_THAY`: ba mẫu dưới đây ra ĐÚNG 0 ĐIỂM
+       * vì cue bank chỉ có `chuyển` / `nộp` / `gửi`:
+       *   "cô nạp 50 triệu vốn ban đầu"
+       *   "bác đặt cọc 1.200.000đ tiền nguyên liệu"
+       *   "chị nạp 8 triệu nâng gói"
+       * Tiếng Việt gọi việc đưa tiền bằng nhiều động từ khác nhau tuỳ bối cảnh
+       * (nạp cho ví/ứng dụng, đóng cho tổ chức, đặt cọc cho hợp đồng). Thiếu
+       * một động từ là thiếu cả một họ kịch bản.
+       *
+       * ⚠️ KHÔNG có `đóng` ở đây, dù nó cũng là "đưa tiền". Đo được: "Mẹ nhớ
+       * ĐÓNG TIỀN bảo hiểm y tế trước ngày 30 nhé" — tin nhắn con nhắc mẹ, nhãn
+       * CHUA_THAY, trần CHUA_THAY — bị đẩy lên NGHI_NGO. `đóng tiền học`,
+       * `đóng tiền điện`, `đóng tiền bảo hiểm` là tiếng Việt đời thường.
+       * `đóng` chỉ được dùng ở OFF_ADVANCE_FEE, nơi có thêm ràng buộc `phí …
+       * trước`. Rộng thêm một động từ mà mất một mẫu lành là lỗ vốn.
+       *
+       * ⚠️ KHÔNG `\b` cạnh `đ` — `đ` không phải ký tự chữ trong JavaScript.
+       */
+      { pattern: '(nạp|đặt cọc|góp vốn)[^.]{0,24}(tiền|triệu|đồng|vốn|nghìn)', scope: 'action' },
+      /**
+       * ĐỘNG TỪ + MỘT SỐ TIỀN CỤ THỂ. Trục phân biệt không phải là từ khoá mà là
+       * HÌNH DẠNG: nói ra một con số là đang đòi đúng số đó.
+       *   "Cô chuyển 6.500.000đ vào số 9999 8888 7777"  → bắt
+       *   "đóng 70 triệu đồng phí thông quan"           → bắt
+       *   "Mẹ nhớ đóng tiền bảo hiểm y tế"              → BỎ QUA (không có số)
+       * Nhờ vậy `đóng` dùng lại được mà không đụng vào tin nhắn hoá đơn đời thường.
+       *
+       * ⚠️ KHÔNG có `ứng` trong danh sách động từ: "tạm ứng 8 triệu" là từ chuẩn
+       * của bệnh viện, và đã đo được nó đẩy một tin nhắn con gái thật lên CAO.
+       * ⚠️ `(?![a-zà-ỹ])` thay cho `\b` — `đ` không phải ký tự chữ trong JavaScript.
+       */
+      { pattern: '(chuyển|nạp|đóng|nộp|gửi)\\s+\\d+\\s*(đ|k|tr|triệu|đồng|nghìn|tỷ|tỉ)(?![a-zà-ỹ])', scope: 'action' },
     ],
     FIN_SAFE_ACCOUNT: [
       { pattern: '(tài khoản|ví)\\s+(an toàn|bảo đảm|tạm giữ|phong toả)', scope: 'action' },
@@ -124,6 +159,26 @@ module.exports = {
     ],
     OFF_INVESTMENT_GUARANTEE: [
       { pattern: '(lợi nhuận|lãi)\\b[^.]{0,20}(cam kết|đảm bảo|chắc chắn)', scope: 'any' },
+    ],
+    /**
+     * OFF_ADVANCE_FEE và OFF_TASK_PREPAY TRƯỚC ĐÂY KHÔNG CÓ MẪU NÀO ở vi-VN —
+     * chúng chỉ bật được khi AI chạy. Mà §6.10 nói rõ tầng luật phải đứng một
+     * mình được khi mất mạng, mất AI. Hai họ kịch bản phổ biến nhất ở Việt Nam
+     * (việc nhẹ lương cao, đầu tư nạp vốn) vì thế câm hoàn toàn ở chế độ suy
+     * giảm. Đây là lỗ, không phải lựa chọn thiết kế.
+     */
+    OFF_ADVANCE_FEE: [
+      /**
+       * ⚠️ KHÔNG có `tạm ứng` ở đây. Đo được: "Con vừa đưa bà vào viện Bạch Mai
+       * phòng 402, TẠM ỨNG 8 triệu" — tin nhắn thật của con gái, trần NGHI_NGO,
+       * bị đẩy lên CAO. `tạm ứng` là từ chuẩn của bệnh viện và cơ quan.
+       */
+      { pattern: '(đặt cọc|ứng trước|nạp trước|đóng trước)', scope: 'action' },
+      { pattern: '(nộp|đóng|chuyển)[^.]{0,20}(phí|lệ phí)[^.]{0,30}(trước|rồi mới|thì mới)', scope: 'action' },
+    ],
+    OFF_TASK_PREPAY: [
+      { pattern: '(nhiệm vụ|đơn hàng|chốt đơn)[^.]{0,40}(nạp|ứng|đặt cọc|chuyển)', scope: 'action' },
+      { pattern: '(nạp|ứng)[^.]{0,30}(làm nhiệm vụ|hoàn thành nhiệm vụ|nâng (gói|cấp)|rút (được|về))', scope: 'action' },
     ],
   },
 

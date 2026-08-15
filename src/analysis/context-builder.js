@@ -83,8 +83,30 @@ function goCheChu(t) {
 }
 
 /** Case-fold để khớp, GIỮ ranh giới câu và dấu câu tới khi phủ định/scope giải xong. */
+/**
+ * DẤU NGĂN HÀNG NGHÌN GIỮA HAI CHỮ SỐ — bỏ đi.
+ *
+ * ⚠️ ĐÂY LÀ LỖ LỚN NHẤT ĐÃ TÌM RA Ở CUE BANK, và nó nằm ở chỗ không ai nhìn.
+ *
+ * Gần như MỌI mẫu trong locale pack dùng `[^.]{0,N}` làm cách nói "trong cùng
+ * một câu". Nhưng tiền Việt viết `1.200.000đ` — dấu chấm nằm GIỮA cụm, nên
+ * `[^.]` chặn ngang. Đo được:
+ *   "Bác chuyển 1.200.000đ vào tài khoản này ngay" → FIN_TRANSFER_REQUEST TRƯỢT
+ *   "Bác chuyển 1200000đ  vào tài khoản này ngay"  → bắt được
+ * Cùng một câu, khác mỗi cách viết số. Mà cách viết CÓ dấu chấm mới là cách
+ * tin nhắn thật viết.
+ *
+ * `catCau()` đã xử lý đúng ở tầng cắt câu (`laRanhGioi` bỏ qua dấu chấm giữa
+ * hai chữ số) — nhưng tầng KHỚP MẪU thì chưa. Vá ở đây một lần cho tất cả mẫu,
+ * thay vì sửa từng dòng cue và chắc chắn quên vài dòng.
+ *
+ * An toàn theo §4.2: bỏ ký tự ngăn chỉ làm khoảng `[^.]{0,N}` với tới XA HƠN,
+ * tức chỉ THÊM khớp. Không mẫu nào trong locale pack chứa dấu chấm giữa số.
+ */
+const NGAN_HANG_NGHIN = /(?<=\d)[.,](?=\d{3}\b)/g;
+
 function chuanHoa(s) {
-  let t = s.toLowerCase();
+  let t = s.toLowerCase().replace(NGAN_HANG_NGHIN, '');
   for (const [re, thay] of CONTRACTIONS) t = t.replace(re, thay);
   return t.replace(/[ \t]+/g, ' ').trim();
 }
@@ -207,62 +229,49 @@ const KHUNG_GIAO_DUC = new RegExp([
   'fraudsters?\\b', 'warns?\\s+(that|you)', 'be (aware|careful)',
   'if\\s+(someone|anyone|a caller)',
   /**
-   * ⚠️ KHUNG TIẾNG VIỆT VIẾT KHÔNG DẤU, và khớp trên bản đã bỏ dấu.
+   * ── KHUNG TIẾNG VIỆT ──
    *
-   * Lý do: `warn-01` là "Cong an TP Ha Noi canh bao: …" — tiếng Việt KHÔNG DẤU,
-   * thứ rất phổ biến trong tin nhắn thật. Mọi khung có dấu đều trượt sạch, và
-   * một bài cảnh báo của công an bị chấm 54 điểm.
+   * ⚠️ VIẾT CÓ DẤU. Bản không dấu SINH TỰ ĐỘNG ở `KHUNG_GIAO_DUC_KHONG_DAU`,
+   * không chép tay hai lần.
    *
-   * Hệ quả tốt: không dấu là ASCII, nên `\b` hoạt động ĐÚNG trở lại. Cả lớp lỗi
-   * `\b` không nhận chữ có dấu biến mất khỏi khu vực này.
+   * Vì sao KHÔNG viết thẳng dạng không dấu: `đừng` và `dụng` cùng bỏ dấu thành
+   * `dung`, nên khung `dung…nhe` khớp trúng câu "mở ứng DỤNG ngân hàng rồi bật
+   * chia sẻ màn hình NHÉ" — một câu lừa đảo bị xếp là giáo dục, vứt luôn
+   * DEV_SCREEN_SHARE_BANKING và mất CO-04. Đồng âm khi bỏ dấu là có thật.
    *
-   * Đây đúng cách C.5 đã làm cho danh sách tắt: "dạng không dấu — chuẩn hoá
-   * trước khi so".
+   * ⚠️ KHÔNG đặt `\b` cạnh chữ có dấu — test/ranh-gioi-tu-unicode.test.js chặn.
    */
-  'khong bao gio\\s+(yeu cau|hoi|doi|goi|nhan|cu)',
-  'khong co\\b[^.]{0,30}\\bnao\\b[^.]{0,20}(yeu cau|doi|hoi)',
-  'ke (lua dao|gian)', 'lua dao thuong',
-  '^\\s*(canh bao|luu y|thong bao)\\b',
-  'dung\\b[^.]{0,60}\\b(hay|nhe|dap may|tat may)\\b',
-  'dung ai\\b', 'khong ai\\b[^.]{0,20}(nen|duoc)\\b',
-  '^\\s*khong\\s+(cai|chuyen|doc|bam|tai)\\b',
-  // Cơ quan / tổ chức đứng TRƯỚC động từ cảnh báo.
-  '(cong an|canh sat|co quan|ngan hang|to dan pho|bo|cuc|chi cuc)[^.]{0,40}'
-    + '(canh bao|khuyen cao|luu y|thong bao)',
-  // Khung TƯỜNG THUẬT về nạn nhân hoặc về kẻ giả danh.
-  '(nan nhan|nguoi bi hai|bi hai)\\b[^.]{0,30}(duoc|bi)\\s+(yeu cau|du|lua)',
-  'co nguoi\\b[^.]{0,20}(gia danh|mao danh|xung la)',
-  'theo (co quan|cong an|bao|nguon tin)',
-  // Cấu trúc ĐIỀU KIỆN — tương đương "if someone … hang up" của tiếng Anh.
-  '\\bai\\b[^.]{0,60}\\bthi\\b[^.]{0,40}(lua dao|ke gian|dung|khong nen|hay|dap may|tat may|cup may)',
-  '(neu|he)\\s[^.]{0,60}(thi\\s[^.]{0,40})?(lua dao|dung|khong nen|hay|dap may|tat may|cup may)',
-  // GỌI THẲNG TÊN là lừa đảo — không ai vừa lừa vừa tự khai mình đang lừa.
-  '(chac chan|dung) la lua dao', 'la (tro|chieu|thu doan) lua',
-  'khong co (cai gi|thu gi|khai niem)',
+  'không bao giờ\\s+(yêu cầu|hỏi|đòi|gọi|nhắn|cử)',
+  'không có[^.]{0,30}nào[^.]{0,20}(yêu cầu|đòi|hỏi)',
+  'kẻ (lừa đảo|gian)', 'lừa đảo thường',
+  '^\\s*(cảnh báo|lưu ý|thông báo)',
+  'đừng[^.]{0,60}(hãy|dập máy|tắt máy)',
+  'đừng ai\\s', 'không ai[^.]{0,20}(nên|được)',
+  '^\\s*không\\s+(cài|chuyển|đọc|bấm|tải)',
 
-  /**
-   * ⚠️ BỐN KHUNG GIÁO DỤC TIẾNG VIỆT BỔ SUNG 15/8/2026.
-   *
-   * Đo được: cả BỐN mẫu FIN_SAFE_ACCOUNT bật oan đều là câu cảnh báo chống lừa
-   * đảo — đúng thứ Phụ lục C sinh ra để chặn. Vì CO-03 là override MỘT TÍN HIỆU,
-   * mỗi lần bật oan là thẳng lên màn khẩn cấp.
-   *
-   * Khung tiếng Việt trước đây mỏng hơn hẳn bản tiếng Anh: chỉ nhận "cảnh báo"
-   * ở ĐẦU câu, không nhận cơ quan đứng trước, không nhận lời kể chuyện cũ, không
-   * nhận cấu trúc điều kiện "ai … thì …".
-   *
-   * C.1: hàng rào là CẤU TRÚC, không phải danh sách từ khoá.
-   */
-  // 1. Cơ quan đứng TRƯỚC động từ cảnh báo: "Công an TP Hà Nội cảnh báo: …"
-  // 2. Khung TƯỜNG THUẬT về nạn nhân: "nạn nhân được yêu cầu chuyển…"
-  '(nạn nhân|người bị hại|bị hại)\\b[^.]{0,30}(được|bị)\\s+(yêu cầu|dụ|lừa)',
-  // 3. Cấu trúc ĐIỀU KIỆN — tương đương "if someone … hang up" của tiếng Anh
-  // ⚠️ KHÔNG đặt `\b` sau `thì` — `ì` không phải ký tự chữ trong JavaScript nên
-  // `\bthì\b` KHÔNG BAO GIỜ khớp. Đây là lần thứ tư lỗi này cắn trong dự án.
-  '\\bai\\b[^.]{0,60}\\bthì[^.]{0,40}(lừa đảo|kẻ gian|đừng|không nên|hãy)',
-  '(nếu|hễ)\\s[^.]{0,60}(thì\\s[^.]{0,30})?(lừa đảo|đừng|không nên|hãy|cúp máy)',
-  // 4. GỌI THẲNG TÊN là lừa đảo — không ai vừa lừa vừa tự khai mình đang lừa
+  // Cơ quan / tổ chức đứng TRƯỚC động từ cảnh báo: "Công an TP Hà Nội cảnh báo:"
+  '(công an|cảnh sát|cơ quan|ngân hàng|tổ dân phố|bộ|cục|chi cục)[^.]{0,40}'
+    + '(cảnh báo|khuyến cáo|lưu ý|thông báo)',
+
+  // Khung TƯỜNG THUẬT về nạn nhân, hoặc về kẻ giả danh.
+  '(nạn nhân|người bị hại)[^.]{0,30}(được|bị)\\s+(yêu cầu|dụ|lừa)',
+  'có người[^.]{0,20}(giả danh|mạo danh|xưng là)',
+  'theo (cơ quan|công an|báo|nguồn tin)',
+
+  // Cấu trúc ĐIỀU KIỆN — tương đương "if someone … hang up" của tiếng Anh.
+  '\\bai\\s[^.]{0,60}thì[^.]{0,40}(lừa đảo|kẻ gian|đừng|không nên|hãy|dập máy|tắt máy|cúp máy)',
+  '(nếu|hễ)\\s[^.]{0,60}(thì\\s[^.]{0,40})?(lừa đảo|đừng|không nên|hãy|dập máy|tắt máy|cúp máy)',
+
+  // GỌI THẲNG TÊN là lừa đảo — không ai vừa lừa vừa tự khai mình đang lừa.
+  '(chắc chắn|đúng) là lừa đảo', 'là (trò|chiêu|thủ đoạn) lừa',
+  'không có (cái gì|thứ gì|khái niệm)',
 ].join('|'), 'g');
+
+/** Bản KHÔNG DẤU, sinh tự động. Chỉ dùng khi văn bản cũng không dấu. */
+const KHUNG_GIAO_DUC_KHONG_DAU = new RegExp(boDau(KHUNG_GIAO_DUC.source), 'g');
+
+/** Văn bản có ít nhất một chữ mang dấu tiếng Việt? */
+const CO_DAU = /[À-ỹ]/;
 
 const KHUNG_THONG_BAO = new RegExp([
   '(was|were|has been|have been)\\s+(completed|processed|received|credited|debited|sent)',
@@ -308,12 +317,25 @@ const KHUNG_MENH_LENH = new RegExp([
  * C.1: khung này chi phối MỌI động từ rủi ro đứng SAU nó.
  */
 /**
- * ⚠️ Khớp trên bản KHÔNG DẤU. Bỏ dấu giữ nguyên độ dài chuỗi (chỉ gỡ dấu tổ hợp
- * và đổi đ→d), nên chỉ số trả về vẫn dùng được để so với vị trí động từ rủi ro.
+ * ⚠️ CHỌN BỘ KHUNG THEO VĂN BẢN, KHÔNG BỎ DẤU TẤT.
+ *
+ * Trước đây hàm này bỏ dấu MỌI văn bản rồi khớp bằng khung không dấu. Đo được
+ * hậu quả: `đừng` và `dụng` cùng bỏ dấu thành `dung`, nên khung `dung…nhé` khớp
+ * trúng "mở ứng DỤNG ngân hàng giúp em rồi bật chia sẻ màn hình NHÉ". Một câu
+ * lừa đảo bị xếp `warning_education`, DEV_SCREEN_SHARE_BANKING bị vứt, mất
+ * override CO-04. Bỏ dấu là phép ánh xạ MẤT THÔNG TIN — chỉ dùng khi buộc phải.
+ *
+ * Nên: có dấu thì khớp khung có dấu trên nguyên văn; không dấu mới hạ xuống bản
+ * đã bỏ dấu (ở đó `warn-01` "Cong an TP Ha Noi canh bao:" vẫn nhận được).
+ *
+ * Bỏ dấu giữ nguyên ĐỘ DÀI chuỗi (chỉ gỡ dấu tổ hợp và đổi đ→d), nên chỉ số trả
+ * về ở cả hai nhánh đều so được với vị trí động từ rủi ro tính trên `n`.
  */
 function viTriKhungGiaoDuc(n) {
-  KHUNG_GIAO_DUC.lastIndex = 0;
-  const m = KHUNG_GIAO_DUC.exec(boDau(n));
+  const coDau = CO_DAU.test(n);
+  const re = coDau ? KHUNG_GIAO_DUC : KHUNG_GIAO_DUC_KHONG_DAU;
+  re.lastIndex = 0;
+  const m = re.exec(coDau ? n : boDau(n));
   return m ? m.index : -1;
 }
 
