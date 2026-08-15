@@ -128,7 +128,33 @@ const laTinHieu = (id) => Object.prototype.hasOwnProperty.call(SIGNALS, id);
 /** Tiền tố nhóm dùng cho điều kiện OR của critical override (ID_* / FIN_* …). */
 const khopTienTo = (id, tienTo) => id.startsWith(tienTo);
 
+/**
+ * Phụ lục C.2 — SCOPE CANONICAL CỦA TỪNG TÍN HIỆU.
+ *
+ * "Với scope 'any' hoặc 'context' thì lấy TẤT CẢ đoạn; các scope khác mới lọc
+ * theo danh sách chặn."
+ *
+ * Scope là thuộc tính của TÍN HIỆU, không phải của locale — nếu để mỗi locale
+ * pack tự khai thì cùng một tín hiệu sẽ lọc khác nhau ở hai ngôn ngữ, phá §6.14.
+ *
+ * `any` dành cho các tín hiệu mà C.3 bẫy 1 nói tới: danh tính và sức ép hầu như
+ * LUÔN nằm ở câu TƯỜNG THUẬT, không phải câu mệnh lệnh. Bắt chúng tự chứng minh
+ * mình là hành động thì mất sạch.
+ */
+const SCOPE_ANY = new Set([
+  'MAN_FEAR_THREAT', 'MAN_EXTORTION_MEDIA_THREAT', 'MAN_KEEP_CALL_ACTIVE',
+  'OFF_INVESTMENT_GUARANTEE',
+]);
+
+function scopeCuaTinHieu(id) {
+  if (!SIGNALS[id]) return 'action';
+  const { group } = SIGNALS[id];
+  if (group === 'identity' || group === 'web' || group === 'case') return 'any';
+  if (SCOPE_ANY.has(id)) return 'any';
+  return 'action';
+}
+
 module.exports = {
   SIGNALS, SIGNAL_IDS, GROUPS, GROUP_IDS,
-  getSignal, listByGroup, laTinHieu, khopTienTo,
+  getSignal, listByGroup, laTinHieu, khopTienTo, scopeCuaTinHieu,
 };

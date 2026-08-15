@@ -12,6 +12,7 @@
  */
 
 const { boDau } = require('./context-builder');
+const { scopeCuaTinHieu } = require('./signal-registry');
 
 /**
  * Offset do gateway trả về hay lệch; thứ kiểm được là CHUỖI CON có thật hay không.
@@ -38,4 +39,34 @@ function validateEvidence(signal, ctx) {
 
 const locTheoEvidence = (signals = [], ctx) => signals.filter((s) => validateEvidence(s, ctx));
 
-module.exports = { validateEvidence, locTheoEvidence, trichCoThat };
+/** Đoạn nào chứa câu trích này? Dùng để áp scope/speech act cho tín hiệu từ AI. */
+function doanChuaTrich(quote, ctx) {
+  if (typeof quote !== 'string' || !quote.trim()) return null;
+  const q = quote.toLowerCase().replace(/\s+/g, ' ').trim();
+  const qf = boDau(q);
+  return ctx.segments.find((d) => d.normalized.includes(q) || d.folded.includes(qf)) || null;
+}
+
+/**
+ * ⚠️ LỖI ĐÃ ĐO 15/8/2026 — hàng rào Phụ lục C chỉ bảo vệ direct-precheck,
+ * KHÔNG bảo vệ đường AI. Mà AI mới là máy dò chính.
+ *
+ * Câu "Never share your OTP or verification code with anyone." được bộ luật
+ * phân loại đúng là `warning_education`, direct-precheck im lặng — nhưng tín
+ * hiệu AI cho ĐÚNG CÂU ĐÓ đi thẳng qua và ghi 25 điểm.
+ *
+ * Đây đúng dạng lỗi §9.1 mô tả: ĐƯỜNG DỰ PHÒNG AN TOÀN HƠN ĐƯỜNG CHÍNH.
+ * Nên scope/speech act phải áp cho MỌI nguồn tín hiệu, không riêng nguồn nào.
+ */
+function locTheoScope(signals = [], ctx) {
+  return signals.filter((s) => {
+    if (s.source === 'direct' || s.source === 'deterministic') return true;
+    if (scopeCuaTinHieu(s.id) !== 'action') return true;   // C.2 — 'any' lấy tất cả đoạn
+    // Tín hiệu action-scope chỉ được nhận khi evidence nằm trong đoạn HÀNH ĐỘNG.
+    return (s.evidence || []).some((e) => doanChuaTrich(e?.quote, ctx)?.actionable === true);
+  });
+}
+
+module.exports = {
+  validateEvidence, locTheoEvidence, locTheoScope, trichCoThat, doanChuaTrich,
+};

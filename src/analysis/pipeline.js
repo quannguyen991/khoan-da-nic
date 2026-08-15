@@ -12,7 +12,7 @@ const { buildContext } = require('./context-builder');
 const { directPrecheck } = require('./direct-precheck');
 const { decide } = require('./decision-engine');
 const { evaluateOverrides } = require('./critical-overrides');
-const { locTheoEvidence } = require('./evidence-validator');
+const { locTheoEvidence, locTheoScope } = require('./evidence-validator');
 const { phanTichUrl, trichUrl } = require('./url-analyzer');
 const { laTinHieu } = require('./signal-registry');
 const { nhanHopDong } = require('../risk-labels');
@@ -147,7 +147,11 @@ function analyze(input = {}) {
 
   const aiDaChay = Array.isArray(input.llmSignals) && input.llmSignals.length > 0 && !input.aiError;
   // §6.1 bước 7 — validate evidence TRƯỚC khi merge. Trích bịa thì loại tín hiệu.
-  const llm = aiDaChay ? locTheoEvidence(nhanTinHieuLLM(input.llmSignals), ctx) : [];
+  // Hai hàng rào, cùng thứ tự §6.1 bước 7: evidence phải có thật, RỒI scope/
+  // speech act phải cho phép. Bỏ hàng rào thứ hai là để AI đi vòng qua Phụ lục C.
+  const llm = aiDaChay
+    ? locTheoScope(locTheoEvidence(nhanTinHieuLLM(input.llmSignals), ctx), ctx)
+    : [];
 
   const signals = ghepTinHieu([...direct, ...web], llm);
   const nhanDuoc = signals.filter((s) => s.state === 'present').map((s) => s.id);
