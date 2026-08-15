@@ -30,7 +30,9 @@ const TC = require('./src/trusted-circle');
 const { taoKho, traNguCanh } = require('./src/intel-radar');
 const { moKho } = require('./src/vault-store');
 const { canDangNhap } = require('./src/auth');
-const { layCauHinhVapid, chuanHoaDangKy } = require('./src/push');
+const {
+  layCauHinhVapid, chuanHoaDangKy, chuanHoaDangKyNative, LOAI_DANG_KY,
+} = require('./src/push');
 
 const CONG = Number(process.env.PORT) || 8089;
 const GIOI_HAN_VAN_BAN = 5000;          // §6.10
@@ -610,12 +612,24 @@ app.get('/api/push/khoa-cong-khai', chanDoc, (req, res) => {
   res.json({ khoaCongKhai: v.daCauHinh ? v.congKhai : null });
 });
 
+/**
+ * ⚠️ HAI LOẠI ĐĂNG KÝ. Trình duyệt gửi khuôn Web Push; bản APK (Capacitor chạy
+ * trong WebView, KHÔNG có Web Push) gửi `{loai:'native', token}` của FCM.
+ *
+ * Rẽ nhánh phải nằm Ở ĐÂY, không chỉ trong `src/push.js` — đây mới là cửa bản
+ * APK gõ vào đầu tiên. Ép token FCM qua `chuanHoaDangKy` thì route trả 400 và
+ * bác không bao giờ bật được thông báo, còn log máy chủ trông vẫn bình thường.
+ * Hàng rào: test/push-trong-apk.test.js
+ */
 app.post('/api/push/dang-ky', chanDoc, async (req, res) => {
   try {
-    const dk = chuanHoaDangKy(req.body?.dangKy);
+    const tho = req.body?.dangKy;
+    const laNative = tho?.loai === LOAI_DANG_KY.native;
+    const dk = laNative ? chuanHoaDangKyNative(tho) : chuanHoaDangKy(tho);
     const kho = await moKho();
-    // Khoá theo endpoint: cùng một máy đăng ký lại thì ghi đè, không nhân bản.
-    await kho.luu(BANG_PUSH, dk.endpoint, dk);
+    // Khoá theo endpoint (web) hoặc token (native): cùng một máy đăng ký lại thì
+    // ghi đè, không nhân bản.
+    await kho.luu(BANG_PUSH, laNative ? dk.token : dk.endpoint, dk);
     return res.json({ daDangKy: true });
   } catch (e) {
     return res.status(400).json({ maLoi: e?.ma || 'DANG_KY_KHONG_HOP_LE' });
