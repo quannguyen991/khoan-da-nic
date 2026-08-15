@@ -15,6 +15,8 @@ const express = require('express');
 const { analyze, toHopDong } = require('./src/analysis/pipeline');
 const { trichTinHieu } = require('./src/analysis/llm-extractor');
 const { layCauHinh } = require('./src/ai/fable-client');
+const { dungSafetyCard } = require('./src/safety-card');
+const { dungTrang } = require('./src/safety-card-page');
 
 const CONG = Number(process.env.PORT) || 8089;
 const GIOI_HAN_VAN_BAN = 5000;          // §6.10
@@ -130,6 +132,16 @@ async function xuLyPhanTich(req, res) {
 
 app.post('/api/analyze', gioiHanTanSuat, xuLyPhanTich);
 app.post('/api/phan-tich', gioiHanTanSuat, xuLyPhanTich);   // §5.2 — alias, cùng handler
+
+/**
+ * §5.3 — /transparency dựng HTML ở máy chủ, KHÔNG CẦN JavaScript phía trình duyệt.
+ * §11 — chưa đo thì hiện "mục tiêu — chưa đo", không điền số mục tiêu vào cho đẹp.
+ */
+app.get('/transparency', (req, res) => {
+  res.setHeader('content-type', 'text/html; charset=utf-8');
+  res.send(dungTrang());
+});
+app.get('/api/safety-card', (req, res) => res.json(dungSafetyCard()));
 
 app.get('/api/suc-khoe', (req, res) => {
   const c = layCauHinh();
