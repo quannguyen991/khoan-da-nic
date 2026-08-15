@@ -164,13 +164,26 @@ test('B.4 — kịch bản trung tâm: giả danh + đòi chuyển khoản + h�
 });
 
 test('B.3 — identity+credential và identity+device tồn tại (bảng 8.11 thiếu)', () => {
-  const a = decide(tinHieu('ID_BANK_IMPERSONATION', 'CRED_OTP_SHARE'));
-  assert.ok(a.appliedSynergies.some((s) => s.id === 'identity+credential'));
-  assert.ok(a.score >= 45, 'họ "bank + đòi mã" từng dừng ở 41–44');
+  // Bất đối xứng của 8.11 không có lý do thiết kế: tự xưng công an đòi mã OTP
+  // nguy hiểm ngang tự xưng công an đòi chuyển tiền.
+  assert.ok(decide(tinHieu('ID_BANK_IMPERSONATION', 'CRED_OTP_SHARE'))
+    .appliedSynergies.some((s) => s.id === 'identity+credential'));
+  assert.ok(decide(tinHieu('ID_TECH_SUPPORT_IMPERSONATION', 'DEV_REMOTE_CONTROL_APP'))
+    .appliedSynergies.some((s) => s.id === 'identity+device'));
+});
 
-  const b = decide(tinHieu('ID_TECH_SUPPORT_IMPERSONATION', 'DEV_REMOTE_CONTROL_APP'));
-  assert.ok(b.appliedSynergies.some((s) => s.id === 'identity+device'));
-  assert.ok(b.score >= 45, 'họ "tech support + đòi thiết bị" từng dừng ở 41–44');
+test('B.3 — hai tổ hợp đó kéo họ kịch bản thật LÊN TRÊN ngưỡng 45', () => {
+  // "bank + đòi mã": 8 + 25 + 7 = 40 → thiếu 5 điểm. Cộng hưởng +10 mới qua ngưỡng.
+  const bank = tinHieu('ID_BANK_IMPERSONATION', 'CRED_OTP_SHARE', 'MAN_URGENCY');
+  assert.strictEqual(decide(bank).baseScore, 40, 'đúng dải 41–44 mà B.3 mô tả');
+  assert.ok(decide(bank).score >= 45, 'họ "bank + đòi mã" phải lên Nguy hiểm cao');
+  assert.strictEqual(decide(bank).riskLabel, 'HIGH');
+
+  // "tech support + đòi thiết bị": 10 + 28 = 38, cộng hưởng +10 = 48.
+  const tech = tinHieu('ID_TECH_SUPPORT_IMPERSONATION', 'DEV_REMOTE_CONTROL_APP');
+  assert.strictEqual(decide(tech).baseScore, 38);
+  assert.ok(decide(tech).score >= 45);
+  assert.strictEqual(decide(tech).riskLabel, 'HIGH');
 });
 
 test('B.2 — mỗi bonus chỉ áp dụng MỘT lần dù nhiều tín hiệu cùng khớp', () => {

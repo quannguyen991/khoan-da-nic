@@ -32,10 +32,16 @@ test('§6.2 — đúng 8 nhóm với số lượng đã chốt', () => {
   assert.strictEqual(tong, 58);
 });
 
-test('§6.2 — đúng 29 tín hiệu có legacyKey, không trùng nhau', () => {
+// ⚠️ MÂU THUẪN TÀI LIỆU ĐÃ GHI NHẬN (15/8/2026)
+// §6.2 viết "29 tín hiệu có legacyKey". Đếm thực tế trên Phụ lục A ra 22:
+//   money 1 · credential 1 · device 2 · manipulation 5 · identity 6 · offer 6 · web 0 · case 1
+// Phụ lục A tự ghi quy tắc phân xử: "Vài chỗ khác nhau — BẢN NÀY THẮNG",
+// và §6.2 xác nhận "Phụ lục LÀ nguồn sự thật". Nên lấy 22.
+// KHÔNG bịa thêm 7 legacyKey để khớp con số ở §6.2.
+test('§6.2 — đúng 22 tín hiệu có legacyKey (Phụ lục A), không trùng nhau', () => {
   const keys = SIGNAL_IDS.map((id) => SIGNALS[id].legacyKey).filter(Boolean);
-  assert.strictEqual(keys.length, 29);
-  assert.strictEqual(new Set(keys).size, 29, 'legacyKey không được trùng');
+  assert.strictEqual(keys.length, 22);
+  assert.strictEqual(new Set(keys).size, 22, 'legacyKey không được trùng');
 });
 
 test('Phụ lục A — trọng số đúng nguyên văn (chọn mẫu mọi nhóm)', () => {
