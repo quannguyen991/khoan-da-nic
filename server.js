@@ -90,6 +90,46 @@ app.use((req, res, next) => {
   next();
 });
 
+/**
+ * ─────────────────── CORS ───────────────────
+ *
+ * ⚠️ CẦN VÌ BẢN APK, VÀ ĐO ĐƯỢC 16/8/2026 LÀ THIẾU HẲN.
+ *
+ * Trong APK, Capacitor phục vụ giao diện ở origin `https://localhost`, còn máy
+ * chủ nằm ở một tên miền khác. Đó là gọi KHÁC ORIGIN. Không có header CORS thì
+ * WebView vẫn GỬI được yêu cầu — máy chủ trả 200 đàng hoàng — nhưng trình duyệt
+ * VỨT phản hồi. Nhìn từ phía máy chủ mọi thứ đều xanh; nhìn từ phía người dùng
+ * là mọi lượt kiểm đều lỗi. Kiểu hỏng này không có chỗ nào báo.
+ *
+ * ⚠️ DANH SÁCH ĐÓNG, KHÔNG DÙNG `*`.
+ * `/api/proof/*` nhận token qua header `authorization`. Mở `*` là cho bất kỳ
+ * trang web nào người dùng đang mở gọi sang đây kèm token của họ.
+ *
+ * ⚠️ KHÔNG bật `credentials`. Không có cookie phiên nào ở đây — danh tính đi
+ * bằng Bearer token, mà token thì trang lạ không đọc được.
+ */
+const ORIGIN_CHO_PHEP = new Set([
+  'https://localhost',        // Capacitor Android (androidScheme: https)
+  'capacitor://localhost',    // Capacitor iOS
+  'http://localhost:8089',    // chạy gộp một tiến trình
+  'http://localhost:3000',    // Vite lúc phát triển
+  ...(process.env.KHOAN_DA_ORIGIN_THEM || '').split(',').map((s) => s.trim()).filter(Boolean),
+]);
+
+app.use((req, res, next) => {
+  const o = req.headers.origin;
+  if (o && ORIGIN_CHO_PHEP.has(o)) {
+    res.setHeader('access-control-allow-origin', o);
+    res.setHeader('vary', 'Origin');
+    res.setHeader('access-control-allow-headers', 'content-type, authorization');
+    res.setHeader('access-control-allow-methods', 'GET, POST, OPTIONS');
+    res.setHeader('access-control-max-age', '600');
+  }
+  // Preflight: trả sớm, đừng để nó rơi xuống handler thật.
+  if (req.method === 'OPTIONS') return res.sendStatus(o && ORIGIN_CHO_PHEP.has(o) ? 204 : 403);
+  return next();
+});
+
 app.use(express.json({ limit: '8mb' }));
 
 // §6.7 — JSON hỏng trả 400 có cấu trúc, KHÔNG 500 trắng trang.

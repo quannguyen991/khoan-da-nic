@@ -183,6 +183,21 @@ test('cổng DEV của frontend cũng là origin hợp lệ', async () => {
   assert.strictEqual(kq.daDangKy, true);
 });
 
+/**
+ * ⚠️ ORIGIN CỦA BẢN APK. Capacitor phục vụ giao diện ở `https://localhost`.
+ * Thiếu origin này thì passkey trong APK bị từ chối hết — và thông báo lỗi trông
+ * y hệt "người dùng bấm sai", nên sẽ mất hàng giờ mò đúng lúc đang demo.
+ */
+test('origin của APK (https://localhost) ký được', async () => {
+  assert.ok(P.CAU_HINH.origins.includes('https://localhost'),
+    'thiếu origin Capacitor — passkey trong APK sẽ hỏng hết');
+
+  const may = await taoMayXacThuc({ rpID: 'localhost', origin: 'https://localhost' });
+  const tuyChon = await P.batDauDangKy('bac-apk');
+  const kq = await P.xacNhanDangKy('bac-apk', may.dangKy(tuyChon.challenge));
+  assert.strictEqual(kq.daDangKy, true);
+});
+
 test('origin lạ VẪN bị từ chối — nới cổng dev không nới cả thế giới', async () => {
   const may = await taoMayXacThuc({ rpID: 'localhost', origin: 'http://localhost:9999' });
   const tuyChon = await P.batDauDangKy('bac-cong-la');

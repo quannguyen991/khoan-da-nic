@@ -58,7 +58,21 @@ const { taoMaGhep, kiemMaGhep, taoPhien, phienConHan } = require('./auth');
  * context; `http://192.168.x.x` không phải secure context và không có cách nào
  * vòng qua. Thêm một origin lạ chỉ tạo ra một cửa mà không làm nó chạy được.
  */
-const ORIGIN_MAC_DINH = ['http://localhost:8089', 'http://localhost:3000'];
+/**
+ * ⚠️ `https://localhost` LÀ ORIGIN CỦA BẢN APK, không phải nhầm lẫn.
+ * Capacitor phục vụ giao diện ở `https://localhost` (androidScheme: https) —
+ * và đó cũng chính là lý do chọn scheme đó: `https://localhost` là SECURE
+ * CONTEXT, nên passkey dùng được trong APK. Đổi sang `http` là mất passkey.
+ *
+ * `rpID` vẫn là `localhost` cho cả bốn origin, nên chữ ký vẫn ràng vào đúng một
+ * relying party — thêm origin ở đây KHÔNG nới lỏng gì về mật mã.
+ */
+const ORIGIN_MAC_DINH = [
+  'http://localhost:8089',
+  'http://localhost:3000',
+  'https://localhost',        // Capacitor Android
+  'capacitor://localhost',    // Capacitor iOS
+];
 
 const CAU_HINH = Object.freeze({
   rpID: process.env.KHOAN_DA_RP_ID || 'localhost',
