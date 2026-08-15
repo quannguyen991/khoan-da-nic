@@ -48,11 +48,10 @@
   --color-border-tinted:      oklch(60% 0.055 298);  /* 3,24:1 */
   --color-border-interactive: oklch(58% 0.09  292);  /* 3,55:1 */
 
-  /* ── 7. MÀU CHỮ TRÊN NỀN ĐẶC (4) ───────────────────────────────────────── */
+  /* ── 7. MÀU CHỮ TRÊN NỀN ĐẶC (3) ───────────────────────────────────────── */
   --color-on-accent:  oklch(100% 0 0);
   --color-on-danger:  oklch(100% 0 0);
   --color-on-success: oklch(100% 0 0);
-  --color-on-dark:    oklch(97% 0.01 298);
 
   /* ── 8. SẮC ĐỘ MỀM / ĐẬM CỦA BA MỨC (9) ──────────────────────────────────
      `*-soft` là NỀN. Chữ đặt lên chúng phải là `*-strong` hoặc `--color-ink`. */
@@ -66,10 +65,9 @@
   --color-danger-vivid:   oklch(58% 0.23 27);   /* nút "Không chuyển tiền" — NỀN */
   --color-danger-vivid-2: oklch(52% 0.24 27);   /* trạng thái bấm của nút trên */
 
-  /* ── 9. TIÊU ĐIỂM BÀN PHÍM (3) ─────────────────────────────────────────── */
+  /* ── 9. TIÊU ĐIỂM BÀN PHÍM (2) ─────────────────────────────────────────── */
   --color-focus:      oklch(38% 0.21 292);
   --color-focus-halo: oklch(88% 0.09 298);
-  --color-focus-ring: oklch(100% 0 0);
 
   /* ── 10. THANH ĐIỀU HƯỚNG DƯỚI (5) ─────────────────────────────────────────
      Nền nav phải đủ tối để chữ trắng đạt 4.5:1 — nav mang CHỮ, không chỉ icon. */
@@ -79,11 +77,16 @@
   --color-nav-pill:       oklch(100% 0 0);
   --color-nav-pill-ink:   oklch(45% 0.23 292);
 
-  /* ── 11. THẺ VÀ Ô NHẬP (8) ─────────────────────────────────────────────── */
+  /* ── 11. THẺ VÀ Ô NHẬP (8) ───────────────────────────────────────────────
+     `--color-card-border` là đường tóc TRANG TRÍ: ranh giới thẻ do mặt thẻ +
+     bóng đổ gánh, nên nó KHÔNG phải chịu sàn 3:1 của WCAG 1.4.11.
+     `--color-card-border-strong` thì CÓ — nó là chỗ viền tự mình làm ranh giới
+     (ô nhập, thẻ đang chọn), nên phải đạt 3:1. Đo: 2,02:1 và 1,63:1 lúc đầu,
+     đã nâng. */
   --color-card-border:        oklch(92% 0.030 298);
-  --color-card-border-strong: oklch(84% 0.055 298);
+  --color-card-border-strong: oklch(62% 0.065 298);
   --color-input-bg:           oklch(100% 0 0);
-  --color-input-border:       oklch(72% 0.05 298);
+  --color-input-border:       oklch(59% 0.060 298);
   --color-input-border-focus: oklch(52% 0.22 292);
   --color-placeholder:        oklch(51% 0.04 285);   /* = --color-muted, 4,67:1 */
   --color-disabled-bg:        oklch(93% 0.012 298);
@@ -94,19 +97,18 @@
      mang sắc xanh lá; nó không phải tin tốt. */
   --color-unchecked-bg:     oklch(96% 0.030 85);
   --color-unchecked-ink:    oklch(39% 0.10 78);
-  --color-unchecked-border: oklch(70% 0.09 85);
+  --color-unchecked-border: oklch(57% 0.10 78);
 
   /* ── 13. LỚP PHỦ (3) ───────────────────────────────────────────────────── */
   --color-overlay:   oklch(20% 0.065 285 / 0.55);
   --color-scrim:     oklch(20% 0.065 285 / 0.14);
   --color-selection: oklch(88% 0.09 298);
 
-  /* ── 14. NÚT MICRO TRANG CHỦ + PHỤ TRỢ (6) ─────────────────────────────── */
+  /* ── 14. NÚT MICRO TRANG CHỦ + PHỤ TRỢ (5) ─────────────────────────────── */
   --color-mic-from: oklch(58% 0.23 300);
   --color-mic-to:   oklch(48% 0.24 288);
   --color-mic-ring: oklch(84% 0.10 298);
   --color-leaf:     oklch(72% 0.19 140);
-  --color-gold:     oklch(80% 0.15 85);
   --color-chip-bg:  oklch(94% 0.045 298);
 
   /* ══ 15. KHOẢNG CÁCH — 17 token ═══════════════════════════════════════════

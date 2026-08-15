@@ -171,8 +171,13 @@ const DANH_MUC = [
     id: 'st-nguoi-than',
     khoRong: 256,
     dung: 'nút "Báo cho con cháu"',
-    prompt: 'Two simple rounded white-and-purple people figures standing close together '
-      + 'side by side, with a small soft red heart shape floating beside them.',
+    // Lượt đầu ra một CẶP ĐÔI LÃNG MẠN — sai nghĩa cho nút "Báo cho con cháu".
+    // Nói rõ: hình khối trừu tượng, không phải người thật, không lãng mạn.
+    prompt: 'Two simple abstract legless rounded people symbols side by side, like a chunky '
+      + 'family group pictogram made of smooth plastic: each is just a sphere head above a '
+      + 'rounded shoulder shape, one slightly taller than the other, both glossy white with '
+      + 'violet-purple accents, with a small soft red heart shape floating above between them. '
+      + 'Not realistic humans, no faces, no hair, no clothing detail, not a romantic couple.',
   },
   {
     id: 'st-chuong-do',

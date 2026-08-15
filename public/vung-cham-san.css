@@ -1,0 +1,177 @@
+/* ══════════════════════════════════════════════════════════════════════════
+   §4.4 — SÀN TIẾP CẬN. NẠP SAU CÙNG. Khai theo VAI TRÒ, không theo tên lớp.
+
+   File này nằm trong `APP_SHELL` của service worker: sàn tiếp cận KHÔNG được
+   phụ thuộc vào việc có mạng.
+
+   ⚠️ §FE0 lỗi 3 — `min-height` KHÔNG CÓ TÁC DỤNG trên hộp `inline`. Dự án đã
+   khai đúng 70px mà phần tử vẫn cao 49px, vì thẻ `<a>` rơi về `display: inline`.
+   Nên mọi sàn ở đây đi KÈM `display: grid`, và dùng `min-block-size`, không
+   dùng `min-height`.
+
+   > **Một sàn khai mà không có hiệu lực còn TỆ HƠN không khai** — nó làm người
+   > đọc CSS tưởng chỗ đó đã được bảo vệ.
+
+   ⚠️ §FE0 lỗi 2 — `white-space: nowrap` trên nút. Đo ở khổ 320px bậc chữ lớn
+   nhất: nhãn "Người thân dùng số mới" cần 277px trong hộp 174px → 19 phần tử bị
+   cắt cụt trên MỘT màn. File này GỠ nowrap khỏi mọi phần tử bấm được, kể cả khi
+   một quy tắc ở trên đã đặt.
+
+   ⚠️ Danh sách nợ `test/no-nowrap-on-controls.test.js`: bản dựng này KHÔNG có
+   selector nào được miễn. Danh sách nợ = 0. Nó chỉ được phép NHỎ ĐI.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* ── 1. SÀN VÙNG CHẠM — 52px, khai theo VAI TRÒ ────────────────────────────
+   `place-content: center` để nhãn nằm giữa khi hộp cao hơn chữ.
+   `place-items` KHÔNG dùng, vì nó ép co con lại. */
+a[href],
+button,
+summary,
+[role="button"],
+[role="link"],
+[role="tab"],
+[role="switch"],
+[role="checkbox"],
+[role="radio"],
+[tabindex]:not([tabindex="-1"]) {
+  display: grid;
+  align-content: center;
+  min-block-size: max(var(--touch-target), 3.25rem);
+  /* §FE0 lỗi 2 — gỡ nowrap dù quy tắc nào ở trên đã đặt. */
+  white-space: normal;
+  overflow-wrap: break-word;
+}
+
+/* Ô nhập là phần tử thay thế — `display: grid` trên chúng cho hành vi lạ giữa
+   các trình duyệt. Dùng `block` / `flex`, sàn vẫn có hiệu lực. */
+input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]),
+select,
+textarea {
+  display: block;
+  inline-size: 100%;
+  min-block-size: max(var(--touch-target), 3.25rem);
+  white-space: normal;
+}
+
+textarea { display: block; }
+
+/* Ô đánh dấu / nút chọn: chính hộp thì nhỏ, nhưng NHÃN mới là đích chạm. */
+input[type="checkbox"],
+input[type="radio"] {
+  inline-size: 1.75rem;
+  block-size: 1.75rem;
+  flex: none;
+}
+label:has(> input[type="checkbox"]),
+label:has(> input[type="radio"]) {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-3);
+  align-items: center;
+  min-block-size: max(var(--touch-target), 3.25rem);
+  white-space: normal;
+}
+
+/* ── 2. SÀN NÚT CHÍNH — 56px ───────────────────────────────────────────────
+   ⚠️ `max(56px, 3.5rem)`, KHÔNG phải `3.5rem` trần: ở bậc chữ nhỏ nhất (15px)
+   rem trần chỉ ra 52,5px, tức vi phạm sàn nút chính. */
+[data-vai-tro="nut-chinh"],
+button[type="submit"] {
+  min-block-size: var(--touch-target-primary);
+}
+
+/* ── 3. KHOẢNG CÁCH GIỮA HAI ĐÍCH CHẠM — 8px ───────────────────────────────
+   Hai nút sát nhau là hai nút bấm nhầm nhau. */
+[data-vai-tro="nhom-nut"] {
+  display: grid;
+  gap: max(var(--space-2), 0.5rem);
+}
+
+/* ── 4. SÀN CỠ CHỮ — 14px ở MỌI bậc gốc ────────────────────────────────────
+   §7.6: chữ phải là CHỮ THẬT trong HTML thì mới phóng theo được. Chữ nướng vào
+   ảnh không đi theo — đó là lý do cấm. */
+body,
+button,
+input,
+select,
+textarea,
+label,
+small,
+figcaption,
+[data-vai-tro="chu-phu"] {
+  font-size: max(var(--text-xs), 1em);
+}
+body { font-size: var(--text-base); }
+small,
+[data-vai-tro="chu-phu"] { font-size: var(--text-xs); }
+
+/* ── 5. CHIỀU CAO DÒNG — không dưới 1.25 ───────────────────────────────────
+   Dấu tiếng Việt xếp CẢ TRÊN LẪN DƯỚI (ế, ộ, ữ, ị, ặ). Dưới 1.25 là cắt dấu. */
+* { line-height: max(1.25, var(--leading-normal)); }
+h1, h2, h3, h4, [data-vai-tro="tieu-de-lon"] { line-height: var(--leading-tight); }
+
+/* ── 6. TIÊU ĐIỂM BÀN PHÍM PHẢI NHÌN THẤY RÕ ───────────────────────────────
+   §6.15 — mọi hành động tương tác tới được bằng bàn phím và có tiêu điểm rõ.
+   KHÔNG gỡ vòng tiêu điểm. Vòng vẽ hai lớp để rõ trên cả nền sáng lẫn nền tím. */
+:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 3px;
+  border-radius: var(--radius-xs);
+  box-shadow: 0 0 0 6px var(--color-focus-halo);
+}
+
+/* ── 7. CẤM CẮT CHỮ TRÊN PHẦN TỬ BẤM ĐƯỢC ──────────────────────────────────
+   Nhãn tiếng Việt dài hơn tiếng Anh ~30%; và có nhãn tiếng Anh còn DÀI HƠN
+   tiếng Việt ("Impersonation detection" vs "Phát hiện giả mạo"). Đừng ghim số
+   cột lưới theo một ngôn ngữ. */
+a[href], button, summary, label, [role="button"], [role="tab"] {
+  text-overflow: clip;
+  overflow: visible;
+}
+
+/* Lưới nhiều cột phải tự xuống dòng, không ghim số cột theo một ngôn ngữ. */
+[data-vai-tro="luoi-tu-xep"] {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(9rem, 100%), 1fr));
+  gap: var(--space-3);
+}
+
+/* ── 8. ẢNH KHÔNG ĐƯỢC ĐẨY BỐ CỤC ──────────────────────────────────────────
+   §7.9 — kẹp `max-block-size` bằng `rem`. KHÔNG kẹp chiều rộng, KHÔNG dùng
+   `dvh`/`vh`/`vw`: ảnh dọc kẹp theo chiều rộng thì ở bậc A++ vẫn cao 355px trên
+   màn 640px và đẩy nút ra ngoài 60px. */
+img {
+  max-inline-size: 100%;
+  block-size: auto;
+}
+
+/* ── 9. KHÔNG TRÀN NGANG Ở BẤT KỲ KHỔ NÀO ──────────────────────────────────
+   Đo ở 320 · 360 · 375 · 768 · 1280 px × ba bậc chữ × hai ngôn ngữ. */
+html, body { max-inline-size: 100%; overflow-x: hidden; }
+* { min-inline-size: 0; }
+
+/* Chuỗi không có khoảng trắng (tên miền, mã giao dịch) phải bẻ được. */
+[data-vai-tro="chuoi-dai"] {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* ── 10. TÔN TRỌNG `prefers-reduced-motion` ────────────────────────────────
+   Không tắt hẳn transition — tắt hẳn làm mất phản hồi chạm, mà phản hồi chạm
+   là thứ người cao tuổi cần nhất. Rút ngắn, và bỏ chuyển động lặp. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: var(--duration-fast) !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ── 11. CHỐNG PHÓNG TO BỊ CHẶN ────────────────────────────────────────────
+   §6.15 — text resize 200% + ba bậc A/A+/A++ không cắt chữ, không giấu điều
+   khiển. Không `user-scalable=no`, không `maximum-scale`. */
+@media (max-width: 22.5rem) {
+  /* Ở 320px bậc A++, lưới hai cột luôn cụt. Ép về một cột. */
+  [data-vai-tro="luoi-tu-xep"] { grid-template-columns: 1fr; }
+}
