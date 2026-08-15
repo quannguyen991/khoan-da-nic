@@ -18,7 +18,7 @@
 module.exports = {
   locale: 'vi-VN',
   language: 'vi',
-  localePackVersion: 'vi-VN@1.0.0',
+  localePackVersion: 'vi-VN@1.1.0',
   supportedCountryProfiles: ['VN', 'GLOBAL'],
 
   directPatterns: {
@@ -96,6 +96,11 @@ module.exports = {
       { pattern: '(nhân viên|người của|bên|đội|tổng đài)\\s+khoan đã', scope: 'any' },
       { pattern: '(tôi|em|cháu|mình)\\s+(là|bên)\\s+khoan đã', scope: 'any' },
       { pattern: 'khoan đã\\s+(yêu cầu|đề nghị|gọi|nhắn)', scope: 'any' },
+      // inj-06 · inj-13 — mạo danh chính sản phẩm để TỰ CẤP CHỨNG NHẬN cho mình.
+      // Đây là dạng nguy hiểm nhất của §9.2: kẻ lừa đảo mượn uy tín của đúng cái
+      // app mà bác đang tin.
+      { pattern: '(đã kiểm tra|xác nhận|chứng nhận|kiểm duyệt)\\s*(bởi|by)?\\s*khoan đã', scope: 'any' },
+      { pattern: '(đội|nhóm|bộ phận)\\s*(phát triển|kỹ thuật|hỗ trợ)\\s*(của\\s*)?khoan đã', scope: 'any' },
     ],
     ID_FAMILY_IMPERSONATION: [
       { pattern: '(con|cháu|em)\\s+(gái|trai)?\\s*(nhờ|bảo|xin)\\b[^.]{0,26}(chuyển|gửi)\\s+tiền', scope: 'any' },

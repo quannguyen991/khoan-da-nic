@@ -49,6 +49,39 @@ const CONTRACTIONS = [
   [/\bi'll\b/g, 'i will'], [/\byou'll\b/g, 'you will'], [/\bthat's\b/g, 'that is'],
 ];
 
+/**
+ * Gỡ CHE CHỮ BẰNG DẤU PHÂN CÁCH: `c-h-u-y-ể-n t-i-ề-n` → `chuyển tiền`.
+ *
+ * ⚠️ ĐÂY LÀ BIẾN THỂ PHỤ, KHÔNG PHẢI BẢN CHUẨN HOÁ GỐC.
+ *
+ * Bản đầu tôi đặt hàm này thẳng vào `chuanHoa()`. Đo được: recall KHÔNG đổi
+ * (65,3% cả hai bên) nhưng FP tăng 10,1% → 10,8%. Vì đổi bản chuẩn hoá gốc là
+ * đổi luôn phân loại speech act và cách khớp scope của MỌI mẫu, kể cả mẫu không
+ * hề bị che chữ.
+ *
+ * Nên nó nằm cùng chỗ với biến thể nhiễu OCR: CHỈ THÊM khả năng bắt, không bao
+ * giờ đụng vào bản gốc. Đúng tinh thần §4.2 — chỉ làm tăng cảnh giác.
+ */
+const RE_CAP_CHE = /\p{L}[-._·•]\p{L}/gu;
+const NGUONG_MAT_DO_CHE = 5;
+
+function goCheChu(t) {
+  // ⚠️ PHẢI dùng \p{L}, KHÔNG dùng \w hay [^\W]. `\w` của JavaScript chỉ là
+  // [A-Za-z0-9_], nên `ể` bị coi là KHÔNG phải chữ và biểu thức đứt giữa chừng:
+  // "c-h-u-y-ể-n" chỉ gỡ được thành "chuy-ể-n". Cùng gốc rễ với lỗi `\b` không
+  // nhận chữ có dấu đã ghi ở locale-packs/vi-VN.js.
+  RE_CAP_CHE.lastIndex = 0;
+  const matDo = (t.match(RE_CAP_CHE) || []).length;
+
+  // Che chữ là thủ đoạn áp cho CẢ TIN NHẮN, không phải cho một từ. Mật độ cao ⇒
+  // gỡ triệt để, bắt được cả từ ngắn như "v-à-o", "a-n".
+  if (matDo >= NGUONG_MAT_DO_CHE) {
+    return t.replace(/(\p{L})[-._·•](?=\p{L})/gu, '$1');
+  }
+  // Mật độ thấp ⇒ chỉ gỡ chuỗi dài, để yên "Việt-Anh", "e-mail", "2026-08-15".
+  return t.replace(/(?:\p{L}[-._·•]){3,}\p{L}/gu, (m) => m.replace(/[-._·•]/g, ''));
+}
+
 /** Case-fold để khớp, GIỮ ranh giới câu và dấu câu tới khi phủ định/scope giải xong. */
 function chuanHoa(s) {
   let t = s.toLowerCase();
@@ -70,13 +103,14 @@ function boDau(s) {
 const OCR_LUA_CHON = { 0: ['o'], 1: ['l', 'i'], 5: ['s'] };
 const OCR_TRAN = 128;
 
-function bienTheOcr(s) {
+function bienTheOcr(s, ...themVao) {
   const viTri = [];
   for (let i = 0; i < s.length; i += 1) {
     if (OCR_LUA_CHON[s[i]]) viTri.push(i);
   }
   const rn = s.includes('rn') ? [s.replace(/rn/g, 'm')] : [];
-  if (viTri.length === 0) return [s, ...rn];
+  const phu = themVao.filter((x) => x && x !== s);
+  if (viTri.length === 0) return [...new Set([s, ...rn, ...phu])];
 
   let bien = [s];
   for (const i of viTri) {
@@ -87,7 +121,7 @@ function bienTheOcr(s) {
     }
     bien = tiep;
   }
-  return [...new Set([...bien, ...rn])];
+  return [...new Set([...bien, ...rn, ...phu])];
 }
 
 // ─────────────────────── Nhận diện ngôn ngữ ───────────────────────
@@ -289,7 +323,7 @@ function buildContext(raw = '', opts = {}) {
       end: d.end,
       normalized: n,
       folded: boDau(n),
-      ocrVariants: bienTheOcr(boDau(n)),
+      ocrVariants: bienTheOcr(boDau(n), goCheChu(n)),
       speechAct,
       direction: huong(n),
       actionable: !NON_ACTIONABLE_ACTS.has(speechAct),
@@ -300,7 +334,7 @@ function buildContext(raw = '', opts = {}) {
     original,
     normalized,
     folded,
-    ocrVariants: bienTheOcr(folded),
+    ocrVariants: bienTheOcr(folded, goCheChu(normalized)),
     language,
     activePacks: packDangDung(language),
     sourceId: opts.sourceId || 'van_ban',
@@ -316,6 +350,6 @@ function segmentsForScope(ctx, scope = 'action') {
 
 module.exports = {
   buildContext, detectLanguage, segmentsForScope,
-  chuanHoa, boDau, bienTheOcr, catCau,
+  chuanHoa, boDau, bienTheOcr, catCau, goCheChu,
   SPEECH_ACTS, NON_ACTIONABLE_ACTS,
 };
