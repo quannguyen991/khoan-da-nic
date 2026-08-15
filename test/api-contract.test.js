@@ -104,14 +104,18 @@ test('§6.7 — JSON hỏng trả 400 có cấu trúc, KHÔNG 500 trắng trang'
 });
 
 test('§6.7 — AI chết vẫn ra kết quả bằng bộ luật, KHÔNG 500', async () => {
+  // Câu này CÓ ĐIỂM nhưng KHÔNG nổ override, nên nó thật sự đi qua tầng AI —
+  // đúng đường cần đo cho chế độ suy giảm.
   const { status, body } = await goi('/api/analyze', {
-    vanBan: 'Bác chuyển hết tiền sang tài khoản an toàn ngay.',
+    vanBan: 'Tôi là điều tra viên, bác chuyển tiền ngay, chậm là bị phong toả tài khoản.',
     _epLoiAi: 'AI_TIMEOUT',   // chỉ bật được ở chế độ test
   });
   assert.strictEqual(status, 200);
   assert.strictEqual(body.nhan, 'CAO', 'direct-precheck phải chạy được khi mất AI');
+  assert.strictEqual(body.canThiep, 'PAUSE_60S');
   assert.strictEqual(body.aiDaChay, false);
-  assert.ok(body.chuaKiem.includes('ai_khong_phan_hoi'));
+  assert.ok(body.chuaKiem.includes('ai_khong_phan_hoi'),
+    'phải nói thẳng là lượt này AI không đọc được');
 });
 
 // ─────────── §6.8 — bảo mật ───────────
@@ -143,6 +147,22 @@ test('§12 — tiêm nhiễm lời nhắc qua HTTP KHÔNG hạ được mức', 
 test('§6.8 — GET không được chấp nhận trên route phân tích', async () => {
   const res = await fetch(goc + '/api/analyze');
   assert.ok(res.status === 404 || res.status === 405);
+});
+
+test('§6.10 — có critical override thì TRẢ NGAY, không chờ AI', async () => {
+  // Bắt người đang bị kẻ lừa đảo thúc trên điện thoại ngồi chờ gateway là đánh
+  // đổi sai. Ca này phải về dưới một giây kể cả khi AI đang chết.
+  const batDau = Date.now();
+  const { status, body } = await goi('/api/analyze', {
+    vanBan: 'Bác chuyển hết tiền sang tài khoản an toàn của Bộ Công an ngay.',
+    _epLoiAi: 'AI_TIMEOUT',
+  });
+  const doTre = Date.now() - batDau;
+  assert.strictEqual(status, 200);
+  assert.strictEqual(body.canThiep, 'PROTECTED_CRITICAL');
+  assert.ok(doTre < 1000, `chờ <1000ms, mất ${doTre}ms`);
+  assert.ok(!body.chuaKiem.includes('ai_khong_phan_hoi'),
+    'không gọi AI thì đừng nói là AI không phản hồi');
 });
 
 test('/api/suc-khoe cho biết AI có cấu hình hay không, KHÔNG lộ khoá', async () => {

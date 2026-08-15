@@ -89,6 +89,20 @@ async function xuLyPhanTich(req, res) {
     return res.status(400).json({ maLoi: 'THIEU_DAU_VAO' });
   }
 
+  /**
+   * §6.10 — BỘ LUẬT CHẠY TRƯỚC, xử lý các ca hiển nhiên mà KHÔNG cần gọi AI.
+   * §6.10 (8.13): "Có direct critical signal, hoặc điểm đã ≥45 từ tín hiệu chắc
+   * chắn ⇒ KHÔNG hỏi thêm trước khi cảnh báo. Can thiệp trước."
+   *
+   * Đây vừa là kiểm soát chi phí, vừa là chuyện an toàn: bắt người đang bị kẻ
+   * lừa đảo thúc trên điện thoại ngồi chờ gateway là đánh đổi sai. 60 giây đã
+   * mất thì không lấy lại được.
+   */
+  const soBo = analyze({ vanBan: coVanBan ? vanBan : '', anh });
+  if (soBo.overrides.length > 0) {
+    return res.json(toHopDong(soBo));
+  }
+
   // §6.1 bước 6 — gọi lớp trích tín hiệu. Hỏng thì rơi về bộ luật, KHÔNG sập.
   let llmSignals = [];
   let aiError = null;
