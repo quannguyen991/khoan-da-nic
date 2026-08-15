@@ -676,6 +676,29 @@ const DUONG_GIAO_DIEN = process.env.KHOAN_DA_GIAO_DIEN
  * thêm thứ chưa ai rà.
  * Hàng rào: test/vo-ung-dung.test.js kiểm cả mã trạng thái LẪN content-type.
  */
+/**
+ * ─────────────────── TẢI APK ───────────────────
+ *
+ * Có tệp thì mở đường tải; không có thì KHÔNG có route (404 thật, không phải
+ * một trang trắng giả vờ).
+ *
+ * ⚠️ ĐÂY LÀ ĐƯỜNG CÔNG KHAI KHI CHẠY QUA TUNNEL. Ai có địa chỉ cũng tải được.
+ * Chấp nhận được với bản `debug` để cài thử trong nhóm, nhưng:
+ *  · KHÔNG đặt bản `release` đã ký ở đây
+ *  · Tắt bằng `KHOAN_DA_KHONG_PHAT_APK=1` khi không còn cần
+ *
+ * ⚠️ `Content-Disposition: attachment` để Android tải xuống chứ không cố mở
+ * trong trình duyệt. Thiếu nó thì một số máy hiện tệp nhị phân ra màn hình.
+ */
+const DUONG_APK = path.join(__dirname, 'khoan-da.apk');
+if (fs.existsSync(DUONG_APK) && process.env.KHOAN_DA_KHONG_PHAT_APK !== '1') {
+  app.get('/khoan-da.apk', chanDoc, (req, res) => {
+    res.setHeader('content-type', 'application/vnd.android.package-archive');
+    res.setHeader('content-disposition', 'attachment; filename="khoan-da.apk"');
+    res.sendFile(DUONG_APK);
+  });
+}
+
 const TEP_DUNG_CHUNG = ['tokens.css', 'vung-cham-san.css'];
 for (const ten of TEP_DUNG_CHUNG) {
   const d = path.join(__dirname, 'public', ten);
