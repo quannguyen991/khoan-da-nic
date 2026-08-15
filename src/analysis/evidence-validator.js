@@ -39,13 +39,24 @@ function validateEvidence(signal, ctx) {
 
 const locTheoEvidence = (signals = [], ctx) => signals.filter((s) => validateEvidence(s, ctx));
 
-/** Đoạn nào chứa câu trích này? Dùng để áp scope/speech act cho tín hiệu từ AI. */
-function doanChuaTrich(quote, ctx) {
-  if (typeof quote !== 'string' || !quote.trim()) return null;
+/**
+ * Những đoạn CHỒNG LẤN với câu trích.
+ *
+ * ⚠️ Model rất hay trích một đoạn BẮC QUA ranh giới hai câu ("Tôi là công an.
+ * Bác chuyển tiền ngay."). Tìm quote nằm gọn trong một đoạn thì không thấy gì cả
+ * — đã đo: 29/30 tín hiệu bị loại oan trên mẫu nguy hiểm đều do lỗi này.
+ * Nên phải xét cả chiều ngược lại: đoạn nằm trong quote.
+ */
+function doanChongLan(quote, ctx) {
+  if (typeof quote !== 'string' || !quote.trim()) return [];
   const q = quote.toLowerCase().replace(/\s+/g, ' ').trim();
   const qf = boDau(q);
-  return ctx.segments.find((d) => d.normalized.includes(q) || d.folded.includes(qf)) || null;
+  return ctx.segments.filter((d) => d.normalized.includes(q) || d.folded.includes(qf)
+    || q.includes(d.normalized) || qf.includes(d.folded));
 }
+
+/** Đoạn nào chứa câu trích này? Dùng để áp scope/speech act cho tín hiệu từ AI. */
+const doanChuaTrich = (quote, ctx) => doanChongLan(quote, ctx)[0] || null;
 
 /**
  * ⚠️ LỖI ĐÃ ĐO 15/8/2026 — hàng rào Phụ lục C chỉ bảo vệ direct-precheck,
@@ -65,9 +76,17 @@ function locTheoScopeChiTiet(signals = [], ctx) {
     if (s.source === 'direct' || s.source === 'deterministic') { giu.push(s); continue; }
     if (scopeCuaTinHieu(s.id) !== 'action') { giu.push(s); continue; }  // C.2 — 'any' lấy tất cả đoạn
 
-    // Tín hiệu action-scope chỉ được nhận khi evidence nằm trong đoạn HÀNH ĐỘNG.
-    const doan = (s.evidence || []).map((e) => doanChuaTrich(e?.quote, ctx));
-    if (doan.some((d) => d?.actionable === true)) { giu.push(s); continue; }
+    // Tín hiệu action-scope chỉ được nhận khi evidence chạm vào đoạn HÀNH ĐỘNG.
+    const doan = (s.evidence || []).flatMap((e) => doanChongLan(e?.quote, ctx));
+    if (doan.some((d) => d.actionable === true)) { giu.push(s); continue; }
+
+    /**
+     * ⚠️ §4.3 — "KHÔNG TRA ĐƯỢC" ≠ "ĐÃ TRA, KHÔNG HỢP LỆ".
+     * Không định vị được câu trích thuộc đoạn nào thì KHÔNG được lấy sự mơ hồ đó
+     * làm cớ để tắt cảnh báo. §4.2: mọi thứ thêm vào chỉ được LÀM TĂNG cảnh giác.
+     * Đã đo: fail-closed ở đây làm mất 29 tín hiệu trên mẫu nguy hiểm thật.
+     */
+    if (doan.length === 0) { giu.push(s); continue; }
 
     // Ghi lại VÌ SAO bị loại — không có dòng này thì mọi chẩn đoán sau đều là đoán.
     loai.push({
@@ -83,5 +102,5 @@ const locTheoScope = (signals, ctx) => locTheoScopeChiTiet(signals, ctx).giu;
 
 module.exports = {
   validateEvidence, locTheoEvidence, locTheoScope, locTheoScopeChiTiet,
-  trichCoThat, doanChuaTrich,
+  trichCoThat, doanChuaTrich, doanChongLan,
 };

@@ -11,6 +11,7 @@
  */
 
 const { SIGNAL_IDS, laTinHieu } = require('./signal-registry');
+const MO_TA = require('./signal-descriptions');
 const { goiChat, LoiNhaCungCap } = require('../ai/fable-client');
 
 /** §4.2 — lược đồ CẤM năm trường này. Model trả về thì tín hiệu bị loại. */
@@ -141,7 +142,8 @@ Chỉ trả JSON đúng dạng:
 {"signals":[{"id":"<SIGNAL_ID>","state":"present|unknown","confidence":0.0-1.0,
 "evidence":[{"quote":"...","start":0,"end":0,"sourceId":"van_ban"}]}]}
 
-SIGNAL_ID hợp lệ: ${SIGNAL_IDS.join(', ')}`;
+SIGNAL_ID hợp lệ, kèm nghĩa của từng mã. Chỉ dùng mã có trong danh sách này:
+${SIGNAL_IDS.map((id) => `- ${id}: ${MO_TA[id] || ''}`).join('\n')}`;
 
 /**
  * §12 — nội dung người dùng nằm trong THẺ DỮ LIỆU, không trộn vào chỉ thị.
