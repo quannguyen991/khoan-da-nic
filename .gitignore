@@ -14,3 +14,7 @@ eval/cache/
 # ⚠️ Đây là ĐẦU RA của một repo khác (thư mục frontend). Commit vào đây là hai
 # nguồn sự thật cho cùng một tệp, và bản trong git sẽ cũ dần mà không ai biết.
 public/app/
+
+# APK dựng ra — 37,5 MB nhị phân, sinh lại được bằng scripts/dung-apk.ps1.
+khoan-da.apk
+*.apk
