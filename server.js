@@ -30,6 +30,7 @@ const TC = require('./src/trusted-circle');
 const { taoKho, traNguCanh } = require('./src/intel-radar');
 const { moKho } = require('./src/vault-store');
 const { canDangNhap } = require('./src/auth');
+const { layCauHinhVapid, chuanHoaDangKy } = require('./src/push');
 
 const CONG = Number(process.env.PORT) || 8089;
 const GIOI_HAN_VAN_BAN = 5000;          // §6.10
@@ -43,13 +44,49 @@ const KHONG_GOI_AI = process.env.KHOAN_DA_KHONG_GOI_AI === '1';
 const app = express();
 app.disable('x-powered-by');   // §6.8 — không rò phiên bản
 
-// §6.8 — security headers.
+/**
+ * §6.8 — security headers.
+ *
+ * ⚠️ `worker-src 'self'` khai TƯỜNG MINH vì một số trình duyệt không rơi về
+ * `default-src` cho service worker. Đây là làm chặt và làm rõ, KHÔNG phải nới.
+ *
+ * ⚠️ NHƯNG ĐỪNG TƯỞNG DÒNG NÀY LÀ THUỐC CHỮA. Ghi lại để người sau khỏi mất
+ * thời gian: khi service worker không đăng ký được kèm thông báo
+ * `An unknown error occurred when fetching the script` — trong khi
+ * `fetch('/sw.js')` trả 200 đúng content-type — thì CSP là nghi phạm đầu tiên,
+ * và đo 16/8/2026 cho thấy nó KHÔNG phải nguyên nhân: thêm `worker-src` xong
+ * vẫn hỏng, và một service worker RỖNG cũng hỏng y hệt.
+ *
+ * Nguyên nhân lúc đó là môi trường trình duyệt chặn đăng ký (trình duyệt trong
+ * ứng dụng, chế độ ẩn danh, hoặc cờ tắt SW). Cách tách bạch nhanh: nạp một
+ * service worker rỗng — rỗng mà cũng hỏng thì lỗi KHÔNG nằm ở mã của bạn.
+ *
+ * ⚠️ `connect-src 'self'` — §12 cấm cho model gọi mạng trực tiếp trong đường
+ * phân tích rủi ro. Khai ở đây là chặn ở tầng trình duyệt, không chỉ ở tầng
+ * quy ước: kể cả ai đó lỡ nhét một lượt fetch tới gateway vào mã frontend thì
+ * trình duyệt cũng chặn.
+ *
+ * ⚠️ `img-src` KHÔNG mở cho https: bên ngoài. Ảnh từ máy chủ lạ là một lượt gọi
+ * ra ngoài mỗi lần bác mở app — đủ để bên đó biết bác đang dùng Khoan Đã.
+ * Giao diện hiện còn vài ảnh mẫu từ unsplash.com; chúng sẽ bị chặn, và ĐÓ LÀ
+ * HÀNH VI ĐÚNG — cần thay bằng ảnh cục bộ chứ không phải nới CSP.
+ */
 app.use((req, res, next) => {
   res.setHeader('x-content-type-options', 'nosniff');
   res.setHeader('x-frame-options', 'DENY');
   res.setHeader('referrer-policy', 'no-referrer');
-  res.setHeader('content-security-policy',
-    "default-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'none'; frame-ancestors 'none'");
+  res.setHeader('content-security-policy', [
+    "default-src 'self'",
+    "script-src 'self'",
+    "worker-src 'self'",              // ⚠️ thiếu dòng này là service worker chết
+    "style-src 'self' 'unsafe-inline'",
+    "font-src 'self' data:",
+    "img-src 'self' data:",
+    "connect-src 'self'",
+    "object-src 'none'",
+    "base-uri 'none'",
+    "frame-ancestors 'none'",
+  ].join('; '));
   next();
 });
 
@@ -481,6 +518,40 @@ app.get('/api/suc-khoe', (req, res) => {
 });
 
 /**
+ * ─────────────────── THÔNG BÁO ĐẨY ───────────────────
+ *
+ * ⚠️ §11 — KHÔNG BAO GIỜ NÓI "ĐÃ GỬI CHO NGƯỜI THÂN" KHI CHƯA XÁC NHẬN ĐƯỢC.
+ * Web Push không cho biết thông báo đã tới máy hay chưa; nó chỉ cho biết máy
+ * chủ đẩy đã NHẬN. `src/push.js` có sẵn mã `PUSH_DELIVERY_UNKNOWN` cho đúng
+ * chuyện đó — đừng viết chữ nào mạnh hơn nó ở tầng trên.
+ *
+ * ⚠️ §12 — không bật đồng bộ mặc định. Người dùng phải CHỦ ĐỘNG bật thông báo;
+ * không có đường nào ở đây tự đăng ký thay họ.
+ *
+ * ⚠️ §6.9 — bản ghi đăng ký KHÔNG được mang nội dung tin nhắn. `moKho()` đã bọc
+ * hàng rào trường cấm, nhưng ở đây cũng chỉ lưu đúng endpoint + khoá.
+ */
+const BANG_PUSH = 'push_dang_ky';
+
+app.get('/api/push/khoa-cong-khai', chanDoc, (req, res) => {
+  const v = layCauHinhVapid();
+  // Chưa cấu hình ⇒ nói thật là chưa, để giao diện không bảo người dùng "đã bật".
+  res.json({ khoaCongKhai: v.daCauHinh ? v.congKhai : null });
+});
+
+app.post('/api/push/dang-ky', chanDoc, async (req, res) => {
+  try {
+    const dk = chuanHoaDangKy(req.body?.dangKy);
+    const kho = await moKho();
+    // Khoá theo endpoint: cùng một máy đăng ký lại thì ghi đè, không nhân bản.
+    await kho.luu(BANG_PUSH, dk.endpoint, dk);
+    return res.json({ daDangKy: true });
+  } catch (e) {
+    return res.status(400).json({ maLoi: e?.ma || 'DANG_KY_KHONG_HOP_LE' });
+  }
+});
+
+/**
  * ─────────────────── GIAO DIỆN ───────────────────
  *
  * Phục vụ bản dựng frontend từ CHÍNH máy chủ này. Một tiến trình, một origin.
@@ -503,6 +574,28 @@ app.get('/api/suc-khoe', (req, res) => {
  */
 const DUONG_GIAO_DIEN = process.env.KHOAN_DA_GIAO_DIEN
   || path.join(__dirname, 'public', 'app');
+
+/**
+ * ⚠️ SÀN TIẾP CẬN §4.4 PHẢI PHỤC VỤ ĐƯỢC — VÀ NÓ TỪNG KHÔNG.
+ *
+ * `tokens.css` và `vung-cham-san.css` nằm ở `public/`, không nằm trong bản dựng
+ * giao diện (`public/app/`). Trước khi có khối này, SPA catch-all nuốt chúng và
+ * trả `index.html` — tức HTTP **200** kèm `content-type: text/html`.
+ *
+ * Đó tệ hơn 404: trình duyệt nhận HTML ở chỗ chờ CSS, âm thầm không áp gì, và
+ * sàn 52px/56px/14px biến mất mà KHÔNG có lỗi ở bất kỳ đâu. §4.4 gọi tên
+ * `vung-cham-san.css` đích danh và nói nó phải nằm trong APP_SHELL của service
+ * worker — mà đệm một trang HTML dưới tên tệp CSS thì đệm luôn cả cái hỏng.
+ *
+ * Khai TƯỜNG MINH từng tệp, không mount cả `public/`: mount cả thư mục là phơi
+ * thêm thứ chưa ai rà.
+ * Hàng rào: test/vo-ung-dung.test.js kiểm cả mã trạng thái LẪN content-type.
+ */
+const TEP_DUNG_CHUNG = ['tokens.css', 'vung-cham-san.css'];
+for (const ten of TEP_DUNG_CHUNG) {
+  const d = path.join(__dirname, 'public', ten);
+  if (fs.existsSync(d)) app.get(`/${ten}`, (req, res) => res.sendFile(d));
+}
 
 if (fs.existsSync(path.join(DUONG_GIAO_DIEN, 'index.html'))) {
   app.use(express.static(DUONG_GIAO_DIEN, { index: false }));
