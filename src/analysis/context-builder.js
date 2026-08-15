@@ -208,9 +208,36 @@ const KHUNG_GIAO_DUC = new RegExp([
   'if\\s+(someone|anyone|a caller)',
   'không bao giờ\\s+(yêu cầu|hỏi|đòi|gọi|nhắn|cử)',
   'kẻ (lừa đảo|gian)', 'lừa đảo thường',
-  '^\\s*(cảnh báo|lưu ý)\\b',
+  '^\\s*(cảnh báo|lưu ý)',
   'đừng\\b[^.]{0,60}\\bhãy\\b',
   '^\\s*không\\s+(cài|chuyển|đọc|bấm|tải)',
+
+  /**
+   * ⚠️ BỐN KHUNG GIÁO DỤC TIẾNG VIỆT BỔ SUNG 15/8/2026.
+   *
+   * Đo được: cả BỐN mẫu FIN_SAFE_ACCOUNT bật oan đều là câu cảnh báo chống lừa
+   * đảo — đúng thứ Phụ lục C sinh ra để chặn. Vì CO-03 là override MỘT TÍN HIỆU,
+   * mỗi lần bật oan là thẳng lên màn khẩn cấp.
+   *
+   * Khung tiếng Việt trước đây mỏng hơn hẳn bản tiếng Anh: chỉ nhận "cảnh báo"
+   * ở ĐẦU câu, không nhận cơ quan đứng trước, không nhận lời kể chuyện cũ, không
+   * nhận cấu trúc điều kiện "ai … thì …".
+   *
+   * C.1: hàng rào là CẤU TRÚC, không phải danh sách từ khoá.
+   */
+  // 1. Cơ quan đứng TRƯỚC động từ cảnh báo: "Công an TP Hà Nội cảnh báo: …"
+  '(công an|cảnh sát|cơ quan|ngân hàng|bộ|cục|chi cục)[^.]{0,40}(cảnh báo|khuyến cáo|lưu ý)',
+  // 2. Khung TƯỜNG THUẬT về nạn nhân: "nạn nhân được yêu cầu chuyển…"
+  '(nạn nhân|người bị hại|bị hại)\\b[^.]{0,30}(được|bị)\\s+(yêu cầu|dụ|lừa)',
+  'theo (cơ quan|công an|báo|nguồn tin)',
+  // 3. Cấu trúc ĐIỀU KIỆN — tương đương "if someone … hang up" của tiếng Anh
+  // ⚠️ KHÔNG đặt `\b` sau `thì` — `ì` không phải ký tự chữ trong JavaScript nên
+  // `\bthì\b` KHÔNG BAO GIỜ khớp. Đây là lần thứ tư lỗi này cắn trong dự án.
+  '\\bai\\b[^.]{0,60}\\bthì[^.]{0,40}(lừa đảo|kẻ gian|đừng|không nên|hãy)',
+  '(nếu|hễ)\\s[^.]{0,60}(thì\\s[^.]{0,30})?(lừa đảo|đừng|không nên|hãy|cúp máy)',
+  // 4. GỌI THẲNG TÊN là lừa đảo — không ai vừa lừa vừa tự khai mình đang lừa
+  '(chắc chắn|đúng) là lừa đảo', 'là (trò|chiêu|thủ đoạn) lừa',
+  'không có (cái gì|thứ gì|khái niệm)',
 ].join('|'), 'g');
 
 const KHUNG_THONG_BAO = new RegExp([
@@ -225,8 +252,11 @@ const KHUNG_QUA_KHU = new RegExp([
   '^\\s*(yesterday|last (night|week|month)|earlier)',
   '^\\s*(a |the )?scammer\\s+(told|said|asked|called)',
   '^\\s*i\\s+(told|sent|transferred|paid|gave|installed|opened|called)',
-  '^\\s*(hôm qua|hôm trước|tuần trước|lúc nãy|ban nãy)',
-  '^\\s*[^.,]{0,30}\\btôi đã\\b',
+  // Mở rộng mốc thời gian quá khứ: "Năm ngoái mẹ suýt bị lừa…" là lời KỂ LẠI,
+  // không phải yêu cầu đang diễn ra.
+  '^\\s*(hôm qua|hôm trước|tuần trước|tháng trước|năm ngoái|năm trước|dạo trước|hồi đó|lúc nãy|ban nãy)',
+  '\\b(suýt|đã từng|có lần)\\b[^.]{0,20}(bị lừa|mắc lừa)',
+  '^\\s*[^.,]{0,30}\\btôi đã\\s',
 ].join('|'));
 
 const KHUNG_TU_QUYET = new RegExp([
@@ -241,7 +271,7 @@ const KHUNG_TU_QUYET = new RegExp([
 const KHUNG_MENH_LENH = new RegExp([
   '^\\s*(please|kindly)\\b', '\\bplease\\b',
   '^\\s*(bác|anh|chị|ông|bà|cô|chú|em|con)\\s+\\S+',
-  '\\b(hãy|vui lòng|nhớ)\\b',
+  '\\b(hãy|vui lòng|nhớ)\\s',
   '^\\s*(chuyển|gửi|đọc|cài|tải|bật|nộp|mua|cung cấp|đăng nhập)\\b',
   // mệnh lệnh tiếng Anh ở ĐẦU câu — "Send $500 now." không có "please" nào cả,
   // và phần lớn mệnh lệnh lừa đảo cũng vậy.

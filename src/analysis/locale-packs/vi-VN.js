@@ -45,7 +45,9 @@ module.exports = {
     ],
     FIN_RECOVERY_FEE: [
       { pattern: 'phí\\s+(giải ngân|xử lý|mở khoá|hồ sơ|kích hoạt|bảo lãnh)', scope: 'action' },
-      { pattern: '(đóng|nộp) phí\\b[^.]{0,44}(lấy lại|hoàn|nhận lại)', scope: 'action' },
+      // ⚠️ KHÔNG `phí\b` — `í` không phải ký tự chữ trong JavaScript nên mẫu đó
+      // CHƯA BAO GIỜ khớp. Hàng rào test/ranh-gioi-tu-unicode.test.js tìm ra.
+      { pattern: '(đóng|nộp) phí[^.]{0,44}(lấy lại|hoàn|nhận lại)', scope: 'action' },
     ],
     FIN_GIFT_CARD_PAYMENT: [
       { pattern: 'thẻ\\s+(quà tặng|cào|game|điện thoại)', scope: 'action' },
