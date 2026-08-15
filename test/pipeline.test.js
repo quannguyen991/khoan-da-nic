@@ -85,6 +85,37 @@ test('§4.2 — aiDaChay = false khi không có lớp AI chạy', () => {
     'frontend PHẢI hiện dòng "lượt này không có AI đọc"');
 });
 
+/**
+ * §4.3 NẰM NGAY TRONG TRƯỜNG SINH RA ĐỂ CHỐNG §4.3.
+ *
+ * "AI đã đọc, không thấy gì" ≠ "AI không chạy". Trước 16/8/2026, điều kiện có
+ * thêm `llmSignals.length > 0`, nên một tin nhắn LÀNH — nơi AI chạy đúng và trả
+ * về không tín hiệu nào — ra `aiDaChay:false`, và §HĐ buộc frontend hiện "Lượt
+ * này không có AI đọc nội dung". App nói dối về chính việc nó vừa làm.
+ *
+ * Đo được qua HTTP: "Chào bác, mai cháu qua chơi ăn cơm nhé." → 4,8 giây gọi AI
+ * thật, 0 tín hiệu, aiDaChay:false.
+ *
+ * Danh sách rỗng là một KẾT QUẢ, không phải một sự vắng mặt.
+ */
+test('§4.3 — AI chạy xong mà KHÔNG thấy tín hiệu nào vẫn là aiDaChay = true', () => {
+  const kq = analyze({ vanBan: 'Chào bác, mai cháu qua chơi ăn cơm nhé.', llmSignals: [] });
+  assert.strictEqual(kq.aiDaChay, true,
+    'AI đã đọc mà app báo là chưa đọc — đúng lỗi §4.3, ở ngay trường chống §4.3');
+});
+
+test('§4.3 — nhưng AI HỎNG thì vẫn là false, dù danh sách cũng rỗng', () => {
+  for (const loi of ['AI_TIMEOUT', 'AI_NETWORK', 'AI_NOT_CONFIGURED', 'AI_KEY_EXPIRED']) {
+    const kq = analyze({ vanBan: 'Chào bác.', llmSignals: [], aiError: loi });
+    assert.strictEqual(kq.aiDaChay, false, `${loi} mà báo là AI đã chạy`);
+  }
+});
+
+test('§4.3 — không gọi tầng AI thì cũng false (đường sơ bộ, và ca critical override)', () => {
+  assert.strictEqual(analyze({ vanBan: 'Chào bác.' }).aiDaChay, false);
+  assert.strictEqual(analyze({ vanBan: 'Chào bác.', llmSignals: undefined }).aiDaChay, false);
+});
+
 test('§4.2 — aiDaChay = true khi có tín hiệu từ llm-extractor', () => {
   const kq = analyze({
     vanBan: 'Bác chuyển tiền giúp cháu nhé.',

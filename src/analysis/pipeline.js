@@ -243,7 +243,24 @@ function analyze(input = {}, nguCanhTinCay = {}) {
   const direct = directPrecheck(ctx, docNguCanhTinCay(nguCanhTinCay));
   const web = phanTichUrl(vanBan);
 
-  const aiDaChay = Array.isArray(input.llmSignals) && input.llmSignals.length > 0 && !input.aiError;
+  /**
+   * ⚠️ "AI ĐÃ ĐỌC, KHÔNG THẤY GÌ" ≠ "AI KHÔNG CHẠY" — §4.3, LẦN THỨ NĂM.
+   *
+   * Trước đây điều kiện có thêm `input.llmSignals.length > 0`. Hệ quả: một tin
+   * nhắn LÀNH, nơi AI chạy đúng và trả về không tín hiệu nào, ra `aiDaChay:
+   * false` — và §HĐ buộc frontend hiện "Lượt này không có AI đọc nội dung".
+   *
+   * Đo được 16/8/2026 qua HTTP: "Chào bác, mai cháu qua chơi ăn cơm nhé."
+   * → 4,8 giây gọi AI thật, 0 tín hiệu, `aiDaChay:false`. App nói dối về chính
+   * việc nó vừa làm.
+   *
+   * Trớ trêu: `aiDaChay` là trường §HĐ sinh ra ĐÚNG ĐỂ phân biệt hai chuyện đó,
+   * và nó lại tự nhầm. Danh sách rỗng là một KẾT QUẢ, không phải một sự vắng mặt.
+   *
+   * Nay chỉ hỏi: tầng AI có chạy xong mà không lỗi không? `aiError` đã phân biệt
+   * mọi ca không chạy được (chưa cấu hình khoá, timeout, mạng, khoá hết hạn).
+   */
+  const aiDaChay = Array.isArray(input.llmSignals) && !input.aiError;
   // §6.1 bước 7 — validate evidence TRƯỚC khi merge. Trích bịa thì loại tín hiệu.
   // Hai hàng rào, cùng thứ tự §6.1 bước 7: evidence phải có thật, RỒI scope/
   // speech act phải cho phép. Bỏ hàng rào thứ hai là để AI đi vòng qua Phụ lục C.
