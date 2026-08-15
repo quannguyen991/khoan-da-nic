@@ -86,6 +86,17 @@ module.exports = {
     ID_TECH_SUPPORT_IMPERSONATION: [
       { pattern: '(hỗ trợ|kỹ thuật viên)\\s+(kỹ thuật|viễn thông)', scope: 'any' },
     ],
+    /**
+     * §9.2 — MẠO DANH CHÍNH KHOAN ĐÃ.
+     * "Hễ một thương hiệu chống lừa đảo được người cao tuổi biết tới, kẻ lừa đảo
+     * sẽ dùng chính cái tên đó. Rủi ro này LỚN DẦN THEO MỨC ĐỘ THÀNH CÔNG."
+     * ⚠️ §9.2 cấm nâng tín hiệu này thành critical override thứ 11.
+     */
+    ID_KHOAN_DA_IMPERSONATION: [
+      { pattern: '(nhân viên|người của|bên|đội|tổng đài)\\s+khoan đã', scope: 'any' },
+      { pattern: '(tôi|em|cháu|mình)\\s+(là|bên)\\s+khoan đã', scope: 'any' },
+      { pattern: 'khoan đã\\s+(yêu cầu|đề nghị|gọi|nhắn)', scope: 'any' },
+    ],
     ID_FAMILY_IMPERSONATION: [
       { pattern: '(con|cháu|em)\\s+(gái|trai)?\\s*(nhờ|bảo|xin)\\b[^.]{0,26}(chuyển|gửi)\\s+tiền', scope: 'any' },
     ],

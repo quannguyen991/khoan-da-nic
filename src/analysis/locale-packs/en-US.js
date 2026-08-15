@@ -93,6 +93,13 @@ module.exports = {
       { pattern: '\\bbank (security|fraud) (team|department|officer)\\b', scope: 'any' },
       { pattern: '\\bthis is\\b[^.]{0,22}\\bbank\\b', scope: 'any' },
     ],
+    // §9.2 — mạo danh chính Khoan Đã. Tên thương hiệu giữ nguyên tiếng Việt ở
+    // mọi locale (§4.1), nên cue cũng phải bắt được nó trong câu tiếng Anh.
+    ID_KHOAN_DA_IMPERSONATION: [
+      { pattern: '(agent|staff|support|team|representative)\\b[^.]{0,16}\\bkhoan da\\b', scope: 'any' },
+      { pattern: '\\bi am (from |with )?khoan da\\b', scope: 'any' },
+      { pattern: '\\bkhoan da\\b[^.]{0,20}\\b(asks?|requires?|needs?) you to\\b', scope: 'any' },
+    ],
     ID_FAMILY_IMPERSONATION: [
       { pattern: '\\bmy (daughter|son|mum|mom|dad|father|mother)\\b[^.]{0,20}\\b(asked|needs|wants|said)\\b', scope: 'any' },
       { pattern: '\\b(it is|this is) (me|your) (son|daughter|mum|mom|dad)\\b', scope: 'any' },
