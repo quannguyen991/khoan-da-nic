@@ -152,6 +152,9 @@
     "ai_khong_chay",
     "khong_nghe_duoc_ghi_am",
     "noi_dung_qua_dai",
+    "chua_tai_xong_model_nghe",
+    "ghi_am_khong_co_tieng_noi",
+    "chi_nghe_duoc_phan_dau",
     "chi_doc_duoc_mot_phan_tin",
     "thong_bao_khong_co_noi_dung",
     "thong_bao_da_bi_xoa",
@@ -164,7 +167,13 @@
     "ten_mien_khong_phan_giai",
     "chi_chay_bang_bo_luat",
     "ghi_am_khong_giai_ma_duoc",
-    "chi_doc_duoc_phan_dau"
+    "chi_doc_duoc_phan_dau",
+    "chua_co_bo_nghe_tren_may",
+    "ghi_am_khong_co_tieng_noi",
+    "chi_doc_duoc_mot_phan_tin",
+    "thong_bao_khong_co_noi_dung",
+    "thong_bao_da_bi_xoa",
+    "chua_lien_lac_duoc_nguoi_than"
   ],
   "hoKichBan": [
     "gia_danh_cong_an",

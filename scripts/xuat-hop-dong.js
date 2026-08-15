@@ -46,6 +46,15 @@ const MA_DA_KIEM = [
 const MA_CHUA_KIEM = [
   'chua_nghe_duoc_cuoc_goi', 'khong_doc_duoc_anh', 'khong_mo_duoc_link',
   'ai_khong_phan_hoi', 'ai_khong_chay', 'khong_nghe_duoc_ghi_am', 'noi_dung_qua_dai',
+  /**
+   * §4.3 — ba chỗ hỏng của nguồn ghi âm trên máy. BA MÃ RIÊNG, đừng gộp:
+   *  · chua_tai_xong_model_nghe  — bác CHƯA CÓ bộ nghe. Bác tự sửa được.
+   *  · ghi_am_khong_co_tieng_noi — có ghi, nhưng không có giọng người.
+   *  · chi_nghe_duoc_phan_dau    — đoạn ghi dài, mới nghe được phần đầu.
+   * Cả ba đều KHÁC "không giải mã được", và viết câu giống nhau cho chúng là
+   * bảo bác đi sửa một thứ bác không sửa được.
+   */
+  'chua_tai_xong_model_nghe', 'ghi_am_khong_co_tieng_noi', 'chi_nghe_duoc_phan_dau',
   // §15.4.1 — bốn chỗ hỏng của nguồn đọc thông báo tin nhắn.
   'chi_doc_duoc_mot_phan_tin', 'thong_bao_khong_co_noi_dung', 'thong_bao_da_bi_xoa',
   /**

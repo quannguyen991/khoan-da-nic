@@ -42,6 +42,30 @@ const GIOI_HAN = Object.freeze({
   ai_khong_chay: 'chi_chay_bang_bo_luat',
   khong_nghe_duoc_ghi_am: 'ghi_am_khong_giai_ma_duoc',
   noi_dung_qua_dai: 'chi_doc_duoc_phan_dau',
+
+  /**
+   * §4.3 — BA KIỂU HỎNG KHÁC NHAU CỦA NGUỒN GHI ÂM, ba mã riêng.
+   * Gộp lại thì Phiếu nói "không giải mã được" trong khi thật ra là "bác chưa
+   * tải bộ nghe" — hai việc khác nhau, và một trong hai bác tự sửa được.
+   */
+  chua_tai_xong_model_nghe: 'chua_co_bo_nghe_tren_may',
+  ghi_am_khong_co_tieng_noi: 'ghi_am_khong_co_tieng_noi',
+  chi_nghe_duoc_phan_dau: 'chi_doc_duoc_phan_dau',
+
+  /**
+   * §15.4.1 — bốn chỗ hỏng của nguồn đọc thông báo, và §16.3.
+   *
+   * ⚠️ Bốn mã này ĐÃ có trong hợp đồng từ trước nhưng THIẾU ở bảng này, nên
+   * `limitations` im lặng về chúng. `chuaKiem` thô vẫn tới được frontend nên
+   * §HĐ luật 3 không bị phá — nhưng một trong hai đường hiển thị thì mù.
+   *
+   * ⚠️ `chua_thay_yeu_cau_da_xac_thuc` CỐ Ý không có ở đây. Xem §16.3 và
+   * test/nguon-da-kiem-day-du.test.js — nó là trạng thái BÌNH THƯỜNG.
+   */
+  chi_doc_duoc_mot_phan_tin: 'chi_doc_duoc_mot_phan_tin',
+  thong_bao_khong_co_noi_dung: 'thong_bao_khong_co_noi_dung',
+  thong_bao_da_bi_xoa: 'thong_bao_da_bi_xoa',
+  chua_lien_lac_duoc_nguoi_than: 'chua_lien_lac_duoc_nguoi_than',
 });
 
 function buildTrustReceipt(envelope) {
