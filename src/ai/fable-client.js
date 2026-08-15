@@ -14,7 +14,20 @@
  * ⚠️ §6.9: KHÔNG log prompt/response ở production.
  */
 
-const TIMEOUT_MAC_DINH = 30_000;
+/**
+ * ĐO 15/8/2026, 9 lượt trên `aws/claude-sonnet-5-medium` qua vertex-key.com,
+ * dùng đúng lời nhắc trích tín hiệu thật. 9/9 lượt đều về:
+ *   5,6 · 5,7 · 5,9 · 6,0 · 6,5 · 8,3 · 17,5 · 19,7 · 27,2 giây
+ * Trung vị 6,5s nhưng phân bố LƯỠNG CỰC, đuôi tới 27,2s.
+ *
+ * ⚠️ Đừng chốt ngưỡng theo trung vị. Ngưỡng 20s (chốt vội trên 3 mẫu đầu) cắt oan
+ * 2/9 lượt — tức ~22% số lượt bị đẩy xuống chế độ suy giảm DÙ AI VẪN ĐANG TRẢ LỜI.
+ * 35s phủ hết dải đã đo với biên ~28%.
+ *
+ * Chờ lâu không phải vấn đề với ca nguy hiểm: §6.10 cho bộ luật chạy trước, ca có
+ * critical override trả về dưới 1 giây và KHÔNG chạm tới tầng này.
+ */
+const TIMEOUT_MAC_DINH = 35_000;
 
 class LoiNhaCungCap extends Error {
   constructor(ma, { cause, providerStatus, providerMessage } = {}) {
