@@ -188,4 +188,4 @@ if (require.main === module) {
   }
 }
 
-module.exports = { dungHopDong, TRUONG_HOP_DONG };
+module.exports = { dungHopDong, TRUONG_HOP_DONG, MA_DA_KIEM, MA_CHUA_KIEM };

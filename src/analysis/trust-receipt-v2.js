@@ -12,11 +12,25 @@
  * Phiếu trả về MÃ. Frontend tra catalog i18n để ra câu.
  */
 
-/** Bảng TĨNH: mã nguồn đầu vào → mã hiển thị. Không sinh động, không nội suy. */
+/**
+ * Bảng TĨNH: mã nguồn đầu vào → mã hiển thị. Không sinh động, không nội suy.
+ *
+ * ⚠️ PHẢI KHỚP `MA_DA_KIEM` trong scripts/xuat-hop-dong.js. Dòng lọc `daKiem`
+ * dưới kia vứt IM LẶNG mọi mã không có ở đây — và ba mã đã từng bị vứt như thế
+ * suốt một thời gian: ghi_am, thong_bao_tin_nhan, bo_hoi_nhanh. Phiếu khai
+ * thiếu thứ nó đã kiểm, không ai thấy, vì chiều sai này không làm đỏ test nào.
+ *
+ * THÊM NGUỒN ĐẦU VÀO MỚI THÌ THÊM VÀO ĐÂY.
+ * Hàng rào: test/nguon-da-kiem-day-du.test.js.
+ */
 const NGUON = Object.freeze({
   van_ban: 'van_ban',
   anh_ocr: 'anh_ocr',
   url: 'url',
+  ghi_am: 'ghi_am',
+  thong_bao_tin_nhan: 'thong_bao_tin_nhan',
+  bo_hoi_nhanh: 'bo_hoi_nhanh',
+  nguoi_than_xac_nhan: 'nguoi_than_xac_nhan',
 });
 
 /** Bảng TĨNH: mã giới hạn kèm theo từng lý do chưa kiểm được. */
