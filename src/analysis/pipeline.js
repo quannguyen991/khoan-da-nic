@@ -107,6 +107,22 @@ function unreadableInputFloor(input = {}) {
     daKiem.push('nguoi_than_xac_nhan');
   }
 
+  /**
+   * VERIFIED REQUEST — CHIỀU KIỂM. Tra xem có yêu cầu đã ký tương ứng không.
+   *
+   * ⚠️ "KHÔNG TÌM THẤY" LÀ TRẠNG THÁI **BÌNH THƯỜNG**, KHÔNG PHẢI TÍN HIỆU.
+   * Hầu như không ai dùng tính năng này, nên nó bật cả với yêu cầu THẬT — con
+   * gái nhắn xin tiền thật cũng chẳng có chữ ký nào.
+   *
+   * Nên nó nằm ở `chuaKiem` chứ KHÔNG BAO GIỜ ở `maLyDo`, và KHÔNG có sàn nào
+   * gắn với nó. Đây là chỗ khác hẳn `chua_lien_lac_duoc_nguoi_than` ngay trên:
+   * ở đó người dùng ĐÃ CHỦ ĐỘNG HỎI mà không ai đáp — im lặng có nghĩa; ở đây
+   * chưa ai hỏi ai cả, im lặng là mặc định của thế giới.
+   */
+  if (input.chuaThayYeuCauDaXacThuc === true) {
+    chuaKiem.push('chua_thay_yeu_cau_da_xac_thuc');
+  }
+
   if (input.aiError) chuaKiem.push('ai_khong_phan_hoi');
 
   return { daKiem, chuaKiem };

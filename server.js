@@ -22,6 +22,7 @@ const { taoSuKien, timHoSoCoTheGop, dungCauHoiGop, tinHieuCase, baLop, GIAI_DOAN
 const { buocTiepTheo } = require('./src/kich-ban-di-tiep');
 const KP = require('./src/khoan-proof');
 const KY = require('./src/khoan-proof-ky');
+const VR = require('./src/verified-request');
 const TC = require('./src/trusted-circle');
 const { taoKho, traNguCanh } = require('./src/intel-radar');
 const { moKho } = require('./src/vault-store');
@@ -267,6 +268,22 @@ app.post('/api/proof/yeu-cau/:yeuCauId/ky', chanProof, canPhien,
     taiKhoanId: req.taiKhoanId,
     quyetDinh: req.body?.quyetDinh,
     phanHoi: req.body?.phanHoi,
+  })));
+
+/**
+ * VERIFIED REQUEST — CHIỀU KIỂM.
+ *
+ * ⚠️ "KHÔNG TÌM THẤY" LÀ TRẠNG THÁI BÌNH THƯỜNG, không phải tín hiệu lừa đảo.
+ * Hầu như không ai dùng tính năng này nên nó bật cả với yêu cầu THẬT. Frontend
+ * phải hiện đúng câu "Khoan Đã chưa tìm thấy yêu cầu đã xác thực từ …" — KHÔNG
+ * được thành "… không hề gửi yêu cầu này", vì app không biết điều đó.
+ *
+ * Route này KHÔNG trả nhãn rủi ro. Nó trả trạng thái hiểu biết, và frontend gọi
+ * /api/analyze riêng như mọi khi.
+ */
+app.get('/api/proof/chieu-kiem/:caseId', chanProof, canPhien,
+  proof((req) => VR.traYeuCauDaKy({
+    chuTaiKhoanId: req.taiKhoanId, caseId: req.params.caseId,
   })));
 
 /**
