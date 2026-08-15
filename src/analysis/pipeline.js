@@ -15,6 +15,7 @@ const { evaluateOverrides } = require('./critical-overrides');
 const { locTheoEvidence, locTheoScopeChiTiet } = require('./evidence-validator');
 const { phanTichUrl, trichUrl } = require('./url-analyzer');
 const { laTinHieu } = require('./signal-registry');
+const { coDinhCuocGoi } = require('./co-dinh-cuoc-goi');
 const { nhanHopDong } = require('../risk-labels');
 const { chonMuc } = require('../intervention-ladder');
 const { tinHieuTuTraLoi } = require('../bo-hoi-nhanh');
@@ -459,8 +460,41 @@ function analyze(input = {}, nguCanhTinCay = {}) {
   }
 
   const chuaKiem = [...san.chuaKiem];
-  // Mọi lượt chỉ có văn bản đều chưa nghe được cuộc gọi — nói ra, đừng im lặng.
-  if (!chuaKiem.includes('chua_nghe_duoc_cuoc_goi')) chuaKiem.push('chua_nghe_duoc_cuoc_goi');
+  /**
+   * §15.9.1 — Khoan Đã KHÔNG nghe được cuộc gọi, và không bao giờ được để bác
+   * tin rằng cuộc gọi đã được kiểm.
+   *
+   * ⚠️ NHƯNG CHỈ NÓI KHI CÓ CUỘC GỌI DÍNH VÀO — đổi 16/8/2026.
+   *
+   * Trước đây câu này ép vào 100% số lượt. §HĐ luật 3 buộc `chuaKiem` hiện CÙNG
+   * CỠ CHỮ VỚI NHÃN, nên bác dán một tin nhắn — không có cuộc gọi nào — mà màn
+   * hình vẫn dành cỡ chữ tiêu đề để nói về một cuộc gọi không tồn tại. Một cảnh
+   * báo xuất hiện ở mọi lượt và không bao giờ đổi thì dạy người ta bỏ qua cả
+   * vùng `chuaKiem`; rồi câu THẬT SỰ quan trọng ("chỉ nghe được phần đầu") cũng
+   * bị bỏ qua nốt. §4.6 gọi tên đúng cơ chế đó.
+   *
+   * `coDinhCuocGoi()` mặc định TRẢ TRUE — nghi ngờ thì giữ. Nó chỉ bỏ khi đầu
+   * vào là văn bản thuần và không có chỉ dấu nào về cuộc gọi. Nó KHÔNG chạm tới
+   * điểm, nhãn hay `canThiep`.
+   */
+  if (coDinhCuocGoi(input) && !chuaKiem.includes('chua_nghe_duoc_cuoc_goi')) {
+    chuaKiem.push('chua_nghe_duoc_cuoc_goi');
+  }
+
+  /**
+   * ⚠️ AI KHÔNG CHẠY LÀ MỘT THỨ CHƯA KIỂM ĐƯỢC — LỖ HỔNG LỘ RA 16/8/2026.
+   *
+   * `ai_khong_chay` từ trước tới nay CHỈ được thêm ở `trust-receipt-v2.js`,
+   * không có trong phong bì §HĐ. Không ai thấy, vì `chua_nghe_duoc_cuoc_goi`
+   * bị ép vào 100% số lượt nên `chuaKiem` không bao giờ rỗng — một cái sai che
+   * đúng một cái sai khác. Gỡ câu cuộc gọi ra thì lượt sơ bộ (chỉ chạy bộ luật,
+   * AI chưa đọc) trả về `chuaKiem: []`, tức là màn hình nói "chưa thấy dấu hiệu
+   * rủi ro" mà không hề nói rằng chưa có AI nào đọc. Đó đúng là §4.3.
+   *
+   * `aiDaChay: false` vẫn ở trong phong bì và frontend BẮT BUỘC hiện nó, nhưng
+   * hai đường nói cùng một sự thật thì không được lệch nhau.
+   */
+  if (!aiDaChay && !chuaKiem.includes('ai_khong_chay')) chuaKiem.push('ai_khong_chay');
 
   const envelope = {
     nhan: nhanHopDong(riskLabel),
