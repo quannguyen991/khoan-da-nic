@@ -58,15 +58,30 @@ function doanChuaTrich(quote, ctx) {
  * Đây đúng dạng lỗi §9.1 mô tả: ĐƯỜNG DỰ PHÒNG AN TOÀN HƠN ĐƯỜNG CHÍNH.
  * Nên scope/speech act phải áp cho MỌI nguồn tín hiệu, không riêng nguồn nào.
  */
-function locTheoScope(signals = [], ctx) {
-  return signals.filter((s) => {
-    if (s.source === 'direct' || s.source === 'deterministic') return true;
-    if (scopeCuaTinHieu(s.id) !== 'action') return true;   // C.2 — 'any' lấy tất cả đoạn
+function locTheoScopeChiTiet(signals = [], ctx) {
+  const giu = [];
+  const loai = [];
+  for (const s of signals) {
+    if (s.source === 'direct' || s.source === 'deterministic') { giu.push(s); continue; }
+    if (scopeCuaTinHieu(s.id) !== 'action') { giu.push(s); continue; }  // C.2 — 'any' lấy tất cả đoạn
+
     // Tín hiệu action-scope chỉ được nhận khi evidence nằm trong đoạn HÀNH ĐỘNG.
-    return (s.evidence || []).some((e) => doanChuaTrich(e?.quote, ctx)?.actionable === true);
-  });
+    const doan = (s.evidence || []).map((e) => doanChuaTrich(e?.quote, ctx));
+    if (doan.some((d) => d?.actionable === true)) { giu.push(s); continue; }
+
+    // Ghi lại VÌ SAO bị loại — không có dòng này thì mọi chẩn đoán sau đều là đoán.
+    loai.push({
+      id: s.id,
+      quote: s.evidence?.[0]?.quote ?? null,
+      speechAct: doan.find(Boolean)?.speechAct ?? 'khong_tim_thay_doan',
+    });
+  }
+  return { giu, loai };
 }
 
+const locTheoScope = (signals, ctx) => locTheoScopeChiTiet(signals, ctx).giu;
+
 module.exports = {
-  validateEvidence, locTheoEvidence, locTheoScope, trichCoThat, doanChuaTrich,
+  validateEvidence, locTheoEvidence, locTheoScope, locTheoScopeChiTiet,
+  trichCoThat, doanChuaTrich,
 };

@@ -167,6 +167,32 @@ const NGUONG = [
     console.log(`\n  đã ghi ${duong}`);
   }
 
+  // Chi tiết TỪNG MẪU. Không có bảng này thì mọi bước sửa tiếp theo đều là đoán —
+  // và đã đo được một lần: đoán thì ra kết quả TỆ HƠN.
+  if (co('--chi-tiet')) {
+    const dong = kq.map((r) => JSON.stringify({
+      id: r.mau.id,
+      ho: r.mau.ho,
+      kenh: r.mau.kenh,
+      ngonNgu: r.mau.ngon_ngu,
+      vangMucDo: r.mau.muc_do,
+      vangToiDa: r.mau.toi_da,
+      duDoan: r.nhan,
+      dat: B.dat(r.mau, r.nhan),
+      score: r.score,
+      overrides: r.overrides,
+      aiTraVe: r.aiTraVe ?? null,
+      daNhan: r.daNhan ?? null,
+      loaiBoScope: r.loaiBoScope ?? null,
+      speechActs: r.speechActs ?? null,
+      hong: r.hong,
+      noiDung: r.mau.noi_dung.slice(0, 220),
+    })).join('\n');
+    const p = require('node:path').join(B.KET_QUA, 'chi-tiet.jsonl');
+    require('node:fs').writeFileSync(p, `${dong}\n`, 'utf8');
+    console.log(`  đã ghi ${p}`);
+  }
+
   console.log(`\n${hong === 0 && thieuLat === 0 ? '✅ Mọi ngưỡng và sàn đều đạt.'
     : `⚠️ ${hong} ngưỡng chưa đạt, ${thieuLat} lát cắt dưới sàn.`}\n`);
 })();
