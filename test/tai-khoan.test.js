@@ -206,3 +206,51 @@ test('§5.3 — /api/analyze không nằm sau đăng nhập', () => {
   assert.ok(KHONG_CAN_DANG_NHAP.includes('/api/analyze'),
     'đường kiểm tin nhắn bị gác sau đăng nhập — người đang bị thúc sẽ đóng app');
 });
+
+// ══════════ Bộ test không được chạm vào kho thật ══════════
+
+/**
+ * ⚠️ BẪY ĐÃ DẪM PHẢI 16/8/2026 — ĐỌC TRƯỚC KHI SỬA `moKho`.
+ *
+ * `khoan-proof.js` gọi `moKho()` KHÔNG THAM SỐ. Sau khi SQLite thành mặc định,
+ * lời gọi đó mở đúng tệp `.du-lieu/khoan-da.sqlite` — kho THẬT. Hai hậu quả:
+ *
+ *   ① bộ test ghi bản ghi lẫn vào tài khoản thật của người dùng
+ *   ② các tệp test chạy song song dùng chung một tệp, nên trạng thái rò từ tệp
+ *      này sang tệp kia: `PHÁT LẠI NONCE ĐÃ DÙNG` XANH khi chạy riêng và ĐỎ khi
+ *      chạy cả bộ. Kiểu lỗi này rất dễ bị "sửa" bằng cách tắt bài test đi.
+ *
+ * `NODE_TEST_CONTEXT` do chính Node đặt, không phải quy ước tự nhớ.
+ */
+test('moKho() trong tiến trình test KHÔNG mở kho thật', async () => {
+  assert.ok(process.env.NODE_TEST_CONTEXT,
+    'Node không đặt NODE_TEST_CONTEXT — hàng rào này mất tác dụng, tìm dấu hiệu khác');
+
+  const kho = await moKho();          // đúng cách `khoan-proof.js` gọi
+  assert.strictEqual(kho.loai, 'bo_nho_tam',
+    `test đang mở kho ${kho.loai} — sẽ ghi vào dữ liệu thật của người dùng`);
+  assert.ok(!kho.duongDan, `test trỏ vào tệp thật: ${kho.duongDan}`);
+});
+
+/** Khai `env` rỗng tường minh nghĩa là "kho sạch, tách biệt", không phải kho thật. */
+test('moKho({env:{}}) cho kho tạm, không phải tệp thật', async () => {
+  const kho = await moKho({ env: {} });
+  assert.strictEqual(kho.loai, 'bo_nho_tam');
+});
+
+/**
+ * ⚠️ HÀNG RÀO TRƯỜNG CẤM PHẢI CÒN SỐNG TRÊN MỌI NHÁNH.
+ * Hai nhánh `return` sớm ở trên là hai lối có thể trả về kho KHÔNG bọc hàng
+ * rào — lúc đó nội dung thô lọt vào máy chủ mà không ai biết.
+ */
+test('mọi nhánh của moKho đều bọc hàng rào trường cấm', async () => {
+  for (const env of [undefined, {}, { SQLITE_PATH: tepTam() }]) {
+    const kho = await moKho(env ? { env } : undefined);
+    await assert.rejects(
+      () => kho.luu('x', 'y', { noiDung: 'tin nhắn thô của người dùng' }),
+      (e) => e.ma === 'TRUONG_BI_CAM_O_TANG_MAY_CHU',
+      `hàng rào chết với env=${JSON.stringify(env)}`,
+    );
+    await kho.dong();
+  }
+});

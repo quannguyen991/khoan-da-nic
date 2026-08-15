@@ -206,6 +206,46 @@ function taoSqlite(duongDan) {
 async function moKho({ env = process.env } = {}) {
   const url = env.DATABASE_URL;
   let nen;
+
+  /**
+   * ⚠️ KHAI `env` RỖNG TƯỜNG MINH ⇒ KHO TẠM, KHÔNG PHẢI KHO THẬT.
+   *
+   * ĐO ĐƯỢC 16/8/2026, và đây là một cái bẫy nghiêm trọng hơn nó trông:
+   * `moKho({ env: {} })` trong test từng cho ra bộ nhớ tạm. Sau khi thêm SQLite,
+   * cùng lời gọi đó bắt đầu ghi vào `./.du-lieu/khoan-da.sqlite` — TỆP DỮ LIỆU
+   * THẬT. Bộ test bắt đầu trộn bản ghi vào tài khoản thật của người dùng, và
+   * triệu chứng đầu tiên chỉ là hai bài test đỏ vì đếm sai số dòng audit.
+   *
+   * Phân biệt: `moKho()` không tham số ⇒ `env = process.env` ⇒ chạy thật.
+   * Người gọi CHỦ ĐỘNG truyền một `env` không có `SQLITE_PATH` thì ý họ là
+   * "cho tôi một kho sạch, tách biệt" — không đời nào là "ghi đè kho sản xuất".
+   */
+  const laMoiTruongThat = env === process.env;
+  if (!laMoiTruongThat && !url && !env.SQLITE_PATH) {
+    return bocHangRao(taoBoNhoTam());
+  }
+
+  /**
+   * ⚠️ BỘ TEST KHÔNG BAO GIỜ ĐƯỢC CHẠM VÀO KHO THẬT — ĐO ĐƯỢC 16/8/2026.
+   *
+   * `khoan-proof.js` gọi `moKho()` KHÔNG THAM SỐ, nên nó đi thẳng vào nhánh
+   * "chạy thật" và mở đúng tệp `.du-lieu/khoan-da.sqlite`. Hậu quả đo được:
+   *
+   *   · bộ test ghi bản ghi lẫn vào tài khoản thật của người dùng
+   *   · các tệp test chạy SONG SONG dùng chung một tệp, nên trạng thái rò từ
+   *     tệp này sang tệp kia. `PHÁT LẠI NONCE ĐÃ DÙNG PHẢI BỊ TỪ CHỐI` XANH
+   *     khi chạy riêng và ĐỎ khi chạy cả bộ — kiểu lỗi tốn hàng giờ để hiểu,
+   *     và rất dễ bị "sửa" bằng cách tắt bài test đi.
+   *
+   * `NODE_TEST_CONTEXT` do chính Node đặt trong tiến trình chạy `node --test`.
+   * Không phải quy ước tự đặt, không cần ai nhớ khai biến môi trường.
+   *
+   * ⚠️ ĐỪNG ĐỔI THÀNH "cảnh báo rồi vẫn mở". Ghi nhầm vào kho thật là việc
+   * KHÔNG hoàn tác được.
+   */
+  if (env.NODE_TEST_CONTEXT && !env.SQLITE_PATH) {
+    return bocHangRao(taoBoNhoTam());
+  }
   if (url) {
     try {
       nen = await taoPostgres(url);
@@ -238,7 +278,17 @@ async function moKho({ env = process.env } = {}) {
     }
   }
 
-  // Bọc mọi lối ghi bằng hàng rào trường cấm.
+  return bocHangRao(nen);
+}
+
+/**
+ * Bọc MỌI lối ghi bằng hàng rào trường cấm.
+ *
+ * ⚠️ TÁCH RA HÀM RIÊNG ĐỂ KHÔNG CÓ LỐI NÀO ĐI VÒNG.
+ * Trước đây đoạn này nằm thẳng trong , nên một nhánh  sớm là
+ * một kho KHÔNG có hàng rào — nội dung thô lọt vào máy chủ mà không ai biết.
+ */
+function bocHangRao(nen) {
   const luuGoc = nen.luu.bind(nen);
   const auditGoc = nen.themAudit.bind(nen);
   nen.luu = async (ten, khoa, giaTri) => {
