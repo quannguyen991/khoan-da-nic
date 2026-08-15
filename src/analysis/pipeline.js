@@ -10,10 +10,13 @@
 
 const { buildContext } = require('./context-builder');
 const { directPrecheck } = require('./direct-precheck');
-const { decide, THRESHOLD_SUSPICIOUS, THRESHOLD_HIGH } = require('./decision-engine');
+const { decide } = require('./decision-engine');
 const { evaluateOverrides } = require('./critical-overrides');
+const { locTheoEvidence } = require('./evidence-validator');
+const { phanTichUrl, trichUrl } = require('./url-analyzer');
 const { laTinHieu } = require('./signal-registry');
 const { nhanHopDong } = require('../risk-labels');
+const { chonMuc } = require('../intervention-ladder');
 
 const GIOI_HAN_VAN_BAN = 5000;      // §6.10
 const NGUONG_CHAP_NHAN_LLM = 0.72;  // §6.4 — 0.55–0.71 → unknown; < 0.55 → drop
@@ -125,29 +128,28 @@ function chonHoKichBan(ids) {
  *
  * §6.2 — PROTECTED_CRITICAL CHỈ đến từ critical override, không bao giờ từ điểm số.
  */
-function chonCanThiep({ score = 0, overrides = [], caseContext = null } = {}) {
-  if (overrides.length > 0) return 'PROTECTED_CRITICAL';
-  if (caseContext?.outcome === 'money_lost') return 'RECOVERY';
-  if (score >= THRESHOLD_HIGH) return 'PAUSE_60S';
-  if (score >= THRESHOLD_SUSPICIOUS) return 'VERIFY_PATH';
-  return 'TRUST_RECEIPT';
-}
+const chonCanThiep = chonMuc;   // một nguồn sự thật duy nhất: intervention-ladder
 
 function analyze(input = {}) {
-  const san = unreadableInputFloor(input);
   const quaDai = typeof input.vanBan === 'string' && input.vanBan.length > GIOI_HAN_VAN_BAN;
   const vanBan = quaDai ? '' : (input.vanBan || '');
+
+  // §6.1 bước 3 — có URL thì phân tích DETERMINISTIC. KHÔNG tự mở link.
+  const urlList = trichUrl(vanBan);
+  const san = unreadableInputFloor({ ...input, url: urlList });
 
   const ctx = buildContext(vanBan, { sourceId: 'van_ban' });
   const direct = directPrecheck(ctx, {
     verifiedChannel: input.verifiedChannel === true,
     verifiedRelationship: input.verifiedRelationship === true,
   });
+  const web = phanTichUrl(vanBan);
 
   const aiDaChay = Array.isArray(input.llmSignals) && input.llmSignals.length > 0 && !input.aiError;
-  const llm = aiDaChay ? nhanTinHieuLLM(input.llmSignals) : [];
+  // §6.1 bước 7 — validate evidence TRƯỚC khi merge. Trích bịa thì loại tín hiệu.
+  const llm = aiDaChay ? locTheoEvidence(nhanTinHieuLLM(input.llmSignals), ctx) : [];
 
-  const signals = ghepTinHieu(direct, llm);
+  const signals = ghepTinHieu([...direct, ...web], llm);
   const nhanDuoc = signals.filter((s) => s.state === 'present').map((s) => s.id);
 
   const kq = decide(signals);
