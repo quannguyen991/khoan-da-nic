@@ -17,6 +17,7 @@ const { phanTichUrl, trichUrl } = require('./url-analyzer');
 const { laTinHieu } = require('./signal-registry');
 const { nhanHopDong } = require('../risk-labels');
 const { chonMuc } = require('../intervention-ladder');
+const { tinHieuTuTraLoi } = require('../bo-hoi-nhanh');
 
 const GIOI_HAN_VAN_BAN = 5000;      // §6.10
 const NGUONG_CHAP_NHAN_LLM = 0.72;  // §6.4 — 0.55–0.71 → unknown; < 0.55 → drop
@@ -51,10 +52,35 @@ function unreadableInputFloor(input = {}) {
     else daKiem.push('ghi_am');
   }
 
+  /**
+   * §15.4.1 — NGUỒN ĐẦU VÀO THỨ TƯ: đọc thông báo tin nhắn (native Android).
+   *
+   * §4.3 gọi tên đích danh: "THÊM NGUỒN ĐẦU VÀO MỚI NÀO THÌ THÊM CA VÀO ĐÂY."
+   * Ba trong bốn chỗ hỏng của nguồn này là "KHÔNG ĐỌC ĐƯỢC", và không đọc được
+   * KHÁC đọc rồi không thấy gì. Im lặng ở đây là đúng con bug đã xuất hiện ba
+   * lần trong cùng một ngày.
+   */
+  if (input.thongBao) {
+    if (input.thongBaoBiCat === true) chuaKiem.push('chi_doc_duoc_mot_phan_tin');
+    else if (input.thongBaoKhongCoNoiDung === true) chuaKiem.push('thong_bao_khong_co_noi_dung');
+    else if (input.thongBaoDaBiXoa === true) chuaKiem.push('thong_bao_da_bi_xoa');
+    else daKiem.push('thong_bao_tin_nhan');
+  }
+
   if (Array.isArray(input.urlUnresolved) && input.urlUnresolved.length > 0) {
     chuaKiem.push('khong_mo_duoc_link');
   } else if (Array.isArray(input.url) && input.url.length > 0) {
     daKiem.push('url');
+  }
+
+  /**
+   * §15.9.1 — bộ hỏi nhanh LÀ một nguồn đã kiểm được: bác đã trả lời.
+   * ⚠️ Nhưng nó KHÔNG PHẢI `nghe_cuoc_goi`. Khoan Đã vẫn không nghe được cuộc
+   * gọi, và `chuaKiem` vẫn mang `chua_nghe_duoc_cuoc_goi` — không có ngoại lệ,
+   * kể cả khi bác trả lời hết bảng hỏi (§15.8).
+   */
+  if (input.traLoiBoHoiNhanh && Object.keys(input.traLoiBoHoiNhanh).length > 0) {
+    daKiem.push('bo_hoi_nhanh');
   }
 
   if (input.aiError) chuaKiem.push('ai_khong_phan_hoi');
@@ -153,7 +179,16 @@ function analyze(input = {}) {
   const scope = locTheoScopeChiTiet(sauEvidence, ctx);
   const llm = scope.giu;
 
-  const signals = ghepTinHieu([...direct, ...web], llm);
+  /**
+   * §15.8 · §6.10 — tín hiệu từ BỘ HỎI NHANH.
+   * `source=user_confirmed`, `confidence=1.0`. Chúng BỔ SUNG, không xoá direct
+   * signal đã có, và đi qua ĐÚNG bộ luật như mọi tín hiệu khác.
+   * Đường này chạy OFFLINE, thuần luật — không chạm tới tầng AI.
+   */
+  const boHoiNhanh = input.traLoiBoHoiNhanh
+    ? tinHieuTuTraLoi(input.traLoiBoHoiNhanh) : [];
+
+  const signals = ghepTinHieu([...direct, ...web, ...boHoiNhanh], llm);
   const nhanDuoc = signals.filter((s) => s.state === 'present').map((s) => s.id);
 
   const kq = decide(signals);

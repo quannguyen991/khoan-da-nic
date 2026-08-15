@@ -16,7 +16,9 @@
     "buocPhucHoi",
     "canhBaoPhucHoi",
     "canhBaoSafetyCard",
-    "maLoiHttp"
+    "maLoiHttp",
+    "cauHoiNhanh",
+    "nhanhHanhDong"
   ],
   "_noiBo": [
     "riskLabelNoiBo",
@@ -134,7 +136,9 @@
     "van_ban",
     "anh_ocr",
     "url",
-    "ghi_am"
+    "ghi_am",
+    "thong_bao_tin_nhan",
+    "bo_hoi_nhanh"
   ],
   "chuaKiem": [
     "chua_nghe_duoc_cuoc_goi",
@@ -143,7 +147,10 @@
     "ai_khong_phan_hoi",
     "ai_khong_chay",
     "khong_nghe_duoc_ghi_am",
-    "noi_dung_qua_dai"
+    "noi_dung_qua_dai",
+    "chi_doc_duoc_mot_phan_tin",
+    "thong_bao_khong_co_noi_dung",
+    "thong_bao_da_bi_xoa"
   ],
   "gioiHanPhieuTinCay": [
     "chi_doc_duoc_van_ban",
@@ -251,5 +258,22 @@
     "JSON_KHONG_HOP_LE",
     "RATE_LIMITED",
     "LOI_MAY_CHU"
+  ],
+  "cauHoiNhanh": [
+    "ho_bao_dung_cup_may",
+    "co_ai_dan_noi_gi_voi_ngan_hang",
+    "ho_bao_dung_noi_voi_ai",
+    "ho_noi_sap_bi_bat_hoac_phat",
+    "ho_bao_chuyen_tien_hoac_rut_tien",
+    "ho_xin_ma_trong_tin_nhan",
+    "ho_nhac_tai_khoan_an_toan",
+    "ho_bao_cai_ung_dung_hoac_bam_link"
+  ],
+  "nhanhHanhDong": [
+    "chuyen_tien",
+    "doi_otp",
+    "cai_ung_dung",
+    "gui_giay_to",
+    "khong_ro"
   ]
 }

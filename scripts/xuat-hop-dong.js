@@ -27,16 +27,23 @@ const { HO_KICH_BAN_MA } = require('../src/analysis/pipeline');
 const { GIAI_DOAN } = require('../src/journey-engine');
 const { TRANG_THAI_GIAO_NHAN, VAI_TRO } = require('../src/trusted-circle');
 const { BUOC_CHUNG, THEO_NUOC } = require('../src/analysis/recovery-adapters');
+const { CAU_HOI, NHANH_HANH_DONG } = require('../src/bo-hoi-nhanh');
 const V = require('../src/version');
 
 /** §HĐ — bảy trường, không hơn không kém. */
 const TRUONG_HOP_DONG = ['nhan', 'maLyDo', 'daKiem', 'chuaKiem', 'hoKichBan', 'aiDaChay', 'canThiep'];
 
-const MA_DA_KIEM = ['van_ban', 'anh_ocr', 'url', 'ghi_am'];
+const MA_DA_KIEM = [
+  'van_ban', 'anh_ocr', 'url', 'ghi_am',
+  'thong_bao_tin_nhan',   // §15.4 — nguồn thứ tư, native Android
+  'bo_hoi_nhanh',         // §15.3.3 — bác tự trả lời, offline
+];
 
 const MA_CHUA_KIEM = [
   'chua_nghe_duoc_cuoc_goi', 'khong_doc_duoc_anh', 'khong_mo_duoc_link',
   'ai_khong_phan_hoi', 'ai_khong_chay', 'khong_nghe_duoc_ghi_am', 'noi_dung_qua_dai',
+  // §15.4.1 — bốn chỗ hỏng của nguồn đọc thông báo tin nhắn.
+  'chi_doc_duoc_mot_phan_tin', 'thong_bao_khong_co_noi_dung', 'thong_bao_da_bi_xoa',
 ];
 
 const MA_LOI_HTTP = [
@@ -72,7 +79,7 @@ function dungHopDong() {
       'nhan', 'canThiep', 'maLoiRa', 'maLyDo', 'daKiem', 'chuaKiem',
       'gioiHanPhieuTinCay', 'hoKichBan', 'giaiDoanVuViec', 'vaiTroVongTron',
       'trangThaiGiaoNhan', 'buocPhucHoi', 'canhBaoPhucHoi', 'canhBaoSafetyCard',
-      'maLoiHttp',
+      'maLoiHttp', 'cauHoiNhanh', 'nhanhHanhDong',
     ],
 
     /**
@@ -118,6 +125,10 @@ function dungHopDong() {
     canhBaoPhucHoi: MA_CANH_BAO_PHUC_HOI,
     canhBaoSafetyCard: MA_CANH_BAO_SAFETY_CARD,
     maLoiHttp: MA_LOI_HTTP,
+
+    // §15.3.3 · §15.11.1 — bộ hỏi nhanh. Frontend cần câu chữ cho từng mã.
+    cauHoiNhanh: CAU_HOI.map((c) => c.ma),
+    nhanhHanhDong: NHANH_HANH_DONG.map((n) => n.ma),
   };
 }
 

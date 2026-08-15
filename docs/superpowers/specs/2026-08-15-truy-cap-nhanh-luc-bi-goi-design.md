@@ -639,7 +639,7 @@ Phải đi qua `decision-engine.js`. Màn hỏi chỉ **bật tín hiệu**, kh�
 **④ Gọi điện tự động → bỏ hẳn.** §15.11.3.
 
 **⑤ Trích dẫn không có nguồn thật.**
-Tài liệu gốc mang các mã kiểu `【4†L99-L102】`, `【47†L194-L202】` — đây là **mã
+Tài liệu gốc mang các mã kiểu ` `[nguồn cần bổ sung — §15.14⑤]``, ` `[nguồn cần bổ sung — §15.14⑤]`` — đây là **mã
 tham chiếu nội bộ của một công cụ nghiên cứu, không phải nguồn tra được**. §11
 cấm *"cảnh báo không có nguồn"*.
 → Muốn giữ luận điểm nào thì **thay bằng URL thật + ngày truy cập**, hoặc bỏ số
