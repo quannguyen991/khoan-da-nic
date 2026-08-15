@@ -36,6 +36,7 @@ const gioiHan = soCo('--gioi-han', null);
  * sản phẩm chậm là đo sai thứ mình định đo. Mặc định để 3.
  */
 const songSong = soCo('--song-song', 3);
+const boCache = co('--bo-cache');   // gọi AI lại từ đầu, bỏ qua đệm
 
 const pt = (x) => (x === null ? '—' : `${(x * 100).toFixed(1)}%`);
 const dau = (ok) => (ok ? '✔' : '✖');
@@ -78,6 +79,7 @@ const NGUONG = [
   const kq = await B.chayTatCa(mau, {
     dungAi,
     songSong,
+    dungCache: !boCache,
     moiMau: (i, n) => {
       if (dungAi && (i % 25 === 0 || i === n)) process.stdout.write(`\r   …${i}/${n}`);
     },
