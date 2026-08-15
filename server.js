@@ -18,7 +18,8 @@ const { layCauHinh } = require('./src/ai/fable-client');
 const { dungSafetyCard } = require('./src/safety-card');
 const { dungTrang } = require('./src/safety-card-page');
 const { layKeHoachPhucHoi } = require('./src/analysis/recovery-adapters');
-const { taoSuKien, timHoSoCoTheGop, dungCauHoiGop, tinHieuCase, baLop } = require('./src/journey-engine');
+const { taoSuKien, timHoSoCoTheGop, dungCauHoiGop, tinHieuCase, baLop, GIAI_DOAN } = require('./src/journey-engine');
+const { buocTiepTheo } = require('./src/kich-ban-di-tiep');
 const TC = require('./src/trusted-circle');
 const { taoKho, traNguCanh } = require('./src/intel-radar');
 const { moKho } = require('./src/vault-store');
@@ -150,6 +151,35 @@ async function xuLyPhanTich(req, res) {
 
 app.post('/api/analyze', gioiHanTanSuat, xuLyPhanTich);
 app.post('/api/phan-tich', gioiHanTanSuat, xuLyPhanTich);   // §5.2 — alias, cùng handler
+
+/**
+ * §16.1 — KỊCH BẢN ĐI TIẾP. Dự báo các bước kế tiếp của một họ lừa đảo.
+ *
+ * ⚠️ KHÔNG THÊM TRƯỜNG NÀO VÀO PHẢN HỒI POST /api/analyze.
+ * Frontend đã cầm sẵn `hoKichBan` từ §HĐ, nó tự gọi tiếp. Không đàm phán lại
+ * hợp đồng chỉ để tiết kiệm một lượt gọi.
+ *
+ * ⚠️ THUẦN ĐỌC. Route này KHÔNG nhận nội dung người dùng — chỉ hai mã enum trên
+ * URL. Không ghi gì, không gọi AI, không chạm decision-engine. Mã lạ ⇒ mảng
+ * rỗng, không phải lỗi: người dùng gõ sai URL cũng không được thấy màn đỏ.
+ *
+ * ⚠️ §4.2 — hạng mục này nằm SAU decision-engine và CHỈ ĐỂ HIỂN THỊ. Nó không
+ * bao giờ được đụng vào `nhan` hay điểm số. Hàng rào:
+ * test/kich-ban-khong-ha-muc.test.js chạy 445 mẫu hai lượt.
+ */
+app.get('/api/kich-ban/:hoKichBan', gioiHanTanSuat, (req, res) => {
+  const { hoKichBan } = req.params;
+  // Thiếu `giaiDoan` ⇒ coi như mới bị tiếp cận: trả về từ bước sớm nhất. Đây là
+  // lựa chọn AN TOÀN — thà dự báo thừa một bước đã qua còn hơn giấu bước sắp tới.
+  const giaiDoan = typeof req.query.giaiDoan === 'string' && req.query.giaiDoan
+    ? req.query.giaiDoan : GIAI_DOAN[0];
+
+  return res.json({
+    hoKichBan,
+    giaiDoan,
+    buoc: buocTiepTheo(hoKichBan, giaiDoan),
+  });
+});
 
 /**
  * §6.11 — BỘ NHỚ VỤ VIỆC.

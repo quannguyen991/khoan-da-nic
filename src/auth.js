@@ -23,10 +23,26 @@ const KHONG_CAN_DANG_NHAP = Object.freeze([
   '/transparency',
 ]);
 
+/**
+ * Route có THAM SỐ ĐƯỜNG DẪN nên không so khớp chính xác được.
+ *
+ * ⚠️ CHỈ ĐƯỢC THÊM VÀO ĐÂY NHỮNG ROUTE THUẦN ĐỌC DỮ LIỆU TĨNH. So theo tiền tố
+ * rộng hơn so chính xác, nên mỗi mục là một cam kết: mọi đường bắt đầu bằng tiền
+ * tố đó đều mở. `/api/kich-ban/:hoKichBan` chỉ tra một bảng hằng trong mã nguồn,
+ * không nhận nội dung người dùng, không ghi gì.
+ *
+ * Vì sao phải mở: màn dự báo là thứ người dùng cần LÚC ĐANG BỊ GỌI. Bắt đăng
+ * nhập ở đúng phút đó là §5.3 nói KHÔNG.
+ */
+const KHONG_CAN_DANG_NHAP_TIEN_TO = Object.freeze([
+  '/api/kich-ban/',
+]);
+
 const HAN_MA_GHEP_MS = 10 * 60 * 1000;   // 10 phút
 const DO_DAI_MA = 6;
 
-const canDangNhap = (duong) => !KHONG_CAN_DANG_NHAP.includes(duong);
+const canDangNhap = (duong) => !KHONG_CAN_DANG_NHAP.includes(duong)
+  && !KHONG_CAN_DANG_NHAP_TIEN_TO.some((t) => typeof duong === 'string' && duong.startsWith(t));
 
 /**
  * Mã ghép đôi: 6 chữ số, sinh bằng nguồn ngẫu nhiên MẬT MÃ.
@@ -74,6 +90,7 @@ function taoPhien({ thanhVienId, bayGio, hanMs = 30 * 24 * 60 * 60 * 1000 }) {
 const phienConHan = (phien, bayGio) => Boolean(phien) && bayGio <= phien.hetHanLuc;
 
 module.exports = {
-  KHONG_CAN_DANG_NHAP, canDangNhap, taoMaGhep, kiemMaGhep, danhDauDaDung,
+  KHONG_CAN_DANG_NHAP, KHONG_CAN_DANG_NHAP_TIEN_TO,
+  canDangNhap, taoMaGhep, kiemMaGhep, danhDauDaDung,
   taoPhien, phienConHan, HAN_MA_GHEP_MS, DO_DAI_MA,
 };
