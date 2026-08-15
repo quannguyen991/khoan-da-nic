@@ -24,6 +24,7 @@ const { layKeHoachPhucHoi } = require('./src/analysis/recovery-adapters');
 const { taoSuKien, timHoSoCoTheGop, dungCauHoiGop, tinHieuCase, baLop, GIAI_DOAN } = require('./src/journey-engine');
 const { buocTiepTheo } = require('./src/kich-ban-di-tiep');
 const { tinLuaDao } = require('./src/tin-lua-dao');
+const TK = require('./src/tai-khoan');
 const KP = require('./src/khoan-proof');
 const KY = require('./src/khoan-proof-ky');
 const VR = require('./src/verified-request');
@@ -368,6 +369,69 @@ const proof = (fn) => async (req, res) => {
  */
 app.post('/api/proof/phien-demo', chanProof,
   proof((req) => KP.capPhienDemo(req.body?.taiKhoanId)));
+
+/**
+ * ══════════ TÀI KHOẢN THẬT ══════════
+ *
+ * ⚠️ §5.3 · §6.9 — KHÔNG ĐƯỜNG NÀO Ở ĐÂY ĐƯỢC GÁC `/api/analyze`.
+ * Tài khoản chỉ mở thêm vòng tròn gia đình, cảnh báo người thân, quy tắc chung.
+ * Chưa đăng nhập vẫn kiểm được tin nhắn — hàng rào ở `auth.js`.
+ *
+ * ⚠️ §11 — ĐĂNG NHẬP SAI TRẢ VỀ ĐÚNG MỘT MÃ, dù số có tồn tại hay không.
+ * Phân biệt hai ca là dựng sẵn một máy dò xem số nào đang dùng Khoan Đã.
+ */
+const taiKhoan = (fn) => async (req, res) => {
+  try {
+    return res.json(await fn(req));
+  } catch (e) {
+    if (e instanceof TK.LoiTaiKhoan) {
+      // 401 cho ca sai thông tin đăng nhập, 400 cho ca đầu vào hỏng.
+      const http = e.ma === 'SAI_SO_HOAC_MAT_KHAU' || e.ma === 'SAI_MAT_KHAU_CU' ? 401 : 400;
+      return res.status(http).json({ maLoi: e.ma });
+    }
+    console.error('[tai-khoan]', e?.message);
+    return res.status(500).json({ maLoi: 'LOI_MAY_CHU' });
+  }
+};
+
+app.post('/api/tai-khoan/dang-ky', chanProof, taiKhoan(async (req) => {
+  const kho = await KP.khoChung();
+  const hs = await TK.dangKy(kho, req.body ?? {});
+  return { hoSo: hs, ...(await KP.capPhien(hs.id)) };
+}));
+
+app.post('/api/tai-khoan/dang-nhap', chanProof, taiKhoan(async (req) => {
+  const kho = await KP.khoChung();
+  const hs = await TK.dangNhap(kho, req.body ?? {});
+  return { hoSo: hs, ...(await KP.capPhien(hs.id)) };
+}));
+
+/** ⚠️ Đăng xuất phải HUỶ token ở máy chủ, không chỉ để máy khách quên nó đi. */
+app.post('/api/tai-khoan/dang-xuat', chanProof, taiKhoan(async (req) => ({
+  daHuy: await KP.huyPhien(req.headers.authorization),
+})));
+
+app.get('/api/tai-khoan/toi', chanDoc, canPhien, taiKhoan(async (req) => {
+  const kho = await KP.khoChung();
+  const hs = await TK.layHoSo(kho, req.taiKhoanId);
+  if (!hs) throw new TK.LoiTaiKhoan('KHONG_CO_TAI_KHOAN');
+  /*
+   * ⚠️ NÓI RA RẰNG ẢNH ĐẠI DIỆN KHÔNG NẰM Ở ĐÂY.
+   * §6.9 giữ ảnh trên máy; giao diện phải cho bác biết điều đó chứ không để bác
+   * tưởng ảnh đã được lưu ở máy chủ rồi mất khi đổi máy.
+   */
+  return { hoSo: hs, chiTrenMay: TK.HO_SO_TREN_MAY };
+}));
+
+app.patch('/api/tai-khoan/toi', chanProof, canPhien, taiKhoan(async (req) => {
+  const kho = await KP.khoChung();
+  return { hoSo: await TK.suaHoSo(kho, req.taiKhoanId, req.body ?? {}) };
+}));
+
+app.post('/api/tai-khoan/doi-mat-khau', chanProof, canPhien, taiKhoan(async (req) => {
+  const kho = await KP.khoChung();
+  return { xong: await TK.doiMatKhau(kho, req.taiKhoanId, req.body ?? {}) };
+}));
 
 app.post('/api/proof/dang-ky/bat-dau', chanProof, canPhien,
   proof((req) => KP.batDauDangKy(req.taiKhoanId)));

@@ -158,6 +158,39 @@ async function capPhienDemo(taiKhoanId, { bayGio = Date.now(), env = process.env
   return { token: phien.token, hetHanLuc: phien.hetHanLuc };
 }
 
+/**
+ * CẤP PHIÊN THẬT — sau khi `tai-khoan.js` đã kiểm mật khẩu.
+ *
+ * ⚠️ HÀM NÀY KHÔNG KIỂM GÌ CẢ, VÀ ĐÓ LÀ CHỦ ĐÍCH.
+ * Nó chỉ cấp token cho một `taiKhoanId` đã được xác thực ở nơi khác. Đừng gọi
+ * nó từ một route nhận `taiKhoanId` do người gọi tự khai — đó đúng là lỗ
+ * `capPhienDemo` phải đóng sau biến môi trường. Chỉ `tai-khoan.js` được gọi,
+ * và chỉ sau khi `dangNhap()` / `dangKy()` trả về thành công.
+ */
+async function capPhien(taiKhoanId, { bayGio = Date.now() } = {}) {
+  if (typeof taiKhoanId !== 'string' || !taiKhoanId.trim()) {
+    throw new LoiProof('THIEU_TAI_KHOAN', { http: 400 });
+  }
+  const phien = taoPhien({ thanhVienId: taiKhoanId.trim(), bayGio });
+  const kho = await layKho();
+  await kho.luu(BANG.PHIEN, phien.token, {
+    thanhVienId: phien.thanhVienId, hetHanLuc: phien.hetHanLuc,
+  });
+  return { token: phien.token, hetHanLuc: phien.hetHanLuc };
+}
+
+/** Xoá phiên. Đăng xuất phải THẬT SỰ huỷ token, không chỉ quên nó ở máy khách. */
+async function huyPhien(header) {
+  if (typeof header !== 'string') return false;
+  const m = /^Bearer\s+(\S+)$/i.exec(header.trim());
+  if (!m) return false;
+  const kho = await layKho();
+  return kho.xoa(BANG.PHIEN, m[1]);
+}
+
+/** Kho dùng chung — `tai-khoan.js` phải ghi vào ĐÚNG kho này, không mở kho riêng. */
+const khoChung = () => layKho();
+
 /** @returns {string|null} taiKhoanId, hoặc null nếu token sai / hết hạn. */
 async function docPhien(header, { bayGio = Date.now() } = {}) {
   if (typeof header !== 'string') return null;
@@ -335,7 +368,7 @@ async function docTatCaBanGhi() {
 
 module.exports = {
   CAU_HINH, MAC_DINH_BAT, BANG, LoiProof, layKho,
-  capPhienDemo, docPhien,
+  capPhienDemo, capPhien, huyPhien, khoChung, docPhien,
   batDauDangKy, xacNhanDangKy,
   batDauGhep, xacNhanGhep, thuHoiGhep, danhSachDaGhep,
   docTatCaBanGhi,

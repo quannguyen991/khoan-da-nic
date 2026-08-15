@@ -18,3 +18,10 @@ public/app/
 # APK dựng ra — 37,5 MB nhị phân, sinh lại được bằng scripts/dung-apk.ps1.
 khoan-da.apk
 *.apk
+
+# ⚠️ DỮ LIỆU NGƯỜI DÙNG THẬT — KHÔNG BAO GIỜ ĐƯA VÀO GIT.
+# Chứa tài khoản, vòng tròn gia đình và nhật ký audit. §6.9.
+.du-lieu/
+
+# Đệm tin báo — lấy lại được, không cần theo dõi.
+.cache/
