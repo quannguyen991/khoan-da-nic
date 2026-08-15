@@ -127,8 +127,8 @@ test('Dedup — cùng SIGNAL_ID gửi hai lần không cộng hai lần', () => 
 
 // ─────────────── B.2 — mười tổ hợp cộng hưởng ───────────────
 
-test('B.2 — đúng mười tổ hợp, không thừa không thiếu', () => {
-  assert.strictEqual(SYNERGIES.length, 10);
+test('B.2 — đúng mười ba tổ hợp, không thừa không thiếu', () => {
+  assert.strictEqual(SYNERGIES.length, 13);
   const mong = {
     'secrecy+fear+transfer': 15,
     'recoverysupport+recoveryfee': 15,
@@ -140,6 +140,10 @@ test('B.2 — đúng mười tổ hợp, không thừa không thiếu', () => {
     'family+urgency+transfer': 10,
     'coverstory+transfer': 10,
     'stageescalation+action': 8,
+    // Thêm 15/8/2026, người dùng duyệt sau khi xem số đo trên 445 mẫu.
+    'offer+transfer': 14,
+    'advancefee+transfer': 14,
+    'orgclaim+transfer': 14,
   };
   for (const s of SYNERGIES) {
     assert.strictEqual(s.bonus, mong[s.id], `bonus ${s.id}`);

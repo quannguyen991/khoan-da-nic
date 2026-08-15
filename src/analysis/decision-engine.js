@@ -20,7 +20,16 @@ const co = (tap, id) => tap.has(id);
 const coTienTo = (tap, tienTo) => [...tap].some((id) => id.startsWith(tienTo));
 const coMotTrong = (tap, ids) => ids.some((id) => tap.has(id));
 
-/** Phụ lục B.2 — mười tổ hợp cộng hưởng. Mỗi bonus chỉ áp dụng MỘT lần. */
+/** Vế "yêu cầu chuyển tiền" dùng chung cho nhiều tổ hợp. */
+const FIN_CHUYEN_MANH = [
+  'FIN_TRANSFER_REQUEST', 'FIN_CRYPTO_TRANSFER', 'FIN_CASH_COURIER',
+  'FIN_PRECIOUS_METAL_PURCHASE', 'FIN_SAFE_ACCOUNT',
+];
+
+/**
+ * Phụ lục B.2 — bảng tổ hợp cộng hưởng. Mỗi bonus chỉ áp dụng MỘT lần.
+ * 10 tổ hợp gốc + 3 tổ hợp thêm 15/8/2026 (xem ghi chú ở cuối mảng).
+ */
 const SYNERGIES = Object.freeze([
   {
     id: 'secrecy+fear+transfer', bonus: 15,
@@ -38,10 +47,7 @@ const SYNERGIES = Object.freeze([
   {
     // B.3 — LÀ 14, KHÔNG PHẢI 10. +10 làm kịch bản trung tâm dừng ở 41, dưới ngưỡng 45.
     id: 'identity+transfer', bonus: 14,
-    khop: (s) => coTienTo(s, 'ID_') && coMotTrong(s, [
-      'FIN_TRANSFER_REQUEST', 'FIN_CRYPTO_TRANSFER', 'FIN_CASH_COURIER',
-      'FIN_PRECIOUS_METAL_PURCHASE', 'FIN_SAFE_ACCOUNT',
-    ]),
+    khop: (s) => coTienTo(s, 'ID_') && coMotTrong(s, FIN_CHUYEN_MANH),
   },
   {
     // B.3 — bảng 8.11 THIẾU tổ hợp này. Họ "bank + đòi mã" từng dừng ở 41–44.
@@ -69,6 +75,54 @@ const SYNERGIES = Object.freeze([
     id: 'stageescalation+action', bonus: 8,
     khop: (s) => co(s, 'CASE_STAGE_ESCALATION')
       && (coTienTo(s, 'CRED_') || coTienTo(s, 'FIN_') || coTienTo(s, 'DEV_')),
+  },
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // BA TỔ HỢP THÊM 15/8/2026 — người dùng duyệt sau khi xem số đo.
+  //
+  // VÌ SAO: sáu trong mười tổ hợp gốc đòi có `ID_*`. Nên mọi kịch bản KHÔNG AI
+  // GIẢ DANH AI đều không có đường nào chạm ngưỡng 45 — mà đó lại là những thủ
+  // đoạn phổ biến nhất: đầu tư lãi cao, việc nhẹ lương cao, trúng thưởng, phí
+  // ứng trước.
+  //
+  // ĐO TRÊN 445 MẪU (dataset b78ac195237f, claude-sonnet-5):
+  //   nhóm bắt đúng : 93/117 mẫu CÓ tín hiệu ID_*  (79%)
+  //   nhóm kẹt      :  7/75  mẫu có ID_*           (9%)
+  //   68/75 mẫu kẹt KHÔNG có tín hiệu danh tính nào.
+  //
+  // Ví dụ thật đang bị chấm dưới ngưỡng, tất cả đều trích tín hiệu ĐÚNG:
+  //   "Sàn cam kết lãi 20%/tháng, chú nạp 30 triệu vào TK…"        43 điểm
+  //   "Task cuối nạp 1.200.000đ, xong trả cả vốn lẫn thưởng"       26 điểm
+  //   "Chuyển trước 250.000đ phí vận chuyển để nhận quà 20 triệu"  26 điểm
+  //
+  // TÁC DỤNG ĐO ĐƯỢC (mô phỏng trên chính 445 mẫu đã chạy):
+  //   offer+transfer       +21 mẫu bắt đúng ·  0 báo đỏ oan thêm
+  //   advancefee+transfer  +11 mẫu           ·  0 báo đỏ oan thêm
+  //   orgclaim+transfer     +1 mẫu           ·  0 báo đỏ oan thêm
+  //   cả ba                +24 mẫu (51,6% → 62,9%) · 0 báo đỏ oan thêm
+  //
+  // Không báo động giả nào thêm, cùng lý do B.3 đã ghi cho identity+transfer:
+  // tổ hợp chỉ nổ khi một LỜI CHÀO MỜI đi cùng một YÊU CẦU CHUYỂN TIỀN. Tin
+  // nhắn lành của người thân không hứa lãi 20%/tháng rồi bảo nạp tiền.
+  //
+  // ⚠️ GHI NHẬN MỘT LO NGẠI THIẾT KẾ: `advancefee+transfer` là TẬP CON của
+  // `offer+transfer` (OFF_ADVANCE_FEE cũng là OFF_*), nên hai bonus cùng nổ
+  // trên một bằng chứng. Đo được là không sinh báo động giả, và cap 69 chặn
+  // cộng dồn vô hạn — nhưng đây là chỗ nên xem lại nếu sau này chỉnh trọng số.
+  //
+  // ⚠️ NGƯỠNG 20/45 VÀ CAP 69 KHÔNG BỊ ĐỤNG TỚI. Chỉ bảng cộng hưởng đổi.
+  // ══════════════════════════════════════════════════════════════════════════
+  {
+    id: 'offer+transfer', bonus: 14,
+    khop: (s) => coTienTo(s, 'OFF_') && coMotTrong(s, FIN_CHUYEN_MANH),
+  },
+  {
+    id: 'advancefee+transfer', bonus: 14,
+    khop: (s) => co(s, 'OFF_ADVANCE_FEE') && coMotTrong(s, FIN_CHUYEN_MANH),
+  },
+  {
+    id: 'orgclaim+transfer', bonus: 14,
+    khop: (s) => co(s, 'FIN_ORG_CLAIM_PERSONAL_ACCOUNT') && coMotTrong(s, FIN_CHUYEN_MANH),
   },
 ]);
 

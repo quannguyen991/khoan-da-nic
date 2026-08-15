@@ -1,0 +1,222 @@
+/* ══════════════════════════════════════════════════════════════════════════
+   §2B.4 — DESIGN TOKENS. 119 token, 15 nhóm. NGUỒN SỰ THẬT cho màu, thang chữ,
+   khoảng cách, vùng chạm. Làm TRƯỚC mọi CSS khác.
+
+   Viết bằng OKLCH, không phải hex. Lý do không phải sở thích: OKLCH giữ độ sáng
+   cảm nhận đều nhau khi đổi hue, nên hạ/nâng một bậc là dự đoán được.
+
+   ⚠️ MỌI SÀN TƯƠNG PHẢN ĐO TRÊN `#ebe2ff` — stop TỐI NHẤT của dải loang, không
+   phải trên `--color-paper` phẳng. Chữ có thể rơi trúng bất kỳ điểm nào của dải.
+   `test/contrast.test.js` tính trên nền phẳng và KHÔNG biết nền là gradient —
+   nên số ở đây đo tay, ngày 15/8/2026, bằng `scripts/do-tuong-phan.cjs`.
+
+   ⚠️ Làm stop cuối tối thêm một bậc là `--color-muted` và `--color-rule` trượt sàn.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* ── 1. NỀN VÀ MẶT (3) ─────────────────────────────────────────────────── */
+  --color-paper:     oklch(98%   0.012 298);  /* #f9f7ff */
+  --color-surface:   oklch(99.4% 0.004 298);  /* #fdfdff — mặt thẻ */
+  --color-surface-2: oklch(96.2% 0.022 298);  /* #f4f0ff — thẻ chìm */
+
+  /* ── 2. CHỮ (3) ────────────────────────────────────────────────────────── */
+  --color-ink:   oklch(20% 0.065 285);  /* #141032 — 14,66:1 ở stop tối nhất */
+  --color-ink-2: oklch(39% 0.06  285);  /* #424064 —  7,84:1 */
+  --color-muted: oklch(51% 0.04  285);  /* #63637d —  4,67:1 ← SÁT SÀN, đừng nhạt thêm */
+
+  /* ── 3. TÍM THƯƠNG HIỆU (3) ────────────────────────────────────────────── */
+  --color-accent:       oklch(52% 0.22 292);  /* #723fd9 — 4,92:1 ở stop tối nhất */
+  --color-accent-hover: oklch(45% 0.23 292);  /* #601dc6 */
+  --color-accent-soft:  oklch(93% 0.055 298); /* #ece1ff — NỀN, CẤM đặt chữ lên */
+
+  /* ── 4. BA MỨC RỦI RO (3) ──────────────────────────────────────────────────
+     Màu là PHỤ; chữ + biểu tượng mới là chính (§4.4). Rủi ro không bao giờ
+     được truyền đạt chỉ bằng màu — người cao tuổi có tỉ lệ mù màu cao. */
+  --color-danger:  oklch(45% 0.19 25);   /* #a50013 — "Nguy hiểm cao" */
+  --color-warning: oklch(46% 0.11 78);   /* #794e00 — "Nghi ngờ" */
+  --color-success: oklch(42% 0.11 155);  /* #005e31 — "Chưa thấy dấu hiệu rủi ro" */
+
+  /* ── 5. BA STOP CỦA DẢI LOANG (3) ──────────────────────────────────────── */
+  --color-onboarding-canvas-top:    oklch(98% 0.012 298);  /* #f9f7ff */
+  --color-onboarding-canvas-mid:    oklch(96% 0.030 298);  /* #f4eeff */
+  --color-onboarding-canvas-bottom: oklch(93% 0.045 298);  /* #ebe2ff ← MỐC SÀN */
+
+  /* ── 6. VIỀN (3) ───────────────────────────────────────────────────────────
+     Ba mẩu lam còn sót đã dọn: hue 240/250 → 292/298. Hai token
+     `--color-border-*` KHÔNG dùng làm chữ hay nền ở bất kỳ đâu. */
+  --color-rule:               oklch(60% 0.04  298);  /* 3,22:1 — sàn viền 3:1 */
+  --color-border-tinted:      oklch(60% 0.055 298);  /* 3,24:1 */
+  --color-border-interactive: oklch(58% 0.09  292);  /* 3,55:1 */
+
+  /* ── 7. MÀU CHỮ TRÊN NỀN ĐẶC (4) ───────────────────────────────────────── */
+  --color-on-accent:  oklch(100% 0 0);
+  --color-on-danger:  oklch(100% 0 0);
+  --color-on-success: oklch(100% 0 0);
+  --color-on-dark:    oklch(97% 0.01 298);
+
+  /* ── 8. SẮC ĐỘ MỀM / ĐẬM CỦA BA MỨC (9) ──────────────────────────────────
+     `*-soft` là NỀN. Chữ đặt lên chúng phải là `*-strong` hoặc `--color-ink`. */
+  --color-danger-soft:    oklch(95.5% 0.030 20);
+  --color-danger-soft-2:  oklch(97.5% 0.017 20);
+  --color-danger-strong:  oklch(38% 0.19 25);
+  --color-warning-soft:   oklch(96% 0.045 85);
+  --color-warning-strong: oklch(39% 0.10 78);
+  --color-success-soft:   oklch(95.5% 0.040 155);
+  --color-success-strong: oklch(35% 0.10 155);
+  --color-danger-vivid:   oklch(58% 0.23 27);   /* nút "Không chuyển tiền" — NỀN */
+  --color-danger-vivid-2: oklch(52% 0.24 27);   /* trạng thái bấm của nút trên */
+
+  /* ── 9. TIÊU ĐIỂM BÀN PHÍM (3) ─────────────────────────────────────────── */
+  --color-focus:      oklch(38% 0.21 292);
+  --color-focus-halo: oklch(88% 0.09 298);
+  --color-focus-ring: oklch(100% 0 0);
+
+  /* ── 10. THANH ĐIỀU HƯỚNG DƯỚI (5) ─────────────────────────────────────────
+     Nền nav phải đủ tối để chữ trắng đạt 4.5:1 — nav mang CHỮ, không chỉ icon. */
+  --color-nav-bg:         oklch(50% 0.20 292);
+  --color-nav-bg-2:       oklch(56% 0.19 292);
+  --color-nav-ink:        oklch(100% 0 0);
+  --color-nav-pill:       oklch(100% 0 0);
+  --color-nav-pill-ink:   oklch(45% 0.23 292);
+
+  /* ── 11. THẺ VÀ Ô NHẬP (8) ─────────────────────────────────────────────── */
+  --color-card-border:        oklch(92% 0.030 298);
+  --color-card-border-strong: oklch(84% 0.055 298);
+  --color-input-bg:           oklch(100% 0 0);
+  --color-input-border:       oklch(72% 0.05 298);
+  --color-input-border-focus: oklch(52% 0.22 292);
+  --color-placeholder:        oklch(51% 0.04 285);   /* = --color-muted, 4,67:1 */
+  --color-disabled-bg:        oklch(93% 0.012 298);
+  --color-disabled-ink:       oklch(46% 0.02 285);
+
+  /* ── 12. "CHƯA KIỂM ĐƯỢC" (3) ──────────────────────────────────────────────
+     §4.3 — "KHÔNG KIỂM ĐƯỢC" ≠ "ĐÃ KIỂM, KHÔNG THẤY GÌ". Khối này KHÔNG được
+     mang sắc xanh lá; nó không phải tin tốt. */
+  --color-unchecked-bg:     oklch(96% 0.030 85);
+  --color-unchecked-ink:    oklch(39% 0.10 78);
+  --color-unchecked-border: oklch(70% 0.09 85);
+
+  /* ── 13. LỚP PHỦ (3) ───────────────────────────────────────────────────── */
+  --color-overlay:   oklch(20% 0.065 285 / 0.55);
+  --color-scrim:     oklch(20% 0.065 285 / 0.14);
+  --color-selection: oklch(88% 0.09 298);
+
+  /* ── 14. NÚT MICRO TRANG CHỦ + PHỤ TRỢ (6) ─────────────────────────────── */
+  --color-mic-from: oklch(58% 0.23 300);
+  --color-mic-to:   oklch(48% 0.24 288);
+  --color-mic-ring: oklch(84% 0.10 298);
+  --color-leaf:     oklch(72% 0.19 140);
+  --color-gold:     oklch(80% 0.15 85);
+  --color-chip-bg:  oklch(94% 0.045 298);
+
+  /* ══ 15. KHOẢNG CÁCH — 17 token ═══════════════════════════════════════════
+     Thang rộng rãi: người cao tuổi cần khoảng trắng để tách các đích chạm. */
+  --space-0:  0;
+  --space-1:  0.25rem;
+  --space-2:  0.5rem;
+  --space-3:  0.75rem;
+  --space-4:  1rem;
+  --space-5:  1.25rem;
+  --space-6:  1.5rem;
+  --space-7:  1.75rem;
+  --space-8:  2rem;
+  --space-9:  2.5rem;
+  --space-10: 3rem;
+  --space-11: 3.5rem;
+  --space-12: 4rem;
+  --space-gutter:  clamp(1rem, 4vw, 1.5rem);   /* lề ngang của trang */
+  --space-section: clamp(1.5rem, 6vw, 2.5rem); /* giữa hai khối lớn */
+  --space-card:    clamp(1rem, 4vw, 1.5rem);   /* trong lòng thẻ */
+  --space-stack:   0.75rem;                    /* giữa hai phần tử cùng nhóm */
+
+  /* ══ THANG CHỮ — 9 token ══════════════════════════════════════════════════
+     ⚠️ `--text-xs` phải ≥14px ở MỌI bậc gốc, không chỉ ở gốc 17px. Ở gốc 15px
+     thì `0.875rem` chỉ ra 13,1px — vi phạm sàn. Dùng `max()`. */
+  --text-xs:   max(14px, 0.875rem);
+  --text-sm:   max(15px, 0.9375rem);
+  --text-base: 1rem;
+  --text-md:   1.125rem;
+  --text-lg:   1.3125rem;
+  --text-xl:   1.5rem;
+  --text-2xl:  1.875rem;
+  --text-3xl:  2.25rem;
+  --text-4xl:  clamp(2.25rem, 9vw, 3rem);
+
+  /* ══ CHIỀU CAO DÒNG — 5 token ═════════════════════════════════════════════
+     ⚠️ KHÔNG dưới 1.25. Dấu tiếng Việt xếp CẢ TRÊN LẪN DƯỚI (ế, ộ, ữ, ị, ặ) —
+     line-height thấp hơn là cắt dấu. */
+  --leading-tight:   1.25;
+  --leading-snug:    1.35;
+  --leading-normal:  1.5;
+  --leading-relaxed: 1.65;
+  --leading-loose:   1.8;
+
+  /* ══ BO GÓC — 5 token ═════════════════════════════════════════════════════ */
+  --radius-xs:   0.5rem;
+  --radius-sm:   0.875rem;
+  --radius-md:   1.25rem;
+  --radius-lg:   1.75rem;
+  --radius-full: 999rem;
+
+  /* ══ ĐƯỜNG CONG — 6 token ═════════════════════════════════════════════════ */
+  --ease-linear:     linear;
+  --ease-out:        cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in:         cubic-bezier(0.55, 0, 1, 0.45);
+  --ease-in-out:     cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-spring:     cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-emphasized: cubic-bezier(0.2, 0, 0, 1);
+
+  /* ══ THỜI LƯỢNG — 5 + 3 token ═════════════════════════════════════════════ */
+  --duration-instant: 0ms;
+  --duration-fast:    120ms;
+  --duration-base:    200ms;
+  --duration-slow:    320ms;
+  --duration-slower:  480ms;
+  --dur-tap:   90ms;    /* phản hồi chạm — phải cảm thấy tức thì */
+  --dur-view:  240ms;   /* đổi màn */
+  --dur-toast: 4000ms;  /* toast tự tắt */
+
+  /* ══ ĐỔ BÓNG — 3 token ════════════════════════════════════════════════════ */
+  --shadow-sm: 0 1px 2px oklch(45% 0.10 292 / 0.06), 0 2px 6px oklch(45% 0.10 292 / 0.05);
+  --shadow-md: 0 2px 6px oklch(45% 0.10 292 / 0.08), 0 8px 20px oklch(45% 0.10 292 / 0.08);
+  --shadow-lg: 0 4px 12px oklch(45% 0.10 292 / 0.10), 0 18px 44px oklch(45% 0.10 292 / 0.12);
+
+  /* ══ BA BẬC CỠ CHỮ A / A+ / A++ — 3 token ═════════════════════════════════
+     Gốc nhỏ nhất 15px. Đổi bằng `document.documentElement.dataset.fontSize`. */
+  --root-small:  15px;
+  --root-medium: 17px;
+  --root-large:  20px;
+
+  /* ══ VÙNG CHẠM — 2 token ══════════════════════════════════════════════════
+     ⚠️ `--touch-target-primary` là `max(56px, 3.5rem)`, KHÔNG phải `3.5rem` trần:
+     ở bậc chữ nhỏ nhất (15px) rem trần chỉ ra 52,5px — vi phạm sàn nút chính. */
+  --touch-target:         52px;
+  --touch-target-primary: max(56px, 3.5rem);
+
+  /* ══ HỌ CHỮ — 2 token ═════════════════════════════════════════════════════
+     Phục vụ CỤC BỘ từ node_modules/@fontsource*. KHÔNG link fonts.googleapis.com
+     — mâu thuẫn với "dữ liệu của bác nằm trên máy của bác", và hỏng ngoại tuyến.
+     Inter Variable CÓ subset `vietnamese` nên không bị trộn phông ở dấu tiếng Việt. */
+  --font-display: "Inter Variable", "Be Vietnam Pro", system-ui, sans-serif;
+  --font-body:    "Inter Variable", "Be Vietnam Pro", system-ui, sans-serif;
+
+  /* ══ BỀ RỘNG ĐỌC — 3 token ════════════════════════════════════════════════ */
+  --reading-width: 34rem;   /* khối chữ dài */
+  --content-width: 30rem;   /* cột chính khổ điện thoại */
+  --bottom-gap:    7.5rem;  /* chừa chỗ cho thanh nav dưới — xem styles.css */
+
+  /* ── Dải loang. `background-attachment: fixed` khai ở styles.css ────────── */
+  --gradient-paper:
+    radial-gradient(120% 80% at 15%  0%, var(--color-onboarding-canvas-mid)    0%, transparent 60%),
+    radial-gradient(100% 70% at 85% 15%, var(--color-onboarding-canvas-bottom) 0%, transparent 55%),
+    linear-gradient(180deg, var(--color-onboarding-canvas-top) 0%, var(--color-onboarding-canvas-mid) 100%);
+}
+
+/* ── BA BẬC CỠ CHỮ ─────────────────────────────────────────────────────────
+   Mặc định = medium. Nút A/A+/A++ chỉ đổi một thuộc tính này; mọi thứ khác
+   khai bằng rem nên đi theo. §7.6: chữ NƯỚNG VÀO ẢNH sẽ không đi theo —
+   đó là lý do cấm. */
+html                          { font-size: var(--root-medium); }
+html[data-font-size="small"]  { font-size: var(--root-small); }
+html[data-font-size="medium"] { font-size: var(--root-medium); }
+html[data-font-size="large"]  { font-size: var(--root-large); }

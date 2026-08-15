@@ -101,7 +101,8 @@ test('Sự thật kiến trúc khớp code, không phải số chép tay', () =>
   const k = suThatKienTruc();
   assert.strictEqual(k.soTinHieu, 58);
   assert.strictEqual(k.soCriticalOverride, 10);
-  assert.strictEqual(k.soToHopCongHuong, 10);
+  // 10 tổ hợp gốc Phụ lục B.2 + 3 tổ hợp thêm 15/8/2026 (rule 1.1.0).
+  assert.strictEqual(k.soToHopCongHuong, 13);
   assert.strictEqual(k.thangDiem, '0–69');
   assert.strictEqual(k.nguong, '20/45');
   assert.strictEqual(k.aiQuyetDinhMuc, false);
