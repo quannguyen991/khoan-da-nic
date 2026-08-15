@@ -65,3 +65,72 @@ test('§4.3 — THÊM NGUỒN MỚI thì phải thêm ca: sàn nhận diện ngu
   assert.ok(san.chuaKiem.length > 0,
     'nguồn đầu vào mới không được rơi vào khoảng lặng của sàn');
 });
+
+// ═══════════ §4.3 — NGUỒN ĐẦU VÀO THỨ SÁU: GHI ÂM TRÊN MÁY ═══════════
+// Ràng buộc thường trực ở pipeline.js:32 — thêm nguồn mới thì THÊM CA VÀO ĐÂY.
+
+test('ghi âm #1 — model chưa tải xong có mã RIÊNG, không gộp', () => {
+  const san = unreadableInputFloor({ ghiAm: true, ghiAmFailed: true, ghiAmMaLoi: 'CHUA_TAI_MODEL' });
+  assert.ok(san.chuaKiem.includes('chua_tai_xong_model_nghe'));
+  assert.ok(!san.chuaKiem.includes('khong_nghe_duoc_ghi_am'),
+    'chưa tải bộ nghe KHÁC không giải mã được — bác tự sửa được cái đầu');
+});
+
+test('ghi âm #2 — có đoạn dưới ngưỡng ⇒ không im lặng', () => {
+  const san = unreadableInputFloor({ ghiAm: true, vanBan: 'alo alo', ghiAmConfidence: 0.3 });
+  assert.ok(san.chuaKiem.includes('khong_nghe_duoc_ghi_am'));
+});
+
+test('ghi âm #3 — không có tiếng người có mã riêng', () => {
+  const san = unreadableInputFloor({ ghiAm: true, ghiAmFailed: true, ghiAmMaLoi: 'KHONG_CO_TIENG_NOI' });
+  assert.ok(san.chuaKiem.includes('ghi_am_khong_co_tieng_noi'));
+});
+
+test('ghi âm #4 — đoạn ghi bị cắt có mã riêng', () => {
+  const san = unreadableInputFloor({ ghiAm: true, vanBan: 'alo', ghiAmConfidence: 0.9, ghiAmMaLoi: 'BI_CAT' });
+  assert.ok(san.chuaKiem.includes('chi_nghe_duoc_phan_dau'));
+});
+
+test('ghi âm #5 — whisper ném lỗi ⇒ khong_nghe_duoc_ghi_am', () => {
+  const san = unreadableInputFloor({ ghiAm: true, ghiAmFailed: true });
+  assert.ok(san.chuaKiem.includes('khong_nghe_duoc_ghi_am'));
+});
+
+test('ghi âm #6 — mã lỗi lạ vẫn ra mã, không rơi vào khoảng lặng', () => {
+  const san = unreadableInputFloor({ ghiAm: true, ghiAmFailed: true, ghiAmMaLoi: 'MA_LA_KHONG_BIET' });
+  assert.ok(san.chuaKiem.length > 0, 'mã lỗi lạ không được rơi vào khoảng lặng');
+  assert.ok(san.chuaKiem.includes('khong_nghe_duoc_ghi_am'));
+});
+
+test('ghi âm #7 — confidence KHÔNG PHẢI SỐ bị coi là HỎNG, không phải là tốt', () => {
+  for (const bay of [undefined, null, 'cao', NaN, -1, 1.5, {}]) {
+    const san = unreadableInputFloor({ ghiAm: true, vanBan: 'alo', ghiAmConfidence: bay });
+    assert.ok(san.chuaKiem.includes('khong_nghe_duoc_ghi_am'),
+      `ghiAmConfidence=${String(bay)} phải bị coi là hỏng`);
+  }
+});
+
+test('ghi âm #8 — HỎNG MỘT PHẦN là daKiem VÀ chuaKiem CÙNG LÚC', () => {
+  // Ca thường gặp nhất của whisper: nghe được phần lớn, hụt một đoạn.
+  // Khai một trong hai đều nói sai (spec §5.1).
+  const san = unreadableInputFloor({
+    ghiAm: true, vanBan: 'bác chuyển tiền đi', ghiAmConfidence: 0.3,
+  });
+  assert.ok(san.daKiem.includes('ghi_am'), 'đã phiên âm được thì phải khai');
+  assert.ok(san.chuaKiem.includes('khong_nghe_duoc_ghi_am'), 'hụt đoạn thì phải khai');
+});
+
+test('ghi âm — nghe tốt hoàn toàn thì KHÔNG sinh mã hỏng nào của ghi âm', () => {
+  const san = unreadableInputFloor({ ghiAm: true, vanBan: 'alo bác ơi', ghiAmConfidence: 0.95 });
+  assert.ok(san.daKiem.includes('ghi_am'));
+  const maGhiAm = ['khong_nghe_duoc_ghi_am', 'chua_tai_xong_model_nghe',
+    'ghi_am_khong_co_tieng_noi', 'chi_nghe_duoc_phan_dau'];
+  assert.deepStrictEqual(san.chuaKiem.filter((m) => maGhiAm.includes(m)), []);
+});
+
+test('§15.9.1 — nghe được ghi âm KHÔNG gỡ chua_nghe_duoc_cuoc_goi', () => {
+  // Ghi qua loa ngoài là nghe cái MICRO ĐẶT CẠNH cuộc gọi, không phải nghe
+  // cuộc gọi. Phiếu tin cậy phải nói đúng cái thứ hai.
+  const kq = analyze({ vanBan: 'alo bác ơi', ghiAm: true, ghiAmConfidence: 0.95 });
+  assert.ok(kq.chuaKiem.includes('chua_nghe_duoc_cuoc_goi'));
+});

@@ -24,6 +24,28 @@ const NGUONG_CHAP_NHAN_LLM = 0.72;  // §6.4 — 0.55–0.71 → unknown; < 0.55
 const NGUONG_OCR = 0.5;
 
 /**
+ * §4.3 — NGƯỠNG GHI ÂM, đối xứng với NGUONG_OCR.
+ *
+ * ⚠️ ĐƠN VỊ: thang [0,1], KHÔNG PHẢI logprob. whisper.cpp trả `avg_logprob`
+ * luôn ÂM (−0,1 đến −1,5); plugin Kotlin chuẩn hoá bằng `exp(avg_logprob)`
+ * TRƯỚC KHI trả sang JS. exp(−0,69) ≈ 0,5. So thẳng logprob với 0.5 thì lượt
+ * nào cũng ra "hỏng", và không ai nhận ra vì hỏng-quá-nhiều trông như thận trọng.
+ *
+ * ⚠️ Giá trị nhận vào là độ tin cậy THẤP NHẤT trong các đoạn, KHÔNG phải trung
+ * bình. Whisper nghe được 90% mà nuốt đúng câu "chuyển sang tài khoản an toàn"
+ * thì bản chép còn lại trông sạch sẽ, luật cứng không thấy gì, và màn hình hiện
+ * "Chưa thấy dấu hiệu rủi ro". Trung bình cả bài che mất đúng ca nguy hiểm nhất.
+ */
+const NGUONG_GHI_AM = 0.5;
+
+/** Mã lỗi plugin trả về → mã chuaKiem. Mã lạ rơi về khong_nghe_duoc_ghi_am. */
+const MA_LOI_GHI_AM = Object.freeze({
+  CHUA_TAI_MODEL: 'chua_tai_xong_model_nghe',
+  KHONG_CO_TIENG_NOI: 'ghi_am_khong_co_tieng_noi',
+  BI_CAT: 'chi_nghe_duoc_phan_dau',
+});
+
+/**
  * §4.3 — "KHÔNG KIỂM ĐƯỢC" ≠ "ĐÃ KIỂM, KHÔNG THẤY GÌ".
  *
  * Ảnh không đọc được vì AI chết, tên miền không phân giải được, bộ eval hỏng —
@@ -47,9 +69,33 @@ function unreadableInputFloor(input = {}) {
     else daKiem.push('anh_ocr');
   }
 
+  /**
+   * §4.3 — NGUỒN ĐẦU VÀO THỨ SÁU: GHI ÂM PHIÊN ÂM TRÊN MÁY.
+   *
+   * ⚠️ HAI ĐIỀU KIỆN ĐỘC LẬP, KHÔNG PHẢI if/else.
+   * Ca thường gặp nhất của whisper là "nghe được phần lớn, hụt một đoạn". Lúc đó
+   * CẢ HAI đều đúng: đã phiên âm được (daKiem), VÀ có đoạn không nghe được
+   * (chuaKiem). Nhị phân hoá nó là nói sai ở một trong hai đầu — khai thiếu thì
+   * Phiếu giấu công đã làm, khai thừa thì Phiếu giấu chỗ mù.
+   *
+   * ⚠️ `ghiAmConfidence` không phải số / ngoài [0,1] ⇒ HỎNG, không phải ⇒ tốt.
+   * Đây là §4.3 ở dạng ngắn nhất: thiếu số đo KHÁC đo rồi thấy tốt.
+   */
   if (input.ghiAm) {
-    if (input.ghiAmFailed === true) chuaKiem.push('khong_nghe_duoc_ghi_am');
-    else daKiem.push('ghi_am');
+    const coChu = typeof input.vanBan === 'string' && input.vanBan.trim().length > 0;
+    const doTinCay = input.ghiAmConfidence;
+    const tinCayDuoc = typeof doTinCay === 'number' && Number.isFinite(doTinCay)
+      && doTinCay >= NGUONG_GHI_AM && doTinCay <= 1;
+    const maLoi = MA_LOI_GHI_AM[input.ghiAmMaLoi];
+
+    if (coChu && input.ghiAmFailed !== true) daKiem.push('ghi_am');
+
+    if (input.ghiAmFailed === true || !coChu) {
+      chuaKiem.push(maLoi || 'khong_nghe_duoc_ghi_am');
+    } else {
+      if (!tinCayDuoc) chuaKiem.push('khong_nghe_duoc_ghi_am');
+      if (maLoi) chuaKiem.push(maLoi);
+    }
   }
 
   /**
@@ -378,4 +424,5 @@ const HO_KICH_BAN_MA = Object.freeze([...new Set(HO_KICH_BAN.map(([, ho]) => ho)
 module.exports = {
   analyze, toHopDong, chonCanThiep, unreadableInputFloor,
   nhanTinHieuLLM, chonHoKichBan, HO_KICH_BAN_MA,
+  NGUONG_GHI_AM, MA_LOI_GHI_AM,
 };
