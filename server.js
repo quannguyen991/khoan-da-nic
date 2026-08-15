@@ -80,6 +80,18 @@ function gioiHanTanSuat(req, res, next) {
 /**
  * HANDLER DUY NHẤT cho cả hai route.
  * Trả về ĐÚNG bảy trường của §HĐ — không rò trường nội bộ ra ngoài.
+ *
+ * ⚠️ CHỈ RÚT `vanBan` VÀ `anh`. KHÔNG trải `...req.body`.
+ *
+ * §HĐ nói rõ thân yêu cầu chỉ có hai trường đó. Mọi trường khác người gọi gửi
+ * kèm đều bị bỏ, đặc biệt là `verifiedChannel` / `verifiedRelationship` — hai
+ * lá cờ DUY NHẤT có thể hạ mức. `/api/analyze` nằm trong `KHONG_CAN_DANG_NHAP`
+ * nên không có danh tính nào biện minh cho chúng; xem chú thích dài ở
+ * `analyze()` trong src/analysis/pipeline.js.
+ *
+ * ⚠️ Khoan Proof KHÔNG nối vào đây bằng cách đọc thêm trường từ `req.body`.
+ * Nó đọc bản ghi chữ ký từ kho của máy chủ rồi truyền qua THAM SỐ THỨ HAI của
+ * `analyze()`. Hàng rào: test/co-xac-minh-khong-tu-khai.test.js.
  */
 async function xuLyPhanTich(req, res) {
   const { vanBan, anh } = req.body || {};

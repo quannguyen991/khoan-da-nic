@@ -8,7 +8,15 @@ const assert = require('node:assert');
 const { analyze } = require('../src/analysis/pipeline');
 const { buildContext } = require('../src/analysis/context-builder');
 
-const batTinHieu = (vanBan, opts = {}) => analyze({ vanBan, ...opts }).maLyDo;
+/**
+ * ⚠️ THAM SỐ THỨ HAI, KHÔNG PHẢI TRẢI VÀO `input`.
+ *
+ * `verifiedChannel` / `verifiedRelationship` từ 15/8/2026 chỉ nhận ở tham số
+ * NGỮ CẢNH TIN CẬY do máy chủ dựng — trải chúng vào `input` (thứ có thể đến
+ * thẳng từ `req.body`) là để người gọi tự khai một lá cờ hạ mức.
+ * Xem test/co-xac-minh-khong-tu-khai.test.js.
+ */
+const batTinHieu = (vanBan, nguCanhTinCay = {}) => analyze({ vanBan }, nguCanhTinCay).maLyDo;
 const actDau = (t) => buildContext(t).segments[0].speechAct;
 
 // ─────────────── C.6.1 — Tiếng Anh ───────────────

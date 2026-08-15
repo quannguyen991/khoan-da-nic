@@ -156,7 +156,42 @@ function chonHoKichBan(ids) {
  */
 const chonCanThiep = chonMuc;   // một nguồn sự thật duy nhất: intervention-ladder
 
-function analyze(input = {}) {
+/**
+ * ⚠️⚠️ HAI LÁ CỜ DUY NHẤT TRONG TOÀN BỘ ĐƯỜNG PHÂN TÍCH CÓ THỂ *HẠ* MỨC.
+ *
+ * `verifiedChannel` tắt `MAN_KEEP_CALL_ACTIVE`; `verifiedRelationship` tắt
+ * `ID_FAMILY_IMPERSONATION` và `ID_CONTACT_ACCOUNT_TAKEOVER`.
+ *
+ * TRƯỚC 15/8/2026 CHÚNG ĐỌC TỪ `input` — tức từ THÂN YÊU CẦU HTTP. Mà
+ * `/api/analyze` nằm trong `KHONG_CAN_DANG_NHAP` (src/auth.js): không có danh
+ * tính nào để biện minh cho lá cờ, ai gọi API cũng khai được. Một kẻ lừa đảo
+ * bảo bác "bấm ô đã xác minh đi cho nhanh" là được giảm mức miễn phí.
+ *
+ * §12: "Bất kỳ cụm nào hạ mức vô điều kiện đều là một câu thần chú tặng cho kẻ
+ * lừa đảo." Lá cờ tự khai cũng là một câu thần chú, chỉ khác là viết bằng JSON.
+ *
+ * NAY CHÚNG NẰM Ở THAM SỐ THỨ HAI. `input` là dữ liệu người dùng và có thể đến
+ * thẳng từ `req.body`; `nguCanhTinCay` thì KHÔNG BAO GIỜ được dựng từ `req.body`.
+ * Tách làm hai tham số biến điều đó thành chuyện CẤU TRÚC chứ không phải kỷ luật
+ * — không ai vô tình trải `...req.body` vào tham số thứ hai được.
+ *
+ * ⚠️ ĐÂY LÀ CHỖ KHOAN PROOF NỐI VÀO. Khi có chữ ký passkey đã xác minh, tầng
+ * route đọc bản ghi chữ ký từ KHO CỦA MÁY CHỦ rồi dựng đối tượng này. Không
+ * bao giờ đọc từ thân yêu cầu, kể cả khi đã đăng nhập — người đăng nhập vẫn có
+ * thể là kẻ lừa đảo đang ngồi cạnh bác.
+ *
+ * Xoá tính năng suppress KHÔNG phải cách vá. Nó đúng khi có bằng chứng thật.
+ * @param {object} nguCanhTinCay  CHỈ do máy chủ dựng. Không từ req.body.
+ */
+function docNguCanhTinCay(nguCanhTinCay) {
+  const n = nguCanhTinCay && typeof nguCanhTinCay === 'object' ? nguCanhTinCay : {};
+  return {
+    verifiedChannel: n.verifiedChannel === true,
+    verifiedRelationship: n.verifiedRelationship === true,
+  };
+}
+
+function analyze(input = {}, nguCanhTinCay = {}) {
   const quaDai = typeof input.vanBan === 'string' && input.vanBan.length > GIOI_HAN_VAN_BAN;
   const vanBan = quaDai ? '' : (input.vanBan || '');
 
@@ -165,10 +200,7 @@ function analyze(input = {}) {
   const san = unreadableInputFloor({ ...input, url: urlList });
 
   const ctx = buildContext(vanBan, { sourceId: 'van_ban' });
-  const direct = directPrecheck(ctx, {
-    verifiedChannel: input.verifiedChannel === true,
-    verifiedRelationship: input.verifiedRelationship === true,
-  });
+  const direct = directPrecheck(ctx, docNguCanhTinCay(nguCanhTinCay));
   const web = phanTichUrl(vanBan);
 
   const aiDaChay = Array.isArray(input.llmSignals) && input.llmSignals.length > 0 && !input.aiError;
