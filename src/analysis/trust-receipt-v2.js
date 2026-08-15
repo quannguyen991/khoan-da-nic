@@ -51,6 +51,9 @@ const GIOI_HAN = Object.freeze({
   chua_tai_xong_model_nghe: 'chua_co_bo_nghe_tren_may',
   ghi_am_khong_co_tieng_noi: 'ghi_am_khong_co_tieng_noi',
   chi_nghe_duoc_phan_dau: 'chi_doc_duoc_phan_dau',
+  // Nghe RA CHỮ nhưng máy không chấm điểm ⇒ nói đúng thế, đừng nói "không
+  // giải mã được" (sai) cũng đừng im (còn sai hơn).
+  ghi_am_khong_do_duoc_do_tin_cay: 'ghi_am_chua_do_duoc_do_tin_cay',
 
   /**
    * §15.4.1 — bốn chỗ hỏng của nguồn đọc thông báo, và §16.3.

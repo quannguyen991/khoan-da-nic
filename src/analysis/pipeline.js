@@ -43,6 +43,18 @@ const MA_LOI_GHI_AM = Object.freeze({
   CHUA_TAI_MODEL: 'chua_tai_xong_model_nghe',
   KHONG_CO_TIENG_NOI: 'ghi_am_khong_co_tieng_noi',
   BI_CAT: 'chi_nghe_duoc_phan_dau',
+  /**
+   * §4.3 — MÁY PHIÊN ÂM ĐƯỢC NHƯNG KHÔNG CHẤM ĐIỂM.
+   *
+   * `SpeechRecognizer` của Android không bắt buộc trả `CONFIDENCE_SCORES`, và
+   * bộ nghe trên máy thường bỏ trống. Lúc đó ta CÓ chữ nhưng KHÔNG có số đo.
+   *
+   * Đây là ca §4.3 tinh tế nhất của cả tính năng, và nó có hai cách sai:
+   *  · coi như tốt (điểm 1.0)  → "đã kiểm, không thấy gì" trong khi chưa đo
+   *  · coi như không nghe được → nói sai, vì rõ ràng đã giải mã ra chữ
+   * Nên nó có mã RIÊNG, nói đúng thứ đã xảy ra: nghe được, chưa đo được độ tin.
+   */
+  KHONG_DO_DUOC_DO_TIN_CAY: 'ghi_am_khong_do_duoc_do_tin_cay',
 });
 
 /**
@@ -93,8 +105,16 @@ function unreadableInputFloor(input = {}) {
     if (input.ghiAmFailed === true || !coChu) {
       chuaKiem.push(maLoi || 'khong_nghe_duoc_ghi_am');
     } else {
-      if (!tinCayDuoc) chuaKiem.push('khong_nghe_duoc_ghi_am');
       if (maLoi) chuaKiem.push(maLoi);
+      /**
+       * ⚠️ `KHONG_DO_DUOC_DO_TIN_CAY` ĐÃ nói đúng chuyện thiếu số đo rồi. Thêm
+       * `khong_nghe_duoc_ghi_am` vào nữa là nói sai — máy đã giải mã ra chữ.
+       * Mọi mã lỗi KHÁC thì vẫn cộng dồn: bị cắt mà đoạn còn lại cũng mờ là
+       * HAI chuyện, và giấu một trong hai là giấu chỗ mù.
+       */
+      if (!tinCayDuoc && input.ghiAmMaLoi !== 'KHONG_DO_DUOC_DO_TIN_CAY') {
+        chuaKiem.push('khong_nghe_duoc_ghi_am');
+      }
     }
   }
 

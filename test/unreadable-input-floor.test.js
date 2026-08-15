@@ -128,6 +128,25 @@ test('ghi âm — nghe tốt hoàn toàn thì KHÔNG sinh mã hỏng nào của 
   assert.deepStrictEqual(san.chuaKiem.filter((m) => maGhiAm.includes(m)), []);
 });
 
+test('ghi âm #9 — nghe RA CHỮ nhưng máy không chấm điểm có mã RIÊNG', () => {
+  // SpeechRecognizer của Android không bắt buộc trả CONFIDENCE_SCORES.
+  const san = unreadableInputFloor({
+    ghiAm: true, vanBan: 'bác chuyển tiền đi', ghiAmMaLoi: 'KHONG_DO_DUOC_DO_TIN_CAY',
+  });
+  assert.ok(san.daKiem.includes('ghi_am'), 'đã ra chữ thì phải khai là đã kiểm');
+  assert.ok(san.chuaKiem.includes('ghi_am_khong_do_duoc_do_tin_cay'));
+  assert.ok(!san.chuaKiem.includes('khong_nghe_duoc_ghi_am'),
+    'nói "không giải mã được" là sai — máy đã giải mã ra chữ, chỉ là chưa đo được');
+});
+
+test('ghi âm #10 — bị cắt VÀ đoạn còn lại mờ là HAI mã, không nuốt bớt', () => {
+  const san = unreadableInputFloor({
+    ghiAm: true, vanBan: 'alo', ghiAmConfidence: 0.2, ghiAmMaLoi: 'BI_CAT',
+  });
+  assert.ok(san.chuaKiem.includes('chi_nghe_duoc_phan_dau'));
+  assert.ok(san.chuaKiem.includes('khong_nghe_duoc_ghi_am'));
+});
+
 test('§15.9.1 — nghe được ghi âm KHÔNG gỡ chua_nghe_duoc_cuoc_goi', () => {
   // Ghi qua loa ngoài là nghe cái MICRO ĐẶT CẠNH cuộc gọi, không phải nghe
   // cuộc gọi. Phiếu tin cậy phải nói đúng cái thứ hai.

@@ -55,6 +55,12 @@ const MA_CHUA_KIEM = [
    * bảo bác đi sửa một thứ bác không sửa được.
    */
   'chua_tai_xong_model_nghe', 'ghi_am_khong_co_tieng_noi', 'chi_nghe_duoc_phan_dau',
+  /**
+   * ⚠️ Nghe RA CHỮ nhưng máy không trả điểm tin cậy. Android không bắt buộc bộ
+   * nghe trả `CONFIDENCE_SCORES`, và bản chạy trên máy thường bỏ trống. Câu cho
+   * mã này phải nói "chưa đo được", KHÔNG được nói "không nghe được".
+   */
+  'ghi_am_khong_do_duoc_do_tin_cay',
   // §15.4.1 — bốn chỗ hỏng của nguồn đọc thông báo tin nhắn.
   'chi_doc_duoc_mot_phan_tin', 'thong_bao_khong_co_noi_dung', 'thong_bao_da_bi_xoa',
   /**
