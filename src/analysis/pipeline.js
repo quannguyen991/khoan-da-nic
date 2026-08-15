@@ -212,7 +212,10 @@ function toHopDong(envelope) {
   };
 }
 
+/** Mọi mã họ kịch bản backend có thể phát ra — frontend cần nhãn cho từng mã. */
+const HO_KICH_BAN_MA = Object.freeze([...new Set(HO_KICH_BAN.map(([, ho]) => ho))]);
+
 module.exports = {
   analyze, toHopDong, chonCanThiep, unreadableInputFloor,
-  nhanTinHieuLLM, chonHoKichBan,
+  nhanTinHieuLLM, chonHoKichBan, HO_KICH_BAN_MA,
 };
