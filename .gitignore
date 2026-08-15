@@ -9,3 +9,8 @@ BACKEND.md
 FRONTEND.md
 THAM-KHAO-DAY-DU.md
 eval/cache/
+
+# Bản dựng giao diện — sinh ra bằng `npm run dung-giao-dien`, không commit.
+# ⚠️ Đây là ĐẦU RA của một repo khác (thư mục frontend). Commit vào đây là hai
+# nguồn sự thật cho cùng một tệp, và bản trong git sẽ cũ dần mà không ai biết.
+public/app/

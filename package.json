@@ -18,7 +18,9 @@
     "eval:quocte": "node eval/khoanbench.js",
     "eval:quocte:ghi": "node eval/khoanbench.js --ghi",
     "tao-anh": "node scripts/tao-anh.cjs",
-    "nen-anh": "node scripts/nen-anh.cjs"
+    "nen-anh": "node scripts/nen-anh.cjs",
+    "dung-giao-dien": "npm --prefix \"../trợ-lý-ảo-khoan-đã (1)\" run build",
+    "gop": "npm run dung-giao-dien && node server.js"
   },
   "keywords": [],
   "author": "",

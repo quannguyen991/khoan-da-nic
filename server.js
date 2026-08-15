@@ -11,6 +11,9 @@
 
 require('dotenv').config();
 
+const fs = require('node:fs');
+const path = require('node:path');
+
 const express = require('express');
 const { analyze, toHopDong } = require('./src/analysis/pipeline');
 const { trichTinHieu } = require('./src/analysis/llm-extractor');
@@ -436,6 +439,49 @@ app.get('/api/suc-khoe', (req, res) => {
     model: c.daCauHinh ? c.model : null,
   });
 });
+
+/**
+ * ─────────────────── GIAO DIỆN ───────────────────
+ *
+ * Phục vụ bản dựng frontend từ CHÍNH máy chủ này. Một tiến trình, một origin.
+ *
+ * ⚠️ VÌ SAO GỘP LẠI CHỨ KHÔNG CHẠY HAI CỔNG:
+ *
+ * ① WEBAUTHN. `rpID` phải khớp origin trình duyệt thấy. Chạy hai cổng thì phải
+ *    nhớ khai cả `localhost:3000` lẫn `localhost:8089` vào danh sách origin, và
+ *    quên một cái là MỌI chữ ký bị từ chối kèm thông báo trông y hệt "người
+ *    dùng bấm sai". Cùng origin thì cả lớp lỗi đó biến mất.
+ *
+ * ② §6.10 — app phải chạy được khi RÚT MẠNG. Hai tiến trình là hai thứ có thể
+ *    chết lệch nhau; người dùng thấy giao diện lên nhưng mọi lượt kiểm đều lỗi.
+ *
+ * ⚠️ ĐẶT SAU MỌI ROUTE `/api`. Đặt trước là `express.static` nuốt hết đường API
+ * và trả `index.html` cho `/api/analyze` — frontend nhận HTML, `JSON.parse` ném
+ * lỗi, và thông báo cuối cùng tới người dùng chẳng liên quan gì tới nguyên nhân.
+ *
+ * ⚠️ KHÔNG CÓ BẢN DỰNG THÌ NÓI RA, đừng trả trang trắng. §6.7.
+ */
+const DUONG_GIAO_DIEN = process.env.KHOAN_DA_GIAO_DIEN
+  || path.join(__dirname, 'public', 'app');
+
+if (fs.existsSync(path.join(DUONG_GIAO_DIEN, 'index.html'))) {
+  app.use(express.static(DUONG_GIAO_DIEN, { index: false }));
+
+  // SPA: mọi đường KHÔNG phải /api đều trả index.html để React tự định tuyến.
+  app.get(/^\/(?!api\/|transparency$).*/, (req, res, next) => {
+    if (req.method !== 'GET') return next();
+    return res.sendFile(path.join(DUONG_GIAO_DIEN, 'index.html'));
+  });
+} else {
+  app.get('/', (req, res) => {
+    res.status(503).type('text/plain; charset=utf-8').send(
+      'Chưa có bản dựng giao diện.\n\n'
+      + `Chờ tệp: ${path.join(DUONG_GIAO_DIEN, 'index.html')}\n\n`
+      + 'Dựng bằng:  npm run dung-giao-dien\n'
+      + 'Hoặc chạy riêng frontend ở cổng 3000 rồi mở http://localhost:3000\n',
+    );
+  });
+}
 
 // §6.7 — mọi lỗi còn lại vẫn ra JSON có cấu trúc, không bao giờ trắng trang.
 app.use((err, req, res, next) => {   // eslint-disable-line no-unused-vars
