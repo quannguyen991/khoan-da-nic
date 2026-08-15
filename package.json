@@ -1,0 +1,35 @@
+{
+  "name": "khoan-da-24h",
+  "version": "1.0.0",
+  "description": "Khoan Đã — phát hiện tin nhắn lừa đảo. Bộ luật quyết định, AI chỉ trích tín hiệu.",
+  "main": "server.js",
+  "type": "commonjs",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test": "node --test",
+    "check": "node --check server.js && node --check public/app.js && node --check public/services.js && node --check public/sw.js",
+    "build": "node scripts/build.js",
+    "eval": "node eval/run.js",
+    "eval:ghi": "node eval/run.js --ghi",
+    "eval:quocte": "node eval/khoanbench.js",
+    "eval:quocte:ghi": "node eval/khoanbench.js --ghi",
+    "tao-anh": "node scripts/tao-anh.cjs",
+    "nen-anh": "node scripts/nen-anh.cjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.115.0",
+    "@fontsource-variable/inter": "^5.3.0",
+    "@fontsource/be-vietnam-pro": "^5.3.0",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "jsqr": "^1.4.0",
+    "pg": "^8.23.0"
+  }
+}

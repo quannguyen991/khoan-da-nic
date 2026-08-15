@@ -1,0 +1,10 @@
+.env
+node_modules/
+dist/
+output/
+*.log
+public/assets/3d/*.png
+*CAU-LENH-TRIEN-KHAI*
+BACKEND.md
+FRONTEND.md
+THAM-KHAO-DAY-DU.md
