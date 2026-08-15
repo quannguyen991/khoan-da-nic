@@ -181,7 +181,18 @@ const chanVuViec = gioiHanTanSuat('vu_viec');
  * HANDLER DUY NHẤT cho cả hai route.
  * Trả về ĐÚNG bảy trường của §HĐ — không rò trường nội bộ ra ngoài.
  *
- * ⚠️ CHỈ RÚT `vanBan` VÀ `anh`. KHÔNG trải `...req.body`.
+ * ⚠️ CHỈ RÚT `vanBan`, `anh` VÀ BỐN TRƯỜNG GHI ÂM. KHÔNG trải `...req.body`.
+ *
+ * §4.3 — bốn trường nguồn ghi âm: `ghiAm`, `ghiAmConfidence`, `ghiAmFailed`,
+ * `ghiAmMaLoi`. Vẫn RÚT TỪNG TRƯỜNG. `nguonGhiAm` là một object DỰNG LẠI từ bốn
+ * trường đã rút, không phải một lát cắt của `req.body` — trải nó là an toàn.
+ *
+ * ⚠️ Cả bốn đều do người gọi tự khai, nên cả bốn phải CHỈ TĂNG cảnh giác:
+ *  · `ghiAm` chỉ thêm vào `daKiem`, mà `daKiem` không vào công thức điểm
+ *  · `ghiAmFailed` / `ghiAmConfidence` thấp chỉ thêm `chuaKiem`
+ *  · `ghiAmMaLoi` chỉ CHỌN mã `chuaKiem` nào, không đổi điểm
+ * Hàng rào: test/ghi-am-khong-ha-muc.test.js — 445 mẫu × 8 tổ hợp, và
+ * test/ghi-am-than-yeu-cau.test.js đo QUA HTTP chứ không chỉ gọi hàm (§5.2).
  *
  * §HĐ nói rõ thân yêu cầu chỉ có hai trường đó. Mọi trường khác người gọi gửi
  * kèm đều bị bỏ, đặc biệt là `verifiedChannel` / `verifiedRelationship` — hai
@@ -194,7 +205,7 @@ const chanVuViec = gioiHanTanSuat('vu_viec');
  * `analyze()`. Hàng rào: test/co-xac-minh-khong-tu-khai.test.js.
  */
 async function xuLyPhanTich(req, res) {
-  const { vanBan, anh } = req.body || {};
+  const { vanBan, anh, ghiAm, ghiAmConfidence, ghiAmFailed, ghiAmMaLoi } = req.body || {};
 
   // §6.10 — giới hạn kích thước, báo lỗi rõ, KHÔNG âm thầm cắt.
   if (typeof anh === 'string' && anh.length > GIOI_HAN_TEP) {
@@ -205,9 +216,17 @@ async function xuLyPhanTich(req, res) {
     return res.status(400).json({ maLoi: 'INPUT_TOO_LONG', toiDa: GIOI_HAN_VAN_BAN });
   }
   const coVanBan = typeof vanBan === 'string' && vanBan.trim().length > 0;
-  if (!coVanBan && !anh) {
+  /**
+   * §4.3 — GHI ÂM HỎNG CŨNG LÀ MỘT ĐẦU VÀO.
+   *
+   * Trả 400 "thiếu đầu vào" cho lượt chỉ có ghi âm hỏng là biến một trạng thái
+   * CẦN NÓI RA thành một lỗi im lặng — bác bấm ghi, không nghe được, rồi màn
+   * hình báo "thiếu đầu vào" như thể bác chưa làm gì. Đúng dạng lỗi §4.3.
+   */
+  if (!coVanBan && !anh && !ghiAm) {
     return res.status(400).json({ maLoi: 'THIEU_DAU_VAO' });
   }
+  const nguonGhiAm = { ghiAm, ghiAmConfidence, ghiAmFailed, ghiAmMaLoi };
 
   /**
    * §6.10 — BỘ LUẬT CHẠY TRƯỚC, xử lý các ca hiển nhiên mà KHÔNG cần gọi AI.
@@ -218,7 +237,7 @@ async function xuLyPhanTich(req, res) {
    * lừa đảo thúc trên điện thoại ngồi chờ gateway là đánh đổi sai. 60 giây đã
    * mất thì không lấy lại được.
    */
-  const soBo = analyze({ vanBan: coVanBan ? vanBan : '', anh });
+  const soBo = analyze({ vanBan: coVanBan ? vanBan : '', anh, ...nguonGhiAm });
   if (soBo.overrides.length > 0) {
     return res.json(toHopDong(soBo));
   }
@@ -244,7 +263,9 @@ async function xuLyPhanTich(req, res) {
     aiError = 'AI_NOT_CONFIGURED';
   }
 
-  const envelope = analyze({ vanBan: coVanBan ? vanBan : '', anh, llmSignals, aiError });
+  const envelope = analyze({
+    vanBan: coVanBan ? vanBan : '', anh, llmSignals, aiError, ...nguonGhiAm,
+  });
   return res.json(toHopDong(envelope));
 }
 
@@ -277,7 +298,15 @@ app.post('/api/phan-tich', chanPhanTich, xuLyPhanTich);   // §5.2 — alias, c�
  * thì hiện tín hiệu đã thấy và trạng thái "đang đọc kỹ hơn", KHÔNG hiện nhãn.
  */
 app.post('/api/analyze/so-bo', chanPhanTich, (req, res) => {
-  const { vanBan, anh } = req.body || {};
+  /**
+   * ⚠️ BỐN TRƯỜNG GHI ÂM PHẢI CÓ Ở CẢ HAI ĐƯỜNG.
+   *
+   * Đường này mù với ghi âm còn `/api/analyze` thì không ⇒ sơ bộ ra "Chưa thấy
+   * dấu hiệu rủi ro" trong khi kết quả cuối có `chuaKiem`. Người dùng đọc màn
+   * hình đầu tiên rồi cất điện thoại. Hàng rào: ca so-bo trong
+   * test/ghi-am-than-yeu-cau.test.js.
+   */
+  const { vanBan, anh, ghiAm, ghiAmConfidence, ghiAmFailed, ghiAmMaLoi } = req.body || {};
 
   if (typeof anh === 'string' && anh.length > GIOI_HAN_TEP) {
     return res.status(413).json({ maLoi: 'FILE_TOO_LARGE' });
@@ -286,9 +315,11 @@ app.post('/api/analyze/so-bo', chanPhanTich, (req, res) => {
     return res.status(400).json({ maLoi: 'INPUT_TOO_LONG', toiDa: GIOI_HAN_VAN_BAN });
   }
   const coVanBan = typeof vanBan === 'string' && vanBan.trim().length > 0;
-  if (!coVanBan && !anh) return res.status(400).json({ maLoi: 'THIEU_DAU_VAO' });
+  if (!coVanBan && !anh && !ghiAm) return res.status(400).json({ maLoi: 'THIEU_DAU_VAO' });
 
-  return res.json(toHopDong(analyze({ vanBan: coVanBan ? vanBan : '', anh })));
+  return res.json(toHopDong(analyze({
+    vanBan: coVanBan ? vanBan : '', anh, ghiAm, ghiAmConfidence, ghiAmFailed, ghiAmMaLoi,
+  })));
 });
 
 /**
