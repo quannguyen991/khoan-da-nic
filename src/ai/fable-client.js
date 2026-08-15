@@ -26,6 +26,26 @@
  *
  * Chờ lâu không phải vấn đề với ca nguy hiểm: §6.10 cho bộ luật chạy trước, ca có
  * critical override trả về dưới 1 giây và KHÔNG chạm tới tầng này.
+ *
+ * ══════════ CẬP NHẬT 16/8/2026 — ĐỔI GATEWAY, SỐ TRÊN KHÔNG CÒN ĐÚNG ══════════
+ *
+ * Sang `codex.hungnguyen.codes`, tên model là `claude-sonnet-5` TRẦN — gateway
+ * này không có biến thể `-low/-medium/-high`, và mặc định bật suy luận sâu.
+ * Đo lại trên đúng lời nhắc đó: 25,6 · 26,3 · 31,6 · 35,0(timeout) · 35,0(timeout).
+ * Chậm gấp năm, và 2/5 lượt bị chính trần 35s cắt.
+ *
+ * ⚠️ NGUYÊN NHÂN KHÔNG PHẢI "GATEWAY CHẬM". Đo tách bạch:
+ *     lời nhắc 8 chữ, 8 lượt          1,9–4,4s   → gateway nhanh
+ *     3.378 token vào, đầu ra ngắn      2,2s     → đầu vào dài KHÔNG tốn kém
+ *     471 token ra                      5,1s     → 92 tok/s, throughput tốt
+ *     lời nhắc trích tín hiệu thật     23–32s    → 2.703 token ra, nội dung ~400
+ * Tức là ~4/5 token sinh ra là TOKEN SUY LUẬN. 2.700 ÷ 90 tok/s ≈ 30 giây.
+ *
+ * Vá bằng `reasoning_effort: 'low'` (xem `layCauHinh`), không phải bằng cách hạ
+ * trần timeout — trần 12s làm hỏng 100% lượt gọi.
+ *
+ * ⚠️ GIỮ TRẦN 35s. Với mức `low` thì lượt gọi về trong ~7s nên trần rộng không
+ * tốn gì; và nó vẫn đỡ được lúc gateway tắc.
  */
 const TIMEOUT_MAC_DINH = 35_000;
 
@@ -63,6 +83,27 @@ function layCauHinh(env = process.env) {
     base,
     key,
     model: env.RISK_LLM_MODEL || env.CHAT_MODEL || env.LLM_MODEL,
+    /**
+     * ⚠️ MỨC SUY LUẬN — ĐO 16/8/2026, ĐÂY LÀ NGUỒN CỦA 30 GIÂY CHỜ.
+     *
+     * Gateway `codex.hungnguyen.codes` mặc định bật suy luận sâu. Đo trên đúng
+     * lời nhắc trích tín hiệu, 3 lượt:
+     *   mặc định            23,5s · 1796 token ra · nội dung 1510 ký tự
+     *   reasoning_effort low 6,7s ·  427 token ra · nội dung 1079 ký tự
+     * Tức là ~4/5 số token sinh ra là TOKEN SUY LUẬN, không phải câu trả lời.
+     * `reasoning_effort:'none'` và `thinking:{type:'disabled'}` bị gateway BỎ
+     * QUA (vẫn ~30s) — chỉ `low` có tác dụng.
+     *
+     * VÌ SAO HẠ MỨC LÀ ĐÚNG CHỨ KHÔNG PHẢI ĐÁNH ĐỔI: §4.2 nói tầng AI CHỈ BẬT
+     * CỜ, bộ luật mới quyết mức. Trích tín hiệu là việc PHÂN LOẠI có bằng chứng
+     * — nó không cần 2.700 token suy luận, và mỗi giây suy luận là một giây
+     * người đang bị thúc trên điện thoại phải chờ.
+     *
+     * ⚠️ Đổi giá trị này là ĐỔI PHÉP ĐO. Khoá đệm của bộ đánh giá có mang nó
+     * (eval/lib/bo-nho-dem.js) — trộn hai mức là công bố số của cấu hình này
+     * bằng kết quả của cấu hình kia.
+     */
+    mucSuyLuan: env.LLM_REASONING_EFFORT || 'low',
     timeout: Number(env.LLM_TIMEOUT_MS) || TIMEOUT_MAC_DINH,
     daCauHinh: Boolean(base && key),
   };
@@ -89,6 +130,9 @@ async function goiChat(messages, opts = {}) {
         messages,
         temperature: 0,
         max_tokens: opts.maxTokens || 1500,
+        // `tat` = không gửi tham số, để gateway tự quyết như trước.
+        ...(cauHinh.mucSuyLuan && cauHinh.mucSuyLuan !== 'tat'
+          ? { reasoning_effort: cauHinh.mucSuyLuan } : {}),
       }),
       signal: huy.signal,
     });
