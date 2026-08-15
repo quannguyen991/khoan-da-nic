@@ -4,9 +4,16 @@
     {
       "name": "khoan-da-frontend",
       "runtimeExecutable": "npm.cmd",
-      "runtimeArgs": ["run", "dev", "--prefix", "D:/trợ-lý-ảo-khoan-đã (1)"],
+      "runtimeArgs": ["run", "dev", "--prefix", "D:/trá»£-lÃ½-áº£o-khoan-Ä‘Ã£ (1)"],
       "port": 3000,
       "url": "http://localhost:3000"
+    },
+    {
+      "name": "khoan-da-ban-dung",
+      "runtimeExecutable": "npm.cmd",
+      "runtimeArgs": ["start"],
+      "port": 8089,
+      "url": "http://localhost:8089"
     }
   ]
 }

@@ -109,11 +109,39 @@ function unreadableInputFloor(input = {}) {
      * Điều KHÔNG được làm là để `-1` rơi vào nhánh "dưới ngưỡng" — nó sẽ nói
      * "ghi âm không giải mã được" trong khi máy đã giải mã ra chữ.
      */
+    /**
+     * ⚠️ MÃ CỤ THỂ THẮNG. ĐO ĐƯỢC 16/8/2026 KHI NÓ KHÔNG THẮNG.
+     *
+     * Lớp native báo hỏng thì CŨNG gửi `doTinCayThapNhat = -1` — hỏng thì lấy
+     * đâu ra số đo. Nếu để `doTinCay === -1` quyết trước thì mọi mã cụ thể đều
+     * bị nuốt: "máy chưa có bộ nghe" và "không có tiếng nói" đều ra
+     * `ghi_am_khong_do_duoc_do_tin_cay` — một câu KHẲNG ĐỊNH đã giải mã ra chữ,
+     * trong khi máy không nghe được gì cả.
+     *
+     * Đo qua HTTP trước khi vá:
+     *   CHUA_TAI_MODEL     → ghi_am_khong_do_duoc_do_tin_cay   ✖ sai
+     *   KHONG_CO_TIENG_NOI → ghi_am_khong_do_duoc_do_tin_cay   ✖ sai
+     *
+     * Đây là §4.3 sai ngay bên trong chỗ xử lý §4.3, và nó sai theo hướng NÓI
+     * QUÁ những gì máy làm được — hướng nguy hiểm hơn.
+     *
+     * "Thiếu số đo" chỉ được kết luận khi KHÔNG có mã cụ thể nào.
+     */
+    const maCuThe = MA_LOI_GHI_AM[input.ghiAmMaLoi];
+
+    /**
+     * ⚠️ HAI KHÁI NIỆM KHÁC NHAU, ĐỪNG GỘP:
+     *  · `maCuThe`     — BÁO CÁI GÌ. Mã plugin gửi lên, luôn thắng.
+     *  · `khongDoDuoc` — CÓ ĐANG THIẾU SỐ ĐO KHÔNG. Dùng để chọn mã khi không có
+     *                    mã cụ thể, VÀ để chặn câu thừa "không giải mã được".
+     *
+     * Gộp làm một thì hoặc mã cụ thể bị nuốt (lỗi vừa vá), hoặc câu thừa quay
+     * lại. Cả hai đều là nói sai về việc máy đã làm được gì.
+     */
     const khongDoDuoc = input.ghiAmMaLoi === 'KHONG_DO_DUOC_DO_TIN_CAY'
-      || doTinCay === -1;
-    const maLoi = khongDoDuoc
-      ? MA_LOI_GHI_AM.KHONG_DO_DUOC_DO_TIN_CAY
-      : MA_LOI_GHI_AM[input.ghiAmMaLoi];
+      || (!maCuThe && doTinCay === -1);
+    const maLoi = maCuThe
+      || (khongDoDuoc ? MA_LOI_GHI_AM.KHONG_DO_DUOC_DO_TIN_CAY : undefined);
 
     if (coChu && input.ghiAmFailed !== true) daKiem.push('ghi_am');
 
@@ -404,6 +432,29 @@ function analyze(input = {}, nguCanhTinCay = {}) {
    * thành một lời trấn an. Đúng con bug §4.3 mô tả, chỉ khác nguồn đầu vào.
    */
   if (san.chuaKiem.includes('chua_lien_lac_duoc_nguoi_than') && riskLabel === 'NO_SIGNS_FOUND') {
+    riskLabel = 'SUSPICIOUS';
+  }
+
+  /**
+   * §4.3 — SÀN CHO GHI ÂM MÀ TA BIẾT LÀ ĐÃ MẤT NỘI DUNG.
+   *
+   * ĐO ĐƯỢC 16/8/2026 QUA HTTP: bản chép bị cắt còn "Bác chuyển 50 triệu sang"
+   * ra `CHUA_THAY` — tức màn hình nói "Chưa thấy dấu hiệu rủi ro" về một đoạn
+   * ghi âm mà chính ta biết là chưa nghe hết. Đó đúng là câu §4.3 cấm.
+   *
+   * ⚠️ CHỈ HAI MÃ NÀY, VÀ CÓ LÝ DO:
+   *   chi_nghe_duoc_phan_dau  — BIẾT CHẮC còn đoạn chưa nghe
+   *   khong_nghe_duoc_ghi_am  — BIẾT CHẮC chất lượng dưới ngưỡng
+   *
+   * ⚠️ KHÔNG áp cho `ghi_am_khong_do_duoc_do_tin_cay`. Ở đó máy ĐÃ ra chữ, chỉ
+   * là không kèm điểm — mà phần lớn bộ nghe trên máy Android không trả
+   * `CONFIDENCE_SCORES`. Áp sàn cho nó là mọi lượt ghi âm trên gần như mọi máy
+   * đều thành NGHI_NGO. Báo động giả tràn lan thì người dùng gỡ ứng dụng, và
+   * §4.6 nhắc thẳng chuyện đó. Thiếu số đo là điều PHẢI NÓI RA (nó đã nằm trong
+   * `chuaKiem`, hiện cùng cỡ chữ với nhãn), không phải điều phải nâng mức.
+   */
+  const MAT_NOI_DUNG = ['chi_nghe_duoc_phan_dau', 'khong_nghe_duoc_ghi_am'];
+  if (riskLabel === 'NO_SIGNS_FOUND' && MAT_NOI_DUNG.some((m) => san.chuaKiem.includes(m))) {
     riskLabel = 'SUSPICIOUS';
   }
 

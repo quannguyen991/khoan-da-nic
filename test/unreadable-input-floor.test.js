@@ -172,3 +172,78 @@ test('§15.9.1 — nghe được ghi âm KHÔNG gỡ chua_nghe_duoc_cuoc_goi', (
   const kq = analyze({ vanBan: 'alo bác ơi', ghiAm: true, ghiAmConfidence: 0.95 });
   assert.ok(kq.chuaKiem.includes('chua_nghe_duoc_cuoc_goi'));
 });
+
+/**
+ * ⚠️ MÃ LỖI CỤ THỂ PHẢI THẮNG "THIẾU SỐ ĐO" — ĐO ĐƯỢC 16/8/2026 KHI NÓ KHÔNG THẮNG.
+ *
+ * Lớp native báo hỏng thì CŨNG gửi `doTinCayThapNhat = -1` — hỏng thì lấy đâu ra
+ * số đo. Nếu để `-1` quyết trước thì mọi mã cụ thể bị nuốt, và cả hai ca dưới
+ * đây đều ra `ghi_am_khong_do_duoc_do_tin_cay` — một câu KHẲNG ĐỊNH máy đã giải
+ * mã ra chữ, trong khi nó không nghe được gì.
+ *
+ * Đây là §4.3 sai ngay bên trong chỗ xử lý §4.3, và sai theo hướng NÓI QUÁ những
+ * gì máy làm được — hướng nguy hiểm hơn.
+ */
+test('ghi âm #10 — mã CỤ THỂ thắng, dù có kèm -1', () => {
+  const ca = [
+    ['CHUA_TAI_MODEL', 'chua_tai_xong_model_nghe'],
+    ['KHONG_CO_TIENG_NOI', 'ghi_am_khong_co_tieng_noi'],
+  ];
+  for (const [maGui, maMong] of ca) {
+    const san = unreadableInputFloor({
+      ghiAm: true, vanBan: '', ghiAmConfidence: -1, ghiAmFailed: true, ghiAmMaLoi: maGui,
+    });
+    assert.ok(san.chuaKiem.includes(maMong),
+      `${maGui} bị nuốt, chuaKiem = ${san.chuaKiem.join(', ')}`);
+    assert.ok(!san.chuaKiem.includes('ghi_am_khong_do_duoc_do_tin_cay'),
+      `${maGui} bị đổi thành "không đo được độ tin" — nói máy đã ra chữ trong khi không`);
+  }
+});
+
+test('ghi âm #10b — BỊ CẮT giữ nguyên mã, kể cả khi điểm tin cậy tốt', () => {
+  const san = unreadableInputFloor({
+    ghiAm: true, vanBan: 'bác chuyển 50 triệu sang', ghiAmConfidence: 0.8, ghiAmMaLoi: 'BI_CAT',
+  });
+  assert.ok(san.daKiem.includes('ghi_am'), 'có chữ thì vẫn là đã kiểm được một phần');
+  assert.ok(san.chuaKiem.includes('chi_nghe_duoc_phan_dau'));
+  assert.ok(!san.chuaKiem.includes('khong_nghe_duoc_ghi_am'),
+    'điểm tin cậy tốt mà báo "không nghe được" là nói sai');
+});
+
+/**
+ * §4.3 — SÀN CHO GHI ÂM MÀ TA BIẾT ĐÃ MẤT NỘI DUNG.
+ *
+ * Đo qua HTTP 16/8/2026: bản chép bị cắt còn "Bác chuyển 50 triệu sang" ra
+ * `CHUA_THAY` — màn hình nói "Chưa thấy dấu hiệu rủi ro" về một đoạn ghi âm mà
+ * chính ta biết là chưa nghe hết.
+ */
+test('ghi âm #11 — bị cắt / nghe kém KHÔNG được ra nhãn thấp nhất', () => {
+  const { analyze, toHopDong } = require('../src/analysis/pipeline');
+  const cut = 'Bác chuyển 50 triệu sang';
+
+  for (const nguon of [
+    { ghiAm: true, ghiAmConfidence: 0.8, ghiAmMaLoi: 'BI_CAT' },
+    { ghiAm: true, ghiAmConfidence: 0.2 },
+  ]) {
+    const r = toHopDong(analyze({ vanBan: cut, ...nguon }));
+    assert.notStrictEqual(r.nhan, 'CHUA_THAY',
+      `mất nội dung mà vẫn ra CHUA_THAY: ${JSON.stringify(nguon)}`);
+  }
+});
+
+/**
+ * ⚠️ VÀ SÀN ĐÓ KHÔNG ĐƯỢC LAN SANG CA "CHỈ THIẾU SỐ ĐO".
+ *
+ * Phần lớn bộ nghe trên máy Android không trả `CONFIDENCE_SCORES`. Áp sàn cho ca
+ * đó là mọi lượt ghi âm trên gần như mọi máy đều thành NGHI_NGO — báo động giả
+ * tràn lan, và §4.6 nhắc thẳng rằng người dùng sẽ gỡ ứng dụng.
+ */
+test('ghi âm #11b — thiếu SỐ ĐO thì nói ra, KHÔNG nâng mức', () => {
+  const { analyze, toHopDong } = require('../src/analysis/pipeline');
+  const r = toHopDong(analyze({
+    vanBan: 'Chào bác, mai cháu qua chơi nhé.', ghiAm: true, ghiAmConfidence: -1,
+  }));
+  assert.strictEqual(r.nhan, 'CHUA_THAY', 'thiếu số đo mà nâng mức ⇒ báo động giả tràn lan');
+  assert.ok(r.chuaKiem.includes('ghi_am_khong_do_duoc_do_tin_cay'),
+    'nâng mức thì không, nhưng NÓI RA thì bắt buộc');
+});
