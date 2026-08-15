@@ -106,11 +106,49 @@ module.exports = {
       { pattern: '(chia sẻ|bật)\\b[^.]{0,16}màn hình\\b[^.]{0,48}(ngân hàng|banking|tài khoản)', scope: 'action' },
       { pattern: 'chia sẻ màn hình\\b[^.]{0,44}(app|ứng dụng)\\s+ngân hàng', scope: 'action' },
     ],
+    /**
+     * ⚠️ HAI GIỌNG, KHÔNG PHẢI MỘT — ĐO ĐƯỢC 16/8/2026.
+     *
+     * Ba mẫu đầu viết theo GIỌNG KẺ LỪA ĐẢO: "tôi là công an…". Chúng đúng cho
+     * tin nhắn bác DÁN VÀO.
+     *
+     * Nhưng trang chủ ghi "Hãy kể tình huống của Bác" — app MỜI BÁC KỂ LẠI. Và
+     * người kể lại thì nói ở ngôi thứ ba: "công an gọi báo tôi dính án, phải
+     * chuyển tiền cho họ". Câu đó không khớp mẫu nào, nên nó ra 14 điểm và
+     * CHUA_THAY — một kịch bản giả danh công an kinh điển đi lọt.
+     *
+     * Đây là lệch giữa CÁCH SẢN PHẨM MỜI NGƯỜI DÙNG NÓI và CÁCH TẦNG LUẬT NGHE.
+     * Thêm mẫu tường thuật là vá đúng chỗ lệch đó.
+     *
+     * ⚠️ §4.2 — chỉ ĐƯỢC THÊM tín hiệu, không gỡ mẫu nào. Và mẫu tường thuật
+     * một mình KHÔNG đủ để báo động: nó phải đi cùng yêu cầu chuyển tiền hay
+     * doạ dẫm mới vượt ngưỡng. Một cuộc gọi thật từ công an, kể lại mà không
+     * kèm đòi tiền, vẫn ra CHUA_THAY.
+     */
     ID_AUTHORITY_IMPERSONATION: [
+      // ── Giọng kẻ lừa đảo (tin nhắn dán vào) ──
       // ⚠️ B.4: phải có CẢ "công an" LẪN "cảnh sát".
       { pattern: '(tôi là|đây là|mình là)[^.]{0,30}(công an|cảnh sát|điều tra viên|viện kiểm sát|toà án|cán bộ)', scope: 'any' },
       { pattern: '(công an|cảnh sát)\\s+(phường|quận|huyện|tỉnh|thành phố)', scope: 'any' },
       { pattern: '\\b(bộ công an|cục cảnh sát|c06)\\b', scope: 'any' },
+
+      /*
+       * ── Giọng người kể lại (bác tự gõ vào ô "kể tình huống") ──
+       *
+       * ⚠️ CHẶN PHỦ ĐỊNH NẰM GIỮA HAI VẾ — TEST C.6.2 BẮT ĐƯỢC 16/8/2026.
+       *
+       * Bản đầu là `(công an|…)[^.]{0,26}(gọi|yêu cầu|…)`. Nó khớp luôn câu
+       * KHUYẾN CÁO "Công an KHÔNG BAO GIỜ yêu cầu chuyển tiền" — biến một câu
+       * dạy người ta cảnh giác thành một tín hiệu giả danh.
+       *
+       * Hàng rào `laPhuDinh` không cứu được: nó chỉ nhìn 16 ký tự TRƯỚC chỗ
+       * khớp, mà chỗ khớp bắt đầu ở "công an" — phủ định nằm SAU đó.
+       *
+       * `(?:(?!không|chẳng|đừng|chớ)[^.]){0,26}` là "tối đa 26 ký tự, nhưng
+       * không được trườn qua một từ phủ định nào".
+       */
+      { pattern: '(công an|cảnh sát|điều tra viên|viện kiểm sát|toà án)(?:(?!không|chẳng|đừng|chớ)[^.]){0,26}(gọi|gọi điện|nhắn|báo|yêu cầu|thông báo|bảo)', scope: 'any' },
+      { pattern: '(gọi|nhắn|điện)(?:(?!không|chẳng)[^.]){0,18}(từ|của|xưng là|tự xưng)[^.]{0,12}(công an|cảnh sát|viện kiểm sát|toà án)', scope: 'any' },
     ],
     ID_TAX_BENEFIT_IMPERSONATION: [
       { pattern: '(chi cục|cơ quan|cục)\\s+thuế', scope: 'any' },

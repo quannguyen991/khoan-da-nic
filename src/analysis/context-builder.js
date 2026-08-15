@@ -258,6 +258,23 @@ const KHUNG_GIAO_DUC = new RegExp([
   'có người[^.]{0,20}(giả danh|mạo danh|xưng là)',
   'theo (cơ quan|công an|báo|nguồn tin)',
 
+  /**
+   * ⚠️ CHUYỆN ĐÃ QUA — MỐC THỜI GIAN QUÁ KHỨ + LỜI KỂ.
+   *
+   * Thêm 16/8/2026 cùng lúc với mẫu tường thuật của `ID_AUTHORITY_IMPERSONATION`.
+   * Mẫu đó bắt "công an gọi báo tôi… phải chuyển tiền" — đúng thứ bác gõ vào ô
+   * "Hãy kể tình huống của Bác". Nhưng nó cũng bắt luôn "HỒI THÁNG BA bác bị một
+   * đứa gọi xưng công an…", tức là bác đang KỂ LẠI một việc đã xong.
+   *
+   * Khác biệt duy nhất giữa hai câu là MỐC THỜI GIAN. Chuyện đang xảy ra thì
+   * không ai gắn "hồi tháng ba" vào.
+   *
+   * ⚠️ ĐÒI CẢ HAI VẾ. Chỉ "năm ngoái" thôi thì quá rộng — kẻ lừa đảo cũng nói
+   * "năm ngoái anh có vay…". Phải đi kèm một động từ KỂ về trải nghiệm.
+   */
+  '(hồi|năm ngoái|tháng trước|tuần trước|hôm trước|dạo trước|trước đây)'
+    + '[^.]{0,40}(bị|suýt|từng|đã)\\s*(một|có)?[^.]{0,16}(lừa|gọi|nhắn|xưng|giả danh)',
+
   // Cấu trúc ĐIỀU KIỆN — tương đương "if someone … hang up" của tiếng Anh.
   '\\bai\\s[^.]{0,60}thì[^.]{0,40}(lừa đảo|kẻ gian|đừng|không nên|hãy|dập máy|tắt máy|cúp máy)',
   '(nếu|hễ)\\s[^.]{0,60}(thì\\s[^.]{0,40})?(lừa đảo|đừng|không nên|hãy|dập máy|tắt máy|cúp máy)',

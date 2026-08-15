@@ -29,11 +29,53 @@ const { laTinHieu } = require('./signal-registry');
  *
  * Hệ quả tốt: không dấu là ASCII nên `\b` hoạt động đúng.
  */
-const PHU_DINH = /(khong|dung|chang|cho|never|do not|cannot)\s*(can|phai|nen|duoc|bao gio)?\s*$/;
+/**
+ * ⚠️⚠️ `cho` ĐÃ BỊ GỠ KHỎI DANH SÁCH NÀY — ĐỪNG THÊM LẠI. ĐO ĐƯỢC 16/8/2026.
+ *
+ * Nó vốn ở đây để bắt "chớ" (đừng). Nhưng bỏ dấu xong thì **"chớ" và "cho" là
+ * cùng một chuỗi** — mà `cho` (giới từ) là một trong những từ phổ biến nhất
+ * tiếng Việt, và nó đứng ngay TRƯỚC đích của gần như mọi câu lừa đảo:
+ *
+ *     "nộp 20tr CHO cục thuế"          → ID_TAX_BENEFIT_IMPERSONATION bị nuốt
+ *     "chuyển tiền CHO công an"        → giả danh cơ quan bị nuốt
+ *     "đọc mã OTP CHO tôi"             → xin OTP bị nuốt
+ *     "chuyển CHO tài khoản này"       → yêu cầu chuyển tiền bị nuốt
+ *
+ * Người dùng báo: gõ "nộp 20tr cho cục thuế" ra "Chưa thấy dấu hiệu rủi ro".
+ * Tín hiệu KHỚP ĐÚNG rồi bị hàng rào phủ định vứt đi — im lặng, không dấu vết.
+ *
+ * §4.2: "Mọi thứ thông minh thêm vào chỉ được LÀM TĂNG cảnh giác, không bao giờ
+ * giảm." Một hàng rào phủ định bắt nhầm là thứ LÀM GIẢM cảnh giác, nên nó phải
+ * sai theo hướng ngược lại: thà bỏ sót một câu phủ định thật còn hơn vứt một
+ * tín hiệu thật.
+ *
+ * Cùng bài học với cụm `nhan qua` trong bộ lọc tin tức: **bỏ dấu làm ranh giới
+ * ngữ nghĩa biến mất, nên cụm ngắn và phổ biến là bẫy.**
+ */
+const PHU_DINH = /(khong|dung|chang|never|do not|cannot)\s*(can|phai|nen|duoc|bao gio)?\s*$/;
+
+/**
+ * "chớ" vẫn được bắt — nhưng CHỈ trên bản CÒN DẤU, nơi nó khác "cho".
+ * Bản đã bỏ dấu thì không phân biệt được, và ta chọn bỏ sót thay vì bắt nhầm.
+ */
+const PHU_DINH_CO_DAU = /\b(chớ|đừng|chẳng|khỏi)\s*(cần|phải|nên|được)?\s*$/;
+
 const KHONG_PHAI_PHU_DINH = /[,;]|\bse\b|\bthi\b/;
 
 function laPhuDinh(text, viTri) {
-  const truoc = boDau(text.slice(Math.max(0, viTri - 16), viTri));
+  const tho = text.slice(Math.max(0, viTri - 16), viTri);
+  const truoc = boDau(tho);
+
+  /*
+   * ⚠️ `boDau` GIỮ NGUYÊN SỐ KÝ TỰ (đã kiểm), nên hai chuỗi cùng chỉ số — dùng
+   * chung một `KHONG_PHAI_PHU_DINH` là hợp lệ.
+   *
+   * Thử bản còn dấu trước: nó phân biệt được "chớ" với "cho". Nếu `text` đã là
+   * bản bỏ dấu thì nhánh này đơn giản là không khớp, và đó là hướng an toàn.
+   */
+  const mDau = PHU_DINH_CO_DAU.exec(tho);
+  if (mDau && !KHONG_PHAI_PHU_DINH.test(truoc.slice(mDau.index))) return true;
+
   const m = PHU_DINH.exec(truoc);
   if (!m) return false;
   // Chỉ xét đoạn GIỮA từ phủ định và cụm. Dấu phẩy đứng TRƯỚC từ phủ định là
