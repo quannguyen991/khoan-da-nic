@@ -167,6 +167,23 @@ const TU_CAM = [
  */
 const MIEN_VI_LA_TEN_THU_DOAN = new Set([
   'FIN_SAFE_ACCOUNT', 'OFF_INVESTMENT_GUARANTEE', 'ho_nhac_tai_khoan_an_toan',
+  /**
+   * LAN THU TU, 15/8/2026 — va lan nay o mot nhom ma hoan toan moi.
+   *
+   * `maBuocKichBan` (§16.1) mo ta BUOC KE TIEP CUA KE LUA DAO. Ma nay la buoc
+   * "ho se bao bac chuyen sang mot 'tai khoan an toan'" — dung mot trong nhung
+   * cau kinh dien nhat cua kich ban gia danh cong an.
+   *
+   * Cam no la cam san pham GOI TEN duoc thu no dang chong. Cung tieu chi voi ba
+   * ma tren: ma la LOI KHOAN DA NOI VOI NGUOI DUNG thi ap luat; ma la TEN/TRICH
+   * DAN THU DOAN thi khong.
+   *
+   * ⚠️ Nhung KHONG mien ca nhom `maBuocKichBan`. Mot ma buoc van co the bi viet
+   * thanh loi Khoan Da noi ("DA_CHAN_BUOC_NAY"), va luc do phai do. Test ngay
+   * duoi doi ma mien phai co THAT trong MA_BUOC_DA_DUNG — khong phai mot chuoi
+   * ai do go vao day cho xanh test.
+   */
+  'DOI_CHUYEN_SANG_TAI_KHOAN_AN_TOAN',
 ]);
 
 test('§15.9.3 — không MÃ nào chứa "bảo vệ cuộc gọi" / "đã chặn" / "đã xác minh" / "an toàn"', () => {
@@ -184,9 +201,15 @@ test('§15.9.3 — không MÃ nào chứa "bảo vệ cuộc gọi" / "đã ch�
 
 test('Danh sách miễn CHỈ gồm tên thủ đoạn, không có mã thông điệp nào', () => {
   // Chan viec ai do nem mot ma thong diep vao danh sach mien de lam xanh test.
+  const { MA_BUOC_DA_DUNG } = require('../src/kich-ban-di-tiep');
   for (const ma of MIEN_VI_LA_TEN_THU_DOAN) {
-    assert.ok(/^(FIN_|OFF_|CRED_|DEV_|MAN_|ID_|WEB_|CASE_)/.test(ma) || ma.startsWith('ho_'),
-      `${ma} khong phai ten thu doan hay cau hoi trich dan`);
+    const laTinHieu = /^(FIN_|OFF_|CRED_|DEV_|MAN_|ID_|WEB_|CASE_)/.test(ma);
+    const laCauHoi = ma.startsWith('ho_');
+    // ⚠️ Doi ma buoc phai CO THAT trong bang kich ban, khong phai mot chuoi go
+    // vao danh sach mien cho xanh test.
+    const laBuocKichBan = MA_BUOC_DA_DUNG.includes(ma);
+    assert.ok(laTinHieu || laCauHoi || laBuocKichBan,
+      `${ma} khong phai ten thu doan, cau hoi trich dan, hay buoc kich ban`);
   }
 });
 

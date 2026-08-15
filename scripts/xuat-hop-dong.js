@@ -28,6 +28,9 @@ const { GIAI_DOAN } = require('../src/journey-engine');
 const { TRANG_THAI_GIAO_NHAN, VAI_TRO } = require('../src/trusted-circle');
 const { BUOC_CHUNG, THEO_NUOC } = require('../src/analysis/recovery-adapters');
 const { CAU_HOI, NHANH_HANH_DONG } = require('../src/bo-hoi-nhanh');
+const { MA_BUOC_DA_DUNG } = require('../src/kich-ban-di-tiep');
+const { MA_KET_QUA, TU_VUNG_CUM_TU } = require('../src/khoan-proof-ky');
+const { MA_CHIEU_KIEM } = require('../src/verified-request');
 const V = require('../src/version');
 
 /** §HĐ — bảy trường, không hơn không kém. */
@@ -37,6 +40,7 @@ const MA_DA_KIEM = [
   'van_ban', 'anh_ocr', 'url', 'ghi_am',
   'thong_bao_tin_nhan',   // §15.4 — nguồn thứ tư, native Android
   'bo_hoi_nhanh',         // §15.3.3 — bác tự trả lời, offline
+  'nguoi_than_xac_nhan',  // §16.3 — nguồn thứ năm, chữ ký Khoan Proof
 ];
 
 const MA_CHUA_KIEM = [
@@ -44,6 +48,17 @@ const MA_CHUA_KIEM = [
   'ai_khong_phan_hoi', 'ai_khong_chay', 'khong_nghe_duoc_ghi_am', 'noi_dung_qua_dai',
   // §15.4.1 — bốn chỗ hỏng của nguồn đọc thông báo tin nhắn.
   'chi_doc_duoc_mot_phan_tin', 'thong_bao_khong_co_noi_dung', 'thong_bao_da_bi_xoa',
+  /**
+   * §16.3 — HAI MÃ NÀY TRÔNG GIỐNG NHAU NHƯNG NGƯỢC NHAU. Frontend đừng gộp:
+   *  · chua_lien_lac_duoc_nguoi_than — ĐÃ hỏi mà không ai đáp. Im lặng CÓ nghĩa,
+   *    và nó kéo theo sàn NGHI_NGO.
+   *  · chua_thay_yeu_cau_da_xac_thuc — CHƯA ai hỏi ai cả. Đây là trạng thái
+   *    BÌNH THƯỜNG vì hầu như không ai dùng Khoan Proof. KHÔNG có sàn nào.
+   * Viết câu cho hai mã này giống nhau là biến một trạng thái bình thường thành
+   * một lời buộc tội.
+   */
+  'chua_lien_lac_duoc_nguoi_than',
+  'chua_thay_yeu_cau_da_xac_thuc',
 ];
 
 const MA_LOI_HTTP = [
@@ -80,6 +95,7 @@ function dungHopDong() {
       'gioiHanPhieuTinCay', 'hoKichBan', 'giaiDoanVuViec', 'vaiTroVongTron',
       'trangThaiGiaoNhan', 'buocPhucHoi', 'canhBaoPhucHoi', 'canhBaoSafetyCard',
       'maLoiHttp', 'cauHoiNhanh', 'nhanhHanhDong',
+      'maBuocKichBan', 'ketQuaKhoanProof', 'cumTuKhoanProof',
     ],
 
     /**
@@ -125,6 +141,22 @@ function dungHopDong() {
     canhBaoPhucHoi: MA_CANH_BAO_PHUC_HOI,
     canhBaoSafetyCard: MA_CANH_BAO_SAFETY_CARD,
     maLoiHttp: MA_LOI_HTTP,
+
+    // §16.1 — kịch bản đi tiếp. Mỗi mã bước cần một câu "họ THƯỜNG…" (§11:
+    // không "họ SẼ", không khẳng định một dấu hiệu VẮNG MẶT).
+    maBuocKichBan: [...MA_BUOC_DA_DUNG],
+
+    /**
+     * KHOAN PROOF. ⚠️ §11 — câu cho các mã này chỉ được nói AI ĐÃ KÝ, tuyệt đối
+     * không nói yêu cầu tốt hay xấu: tài khoản người con vẫn có thể bị chiếm
+     * quyền, VÀ dạng lạm dụng tài chính người cao tuổi phổ biến nhất là do người
+     * trong nhà gây ra.
+     */
+    ketQuaKhoanProof: [...new Set([
+      ...Object.values(MA_KET_QUA), ...Object.values(MA_CHIEU_KIEM),
+    ])],
+    // Cụm từ đối chiếu hai máy. LA_TIM → "Lá Tím".
+    cumTuKhoanProof: [...TU_VUNG_CUM_TU],
 
     // §15.3.3 · §15.11.1 — bộ hỏi nhanh. Frontend cần câu chữ cho từng mã.
     cauHoiNhanh: CAU_HOI.map((c) => c.ma),
