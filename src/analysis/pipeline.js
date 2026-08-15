@@ -98,7 +98,22 @@ function unreadableInputFloor(input = {}) {
     const doTinCay = input.ghiAmConfidence;
     const tinCayDuoc = typeof doTinCay === 'number' && Number.isFinite(doTinCay)
       && doTinCay >= NGUONG_GHI_AM && doTinCay <= 1;
-    const maLoi = MA_LOI_GHI_AM[input.ghiAmMaLoi];
+    /**
+     * ⚠️ HAI CÁCH KHAI "MÁY KHÔNG CHẤM ĐIỂM", NHẬN CẢ HAI.
+     *
+     * Lớp native trả `doTinCayThapNhat = -1` làm giá trị canh, còn tầng gọi có
+     * thể khai thẳng bằng mã `KHONG_DO_DUOC_DO_TIN_CAY`. Hai nửa được dựng song
+     * song và mỗi bên chọn một lối; nhận cả hai thì không bên nào phải nhớ dịch
+     * cho bên kia.
+     *
+     * Điều KHÔNG được làm là để `-1` rơi vào nhánh "dưới ngưỡng" — nó sẽ nói
+     * "ghi âm không giải mã được" trong khi máy đã giải mã ra chữ.
+     */
+    const khongDoDuoc = input.ghiAmMaLoi === 'KHONG_DO_DUOC_DO_TIN_CAY'
+      || doTinCay === -1;
+    const maLoi = khongDoDuoc
+      ? MA_LOI_GHI_AM.KHONG_DO_DUOC_DO_TIN_CAY
+      : MA_LOI_GHI_AM[input.ghiAmMaLoi];
 
     if (coChu && input.ghiAmFailed !== true) daKiem.push('ghi_am');
 
@@ -112,9 +127,7 @@ function unreadableInputFloor(input = {}) {
        * Mọi mã lỗi KHÁC thì vẫn cộng dồn: bị cắt mà đoạn còn lại cũng mờ là
        * HAI chuyện, và giấu một trong hai là giấu chỗ mù.
        */
-      if (!tinCayDuoc && input.ghiAmMaLoi !== 'KHONG_DO_DUOC_DO_TIN_CAY') {
-        chuaKiem.push('khong_nghe_duoc_ghi_am');
-      }
+      if (!tinCayDuoc && !khongDoDuoc) chuaKiem.push('khong_nghe_duoc_ghi_am');
     }
   }
 

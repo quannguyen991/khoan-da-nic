@@ -103,7 +103,9 @@ test('ghi âm #6 — mã lỗi lạ vẫn ra mã, không rơi vào khoảng lặ
 });
 
 test('ghi âm #7 — confidence KHÔNG PHẢI SỐ bị coi là HỎNG, không phải là tốt', () => {
-  for (const bay of [undefined, null, 'cao', NaN, -1, 1.5, {}]) {
+  // ⚠️ `-1` KHÔNG có trong danh sách này: nó là GIÁ TRỊ CANH nghĩa "máy không
+  // chấm điểm", không phải rác. Ca #9b giữ nghĩa đó. Mọi số âm khác vẫn là rác.
+  for (const bay of [undefined, null, 'cao', NaN, -2, -0.5, 1.5, {}]) {
     const san = unreadableInputFloor({ ghiAm: true, vanBan: 'alo', ghiAmConfidence: bay });
     assert.ok(san.chuaKiem.includes('khong_nghe_duoc_ghi_am'),
       `ghiAmConfidence=${String(bay)} phải bị coi là hỏng`);
@@ -137,6 +139,23 @@ test('ghi âm #9 — nghe RA CHỮ nhưng máy không chấm điểm có mã RI�
   assert.ok(san.chuaKiem.includes('ghi_am_khong_do_duoc_do_tin_cay'));
   assert.ok(!san.chuaKiem.includes('khong_nghe_duoc_ghi_am'),
     'nói "không giải mã được" là sai — máy đã giải mã ra chữ, chỉ là chưa đo được');
+});
+
+test('ghi âm #9b — giá trị canh -1 cũng là "không chấm điểm", không phải điểm thấp', () => {
+  // Lớp native trả -1; tầng gọi có thể khai bằng mã. Nhận cả hai lối.
+  const san = unreadableInputFloor({
+    ghiAm: true, vanBan: 'bác chuyển tiền đi', ghiAmConfidence: -1,
+  });
+  assert.ok(san.daKiem.includes('ghi_am'));
+  assert.ok(san.chuaKiem.includes('ghi_am_khong_do_duoc_do_tin_cay'));
+  assert.ok(!san.chuaKiem.includes('khong_nghe_duoc_ghi_am'),
+    '-1 rơi vào nhánh "dưới ngưỡng" là nói sai — máy đã giải mã ra chữ');
+});
+
+test('ghi âm #9c — điểm thấp THẬT vẫn là không nghe được, đừng lẫn với -1', () => {
+  const san = unreadableInputFloor({ ghiAm: true, vanBan: 'alo', ghiAmConfidence: 0.1 });
+  assert.ok(san.chuaKiem.includes('khong_nghe_duoc_ghi_am'));
+  assert.ok(!san.chuaKiem.includes('ghi_am_khong_do_duoc_do_tin_cay'));
 });
 
 test('ghi âm #10 — bị cắt VÀ đoạn còn lại mờ là HAI mã, không nuốt bớt', () => {
