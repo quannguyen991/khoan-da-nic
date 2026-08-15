@@ -24,7 +24,18 @@ const soCo = (ten, macDinh) => {
   return i > 0 ? Number(process.argv[i + 1]) : macDinh;
 };
 const gioiHan = soCo('--gioi-han', null);
-const songSong = soCo('--song-song', 5);
+
+/**
+ * ⚠️ ĐO 15/8/2026 — SONG SONG CAO LÀM HỎNG PHÉP ĐO, KHÔNG PHẢI HỎNG SẢN PHẨM.
+ *
+ * Lời nhắc dài (6.055 ký tự) chạy song song 6 làm 19,1% lượt AI_TIMEOUT, và §4.3
+ * đã đúng khi từ chối công bố số. Nhưng đo TUẦN TỰ trên cùng lời nhắc đó:
+ * trung vị 16,9s, max 19,8s — KHÔNG lượt nào chạm trần 35s.
+ *
+ * Người dùng thật gửi từng yêu cầu một. Ép gateway chạy 6 luồng rồi kết luận
+ * sản phẩm chậm là đo sai thứ mình định đo. Mặc định để 3.
+ */
+const songSong = soCo('--song-song', 3);
 
 const pt = (x) => (x === null ? '—' : `${(x * 100).toFixed(1)}%`);
 const dau = (ok) => (ok ? '✔' : '✖');
