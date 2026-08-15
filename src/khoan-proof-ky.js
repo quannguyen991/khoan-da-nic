@@ -261,7 +261,7 @@ async function xacMinhChuKy(p, { bayGio = Date.now() } = {}) {
     kq = await verifyAuthenticationResponse({
       response: p.phanHoi,
       expectedChallenge: ban.challenge,   // ⚠️ băm của ĐÚNG yêu cầu này
-      expectedOrigin: CAU_HINH.origin,
+      expectedOrigin: [...CAU_HINH.origins],
       expectedRPID: CAU_HINH.rpID,
       requireUserVerification: CAU_HINH.userVerification === 'required',
       credential: {

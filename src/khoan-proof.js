@@ -43,11 +43,33 @@ const { taoMaGhep, kiemMaGhep, taoPhien, phienConHan } = require('./auth');
  * ⚠️ `origin` và `rpID` phải khớp ĐÚNG thứ trình duyệt thấy trên thanh địa chỉ.
  * Lệch một chữ là `verifyRegistrationResponse` từ chối, và thông báo lỗi của nó
  * không nói ra chỗ lệch — mất hàng giờ mò.
+ *
+ * ⚠️ NHIỀU ORIGIN, VÀ ĐÂY LÀ LÝ DO — ĐO ĐƯỢC 15/8/2026.
+ *
+ * Lúc phát triển, frontend chạy ở `localhost:3000` (Vite) và gọi backend qua
+ * proxy. Trình duyệt báo origin là `http://localhost:3000`, còn máy chủ chỉ chờ
+ * `http://localhost:8089` — nên MỌI chữ ký đều bị từ chối với thông báo
+ * `CHUNG_THU_KHONG_HOP_LE`, trông y hệt "người dùng bấm sai".
+ *
+ * Cả hai origin đều là `localhost` nên `rpID` KHÔNG đổi — chữ ký vẫn ràng vào
+ * đúng một relying party. Chấp nhận thêm cổng dev không nới lỏng gì về mật mã.
+ *
+ * ⚠️ NHƯNG ĐỪNG THÊM ORIGIN NGOÀI `localhost` VÀO ĐÂY. WebAuthn đòi secure
+ * context; `http://192.168.x.x` không phải secure context và không có cách nào
+ * vòng qua. Thêm một origin lạ chỉ tạo ra một cửa mà không làm nó chạy được.
  */
+const ORIGIN_MAC_DINH = ['http://localhost:8089', 'http://localhost:3000'];
+
 const CAU_HINH = Object.freeze({
   rpID: process.env.KHOAN_DA_RP_ID || 'localhost',
   rpName: 'Khoan Đã',
-  origin: process.env.KHOAN_DA_ORIGIN || 'http://localhost:8089',
+  /** Giữ một chuỗi cho tương thích ngược; `origins` mới là thứ đem đi xác minh. */
+  origin: process.env.KHOAN_DA_ORIGIN || ORIGIN_MAC_DINH[0],
+  origins: Object.freeze(
+    process.env.KHOAN_DA_ORIGIN
+      ? process.env.KHOAN_DA_ORIGIN.split(',').map((s) => s.trim()).filter(Boolean)
+      : ORIGIN_MAC_DINH,
+  ),
   userVerification: 'required',   // bắt buộc, để có sinh trắc học
 });
 
@@ -177,7 +199,7 @@ async function xacNhanDangKy(taiKhoanId, phanHoi, { bayGio = Date.now() } = {}) 
     kq = await verifyRegistrationResponse({
       response: phanHoi,
       expectedChallenge: cho.challenge,
-      expectedOrigin: CAU_HINH.origin,
+      expectedOrigin: [...CAU_HINH.origins],
       expectedRPID: CAU_HINH.rpID,
       requireUserVerification: CAU_HINH.userVerification === 'required',
     });

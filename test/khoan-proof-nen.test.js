@@ -166,6 +166,32 @@ test('chữ ký đúng nhưng CHALLENGE khác ⇒ từ chối', async () => {
   );
 });
 
+/**
+ * ⚠️ LỖ ĐÃ ĐO ĐƯỢC 15/8/2026 — SẼ NỔ ĐÚNG LÚC DEMO NẾU KHÔNG CÓ TEST NÀY.
+ *
+ * Frontend chạy ở `localhost:3000` (Vite) và gọi backend qua proxy. Trình duyệt
+ * báo origin là `http://localhost:3000`, còn máy chủ chỉ chờ `:8089` — nên MỌI
+ * chữ ký đều bị từ chối, kèm thông báo trông y hệt "người dùng bấm sai".
+ */
+test('cổng DEV của frontend cũng là origin hợp lệ', async () => {
+  assert.ok(P.CAU_HINH.origins.includes('http://localhost:3000'),
+    'thiếu origin của Vite — chữ ký từ frontend sẽ bị từ chối hết');
+
+  const may = await taoMayXacThuc({ rpID: 'localhost', origin: 'http://localhost:3000' });
+  const tuyChon = await P.batDauDangKy('bac-cong-dev');
+  const kq = await P.xacNhanDangKy('bac-cong-dev', may.dangKy(tuyChon.challenge));
+  assert.strictEqual(kq.daDangKy, true);
+});
+
+test('origin lạ VẪN bị từ chối — nới cổng dev không nới cả thế giới', async () => {
+  const may = await taoMayXacThuc({ rpID: 'localhost', origin: 'http://localhost:9999' });
+  const tuyChon = await P.batDauDangKy('bac-cong-la');
+  await assert.rejects(
+    () => P.xacNhanDangKy('bac-cong-la', may.dangKy(tuyChon.challenge)),
+    (e) => e.ma === 'CHUNG_THU_KHONG_HOP_LE',
+  );
+});
+
 test('chữ ký đúng nhưng ORIGIN khác ⇒ từ chối', async () => {
   const may = await taoMayXacThuc({ rpID: 'localhost', origin: 'http://ke-lua-dao.invalid' });
   const tuyChon = await P.batDauDangKy('bac-lech-origin');
