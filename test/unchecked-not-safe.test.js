@@ -99,3 +99,28 @@ test('§11 — trust receipt nói rõ AI có chạy hay không, không mập m�
   assert.strictEqual(bien.aiDaChay, false);
   assert.ok(bien.chuaKiem.includes('ai_khong_chay'));
 });
+
+/**
+ * ⚠️ ẢNH KHÔNG ĐỌC ĐƯỢC PHẢI ĐƯỢC KHAI, KỂ CẢ KHI KHÔNG CÓ ẢNH ĐỂ GỬI.
+ *
+ * Lỗ hổng đo được 16/8/2026: điều kiện cũ là `if (input.anh)`, nên nhánh hỏng
+ * chỉ chạy khi ảnh CÓ MẶT. Nhưng ca hỏng nặng nhất lại là ca KHÔNG có ảnh nào
+ * để gửi: bác chia sẻ một ảnh chụp màn hình vào Khoan Đã, lớp native không đọc
+ * nổi (quá lớn, hoặc quyền URI đã hết hạn) nên gửi `ocrFailed: true` với `anh`
+ * rỗng. Điều kiện cũ bỏ qua sạch, và màn hình nói "Chưa thấy dấu hiệu rủi ro"
+ * về một tấm ảnh chưa ai đọc.
+ */
+test('§4.3 — ocrFailed tự nó đủ để khai, không đòi phải có ảnh kèm theo', () => {
+  const khongCoAnh = analyze({ vanBan: '', ocrFailed: true });
+  assert.ok(khongCoAnh.chuaKiem.includes('khong_doc_duoc_anh'),
+    `ảnh hỏng mà không khai: ${JSON.stringify(khongCoAnh.chuaKiem)}`);
+
+  // Và nó KHÔNG được ra nhãn thấp một cách trơn tru.
+  assert.ok(!khongCoAnh.daKiem.includes('anh_ocr'),
+    'khai là đã đọc được ảnh trong khi chưa đọc được');
+
+  // Ảnh đọc được thì vẫn vào daKiem như cũ — không phá đường đang chạy.
+  const docDuoc = analyze({ vanBan: 'xin chào', anh: 'data:image/png;base64,xx' });
+  assert.ok(docDuoc.daKiem.includes('anh_ocr'));
+  assert.ok(!docDuoc.chuaKiem.includes('khong_doc_duoc_anh'));
+});

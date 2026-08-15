@@ -75,10 +75,24 @@ function unreadableInputFloor(input = {}) {
     else daKiem.push('van_ban');
   }
 
-  if (input.anh) {
-    const hong = input.ocrFailed === true
-      || (typeof input.ocrConfidence === 'number' && input.ocrConfidence < NGUONG_OCR);
-    if (hong) chuaKiem.push('khong_doc_duoc_anh');
+  /**
+   * ⚠️ `ocrFailed` TỰ NÓ ĐỦ ĐỂ KHAI — KHÔNG ĐÒI PHẢI CÓ `anh`.
+   *
+   * Lỗ hổng đo được 16/8/2026: điều kiện cũ là `if (input.anh)`, nên nhánh hỏng
+   * chỉ chạy khi ảnh CÓ MẶT trong yêu cầu. Nhưng ca hỏng nặng nhất lại là ca
+   * KHÔNG có ảnh nào để gửi: bác chia sẻ một ảnh chụp màn hình vào Khoan Đã,
+   * lớp native không đọc nổi (quá lớn, hoặc quyền URI đã hết hạn), nên nó gửi
+   * `ocrFailed: true` mà `anh` rỗng. Điều kiện cũ bỏ qua sạch, và màn hình nói
+   * "Chưa thấy dấu hiệu rủi ro" về một tấm ảnh chưa ai đọc.
+   *
+   * `ocrFailed: true` CHÍNH LÀ lời khai "có một ảnh, và tôi không đọc được nó".
+   * Đó là thứ §4.3 sinh ra để nói.
+   */
+  const ocrHong = input.ocrFailed === true
+    || (typeof input.ocrConfidence === 'number' && input.ocrConfidence < NGUONG_OCR);
+
+  if (input.anh || ocrHong) {
+    if (ocrHong) chuaKiem.push('khong_doc_duoc_anh');
     else daKiem.push('anh_ocr');
   }
 
