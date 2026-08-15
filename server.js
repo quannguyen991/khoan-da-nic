@@ -20,6 +20,7 @@ const { dungTrang } = require('./src/safety-card-page');
 const { layKeHoachPhucHoi } = require('./src/analysis/recovery-adapters');
 const { taoSuKien, timHoSoCoTheGop, dungCauHoiGop, tinHieuCase, baLop, GIAI_DOAN } = require('./src/journey-engine');
 const { buocTiepTheo } = require('./src/kich-ban-di-tiep');
+const KP = require('./src/khoan-proof');
 const TC = require('./src/trusted-circle');
 const { taoKho, traNguCanh } = require('./src/intel-radar');
 const { moKho } = require('./src/vault-store');
@@ -62,13 +63,24 @@ app.use((err, req, res, next) => {
 
 /**
  * §6.10 — giới hạn tần suất theo thiết bị/phiên.
+ *
  * ⚠️ RATE_LIMITED KHÔNG được chặn nút gọi người thân, ngắt cuộc gọi hay luồng
  * phục hồi. Giới hạn tần suất là để kiểm soát chi phí, không phải để chặn người
- * đang gặp nguy — nên nó CHỈ áp lên route phân tích.
+ * đang gặp nguy.
+ *
+ * ⚠️ MỖI NHÓM ROUTE MỘT NGĂN ĐẾM RIÊNG — ĐO ĐƯỢC 15/8/2026 KHI DÙNG CHUNG.
+ * Trước đây mọi route dùng CHUNG một bộ đếm. Hệ quả: một lượt ghép cặp Khoan
+ * Proof (7–8 lượt gọi) ăn hết ngân sách, rồi `/api/analyze` trả 429 — đường
+ * phân tích bị chặn bởi hoạt động của một tính năng phụ, đúng thứ dòng trên nói
+ * KHÔNG được xảy ra. Test §5.3 bắt được, và nó bắt bằng cách trả 429 chứ không
+ * phải 401 — đọc lướt thì tưởng lỗi test.
+ *
+ * Ngăn riêng ⇒ dù người dùng nghịch ghép cặp bao nhiêu lần, ô kiểm tin nhắn vẫn
+ * còn nguyên 30 lượt.
  */
 const soLuot = new Map();
-function gioiHanTanSuat(req, res, next) {
-  const khoa = req.ip || 'khong_ro';
+const gioiHanTanSuat = (ngan) => function chan(req, res, next) {
+  const khoa = `${ngan}|${req.ip || 'khong_ro'}`;
   const gio = Date.now();
   const muc = soLuot.get(khoa) || { dem: 0, moc: gio };
   if (gio - muc.moc > CUA_SO_RATE) { muc.dem = 0; muc.moc = gio; }
@@ -76,7 +88,12 @@ function gioiHanTanSuat(req, res, next) {
   soLuot.set(khoa, muc);
   if (muc.dem > SO_LUOT_TOI_DA) return res.status(429).json({ maLoi: 'RATE_LIMITED' });
   return next();
-}
+};
+
+const chanPhanTich = gioiHanTanSuat('phan_tich');
+const chanProof = gioiHanTanSuat('proof');
+const chanDoc = gioiHanTanSuat('doc');
+const chanVuViec = gioiHanTanSuat('vu_viec');
 
 /**
  * HANDLER DUY NHẤT cho cả hai route.
@@ -149,8 +166,68 @@ async function xuLyPhanTich(req, res) {
   return res.json(toHopDong(envelope));
 }
 
-app.post('/api/analyze', gioiHanTanSuat, xuLyPhanTich);
-app.post('/api/phan-tich', gioiHanTanSuat, xuLyPhanTich);   // §5.2 — alias, cùng handler
+app.post('/api/analyze', chanPhanTich, xuLyPhanTich);
+app.post('/api/phan-tich', chanPhanTich, xuLyPhanTich);   // §5.2 — alias, cùng handler
+
+/**
+ * ─────────────────── KHOAN PROOF ───────────────────
+ *
+ * ⚠️ TẤT CẢ /api/proof/* ĐỀU CẦN ĐĂNG NHẬP — và KHÔNG được thêm vào
+ * KHONG_CAN_DANG_NHAP. Ngược lại, /api/analyze TUYỆT ĐỐI KHÔNG được bắt đăng
+ * nhập (§5.3, §6.9): rút mạng, chưa đăng nhập, app vẫn phải phân tích được bằng
+ * tầng luật.
+ *
+ * ⚠️ DANH TÍNH LẤY TỪ TOKEN MÁY CHỦ CẤP, không từ header người gọi tự khai.
+ * Cùng bài học với `verifiedChannel`/`verifiedRelationship`.
+ */
+function canPhien(req, res, next) {
+  KP.docPhien(req.headers.authorization)
+    .then((taiKhoanId) => {
+      if (!taiKhoanId) return res.status(401).json({ maLoi: 'CHUA_DANG_NHAP' });
+      req.taiKhoanId = taiKhoanId;
+      return next();
+    })
+    .catch(() => res.status(401).json({ maLoi: 'CHUA_DANG_NHAP' }));
+}
+
+/** Bọc handler async, đổi LoiProof thành mã lỗi sạch. §6.8: không rò nội bộ. */
+const proof = (fn) => async (req, res) => {
+  try {
+    return res.json(await fn(req));
+  } catch (e) {
+    if (e instanceof KP.LoiProof) {
+      // Nguyên nhân gốc CHỈ vào log (§6.7 + §6.9) — không đưa ra phản hồi.
+      if (e.chiTiet) console.error('[proof]', e.ma, e.chiTiet);
+      return res.status(e.http).json({ maLoi: e.ma });
+    }
+    console.error('[proof]', e?.message);
+    return res.status(500).json({ maLoi: 'LOI_MAY_CHU' });
+  }
+};
+
+/**
+ * ⚠️ ĐƯỜNG CẤP PHIÊN CHO DEMO. Mặc định ĐÓNG (404), chỉ mở khi
+ * `KHOAN_DA_PHIEN_DEMO=1`. Đây CHƯA phải hệ đăng nhập: chưa có mật khẩu, chưa
+ * có email, chưa có khôi phục tài khoản. Đừng gọi nó là đăng nhập trên slide.
+ */
+app.post('/api/proof/phien-demo', chanProof,
+  proof((req) => KP.capPhienDemo(req.body?.taiKhoanId)));
+
+app.post('/api/proof/dang-ky/bat-dau', chanProof, canPhien,
+  proof((req) => KP.batDauDangKy(req.taiKhoanId)));
+
+app.post('/api/proof/dang-ky/xac-nhan', chanProof, canPhien,
+  proof((req) => KP.xacNhanDangKy(req.taiKhoanId, req.body?.phanHoi)));
+
+app.post('/api/proof/ghep/bat-dau', chanProof, canPhien,
+  proof((req) => KP.batDauGhep(req.taiKhoanId)));
+
+app.post('/api/proof/ghep/xac-nhan', chanProof, canPhien,
+  proof((req) => KP.xacNhanGhep(req.taiKhoanId, req.body?.ma)));
+
+/** §9.8 — chủ tài khoản thu hồi bất cứ lúc nào, KHÔNG cần người con đồng ý. */
+app.post('/api/proof/thu-hoi', chanProof, canPhien,
+  proof((req) => KP.thuHoiGhep(req.taiKhoanId, req.body?.thanhVienId)));
 
 /**
  * §16.1 — KỊCH BẢN ĐI TIẾP. Dự báo các bước kế tiếp của một họ lừa đảo.
@@ -167,7 +244,7 @@ app.post('/api/phan-tich', gioiHanTanSuat, xuLyPhanTich);   // §5.2 — alias, 
  * bao giờ được đụng vào `nhan` hay điểm số. Hàng rào:
  * test/kich-ban-khong-ha-muc.test.js chạy 445 mẫu hai lượt.
  */
-app.get('/api/kich-ban/:hoKichBan', gioiHanTanSuat, (req, res) => {
+app.get('/api/kich-ban/:hoKichBan', chanDoc, (req, res) => {
   const { hoKichBan } = req.params;
   // Thiếu `giaiDoan` ⇒ coi như mới bị tiếp cận: trả về từ bước sớm nhất. Đây là
   // lựa chọn AN TOÀN — thà dự báo thừa một bước đã qua còn hơn giấu bước sắp tới.
@@ -190,7 +267,7 @@ app.get('/api/kich-ban/:hoKichBan', gioiHanTanSuat, (req, res) => {
  *
  * ⚠️ §6.11 — route này KHÔNG TỰ GỘP. Nó trả về CÂU HỎI để người dùng quyết.
  */
-app.post('/api/vu-viec/ung-vien', gioiHanTanSuat, async (req, res) => {
+app.post('/api/vu-viec/ung-vien', chanVuViec, async (req, res) => {
   const { vanBan, kenh, thoiDiem, hoSoDangMo } = req.body || {};
   if (typeof vanBan !== 'string' || !vanBan.trim()) {
     return res.status(400).json({ maLoi: 'THIEU_DAU_VAO' });
@@ -212,7 +289,7 @@ app.post('/api/vu-viec/ung-vien', gioiHanTanSuat, async (req, res) => {
  * Phụ lục A.8 — tín hiệu CASE_* CHỈ được tính SAU KHI người dùng xác nhận gộp.
  * Nên đây là route RIÊNG, và nó đòi cờ xác nhận rõ ràng.
  */
-app.post('/api/vu-viec/gop', gioiHanTanSuat, async (req, res) => {
+app.post('/api/vu-viec/gop', chanVuViec, async (req, res) => {
   const { vanBan, kenh, thoiDiem, hoSo, daXacNhanGop } = req.body || {};
   if (daXacNhanGop !== true) {
     return res.status(400).json({ maLoi: 'CHUA_XAC_NHAN_GOP' });
@@ -240,7 +317,7 @@ app.get('/api/ke-hoach-phuc-hoi', (req, res) => {
 
 /** Ra-đa: trả NGỮ CẢNH. §4.2 — không đụng vào mức rủi ro. */
 const khoIntel = taoKho();
-app.post('/api/ra-da', gioiHanTanSuat, (req, res) => {
+app.post('/api/ra-da', chanDoc, (req, res) => {
   const { vanBan } = req.body || {};
   if (typeof vanBan !== 'string' || !vanBan.trim()) {
     return res.status(400).json({ maLoi: 'THIEU_DAU_VAO' });
@@ -253,7 +330,16 @@ app.post('/api/ra-da', gioiHanTanSuat, (req, res) => {
  * ⚠️ Trả về TRẠNG THÁI GIAO NHẬN TRUNG THỰC. Endpoint trả thành công KHÔNG
  * đồng nghĩa người thân đã thấy, và tuyệt đối không có "đã đọc và hiểu" (§11).
  */
-app.post('/api/canh-bao-nguoi-than', gioiHanTanSuat, (req, res) => {
+/**
+ * ⚠️ KHÔNG CÓ GIỚI HẠN TẦN SUẤT Ở ĐÂY, VÀ ĐÓ LÀ CHỦ Ý.
+ *
+ * §6.10 ghi thẳng: "RATE_LIMITED KHÔNG được chặn nút gọi người thân." Route
+ * này TỪNG có `gioiHanTanSuat` — tức là bấm quá 30 lần trong một phút thì nút
+ * báo cho con cháu ngừng hoạt động, đúng lúc người ta đang hoảng và bấm nhiều.
+ * Tệ nhất có thể xảy ra khi bỏ giới hạn: người dùng làm phiền chính gia đình
+ * mình. Tệ nhất khi giữ giới hạn: không ai trong nhà biết bác đang bị lừa.
+ */
+app.post('/api/canh-bao-nguoi-than', (req, res) => {
   const { vongTron, vanBan, soTien, huyLanNay, thoiDiem } = req.body || {};
   if (!vongTron || typeof vongTron !== 'object') {
     return res.status(400).json({ maLoi: 'THIEU_VONG_TRON' });
