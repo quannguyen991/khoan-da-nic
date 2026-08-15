@@ -175,6 +175,46 @@ app.post('/api/analyze', chanPhanTich, xuLyPhanTich);
 app.post('/api/phan-tich', chanPhanTich, xuLyPhanTich);   // §5.2 — alias, cùng handler
 
 /**
+ * ─────────────────── KẾT QUẢ SƠ BỘ, TRẢ NGAY ───────────────────
+ *
+ * CHỈ TẦNG LUẬT. Không gọi AI. Trả về dưới 50ms.
+ *
+ * VÌ SAO CẦN — ĐO ĐƯỢC 15/8/2026: gateway mất 25,6–35s một lượt (5 phép đo,
+ * trung vị 31,6s, 2/5 chạm trần 35s). Người đang bị kẻ lừa đảo thúc trên điện
+ * thoại phải nhìn màn chờ nửa phút. §6.10 nói thẳng đó là đánh đổi sai.
+ *
+ * ⚠️ HẠ TRẦN TIMEOUT KHÔNG PHẢI CÁCH VÁ. Đã đo: trần 12s làm hỏng 100% lượt
+ * gọi, và recall rơi từ 67,6% về mức chỉ-bộ-luật 3,8%. Chờ nhanh mà mù thì tệ
+ * hơn chờ lâu mà thấy.
+ *
+ * ⚠️⚠️ TÍNH CHẤT AN TOÀN KHIẾN ĐƯỜNG NÀY DÙNG ĐƯỢC:
+ * §4.2 nói tầng AI CHỈ BẬT CỜ, và mọi thứ thêm vào chỉ được LÀM TĂNG cảnh giác.
+ * Hệ quả: mức của kết quả cuối LUÔN ≥ mức sơ bộ. Không bao giờ có chuyện hiện
+ * "Nguy hiểm cao" rồi hạ xuống "Chưa thấy dấu hiệu" — chiều đó bị cấm bởi bộ
+ * luật, không phải bởi ước lệ.
+ * Hàng rào: test/so-bo-khong-cao-hon-ket-qua.test.js chạy 445 mẫu.
+ *
+ * ⚠️ NHƯNG GIAO DIỆN VẪN KHÔNG ĐƯỢC HIỆN NHÃN TRẤN AN SỚM. `aiDaChay:false` ở
+ * đây là thật, và §HĐ đã buộc frontend hiện dòng "lượt này không có AI đọc"
+ * cùng cỡ chữ. Frontend chỉ hiện NHÃN sớm khi nhãn sơ bộ là CAO; mức thấp hơn
+ * thì hiện tín hiệu đã thấy và trạng thái "đang đọc kỹ hơn", KHÔNG hiện nhãn.
+ */
+app.post('/api/analyze/so-bo', chanPhanTich, (req, res) => {
+  const { vanBan, anh } = req.body || {};
+
+  if (typeof anh === 'string' && anh.length > GIOI_HAN_TEP) {
+    return res.status(413).json({ maLoi: 'FILE_TOO_LARGE' });
+  }
+  if (typeof vanBan === 'string' && vanBan.length > GIOI_HAN_VAN_BAN) {
+    return res.status(400).json({ maLoi: 'INPUT_TOO_LONG', toiDa: GIOI_HAN_VAN_BAN });
+  }
+  const coVanBan = typeof vanBan === 'string' && vanBan.trim().length > 0;
+  if (!coVanBan && !anh) return res.status(400).json({ maLoi: 'THIEU_DAU_VAO' });
+
+  return res.json(toHopDong(analyze({ vanBan: coVanBan ? vanBan : '', anh })));
+});
+
+/**
  * ─────────────────── KHOAN PROOF ───────────────────
  *
  * ⚠️ TẤT CẢ /api/proof/* ĐỀU CẦN ĐĂNG NHẬP — và KHÔNG được thêm vào
