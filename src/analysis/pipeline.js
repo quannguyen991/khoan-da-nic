@@ -83,6 +83,30 @@ function unreadableInputFloor(input = {}) {
     daKiem.push('bo_hoi_nhanh');
   }
 
+  /**
+   * §16.3 — NGUỒN ĐẦU VÀO THỨ NĂM: XÁC MINH BẰNG CHỮ KÝ CỦA NGƯỜI THÂN.
+   *
+   * §4.3 gọi tên đích danh: "THÊM NGUỒN ĐẦU VÀO MỚI NÀO THÌ THÊM CA VÀO ĐÂY."
+   *
+   * ⚠️ BA TRẠNG THÁI, KHÔNG PHẢI HAI. Chỗ này chính là §4.3 ở dạng thuần khiết
+   * nhất mà dự án gặp tới giờ:
+   *   DA_XAC_NHAN            → đã kiểm, có trả lời
+   *   DA_TU_CHOI             → đã kiểm, có trả lời (và là trả lời XẤU)
+   *   HET_HAN_KHONG_TRA_LOI  → CHƯA KIỂM ĐƯỢC. Không phải "không sao", cũng
+   *                            không phải "đã từ chối".
+   *
+   * ⚠️ ĐỪNG NHẦM VỚI §9.4 "im lặng = gửi". §9.4 nói: người thân không phản đối
+   * trong X phút thì CỨ GỬI cảnh báo — im lặng ngả về phía AN TOÀN HƠN. Ở đây
+   * ngược lại: im lặng ngả về phía CHƯA BIẾT. Cùng chữ "im lặng", ngược hướng.
+   * Hợp nhất hai cơ chế này là tạo ra đúng con bug §4.3 mô tả.
+   */
+  if (input.xacMinhNguoiThan === 'HET_HAN_KHONG_TRA_LOI') {
+    chuaKiem.push('chua_lien_lac_duoc_nguoi_than');
+  } else if (input.xacMinhNguoiThan === 'DA_XAC_NHAN'
+    || input.xacMinhNguoiThan === 'DA_TU_CHOI') {
+    daKiem.push('nguoi_than_xac_nhan');
+  }
+
   if (input.aiError) chuaKiem.push('ai_khong_phan_hoi');
 
   return { daKiem, chuaKiem };
@@ -220,7 +244,31 @@ function analyze(input = {}, nguCanhTinCay = {}) {
   const boHoiNhanh = input.traLoiBoHoiNhanh
     ? tinHieuTuTraLoi(input.traLoiBoHoiNhanh) : [];
 
-  const signals = ghepTinHieu([...direct, ...web, ...boHoiNhanh], llm);
+  /**
+   * §16.3 — NGƯỜI ĐƯỢC NÊU TÊN ĐÃ KÝ **TỪ CHỐI**.
+   *
+   * "Tôi không gửi yêu cầu này" từ chính tài khoản bị mượn danh là bằng chứng
+   * mạnh nhất có thể có cho `ID_FAMILY_IMPERSONATION` — một tín hiệu ĐÃ CÓ
+   * trong Phụ lục A. §12 cấm thêm tín hiệu mới, và ở đây không cần thêm.
+   *
+   * ⚠️ CHỈ CÓ NHÁNH LÀM TĂNG. Không có nhánh nào ở đây làm giảm: "đã xác nhận"
+   * đi đường khác hẳn (tham số `nguCanhTinCay`, và chỉ TẮT được vài tín hiệu
+   * chứ không trừ điểm). §4.2.
+   *
+   * `source='signed_denial'` — cùng hạng với `user_confirmed` của bộ hỏi nhanh:
+   * con người đã trả lời, không phải model đoán.
+   */
+  const kyTuChoi = input.xacMinhNguoiThan === 'DA_TU_CHOI' ? [{
+    id: 'ID_FAMILY_IMPERSONATION',
+    state: 'present',
+    source: 'signed_denial',
+    confidence: 1.0,
+    evidence: [{
+      quote: 'DA_TU_CHOI', start: 0, end: 11, sourceId: 'khoan_proof',
+    }],
+  }] : [];
+
+  const signals = ghepTinHieu([...direct, ...web, ...boHoiNhanh, ...kyTuChoi], llm);
   const nhanDuoc = signals.filter((s) => s.state === 'present').map((s) => s.id);
 
   const kq = decide(signals);
@@ -234,6 +282,18 @@ function analyze(input = {}, nguCanhTinCay = {}) {
   let riskLabel = kq.riskLabel;
   if (overrides.length > 0) riskLabel = 'HIGH';
   else if (san.daKiem.length === 0 && riskLabel === 'NO_SIGNS_FOUND') riskLabel = 'SUSPICIOUS';
+  /**
+   * §16.3 — SÀN CHO CA "HỎI NGƯỜI THÂN MÀ KHÔNG AI TRẢ LỜI".
+   *
+   * ⚠️ SÀN NÀY ÁP KỂ CẢ KHI VĂN BẢN ĐỌC ĐƯỢC — khác hẳn sàn ngay trên, thứ chỉ
+   * chạy khi KHÔNG nguồn nào đọc được. Lý do: người dùng đã CHỦ ĐỘNG bấm "xác
+   * minh yêu cầu này", tức là chính họ thấy có gì đó đáng ngờ. Không ai trả lời
+   * mà app hạ xuống "chưa thấy dấu hiệu" là biến một câu hỏi chưa có lời đáp
+   * thành một lời trấn an. Đúng con bug §4.3 mô tả, chỉ khác nguồn đầu vào.
+   */
+  if (san.chuaKiem.includes('chua_lien_lac_duoc_nguoi_than') && riskLabel === 'NO_SIGNS_FOUND') {
+    riskLabel = 'SUSPICIOUS';
+  }
 
   const chuaKiem = [...san.chuaKiem];
   // Mọi lượt chỉ có văn bản đều chưa nghe được cuộc gọi — nói ra, đừng im lặng.

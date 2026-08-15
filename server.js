@@ -21,6 +21,7 @@ const { layKeHoachPhucHoi } = require('./src/analysis/recovery-adapters');
 const { taoSuKien, timHoSoCoTheGop, dungCauHoiGop, tinHieuCase, baLop, GIAI_DOAN } = require('./src/journey-engine');
 const { buocTiepTheo } = require('./src/kich-ban-di-tiep');
 const KP = require('./src/khoan-proof');
+const KY = require('./src/khoan-proof-ky');
 const TC = require('./src/trusted-circle');
 const { taoKho, traNguCanh } = require('./src/intel-radar');
 const { moKho } = require('./src/vault-store');
@@ -228,6 +229,45 @@ app.post('/api/proof/ghep/xac-nhan', chanProof, canPhien,
 /** §9.8 — chủ tài khoản thu hồi bất cứ lúc nào, KHÔNG cần người con đồng ý. */
 app.post('/api/proof/thu-hoi', chanProof, canPhien,
   proof((req) => KP.thuHoiGhep(req.taiKhoanId, req.body?.thanhVienId)));
+
+/**
+ * ─────────────────── KÝ MỘT YÊU CẦU CỤ THỂ ───────────────────
+ *
+ * ⚠️ `chuTaiKhoanId` LẤY TỪ PHIÊN, KHÔNG TỪ THÂN YÊU CẦU. Cho người gọi tự khai
+ * chủ tài khoản là cho họ tạo yêu cầu nhân danh nhà người khác.
+ */
+app.post('/api/proof/yeu-cau/tao', chanProof, canPhien, proof(async (req) => {
+  const y = await KY.taoYeuCau({
+    chuTaiKhoanId: req.taiKhoanId,
+    caseId: req.body?.caseId,
+    khoangTien: req.body?.khoangTien,   // KHOẢNG, không phải số chính xác (§6.9)
+    hanhDong: req.body?.hanhDong,
+    nguoiYeuCau: req.body?.nguoiYeuCau,
+  });
+  // Không trả `nonce` ra ngoài: nó nằm trong payload đã băm, người ký không cần.
+  const { nonce, ...raNgoai } = y;
+  void nonce;
+  return raNgoai;
+}));
+
+/** Cả hai đầu cùng hỏi trạng thái ở đây. Không có gì bí mật trong phản hồi. */
+app.get('/api/proof/yeu-cau/:yeuCauId', chanProof, canPhien,
+  proof((req) => KY.docYeuCau(req.params.yeuCauId)));
+
+/**
+ * Người con ký — XÁC NHẬN hoặc TỪ CHỐI, cả hai đều được ký.
+ *
+ * ⚠️ §11 — phản hồi chỉ nói AI ĐÃ KÝ. Không nói yêu cầu tốt hay xấu: tài khoản
+ * của Minh vẫn có thể bị chiếm quyền, VÀ dạng lạm dụng tài chính người cao tuổi
+ * phổ biến nhất là do người trong nhà gây ra.
+ */
+app.post('/api/proof/yeu-cau/:yeuCauId/ky', chanProof, canPhien,
+  proof((req) => KY.xacMinhChuKy({
+    yeuCauId: req.params.yeuCauId,
+    taiKhoanId: req.taiKhoanId,
+    quyetDinh: req.body?.quyetDinh,
+    phanHoi: req.body?.phanHoi,
+  })));
 
 /**
  * §16.1 — KỊCH BẢN ĐI TIẾP. Dự báo các bước kế tiếp của một họ lừa đảo.

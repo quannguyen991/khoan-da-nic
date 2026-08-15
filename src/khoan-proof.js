@@ -64,6 +64,16 @@ const BANG = Object.freeze({
 
 const HAN_THACH_DO_MS = 5 * 60 * 1000;
 
+/**
+ * ⚠️ MỘT KHO DUY NHẤT CHO CẢ KHOAN PROOF.
+ *
+ * Lỗi đã đo được: `khoan-proof-ky.js` tự gọi `moKho()` lần nữa, thành hai kho
+ * bộ nhớ tạm KHÁC NHAU. Chứng thư đăng ký ở kho A, đường ký tra ở kho B, và
+ * mọi chữ ký ĐÚNG đều trả về `CHUA_DANG_KY_PASSKEY`. Nguy hiểm ở chỗ nó trông
+ * y hệt một hàng rào chặt chẽ — lại đúng họ lỗi §4.3.
+ *
+ * Nên kho export ra ngoài, không module nào tự mở kho thứ hai.
+ */
 let khoDangCho = null;
 const layKho = async () => {
   if (!khoDangCho) khoDangCho = moKho();
@@ -288,7 +298,7 @@ async function docTatCaBanGhi() {
 }
 
 module.exports = {
-  CAU_HINH, MAC_DINH_BAT, BANG, LoiProof,
+  CAU_HINH, MAC_DINH_BAT, BANG, LoiProof, layKho,
   capPhienDemo, docPhien,
   batDauDangKy, xacNhanDangKy,
   batDauGhep, xacNhanGhep, thuHoiGhep, danhSachDaGhep,
