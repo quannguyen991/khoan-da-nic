@@ -17,6 +17,12 @@ const { trichTinHieu } = require('./src/analysis/llm-extractor');
 const { layCauHinh } = require('./src/ai/fable-client');
 const { dungSafetyCard } = require('./src/safety-card');
 const { dungTrang } = require('./src/safety-card-page');
+const { layKeHoachPhucHoi } = require('./src/analysis/recovery-adapters');
+const { taoSuKien, timHoSoCoTheGop, dungCauHoiGop, tinHieuCase, baLop } = require('./src/journey-engine');
+const TC = require('./src/trusted-circle');
+const { taoKho, traNguCanh } = require('./src/intel-radar');
+const { moKho } = require('./src/vault-store');
+const { canDangNhap } = require('./src/auth');
 
 const CONG = Number(process.env.PORT) || 8089;
 const GIOI_HAN_VAN_BAN = 5000;          // §6.10
@@ -132,6 +138,99 @@ async function xuLyPhanTich(req, res) {
 
 app.post('/api/analyze', gioiHanTanSuat, xuLyPhanTich);
 app.post('/api/phan-tich', gioiHanTanSuat, xuLyPhanTich);   // §5.2 — alias, cùng handler
+
+/**
+ * §6.11 — BỘ NHỚ VỤ VIỆC.
+ *
+ * ⚠️ §6.9 — máy chủ KHÔNG lưu nội dung thô. Sự kiện chỉ mang THỰC THỂ ĐÃ TRÍCH
+ * (số điện thoại, tên miền, tổ chức bị giả danh) — đủ để ghép hồ sơ, không đủ
+ * để dựng lại tin nhắn.
+ *
+ * ⚠️ §6.11 — route này KHÔNG TỰ GỘP. Nó trả về CÂU HỎI để người dùng quyết.
+ */
+app.post('/api/vu-viec/ung-vien', gioiHanTanSuat, async (req, res) => {
+  const { vanBan, kenh, thoiDiem, hoSoDangMo } = req.body || {};
+  if (typeof vanBan !== 'string' || !vanBan.trim()) {
+    return res.status(400).json({ maLoi: 'THIEU_DAU_VAO' });
+  }
+  const moc = Number.isFinite(thoiDiem) ? thoiDiem : Date.now();
+  const env = analyze({ vanBan });
+  const sk = taoSuKien({ vanBan, envelope: env, kenh, thoiDiem: moc });
+  const ungVien = timHoSoCoTheGop(sk, Array.isArray(hoSoDangMo) ? hoSoDangMo : [], moc);
+
+  return res.json({
+    // Thực thể đã trích — KHÔNG có nội dung thô ở đây.
+    suKien: { kenh: sk.kenh ?? null, giaiDoan: sk.giaiDoan, thucThe: sk.thucThe },
+    cauHoiGop: dungCauHoiGop(ungVien),
+    baLop: baLop(ungVien?.hoSo ?? null, env),
+  });
+});
+
+/**
+ * Phụ lục A.8 — tín hiệu CASE_* CHỈ được tính SAU KHI người dùng xác nhận gộp.
+ * Nên đây là route RIÊNG, và nó đòi cờ xác nhận rõ ràng.
+ */
+app.post('/api/vu-viec/gop', gioiHanTanSuat, async (req, res) => {
+  const { vanBan, kenh, thoiDiem, hoSo, daXacNhanGop } = req.body || {};
+  if (daXacNhanGop !== true) {
+    return res.status(400).json({ maLoi: 'CHUA_XAC_NHAN_GOP' });
+  }
+  if (typeof vanBan !== 'string' || !vanBan.trim()) {
+    return res.status(400).json({ maLoi: 'THIEU_DAU_VAO' });
+  }
+  const moc = Number.isFinite(thoiDiem) ? thoiDiem : Date.now();
+  const env0 = analyze({ vanBan });
+  const sk = taoSuKien({ vanBan, envelope: env0, kenh, thoiDiem: moc });
+  const tinHieu = tinHieuCase(hoSo, sk, { daXacNhanGop: true });
+
+  // Tín hiệu CASE_* đi qua ĐÚNG bộ luật như mọi tín hiệu khác.
+  const env = analyze({ vanBan, llmSignals: tinHieu });
+  return res.json({ ...toHopDong(env), tinHieuVuViec: tinHieu.map((t) => t.id) });
+});
+
+/**
+ * §2B.5 · §9.6 — KẾ HOẠCH PHỤC HỒI.
+ * Không cần đăng nhập: người vừa mất tiền mà gặp màn đăng nhập thì họ đóng app.
+ */
+app.get('/api/ke-hoach-phuc-hoi', (req, res) => {
+  res.json(layKeHoachPhucHoi(req.query.nuoc));
+});
+
+/** Ra-đa: trả NGỮ CẢNH. §4.2 — không đụng vào mức rủi ro. */
+const khoIntel = taoKho();
+app.post('/api/ra-da', gioiHanTanSuat, (req, res) => {
+  const { vanBan } = req.body || {};
+  if (typeof vanBan !== 'string' || !vanBan.trim()) {
+    return res.status(400).json({ maLoi: 'THIEU_DAU_VAO' });
+  }
+  res.json(traNguCanh(khoIntel, analyze({ vanBan })));
+});
+
+/**
+ * §9.4 — CẢNH BÁO NGƯỜI THÂN.
+ * ⚠️ Trả về TRẠNG THÁI GIAO NHẬN TRUNG THỰC. Endpoint trả thành công KHÔNG
+ * đồng nghĩa người thân đã thấy, và tuyệt đối không có "đã đọc và hiểu" (§11).
+ */
+app.post('/api/canh-bao-nguoi-than', gioiHanTanSuat, (req, res) => {
+  const { vongTron, vanBan, soTien, huyLanNay, thoiDiem } = req.body || {};
+  if (!vongTron || typeof vongTron !== 'object') {
+    return res.status(400).json({ maLoi: 'THIEU_VONG_TRON' });
+  }
+  const env = analyze({ vanBan: typeof vanBan === 'string' ? vanBan : '' });
+  const quyet = TC.nenTuDongCanhBao(vongTron, { canThiep: env.canThiep, huyLanNay: huyLanNay === true });
+  if (!quyet.gui) return res.json({ daGui: false, lyDo: quyet.lyDo });
+
+  const payload = TC.dungPayloadCanhBao(vongTron, {
+    envelope: env, soTien, thoiDiem: Number.isFinite(thoiDiem) ? thoiDiem : Date.now(),
+  });
+  // Chưa có hạ tầng push thật ⇒ NÓI THẬT là không xác nhận được, không giả vờ.
+  return res.json({
+    daGui: true,
+    nguoiNhanId: quyet.nguoiNhanId,
+    payload,
+    trangThai: TC.trangThaiGiaoNhan({ endpointOk: false, coSuKienMo: false }),
+  });
+});
 
 /**
  * §5.3 — /transparency dựng HTML ở máy chủ, KHÔNG CẦN JavaScript phía trình duyệt.
