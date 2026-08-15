@@ -91,8 +91,9 @@ const NGUONG = [
   const chiSo = B.tinhChiSo(kq);
   const parity = B.tinhParity(kq);
   const mauThat = B.thongKeMauThat(kq);
+  const latCatDanXuat = B.tinhLatCatDanXuat(kq);
   const metadata = B.dungMetadata({ mau, dungAi });
-  const bao = { metadata, chiSo, parity, mauThat, tranHong, thoiGianGiay: Number(giay) };
+  const bao = { metadata, chiSo, parity, mauThat, latCatDanXuat, tranHong, thoiGianGiay: Number(giay) };
 
   // ── §4.3 — TRẦN LƯỢT HỎNG. Kiểm TRƯỚC khi in bất kỳ con số nào. ──
   if (tranHong.vuotTran) {
@@ -100,6 +101,12 @@ const NGUONG = [
     console.log('║  ✖ TỪ CHỐI CÔNG BỐ SỐ — VƯỢT TRẦN LƯỢT HỎNG                  ║');
     console.log('╚══════════════════════════════════════════════════════════════╝');
     console.log(`   hỏng ${tranHong.soHong}/${kq.length} = ${pt(tranHong.tyLeHong)}, trần ${pt(tranHong.tran)}`);
+    if (tranHong.loVuotTran?.length) {
+      console.log('   ⚠️ LÔ VƯỢT TRẦN RIÊNG (số tổng che mất):');
+      for (const l of tranHong.loVuotTran) {
+        console.log(`      ${l.lo}: hỏng ${l.hong}/${l.tong} = ${pt(l.tyLe)}`);
+      }
+    }
     console.log(`   lý do: ${tranHong.lyDoHong.join(', ')}`);
     console.log(`   theo HTTP status: ${JSON.stringify(tranHong.theoStatus)}`);
     if (tranHong.viDu) console.log(`   ví dụ: ${tranHong.viDu}`);
@@ -152,6 +159,15 @@ const NGUONG = [
   } else {
     console.log('  ✖ KHÔNG CÓ MẪU NÀO nguon="that". Mọi con số trên đây đo trên mẫu TỰ SOẠN.');
     console.log('    §2B.6 đòi 25–40 mẫu thật đã che PII. Đây là khoảng trống, không phải điểm mạnh.');
+  }
+
+  // ── Lát cắt dẫn xuất ──
+  if (Object.keys(latCatDanXuat).length > 0) {
+    console.log('\n── LÁT CẮT DẪN XUẤT (§2B.6 — sinh bằng HÀM, báo RIÊNG, KHÔNG tính vào số tổng) ──');
+    for (const [phep, v] of Object.entries(latCatDanXuat)) {
+      console.log(`  ${phep.padEnd(12)} n=${String(v.soMau).padStart(3)} `
+        + `(từ ${v.soMauGoc} mẫu gốc)  đạt ${pt(v.tyLeDat)}  recall ${pt(v.dangerousRecall)}`);
+    }
   }
 
   // ── Ngưỡng ──

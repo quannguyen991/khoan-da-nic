@@ -1,18 +1,18 @@
 {
   "metadata": {
-    "commitSha": "3fd7eba",
+    "commitSha": "1b1a6ea",
     "analysisVersion": "1.0.0",
     "registryVersion": "1.0.0",
     "ruleVersion": "1.1.0",
     "promptVersion": "1.0.0",
-    "datasetVersion": "b78ac195237f",
-    "datasetSize": 445,
+    "datasetVersion": "d9b4a242f314",
+    "datasetSize": 485,
     "aiDaChay": true,
     "model": "claude-sonnet-5",
     "apiBase": "https://codex.hungnguyen.codes/v1",
     "cheDo": "bo_luat_va_ai",
     "tinHieuTuDem": 445,
-    "tinHieuGoiMoi": 0
+    "tinHieuGoiMoi": 40
   },
   "chiSo": {
     "tongMau": 445,
@@ -123,14 +123,27 @@
     "nguyHiemBatDuoc": 0,
     "nguyHiemTong": 0
   },
+  "latCatDanXuat": {
+    "bo_dau": {
+      "soMau": 40,
+      "soMauGoc": 40,
+      "tyLeDat": 0.35,
+      "dangerousRecall": 0.14285714285714285
+    }
+  },
   "tranHong": {
-    "soHong": 0,
-    "tyLeHong": 0,
+    "soHong": 31,
+    "tyLeHong": 0.06391752577319587,
     "tran": 0.1,
     "vuotTran": false,
-    "lyDoHong": [],
-    "theoStatus": {},
+    "lyDoHong": [
+      "AI_SCHEMA_INVALID",
+      "AI_TIMEOUT"
+    ],
+    "theoStatus": {
+      "khong_co_status": 31
+    },
     "viDu": null
   },
-  "thoiGianGiay": 1.1
+  "thoiGianGiay": 413.8
 }

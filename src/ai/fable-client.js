@@ -40,6 +40,22 @@ class LoiNhaCungCap extends Error {
   }
 }
 
+/**
+ * Dấu hiệu gateway trả THÔNG BÁO DỊCH VỤ thay vì nội dung trả lời.
+ * Cố ý bắt cả tiếng Anh lẫn tiếng Trung — gateway này trả tiếng Trung.
+ */
+const MAU_THONG_BAO_DICH_VU = [
+  /\[?key expired\]?/i,
+  /密钥已过期|额度耗尽|请新购/,
+  /quota (exhausted|exceeded)/i,
+  /insufficient (balance|credit|quota)/i,
+  /(credit|subscription).{0,20}(expired|exhausted)/i,
+];
+
+const laThongBaoDichVu = (s) => typeof s === 'string'
+  && s.length < 600                      // thông báo dịch vụ luôn ngắn
+  && MAU_THONG_BAO_DICH_VU.some((re) => re.test(s));
+
 function layCauHinh(env = process.env) {
   const base = env.LLM_API_BASE || env.LLM_BASE_URL;
   const key = env.LLM_API_KEY;
@@ -101,7 +117,31 @@ async function goiChat(messages, opts = {}) {
       providerMessage: 'choices[0].message.content không phải chuỗi',
     });
   }
+
+  /**
+   * ⚠️ §6.7 LẦN THỨ BA, CẢI TRANG KIỂU MỚI.
+   *
+   * Gateway hết hạn khoá trả về HTTP 200 kèm một câu THÔNG BÁO DỊCH VỤ nằm đúng
+   * chỗ của nội dung trả lời:
+   *   "[Key Expired] 密钥已过期 / 额度耗尽，请新购后重新运行一次配置命令…"
+   *
+   * Không có mã lỗi nào. Tầng trên đọc thành AI_SCHEMA_INVALID và trông y hệt
+   * lỗi định dạng của model — đúng cái bẫy §6.7 mô tả: "nhà cung cấp hết tiền
+   * hỏng GIỐNG HỆT hỏng do mã".
+   *
+   * Nên nhận diện nó thành mã RIÊNG. Sai một chẩn đoán ở đây là mất hàng giờ đi
+   * sửa lời nhắc trong khi thứ hỏng là cái ví.
+   */
+  if (laThongBaoDichVu(noiDung)) {
+    throw new LoiNhaCungCap('AI_KEY_EXPIRED', {
+      providerStatus: res.status,
+      providerMessage: noiDung.slice(0, 200),
+    });
+  }
   return noiDung;
 }
 
-module.exports = { goiChat, layCauHinh, LoiNhaCungCap, TIMEOUT_MAC_DINH };
+module.exports = {
+  goiChat, layCauHinh, LoiNhaCungCap, TIMEOUT_MAC_DINH,
+  laThongBaoDichVu, MAU_THONG_BAO_DICH_VU,
+};
