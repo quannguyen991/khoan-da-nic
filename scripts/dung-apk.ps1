@@ -1,6 +1,14 @@
-# DỰNG APK — chạy được từ đầu trên máy Windows sạch.
+﻿# DỰNG APK — chạy được từ đầu trên máy Windows sạch.
 #
-# ══════════ HAI CÁI BẪY ĐÃ DẪM PHẢI, ĐỌC TRƯỚC KHI SỬA ══════════
+# ══════════ BA CÁI BẪY ĐÃ DẪM PHẢI, ĐỌC TRƯỚC KHI SỬA ══════════
+#
+# ⚠️ ⓪ TỆP NÀY PHẢI LƯU UTF-8 **CÓ BOM**. ĐỪNG LƯU LẠI BẰNG CÔNG CỤ TỰ BỎ BOM.
+#    Windows PowerShell 5.1 đọc `.ps1` không BOM theo bảng mã ANSI (cp1252). Khi
+#    đó hằng `$Frontend` ngay dưới đây — có `ợ ý ả đ` — hỏng NGAY LÚC PHÂN TÍCH
+#    CÚ PHÁP, thành `D:\trá»£-lÃ½-áº£o-khoan-Ä‘Ã£ (1)`. Lỗi báo ra là
+#    "Cannot find path ... because it does not exist", nghe như thư mục bị xoá
+#    chứ không như lỗi bảng mã, nên rất dễ đi tìm nhầm chỗ.
+#    Truyền `-Frontend` ở dòng lệnh KHÔNG chữa được — dòng lệnh cũng cùng bảng mã.
 #
 # ⚠️ ① ĐƯỜNG DẪN CÓ DẤU TIẾNG VIỆT LÀM HỎNG GRADLE.
 #    Thư mục frontend tên `trợ-lý-ảo-khoan-đã (1)`. Chạy `gradlew` trong đó thì
