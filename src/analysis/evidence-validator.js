@@ -11,8 +11,32 @@
  * "Translated explanation", và KHÔNG thay thế evidence gốc.
  */
 
-const { boDau } = require('./context-builder');
+const { boDau, chuanHoa } = require('./context-builder');
 const { scopeCuaTinHieu } = require('./signal-registry');
+
+/**
+ * ⚠️ TRÍCH DẪN PHẢI ĐI QUA ĐÚNG HÀM CHUẨN HOÁ ĐÃ DÙNG CHO VĂN BẢN.
+ *
+ * ĐO ĐƯỢC 15/8/2026 — LỖI ĐẮT NHẤT PHIÊN NÀY, −5,6 ĐIỂM RECALL.
+ *
+ * Trước đây chỗ này tự chuẩn hoá lấy: `toLowerCase()` + gộp khoảng trắng. Rồi
+ * `chuanHoa()` bên context-builder được sửa để GỠ DẤU NGĂN HÀNG NGHÌN (vì tiền
+ * Việt viết `1.200.000đ` và `[^.]{0,N}` trong cue bank bị dấu chấm chặn ngang).
+ *
+ * Hai hàm chuẩn hoá LỆCH NHAU ngay lập tức. Model trích nguyên văn
+ * `"chú chuẩn bị 450.000đ tiền mặt"`, còn `doan.normalized` giờ là
+ * `"chú chuẩn bị 450000đ tiền mặt"` — không khớp, tín hiệu bị LOẠI. Mà trích dẫn
+ * chứa số tiền lại đúng là những tín hiệu nặng điểm nhất (FIN_TRANSFER_REQUEST,
+ * FIN_CASH_COURIER, OFF_ADVANCE_FEE), nên điểm sụp thẳng: 69 → 6.
+ *
+ * Đo được 9/17 trích dẫn trên các mẫu tụt có chứa dấu ngăn.
+ *
+ * ⚠️ BÀI HỌC, KHÔNG PHẢI CHI TIẾT VẶT: hai bên của một phép so BẮT BUỘC dùng
+ * CHUNG một hàm chuẩn hoá. Chép logic sang đây lần nữa là hẹn ngày lệch tiếp,
+ * và kiểu lệch này IM LẶNG — tín hiệu biến mất chứ không ai báo lỗi.
+ * Hàng rào: test/evidence-chuan-hoa-chung.test.js.
+ */
+const chuanHoaTrich = (quote) => chuanHoa(String(quote).replace(/\s+/g, ' '));
 
 /**
  * Offset do gateway trả về hay lệch; thứ kiểm được là CHUỖI CON có thật hay không.
@@ -20,7 +44,7 @@ const { scopeCuaTinHieu } = require('./signal-registry');
  */
 function trichCoThat(quote, ctx) {
   if (typeof quote !== 'string' || !quote.trim()) return false;
-  const q = quote.toLowerCase().replace(/\s+/g, ' ').trim();
+  const q = chuanHoaTrich(quote);
   if (ctx.normalized.includes(q)) return true;
   // §6.13 — tiếng Việt không dấu cũng là bản gốc hợp lệ.
   return ctx.folded.includes(boDau(q));
@@ -49,7 +73,8 @@ const locTheoEvidence = (signals = [], ctx) => signals.filter((s) => validateEvi
  */
 function doanChongLan(quote, ctx) {
   if (typeof quote !== 'string' || !quote.trim()) return [];
-  const q = quote.toLowerCase().replace(/\s+/g, ' ').trim();
+  // ⚠️ CÙNG hàm chuẩn hoá với `trichCoThat` — xem chú thích dài ở đó.
+  const q = chuanHoaTrich(quote);
   const qf = boDau(q);
   return ctx.segments.filter((d) => d.normalized.includes(q) || d.folded.includes(qf)
     || q.includes(d.normalized) || qf.includes(d.folded));
