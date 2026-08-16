@@ -44,9 +44,21 @@ summary,
 
 /* Ô nhập là phần tử thay thế — `display: grid` trên chúng cho hành vi lạ giữa
    các trình duyệt. Dùng `block` / `flex`, sàn vẫn có hiệu lực. */
-input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]),
-select,
-textarea {
+/* ⚠️ `:not([hidden])` LÀ BẮT BUỘC — ĐO TRÊN MÁY THẬT 16/8/2026.
+
+   Tệp này nạp SAU CÙNG, nên `display: block` ở đây THẮNG cả class `hidden`
+   của Tailwind (độ ưu tiên cao hơn, lại nạp sau). Hệ quả đo được: ô chọn tệp
+   giấu sau nút đính ảnh bị HỒI SINH — trên máy hiện nguyên dòng
+   "Chọn tệp / Không có tệp nào được chọn" của hệ điều hành, chiếm hết ô nhập
+   trang chủ và đẩy các nút trong hàng lệch đi.
+
+   Sàn tiếp cận chỉ dành cho ô NGƯỜI DÙNG THẤY. Phần tử đã giấu bằng THUỘC TÍNH
+   `hidden` không phải đích chạm — và mọi input muốn giấu phải dùng thuộc tính
+   đó, không chỉ class (test: input-file-hidden ở giao diện, và
+   test/vung-cham-khong-hoi-sinh.test.js ở đây). */
+input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):not([hidden]),
+select:not([hidden]),
+textarea:not([hidden]) {
   display: block;
   inline-size: 100%;
   min-block-size: max(var(--touch-target), 3.25rem);
