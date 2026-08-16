@@ -177,8 +177,40 @@ module.exports = {
       { pattern: '(đã kiểm tra|xác nhận|chứng nhận|kiểm duyệt)\\s*(bởi|by)?\\s*khoan đã', scope: 'any' },
       { pattern: '(đội|nhóm|bộ phận)\\s*(phát triển|kỹ thuật|hỗ trợ)\\s*(của\\s*)?khoan đã', scope: 'any' },
     ],
+    /**
+     * ⚠️ ĐÂY LÀ KỊCH BẢN LỪA ĐẢO PHỔ BIẾN NHẤT VIỆT NAM, VÀ NÓ TỪNG CHỈ CÓ
+     * ĐÚNG MỘT MẪU. Người dùng báo 16/8/2026:
+     *
+     *     "Mẹ ơi con đổi số mới, mẹ chuyển cho con 20 triệu"   → 14 điểm, CHUA_THAY
+     *     "con gái tôi bên nước ngoài bảo gửi tiền"            → 14 điểm, CHUA_THAY
+     *
+     * Mẫu cũ đòi cấu trúc quá cứng: `(con|cháu|em)\s+(gái|trai)?\s*(nhờ|bảo)`.
+     * Chỉ cần chen "tôi bên nước ngoài" vào giữa là trượt, vì `\s*` không cho
+     * chữ nào ở đó.
+     *
+     * Và thiếu hẳn DẤU HIỆU ĐỊNH DANH của họ kịch bản này: **"đổi số mới"**.
+     * Toàn bộ mưu mẹo nằm ở chỗ đó — kẻ lừa đảo phải giải thích vì sao tin nhắn
+     * đến từ một số lạ, nên gần như lần nào chúng cũng tự khai ra.
+     *
+     * ⚠️ MỖI MẪU Ở ĐÂY CHỈ ĐƯỢC 8 ĐIỂM, KHÔNG TỰ ĐỦ ĐỂ BÁO ĐỘNG.
+     * Ngưỡng là 20. "Con gái tôi bên nước ngoài" một mình = 8 điểm = CHUA_THAY,
+     * đúng như nó phải thế — đó là một câu bình thường. Chỉ khi ĐI CÙNG yêu cầu
+     * chuyển tiền (14 điểm) mới thành 22 và vượt ngưỡng.
+     *
+     * Và mức đó là NGHI_NGO, không phải CAO — màn hình sẽ bảo bác gọi thẳng cho
+     * con để xác minh. Với kịch bản này thì đó đúng là việc cần làm.
+     */
     ID_FAMILY_IMPERSONATION: [
-      { pattern: '(con|cháu|em)\\s+(gái|trai)?\\s*(nhờ|bảo|xin)\\b[^.]{0,26}(chuyển|gửi)\\s+tiền', scope: 'any' },
+      // Cấu trúc gốc, nới khoảng cách giữa danh xưng và động từ.
+      { pattern: '(con|cháu|em)\\s+(gái|trai)?[^.]{0,26}(nhờ|bảo|xin|nhắn)[^.]{0,22}(chuyển|gửi)\\s*(tiền|khoản)', scope: 'any' },
+
+      // ── Dấu hiệu định danh: ĐỔI SỐ ──
+      { pattern: '(đổi|dùng|chuyển)\\s*(sang\\s*)?(số|sđt|số điện thoại)\\s*(mới|khác)', scope: 'any' },
+      { pattern: '(số|sđt)\\s*(này|mới|khác)\\s*(là\\s*)?(của\\s*)?(con|cháu|em|mẹ|bố|ba|má|anh|chị)', scope: 'any' },
+      { pattern: '(con|cháu|em|mẹ|bố|ba|má)[^.]{0,20}(đổi|mất|hỏng)[^.]{0,12}(số|sđt|máy|điện thoại)', scope: 'any' },
+
+      // ── Người thân Ở XA: không gặp mặt được nên không xác minh được ──
+      { pattern: '(con|cháu|em|anh|chị|bố|mẹ)[^.]{0,26}(nước ngoài|bên kia|du học|xuất khẩu lao động|đi làm xa|ở xa)', scope: 'any' },
     ],
     MAN_SECRECY: [
       { pattern: '(đừng|không)\\s+(nói|kể|báo|tiết lộ)[^.]{0,28}(với ai|cho ai|người thân|gia đình|vợ|chồng|con)', scope: 'action' },
