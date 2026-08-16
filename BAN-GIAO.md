@@ -274,7 +274,7 @@ Tầng luật đơn thuần, không AI, trên 485 mẫu: **báo oan 12/164 · b�
 | Việc | Ghi chú |
 |---|---|
 | **Parity VI↔EN 16,6** | Ngưỡng ≤3,0. Hồi quy từ lúc đổi `reasoning_effort: low`; đã chấp nhận vì recall tuyệt đối tăng ở cả ba ngôn ngữ. Cần xem lại. |
-| **Thông báo + popup chưa nối vào luồng thật** | Kênh `IMPORTANCE_HIGH` và `PopupDeManHinh` đã dựng và biên dịch được, nhưng **chưa có chỗ nào gọi chúng khi kết quả là `CAO`**. Xem `native.ts → dungKenhCanhBao/hienPopupCanhBao`. |
+| **Thông báo chưa nối vào luồng thật** | Kênh `IMPORTANCE_HIGH` đã dựng và biên dịch được, nhưng **chưa chỗ nào gọi `native.ts → dungKenhCanhBao`** khi kết quả là `CAO`. (Popup thì ĐÃ nối — xem `useEffect` gọi `hienPopupCanhBao` trong `App.tsx`, có cờ chặn `nhan !== 'CAO'` và test chặn ở `giao-dien.test.mjs`.) |
 | **13 mẫu `warn-*` báo oan** | Nội dung DẠY về lừa đảo bị nhận là lừa đảo. `KHUNG_GIAO_DUC` chưa đủ. |
 | **Câu chuyển tiền trần trụi** | *"chuyển 50 triệu cho tài khoản này"* = 14 điểm, dưới ngưỡng 20. **Không hạ ngưỡng** (§12 cấm). Cần tín hiệu "số tiền lớn + tài khoản vô danh". |
 | **22 mẫu quà tặng không có `hoKichBan`** | `OFF_PRIZE_GIFT` tồn tại nhưng thiếu dòng `HO_KICH_BAN`. |
