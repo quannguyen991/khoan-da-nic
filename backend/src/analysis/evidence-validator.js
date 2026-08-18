@@ -125,7 +125,89 @@ function locTheoScopeChiTiet(signals = [], ctx) {
 
 const locTheoScope = (signals, ctx) => locTheoScopeChiTiet(signals, ctx).giu;
 
+/**
+ * ─────────── BẰNG CHỨNG PHẢI MANG DẤU HIỆU CỦA CHÍNH TÍN HIỆU ĐÓ ───────────
+ *
+ * ⚠️ LỖ HỔNG ĐÃ ĐO 18/8/2026 KHI CHẠY MÔ HÌNH NHỎ TẠI CHỖ (qwen2.5vl:7b).
+ *
+ * `trichCoThat()` ở trên kiểm câu trích CÓ TỒN TẠI trong bản gốc hay không. Nó
+ * KHÔNG kiểm câu trích có ĐÚNG NGHĨA với nhãn được gán hay không. Mô hình nhỏ
+ * khai thác đúng khe đó: lấy một câu có thật rồi dán sai nhãn lên. Evidence hợp
+ * lệ, tín hiệu bịa, và không hàng rào nào ở giữa.
+ *
+ * Đo trên 5 tin nhắn LÀNH, mô hình 7B chạy cục bộ:
+ *
+ *   "BIDV: tài khoản vừa bị trừ 500.000đ, số dư còn 12.450.000đ"
+ *       → FIN_RECOVERY_FEE, FIN_CRYPTO_TRANSFER, FIN_TRANSFER_REQUEST
+ *         (tin nhắn không hề nhắc phí lấy lại tiền, cũng không nhắc tiền mã hoá)
+ *   "Bệnh viện Bạch Mai nhắc lịch khám lại của bác vào 8h ngày 25/8"
+ *       → FIN_TRANSFER_REQUEST   (không ai đòi tiền)
+ *
+ * Kết quả: **3 trên 5 tin nhắn lành bị báo động** — mà §4.6 ghi rõ người bị báo
+ * oan sẽ hoảng rồi gỡ ứng dụng. Với app khuyên "đừng tin ai", báo oan đắt hơn
+ * bỏ sót.
+ *
+ * ⚠️ HÀNG RÀO NÀY KHÔNG PHẢI MỘT CƠ CHẾ HẠ MỨC (§4.2). Nó không đụng tới điểm,
+ * ngưỡng hay override. Nó chỉ nói: **một tín hiệu chỉ được tính khi bằng chứng
+ * của nó mang dấu hiệu của chính nó** — cùng tinh thần với `trichCoThat()`, chỉ
+ * chặt hơn một bậc.
+ *
+ * ⚠️ CHỈ ÁP CHO TÍN HIỆU CÓ MẪU TRONG LOCALE PACK (26/58 mã).
+ * Tín hiệu không có mẫu thì KHÔNG có gì để đối chiếu, và im lặng loại nó đi là
+ * tự bịt mắt mình — đúng thứ §4.3 cấm. Chúng đi qua như cũ.
+ *
+ * ⚠️ CÓ CÔNG TẮC, VÀ CÔNG TẮC MẶC ĐỊNH BẬT.
+ * `KHOAN_DA_BANG_CHUNG_PHAI_KHOP_MAU=0` để tắt khi cần đo so sánh. Đừng tắt vĩnh
+ * viễn mà không chạy lại cả hai con số: báo oan VÀ bỏ sót.
+ */
+function mauCuaTinHieu(pack, signalId) {
+  const ds = pack?.directPatterns?.[signalId];
+  return Array.isArray(ds) && ds.length > 0 ? ds : null;
+}
+
+function bangChungMangDauHieu(signal, ctx, pack) {
+  const mauList = mauCuaTinHieu(pack, signal.id);
+  if (!mauList) return true;                       // không có mẫu ⇒ không phán
+
+  const trich = (signal.evidence || [])
+    .map((e) => String(e?.quote || ''))
+    .filter(Boolean);
+  if (trich.length === 0) return true;             // ca này đã bị hàng rào khác lo
+
+  // So trên CẢ bản có dấu lẫn bản bỏ dấu, đúng như direct-precheck làm.
+  const ungVien = trich.flatMap((q) => [chuanHoaTrich(q), boDau(chuanHoaTrich(q))]);
+
+  return mauList.some(({ pattern }) => {
+    const bien = [pattern, boDau(pattern)];
+    return bien.some((mau) => {
+      let re;
+      try { re = new RegExp(mau, 'i'); } catch { return false; }
+      return ungVien.some((chuoi) => re.test(chuoi));
+    });
+  });
+}
+
+/**
+ * @returns {{giu: Array, loai: Array}} — `loai` ghi rõ vì sao, để chẩn đoán được.
+ */
+function locTheoDauHieu(signals = [], ctx, pack) {
+  if (process.env.KHOAN_DA_BANG_CHUNG_PHAI_KHOP_MAU === '0') {
+    return { giu: signals, loai: [] };
+  }
+  const giu = [];
+  const loai = [];
+  for (const s of signals) {
+    if (s.source === 'direct' || s.source === 'deterministic' || s.source === 'user_confirmed') {
+      giu.push(s); continue;                        // ba nguồn này không do model đoán
+    }
+    if (bangChungMangDauHieu(s, ctx, pack)) giu.push(s);
+    else loai.push({ id: s.id, lyDo: 'bang_chung_khong_mang_dau_hieu' });
+  }
+  return { giu, loai };
+}
+
 module.exports = {
   validateEvidence, locTheoEvidence, locTheoScope, locTheoScopeChiTiet,
+  locTheoDauHieu, bangChungMangDauHieu,
   trichCoThat, doanChuaTrich, doanChongLan,
 };

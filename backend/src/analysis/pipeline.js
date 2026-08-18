@@ -12,7 +12,8 @@ const { buildContext } = require('./context-builder');
 const { directPrecheck } = require('./direct-precheck');
 const { decide } = require('./decision-engine');
 const { evaluateOverrides } = require('./critical-overrides');
-const { locTheoEvidence, locTheoScopeChiTiet } = require('./evidence-validator');
+const { locTheoEvidence, locTheoScopeChiTiet, locTheoDauHieu } = require('./evidence-validator');
+const { packTheoNgonNgu } = require('./locale-pack-registry');
 const { phanTichUrl, trichUrl } = require('./url-analyzer');
 const { laTinHieu } = require('./signal-registry');
 const { coDinhCuocGoi } = require('./co-dinh-cuoc-goi');
@@ -388,7 +389,25 @@ function analyze(input = {}, nguCanhTinCay = {}) {
   // speech act phải cho phép. Bỏ hàng rào thứ hai là để AI đi vòng qua Phụ lục C.
   const sauEvidence = aiDaChay ? locTheoEvidence(nhanTinHieuLLM(input.llmSignals), ctx) : [];
   const scope = locTheoScopeChiTiet(sauEvidence, ctx);
-  const llm = scope.giu;
+  /**
+   * HÀNG RÀO THỨ BA — bằng chứng phải mang dấu hiệu của CHÍNH tín hiệu đó.
+   *
+   * Hai hàng rào trên hỏi "câu trích có thật không" và "nó nằm ở đoạn hành động
+   * không". Không cái nào hỏi "câu trích này có liên quan gì tới nhãn được gán
+   * không" — và mô hình nhỏ chạy tại chỗ khai thác đúng khe đó: lấy một câu có
+   * thật rồi dán sai nhãn lên.
+   *
+   * Đo 18/8/2026, qwen2.5vl:7b, 5 tin nhắn LÀNH: 3 tin bị báo động vì những
+   * tín hiệu không hề có trong nội dung (phí lấy lại tiền, chuyển tiền mã hoá,
+   * người thân gặp nạn). Chi tiết ở `evidence-validator.js`.
+   */
+  /**
+   * ⚠️ LẤY PACK THEO NGÔN NGỮ CỦA CHÍNH VĂN BẢN, đúng như direct-precheck làm.
+   * Truyền nhầm `undefined` vào đây thì hàng rào im lặng không chặn gì — nó vẫn
+   * chạy, vẫn trả về, và mọi test vẫn xanh. Loại hỏng tệ nhất.
+   */
+  const dauHieu = locTheoDauHieu(scope.giu, ctx, packTheoNgonNgu(ctx.language));
+  const llm = dauHieu.giu;
 
   /**
    * §15.8 · §6.10 — tín hiệu từ BỘ HỎI NHANH.

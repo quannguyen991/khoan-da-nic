@@ -430,3 +430,58 @@ test('§4.3 · mặc định của đường cục bộ là KHÔNG có thị gi�
     'giả định an toàn hơn: chưa khai thì coi như mô hình không nhìn được ảnh');
   assert.equal(layCauHinh({ LLM_CUC_BO: '1', LLM_CUC_BO_CO_THI_GIAC: '1' }).coThiGiac, true);
 });
+
+/**
+ * §4.6 — BÁO OAN LÀ THỨ ĐẮT NHẤT VỚI APP NÀY.
+ *
+ * Mô hình nhỏ chạy tại chỗ lấy một câu CÓ THẬT trong tin nhắn rồi dán sai nhãn
+ * lên. `trichCoThat()` chỉ kiểm câu trích có tồn tại, không kiểm nó có đúng
+ * nghĩa với nhãn — nên tín hiệu bịa đi thẳng qua.
+ *
+ * Đo 18/8/2026 với qwen2.5vl:7b: 3 trên 5 tin nhắn LÀNH bị báo động.
+ */
+test('§4.6 · bằng chứng không mang dấu hiệu của tín hiệu ⇒ loại tín hiệu đó', () => {
+  const { analyze } = require(path.join(GOC, 'backend', 'src', 'analysis', 'pipeline.js'));
+  const mk = (id, q) => ({
+    id, state: 'present', confidence: 0.9, source: 'llm',
+    evidence: [{ quote: q, start: 0, end: q.length, sourceId: 'van_ban' }],
+  });
+
+  // Tin nhắn ngân hàng thật + ba tín hiệu tài chính bịa hoàn toàn.
+  const lanh = analyze({
+    vanBan: 'BIDV: Tai khoan cua quy khach vua bi tru 500.000d. So du con lai 12.450.000d.',
+    llmSignals: [
+      mk('FIN_RECOVERY_FEE', 'Tai khoan cua quy khach vua bi tru 500.000d'),
+      mk('FIN_CRYPTO_TRANSFER', 'So du con lai 12.450.000d'),
+      mk('FIN_TRANSFER_REQUEST', 'vua bi tru 500.000d'),
+    ],
+  });
+  assert.equal(lanh.nhan, 'CHUA_THAY', 'báo oan trên tin nhắn ngân hàng thật');
+  assert.equal(lanh.maLyDo.length, 0);
+
+  // ⚠️ VÀ HÀNG RÀO KHÔNG ĐƯỢC ĂN CẢ TÍN HIỆU THẬT. Đây mới là nửa nguy hiểm.
+  const that = analyze({
+    vanBan: 'Chào bác, tôi là công an. Bác chuyển 50 triệu vào tài khoản an toàn của cơ quan và đọc mã OTP cho tôi.',
+    llmSignals: [
+      mk('FIN_TRANSFER_REQUEST', 'chuyển 50 triệu vào tài khoản an toàn'),
+      mk('CRED_OTP_SHARE', 'đọc mã OTP cho tôi'),
+      mk('FIN_SAFE_ACCOUNT', 'tài khoản an toàn của cơ quan'),
+    ],
+  });
+  assert.equal(that.nhan, 'CAO', 'hàng rào đã loại oan tín hiệu thật');
+  assert.ok(that.maLyDo.includes('CRED_OTP_SHARE'));
+  assert.ok(that.maLyDo.includes('FIN_SAFE_ACCOUNT'));
+});
+
+test('§4.3 · tín hiệu KHÔNG có mẫu trong locale pack thì đi qua như cũ', () => {
+  const { bangChungMangDauHieu } = require(path.join(GOC, 'backend', 'src', 'analysis', 'evidence-validator.js'));
+  const { packTheoNgonNgu } = require(path.join(GOC, 'backend', 'src', 'analysis', 'locale-pack-registry.js'));
+  const pack = packTheoNgonNgu('vi');
+  // Mã này cố ý không có trong directPatterns — không có gì để đối chiếu, nên
+  // im lặng loại nó đi là tự bịt mắt mình.
+  const tin = {
+    id: 'CASE_REPEATED_CONTACT', source: 'llm',
+    evidence: [{ quote: 'một câu bất kỳ' }],
+  };
+  assert.equal(bangChungMangDauHieu(tin, {}, pack), true);
+});
