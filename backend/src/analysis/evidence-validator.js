@@ -175,10 +175,41 @@ function bangChungMangDauHieu(signal, ctx, pack) {
   if (trich.length === 0) return true;             // ca này đã bị hàng rào khác lo
 
   // So trên CẢ bản có dấu lẫn bản bỏ dấu, đúng như direct-precheck làm.
-  const ungVien = trich.flatMap((q) => [chuanHoaTrich(q), boDau(chuanHoaTrich(q))]);
+  // Gỡ HẾT dấu ngăn hàng nghìn: `1.200.000đ` → `1200000đ`.
+  const goSoTien = (x) => x.replace(/(\d)[.,](?=\d{3})/g, '$1');
+  const ungVien = trich.flatMap((q) => {
+    const c = goSoTien(chuanHoaTrich(q));
+    return [c, boDau(c)];
+  });
+
+  /**
+   * ⚠️ NỚI `[^.]` THÀNH "KÝ TỰ BẤT KỲ" — VÁ 18/8/2026, SAU KHI ĐO THẤY LOẠI OAN.
+   *
+   * Cue bank viết cho việc QUÉT CẢ ĐOẠN VĂN, nên chúng dùng `[^.]{0,30}` để
+   * regex không lan qua câu khác. Ở đây thì khác hẳn: chuỗi đem so là một TRÍCH
+   * DẪN NGẮN mà model đã tự chọn ra, nên nguy cơ "lan man qua câu khác" không
+   * tồn tại — còn ràng buộc kia thì gây hại thật.
+   *
+   * Đo được, tin nhắn lừa đảo THẬT:
+   *   "Chi nap 1.200.000d lam nhiem vu cuoi la rut duoc ca von lan thuong"
+   *   mẫu OFF_TASK_PREPAY: `(nạp|ứng)[^.]{0,30}(làm nhiệm vụ|…|rút (được|về))`
+   *   → dấu chấm trong "1.200.000" chặn ngang ⇒ LOẠI OAN hai tín hiệu nặng,
+   *     và cả tin nhắn tụt từ NGHI_NGO xuống CHUA_THAY.
+   *
+   * Đây đúng con bug mà chú thích ở đầu tệp đã kể (−5,6 điểm recall hồi 15/8),
+   * quay lại bằng một cửa khác. Hai bên của một phép so phải cùng cách chuẩn hoá
+   * — và cùng cả những ràng buộc đi kèm.
+   */
+  /**
+   * ⚠️ `String.raw` LÀ BẮT BUỘC Ở ĐÂY. Viết `'[\s\S]'` trong chuỗi thường thì
+   * JavaScript nuốt mất dấu gạch chéo và regex thành `[sS]` — nghĩa là "ký tự s
+   * hoặc S", chứ không phải "ký tự bất kỳ". Đã đo: hàng rào im lặng không khớp
+   * gì cả, và mọi tín hiệu có mẫu đều bị loại oan.
+   */
+  const noiChanCham = (mau) => mau.replace(/\[\^\.\]/g, String.raw`[\s\S]`);
 
   return mauList.some(({ pattern }) => {
-    const bien = [pattern, boDau(pattern)];
+    const bien = [pattern, boDau(pattern)].map(noiChanCham);
     return bien.some((mau) => {
       let re;
       try { re = new RegExp(mau, 'i'); } catch { return false; }
