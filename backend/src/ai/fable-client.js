@@ -204,7 +204,13 @@ function layCauHinh(env = process.env) {
      *
      * Đè bằng `LLM_REASONING_EFFORT` nếu nhà cung cấp đổi cách hiểu tham số.
      */
-    mucSuyLuan = env.LLM_REASONING_EFFORT || 'none';
+    /**
+     * ⚠️ `none` BỊ GEMINI TỪ CHỐI: 400 INVALID_ARGUMENT (đo 18/8/2026).
+     * Nhà cung cấp này chỉ nhận low/medium/high. Không tắt hẳn suy luận được,
+     * nên phải nới thời gian chờ thay vì cắt phần suy nghĩ — xem `timeout` bên
+     * dưới.
+     */
+    mucSuyLuan = env.LLM_REASONING_EFFORT || 'low';
     noiChay = 'gemini';
   }
 
@@ -238,7 +244,27 @@ function layCauHinh(env = process.env) {
     noiChay,
     coThiGiac,
     laCucBo: noiChay === 'tren_may_nguoi_dung' || noiChay === 'tren_may_chu_tu_van_hanh',
-    timeout: Number(env.LLM_TIMEOUT_MS) || TIMEOUT_MAC_DINH,
+    /**
+     * ⚠️ GEMINI CẦN NHIỀU THỜI GIAN HƠN, VÀ KHÔNG CÓ CÁCH NÀO CẮT.
+     *
+     * Đo 18/8/2026, cùng một lời nhắc, cùng một tin nhắn:
+     *   không gửi reasoning_effort → chạm trần 35s
+     *   low + max_tokens 1500      → xong trong 35s nhưng content RỖNG
+     *                                (thinking ăn hết ngân sách token)
+     *   low + max_tokens 4000      → chạm trần 35s
+     *   none                       → 400 INVALID_ARGUMENT, không nhận
+     *
+     * Model này bắt buộc suy nghĩ, và phần suy nghĩ vừa tốn token vừa tốn giây.
+     * Ngân sách phải đủ cho CẢ phần nghĩ LẪN phần trả lời, nên trần thời gian
+     * cũng phải nới theo.
+     *
+     * ⚠️ ĐÂY LÀ CÁI GIÁ CỦA ĐƯỜNG ĐÁM MÂY, và là một lý do nữa để đường cục bộ
+     * tồn tại: mô hình chạy trên GPU của chính mình không có phần "suy nghĩ" ép
+     * buộc nào cả. Bác đang bị thúc trên điện thoại không chờ nổi 60 giây —
+     * `/api/analyze/so-bo` trả kết quả tầng luật dưới 50ms chính là để đỡ chỗ này.
+     */
+    timeout: Number(env.LLM_TIMEOUT_MS)
+      || (noiChay === 'gemini' ? 90_000 : TIMEOUT_MAC_DINH),
     daCauHinh: Boolean(base && key),
   };
 }
