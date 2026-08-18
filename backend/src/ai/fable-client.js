@@ -163,7 +163,27 @@ function layCauHinh(env = process.env) {
      * sửa mã.
      */
     model = model || 'gemini-3.6-flash';
-    mucSuyLuan = undefined;
+    /**
+     * ⚠️ HẠ MỨC SUY LUẬN — CÙNG BÀI HỌC ĐÃ ĐO TRÊN GATEWAY, LẶP LẠI Ở GEMINI.
+     *
+     * Đo 18/8/2026 trên bản công khai: `gemini-3.6-flash` KHÔNG gửi kèm
+     * `reasoning_effort` thì mọi lượt gọi chạm trần 35s và trả `AI_TIMEOUT` —
+     * người dùng thấy "Chưa thấy dấu hiệu rủi ro" cho một tin nhắn giả danh công
+     * an rõ ràng. Bản 2.5 trước đây không nhận tham số này nên code cố ý bỏ
+     * trống; bản 3.x thì nhận, và mặc định của nó là suy luận sâu.
+     *
+     * VÌ SAO HẠ MỨC LÀ ĐÚNG CHỨ KHÔNG PHẢI ĐÁNH ĐỔI (§4.2): tầng AI CHỈ BẬT CỜ,
+     * bộ luật mới quyết mức. Trích tín hiệu là việc PHÂN LOẠI CÓ BẰNG CHỨNG —
+     * nó không cần hàng nghìn token suy luận, và mỗi giây suy luận là một giây
+     * người đang bị thúc trên điện thoại phải chờ.
+     *
+     * Số đo cũ trên gateway, cùng lời nhắc: mặc định 23,5s · 1.796 token ra —
+     * `low` 6,7s · 427 token ra, và recall còn TĂNG (62,5% → 71,9%).
+     *
+     * ⚠️ ĐỪNG "vá" bằng cách nâng LLM_TIMEOUT_MS. Chờ lâu hơn không làm kết quả
+     * đúng hơn, chỉ làm bác đứng chờ lâu hơn giữa lúc kẻ lừa đảo đang thúc.
+     */
+    mucSuyLuan = env.LLM_REASONING_EFFORT || 'low';
     noiChay = 'gemini';
   }
 
