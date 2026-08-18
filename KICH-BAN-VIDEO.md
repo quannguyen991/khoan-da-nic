@@ -27,6 +27,22 @@ tròn tiếng". Ban tổ chức cấm thẳng, và đội thắng còn phải qu
 ⚠️ **120 giây là trần, không phải mục tiêu.** Dựng xong đo lại; 118 giây an toàn
 hơn 121 giây.
 
+## Sáu điểm form BẮT BUỘC video phải có — đối chiếu
+
+Form ghi rõ video phải gồm sáu mục. Kịch bản dưới đây phủ đủ cả sáu:
+
+| # | Form đòi | Nằm ở giây |
+|---|---|---|
+| 1 | Self Introduction | 0–12 |
+| 2 | Problem statement | 0–12 |
+| 3 | Project/Solution description | 12–22 · 50–63 |
+| 4 | Project/solution demonstration | 22–50 · 88–102 |
+| 5 | Technology used | 72–88 |
+| 6 | **Future scope** | 110–120 |
+
+⚠️ Thiếu một mục là thiếu một phần điểm, dù các mục khác làm tốt tới đâu. Dựng
+xong thì tự soi lại bảng này trước khi nộp.
+
 ## Nguyên tắc soạn kịch bản này
 
 Mỗi cảnh phục vụ một dòng chấm điểm cụ thể — cột bên phải ghi rõ dòng nào. Cảnh
@@ -53,8 +69,8 @@ Giọng AI đọc kịch bản xoá mất đúng thứ họ đang tìm.
 | **63–72** | Cận cảnh nhãn màu xanh "Chưa thấy dấu hiệu rủi ro" | "App **không có chữ 'an toàn'**. Nó chưa từng hứa điều đó — nó chỉ nói chưa thấy dấu hiệu trong thứ bác đưa." | Đạo đức AI · không hứa quá |
 | **72–88** | Màn hình chia đôi: bên trái app đang kiểm · bên phải `nvidia-smi` | "Mô hình chạy **ngay trên máy của tụi em**, GPU RTX 3060. Nội dung không gửi cho công ty nào khác. Một lượt kiểm **1,8 giây**." | **Phần cứng · quyền riêng tư · năng lượng** |
 | **88–102** | Bấm "Chạy tất cả" ở khu Thử 10 tình huống, để hai con số hiện ra | "Tụi em thử mười tình huống — năm lừa đảo, **năm bình thường**. Vì với người già, **báo oan đắt hơn bỏ sót**: kêu nhầm vài lần là bác gỡ app." | Dữ liệu · phân tích · **trung thực về giới hạn** |
-| **102–112** | Lướt qua màn Bài học và Người thân | "Ngoài cảnh báo, app còn dạy nhận diện chiêu trò và giữ sẵn số người thân. Chạy được **cả khi mất mạng**." | SDG 4 · hoà nhập · offline |
-| **112–120** | **Mặt bạn** ← đoạn thứ hai nói thẳng vào camera | "Khoan Đã. **Dừng lại trước, kiểm sau, rồi hãy làm.** Mã nguồn mở, ai cũng kiểm được." | Bền vững · mã nguồn mở |
+| **102–110** | Lướt qua màn Bài học và Người thân | "Ngoài cảnh báo, app còn dạy nhận diện chiêu trò và giữ sẵn số người thân. Chạy được **cả khi mất mạng**." | SDG 4 · hoà nhập · offline |
+| **110–120** | **Mặt bạn** ← đoạn thứ hai nói thẳng vào camera | "Tới đây tụi em muốn đưa app cho hội người cao tuổi ở phường, và làm bản chặn ngay trên cuộc gọi đến. **Khoan Đã: dừng lại trước, kiểm sau, rồi hãy làm.** Mã nguồn mở, ai cũng kiểm được." | **Future scope** (mục 6 bắt buộc) · bền vững |
 
 ---
 
@@ -86,7 +102,9 @@ Giọng AI đọc kịch bản xoá mất đúng thứ họ đang tìm.
 > Ngoài cảnh báo, app còn dạy nhận diện chiêu trò và giữ sẵn số người thân. Chạy
 > được cả khi mất mạng.
 >
-> Khoan Đã. Dừng lại trước, kiểm sau, rồi hãy làm. Mã nguồn mở, ai cũng kiểm được.
+> Tới đây tụi em muốn đưa app cho hội người cao tuổi ở phường, và làm bản chặn
+> ngay trên cuộc gọi đến. Khoan Đã: dừng lại trước, kiểm sau, rồi hãy làm. Mã
+> nguồn mở, ai cũng kiểm được.
 
 ---
 
