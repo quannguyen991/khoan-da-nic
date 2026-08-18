@@ -145,7 +145,24 @@ function layCauHinh(env = process.env) {
   } else if (!key && env.GEMINI_API_KEY) {
     base = 'https://generativelanguage.googleapis.com/v1beta/openai';
     key = env.GEMINI_API_KEY;
-    model = model || 'gemini-2.5-flash';
+    /**
+     * ⚠️ GOOGLE NGỪNG CẤP MODEL CŨ CHO TÀI KHOẢN MỚI, VÀ BÁO BẰNG 404.
+     *
+     * Đo 18/8/2026 trên bản công khai: `gemini-2.5-flash` trả
+     *   404 "This model is no longer available to new users.
+     *        Please update your code to use models/gemini-3.6-flash"
+     *
+     * Triệu chứng nhìn từ ngoài rất dễ đọc nhầm: app khai `aiCauHinh: true`
+     * (khoá có thật), nhưng mọi lượt kiểm ra "Chưa thấy dấu hiệu rủi ro" kèm
+     * `ai_khong_phan_hoi`. Trông y hệt khoá sai, trong khi khoá hoàn toàn ổn.
+     *
+     * Đây là lý do `/api/suc-khoe` trả `loiAiGanNhat` — không có nó thì phải mò
+     * trong log máy chủ mới biết là lỗi TÊN MODEL chứ không phải lỗi khoá.
+     *
+     * Google sẽ còn đổi nữa. Đè bằng biến `RISK_LLM_MODEL` khi cần, đừng chờ
+     * sửa mã.
+     */
+    model = model || 'gemini-3.6-flash';
     mucSuyLuan = undefined;
     noiChay = 'gemini';
   }
