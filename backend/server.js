@@ -60,6 +60,9 @@ const KHONG_GOI_AI = process.env.KHOAN_DA_KHONG_GOI_AI === '1';
  */
 let loiAiGanNhat = null;
 
+/** Lượt AI gần nhất CHẠY ĐƯỢC: nhận mấy tín hiệu, loại mấy, vì sao. */
+let chanDoanAiGanNhat = null;
+
 const app = express();
 app.disable('x-powered-by');   // §6.8 — không rò phiên bản
 
@@ -347,7 +350,31 @@ async function xuLyPhanTich(req, res) {
           ? kq.chiTiet.providerMessage.slice(0, 200) : null,
       };
     } else {
+      /**
+       * ⚠️ "AI CHẠY XONG" KHÔNG CÓ NGHĨA LÀ "AI TRÍCH ĐƯỢC GÌ".
+       *
+       * Đo 18/8/2026: sau khi vá timeout, `aiDaChay: true` nhưng `maLyDo: []`
+       * cho một tin nhắn giả danh công an rõ ràng. Nhìn từ ngoài giống hệt lúc
+       * AI hỏng, mà nguyên nhân hoàn toàn khác — và ba nguyên nhân khả dĩ cần
+       * ba cách sửa khác nhau:
+       *   · model trả rỗng            → lời nhắc hoặc mức suy luận
+       *   · model trả, bị loại evidence → trích dẫn không khớp bản gốc
+       *   · model trả, sai lược đồ    → mã không có trong registry
+       *
+       * `rejected` phân biệt được ba ca đó. §6.9 — CHỈ ĐẾM VÀ MÃ LÝ DO, không
+       * bao giờ đưa `quote` ra ngoài: trích dẫn LÀ nội dung người dùng.
+       */
+      const boLoc = {};
+      for (const r of kq.rejected || []) {
+        const ly = r?.lyDo || 'khong_ro';
+        boLoc[ly] = (boLoc[ly] || 0) + 1;
+      }
       loiAiGanNhat = null;
+      chanDoanAiGanNhat = {
+        soTinHieuNhan: kq.signals?.length || 0,
+        soTinHieuBiLoai: (kq.rejected || []).length,
+        lyDoLoai: boLoc,
+      };
     }
   } else {
     aiError = 'AI_NOT_CONFIGURED';
@@ -796,6 +823,8 @@ app.get('/api/suc-khoe', (req, res) => {
     coThiGiac: chay ? c.coThiGiac : false,
     /** Lỗi AI gần nhất, chỉ mã và trạng thái. `null` = lượt gần nhất chạy tốt. */
     loiAiGanNhat,
+    /** Lượt chạy được gần nhất: nhận mấy tín hiệu, loại mấy, vì sao loại. */
+    chanDoanAiGanNhat,
   });
 });
 
