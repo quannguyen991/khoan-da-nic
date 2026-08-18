@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { ViewState } from '../App';
 import { Lang, NHAN, CHUA_KIEM, MA_LY_DO, tra, traNhieu } from '../catalog';
+import { ThuTinhHuong } from './ThuTinhHuong';
 
 /**
  * Hình dạng §HĐ mà `/api/analyze` trả về. Frontend KHÔNG thêm trường nào, và
@@ -190,7 +191,8 @@ export function GuardianView({
   isLoggedIn = true,
   onAnalyze,
   familyMembers,
-  onTriggerEmergency
+  onTriggerEmergency,
+  setUserRole
 }: {
   setView: (v: ViewState) => void;
   t: any;
@@ -200,6 +202,7 @@ export function GuardianView({
   onAnalyze?: (text: string, image?: string | null) => void;
   familyMembers?: any[];
   onTriggerEmergency?: () => void;
+  setUserRole?: (r: 'elder' | 'guardian') => void;
 }) {
   const tr = (k: string) => (t ? t(k) : k);
 
@@ -309,11 +312,29 @@ export function GuardianView({
         máy nào gửi số về là một lời trấn an không ai kiểm. Đây là màn con cháu
         nhìn để yên tâm — nó phải nói thật về việc nó biết được gì.
       */}
-      <div className="w-full bg-amber-50 border-2 border-amber-300 rounded-2xl px-4 py-3 flex items-start gap-2.5">
-        <Info size={20} className="text-amber-700 shrink-0 mt-0.5" />
-        <p className="text-[16px] font-semibold text-amber-900 leading-snug">
-          {tr("Bản xem thử: máy của bố mẹ chưa được nối vào đây. Những con số dưới đây là ví dụ, không phải trạng thái thật.")}
-        </p>
+      <div className="flex flex-col lg:flex-row lg:items-center gap-3">
+        <div className="flex-1 bg-amber-50 border-2 border-amber-300 rounded-2xl px-4 py-3 flex items-start gap-2.5">
+          <Info size={20} className="text-amber-700 shrink-0 mt-0.5" />
+          <p className="text-[16px] font-semibold text-amber-900 leading-snug">
+            {tr("Bản xem thử: máy của bố mẹ chưa được nối vào đây. Những con số dưới đây là ví dụ, không phải trạng thái thật.")}
+          </p>
+        </div>
+
+        {/*
+          ⚠️ ĐỔI VAI PHẢI LUÔN THẤY ĐƯỢC, KHÔNG CHỈ Ở MÀN ĐẦU.
+          Vai được lưu vào máy, nên ai lỡ chọn nhầm "Người cao tuổi" trên máy
+          tính sẽ mắc kẹt trong giao diện điện thoại phóng to và không biết
+          đường ra. Đó chính là màn hình người dùng gửi ảnh báo lỗi.
+        */}
+        {setUserRole && (
+          <button
+            onClick={() => { setUserRole('elder'); setView('home'); }}
+            className="shrink-0 px-4 py-3 bg-white border-2 border-purple-300 hover:bg-purple-50 text-purple-800 rounded-2xl font-bold text-[15px] flex items-center justify-center gap-2 active:scale-95 transition-transform"
+          >
+            <Smartphone size={18} />
+            {tr("Xem giao diện của bác")}
+          </button>
+        )}
       </div>
 
       {/* Main 4-Card Responsive Grid - Minimalist & Low Text */}
@@ -474,8 +495,13 @@ export function GuardianView({
             </div>
           </div>
 
-          <p className="text-[14px] text-slate-400 font-medium text-center mt-3">
-            🔒 {tr("Không hiển thị nội dung thô để bảo mật")}
+          {/*
+            §4.3 — BA CÔNG TẮC NÀY CHƯA NỐI VÀO ĐÂU, VÀ PHẢI NÓI RA.
+            Chúng bật/tắt được nên trông y hệt công tắc thật; im lặng để vậy là
+            để con cháu tin rằng bố mẹ đang được bảo vệ bởi thứ chưa tồn tại.
+          */}
+          <p className="text-[14px] text-slate-600 font-medium text-center mt-3 bg-slate-100 border border-slate-300 rounded-xl px-3 py-2">
+            {tr("Ba công tắc trên chưa nối được với máy của bố mẹ — chúng cho thấy dự định, không phải trạng thái đang chạy.")}
           </p>
         </div>
 
@@ -641,6 +667,15 @@ export function GuardianView({
         </div>
 
       </div>
+
+      {/*
+        KHU THỬ TÌNH HUỐNG — lý do bản máy tính tồn tại.
+
+        Người cao tuổi hiếm khi ngồi máy tính; con cháu thì có. Chỗ này để họ tự
+        kiểm chứng app trước khi bảo bố mẹ tin nó — và để thấy cả chỗ app làm
+        chưa tốt, không chỉ chỗ nó làm được.
+      */}
+      <ThuTinhHuong t={tr} lang={lang} />
     </div>
   );
 }

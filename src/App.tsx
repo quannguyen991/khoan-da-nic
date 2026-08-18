@@ -601,7 +601,7 @@ export default function App() {
             {view === 'login' && <LoginView setView={setView} t={t} setIsLoggedIn={setIsLoggedIn} userRole={userRole} setUserRole={setUserRole} />}
             {view === 'add_family' && <AddFamilyView setView={setView} t={t} setFamilyMembers={setFamilyMembers} />}
             {view === 'warning' && <WarningView setView={setView} t={t} lang={lang} result={analyzeResult} familyMembers={familyMembers} noiChayAi={noiChayAi} />}
-            {view === 'guardian' && <GuardianView setView={setView} t={t} lang={lang} isDesktop={false} isLoggedIn={isLoggedIn} onAnalyze={handleAnalyze} familyMembers={familyMembers} onTriggerEmergency={triggerEmergencyAlert} />}
+            {view === 'guardian' && <GuardianView setView={setView} t={t} lang={lang} setUserRole={setUserRole} isDesktop={false} isLoggedIn={isLoggedIn} onAnalyze={handleAnalyze} familyMembers={familyMembers} onTriggerEmergency={triggerEmergencyAlert} />}
             {view === 'account' && <AccountView setView={setView} t={t} setIsLoggedIn={setIsLoggedIn} />}
             {view === 'privacy' && <PrivacyView setView={setView} t={t} />}
             {view === 'notifications' && (
@@ -737,6 +737,7 @@ export default function App() {
                   setView={setView}
                   t={t}
                   lang={lang}
+                  setUserRole={setUserRole}
                   isDesktop={true}
                   isLoggedIn={isLoggedIn}
                   onAnalyze={handleAnalyze}
