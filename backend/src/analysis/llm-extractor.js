@@ -188,7 +188,21 @@ async function trichTinHieu(vanBan, opts = {}) {
     const { messages } = dungLoiNhac(vanBan, opts.sourceId, opts.anh);
     const tho = await goiChat(messages, opts);
     const doc = parseJsonLoose(tho);
-    if (!doc) return { signals: [], rejected: [], aiDaChay: false, loi: 'AI_SCHEMA_INVALID' };
+    if (!doc) {
+      /**
+       * ⚠️ HAI CA KHÁC NHAU, ĐỪNG GỘP VÀO MỘT MÃ.
+       *   · trả về RỖNG        → model tiêu hết ngân sách token cho phần suy nghĩ,
+       *                          hoặc bị chặn bởi bộ lọc an toàn của nhà cung cấp.
+       *   · trả về CÓ CHỮ nhưng không phải JSON → lời nhắc hoặc model không theo
+       *                          được định dạng.
+       * Hai nguyên nhân, hai cách sửa. Gộp làm một là phải đoán.
+       */
+      const rong = typeof tho !== 'string' || !tho.trim();
+      return {
+        signals: [], rejected: [], aiDaChay: false,
+        loi: rong ? 'AI_TRA_LOI_RONG' : 'AI_SCHEMA_INVALID',
+      };
+    }
     const kq = validateExtraction(doc, opts.sourceId);
     return { ...kq, aiDaChay: true, loi: null };
   } catch (e) {

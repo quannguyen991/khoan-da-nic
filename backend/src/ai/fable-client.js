@@ -242,7 +242,28 @@ async function goiChat(messages, opts = {}) {
         model: cauHinh.model,
         messages,
         temperature: 0,
-        max_tokens: opts.maxTokens || 1500,
+        /**
+         * ⚠️ TOKEN SUY NGHĨ ĂN CHUNG NGÂN SÁCH VỚI CÂU TRẢ LỜI.
+         *
+         * Đo 18/8/2026 trên bản công khai: `gemini-3.6-flash` với
+         * `max_tokens: 1500` trả về `content` RỖNG — model tiêu hết ngân sách cho
+         * phần suy nghĩ, không còn chỗ viết JSON. Nhìn từ ngoài là
+         * `AI_SCHEMA_INVALID`, dễ tưởng lời nhắc sai, trong khi lời nhắc không
+         * liên quan gì.
+         *
+         * Đây là nguyên nhân thứ BA của cùng một triệu chứng "app không phát hiện
+         * gì", sau tên model đã ngừng cấp và timeout. Cả ba đều hiện ra giống hệt
+         * nhau trên màn hình người dùng — đó là lý do `/api/suc-khoe` phải nói
+         * được chúng khác nhau.
+         */
+        max_tokens: opts.maxTokens || (cauHinh.noiChay === 'gemini' ? 4000 : 1500),
+        /**
+         * ⚠️ CHỈ ÉP JSON VỚI NHÀ CUNG CẤP CHẮC CHẮN HIỂU THAM SỐ NÀY.
+         * Gateway cũ KHÔNG ép được `response_format` (xem chú thích ở
+         * `parseJsonLoose`), và gửi tham số lạ cho nó thì cả lượt gọi trả 400 —
+         * đổi một lỗi im lặng lấy một lỗi ồn ào hơn nhưng vẫn là lỗi.
+         */
+        ...(cauHinh.noiChay === 'gemini' ? { response_format: { type: 'json_object' } } : {}),
         // `tat` = không gửi tham số, để gateway tự quyết như trước.
         ...(cauHinh.mucSuyLuan && cauHinh.mucSuyLuan !== 'tat'
           ? { reasoning_effort: cauHinh.mucSuyLuan } : {}),
