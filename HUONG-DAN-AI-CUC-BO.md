@@ -48,13 +48,41 @@ trong rubric — và nó là sự thật kiểm được, không phải cách n�
 > 7B, máy 4 GB chạy 3B, máy không có GPU rơi về tầng luật và **nói rõ là lượt này
 > không có AI đọc**. Không máy nào bị loại ra khỏi giải pháp.
 
-## Chọn mô hình theo VRAM, không chọn theo tên
+## Chọn mô hình: hai ràng buộc, không phải một
 
-| Mô hình | Cỡ tệp | 12 GB | 4 GB | Tiếng Việt |
-|---|---|---|---|---|
-| `qwen2.5:7b` | ~4,7 GB | ✅ **dùng cái này** | ❌ tràn, rơi xuống CPU rất chậm | tốt |
-| `qwen2.5:3b-instruct-q4_K_M` | ~2,0 GB | ✅ | ✅ **dùng cái này** | khá |
-| `gemma2:2b-instruct-q4_K_M` | ~1,6 GB | ✅ | ✅ | tạm |
+**① VRAM.** Mô hình phải vừa trong bộ nhớ GPU, còn chừa chỗ cho ngữ cảnh.
+
+**② Có nhìn được ảnh không.** Khoan Đã nhận **ảnh chụp màn hình** — đó là cách
+người cao tuổi gửi tin nhắn đáng ngờ dễ nhất. Mô hình chỉ-đọc-chữ nhận ảnh rồi
+**lặng lẽ bỏ qua**, không báo lỗi gì.
+
+| Mô hình | Cỡ | 12 GB | 4 GB | Nhìn ảnh | Tiếng Việt |
+|---|---|---|---|---|---|
+| `qwen2.5vl:7b` | ~6 GB | ✅ **khuyên dùng** | ❌ | ✅ | tốt |
+| `gemma3:12b` | ~8,9 GB | ✅ sát | ❌ | ✅ | tốt |
+| `minicpm-v` | ~5,5 GB | ✅ | ❌ | ✅ (OCR tốt) | khá |
+| `qwen2.5:7b` | ~4,7 GB | ✅ | ❌ | ❌ **mù ảnh** | tốt |
+| `qwen2.5:3b-instruct-q4_K_M` | ~2,0 GB | ✅ | ✅ | ❌ | khá |
+
+> ⚠️ **DÙNG MÔ HÌNH MÙ ẢNH THÌ PHẢI KHAI RA.** App mặc định coi mô hình cục bộ là
+> không nhìn được ảnh: nó **không gửi ảnh đi**, và màn hình nói *"Khoan Đã chưa
+> đọc được chữ trong ảnh"* thay vì im lặng rồi khai "đã đọc". Chỉ đặt
+> `LLM_CUC_BO_CO_THI_GIAC=1` khi mô hình thật sự là bản vision. Có test chặn ở
+> `test/hop-dong.test.mjs`.
+
+### Cấu hình khuyên dùng cho HoaiDuc
+
+```
+LLM_CUC_BO=1
+LLM_CUC_BO_BASE=http://127.0.0.1:11434/v1
+LLM_CUC_BO_MODEL=qwen2.5vl:7b
+LLM_CUC_BO_CO_THI_GIAC=1
+LLM_TIMEOUT_MS=35000
+```
+
+```powershell
+ollama pull qwen2.5vl:7b
+```
 
 ## Mở cổng Ollama trên HoaiDuc
 

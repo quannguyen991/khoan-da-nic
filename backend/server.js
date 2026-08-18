@@ -293,10 +293,29 @@ async function xuLyPhanTich(req, res) {
   let aiError = null;
   const epLoi = KHONG_GOI_AI ? req.body?._epLoiAi : null;
 
+  /**
+   * ⚠️ MÔ HÌNH KHÔNG NHÌN ĐƯỢC ẢNH THÌ PHẢI KHAI RA, KHÔNG GỬI RỒI IM.
+   *
+   * Mô hình chỉ-đọc-chữ nhận khối `image_url` rồi lặng lẽ bỏ qua nó. Nếu cứ gửi
+   * thì `unreadableInputFloor()` thấy có trường `anh` và khai `daKiem:
+   * ['anh_ocr']` — màn hình nói "đã đọc chữ trong ảnh" về một tấm ảnh chưa ai
+   * nhìn. §4.3, và là loại chỉ lộ ra khi đổi mô hình chứ không lộ khi chạy test
+   * bằng văn bản.
+   *
+   * Nên: không có thị giác ⇒ KHÔNG gửi ảnh đi, và báo `ocrFailed` để tầng sàn
+   * khai `khong_doc_duoc_anh`. Bác thấy đúng một câu: "Khoan Đã chưa đọc được
+   * chữ trong ảnh".
+   */
+  const cauHinhAi = layCauHinh();
+  const moHinhDocDuocAnh = cauHinhAi.coThiGiac;
+  const anhBiBoQua = Boolean(anh) && !moHinhDocDuocAnh;
+
   if (epLoi) {
     aiError = epLoi;
-  } else if (!KHONG_GOI_AI && layCauHinh().daCauHinh && (coVanBan || anh)) {
-    const kq = await trichTinHieu(coVanBan ? vanBan : '', { anh });
+  } else if (!KHONG_GOI_AI && cauHinhAi.daCauHinh && (coVanBan || (anh && moHinhDocDuocAnh))) {
+    const kq = await trichTinHieu(coVanBan ? vanBan : '', {
+      anh: moHinhDocDuocAnh ? anh : undefined,
+    });
     llmSignals = kq.signals;
     aiError = kq.loi;
     if (kq.loi) {
@@ -310,7 +329,10 @@ async function xuLyPhanTich(req, res) {
   }
 
   const envelope = analyze({
-    vanBan: coVanBan ? vanBan : '', anh, llmSignals, aiError, traLoiBoHoiNhanh, ...nguonGhiAm,
+    vanBan: coVanBan ? vanBan : '', anh, llmSignals, aiError, traLoiBoHoiNhanh,
+    // Ảnh có mà không mô hình nào nhìn ⇒ "chưa đọc được", không phải "đã đọc".
+    ...(anhBiBoQua ? { ocrFailed: true } : {}),
+    ...nguonGhiAm,
   });
   return res.json(toHopDong(envelope));
 }

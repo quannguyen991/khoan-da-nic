@@ -150,12 +150,35 @@ function layCauHinh(env = process.env) {
     noiChay = 'gemini';
   }
 
+  /**
+   * ⚠️⚠️ MÔ HÌNH CÓ NHÌN ĐƯỢC ẢNH KHÔNG — HỎI TRƯỚC KHI GỬI, ĐỪNG GỬI RỒI ĐOÁN.
+   *
+   * `llm-extractor.js` gửi ảnh dạng `image_url`. Mô hình CHỈ ĐỌC CHỮ
+   * (`qwen2.5:7b`, `llama3.1:8b`…) nhận khối đó rồi lặng lẽ bỏ qua phần ảnh —
+   * không báo lỗi, không nói gì. Nhưng `unreadableInputFloor()` thấy có trường
+   * `anh` nên vẫn khai `daKiem: ['anh_ocr']`, tức MÀN HÌNH NÓI "đã đọc chữ trong
+   * ảnh" về một tấm ảnh chưa ai nhìn.
+   *
+   * Đó đúng là dạng lỗi §4.3, và nó nguy hiểm hơn bình thường vì chỉ xuất hiện
+   * khi đổi sang mô hình cục bộ — mọi test chạy bằng văn bản đều xanh.
+   *
+   * Nên mặc định của đường cục bộ là KHÔNG có thị giác. Muốn bật thì phải khai
+   * rõ `LLM_CUC_BO_CO_THI_GIAC=1`, và chỉ khai khi mô hình thật sự là bản vision
+   * (`qwen2.5vl`, `gemma3`, `llama3.2-vision`, `minicpm-v`…).
+   *
+   * Gateway và Gemini đều dùng mô hình đa phương thức nên mặc định là có.
+   */
+  const coThiGiac = noiChay === 'gateway' || noiChay === 'gemini'
+    ? env.LLM_KHONG_CO_THI_GIAC !== '1'
+    : env.LLM_CUC_BO_CO_THI_GIAC === '1';
+
   return {
     base,
     key,
     model: model || 'claude-sonnet-5',
     mucSuyLuan,
     noiChay,
+    coThiGiac,
     laCucBo: noiChay === 'tren_may_nguoi_dung' || noiChay === 'tren_may_chu_tu_van_hanh',
     timeout: Number(env.LLM_TIMEOUT_MS) || TIMEOUT_MAC_DINH,
     daCauHinh: Boolean(base && key),

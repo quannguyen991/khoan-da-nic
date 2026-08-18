@@ -396,3 +396,37 @@ test('§11 · chạy AI cục bộ mặc định KHÔNG hứa "không rời kh�
   assert.ok(viTriTrangThaiManh < viTriCauManh && viTriCauManh < viTriTrangThaiYeu,
     'câu "không rời khỏi máy" phải thuộc về tren_may_nguoi_dung, không phải trạng thái máy chủ');
 });
+
+/**
+ * §4.3 — MÔ HÌNH KHÔNG NHÌN ĐƯỢC ẢNH THÌ MÀN HÌNH PHẢI NÓI RA.
+ *
+ * Mô hình chỉ-đọc-chữ (qwen2.5, llama3.1…) nhận khối `image_url` rồi lặng lẽ bỏ
+ * qua nó — không lỗi, không cảnh báo. Nếu cứ gửi ảnh đi thì tầng sàn thấy có
+ * trường `anh` và khai `daKiem: ['anh_ocr']`, tức màn hình nói "đã đọc chữ trong
+ * ảnh" về một tấm ảnh chưa ai nhìn.
+ *
+ * Đây là loại lỗi chỉ lộ ra khi đổi sang mô hình cục bộ; mọi test chạy bằng văn
+ * bản đều xanh trong khi nó đang sai.
+ */
+test('§4.3 · mô hình không có thị giác ⇒ ảnh vào chuaKiem, KHÔNG vào daKiem', async () => {
+  const anh1px = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
+  const cu = { ...process.env };
+  try {
+    process.env.LLM_CUC_BO = '1';
+    delete process.env.LLM_CUC_BO_CO_THI_GIAC;
+    const { than } = await goi('/api/analyze', { anh: anh1px });
+    assert.ok(!than.daKiem.includes('anh_ocr'),
+      'khai đã đọc chữ trong ảnh trong khi mô hình không nhìn được ảnh');
+    assert.ok(than.chuaKiem.includes('khong_doc_duoc_anh'),
+      'phải nói ra là chưa đọc được ảnh');
+  } finally {
+    process.env = cu;
+  }
+});
+
+test('§4.3 · mặc định của đường cục bộ là KHÔNG có thị giác', () => {
+  const { layCauHinh } = require(path.join(GOC, 'backend', 'src', 'ai', 'fable-client.js'));
+  assert.equal(layCauHinh({ LLM_CUC_BO: '1' }).coThiGiac, false,
+    'giả định an toàn hơn: chưa khai thì coi như mô hình không nhìn được ảnh');
+  assert.equal(layCauHinh({ LLM_CUC_BO: '1', LLM_CUC_BO_CO_THI_GIAC: '1' }).coThiGiac, true);
+});
