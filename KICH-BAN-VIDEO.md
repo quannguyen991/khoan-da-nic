@@ -4,6 +4,29 @@
 > Nói tiếng Việt tốc độ vừa phải ≈ **2,5 từ/giây**, nên toàn bộ lời thoại dưới đây
 > gói trong **~290 từ**. Đừng thêm câu nào mà không bỏ bớt câu khác.
 
+## Bốn quy định của ban tổ chức — đọc trước khi quay
+
+Trích nguyên văn từ tài liệu Intel AI Global Impact Festival 2026:
+
+| Quy định | Nguyên văn |
+|---|---|
+| **Phải có đoạn nói thẳng vào camera** | *"The video should include a section where the project team speaks directly to the camera"* |
+| **Cấm giọng AI đọc** | *"AI-generated voiceover is not allowed"* |
+| **Quá 2 phút bị trừ điểm** | *"videos longer than two minutes may receive a penalty"* |
+| **Không nói tiếng Anh ⇒ bắt buộc phụ đề tiếng Anh** | *"If the video is not in English, add English subtitles"* |
+
+**Nói tiếng Việt là hợp lệ.** Và nên nói tiếng Việt: rubric chấm *"thí sinh có
+thể hiện được kiến thức AI của mình không"* (0–2 điểm) qua chính video này, mà
+bạn giải thích bằng tiếng mẹ đẻ sẽ rõ hơn hẳn. Sản phẩm cũng dành cho người Việt,
+xưng hô "bác / cháu" — nghe bằng tiếng Việt thuyết phục hơn.
+
+⚠️ **Giọng phải là giọng bạn.** Không dùng công cụ đọc tự động, kể cả để "cho
+tròn tiếng". Ban tổ chức cấm thẳng, và đội thắng còn phải qua một lượt kiểm toán
+đạo đức AI của kỹ sư Intel.
+
+⚠️ **120 giây là trần, không phải mục tiêu.** Dựng xong đo lại; 118 giây an toàn
+hơn 121 giây.
+
 ## Nguyên tắc soạn kịch bản này
 
 Mỗi cảnh phục vụ một dòng chấm điểm cụ thể — cột bên phải ghi rõ dòng nào. Cảnh
@@ -22,7 +45,7 @@ Giọng AI đọc kịch bản xoá mất đúng thứ họ đang tìm.
 
 | Giây | Hình | Lời thoại | Ăn điểm dòng nào |
 |---|---|---|---|
-| **0–12** | Mặt bạn, nói thẳng vào máy quay | "Em là [tên], học sinh lớp [x]. Ở Việt Nam năm 2025, **giả danh công an là kiểu lừa đảo phổ biến nhất** — và chỉ **32% nạn nhân đi trình báo**. Nghĩa là cứu sau khi mất tiền gần như không xảy ra." | Vấn đề rõ · **có trích dẫn nguồn** |
+| **0–12** | **Mặt bạn, nói thẳng vào máy quay** ← quy định bắt buộc | "Em là [tên], học sinh lớp [x]. Ở Việt Nam năm 2025, **giả danh công an là kiểu lừa đảo phổ biến nhất** — và chỉ **32% nạn nhân đi trình báo**. Nghĩa là cứu sau khi mất tiền gần như không xảy ra." | Vấn đề rõ · **có trích dẫn nguồn** |
 | **12–22** | Quay điện thoại: bấm mở màn hỏi nhanh | "Lúc bị gọi, bác không gõ được gì. Nên Khoan Đã hỏi đúng một câu: **người ta đang bảo bác làm gì?**" | Hiểu người dùng · UX cho người cao tuổi |
 | **22–35** | Chạm "Đưa mã OTP" → hai câu CÓ/KHÔNG → màn đỏ | "Chạm ba lần, tám giây. Máy trả lời: **Nguy hiểm cao**." | Prototype chạy được · hoà nhập |
 | **35–50** | Màn hình máy tính: dán tin **không dấu** *"Chi oi ben em tuyen CTV lam nhiem vu don hang… nap 1.200.000d"* | "Còn đây là tin nhắn viết **không dấu**, không giả danh ai. Không luật nào bắt được kiểu này — bỏ tầng AI đi, độ nhạy phát hiện của tụi em **tụt từ 67% xuống dưới 4%**." | **AI là thứ không thể thay bằng phần mềm thường** |
@@ -31,7 +54,7 @@ Giọng AI đọc kịch bản xoá mất đúng thứ họ đang tìm.
 | **72–88** | Màn hình chia đôi: bên trái app đang kiểm · bên phải `nvidia-smi` | "Mô hình chạy **ngay trên máy của tụi em**, GPU RTX 3060. Nội dung không gửi cho công ty nào khác. Một lượt kiểm **1,8 giây**." | **Phần cứng · quyền riêng tư · năng lượng** |
 | **88–102** | Bấm "Chạy tất cả" ở khu Thử 10 tình huống, để hai con số hiện ra | "Tụi em thử mười tình huống — năm lừa đảo, **năm bình thường**. Vì với người già, **báo oan đắt hơn bỏ sót**: kêu nhầm vài lần là bác gỡ app." | Dữ liệu · phân tích · **trung thực về giới hạn** |
 | **102–112** | Lướt qua màn Bài học và Người thân | "Ngoài cảnh báo, app còn dạy nhận diện chiêu trò và giữ sẵn số người thân. Chạy được **cả khi mất mạng**." | SDG 4 · hoà nhập · offline |
-| **112–120** | Mặt bạn | "Khoan Đã. **Dừng lại trước, kiểm sau, rồi hãy làm.** Mã nguồn mở, ai cũng kiểm được." | Bền vững · mã nguồn mở |
+| **112–120** | **Mặt bạn** ← đoạn thứ hai nói thẳng vào camera | "Khoan Đã. **Dừng lại trước, kiểm sau, rồi hãy làm.** Mã nguồn mở, ai cũng kiểm được." | Bền vững · mã nguồn mở |
 
 ---
 
@@ -88,8 +111,18 @@ Giọng AI đọc kịch bản xoá mất đúng thứ họ đang tìm.
 - Quay từng cảnh riêng rồi ghép — đừng cố quay một mạch.
 - 60 MB cho 2 phút ≈ **4 Mbps**. Xuất 1080p, H.264, 30fps là vừa. Quá nặng thì hạ 720p, đừng cắt bớt nội dung.
 
-**Phụ đề:** làm phụ đề tiếng Anh. Nếu bạn thắng vòng Việt Nam thì video này đi tiếp
-vòng toàn cầu, nơi giám khảo không nói tiếng Việt.
+**Phụ đề tiếng Anh — BẮT BUỘC, không phải tuỳ chọn:**
+
+- Ghi phụ đề **cháy vào hình** (burned-in) thay vì tệp `.srt` rời. Nộp qua form
+  thì tệp phụ đề rời rất dễ thất lạc, và không ai chắc trình phát của giám khảo
+  có bật nó lên không.
+- Đặt ở **1/3 dưới**, nền tối chữ trắng, cỡ đủ đọc trên điện thoại.
+- Dịch **ý**, đừng dịch từng từ. Ba cụm nên dịch đúng chuẩn của dự án:
+  *"Nguy hiểm cao"* → **High risk** · *"Chưa thấy dấu hiệu rủi ro"* →
+  **No clear risk signals found** · *"Dừng lại trước, kiểm sau"* →
+  **Pause. Verify. Protect.**
+- Ba cụm đó là chữ chính thức trong `src/catalog.ts`, nên phụ đề khớp với chữ
+  đang hiện trên màn hình — giám khảo đối chiếu được ngay.
 
 ---
 
