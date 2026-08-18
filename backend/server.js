@@ -46,6 +46,20 @@ const SO_LUOT_TOI_DA = 30;
 // Cho phép test chạy mà không gọi ra gateway thật.
 const KHONG_GOI_AI = process.env.KHOAN_DA_KHONG_GOI_AI === '1';
 
+/**
+ * LỖI AI GẦN NHẤT — để chẩn đoán được bản đang chạy thật mà không cần vào log.
+ *
+ * ⚠️ §6.9 — CHỈ MÃ LỖI VÀ MÃ TRẠNG THÁI HTTP. Tuyệt đối không giữ nội dung
+ * người dùng, không giữ khoá, không giữ thân yêu cầu. `providerMessage` của nhà
+ * cung cấp có thể chứa nguyên văn lời nhắc nên KHÔNG được đưa vào đây — nó chỉ
+ * đi vào log máy chủ.
+ *
+ * Vì sao cần: khi bản công khai trả "Lượt này AI không trả lời được", không có
+ * cách nào biết vì khoá sai, hết quota, hay tên model sai — mà ba nguyên nhân đó
+ * cần ba cách sửa khác nhau.
+ */
+let loiAiGanNhat = null;
+
 const app = express();
 app.disable('x-powered-by');   // §6.8 — không rò phiên bản
 
@@ -323,6 +337,17 @@ async function xuLyPhanTich(req, res) {
       // Chỉ vào log, và KHÔNG kèm nội dung người dùng (§6.9).
       console.error('[ai]', kq.loi, kq.chiTiet?.providerStatus || '',
         kq.chiTiet?.providerMessage || '');
+      loiAiGanNhat = {
+        ma: kq.loi,
+        trangThaiNhaCungCap: kq.chiTiet?.providerStatus ?? null,
+        // ⚠️ 200 ký tự đầu của thông báo nhà cung cấp. Nó mô tả LỖI CẤU HÌNH
+        // (khoá sai, model không tồn tại, hết quota) chứ không phải nội dung
+        // người dùng — nhưng vẫn cắt ngắn để không vô tình mang gì theo.
+        moTa: typeof kq.chiTiet?.providerMessage === 'string'
+          ? kq.chiTiet.providerMessage.slice(0, 200) : null,
+      };
+    } else {
+      loiAiGanNhat = null;
     }
   } else {
     aiError = 'AI_NOT_CONFIGURED';
@@ -767,6 +792,10 @@ app.get('/api/suc-khoe', (req, res) => {
     noiChay: chay ? c.noiChay : 'khong_chay',
     /** Có sang BÊN THỨ BA không. Khác với "có rời khỏi máy người dùng không". */
     noiDungSangBenThuBa: chay ? !c.laCucBo : false,
+    /** Mô hình có nhìn được ảnh không — quyết định ảnh vào daKiem hay chuaKiem. */
+    coThiGiac: chay ? c.coThiGiac : false,
+    /** Lỗi AI gần nhất, chỉ mã và trạng thái. `null` = lượt gần nhất chạy tốt. */
+    loiAiGanNhat,
   });
 });
 
