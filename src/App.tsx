@@ -572,7 +572,7 @@ export default function App() {
 
       {/* MOBILE & TABLET & NORMAL ELDER MODE */}
       {!((isDesktopScreen && userRole !== 'elder') || userRole === 'guardian' || isUltraZoomedOut) ? (
-        <div className="flex w-full h-[100dvh] max-h-[100dvh] flex-col relative overflow-hidden bg-[#f8f4ff] select-none touch-none overscroll-none md:max-w-2xl lg:max-w-3xl md:mx-auto md:my-auto md:h-[96vh] md:max-h-[960px] md:rounded-[2.5rem] md:shadow-[0_25px_60px_rgba(76,29,149,0.18)] md:border-2 md:border-purple-200/80">
+        <div className="flex w-full h-[100dvh] max-h-[100dvh] flex-col relative overflow-hidden bg-[#f8f4ff] select-none touch-none overscroll-none md:max-w-3xl lg:max-w-5xl xl:max-w-6xl md:mx-auto md:my-auto md:h-[96vh] md:max-h-[1000px] md:rounded-[2.5rem] md:shadow-[0_25px_60px_rgba(76,29,149,0.18)] md:border-2 md:border-purple-200/80">
           {/* Background ambient lighting */}
           <div className="absolute top-[-5%] left-[-10%] w-72 h-72 bg-white opacity-60 rounded-full blur-3xl pointer-events-none select-none"></div>
           <div className="absolute bottom-1/4 right-[-20%] w-80 h-80 bg-[#d8b4fe] opacity-30 rounded-full blur-[80px] pointer-events-none select-none"></div>
@@ -980,7 +980,7 @@ function HomeView({
                </div>
                <div>
                   <h3 className="text-xl font-bold text-[#2e1065]">{t("Cập nhật thông tin")}</h3>
-                  <p className="text-sm text-[#6b7280]">{t("Cảnh báo và kiến thức giúp bác phòng tránh lừa đảo hiệu quả.")}</p>
+                  <p className="text-[15px] text-[#4b5563] leading-snug">{t("Cảnh báo và kiến thức giúp bác phòng tránh lừa đảo hiệu quả.")}</p>
                </div>
             </div>
             <button onClick={() => setView('learn')} className="flex items-center gap-1 text-sm font-semibold text-[#7e22ce] bg-white px-4 py-2 rounded-full shadow-sm hover:bg-gray-50">
@@ -2039,9 +2039,16 @@ function FamilyView({
       <div className="flex flex-col md:flex-row gap-4 md:gap-8 max-w-5xl mx-auto w-full">
         {/* Left Column - Contact List */}
         <div className="flex-1 bg-transparent md:bg-white md:rounded-[2rem] md:p-6 md:shadow-sm md:border border-white/50">
+          {/*
+            ⚠️ XẾP DỌC KHI HẸP — ba nút từng ĐÈ LÊN TÊN người thân.
+            Hàng ngang gồm tên + "Gọi" + "Báo tin" + thùng rác cần khoảng 420px
+            mới đủ; dưới mức đó tên bị nút phủ lên và bác không biết mình sắp gọi
+            cho ai. Tên xuống một dòng riêng thì không bao giờ bị che, và nút vẫn
+            giữ đủ chiều cao vùng chạm.
+          */}
           <div className="flex flex-col gap-2.5">
             {familyMembers.map((member) => (
-              <div key={member.id} className="bg-white rounded-2xl p-3 flex gap-3 items-center shadow-2xs border border-purple-100">
+              <div key={member.id} className="bg-white rounded-2xl p-3.5 flex flex-col sm:flex-row sm:items-center gap-3 shadow-2xs border border-purple-100">
                 <div className="w-12 h-12 rounded-xl bg-purple-100 overflow-hidden border border-purple-200 shrink-0">
                    {/* `avatar` giờ là MÃ MÀU, không phải đường dẫn ảnh — xem AddFamilyView. */}
                    <div
@@ -2052,24 +2059,24 @@ function FamilyView({
                    </div>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-bold text-[#1e1b4b] text-[14px] leading-tight truncate">{member.name}</h3>
+                  <h3 className="font-bold text-[#1e1b4b] text-[16px] leading-snug">{member.name}</h3>
                   <p className="text-purple-700 font-semibold text-[14px] mt-0.5">{t(member.relation) || member.relation} • {member.phone || '0988 *** 888'}</p>
                 </div>
-                <div className="flex items-center gap-1.5 shrink-0">
+                <div className="flex items-center gap-2 shrink-0">
                    <button 
                      onClick={() => handleCall(member.phone)}
-                     className="px-3 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-bold text-[14px] flex items-center gap-1 shadow-2xs active:scale-95 transition-transform"
+                     className="flex-1 sm:flex-none px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-[15px] flex items-center justify-center gap-1.5 shadow-2xs active:scale-95 transition-transform"
                      title={t("Gọi ngay")}
                    >
-                      <Phone size={14} />
+                      <Phone size={16} />
                       <span>{t("Gọi")}</span>
                    </button>
                    <button 
                      onClick={() => handleSms(member)}
-                     className="px-3 py-2 bg-[#8b5cf6] hover:bg-[#7e22ce] text-white rounded-xl font-bold text-[14px] flex items-center gap-1 shadow-2xs active:scale-95 transition-transform"
+                     className="flex-1 sm:flex-none px-4 py-2.5 bg-[#7e22ce] hover:bg-[#6b21a8] text-white rounded-xl font-bold text-[15px] flex items-center justify-center gap-1.5 shadow-2xs active:scale-95 transition-transform"
                      title={t("Gửi tin nhắn nhờ hỗ trợ")}
                    >
-                      <MessageSquare size={14} />
+                      <MessageSquare size={16} />
                       <span>{t("Báo tin")}</span>
                    </button>
                    <button aria-label={t("Xoá")} 
@@ -3485,46 +3492,48 @@ function SearchView({
       </div>
 
       {/* Desktop Grid Options */}
-      <div className="hidden md:grid grid-cols-3 gap-6 max-w-5xl mx-auto w-full mb-8">
-         <div onClick={() => handleRunSearch("Cuộc gọi tự xưng cơ quan chức năng hoặc công an điều tra")} className="bg-white rounded-[1.5rem] p-6 shadow-sm border border-white/50 flex items-center gap-5 hover:shadow-md transition-shadow cursor-pointer group">
-            <div className="w-20 h-20 bg-[#f3e8ff] rounded-2xl flex items-center justify-center shadow-inner relative overflow-hidden group-hover:scale-105 transition-transform">
-               <Phone className="w-10 h-10 text-[#7e22ce] relative z-10" />
+      {/*
+        ⚠️ BA THẺ NÀY TỪNG VỠ CHỮ DỌC TRÊN MÁY TÍNH — mỗi từ một dòng.
+
+        Nguyên nhân: lưới 3 cột nằm BÊN TRONG khung app vốn bị kẹp `max-w-3xl`,
+        nên mỗi cột chỉ còn ~200px; thẻ lại xếp NGANG (icon 80px + chữ), phần
+        chữ còn ~90px và tiếng Việt bị bẻ từng từ xuống dòng.
+
+        Vá hai đầu: khung app rộng ra ở `lg:` trở lên, và thẻ xếp DỌC thay vì
+        ngang. Xếp dọc còn hợp hơn với chữ tiếng Việt — nó dài hơn tiếng Anh
+        khoảng 30%, nên đừng thiết kế hộp vừa khít chữ (§4.5).
+      */}
+      <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-5 w-full mb-8">
+         <div onClick={() => handleRunSearch("Cuộc gọi tự xưng cơ quan chức năng hoặc công an điều tra")} className="bg-white rounded-[1.5rem] p-5 shadow-sm border border-purple-100 flex flex-col gap-3 hover:shadow-md hover:border-purple-300 transition-all cursor-pointer group text-left min-w-0">
+            <div className="w-14 h-14 bg-[#f3e8ff] rounded-2xl flex items-center justify-center shadow-inner relative overflow-hidden shrink-0">
+               <Phone className="w-7 h-7 text-[#7e22ce] relative z-10" />
                <div className="absolute inset-0 bg-gradient-to-tr from-[#c084fc]/20 to-transparent"></div>
             </div>
-            <div className="flex-1">
-               <h3 className="font-bold text-lg text-[#2e1065] mb-1">{t("Cuộc gọi lạ")}</h3>
-               <p className="text-sm text-[#6b7280]">{t("Kể lại nội dung cuộc gọi để được kiểm tra.")}</p>
-            </div>
-            <div className="w-8 h-8 rounded-full border border-gray-100 flex items-center justify-center text-[#9ca3af] group-hover:bg-[#f3e8ff] group-hover:text-[#7e22ce] transition-colors">
-               <ChevronRight className="w-4 h-4" />
+            <div className="min-w-0">
+               <h3 className="font-bold text-[18px] text-[#2e1065] mb-1">{t("Cuộc gọi lạ")}</h3>
+               <p className="text-[15px] text-[#4b5563] leading-snug">{t("Kể lại nội dung cuộc gọi để được kiểm tra.")}</p>
             </div>
          </div>
 
-         <div onClick={() => handleRunSearch("Tin nhắn thông báo tài khoản ngân hàng bị khóa hoặc yêu cầu ấn vào link")} className="bg-white rounded-[1.5rem] p-6 shadow-sm border border-white/50 flex items-center gap-5 hover:shadow-md transition-shadow cursor-pointer group">
-            <div className="w-20 h-20 bg-[#f3e8ff] rounded-2xl flex items-center justify-center shadow-inner relative overflow-hidden group-hover:scale-105 transition-transform">
-               <MessageSquare className="w-10 h-10 text-[#7e22ce] relative z-10" />
+         <div onClick={() => handleRunSearch("Tin nhắn thông báo tài khoản ngân hàng bị khóa hoặc yêu cầu ấn vào link")} className="bg-white rounded-[1.5rem] p-5 shadow-sm border border-purple-100 flex flex-col gap-3 hover:shadow-md hover:border-purple-300 transition-all cursor-pointer group text-left min-w-0">
+            <div className="w-14 h-14 bg-[#f3e8ff] rounded-2xl flex items-center justify-center shadow-inner relative overflow-hidden shrink-0">
+               <MessageSquare className="w-7 h-7 text-[#7e22ce] relative z-10" />
                <div className="absolute inset-0 bg-gradient-to-tr from-[#c084fc]/20 to-transparent"></div>
             </div>
-            <div className="flex-1">
-               <h3 className="font-bold text-lg text-[#2e1065] mb-1">{t("Tin nhắn đáng ngờ")}</h3>
-               <p className="text-sm text-[#6b7280]">{t("Dán nội dung hoặc gửi ảnh chụp tin nhắn.")}</p>
-            </div>
-            <div className="w-8 h-8 rounded-full border border-gray-100 flex items-center justify-center text-[#9ca3af] group-hover:bg-[#f3e8ff] group-hover:text-[#7e22ce] transition-colors">
-               <ChevronRight className="w-4 h-4" />
+            <div className="min-w-0">
+               <h3 className="font-bold text-[18px] text-[#2e1065] mb-1">{t("Tin nhắn đáng ngờ")}</h3>
+               <p className="text-[15px] text-[#4b5563] leading-snug">{t("Dán nội dung hoặc gửi ảnh chụp tin nhắn.")}</p>
             </div>
          </div>
 
-         <div onClick={() => handleRunSearch("Đường link nhận quà hoặc yêu cầu quét mã QR nạp tiền")} className="bg-white rounded-[1.5rem] p-6 shadow-sm border border-white/50 flex items-center gap-5 hover:shadow-md transition-shadow cursor-pointer group">
-            <div className="w-20 h-20 bg-[#f3e8ff] rounded-2xl flex items-center justify-center shadow-inner relative overflow-hidden group-hover:scale-105 transition-transform">
-               <Globe className="w-10 h-10 text-[#7e22ce] relative z-10" />
+         <div onClick={() => handleRunSearch("Đường link nhận quà hoặc yêu cầu quét mã QR nạp tiền")} className="bg-white rounded-[1.5rem] p-5 shadow-sm border border-purple-100 flex flex-col gap-3 hover:shadow-md hover:border-purple-300 transition-all cursor-pointer group text-left min-w-0">
+            <div className="w-14 h-14 bg-[#f3e8ff] rounded-2xl flex items-center justify-center shadow-inner relative overflow-hidden shrink-0">
+               <Globe className="w-7 h-7 text-[#7e22ce] relative z-10" />
                <div className="absolute inset-0 bg-gradient-to-tr from-[#c084fc]/20 to-transparent"></div>
             </div>
-            <div className="flex-1">
-               <h3 className="font-bold text-lg text-[#2e1065] mb-1">{t("Link hoặc mã QR")}</h3>
-               <p className="text-sm text-[#6b7280]">{t("Kiểm tra trước khi bấm mở để tránh rủi ro.")}</p>
-            </div>
-            <div className="w-8 h-8 rounded-full border border-gray-100 flex items-center justify-center text-[#9ca3af] group-hover:bg-[#f3e8ff] group-hover:text-[#7e22ce] transition-colors">
-               <ChevronRight className="w-4 h-4" />
+            <div className="min-w-0">
+               <h3 className="font-bold text-[18px] text-[#2e1065] mb-1">{t("Link hoặc mã QR")}</h3>
+               <p className="text-[15px] text-[#4b5563] leading-snug">{t("Kiểm tra trước khi bấm mở để tránh rủi ro.")}</p>
             </div>
          </div>
       </div>
