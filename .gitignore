@@ -1,0 +1,20 @@
+node_modules/
+build/
+dist/
+coverage/
+.DS_Store
+*.log
+.env*
+!.env.example
+
+# ⚠️ ẢNH GỐC KHÔNG ĐẨY LÊN GIT — 34 MB, và không cần để chạy app.
+# Bản đã tối ưu nằm ở `public/` (628 KB). Ảnh gốc giữ trên máy để dựng lại khi
+# cần; xem `assets/anh-goc/DOC-TRUOC.md` cho lệnh chuyển đổi.
+assets/anh-goc/*.png
+
+# Khoá API. `.env*` ở trên đã chặn, nhắc lại cho rõ ràng.
+.env
+.env.local
+
+# Bản git cũ đã hỏng, giữ trên máy phòng khi cần — không đẩy lên.
+.git-hong-*/

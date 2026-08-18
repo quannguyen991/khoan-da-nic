@@ -1,0 +1,103 @@
+{
+  "_doc": "§2B.5 — DANH BẠ HOTLINE. Mỗi mục PHẢI có nguồn + ngày xác minh + trạng thái.",
+  "_canh_bao": "Một số sai đẩy nạn nhân tới ĐÚNG KẺ LỪA ĐẢO. Đây là kịch bản hỏng tệ nhất của sản phẩm. Thà rỗng còn hơn sai.",
+  "_luat": [
+    "AI KHÔNG được tự tạo mục nào. Mọi mục do người duyệt.",
+    "KHÔNG lấy số từ nội dung người dùng gửi lên.",
+    "reviewStatus phải là 'approved' thì mục mới được hiển thị.",
+    "sourceUrl phải trỏ tới trang chính thức của tổ chức, không phải bài báo hay diễn đàn."
+  ],
+  "_trang_thai": "CHƯA CÓ MỤC NÀO ĐƯỢC XÁC MINH. Ba ngân hàng tối thiểu mà §2B.5 đòi (Vietcombank, BIDV, VietinBank) đang nằm ở phần chờ duyệt bên dưới, KHÔNG có số điện thoại, vì số phải do người tra từ trang chính thức rồi điền vào — không được suy đoán.",
+  "institutions": [],
+  "_cho_duyet": [
+    {
+      "id": "vn-vietcombank",
+      "countryCode": "VN",
+      "type": "bank",
+      "canonicalName": "Ngân hàng TMCP Ngoại thương Việt Nam (Vietcombank)",
+      "aliases": [
+        "Vietcombank",
+        "VCB"
+      ],
+      "officialDomains": [
+        "vietcombank.com.vn"
+      ],
+      "officialPhoneNumbers": [],
+      "sourceUrl": "",
+      "verifiedAt": "",
+      "reviewStatus": "pending",
+      "_can_lam": "Người duyệt mở trang chính thức, chép số tổng đài, điền sourceUrl + verifiedAt, đổi reviewStatus thành approved."
+    },
+    {
+      "id": "vn-bidv",
+      "countryCode": "VN",
+      "type": "bank",
+      "canonicalName": "Ngân hàng TMCP Đầu tư và Phát triển Việt Nam (BIDV)",
+      "aliases": [
+        "BIDV"
+      ],
+      "officialDomains": [
+        "bidv.com.vn"
+      ],
+      "officialPhoneNumbers": [],
+      "sourceUrl": "",
+      "verifiedAt": "",
+      "reviewStatus": "pending",
+      "_can_lam": "Như trên."
+    },
+    {
+      "id": "vn-vietinbank",
+      "countryCode": "VN",
+      "type": "bank",
+      "canonicalName": "Ngân hàng TMCP Công thương Việt Nam (VietinBank)",
+      "aliases": [
+        "VietinBank",
+        "CTG"
+      ],
+      "officialDomains": [
+        "vietinbank.vn"
+      ],
+      "officialPhoneNumbers": [],
+      "sourceUrl": "",
+      "verifiedAt": "",
+      "reviewStatus": "pending",
+      "_can_lam": "Như trên."
+    },
+    {
+      "id": "vn-c02-bo-cong-an",
+      "countryCode": "VN",
+      "type": "law_enforcement",
+      "canonicalName": "Cục Cảnh sát hình sự (C02) — Bộ Công an",
+      "aliases": [
+        "C02",
+        "Cảnh sát hình sự"
+      ],
+      "officialDomains": [
+        "bocongan.gov.vn"
+      ],
+      "officialPhoneNumbers": [],
+      "sourceUrl": "",
+      "verifiedAt": "",
+      "reviewStatus": "pending",
+      "_can_lam": "Giao diện từng hiển thị 069.234.8560 mà không có nguồn — đã gỡ 18/8/2026. Người duyệt mở trang chính thức, chép số, điền sourceUrl + verifiedAt, đổi reviewStatus thành approved."
+    },
+    {
+      "id": "vn-a05-an-ninh-mang",
+      "countryCode": "VN",
+      "type": "law_enforcement",
+      "canonicalName": "Cục An ninh mạng và phòng, chống tội phạm sử dụng công nghệ cao (A05)",
+      "aliases": [
+        "A05",
+        "An ninh mạng"
+      ],
+      "officialDomains": [
+        "bocongan.gov.vn"
+      ],
+      "officialPhoneNumbers": [],
+      "sourceUrl": "",
+      "verifiedAt": "",
+      "reviewStatus": "pending",
+      "_can_lam": "Giao diện từng hiển thị 069.234.5860 mà không có nguồn — đã gỡ 18/8/2026. Hai số C02/A05 chỉ khác nhau thứ tự chữ số, nên phải tra từng số một từ trang chính thức."
+    }
+  ]
+}

@@ -1,0 +1,79 @@
+{
+  "short_name": "Khoan Đã",
+  "name": "Khoan Đã - Trợ Lý Cảnh Giác & Chống Lừa Đảo",
+  "icons": [
+    {
+      "src": "/logo-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any"
+    },
+    {
+      "src": "/logo-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any"
+    },
+    {
+      "src": "/logo-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "maskable"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#2e1065",
+  "theme_color": "#7e22ce",
+  "display": "standalone",
+  "orientation": "portrait",
+  "scope": "/",
+  "description": "Ứng dụng trợ lý AI bảo vệ người cao tuổi và gia đình khỏi các cuộc gọi, tin nhắn và bẫy lừa đảo trên mạng.",
+  "share_target": {
+    "action": "/?chia_se=1",
+    "method": "GET",
+    "enctype": "application/x-www-form-urlencoded",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  },
+  "shortcuts": [
+    {
+      "name": "Hỏi Nhanh Lúc Bị Gọi",
+      "short_name": "Hỏi Nhanh",
+      "description": "Mở bộ câu hỏi nhanh 8 giây khi kẻ lừa đảo đang gọi",
+      "url": "/?view=hoi_nhanh",
+      "icons": [
+        {
+          "src": "/logo-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Khẩn Cấp Dừng 60 Giây",
+      "short_name": "Cảnh Giác SOS",
+      "description": "Dừng khẩn cấp mọi giao dịch chuyển tiền",
+      "url": "/?view=warning",
+      "icons": [
+        {
+          "src": "/logo-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Kiểm tra ảnh hoặc tin nhắn",
+      "short_name": "Kiểm tra",
+      "description": "Mở màn kiểm tra để gửi ảnh chụp màn hình hoặc nội dung tin nhắn",
+      "url": "/?view=search",
+      "icons": [
+        {
+          "src": "/logo-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
+}

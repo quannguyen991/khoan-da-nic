@@ -1,0 +1,131 @@
+'use strict';
+/**
+ * §2B.2 bước 11 — EVIDENCE PHẢI KHỚP BẢN GỐC.
+ *
+ * §6.4 / 18.9: evidence phải trích được ĐÚNG CHUỖI CON trên normalized text của
+ * NGÔN NGỮ GỐC. KHÔNG dịch evidence trước khi validate — tiếng Anh phải khớp bản
+ * tiếng Anh gốc, tiếng Việt khớp bản tiếng Việt gốc.
+ *
+ * Model trả một "câu trích" đã diễn giải lại mà không tồn tại trong nguồn thì
+ * LOẠI TÍN HIỆU ĐÓ. Bản dịch chỉ được hiển thị như phụ chú, gắn nhãn
+ * "Translated explanation", và KHÔNG thay thế evidence gốc.
+ */
+
+const { boDau, chuanHoa } = require('./context-builder');
+const { scopeCuaTinHieu } = require('./signal-registry');
+
+/**
+ * ⚠️ TRÍCH DẪN PHẢI ĐI QUA ĐÚNG HÀM CHUẨN HOÁ ĐÃ DÙNG CHO VĂN BẢN.
+ *
+ * ĐO ĐƯỢC 15/8/2026 — LỖI ĐẮT NHẤT PHIÊN NÀY, −5,6 ĐIỂM RECALL.
+ *
+ * Trước đây chỗ này tự chuẩn hoá lấy: `toLowerCase()` + gộp khoảng trắng. Rồi
+ * `chuanHoa()` bên context-builder được sửa để GỠ DẤU NGĂN HÀNG NGHÌN (vì tiền
+ * Việt viết `1.200.000đ` và `[^.]{0,N}` trong cue bank bị dấu chấm chặn ngang).
+ *
+ * Hai hàm chuẩn hoá LỆCH NHAU ngay lập tức. Model trích nguyên văn
+ * `"chú chuẩn bị 450.000đ tiền mặt"`, còn `doan.normalized` giờ là
+ * `"chú chuẩn bị 450000đ tiền mặt"` — không khớp, tín hiệu bị LOẠI. Mà trích dẫn
+ * chứa số tiền lại đúng là những tín hiệu nặng điểm nhất (FIN_TRANSFER_REQUEST,
+ * FIN_CASH_COURIER, OFF_ADVANCE_FEE), nên điểm sụp thẳng: 69 → 6.
+ *
+ * Đo được 9/17 trích dẫn trên các mẫu tụt có chứa dấu ngăn.
+ *
+ * ⚠️ BÀI HỌC, KHÔNG PHẢI CHI TIẾT VẶT: hai bên của một phép so BẮT BUỘC dùng
+ * CHUNG một hàm chuẩn hoá. Chép logic sang đây lần nữa là hẹn ngày lệch tiếp,
+ * và kiểu lệch này IM LẶNG — tín hiệu biến mất chứ không ai báo lỗi.
+ * Hàng rào: test/evidence-chuan-hoa-chung.test.js.
+ */
+const chuanHoaTrich = (quote) => chuanHoa(String(quote).replace(/\s+/g, ' '));
+
+/**
+ * Offset do gateway trả về hay lệch; thứ kiểm được là CHUỖI CON có thật hay không.
+ * Nên ở đây chỉ kiểm sự tồn tại, không kiểm offset.
+ */
+function trichCoThat(quote, ctx) {
+  if (typeof quote !== 'string' || !quote.trim()) return false;
+  const q = chuanHoaTrich(quote);
+  if (ctx.normalized.includes(q)) return true;
+  // §6.13 — tiếng Việt không dấu cũng là bản gốc hợp lệ.
+  return ctx.folded.includes(boDau(q));
+}
+
+/**
+ * @param {object} signal  tín hiệu đã normalize
+ * @param {object} ctx     kết quả buildContext() của NGÔN NGỮ GỐC
+ */
+function validateEvidence(signal, ctx) {
+  // §6.4 — direct detector tự sinh evidence từ chính bản gốc, không qua tầng này.
+  if (signal?.source === 'direct') return true;
+  if (!signal || !Array.isArray(signal.evidence) || signal.evidence.length === 0) return false;
+  return signal.evidence.some((e) => trichCoThat(e?.quote, ctx));
+}
+
+const locTheoEvidence = (signals = [], ctx) => signals.filter((s) => validateEvidence(s, ctx));
+
+/**
+ * Những đoạn CHỒNG LẤN với câu trích.
+ *
+ * ⚠️ Model rất hay trích một đoạn BẮC QUA ranh giới hai câu ("Tôi là công an.
+ * Bác chuyển tiền ngay."). Tìm quote nằm gọn trong một đoạn thì không thấy gì cả
+ * — đã đo: 29/30 tín hiệu bị loại oan trên mẫu nguy hiểm đều do lỗi này.
+ * Nên phải xét cả chiều ngược lại: đoạn nằm trong quote.
+ */
+function doanChongLan(quote, ctx) {
+  if (typeof quote !== 'string' || !quote.trim()) return [];
+  // ⚠️ CÙNG hàm chuẩn hoá với `trichCoThat` — xem chú thích dài ở đó.
+  const q = chuanHoaTrich(quote);
+  const qf = boDau(q);
+  return ctx.segments.filter((d) => d.normalized.includes(q) || d.folded.includes(qf)
+    || q.includes(d.normalized) || qf.includes(d.folded));
+}
+
+/** Đoạn nào chứa câu trích này? Dùng để áp scope/speech act cho tín hiệu từ AI. */
+const doanChuaTrich = (quote, ctx) => doanChongLan(quote, ctx)[0] || null;
+
+/**
+ * ⚠️ LỖI ĐÃ ĐO 15/8/2026 — hàng rào Phụ lục C chỉ bảo vệ direct-precheck,
+ * KHÔNG bảo vệ đường AI. Mà AI mới là máy dò chính.
+ *
+ * Câu "Never share your OTP or verification code with anyone." được bộ luật
+ * phân loại đúng là `warning_education`, direct-precheck im lặng — nhưng tín
+ * hiệu AI cho ĐÚNG CÂU ĐÓ đi thẳng qua và ghi 25 điểm.
+ *
+ * Đây đúng dạng lỗi §9.1 mô tả: ĐƯỜNG DỰ PHÒNG AN TOÀN HƠN ĐƯỜNG CHÍNH.
+ * Nên scope/speech act phải áp cho MỌI nguồn tín hiệu, không riêng nguồn nào.
+ */
+function locTheoScopeChiTiet(signals = [], ctx) {
+  const giu = [];
+  const loai = [];
+  for (const s of signals) {
+    if (s.source === 'direct' || s.source === 'deterministic') { giu.push(s); continue; }
+    if (scopeCuaTinHieu(s.id) !== 'action') { giu.push(s); continue; }  // C.2 — 'any' lấy tất cả đoạn
+
+    // Tín hiệu action-scope chỉ được nhận khi evidence chạm vào đoạn HÀNH ĐỘNG.
+    const doan = (s.evidence || []).flatMap((e) => doanChongLan(e?.quote, ctx));
+    if (doan.some((d) => d.actionable === true)) { giu.push(s); continue; }
+
+    /**
+     * ⚠️ §4.3 — "KHÔNG TRA ĐƯỢC" ≠ "ĐÃ TRA, KHÔNG HỢP LỆ".
+     * Không định vị được câu trích thuộc đoạn nào thì KHÔNG được lấy sự mơ hồ đó
+     * làm cớ để tắt cảnh báo. §4.2: mọi thứ thêm vào chỉ được LÀM TĂNG cảnh giác.
+     * Đã đo: fail-closed ở đây làm mất 29 tín hiệu trên mẫu nguy hiểm thật.
+     */
+    if (doan.length === 0) { giu.push(s); continue; }
+
+    // Ghi lại VÌ SAO bị loại — không có dòng này thì mọi chẩn đoán sau đều là đoán.
+    loai.push({
+      id: s.id,
+      quote: s.evidence?.[0]?.quote ?? null,
+      speechAct: doan.find(Boolean)?.speechAct ?? 'khong_tim_thay_doan',
+    });
+  }
+  return { giu, loai };
+}
+
+const locTheoScope = (signals, ctx) => locTheoScopeChiTiet(signals, ctx).giu;
+
+module.exports = {
+  validateEvidence, locTheoEvidence, locTheoScope, locTheoScopeChiTiet,
+  trichCoThat, doanChuaTrich, doanChongLan,
+};

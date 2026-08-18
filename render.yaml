@@ -1,0 +1,29 @@
+# Triển khai công khai — Render (gói free đủ dùng cho vòng chấm).
+#
+# ⚠️ CÓ MỘT ĐIỀU PHẢI BIẾT TRƯỚC KHI ĐẨY LÊN:
+# Không đặt khoá AI thì bản công khai chạy CHỈ BẰNG TẦNG LUẬT. Nó vẫn trung thực
+# — màn kết quả hiện "Lượt này không có AI đọc nội dung" — nhưng người vào thử
+# một tin nhắn lừa đảo sẽ thấy "Chưa thấy dấu hiệu rủi ro", vì tầng luật một
+# mình chỉ bắt được các dấu hiệu trực tiếp.
+#
+# Đo được: bỏ AI đi, độ nhạy phát hiện rơi từ 67,6% xuống 3,8%.
+#
+# Nên đặt `GEMINI_API_KEY` trong bảng Environment của Render (lấy free tại
+# https://aistudio.google.com/apikey). Mã đã có sẵn nhánh nhận khoá này.
+services:
+  - type: web
+    name: khoan-da
+    runtime: node
+    plan: free
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # ⚠️ ĐẶT TAY TRONG BẢNG ENVIRONMENT, ĐỪNG VIẾT KHOÁ VÀO TỆP NÀY.
+      # Tệp này đi vào git; khoá viết ở đây là khoá đã lộ.
+      - key: GEMINI_API_KEY
+        sync: false
+      # Cho phép bản APK / tên miền khác gọi vào. Để trống nếu chỉ chạy web.
+      - key: KHOAN_DA_ORIGIN_THEM
+        sync: false

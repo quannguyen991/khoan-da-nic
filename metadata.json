@@ -1,0 +1,6 @@
+{
+  "name": "Trợ lý ảo Khoan Đã",
+  "description": "Trợ lý ảo Khoan Đã - Nhận diện, cảnh giác và phòng chống lừa đảo trực tuyến cho người cao tuổi và gia đình.",
+  "requestFramePermissions": ["camera", "microphone", "notifications"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

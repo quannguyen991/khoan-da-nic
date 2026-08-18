@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Khoan Đã - Trợ Lý Cảnh Giác &amp; Chống Lừa Đảo</title>
+    <meta name="description" content="Ứng dụng trợ lý AI bảo vệ người cao tuổi và gia đình khỏi bẫy lừa đảo mạng." />
+    <meta name="theme-color" content="#7e22ce" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="icon" type="image/webp" href="/logo.webp" />
+    <link rel="apple-touch-icon" href="/logo-192.png" />
+    <meta property="og:title" content="Khoan Đã" />
+    <meta property="og:description" content="Trợ lý cảnh giác lừa đảo cho người cao tuổi và gia đình." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <!--
+      ⚠️ KHÔNG NẠP FONT TỪ fonts.googleapis.com.
+      Mỗi lần bác mở app là một lượt gọi ra máy chủ lạ — đủ để bên đó biết bác
+      đang dùng Khoan Đã. `connect-src 'self'` / `font-src 'self'` trong CSP của
+      máy chủ chặn đúng thứ này, và chặn là HÀNH VI ĐÚNG. Font nằm cục bộ trong
+      `@fontsource/be-vietnam-pro`, nạp từ src/index.css. Nó cũng là điều kiện
+      để app chạy được khi mất mạng.
+    -->
+
+    <!--
+      §4.4 — SÀN TIẾP CẬN NẠP SAU CÙNG.
+      Hai tệp này KHÔNG dùng `@layer`, nên chúng thắng mọi utility của Tailwind
+      (CSS không phân lớp luôn thắng CSS trong `@layer`). Đừng gói chúng vào
+      layer nào, và đừng nạp trước bundle — sàn phải là tiếng nói cuối cùng.
+      Chúng nằm trong `APP_SHELL` của service worker: sàn tiếp cận không được
+      phụ thuộc vào việc có mạng.
+    -->
+    <link rel="stylesheet" href="/tokens.css" />
+    <link rel="stylesheet" href="/vung-cham-san.css" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

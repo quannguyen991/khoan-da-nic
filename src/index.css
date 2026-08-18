@@ -1,0 +1,51 @@
+@import "tailwindcss";
+
+/* ⚠️ FONT CỤC BỘ, KHÔNG GỌI RA fonts.googleapis.com.
+   Be Vietnam Pro dựng riêng cho chữ Việt: dấu xếp cả trên lẫn dưới (ế, ộ, ữ,
+   ị, ặ) nên khoảng dấu rộng hơn font Latin thường. Nạp cục bộ giữ được cả
+   quyền riêng tư lẫn khả năng chạy khi mất mạng. */
+@import "@fontsource/be-vietnam-pro/400.css";
+@import "@fontsource/be-vietnam-pro/600.css";
+@import "@fontsource/be-vietnam-pro/700.css";
+@import "@fontsource/be-vietnam-pro/800.css";
+
+@theme {
+  --font-sans: "Be Vietnam Pro", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}
+
+/* Prevent unwanted drag, bounce, and selection */
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+img {
+  -webkit-user-drag: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+input, textarea {
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   §4.4 — BA BẬC CỠ CHỮ, ĐẶT BẰNG THUỘC TÍNH TRÊN <html>, KHÔNG BẰNG INLINE.
+
+   ⚠️ Bản cũ ghi thẳng `document.documentElement.style.fontSize = '14px'`.
+   Hai chuyện hỏng cùng lúc:
+     · inline style thắng mọi thứ, kể cả sàn — cả hệ bậc chữ mất hiệu lực;
+     · bậc "nhỏ" đặt gốc 14px, thấp hơn gốc 15px mà `--touch-target-primary`
+       tính theo `rem` dựa vào, nên nút chính tụt xuống dưới 56px.
+
+   Ba giá trị dưới đây neo ở 15/17/20px — trùng thang của tokens.css.
+   ══════════════════════════════════════════════════════════════════════════ */
+html[data-bac-chu="nho"]  { font-size: 15px; }
+html[data-bac-chu="vua"]  { font-size: 17px; }
+html[data-bac-chu="lon"]  { font-size: 20px; }
