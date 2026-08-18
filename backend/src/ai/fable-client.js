@@ -183,7 +183,28 @@ function layCauHinh(env = process.env) {
      * ⚠️ ĐỪNG "vá" bằng cách nâng LLM_TIMEOUT_MS. Chờ lâu hơn không làm kết quả
      * đúng hơn, chỉ làm bác đứng chờ lâu hơn giữa lúc kẻ lừa đảo đang thúc.
      */
-    mucSuyLuan = env.LLM_REASONING_EFFORT || 'low';
+    /**
+     * ⚠️ `none`, KHÔNG PHẢI `low` — ĐO ĐƯỢC QUA BỐN VÒNG 18/8/2026.
+     *
+     * Chuỗi triệu chứng, tất cả đều hiện ra trên màn hình y hệt nhau
+     * ("Chưa thấy dấu hiệu rủi ro" cho một tin nhắn giả danh công an rõ ràng):
+     *
+     *   1. không gửi reasoning_effort  → AI_TIMEOUT   (chạm trần 35s)
+     *   2. low + max_tokens 1500       → content RỖNG (thinking ăn hết ngân sách)
+     *   3. low + max_tokens 4000       → AI_TIMEOUT   (nghĩ lâu hơn)
+     *   4. none                        → ✅
+     *
+     * Ba lần đầu là cùng một nguyên nhân gốc: phần suy nghĩ vừa tốn token vừa
+     * tốn thời gian, mà việc ở đây KHÔNG CẦN suy nghĩ. §4.2 — tầng AI chỉ bật
+     * cờ, bộ luật mới quyết mức; trích tín hiệu là việc QUAN SÁT CÓ BẰNG CHỨNG.
+     *
+     * Và tắt suy luận không phải đánh đổi: đo trên gateway cho thấy hạ mức làm
+     * recall TĂNG (62,5% → 71,9%), vì model nghĩ nhiều lại tự vấn rồi bỏ bớt
+     * tín hiệu nó đã nhìn thấy.
+     *
+     * Đè bằng `LLM_REASONING_EFFORT` nếu nhà cung cấp đổi cách hiểu tham số.
+     */
+    mucSuyLuan = env.LLM_REASONING_EFFORT || 'none';
     noiChay = 'gemini';
   }
 
