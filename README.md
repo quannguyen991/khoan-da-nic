@@ -9,13 +9,36 @@ Dừng lại trước, kiểm sau, rồi hãy làm.
 
 ## Vấn đề
 
-Người cao tuổi là nhóm bị nhắm nhiều nhất trong các vụ lừa đảo qua điện thoại và
-tin nhắn ở Việt Nam: giả danh công an, "tài khoản an toàn", đòi mã OTP, dụ cài ứng
-dụng lạ. Cái khó không phải là thiếu thông tin cảnh báo — mà là **lúc đang bị gọi,
-người ta không có ai để hỏi trong 60 giây tiếp theo.**
+**Giả danh công an là hình thức lừa đảo trực tuyến phổ biến nhất Việt Nam năm
+2025** — theo khảo sát 60.300 người của Hiệp hội An ninh mạng Quốc gia (NCA),
+thực hiện 1–18/12/2025. Kẻ lừa đảo nay dựng cả phòng làm việc giả, mặc đồng phục
+và gọi video để tăng độ tin cậy.
 
-> 📌 *Chỗ điền số liệu có nguồn: [ ] báo cáo Cục An toàn thông tin — Bộ TT&TT ·*
-> *[ ] Cục A05 — Bộ Công an. Ghi rõ năm và đường dẫn.*
+Ba con số nói rõ vì sao cần một công cụ can thiệp **trước** lúc mất tiền:
+
+| Số liệu | Nguồn |
+|---|---|
+| Thiệt hại do lừa đảo trực tuyến **hơn 6.000 tỷ đồng** trong 11 tháng đầu 2025 | Bộ Công an |
+| **Chỉ 32,12%** nạn nhân trình báo cơ quan chức năng; **12,03%** chấp nhận mất, không làm gì | NCA, khảo sát 60.300 người, 12/2025 |
+| Tỷ lệ nạn nhân 2025 là **0,18%** (1/555 người), giảm từ 0,45% năm 2024 | NCA |
+
+Hai phần ba nạn nhân không báo với ai. Nghĩa là **can thiệp sau khi mất tiền gần
+như không xảy ra** — chỉ còn cách chặn ở đúng lúc kẻ lừa đảo đang gọi.
+
+Người cao tuổi dễ bị nhắm vì ba lý do cùng lúc: khoảng cách kỹ năng số, thường
+sống một mình và ít giao tiếp nên dễ tin một giọng nói quan tâm, và kẻ lừa đảo
+tiếp cận bằng đúng giọng điệu người nhà. Ở Mỹ, thiệt hại ở nhóm trên 60 tuổi năm
+2024 là **2,4 tỷ USD, tăng 26,3%** so với năm trước (FTC) — đây không phải vấn đề
+riêng của Việt Nam.
+
+Và cái khó không phải thiếu thông tin cảnh báo — mà là **lúc đang bị gọi, người ta
+không có ai để hỏi trong 60 giây tiếp theo.**
+
+> **Nguồn** *(truy cập 18/8/2026 — nên kiểm lại trước khi nộp, số liệu có thể được
+> cập nhật)*:
+> · [Hiệp hội An ninh mạng Quốc gia — khảo sát an ninh mạng 2025](https://antoanthongtin.vn/tin/nguoi-dung-viet-nam-thiet-hai-hon-6000-ty-dong-do-lua-dao-truc-tuyen-trong-nam-2025)
+> · [Báo Chính phủ — Dự báo 2026: mức độ tinh vi của lừa đảo trực tuyến sẽ tăng](https://baochinhphu.vn/du-bao-nam-2026-muc-do-tinh-vi-cua-cac-hinh-thuc-lua-dao-truc-tuyen-se-tang-102260107101756364.htm)
+> · [VnEconomy — Ngăn chặn lừa đảo tài chính nhắm vào người cao tuổi](https://vneconomy.vn/bao-ve-nguoi-cao-tuoi-truoc-nguy-co-lua-dao-tai-chinh-online.htm)
 
 ## Cách giải quyết
 
@@ -138,6 +161,30 @@ npm test
 | `src/catalog.ts` | Mã → chữ hiển thị (đổi ngôn ngữ không đổi được kết luận) |
 | `src/config/ma-hop-dong.json` | Hợp đồng mã giữa hai nửa |
 | `test/hop-dong.test.mjs` | Hàng rào cho các luật bất biến |
+
+## Mục tiêu Phát triển Bền vững
+
+Khoan Đã hướng tới bốn chỉ tiêu SDG của Liên Hợp Quốc:
+
+| SDG | Chỉ tiêu | Liên hệ |
+|---|---|---|
+| **16** Hoà bình, công lý | 16.4 giảm dòng tiền bất hợp pháp và tội phạm có tổ chức | Lừa đảo trực tuyến ở Việt Nam do các nhóm có tổ chức thực hiện; chặn ở phía nạn nhân là cắt dòng tiền tại nguồn |
+| **10** Giảm bất bình đẳng | 10.2 hoà nhập cho mọi lứa tuổi | Người cao tuổi bị đẩy ra khỏi thế giới số vì sợ bị lừa; app hạ rào cản thay vì bảo họ tránh xa |
+| **3** Sức khoẻ và hạnh phúc | 3.4 sức khoẻ tinh thần | Mất tiền tiết kiệm cả đời gây sang chấn kéo dài — hậu quả không dừng ở tiền |
+| **4** Giáo dục chất lượng | 4.4 kỹ năng số | Module Bài học dạy nhận diện chiêu trò, không chỉ cảnh báo từng vụ |
+
+## Con đường đưa tới người dùng
+
+1. **PWA** — cài từ trình duyệt, không qua cửa hàng ứng dụng, không cần tài khoản.
+2. **Con cháu cài cho bố mẹ** — đây là con đường thật: người cao tuổi hiếm khi tự
+   tìm app, nhưng con cháu tìm hộ. Bảng điều khiển cho con cháu phục vụ đúng việc đó.
+3. **Hội người cao tuổi, tổ dân phố, thư viện phường** — nơi đã có sẵn niềm tin và
+   có người hướng dẫn trực tiếp.
+4. **Mã nguồn mở** — bất kỳ ai cũng kiểm được bộ luật quyết định mức rủi ro. Với
+   một app nói "đừng tin ai", việc tự nó kiểm chứng được là điều kiện cần.
+
+Chi phí vận hành gần bằng không khi chạy mô hình cục bộ, nên không phụ thuộc vào
+nguồn tài trợ để tiếp tục sống.
 
 ## Ghi nhận
 

@@ -59,7 +59,7 @@ Mở <https://github.com/new>:
 Bấm *Create repository*, rồi chạy (thay `<tên-github>`):
 
 ```bash
-git remote add origin https://github.com/<tên-github>/khoan-da.git
+git remote add origin https://github.com/quannguyen991/khoan-da-nic.git
 git push -u origin main
 ```
 
@@ -105,10 +105,15 @@ ollama pull qwen2.5:7b
 
 ```powershell
 cd $HOME
-git clone https://github.com/<tên-github>/khoan-da.git
-cd khoan-da
+git clone https://github.com/quannguyen991/khoan-da-nic.git
+cd khoan-da-nic
 npm install
 ```
+
+> ⚠️ Thư mục tạo ra tên là **`khoan-da-nic`** (theo tên repo), không phải
+> `khoan-da`. Gõ `cd khoan-da` sẽ báo *"Cannot find path"*, và `npm install`
+> chạy ở thư mục sai sẽ báo `ENOENT ... package.json` — nghe như thiếu tệp,
+> thật ra chỉ là đứng nhầm chỗ.
 
 `npm install` mất vài phút.
 
