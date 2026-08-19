@@ -487,9 +487,24 @@ app.post('/api/analyze/so-bo', chanPhanTich, (req, res) => {
   const {
     vanBan, anh, ghiAm, ghiAmConfidence, ghiAmFailed, ghiAmMaLoi,
     traLoiBoHoiNhanh: traLoiBoHoiNhanhRaw,
+    trangThaiMay: trangThaiMayRaw,
   } = req.body || {};
 
   const traLoiBoHoiNhanh = locTraLoiBoHoiNhanh(traLoiBoHoiNhanhRaw);
+  /*
+   * ⚠️ RÚT Ở ĐÂY NỮA, KHÔNG DÙNG CHUNG BIẾN VỚI `xuLyPhanTich` — LỖI ĐO 19/8/2026.
+   *
+   * Route này là handler RIÊNG, không nằm trong `xuLyPhanTich`. Khi thêm nguồn
+   * đầu vào `trangThaiMay`, biến được khai bên kia nhưng dòng gọi `analyze()` ở
+   * đây cũng được sửa theo — nên nó tham chiếu một tên không tồn tại và ném
+   * `ReferenceError` ⇒ HTTP 500.
+   *
+   * Hỏng đúng chỗ tệ nhất: `/api/analyze/so-bo` LÀ đường dự phòng mà giao diện
+   * gọi khi `/api/analyze` lỗi. Cả hai cùng chết thì màn kết quả rơi về
+   * `khongGoiDuocMayChu` — bác thấy "chưa gửi đi kiểm được" và không có cách nào
+   * biết là do một biến chưa khai.
+   */
+  const trangThaiMay = locTrangThaiMay(trangThaiMayRaw);
 
   if (typeof anh === 'string' && anh.length > GIOI_HAN_TEP) {
     return res.status(413).json({ maLoi: 'FILE_TOO_LARGE' });

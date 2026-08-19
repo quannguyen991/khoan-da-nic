@@ -176,7 +176,12 @@ function bangChungMangDauHieu(signal, ctx, pack) {
 
   // So trên CẢ bản có dấu lẫn bản bỏ dấu, đúng như direct-precheck làm.
   // Gỡ HẾT dấu ngăn hàng nghìn: `1.200.000đ` → `1200000đ`.
-  const goSoTien = (x) => x.replace(/(\d)[.,](?=\d{3})/g, '$1');
+  /*
+   * ⚠️ GIỐNG HỆT `NGAN_HANG_NGHIN` bên context-builder, kể cả `(?!\d)` chặn
+   * ngày tháng. Hai tầng chuẩn hoá lệch nhau nghĩa là cùng một câu, tầng này
+   * thấy tầng kia không — đúng loại lỗi vừa phải vá ngày 19/8/2026.
+   */
+  const goSoTien = (x) => x.replace(/(\d)[.,](?=\d{3}(?!\d))/g, '$1');
   const ungVien = trich.flatMap((q) => {
     const c = goSoTien(chuanHoaTrich(q));
     return [c, boDau(c)];

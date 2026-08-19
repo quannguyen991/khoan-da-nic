@@ -103,10 +103,38 @@ function goCheChu(t) {
  * An toàn theo §4.2: bỏ ký tự ngăn chỉ làm khoảng `[^.]{0,N}` với tới XA HƠN,
  * tức chỉ THÊM khớp. Không mẫu nào trong locale pack chứa dấu chấm giữa số.
  */
-const NGAN_HANG_NGHIN = /(?<=\d)[.,](?=\d{3}\b)/g;
+/*
+ * ⚠️ KHÔNG CÓ `` Ở CUỐI — ĐO ĐƯỢC 19/8/2026, VÀ ĐÂY LÀ MỘT LỖ CHỈ HỞ VỚI
+ * TIẾNG VIỆT KHÔNG DẤU.
+ *
+ * Bản trước kết thúc bằng `\d{3}`. Ranh giới từ phân biệt chữ cái ASCII với
+ * chữ khác, nên nó cư xử KHÁC NHAU giữa hai cách viết cùng một số tiền:
+ *
+ *   "1.200.000đ"  ->  1200000đ   (đ không phải chữ ASCII, có ranh giới)
+ *   "1.200.000d"  ->  1200.000d  (d là chữ ASCII, KHÔNG có ranh giới)
+ *
+ * Dấu chấm còn sót chặn ngang `[^.]{0,N}` của gần như mọi mẫu trong locale
+ * pack — tức toàn bộ cue bank mù với tin nhắn viết KHÔNG DẤU có kèm số tiền.
+ * Mà không dấu chính là cách tin nhắn lừa đảo hay được viết nhất.
+ *
+ * Đo trên ca `viec-nhe-luong-cao` ("Chi nap 1.200.000d lam nhiem vu cuoi la rut
+ * duoc ca von lan thuong"): cả hai mẫu OFF_TASK_PREPAY đều trượt, tầng luật câm
+ * hoàn toàn — trong khi mẫu viết ra chính là để bắt câu đó.
+ *
+ * `evidence-validator.js` đã dùng đúng dạng không có ranh giới từ từ trước. Hai
+ * tầng chuẩn hoá khác nhau tự nó là một lỗi: cùng một câu, tầng này thấy, tầng
+ * kia không.
+ */
+/*
+ * ⚠️ `(?!\d)` Ở CUỐI CHẶN NGÀY THÁNG. Không có nó thì "19.8.2026" thành
+ * "19.82026" — dấu chấm giữa ngày và năm bị nuốt vì "202" trông như nhóm ba
+ * chữ số. Tiền Việt luôn có nhóm ba chữ số ĐẦY ĐỦ rồi hết số, nên yêu cầu đó
+ * loại được ngày tháng mà không bỏ sót số tiền nào.
+ */
+const NGAN_HANG_NGHIN = /(\d)[.,](?=\d{3}(?!\d))/g;
 
 function chuanHoa(s) {
-  let t = s.toLowerCase().replace(NGAN_HANG_NGHIN, '');
+  let t = s.toLowerCase().replace(NGAN_HANG_NGHIN, '$1');
   for (const [re, thay] of CONTRACTIONS) t = t.replace(re, thay);
   return t.replace(/[ \t]+/g, ' ').trim();
 }

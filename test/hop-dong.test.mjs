@@ -626,3 +626,67 @@ test('§4.3 · Gemini dự phòng không nhận model của gateway', () => {
   const de = layCauHinh({ GEMINI_API_KEY: 'g', GEMINI_MODEL: 'gemini-2.0-flash' });
   assert.equal(de.model, 'gemini-2.0-flash');
 });
+
+/**
+ * §6.10 — TẦNG LUẬT PHẢI ĐỨNG MỘT MÌNH ĐƯỢC, KỂ CẢ VỚI TIẾNG VIỆT KHÔNG DẤU.
+ *
+ * ĐO ĐƯỢC 19/8/2026. `chuanHoa()` gỡ dấu ngăn hàng nghìn bằng
+ * `(?<=\d)[.,](?=\d{3})`. Ranh giới từ `` phân biệt chữ ASCII với chữ
+ * khác, nên cùng một số tiền cho hai kết quả khác nhau:
+ *
+ *     "1.200.000đ"  ->  1200000đ    (đ không phải chữ ASCII)
+ *     "1.200.000d"  ->  1200.000d   (d là chữ ASCII — CÒN SÓT dấu chấm)
+ *
+ * Dấu chấm còn sót chặn ngang `[^.]{0,N}` của gần như mọi mẫu trong cue bank,
+ * nên toàn bộ tầng luật mù với tin nhắn viết KHÔNG DẤU có kèm số tiền — mà
+ * không dấu chính là cách tin nhắn lừa đảo hay được viết nhất.
+ *
+ * Hệ quả đo được: ca "việc nhẹ lương cao" (nạp 1.200.000d làm nhiệm vụ) trước
+ * đây tầng luật câm hoàn toàn, và cả gpt-5.4 lẫn qwen đều bỏ sót nốt — tức là
+ * không lớp nào bắt được. Sau khi vá, tầng luật ra CAO trong 0,02 giây.
+ */
+test('§6.10 · tầng luật bắt được số tiền viết KHÔNG DẤU', async () => {
+  const { chuanHoa } = require(path.join(GOC, 'backend', 'src', 'analysis', 'context-builder.js'));
+
+  assert.equal(chuanHoa('nap 1.200.000d'), 'nap 1200000d',
+    'dấu ngăn hàng nghìn còn sót khi đơn vị viết không dấu');
+  assert.equal(chuanHoa('nap 1.200.000đ'), 'nap 1200000đ');
+  // Ngày tháng KHÔNG được gộp — "19.8.2026" không phải số tiền.
+  assert.equal(chuanHoa('ngay 19.8.2026'), 'ngay 19.8.2026');
+
+  const tin = 'Chi oi ben em tuyen CTV lam nhiem vu don hang, hoa hong 15%. '
+    + 'Chi nap 1.200.000d lam nhiem vu cuoi la rut duoc ca von lan thuong ngay a';
+  const { than } = await goi('/api/analyze/so-bo', { vanBan: tin });
+  assert.ok(['CAO', 'NGHI_NGO'].includes(than.nhan),
+    `tầng luật bỏ sót kịch bản "việc nhẹ lương cao" viết không dấu: ${than.nhan}`);
+
+  // Và KHÔNG được kéo theo báo oan: tin ngân hàng thật cũng có số tiền như thế.
+  const lanh = await goi('/api/analyze/so-bo', {
+    vanBan: 'Tai khoan cua quy khach vua bi tru 1.200.000d. So du con lai 3.450.000d.',
+  });
+  assert.equal(lanh.than.nhan, 'CHUA_THAY',
+    'gom số tiền không được biến tin nhắn ngân hàng thật thành cảnh báo');
+});
+
+/**
+ * §6.7 — `/api/analyze/so-bo` LÀ ĐƯỜNG DỰ PHÒNG, NÓ KHÔNG ĐƯỢC NÉM 500.
+ *
+ * Route này là handler RIÊNG, không nằm trong `xuLyPhanTich`. Khi thêm nguồn
+ * đầu vào `trangThaiMay` (19/8/2026), dòng gọi `analyze()` ở đây được sửa theo
+ * nhưng biến thì khai bên handler kia — `ReferenceError` ⇒ HTTP 500.
+ *
+ * Hỏng đúng chỗ tệ nhất: giao diện gọi route này KHI `/api/analyze` đã lỗi. Cả
+ * hai cùng chết thì màn kết quả rơi về `khongGoiDuocMayChu`, và bác không có
+ * cách nào biết là do một biến chưa khai.
+ */
+test('§6.7 · /api/analyze/so-bo nhận đủ mọi trường mà /api/analyze nhận', async () => {
+  const day = {
+    vanBan: 'Bac chuyen 50 trieu vao tai khoan an toan',
+    trangThaiMay: { docDuoc: true, soUngDungLa: 1, coCaiTrongTuan: true },
+    traLoiBoHoiNhanh: {},
+    ghiAm: false,
+  };
+  const { ma } = await goi('/api/analyze/so-bo', day);
+  assert.notEqual(ma, 500, 'đường dự phòng ném 500 khi nhận đủ trường của đường chính');
+  assert.equal(ma, 200);
+});
