@@ -49,7 +49,15 @@ import { translations, Lang, t as translate } from './i18n';
  * Backend trả ENUM và MÃ; chữ tiếng Việt / tiếng Anh nằm ở `catalog.ts`, và
  * CHỈ ở đó. Hệ quả cố ý: đổi ngôn ngữ KHÔNG THỂ làm đổi kết luận.
  */
-import { NHAN, MA_LY_DO, CHUA_KIEM, CHUA_LAY_TIN, NOI_CHAY_AI, tra, traNhieu } from './catalog';
+import { NHAN, MA_LY_DO, CHUA_KIEM, CHUA_LAY_TIN, NOI_CHAY_AI, tra, traNhieu, CHU_NATIVE } from './catalog';
+import { api } from './api-goc';
+import {
+  laApk, hienCanhBaoHeadsUp, hienPopupCanhBao, anPopup,
+  datThongBaoThuongTruc, noiDungChiaSe, quyenPopup, xinQuyenPopup,
+  ngheGiongNoi, dungNghe as dungNgheNative, coBoNghe, moCaiDatGiongNoi,
+  quyenDocThongBao, xinQuyenDocThongBao, tinMoiNhat, xoaTinDaBat,
+  type QuyenNative,
+} from './native';
 import { GuardianIntroView, GuardianAuthView, GuardianView } from './components/Guardian';
 import { AppMenuModal } from './components/AppMenuModal';
 import { FloatingQuickAccess } from './components/FloatingQuickAccess';
@@ -159,6 +167,22 @@ export default function App() {
   const [analyzeResult, setAnalyzeResult] = useState<any>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [pinnedNotification, setPinnedNotification] = useState(() => localStorage.getItem('pinnedNotification') === 'true');
+  /**
+   * Vì sao công tắc thông báo không bật lên được. `null` = không có gì để nói.
+   * §4.3 — giới hạn phải NÓI RA, không im lặng để bác tự đoán.
+   */
+  const [loiThongBaoNative, setLoiThongBaoNative] = useState<string | null>(null);
+
+  /**
+   * Có đang chạy trong bản APK không. `laApk()` phải hỏi cầu nối native nên nó
+   * bất đồng bộ — giữ kết quả ở đây để giao diện dùng đồng bộ được.
+   *
+   * ⚠️ MẶC ĐỊNH `false`, KHÔNG PHẢI `true`. Đoán nhầm về phía "có native" là
+   * hứa với bác những khả năng bản web không có (§4.3); đoán nhầm về phía
+   * ngược lại chỉ là khiêm tốn thừa trong khoảnh khắc đầu.
+   */
+  const [dangChayApk, setDangChayApk] = useState(false);
+  useEffect(() => { void laApk().then(setDangChayApk); }, []);
   const [historyItems, setHistoryItems] = useState<HistoryRecord[]>(() => {
     const saved = localStorage.getItem('khoan_da_history');
     if (saved) {
@@ -303,13 +327,83 @@ export default function App() {
     }
   };
 
+  /**
+   * ⚠️ CÔNG TẮC PHẢI THEO TRẠNG THÁI THẬT, KHÔNG THEO Ý MUỐN — §4.3.
+   *
+   * Bản trước lật công tắc rồi mới gửi, và không bao giờ đọc lại kết quả. Trong
+   * APK điều đó hỏng nặng hơn ở web: WebView của Capacitor KHÔNG có Notification
+   * API dùng được, nên `sendRealNotification` chạy xong êm ru mà thanh thông báo
+   * trống trơn. Công tắc xanh, chữ ghi "Đang BẬT túc trực 24/7", và thực tế là
+   * không có gì túc trực cả.
+   *
+   * Đó chính là dạng lỗi §4.3: không phải "không làm được" mà là "báo là làm
+   * được trong khi không làm được". Bác tin có một lối tắt chờ sẵn lúc bị gọi
+   * thúc — và lúc cần thì không có.
+   *
+   * Nay: APK đi đường native và ĐỌC LẠI `dangBat` mà lớp native trả về; công tắc
+   * chỉ sáng khi Android xác nhận thông báo đã nằm trên thanh. Từ chối quyền là
+   * một kết quả hợp lệ, không phải lỗi — công tắc ở lại TẮT.
+   */
   const togglePinnedNotification = async () => {
     const next = !pinnedNotification;
+
+    if (await laApk()) {
+      const r = await datThongBaoThuongTruc(next);
+      // `dangBat` là sự thật từ Android, không phải thứ vừa được yêu cầu.
+      setPinnedNotification(r.dangBat);
+      localStorage.setItem('pinnedNotification', String(r.dangBat));
+      if (next && !r.dangBat) setLoiThongBaoNative(r.maLoi ?? 'CHUA_CO_QUYEN_THONG_BAO');
+      else setLoiThongBaoNative(null);
+      return;
+    }
+
     setPinnedNotification(next);
     localStorage.setItem('pinnedNotification', String(next));
     if (next) {
       sendRealNotification(pinnedActionType);
     }
+  };
+
+  /**
+   * ĐƯA CẢNH BÁO RA NGOÀI APP — hai lối, cùng một mức `CAO`.
+   *
+   * ⚠️ VÌ SAO CẦN CẢ HAI, KHÔNG PHẢI MỘT.
+   *
+   *  · Heads-up notification: chạy được ngay, không cần quyền đặc biệt nào
+   *    ngoài POST_NOTIFICATIONS. Nhưng nó nằm ở thanh trên và tự ẩn sau vài
+   *    giây — bác đang áp điện thoại vào tai thì không thấy.
+   *  · Popup đè màn hình: thấy được kể cả khi bác đang trong cuộc gọi, nhưng
+   *    cần `SYSTEM_ALERT_WINDOW` — một quyền phải tự vào Cài đặt bật, và phần
+   *    lớn người dùng sẽ không bật.
+   *
+   * Nên: cái nào bật được thì chạy cái đó, không cái nào phụ thuộc cái nào.
+   *
+   * ⚠️ KHÔNG CÓ `await` NÀO Ở ĐÂY CHẶN ĐƯỜNG KIỂM (§6.7). Lượt phân tích đã
+   * xong và màn kết quả đã hiện; hai lời gọi này chỉ là phần thêm ra ngoài. Một
+   * cái hỏng, một cái treo, hay cả hai cùng chết — màn kết quả trong app vẫn
+   * nguyên vẹn.
+   */
+  const canhBaoRaNgoaiApp = async () => {
+    if (!(await laApk())) return;
+
+    // Chữ đi từ catalog xuống — §11, lớp Java không tự soạn câu nào.
+    void hienCanhBaoHeadsUp({
+      tieuDe: tra(CHU_NATIVE, 'heads_up_tieu_de', lang) ?? '',
+      noiDung: tra(CHU_NATIVE, 'heads_up_noi_dung', lang) ?? '',
+    });
+
+    /*
+     * ⚠️ HỎI QUYỀN TRƯỚC, ĐỪNG GỌI RỒI BẮT LỖI. `hienPopupCanhBao` reject với
+     * `CHUA_BAT_QUYEN_POPUP` khi chưa được cấp — bắt im rồi bỏ qua thì không ai
+     * biết tính năng đang tắt. Hỏi trước để còn ghi lại được trạng thái thật.
+     */
+    if ((await quyenPopup()) !== 'da_bat') return;
+    void hienPopupCanhBao({
+      nhan: 'CAO',
+      tieuDe: tra(CHU_NATIVE, 'popup_tieu_de', lang) ?? '',
+      nutMo: tra(CHU_NATIVE, 'popup_nut_mo', lang) ?? '',
+      nutOn: tra(CHU_NATIVE, 'popup_nut_on', lang) ?? '',
+    });
   };
 
   const handleAnalyze = async (text: string, image?: string | null) => {
@@ -318,7 +412,7 @@ export default function App() {
     let finalResult: any = null;
 
     try {
-      const res = await fetch('/api/analyze', {
+      const res = await fetch(api('/api/analyze'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ vanBan: text || '', anh: image || undefined })
@@ -331,7 +425,7 @@ export default function App() {
     } catch (err) {
       console.warn('Full AI route fallback to preliminary rule check:', err);
       try {
-        const res2 = await fetch('/api/analyze/so-bo', {
+        const res2 = await fetch(api('/api/analyze/so-bo'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ vanBan: text || '', anh: image || undefined })
@@ -365,6 +459,38 @@ export default function App() {
       if (finalResult) {
         setAnalyzeResult(finalResult);
         /**
+         * ⚠️ CHỈ MỨC `CAO` MỚI ĐƯỢC ĐÈ RA NGOÀI APP — và đây là ràng buộc an
+         * toàn, không phải lựa chọn thẩm mỹ.
+         *
+         * Cho `NGHI_NGO` cũng đè popup + rung chuông thì bác học được đúng một
+         * điều: vuốt bỏ cái dải đỏ đó. Đến lượt `CAO` thật — lúc có người đang
+         * thúc chuyển tiền — bác cũng vuốt bỏ nốt, theo phản xạ đã được chính
+         * app này dạy. §4.6: mỗi lần làm phiền sai là một lần bào mòn lần đúng.
+         *
+         * ⚠️ KHÔNG ĐỌC `canThiep` Ở ĐÂY. §HĐ luật 4: `canThiep` chọn MÀN HÌNH
+         * bên trong app, `nhan` mới là mức rủi ro. Đây là quyết định "có làm
+         * phiền ra ngoài app không" — nó đi theo mức, không theo màn hình.
+         *
+         * ⚠️ CẢ HAI ĐỀU IM LẶNG KHI KHÔNG PHẢI APK. `native.ts` trả về false
+         * chứ không ném, nên bản web và PWA chạy qua đây không hề hấn gì.
+         */
+        if (finalResult.nhan === 'CAO') {
+          /*
+           * ⚠️ LƯU LẠI TRƯỚC KHI GỬI CẢNH BÁO RA NGOÀI.
+           * Bấm heads-up có thể xảy ra sau khi app đã bị Android thu hồi bộ nhớ
+           * — lúc đó `analyzeResult` trong React đã mất. Không lưu thì bác chạm
+           * vào cảnh báo và nhận một màn hình trống, phải kiểm lại từ đầu đúng
+           * lúc đang bị thúc.
+           */
+          try {
+            localStorage.setItem('khoan_da_canh_bao_cao', JSON.stringify(finalResult));
+          } catch {
+            // Hết chỗ lưu (ảnh base64 lớn). Không sao — deep link rơi về trang
+            // chủ, và §4.3 nói thà về trang chủ còn hơn dựng màn cảnh báo rỗng.
+          }
+          void canhBaoRaNgoaiApp();
+        }
+        /**
          * ⚠️ CHỈ GHI LỊCH SỬ KHI CÓ MỘT MỨC THẬT TỪ MÁY CHỦ.
          * Bản trước ghi `risk: finalResult.nhan || 'CAO'`, nên một lượt HỎNG
          * MẠNG cũng nằm lại trong lịch sử như một lượt "Nguy hiểm cao" đã kiểm.
@@ -390,6 +516,88 @@ export default function App() {
   };
 
   /**
+   * ĐƯỜNG VÀO TỪ ANDROID: nút Chia sẻ, lối tắt giữ biểu tượng, và deep link của
+   * chính thông báo cảnh báo.
+   *
+   * ⚠️ NGHE CẢ `visibilitychange`, KHÔNG CHỈ CHẠY MỘT LẦN LÚC DỰNG.
+   * `launchMode="singleTask"` nghĩa là app đang chạy thì Android KHÔNG dựng lại
+   * WebView — nó chỉ đưa cái đang có ra tiền cảnh. Chỉ đọc lúc dựng thì lần
+   * chia sẻ THỨ HAI trở đi im lặng hoàn toàn: app hiện lên, không có gì xảy ra,
+   * không lỗi. Người dùng kết luận là "lúc được lúc không", trong khi thật ra
+   * nó hỏng đúng từ lần thứ hai.
+   *
+   * ⚠️ Ở BẢN WEB, `noiDungChiaSe()` trả `{ co: false }` và không ném — cùng một
+   * mã nguồn chạy được ở cả ba nơi (§6.7).
+   */
+  useEffect(() => {
+    let huy = false;
+
+    const lay = async () => {
+      if (!(await laApk())) return;
+
+      /*
+       * Bác đã ở trong app rồi thì dải popup đè màn hình không còn việc gì để
+       * làm — để nguyên là che mất chính màn kết quả mà nó vừa gọi bác tới.
+       */
+      void anPopup();
+
+      const d = await noiDungChiaSe();
+      if (huy || !d.co) return;
+
+      if (d.loiTat) {
+        // Lối tắt là ĐIỀU HƯỚNG, không phải nội dung — không gửi đi phân tích.
+        if (d.loiTat === 'canh-bao-dung-lai-60s' || d.loiTat === 'dung-lai-60s') {
+          /*
+           * §4.6 — chạm vào cảnh báo phải tới THẲNG màn Dừng 60s, không phải
+           * trang chủ rồi tự tìm nút.
+           */
+          const daLuu = localStorage.getItem('khoan_da_canh_bao_cao');
+          if (daLuu) {
+            try {
+              const kq = JSON.parse(daLuu);
+              if (kq?.nhan === 'CAO') {
+                setAnalyzeResult(kq);
+                setView('warning');
+                return;
+              }
+            } catch {
+              localStorage.removeItem('khoan_da_canh_bao_cao');
+            }
+          }
+          /*
+           * ⚠️ KHÔNG DỰNG MÀN CẢNH BÁO VỚI DỮ LIỆU RỖNG — §4.3.
+           * Không có kết quả lưu nghĩa là app đã bị đóng hẳn trước khi kịp lưu.
+           * Hiện một màn "Nguy hiểm cao" trống là khẳng định một điều chưa hề
+           * kiểm được. Về trang chủ, để bác kiểm lại.
+           */
+          setView('home');
+          return;
+        }
+        setView(d.loiTat === 'dang-bi-goi' ? 'voice'
+          : d.loiTat === 'goi-nguoi-than' ? 'family'
+            : 'guardian');
+        return;
+      }
+
+      /*
+       * ⚠️ ẢNH HỎNG VẪN PHẢI GỬI ĐI — §4.3.
+       * `maLoi` (ANH_QUA_LON / KHONG_DOC_DUOC_ANH) là thứ backend cần để đẩy
+       * vào `chuaKiem`. Chặn ở đây là nuốt mất đúng thứ §4.3 sinh ra để nói:
+       * bác chia sẻ một ảnh sang, app im lặng, và bác tưởng đã kiểm rồi.
+       */
+      if (d.vanBan || d.anh) {
+        handleAnalyze(d.vanBan ?? '', d.anh ?? null);
+      }
+    };
+
+    void lay();
+    const khiHien = () => { if (document.visibilityState === 'visible') void lay(); };
+    document.addEventListener('visibilitychange', khiHien);
+    return () => { huy = true; document.removeEventListener('visibilitychange', khiHien); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  /**
    * AI ĐANG CHẠY Ở ĐÂU — §11 minh bạch.
    *
    * ⚠️ HỎI MÁY CHỦ, ĐỪNG ĐOÁN. Giao diện không có cách nào tự biết mô hình đang
@@ -404,7 +612,7 @@ export default function App() {
 
   useEffect(() => {
     let huy = false;
-    fetch('/api/suc-khoe')
+    fetch(api('/api/suc-khoe'))
       .then((r) => (r.ok ? r.json() : null))
       .then((d) => { if (!huy && d?.noiChay) setNoiChayAi(d.noiChay); })
       .catch(() => { /* không biết thì không nói */ });
@@ -616,6 +824,9 @@ export default function App() {
                 setPinnedActionType={setPinnedActionType}
                 onTriggerEmergency={triggerEmergencyAlert}
                 onSendTestNotification={() => sendRealNotification(pinnedActionType)}
+                loiThongBaoNative={loiThongBaoNative}
+                dangChayApk={dangChayApk}
+                onAnalyzeText={(txt) => handleAnalyze(txt)}
                 showInAppBanner={showInAppBanner}
                 setShowInAppBanner={setShowInAppBanner}
               />
@@ -1284,6 +1495,24 @@ function VoiceView({
   const [micVolume, setMicVolume] = useState<number[]>([10, 16, 24, 30, 36, 30, 24, 16, 10]);
   const [speechApiSupported, setSpeechApiSupported] = useState(true);
 
+  /**
+   * ĐƯỜNG NGHE CỦA BẢN APK — và đây là một KHÁC BIỆT VỀ QUYỀN RIÊNG TƯ, không
+   * phải một chi tiết kỹ thuật.
+   *
+   * `webkitSpeechRecognition` của trình duyệt GỬI TIẾNG NÓI RA MÁY CHỦ của hãng
+   * (Google/Microsoft) để đổi thành chữ — và vì nó không đi qua `fetch`, CSP
+   * `connect-src 'self'` không thấy và không chặn được. Bộ nghe native của
+   * Android thì chạy TRÊN MÁY.
+   *
+   * Nên hai đường này khác nhau ở đúng cái người dùng cần biết: tiếng nói có rời
+   * khỏi máy hay không. Dòng cảnh báo bên dưới bám theo `nguonNghe`, không bám
+   * theo "có nghe được hay không" — nói sai chiều nào cũng là lời khai sai.
+   *
+   * `dang_do` = chưa hỏi xong máy. Chưa biết thì chưa khẳng định gì (§4.3).
+   */
+  const [nguonNghe, setNguonNghe] = useState<'dang_do' | 'trinh_duyet' | 'tren_may' | 'khong_co'>('dang_do');
+  const dangNgheNativeRef = useRef(false);
+
   const recognitionRef = useRef<any>(null);
   const timerRef = useRef<any>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -1296,10 +1525,30 @@ function VoiceView({
 
   useEffect(() => {
     isComponentMounted.current = true;
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      setSpeechApiSupported(false);
-    }
+
+    /*
+     * ⚠️ HỎI MÁY, ĐỪNG SUY TỪ `window.SpeechRecognition`.
+     * Trong APK, WebView KHÔNG có `webkitSpeechRecognition` — suy theo nó thì
+     * app kết luận "máy bác không nghe được chữ" trong khi Android ngay dưới đó
+     * có bộ nghe chạy trên máy, tốt hơn hẳn về quyền riêng tư. Đó là §4.3 lộn
+     * ngược: khai THIẾU một khả năng đang có, và đẩy bác sang gõ tay không cần
+     * thiết.
+     */
+    void (async () => {
+      if (await laApk()) {
+        const co = await coBoNghe();
+        if (!isComponentMounted.current) return;
+        // `'chua_ro'` ⇒ chưa hỏi được ROM. Cho đi tiếp: lượt nghe thật sẽ trả
+        // về mã lỗi cụ thể, và đó là thông tin đúng hơn một lời đoán ở đây.
+        setNguonNghe(co === false ? 'khong_co' : 'tren_may');
+        setSpeechApiSupported(co !== false);
+        return;
+      }
+      const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      if (!isComponentMounted.current) return;
+      setNguonNghe(SR ? 'trinh_duyet' : 'khong_co');
+      setSpeechApiSupported(!!SR);
+    })();
 
     // Auto-start recording & microphone stream with smooth initialization
     startRecording();
@@ -1390,6 +1639,47 @@ function VoiceView({
       setDuration(prev => prev + 1);
     }, 1000);
 
+    /*
+     * ⚠️ BẢN APK ĐI ĐƯỜNG NATIVE VÀ DỪNG Ở ĐÂY.
+     *
+     * Bộ nghe Android là MỘT LƯỢT: bắt đầu → nói → nó tự chốt hoặc bác bấm dừng
+     * → trả về chữ. Không có luồng chữ tạm như Web Speech API, nên không có
+     * `interimText` — sóng âm vẫn nhảy theo micro thật, và chữ hiện ra một lần
+     * khi lượt nghe chốt.
+     *
+     * ⚠️ KHÔNG `await` Ở ĐÂY. `startRecording` được gọi từ `useEffect` lúc vào
+     * màn; chờ ở đây là treo cả màn hình trong lúc bộ nghe khởi động (§6.7).
+     */
+    if (nguonNghe === 'tren_may') {
+      dangNgheNativeRef.current = true;
+      void ngheGiongNoi('vi-VN').then((kq) => {
+        if (!isComponentMounted.current) return;
+        dangNgheNativeRef.current = false;
+        setIsRecording(false);
+        if (timerRef.current) clearInterval(timerRef.current);
+
+        // Nghe được chữ — kể cả khi lượt bị cắt giữa chừng, phần nghe được vẫn dùng.
+        if (kq.vanBan) setTranscript(kq.vanBan);
+
+        /*
+         * ⚠️ §4.3 — HỎNG THÌ NÓI RA, VÀ NÓI KÈM LỐI ĐI TIẾP.
+         * `CHUA_TAI_MODEL` là ca phổ biến nhất ở Việt Nam: máy chưa tải gói
+         * tiếng Việt ngoại tuyến. App KHÔNG tự tải được (Android không có API),
+         * nên thứ duy nhất làm được là đưa bác tới đúng màn Cài đặt.
+         */
+        if (kq.ghiAmFailed && !kq.vanBan) {
+          setErrorMessage(
+            kq.maLoi === 'CHUA_TAI_MODEL'
+              ? t("Máy bác chưa tải bộ nghe tiếng Việt. Bác bấm nút bên dưới để mở Cài đặt, tải xong rồi quay lại — hoặc gõ chữ cũng được.")
+              : kq.maLoi === 'CHUA_CHO_QUYEN_MICRO'
+                ? t("Máy chưa cho Khoan Đã dùng micro. Bác gõ chữ hoặc gửi ảnh giúp cháu nhé.")
+                : t("Lượt nghe này chưa xong. Bác thử lại, hoặc gõ chữ cũng được."),
+          );
+        }
+      });
+      return;
+    }
+
     // Init Speech Recognition
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (SpeechRecognition) {
@@ -1463,6 +1753,16 @@ function VoiceView({
 
   const stopRecording = () => {
     setIsRecording(false);
+    /*
+     * ⚠️ "DỪNG" PHẢI CHỐT LƯỢT NGHE, KHÔNG CHỈ TẮT MICRO.
+     * Lượt native đang treo chờ `onResults`; không gọi `dungNghe` thì nó nằm
+     * chờ tới khi hạn giờ cắt, và bác bấm Dừng rồi vẫn thấy màn hình như đang
+     * nghe. Đây đúng là lỗi đã phải vá ba lần ở bản trước.
+     */
+    if (dangNgheNativeRef.current) {
+      dangNgheNativeRef.current = false;
+      void dungNgheNative();
+    }
     if (timerRef.current) clearInterval(timerRef.current);
     if (restartTimeoutRef.current) clearTimeout(restartTimeoutRef.current);
     if (recognitionRef.current) {
@@ -1636,13 +1936,28 @@ function VoiceView({
           Gỡ được khi và chỉ khi chuyển sang bộ nghe chạy trên máy (bản APK có
           plugin native, hoặc Whisper cục bộ).
         */}
-        {speechApiSupported && (
+        {nguonNghe === 'trinh_duyet' && (
           <div className="w-full max-w-md bg-slate-100 border-2 border-slate-400 rounded-2xl px-4 py-3 my-2">
             <p className="text-[16px] font-bold text-slate-900 leading-snug">
               {t("Phần nghe này dùng dịch vụ của trình duyệt: tiếng nói của bác được gửi ra ngoài để đổi thành chữ.")}
             </p>
             <p className="text-[14px] font-medium text-slate-700 leading-snug mt-1">
               {t("Những phần khác của Khoan Đã không gửi gì ra ngoài. Bác không muốn thì gõ chữ hoặc gửi ảnh cũng được.")}
+            </p>
+          </div>
+        )}
+
+        {/*
+          ⚠️ NÓI RA CẢ KHI TIN TỐT — VÀ CHỈ KHI NÓ ĐÚNG.
+          Bộ nghe của Android chạy trên máy: tiếng nói không rời khỏi thiết bị.
+          Đây là khác biệt thật giữa bản cài đặt và bản web, và là lý do đáng để
+          bác cài bản APK. Nhưng dòng này bám theo `nguonNghe === 'tren_may'` —
+          hiện nó ở bản web là lời khai SAI, tệ hơn cả im lặng (§11).
+        */}
+        {nguonNghe === 'tren_may' && (
+          <div className="w-full max-w-md bg-emerald-50 border-2 border-emerald-500 rounded-2xl px-4 py-3 my-2">
+            <p className="text-[16px] font-bold text-emerald-900 leading-snug">
+              {t("Phần nghe này chạy ngay trên máy của bác. Tiếng nói không gửi đi đâu cả.")}
             </p>
           </div>
         )}
@@ -1665,9 +1980,26 @@ function VoiceView({
       </div>
 
       {errorMessage && (
-        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-3 text-[14px] text-amber-900 mb-2 flex items-start gap-2.5 shadow-xs">
-          <AlertTriangle size={16} className="text-amber-600 shrink-0 mt-0.5" />
-          <p className="leading-snug">{errorMessage}</p>
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-3 text-[14px] text-amber-900 mb-2 shadow-xs">
+          <div className="flex items-start gap-2.5">
+            <AlertTriangle size={16} className="text-amber-600 shrink-0 mt-0.5" />
+            <p className="leading-snug">{errorMessage}</p>
+          </div>
+          {/*
+            ⚠️ §6.7 — NÓI RA GIỚI HẠN THÌ PHẢI KÈM LỐI ĐI TIẾP.
+            "Máy bác chưa có bộ nghe tiếng Việt" mà dừng ở đó là bỏ bác giữa
+            đường: bác không biết tải ở đâu, và app thì KHÔNG tự tải được —
+            Android không có API nào cho phép. Thứ duy nhất làm được là mở đúng
+            màn Cài đặt.
+          */}
+          {nguonNghe === 'tren_may' && (
+            <button
+              onClick={() => { void moCaiDatGiongNoi(); }}
+              className="mt-2.5 w-full min-h-[52px] px-4 bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-extrabold rounded-xl text-[15px] transition-all"
+            >
+              {t("Mở Cài đặt để tải bộ nghe")}
+            </button>
+          )}
         </div>
       )}
 
@@ -2236,6 +2568,255 @@ function PrivacyView({ setView, t }: { setView: (v: ViewState) => void, t: any }
 }
 
 // --- Notifications View ---
+/**
+ * CỬA SỔ NỔI CỦA BẢN APK — quyền `SYSTEM_ALERT_WINDOW`.
+ *
+ * ══════════ VÌ SAO ĐÁNG LÀM RIÊNG MỘT KHỐI ══════════
+ *
+ * Đây là thứ DUY NHẤT trong app hiện ra được khi bác đang nghe điện thoại.
+ * Thông báo heads-up bị màn hình cuộc gọi che; app thì bác không mở được vì tay
+ * đang cầm máy áp vào tai. Kẻ lừa đảo biết điều đó — cả kịch bản giả danh công
+ * an đều diễn ra TRONG một cuộc gọi đang nối, và chúng dặn "đừng tắt máy".
+ *
+ * Một dải chữ đè lên chính màn hình cuộc gọi là cách duy nhất chen được vào.
+ *
+ * ⚠️ QUYỀN NÀY KHÔNG XIN BẰNG HỘP THOẠI ĐƯỢC. Android bắt người dùng tự vào
+ * Cài đặt bật, và cố tình làm nó khó — vì đây cũng chính là quyền phần mềm độc
+ * hại dùng để vẽ đè lên màn hình ngân hàng. Nên: nói thật là phải đi mấy bước,
+ * đưa thẳng tới màn Cài đặt, rồi ĐỌC LẠI trạng thái khi bác quay về.
+ *
+ * ⚠️ §4.3 — ĐỌC LẠI KHI QUAY VỀ, ĐỪNG GIẢ ĐỊNH ĐÃ BẬT. Bấm nút mở Cài đặt rồi
+ * coi như xong là dạng lỗi quen thuộc: bác có thể đã bật, có thể bấm nhầm, có
+ * thể ROM không có màn đó. Ba ca khác nhau, và chỉ đọc lại mới phân biệt được.
+ */
+function CuaSoNoiNative({ t }: { t: any }) {
+  const [quyen, setQuyen] = useState<QuyenNative>('chua_bat');
+  const [dangThu, setDangThu] = useState(false);
+
+  const doLai = () => { void quyenPopup().then(setQuyen); };
+
+  useEffect(() => {
+    doLai();
+    // Bác đi sang Cài đặt hệ thống rồi quay về ⇒ app trở lại tiền cảnh ⇒ đọc lại.
+    const khiHien = () => { if (document.visibilityState === 'visible') doLai(); };
+    document.addEventListener('visibilitychange', khiHien);
+    return () => document.removeEventListener('visibilitychange', khiHien);
+  }, []);
+
+  /**
+   * ⚠️ NÚT THỬ LÀ BẮT BUỘC, KHÔNG PHẢI TIỆN NGHI.
+   * Không có nó thì lần đầu tiên bác nhìn thấy dải cảnh báo này là giữa một vụ
+   * lừa đảo thật — lúc đang hoảng, và không biết nó là cái gì. Thấy trước một
+   * lần trong lúc bình tĩnh là biết nó vô hại và biết nút tắt nằm đâu.
+   */
+  const thu = async () => {
+    setDangThu(true);
+    try {
+      await hienPopupCanhBao({
+        nhan: 'CAO',
+        tieuDe: t("Đây là dải cảnh báo — bác đang xem thử"),
+        nutMo: t("Mở Khoan Đã"),
+        nutOn: t("Tôi ổn, tắt đi"),
+      });
+      // Tự tắt sau 5 giây để bản thử không nằm lại trên màn hình bác.
+      setTimeout(() => { void anPopup(); setDangThu(false); }, 5000);
+    } catch {
+      setDangThu(false);
+      doLai();
+    }
+  };
+
+  return (
+    <div className="w-full max-w-[420px] bg-gradient-to-r from-purple-900 via-indigo-900 to-purple-800 text-white rounded-[26px] p-5 shadow-lg border border-purple-400/50 mb-5 relative overflow-hidden">
+      <div className="flex items-start gap-2.5 mb-2">
+        <div className="w-9 h-9 rounded-xl bg-purple-500/30 border border-purple-300/40 flex items-center justify-center text-purple-200 shrink-0">
+          <Maximize2 size={20} />
+        </div>
+        <div>
+          <h3 className="font-extrabold text-[15px] text-white leading-tight">
+            {t("Dải cảnh báo đè lên màn hình")}
+          </h3>
+          <p className="text-[14px] text-purple-200 leading-snug">
+            {t("Hiện được cả khi bác đang nghe điện thoại.")}
+          </p>
+        </div>
+      </div>
+
+      <p className="text-[14px] text-purple-100/90 leading-relaxed mb-3">
+        {t("Khi Khoan Đã thấy dấu hiệu nguy hiểm cao, một dải chữ hiện đè lên màn hình bác đang dùng — kể cả màn hình cuộc gọi. Dải này luôn có nút tắt.")}
+      </p>
+
+      {quyen === 'da_bat' ? (
+        <>
+          <div className="flex items-center gap-2 mb-3 p-3 bg-emerald-400/15 border border-emerald-300/40 rounded-2xl">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 shrink-0"></span>
+            <span className="text-[14px] font-extrabold text-emerald-100">{t("Máy bác đã cho phép")}</span>
+          </div>
+          <button
+            onClick={thu}
+            disabled={dangThu}
+            className="w-full py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 active:scale-95 disabled:opacity-60 text-white font-extrabold rounded-xl text-[14px] flex items-center justify-center gap-2 shadow-md transition-all"
+          >
+            <Sparkles size={15} />
+            <span>{dangThu ? t("Đang hiện thử…") : t("Xem thử một lần")}</span>
+          </button>
+        </>
+      ) : quyen === 'khong_ho_tro' ? (
+        /*
+         * ⚠️ §4.3 — "MÁY NÀY KHÔNG LÀM ĐƯỢC" KHÁC "CHƯA BẬT".
+         * Gộp hai ca thành một nút "Bật ngay" là đẩy bác đi tìm một thứ không
+         * tồn tại trên máy của mình, rồi tự trách là mình làm sai.
+         */
+        <div className="p-3.5 bg-white/10 border border-white/20 rounded-2xl">
+          <p className="text-[14px] text-purple-100 leading-relaxed">
+            {t("Máy này chưa dùng được dải cảnh báo. Các phần khác của Khoan Đã vẫn chạy bình thường.")}
+          </p>
+        </div>
+      ) : (
+        <>
+          <div className="p-3.5 bg-amber-400/15 border border-amber-300/40 rounded-2xl mb-3">
+            <p className="text-[14px] text-amber-100 leading-relaxed">
+              {t("Chưa bật. Bấm nút dưới đây, máy sẽ mở màn Cài đặt — bác tìm dòng Khoan Đã rồi gạt sang bật, xong quay lại đây.")}
+            </p>
+          </div>
+          <button
+            onClick={() => { void xinQuyenPopup(); }}
+            className="w-full py-2.5 bg-gradient-to-r from-amber-400 to-orange-400 hover:from-amber-500 hover:to-orange-500 active:scale-95 text-[#3b1f00] font-extrabold rounded-xl text-[14px] flex items-center justify-center gap-2 shadow-md transition-all"
+          >
+            <Sparkles size={15} />
+            <span>{t("Mở Cài đặt để bật")}</span>
+          </button>
+        </>
+      )}
+    </div>
+  );
+}
+
+/**
+ * TỰ BẮT TIN NHẮN ĐẾN — quyền đọc thông báo.
+ *
+ * ══════════ ĐÂY LÀ QUYỀN NHẠY CẢM NHẤT TRONG APP ══════════
+ *
+ * `BIND_NOTIFICATION_LISTENER_SERVICE` đọc được MỌI thông báo trên máy. Lớp
+ * native đã thu hẹp hết mức: chỉ lấy từ 7 app nhắn tin, giữ tối đa 20 tin,
+ * TRONG BỘ NHỚ, không ghi ra tệp và không gửi đi đâu (§6.9).
+ *
+ * ⚠️ VÀ NÓ KHÔNG TỰ KIỂM. Tin bắt được nằm chờ tới khi bác BẤM. Tự gửi mọi tin
+ * nhắn đến máy chủ ngay khi nhận là biến một tính năng trợ giúp thành một đường
+ * ống dữ liệu — §12 cấm tự bật thay chủ tài khoản, và tinh thần ở đây là như
+ * nhau: máy không quyết định thay bác.
+ *
+ * ⚠️ NÓI THẲNG APP ĐỌC ĐƯỢC GÌ, TRƯỚC KHI XIN. Không "để Khoan Đã bảo vệ bác
+ * tốt hơn" rồi im chuyện nó đọc thông báo. Bác phải biết mình đang cho phép gì.
+ */
+function DocTinNhanNative({ t, onAnalyze }: { t: any; onAnalyze?: (text: string) => void }) {
+  const [quyen, setQuyen] = useState<QuyenNative>('chua_bat');
+  const [dangLay, setDangLay] = useState(false);
+  const [khongCoTin, setKhongCoTin] = useState(false);
+
+  const doLai = () => { void quyenDocThongBao().then(setQuyen); };
+
+  useEffect(() => {
+    doLai();
+    const khiHien = () => { if (document.visibilityState === 'visible') doLai(); };
+    document.addEventListener('visibilitychange', khiHien);
+    return () => document.removeEventListener('visibilitychange', khiHien);
+  }, []);
+
+  const kiemTinMoi = async () => {
+    setDangLay(true);
+    setKhongCoTin(false);
+    try {
+      const tin = await tinMoiNhat();
+      /*
+       * ⚠️ §4.3 — "CHƯA BẮT ĐƯỢC TIN NÀO" KHÁC "TIN NÀY KHÔNG SAO".
+       * Không có tin thì nói KHÔNG CÓ TIN, đừng gửi chuỗi rỗng đi kiểm rồi hiện
+       * "Chưa thấy dấu hiệu rủi ro" — đó là trả lời một câu chưa ai hỏi, và câu
+       * trả lời đó nghe như một lời bảo đảm.
+       */
+      if (!tin?.co || !tin.noiDung) {
+        setKhongCoTin(true);
+        return;
+      }
+      onAnalyze?.(tin.noiDung);
+    } finally {
+      setDangLay(false);
+    }
+  };
+
+  return (
+    <div className="w-full max-w-[420px] bg-white rounded-[26px] p-5 shadow-md border border-[#e9d5ff] mb-5">
+      <h3 className="font-black text-[16px] text-[#311068] mb-1 flex items-center gap-2">
+        <Bell size={18} className="text-[#6d28d9]" />
+        {t("Tự bắt tin nhắn đến")}
+      </h3>
+
+      {/*
+        Nói đủ ba điều TRƯỚC khi xin: đọc gì, giữ bao lâu, có gửi đi không.
+      */}
+      <p className="text-[14px] text-slate-600 leading-relaxed mb-3">
+        {t("Khoan Đã đọc thông báo tin nhắn mới (Tin nhắn, Zalo, Messenger…) để bác chạm một cái là kiểm được ngay, không phải chép tay. Tin chỉ nằm trong máy bác và chỉ được gửi đi kiểm khi bác bấm.")}
+      </p>
+
+      {quyen === 'da_bat' ? (
+        <>
+          <div className="flex items-center gap-2 mb-3 p-3 bg-emerald-50 border border-emerald-300 rounded-2xl">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0"></span>
+            <span className="text-[14px] font-extrabold text-emerald-900">{t("Đang bật")}</span>
+          </div>
+
+          {khongCoTin && (
+            <div className="p-3 bg-slate-100 border border-slate-300 rounded-2xl mb-3">
+              <p className="text-[14px] text-slate-700 leading-snug">
+                {t("Chưa bắt được tin nhắn nào. Bác thử sau khi có tin mới đến nhé.")}
+              </p>
+            </div>
+          )}
+
+          <button
+            onClick={kiemTinMoi}
+            disabled={dangLay}
+            className="w-full min-h-[52px] px-4 mb-2.5 bg-gradient-to-r from-[#7c3aed] to-[#6d28d9] hover:opacity-95 active:scale-95 disabled:opacity-60 text-white font-extrabold rounded-xl text-[15px] transition-all"
+          >
+            {dangLay ? t("Đang lấy…") : t("Kiểm tin nhắn mới nhất")}
+          </button>
+
+          {/*
+            ⚠️ §6.9 — LỐI XOÁ PHẢI Ở NGAY ĐÂY, KHÔNG CHÔN TRONG CÀI ĐẶT SÂU.
+            Bác cho app đọc tin nhắn thì bác phải rút lại được dễ như lúc cho.
+          */}
+          <button
+            onClick={() => { void xoaTinDaBat(); setKhongCoTin(false); }}
+            className="w-full min-h-[52px] px-4 bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 font-bold rounded-xl text-[14px] transition-all"
+          >
+            {t("Xoá các tin đã bắt")}
+          </button>
+        </>
+      ) : quyen === 'khong_ho_tro' ? (
+        <div className="p-3.5 bg-slate-100 border border-slate-300 rounded-2xl">
+          <p className="text-[14px] text-slate-700 leading-relaxed">
+            {t("Máy này chưa dùng được phần đọc thông báo. Bác vẫn gõ chữ hoặc gửi ảnh để kiểm bình thường.")}
+          </p>
+        </div>
+      ) : (
+        <>
+          <div className="p-3.5 bg-amber-50 border border-amber-300 rounded-2xl mb-3">
+            <p className="text-[14px] text-amber-900 leading-relaxed">
+              {t("Chưa bật. Bấm nút dưới đây, máy mở màn Cài đặt — bác tìm dòng Khoan Đã rồi gạt sang bật, xong quay lại đây.")}
+            </p>
+          </div>
+          <button
+            onClick={() => { void xinQuyenDocThongBao(); }}
+            className="w-full min-h-[52px] px-4 bg-gradient-to-r from-amber-400 to-orange-400 hover:opacity-95 active:scale-95 text-[#3b1f00] font-extrabold rounded-xl text-[15px] transition-all"
+          >
+            {t("Mở Cài đặt để bật")}
+          </button>
+        </>
+      )}
+    </div>
+  );
+}
+
 function NotificationsView({ 
   setView, 
   t, 
@@ -2246,7 +2827,10 @@ function NotificationsView({
   onTriggerEmergency,
   onSendTestNotification,
   showInAppBanner,
-  setShowInAppBanner
+  setShowInAppBanner,
+  loiThongBaoNative,
+  dangChayApk,
+  onAnalyzeText
 }: { 
   setView: (v: ViewState) => void, 
   t: any, 
@@ -2257,7 +2841,13 @@ function NotificationsView({
   onTriggerEmergency?: () => void,
   onSendTestNotification?: () => void,
   showInAppBanner?: boolean,
-  setShowInAppBanner?: (val: boolean) => void
+  setShowInAppBanner?: (val: boolean) => void,
+  /** Vì sao công tắc không bật lên được. `null` = không có gì để nói (§4.3). */
+  loiThongBaoNative?: string | null,
+  /** Bản APK hay bản web — hai nơi có khả năng KHÁC NHAU, và phải nói khác nhau. */
+  dangChayApk?: boolean,
+  /** Gửi một đoạn chữ đi kiểm — dùng cho tin nhắn bắt được từ thông báo. */
+  onAnalyzeText?: (text: string) => void
 }) {
   const [testSentToast, setTestSentToast] = useState(false);
   const [pipActiveToast, setPipActiveToast] = useState(false);
@@ -2378,7 +2968,27 @@ function NotificationsView({
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
-      className="absolute inset-0 z-50 bg-[#f8f4ff] flex flex-col items-center justify-start overflow-y-auto px-4 sm:px-6 pt-10 pb-28"
+      /*
+        ⚠️ `[&>*]:shrink-0` — KHÔNG PHẢI TRANG TRÍ. LỖI ĐO ĐƯỢC 19/8/2026 TRÊN
+        MÁY THẬT (máy ảo Android 14, 360dp).
+
+        Đây là một hộp `flex flex-col` CÓ CUỘN. Trong flex, con mặc định
+        `flex-shrink: 1` — nghĩa là khi tổng chiều cao của chúng vượt quá hộp,
+        trình duyệt KHÔNG cho cuộn trước, mà NÉN các con lại cho vừa.
+
+        Với thẻ có `overflow-hidden`, nén không làm chữ tràn ra — nó CẮT SẠCH
+        nội dung bên trong. Kết quả đo được: hai thẻ "Nhắc cảnh giác" và "Dải
+        cảnh báo đè lên màn hình" teo thành hai dải cao chừng 60px, mất cả mô
+        tả lẫn NÚT BẬT nằm trong đó. Thẻ vẫn ở đúng chỗ, tiêu đề vẫn đọc được,
+        nên nhìn qua tưởng là thiết kế cố ý.
+
+        Hệ quả thật: không có đường nào bật được dải cảnh báo đè màn hình — nút
+        đã bị cắt mất. Tính năng có, mã chạy, mà người dùng không với tới được.
+
+        ⚠️ ĐỪNG GỠ. Thêm thẻ mới vào màn này thì nó tự động được bảo vệ; gỡ ra
+        là lỗi quay lại, và nó quay lại một cách IM LẶNG.
+      */
+      className="absolute inset-0 z-50 bg-[#f8f4ff] flex flex-col items-center justify-start overflow-y-auto [&>*]:shrink-0 px-4 sm:px-6 pt-10 pb-28"
     >
       {/* Top Bar */}
       <div className="w-full max-w-[420px] flex items-center justify-between mb-4">
@@ -2443,8 +3053,21 @@ function NotificationsView({
             </div>
             <div>
               <h3 className="font-black text-lg text-white leading-tight">{t("Nhắc cảnh giác trên thanh thông báo")}</h3>
+              {/*
+                ⚠️ §11 — HAI NƠI CHẠY, HAI KHẢ NĂNG KHÁC NHAU, HAI CÂU KHÁC NHAU.
+
+                Bản web: `new Notification()` sống theo trang. Đóng trình duyệt
+                là mất. Bản APK: `ThongBaoThuongTruc` là ongoing notification
+                thật của Android, có `setOngoing(true)` — nó ở lại kể cả khi app
+                đã đóng hẳn.
+
+                Dùng chung một câu thì một trong hai luôn là lời khai sai. Nói
+                "chỉ hiện khi còn mở" ở bản APK là hạ thấp thứ mình làm được;
+                nói "luôn ở đó" ở bản web là hứa một thứ không có — và cái sau
+                mới là cái nguy hiểm, vì bác tin có một lối tắt chờ sẵn.
+              */}
               <span className="inline-block text-[14px] text-amber-300 font-bold bg-amber-400/10 px-2 py-0.5 rounded-md border border-amber-300/30 mt-0.5">
-                {t("Chỉ hiện khi Khoan Đã còn mở")}
+                {dangChayApk ? t("Ở lại cả khi đã đóng app") : t("Chỉ hiện khi Khoan Đã còn mở")}
               </span>
             </div>
           </div>
@@ -2463,8 +3086,27 @@ function NotificationsView({
             frontend chưa nối vào — nên tới khi nối xong, câu chữ ở đây phải nói
             đúng cái đang có.
           */}
-          {t("Khi được bật, Khoan Đã hiện một thông báo để bác chạm vào là mở được app ngay. Thông báo này chỉ còn khi Khoan Đã đang mở — đóng trình duyệt là nó mất.")}
+          {dangChayApk
+            ? t("Khi được bật, Khoan Đã giữ một dòng trên thanh thông báo để bác chạm vào là mở được app ngay. Dòng này ở lại kể cả khi app đã đóng.")
+            : t("Khi được bật, Khoan Đã hiện một thông báo để bác chạm vào là mở được app ngay. Thông báo này chỉ còn khi Khoan Đã đang mở — đóng trình duyệt là nó mất.")}
         </p>
+
+        {/*
+          ⚠️ §4.3 — BẬT HỤT PHẢI NÓI RA, KHÔNG ĐƯỢC IM LẶNG QUAY VỀ TẮT.
+          Công tắc tự nhảy về vị trí cũ mà không giải thích thì bác chỉ thấy
+          "bấm mãi không được" và kết luận app hỏng. Lý do thật — Android chưa
+          cho quyền gửi thông báo — kèm luôn đường đi tiếp (§6.7).
+        */}
+        {loiThongBaoNative && (
+          <div className="mt-3 p-3.5 bg-amber-400/15 border border-amber-300/40 rounded-2xl relative z-10">
+            <p className="text-[15px] font-bold text-amber-100 leading-snug">
+              {t("Chưa bật được: máy chưa cho Khoan Đã gửi thông báo.")}
+            </p>
+            <p className="text-[14px] text-amber-200/90 leading-relaxed mt-1">
+              {t("Bác vào Cài đặt của máy › Ứng dụng › Khoan Đã › Thông báo và bật lên, rồi quay lại bấm công tắc này.")}
+            </p>
+          </div>
+        )}
 
         {/* Master Toggle */}
         <div className="flex items-center justify-between p-3.5 bg-white/10 rounded-2xl border border-white/15 relative z-10">
@@ -2489,7 +3131,22 @@ function NotificationsView({
         </div>
       </div>
 
-      {/* 2. Floating Always-on-top PiP Window Section (OUTSIDE APP) */}
+      {/*
+        2. CỬA SỔ NỔI — HAI ĐƯỜNG HOÀN TOÀN KHÁC NHAU, KHÔNG PHẢI MỘT TÍNH NĂNG
+        CÓ HAI GIAO DIỆN.
+
+        · Bản web dùng `documentPictureInPicture`: CHỈ có trên Chrome/Edge máy
+          tính, và cửa sổ đó nổi trên các cửa sổ khác CỦA MÁY TÍNH.
+        · Bản APK dùng `SYSTEM_ALERT_WINDOW`: nổi đè lên app khác trên điện
+          thoại, kể cả màn hình cuộc gọi đến — đúng lúc bác cần nhất.
+
+        ⚠️ ĐỪNG GỘP HAI THỨ NÀY LÀM MỘT DÒNG CHỮ. Chúng khác nhau ở chỗ quan
+        trọng nhất: cái nào chạy được trên máy bác đang cầm. Gộp lại là hứa với
+        người dùng điện thoại một thứ bản web không có (§11).
+      */}
+      {dangChayApk ? (
+        <CuaSoNoiNative t={t} />
+      ) : (
       <div className="w-full max-w-[420px] bg-gradient-to-r from-purple-900 via-indigo-900 to-purple-800 text-white rounded-[26px] p-5 shadow-lg border border-purple-400/50 mb-5 relative overflow-hidden">
         <div className="flex items-start justify-between gap-3 mb-2">
           <div className="flex items-center gap-2.5">
@@ -2526,8 +3183,16 @@ function NotificationsView({
           <span>{t("Mở cửa sổ nổi")}</span>
         </button>
       </div>
+      )}
 
-      {/* 3. Action Mode Selector */}
+      {/*
+        3. TỰ BẮT TIN NHẮN ĐẾN — CHỈ CÓ Ở BẢN CÀI ĐẶT.
+        Web không có cách nào đọc thông báo của app khác, và cũng không nên có.
+        Hiện khối này ở bản web là bày ra một tính năng không tồn tại (§11).
+      */}
+      {dangChayApk && <DocTinNhanNative t={t} onAnalyze={onAnalyzeText} />}
+
+      {/* 4. Action Mode Selector */}
       <div className="w-full max-w-[420px] bg-white rounded-[26px] p-5 shadow-md border border-[#e9d5ff] mb-5">
         <h3 className="font-black text-[16px] text-[#311068] mb-1 flex items-center gap-2">
           <Sliders size={18} className="text-[#6d28d9]" />
@@ -2912,7 +3577,7 @@ function SettingsView({
       initial={{ opacity: 0, y: 50 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 50 }}
-      className="absolute inset-0 z-50 bg-[#f8f4ff] flex flex-col items-center justify-start overflow-y-auto px-6 pt-12 pb-24"
+      className="absolute inset-0 z-50 bg-[#f8f4ff] flex flex-col items-center justify-start overflow-y-auto [&>*]:shrink-0 px-6 pt-12 pb-24"
     >
       <button aria-label={t("Quay lại")} 
         onClick={() => setView('home')}
@@ -3278,7 +3943,7 @@ function TinLuaDaoGanDay({ t, lang = 'vi' }: { t: any, lang?: Lang }) {
     let huy = false;
     (async () => {
       try {
-        const res = await fetch('/api/tin-lua-dao');
+        const res = await fetch(api('/api/tin-lua-dao'));
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const d = await res.json();
         if (huy) return;

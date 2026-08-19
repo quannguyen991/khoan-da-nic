@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  MENU LỐI TẮT — hiện khi nhấn giữ biểu tượng app ở màn hình chính.
+
+  ⚠️ LÝ DO TỒN TẠI: LÚC ĐANG BỊ GỌI, MỖI CÚ CHẠM ĐỀU ĐẮT.
+  Kẻ lừa đảo giữ người ta trên điện thoại và thúc liên tục. Mở app rồi tìm đúng
+  nút là ba, bốn bước — đủ lâu để bác bỏ cuộc và làm theo lời chúng. Nhấn giữ
+  biểu tượng là MỘT bước tới thẳng việc cần làm.
+
+  ⚠️ MỌI CHUỖI Ở ĐÂY LÀ TÀI NGUYÊN, KHÔNG MÃ CỨNG (§4.1).
+  Android đọc nhãn lối tắt bằng trình đọc màn hình, nên chúng là "chuỗi người
+  dùng đọc" theo đúng nghĩa §4.1 — phải qua bảng i18n như mọi chuỗi khác.
+
+  ⚠️ TỐI ĐA 4 LỐI TẮT, và đó là giới hạn của Android chứ không phải lựa chọn
+  thẩm mỹ. `getMaxShortcutCountPerActivity()` thường trả 4–5; khai thừa thì các
+  mục cuối bị BỎ IM LẶNG. Nên thứ tự ở đây là thứ tự ưu tiên thật.
+
+  ⚠️ `android:enabled="true"` bắt buộc — thiếu thì lối tắt không hiện, không lỗi.
+-->
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- ① Việc gấp nhất: có người đang gọi và đang thúc. -->
+    <shortcut
+        android:shortcutId="dang_bi_goi"
+        android:enabled="true"
+        android:icon="@drawable/loi_tat_goi"
+        android:shortcutShortLabel="@string/loi_tat_goi_ngan"
+        android:shortcutLongLabel="@string/loi_tat_goi_dai">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="vn.khoanda.app"
+            android:targetClass="vn.khoanda.app.MainActivity"
+            android:data="khoanda://loi-tat/dang-bi-goi" />
+        <categories android:name="android.shortcut.conversation" />
+    </shortcut>
+
+    <!-- ② Dán tin nhắn vào kiểm. -->
+    <shortcut
+        android:shortcutId="kiem_tin_nhan"
+        android:enabled="true"
+        android:icon="@drawable/loi_tat_tin_nhan"
+        android:shortcutShortLabel="@string/loi_tat_tin_ngan"
+        android:shortcutLongLabel="@string/loi_tat_tin_dai">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="vn.khoanda.app"
+            android:targetClass="vn.khoanda.app.MainActivity"
+            android:data="khoanda://loi-tat/kiem-tin-nhan" />
+    </shortcut>
+
+    <!-- ③ Gọi cho người thân — §4.6, luôn phải có đường ra người thật. -->
+    <shortcut
+        android:shortcutId="goi_nguoi_than"
+        android:enabled="true"
+        android:icon="@drawable/loi_tat_nguoi_than"
+        android:shortcutShortLabel="@string/loi_tat_nguoi_than_ngan"
+        android:shortcutLongLabel="@string/loi_tat_nguoi_than_dai">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="vn.khoanda.app"
+            android:targetClass="vn.khoanda.app.MainActivity"
+            android:data="khoanda://loi-tat/goi-nguoi-than" />
+    </shortcut>
+</shortcuts>

@@ -18,3 +18,20 @@ assets/anh-goc/*.png
 
 # Bản git cũ đã hỏng, giữ trên máy phòng khi cần — không đẩy lên.
 .git-hong-*/
+
+# ⚠️ SẢN PHẨM DỰNG CỦA ANDROID — KHÔNG ĐẨY LÊN.
+#
+# `android/app/src/main/assets/public/` là BẢN SAO của `dist/`, do `npx cap sync`
+# chép vào mỗi lần dựng. Đẩy lên git thì mỗi lần dựng lại sinh ra vài trăm dòng
+# diff của tệp đã băm tên, và bản trong git sẽ lệch bản thật ngay lần dựng kế —
+# lệch mà không ai nhận ra, vì không ai đọc diff của bundle.
+#
+# Mã nguồn Android thật (Java, manifest, res, gradle) VẪN được theo dõi.
+android/app/src/main/assets/public/
+android/app/src/main/assets/capacitor.config.json
+android/app/src/main/assets/capacitor.plugins.json
+android/app/build/
+android/build/
+android/.gradle/
+android/local.properties
+android/capacitor-cordova-android-plugins/build/

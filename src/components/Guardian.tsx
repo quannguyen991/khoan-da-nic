@@ -17,6 +17,7 @@ import {
   Info
 } from 'lucide-react';
 import { ViewState } from '../App';
+import { api } from '../api-goc';
 import { Lang, NHAN, CHUA_KIEM, MA_LY_DO, tra, traNhieu } from '../catalog';
 import { ThuTinhHuong } from './ThuTinhHuong';
 
@@ -260,7 +261,7 @@ export function GuardianView({
     setIsChecking(true);
     setQueryResult(null);
     try {
-      const res = await fetch('/api/analyze', {
+      const res = await fetch(api('/api/analyze'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ vanBan: queryInput }),

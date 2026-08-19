@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Play, Loader2, EyeOff, ChevronDown, ChevronUp, ShieldAlert, AlertTriangle, Info } from 'lucide-react';
 import { Lang, NHAN, MA_LY_DO, CHUA_KIEM, tra, traNhieu } from '../catalog';
 import { TINH_HUONG_THU, TinhHuongThu } from '../data/tinh-huong-thu';
+import { api } from '../api-goc';
 
 /**
  * KHU THỬ TÌNH HUỐNG — bản máy tính, dành cho con cháu.
@@ -40,7 +41,7 @@ export function ThuTinhHuong({ t, lang = 'vi' }: { t: (k: string) => string; lan
     setDangChay(th.ma);
     const batDau = performance.now();
     try {
-      const res = await fetch('/api/analyze', {
+      const res = await fetch(api('/api/analyze'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ vanBan: th.noiDung }),

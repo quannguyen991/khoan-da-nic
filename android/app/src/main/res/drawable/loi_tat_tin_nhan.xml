@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Biểu tượng lối tắt. Vector, không bitmap: launcher hiện ở nhiều cỡ khác nhau. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp" android:height="24dp"
+    android:viewportWidth="24" android:viewportHeight="24"
+    android:tint="#6d28d9">
+    <path android:fillColor="#FFFFFF" android:pathData="M20 2H4a 2 2 0 0 0 -2 2v18l4-4h14a 2 2 0 0 0 2 -2V4a 2 2 0 0 0 -2 -2zM7 9h10v2H7V9zm0-4h10v2H7V5z" />
+</vector>

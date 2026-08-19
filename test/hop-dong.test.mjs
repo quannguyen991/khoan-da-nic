@@ -14,7 +14,7 @@
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
-import { readFileSync, readdirSync, existsSync } from 'node:fs';
+import { readFileSync, readdirSync, existsSync, statSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
@@ -484,4 +484,59 @@ test('§4.3 · tín hiệu KHÔNG có mẫu trong locale pack thì đi qua như 
     evidence: [{ quote: 'một câu bất kỳ' }],
   };
   assert.equal(bangChungMangDauHieu(tin, {}, pack), true);
+});
+
+/**
+ * §4.3 — VECTOR HỎNG CÚ PHÁP LÀ MỘT LỖI IM LẶNG, VÀ NÓ ĐÃ XẢY RA THẬT.
+ *
+ * ĐO ĐƯỢC 19/8/2026 trên máy ảo Android 14. Cả BA biểu tượng lối tắt đều dùng
+ * cú pháp arc nén của SVG — `a15.1 15.1 0 006.6 6.6`, trong đó `006.6` là hai
+ * cờ `0 0` viết dính vào toạ độ `6.6`. Trình duyệt đọc được. Android thì không:
+ *
+ *     IllegalArgumentException: a needs to be followed by a multiple of 7
+ *     floats. However, 5 float(s) are found.
+ *
+ * Và đây là phần đúng kiểu §4.3: KHÔNG CÓ GÌ BÁO LỖI Ở PHÍA NGƯỜI DÙNG. Gradle
+ * dựng thành công, APK cài được, app mở bình thường. Chỉ có SystemUI — một tiến
+ * trình khác — lặng lẽ bỏ qua biểu tượng, và hệ quả là:
+ *
+ *   · ba lối tắt giữ-biểu-tượng-app không có hình,
+ *   · và THÔNG BÁO THƯỜNG TRỰC KHÔNG HIỆN LÊN THANH, vì `setSmallIcon` trỏ vào
+ *     đúng một trong ba tệp đó.
+ *
+ * Cái thứ hai mới là cái nguy hiểm: bác bật công tắc "túc trực 24/7", tin rằng
+ * có một lối tắt chờ sẵn lúc bị gọi thúc, và lúc cần thì trên thanh không có gì.
+ *
+ * ⚠️ THÊM VECTOR MỚI NÀO THÌ NÓ TỰ ĐỘNG ĐI QUA TEST NÀY. Đừng bỏ test đi khi
+ * thấy nó chặn một tệp mới — hãy giãn cờ arc ra: `a 15.1 15.1 0 0 0 6.6 6.6`.
+ */
+test('§4.3 · vector drawable không dùng cú pháp arc nén (Android không đọc được)', () => {
+  const goc = path.join(GOC, 'android/app/src/main/res');
+  if (!existsSync(goc)) return;   // bản không kèm mã native
+
+  const SO = /-?\d*\.?\d+(?:[eE][-+]?\d+)?/g;
+  const hong = [];
+
+  const quet = (thuMuc) => {
+    for (const ten of readdirSync(thuMuc)) {
+      const duong = path.join(thuMuc, ten);
+      if (statSync(duong).isDirectory()) { quet(duong); continue; }
+      if (!ten.endsWith('.xml')) continue;
+      const noi = readFileSync(duong, 'utf8');
+      for (const m of noi.matchAll(/pathData="([^"]*)"/g)) {
+        for (const a of m[1].matchAll(/[aA]([^a-zA-Z]*)/g)) {
+          const n = (a[1].match(SO) || []).length;
+          // Mỗi cung tròn cần đúng 7 tham số: rx ry xoay cờ cờ x y.
+          if (n % 7 !== 0) hong.push(`${path.relative(goc, duong)} (${n} số)`);
+        }
+      }
+    }
+  };
+  quet(goc);
+
+  assert.deepEqual(
+    hong, [],
+    'Vector dùng cú pháp arc nén — Android ném IllegalArgumentException và bỏ qua ' +
+    'biểu tượng trong im lặng. Giãn hai cờ ra: "a 4 4 0 0 0 -2 2".',
+  );
 });

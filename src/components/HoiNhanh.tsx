@@ -16,6 +16,7 @@ import {
   EyeOff,
 } from 'lucide-react';
 import { ViewState } from '../App';
+import { api } from '../api-goc';
 import maHopDong from '../config/ma-hop-dong.json';
 import {
   Lang, NHAN, MAU_NHAN, CHUA_KIEM, MA_LY_DO,
@@ -174,7 +175,7 @@ export function HoiNhanhView({ setView, t, lang = 'vi', onTriggerEmergency }: Ho
   const guiDiKiem = async (traLoi: Record<string, boolean>) => {
     setLoading(true);
     try {
-      const res = await fetch('/api/analyze', {
+      const res = await fetch(api('/api/analyze'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ traLoiBoHoiNhanh: traLoi }),

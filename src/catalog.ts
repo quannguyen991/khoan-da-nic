@@ -580,6 +580,43 @@ export const MA_LOI_RA: Record<string, Cap> = {
   toi_on_khong_co_gi_nguy_hiem: c('Tôi ổn, không có gì nguy hiểm', 'I’m fine, nothing dangerous here'),
 };
 
+// ═══════════════ Chữ cho lớp native của bản APK ═══════════════
+//
+// ⚠️ §11 — LỚP JAVA KHÔNG ĐƯỢC TỰ SOẠN CÂU NÀO.
+// `KhoanDaPlugin.hienPopup` và `hienCanhBaoHeadsUp` đều TỪ CHỐI chạy nếu tầng
+// web không truyền chữ xuống. Chữ phải đi qua đây để đổi ngôn ngữ là đổi được
+// cả popup đè màn hình lẫn thông báo — chứ không phải một nửa app nói tiếng
+// Việt còn nửa kia mắc kẹt ở chuỗi mã cứng trong Java.
+//
+// ⚠️ KHÔNG CÂU NÀO ĐƯỢC BUỘC TỘI MỘT NGƯỜI CỤ THỂ (§11). Popup hiện đè lên màn
+// hình lúc bác đang nghe điện thoại — đúng lúc dễ hiểu nhầm thành "app nói
+// người này là kẻ lừa đảo". Nói về YÊU CẦU, không nói về người.
+
+export const CHU_NATIVE: Record<string, Cap> = {
+  /** Tiêu đề dải popup đè màn hình. Ngắn — nó nằm trên một dải hẹp. */
+  popup_tieu_de: c('Khoan đã — hãy dừng lại 60 giây', 'Wait — pause for 60 seconds'),
+  /** Nút mở app từ popup. */
+  popup_nut_mo: c('Mở Khoan Đã', 'Open Khoan Đã'),
+  /**
+   * ⚠️ LỐI RA CỦA §4.6, VÀ NÓ QUAN TRỌNG HƠN Ở ĐÂY SO VỚI TRONG APP.
+   * Popup này đè lên mọi thứ. Không có nút tắt thì một lần báo động giả là bác
+   * bị một dải chữ đỏ che màn hình giữa lúc đang nghe điện thoại thật —
+   * `hienPopup` từ chối chạy nếu thiếu chuỗi này, và đó là chủ ý.
+   */
+  popup_nut_on: c('Tôi ổn, tắt đi', 'I’m fine, dismiss'),
+
+  /** Tiêu đề thông báo heads-up khi mức CAO. */
+  heads_up_tieu_de: c('Khoan Đã: hãy dừng lại 60 giây', 'Khoan Đã: pause for 60 seconds'),
+  /**
+   * ⚠️ NÓI VỀ YÊU CẦU, KHÔNG NÓI VỀ NGƯỜI GỌI (§11).
+   * Không "người này đang lừa bác" — hệ thống không biết người kia là ai.
+   */
+  heads_up_noi_dung: c(
+    'Yêu cầu bác vừa nhận có dấu hiệu thường gặp trong các vụ lừa đảo. Chạm để xem.',
+    'What you were just asked shows signals commonly seen in scams. Tap to see.',
+  ),
+};
+
 // ═══════════════ Lỗi ═══════════════
 
 export const MA_LOI: Record<string, Cap> = {

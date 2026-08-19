@@ -1,0 +1,48 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!--
+  ⚠️ MỌI CHUỖI NGƯỜI DÙNG ĐỌC ĐỀU PHẢI Ở ĐÂY, KHÔNG MÃ CỨNG TRONG JAVA (§4.1).
+  Trình đọc màn hình đọc nhãn lối tắt và tiêu đề thông báo, nên chúng là "chuỗi
+  người dùng đọc" theo đúng nghĩa §4.1.
+
+  ⚠️ "Khoan Đã" GIỮ NGUYÊN TIẾNG VIỆT Ở MỌI LOCALE (§4.1). Đừng dịch tên.
+
+  ⚠️ NHÃN NGẮN CỦA LỐI TẮT BỊ CẮT Ở ~10 KÝ TỰ trên phần lớn launcher. Tiếng Việt
+  dài hơn tiếng Anh ~30% (§4.5), nên nhãn ngắn phải THẬT ngắn — không phải rút
+  gọn nhãn dài.
+-->
+<resources>
+    <string name="app_name">Khoan Đã</string>
+    <string name="title_activity_main">Khoan Đã</string>
+    <string name="package_name">vn.khoanda.app</string>
+    <string name="custom_url_scheme">vn.khoanda.app</string>
+
+    <!-- ─── Lối tắt nhấn giữ biểu tượng ─── -->
+    <string name="loi_tat_goi_ngan">Đang bị gọi</string>
+    <string name="loi_tat_goi_dai">Có người đang gọi và thúc bác</string>
+
+    <string name="loi_tat_tin_ngan">Kiểm tin</string>
+    <string name="loi_tat_tin_dai">Kiểm tin nhắn hoặc đường link</string>
+
+    <string name="loi_tat_nguoi_than_ngan">Gọi con</string>
+    <string name="loi_tat_nguoi_than_dai">Gọi cho người thân trong nhà</string>
+
+    <!-- ─── Kênh thông báo ─── -->
+    <string name="kenh_canh_bao_ten">Cảnh báo lừa đảo</string>
+    <string name="kenh_canh_bao_mo_ta">Hiện ngay ở đầu danh sách khi cháu thấy dấu hiệu nguy hiểm cao</string>
+
+    <!-- ─── Nhận nội dung chia sẻ từ app khác ─── -->
+    <string name="nhan_chia_se">Kiểm bằng Khoan Đã</string>
+
+    <!-- ─── Thông báo thường trực (lối tắt lúc đang bị gọi) ─── -->
+    <!-- §11: KHÔNG hứa gì. Nói đúng một việc: chạm vào để hỏi. -->
+    <string name="kenh_loi_tat_ten">Lối tắt Khoan Đã</string>
+    <string name="kenh_loi_tat_mo_ta">Một dòng nằm sẵn trên thanh thông báo để bác mở nhanh khi có người gọi</string>
+    <string name="tb_thuong_truc_tieu_de">Khoan Đã</string>
+    <string name="tb_thuong_truc_noi_dung">Có ai gọi bảo bác chuyển tiền hay đọc mã? Chạm vào đây để hỏi cháu trước.</string>
+
+    <!-- ─── Thông báo cảnh báo (heads-up khi mức CAO) ─── -->
+    <!-- §11: tiêu đề ngắn, không buộc tội cá nhân, không hứa an toàn. -->
+    <string name="kenh_canh_bao_v2_ten">Cảnh báo nguy hiểm cao</string>
+    <string name="kenh_canh_bao_v2_mo_ta">Heads-up khi Khoan Đã thấy dấu hiệu nguy hiểm cao</string>
+    <string name="tb_canh_bao_tieu_de">Khoan Đã cảnh báo</string>
+</resources>
