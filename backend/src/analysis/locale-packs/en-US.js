@@ -160,6 +160,47 @@ module.exports = {
      * §6.10 nói tầng luật phải đứng một mình được. Một họ kịch bản phổ biến mà
      * pack ngôn ngữ này câm hoàn toàn là lỗ, không phải lựa chọn thiết kế.
      */
+    /**
+     * ══════ ĐỐI XỨNG VỚI vi-VN — THÊM 19/8/2026 ══════
+     *
+     * Chín tín hiệu này vừa được thêm cho tiếng Việt sau khi đo bộ 100. Test
+     * `§6.10 · hai pack ngôn ngữ phủ cùng một tập tín hiệu` đỏ ngay khi chỉ
+     * thêm một bên — và nó đỏ ĐÚNG: một kịch bản mà tiếng Việt bắt được còn
+     * tiếng Anh thì không nghĩa là một nửa người dùng không được bảo vệ.
+     */
+    DEV_ACCESSIBILITY_PERMISSION: [
+      { pattern: '\\b(enable|allow|turn on|grant)\\b[^.]{0,24}\\b(accessibility|assistive)\\b', scope: 'action' },
+      { pattern: '\\b(allow|accept|grant)\\b[^.]{0,20}\\b(all|every)\\b[^.]{0,16}\\bpermissions?\\b', scope: 'action' },
+    ],
+    MAN_EXTORTION_MEDIA_THREAT: [
+      { pattern: '\\b(have|got|holding)\\b[^.]{0,26}\\b(photos?|videos?|clips?|images?)\\b[^.]{0,20}\\b(private|intimate|of you)\\b', scope: 'any' },
+      { pattern: '\\b(send|post|share|leak)\\b[^.]{0,30}\\b(to|on)\\b[^.]{0,24}\\b(contacts|friends|family|facebook|everyone)\\b', scope: 'any' },
+    ],
+    MAN_ISOLATION: [
+      { pattern: '\\b(do not|don.t)\\b[^.]{0,16}\\b(call|text|contact|ask)\\b[^.]{0,20}\\b(back|anyone|dad|mum|mom|your)\\b', scope: 'action' },
+      { pattern: '\\bcome alone\\b', scope: 'action' },
+    ],
+    ID_UTILITY_IMPERSONATION: [
+      { pattern: '\\b(electricity|power|water) (company|department|board)\\b[^.]{0,40}\\b(overdue|unpaid|cut off|disconnect)', scope: 'any' },
+      { pattern: '\\b(cut off|disconnect)\\b[^.]{0,24}\\b(power|electricity|water)\\b', scope: 'any' },
+    ],
+    ID_DELIVERY_IMPERSONATION: [
+      { pattern: '\\b(parcel|package|shipment)\\b[^.]{0,36}\\b(held|on hold|customs|detained|stuck)\\b', scope: 'any' },
+    ],
+    ID_EMPLOYER_JOB_IMPERSONATION: [
+      { pattern: '\\b(recruiting|hiring|looking for)\\b[^.]{0,40}\\b(part.?time|work from home|collaborators?|helpers?)\\b', scope: 'any' },
+    ],
+    OFF_ROMANCE_EMERGENCY: [
+      { pattern: '\\b(met|talking|chatting)\\b[^.]{0,26}\\b(online|never met)\\b[^.]{0,40}\\b(send|transfer|wire)\\b', scope: 'any' },
+      { pattern: '\\b(my love|darling|honey|sweetheart)\\b[^.]{0,60}\\b(send|transfer|pay|wire)\\b', scope: 'any' },
+    ],
+    OFF_PRIZE_GIFT: [
+      { pattern: '\\b(won|winner|prize|reward)\\b[^.]{0,40}\\b(fee|pay|transfer|deposit)\\b', scope: 'any' },
+    ],
+    MAN_SCARCITY_PRESSURE: [
+      { pattern: '\\b(only|last|limited)\\b[^.]{0,26}\\b(spot|slot|place|today|tonight|hours?)\\b', scope: 'any' },
+      { pattern: '\\b(reserve|secure|hold)\\b[^.]{0,20}\\b(your )?(spot|slot|place)\\b[^.]{0,20}\\b(today|now|tonight)\\b', scope: 'action' },
+    ],
     OFF_ADVANCE_FEE: [
       /*
        * ⚠️ KHÔNG có `deposit` trần. Cùng bài học với `tạm ứng` bên vi-VN: nó là

@@ -775,3 +775,91 @@ test('§6.10 · tầng luật bắt được cùng kịch bản ở cả hai ng�
     assert.equal(than.nhan, 'CHUA_THAY', `báo oan tin nhắn lành: "${lanh.slice(0, 45)}…"`);
   }
 });
+
+/**
+ * ══════ BỘ 100 TÌNH HUỐNG — HÀNG RÀO CHỐNG THỤT LÙI ══════
+ *
+ * ⚠️ VÌ SAO CẦN BỘ LỚN: bộ thử cũ có 10 mẫu và cho 5/5 — nhìn như đã xong.
+ * Bộ 100 cho 30/50 ở lần đo đầu (60%). Chênh lệch đó không phải vì bộ luật
+ * kém đi, mà vì 10 mẫu không đủ để thấy mình đang mù ở đâu.
+ *
+ * ⚠️ GỌI `analyze()` TRỰC TIẾP, KHÔNG QUA HTTP. Máy chủ giới hạn 30 lượt/phút;
+ * 100 lượt qua HTTP thì phần lớn trả 429, và nếu không kiểm mã lỗi thì chúng
+ * trông y hệt "bỏ sót" — một phép đo báo sai theo hướng nguy hiểm nhất: làm bộ
+ * luật trông tệ hơn thực tế rồi dẫn tới việc nới mẫu cho đến khi báo oan.
+ *
+ * ⚠️ HAI NGƯỠNG BẤT ĐỐI XỨNG, VÀ ĐÓ LÀ CHỦ Ý:
+ *   · bắt được ≥ 75%  — sàn, có thể còn tăng
+ *   · báo oan  ≤ 2%   — trần rất chặt
+ * Bỏ sót một tin lừa đảo là mất một cơ hội cảnh báo. Báo oan một tin lành là
+ * dạy bác bỏ qua cảnh báo — và lần đúng tiếp theo cũng bị bỏ qua theo (§4.6).
+ * Hai loại sai này không cùng giá.
+ */
+test('§6.10 · bộ 100 tình huống — tầng luật giữ được mức đã đo', () => {
+  const { analyze } = require(path.join(GOC, 'backend', 'src', 'analysis', 'pipeline.js'));
+  const bo = JSON.parse(readFileSync(
+    path.join(GOC, 'test', 'du-lieu', 'tinh-huong-100.json'), 'utf8'));
+  const th = bo.tinhHuong;
+
+  assert.equal(th.length, 100, 'bộ thử phải có đúng 100 tình huống');
+
+  const BAC = { NO_SIGNS_FOUND: 0, SUSPICIOUS: 1, HIGH: 2 };
+  let luaDao = 0; let batDuoc = 0; let lanh = 0; let baoOan = 0;
+  const sot = []; const oan = [];
+
+  for (const x of th) {
+    const kq = analyze({ vanBan: x.noiDung });
+    const muc = BAC[kq.riskLabel] ?? 0;
+    if (x.nhom === 'lua_dao') {
+      luaDao += 1;
+      if (muc >= 1) batDuoc += 1; else sot.push(x.ma);
+    } else {
+      lanh += 1;
+      if (muc >= 1) { baoOan += 1; oan.push(`${x.ma} → ${kq.riskLabel}`); }
+    }
+  }
+
+  const tiLeBat = (batDuoc / luaDao) * 100;
+  const tiLeOan = (baoOan / lanh) * 100;
+
+  assert.ok(tiLeOan <= 2,
+    `BÁO OAN vượt trần 2%: ${baoOan}/${lanh} (${tiLeOan.toFixed(0)}%) — ${oan.join(', ')}`);
+  assert.ok(tiLeBat >= 75,
+    `BẮT ĐƯỢC tụt dưới sàn 75%: ${batDuoc}/${luaDao} (${tiLeBat.toFixed(0)}%) — bỏ sót: ${sot.join(', ')}`);
+});
+
+/**
+ * ⚠️ NỬA LÀNH CỦA BỘ THỬ PHẢI KHÓ, KHÔNG ĐƯỢC HIỀN.
+ *
+ * Một bộ thử toàn tin lành hiền lành ("con chào mẹ") thì tỉ lệ báo oan luôn 0%
+ * và con số đó không nói lên điều gì. Test này đếm xem nửa lành có thật sự
+ * chứa những thứ TRÔNG GIỐNG dấu hiệu hay không: số tiền, chữ gấp, đường link,
+ * mã OTP, tên cơ quan.
+ *
+ * Nếu ai đó làm đẹp số liệu bằng cách thêm tin lành dễ, test này đỏ.
+ */
+test('§6.10 · nửa lành của bộ 100 đủ khó để phép đo có nghĩa', () => {
+  const bo = JSON.parse(readFileSync(
+    path.join(GOC, 'test', 'du-lieu', 'tinh-huong-100.json'), 'utf8'));
+  const lanh = bo.tinhHuong.filter((x) => x.nhom === 'lanh');
+
+  /*
+   * ⚠️ NHẬN CẢ DẠNG KHÔNG DẤU. Bộ thử cố ý trộn hai lối viết, nên một biểu
+   * thức chỉ có chữ có dấu sẽ đếm hụt gần một nửa và báo bộ thử "quá hiền"
+   * trong khi nó không hề hiền.
+   */
+  const KHO = new RegExp([
+    '\\\\d[\\\\d.,]{3,}',                       // số tiền
+    'g[âa]p|ngay|h[ôo]m nay|tr[ưu][ơo]c',    // gấp gáp
+    'link|http',                             // đường dẫn
+    'otp|m[ãa] x[áa]c',                      // mã xác thực
+    'ng[âa]n h[àa]ng|c[ôo]ng an|thu[êe]|[đd]i[ệe]n l[ựu]c|b[ảa]o hi[ểe]m',
+    'chuy[ểe]n|n[ộo]p|[đd][óo]ng|thanh to[áa]n',
+  ].join('|'), 'i');
+  const soKho = lanh.filter((x) => KHO.test(x.noiDung)).length;
+  const tiLe = (soKho / lanh.length) * 100;
+
+  assert.ok(tiLe >= 60,
+    `chỉ ${soKho}/${lanh.length} (${tiLe.toFixed(0)}%) tin lành có yếu tố dễ gây báo oan — `
+    + 'bộ thử quá hiền, tỉ lệ báo oan 0% sẽ không chứng minh được gì');
+});

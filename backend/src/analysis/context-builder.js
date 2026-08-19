@@ -133,8 +133,28 @@ function goCheChu(t) {
  */
 const NGAN_HANG_NGHIN = /(\d)[.,](?=\d{3}(?!\d))/g;
 
+/**
+ * Đuôi tên miền hay gặp trong tin nhắn lừa đảo Việt Nam. Dấu chấm trước chúng
+ * được đổi thành dấu chấm giữa (·) để không chặn `[^.]` của cue bank.
+ */
+const DUOI_TEN_MIEN = /\.(com|net|org|info|online|top|xyz|site|vn|shop|store|club|icu|live|cc|app|link|space|website)\b/g;
+
 function chuanHoa(s) {
   let t = s.toLowerCase().replace(NGAN_HANG_NGHIN, '$1');
+  /*
+   * ⚠️ DẤU CHẤM TRONG TÊN MIỀN CHẶN `[^.]` Y HỆT DẤU CHẤM TRONG SỐ TIỀN.
+   *
+   * Đo trên bộ 100 (19/8/2026): "Vao link nuoc-sach.online tai ung dung" —
+   * mẫu `(vào|bấm|truy cập) link[^.]{0,40}(tải|cài)` trượt, vì dấu chấm của
+   * `.online` nằm đúng giữa hai vế. Cùng một lỗ với `1.200.000d`, chỉ khác
+   * loại dấu chấm; và nó bịt luôn cả họ kịch bản "vào link này tải app".
+   *
+   * ⚠️ CHỈ ĐỔI KHI THẤY ĐUÔI TÊN MIỀN THẬT. Đổi mọi dấu chấm giữa hai chữ cái
+   * là nối liền hai câu ("...xong. Tôi..."), và `[^.]{0,N}` sẽ lan qua câu
+   * khác — đúng thứ nó sinh ra để ngăn. Danh sách đuôi giữ hẹp, thêm được khi
+   * gặp đuôi mới trong tin nhắn thật.
+   */
+  t = t.replace(DUOI_TEN_MIEN, '\u00b7$1');
   for (const [re, thay] of CONTRACTIONS) t = t.replace(re, thay);
   return t.replace(/[ \t]+/g, ' ').trim();
 }
