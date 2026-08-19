@@ -100,7 +100,26 @@ module.exports = {
       { pattern: '(điều khiển|truy cập)\\s+từ xa', scope: 'action' },
     ],
     DEV_INSTALL_APK_UNKNOWN: [
-      { pattern: '(cài|tải)\\b[^.]{0,44}(dịch vụ công|qua (đường )?link|file apk|\\bapk\\b|đường dẫn (tôi|em|anh) gửi)', scope: 'action' },
+      /**
+       * ⚠️ NHIỀU CÁCH NÓI "LẤY APP TỪ LINK", KHÔNG CHỈ "QUA LINK" — MỞ 19/8/2026.
+       *
+       * Bản trước chỉ nhận `qua (đường )?link`. Đo được trên ca
+       * `gia-danh-dien-luc`: "Vui long TAI UNG DUNG TAI LINK evn-thanhtoan.xyz"
+       * — tầng luật không bật một tín hiệu nào, nhãn ra CHUA_THAY.
+       *
+       * Cùng nội dung viết bằng tiếng Anh ("install our support app from this
+       * link") thì pack en-US bắt được ngay. Cùng một vụ lừa, hai ngôn ngữ hai
+       * kết quả — đó là lỗ, không phải khác biệt văn hoá.
+       *
+       * Người Việt nói "tải tại link", "tải ở link", "tải theo đường link",
+       * "vào link tải" — `qua` chỉ là một trong nhiều giới từ.
+       */
+      { pattern: '(cài|tải)\\b[^.]{0,44}(dịch vụ công|(qua|tại|từ|theo|ở|vào)\\s*(đường\\s*)?link|đường link|link\\s*(bên )?dưới|file apk|\\bapk\\b|đường dẫn (tôi|em|anh) gửi)', scope: 'action' },
+      /**
+       * Ngược lại: "vào link … tải/cài" — động từ đứng SAU. Không có mẫu này
+       * thì nửa số cách đặt câu vẫn lọt.
+       */
+      { pattern: '(vào|bấm|nhấn|truy cập)\\s*(đường\\s*)?link[^.]{0,40}(tải|cài)\\b', scope: 'action' },
     ],
     DEV_SCREEN_SHARE_BANKING: [
       { pattern: '(chia sẻ|bật)\\b[^.]{0,16}màn hình\\b[^.]{0,48}(ngân hàng|banking|tài khoản)', scope: 'action' },

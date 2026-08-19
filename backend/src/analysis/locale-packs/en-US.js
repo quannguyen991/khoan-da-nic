@@ -41,6 +41,27 @@ module.exports = {
       { pattern: '\\btransfer\\b[^.]{0,24}\\b(money|funds)\\b', scope: 'action' },
       { pattern: '\\b(send|wire|move)\\b[^.]{0,26}\\b(the )?(money|funds|\\$\\s?[\\d,]+)', scope: 'action' },
       { pattern: '\\bsend\\b[^.]{0,14}\\$\\s?[\\d,]+', scope: 'action' },
+      /**
+       * ⚠️ SỐ TIỀN VIẾT TRẦN, KHÔNG CÓ KÝ HIỆU TIỀN TỆ — THÊM 19/8/2026.
+       *
+       * Bốn mẫu trên đòi chữ "money/funds" hoặc dấu `$`. Nhưng tin nhắn lừa
+       * đảo nhắm vào người Việt, dù viết bằng tiếng Anh, gần như luôn ghi số
+       * trần: "top up 1,200,000". Không đồng, không đô, không chữ "money".
+       *
+       * Đo được: ca `task-prepay` bật đúng OFF_TASK_PREPAY và MAN_URGENCY
+       * (10+7=17 điểm) nhưng THIẾU FIN_TRANSFER_REQUEST nên không chạm ngưỡng
+       * 20 — trong khi bản tiếng Việt CÙNG NỘI DUNG bật đủ ba tín hiệu và ra
+       * CAO. Cùng một vụ lừa, hai ngôn ngữ hai kết quả: đó là lỗ, không phải
+       * khác biệt văn hoá.
+       *
+       * ⚠️ CHỈ BA ĐỘNG TỪ HẸP, và số phải từ SÁU chữ số. `send` cố ý không có
+       * trong danh sách: "send me 3 photos" là câu bình thường, còn số điện
+       * thoại mười chữ số hay đi sau "call"/"text" chứ không sau "top up".
+       * Dấu phân cách nghìn đã bị `chuanHoa()` gom trước khi so, nên
+       * "1,200,000" tới đây là "1200000".
+       */
+      { pattern: '\\b(top ?up|deposit|transfer)\\b[^.]{0,20}\\b\\d{6,}\\b', scope: 'action' },
+      { pattern: '\\b(transfer|send|deposit|top ?up|pay|remit|wire)\\b[^.]{0,24}\\b\\d+\\s*(vnd|dong|million|k|m)\\b', scope: 'action' },
     ],
     FIN_SAFE_ACCOUNT: [
       { pattern: '\\b(safe|secure|protected|holding) (account|wallet)\\b', scope: 'action' },
@@ -125,6 +146,34 @@ module.exports = {
     ],
     OFF_INVESTMENT_GUARANTEE: [
       { pattern: '\\bguaranteed (return|profit|income)\\b', scope: 'any' },
+    ],
+    /**
+     * OFF_ADVANCE_FEE và OFF_TASK_PREPAY — THÊM 19/8/2026, LẤP ĐÚNG LỖ ĐÃ LẤP
+     * BÊN vi-VN.
+     *
+     * Đo được trên bộ thử tiếng Anh 10 tình huống: tầng luật bỏ sót đúng ca
+     * `task-prepay` ("top up 1,200,000 for the final task and you can withdraw
+     * both your capital and the bonus") — cùng họ kịch bản với
+     * `viec-nhe-luong-cao` bên tiếng Việt, và cùng một nguyên nhân: hai tín
+     * hiệu này KHÔNG CÓ MẪU NÀO ở pack này.
+     *
+     * §6.10 nói tầng luật phải đứng một mình được. Một họ kịch bản phổ biến mà
+     * pack ngôn ngữ này câm hoàn toàn là lỗ, không phải lựa chọn thiết kế.
+     */
+    OFF_ADVANCE_FEE: [
+      /*
+       * ⚠️ KHÔNG có `deposit` trần. Cùng bài học với `tạm ứng` bên vi-VN: nó là
+       * từ chuẩn của ngân hàng và bệnh viện ("your deposit has been received"),
+       * nên phải đi kèm ngữ cảnh trả-trước mới tính.
+       */
+      { pattern: '\\b(processing|handling|clearance|release|administrative|admin) fee\\b', scope: 'action' },
+      { pattern: '\\b(pay|transfer|send)\\b[^.]{0,30}\\b(fee|charge)\\b[^.]{0,30}\\b(first|upfront|in advance|before)\\b', scope: 'action' },
+      { pattern: '\\b(pay|transfer|send)\\b[^.]{0,20}\\b(upfront|in advance)\\b', scope: 'action' },
+    ],
+    OFF_TASK_PREPAY: [
+      { pattern: '\\b(task|order|mission|assignment)s?\\b[^.]{0,40}\\b(top ?up|deposit|prepay|pay in)\\b', scope: 'action' },
+      { pattern: '\\b(top ?up|deposit|prepay)\\b[^.]{0,40}\\b(complete|finish|final)\\b[^.]{0,20}\\btask\\b', scope: 'action' },
+      { pattern: '\\b(top ?up|deposit)\\b[^.]{0,50}\\bwithdraw\\b[^.]{0,30}\\b(capital|principal|bonus|commission)\\b', scope: 'action' },
     ],
   },
 

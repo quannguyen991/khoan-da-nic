@@ -690,3 +690,88 @@ test('§6.7 · /api/analyze/so-bo nhận đủ mọi trường mà /api/analyze 
   assert.notEqual(ma, 500, 'đường dự phòng ném 500 khi nhận đủ trường của đường chính');
   assert.equal(ma, 200);
 });
+
+/**
+ * §6.10 — CÙNG MỘT VỤ LỪA, HAI NGÔN NGỮ PHẢI CHO CÙNG KẾT QUẢ.
+ *
+ * Đo được 19/8/2026: hai pack lệch nhau ở cả hai chiều, và mỗi chiều đều tạo
+ * ra một lỗ thật.
+ *
+ *   · `OFF_ADVANCE_FEE` và `OFF_TASK_PREPAY` KHÔNG CÓ mẫu nào ở en-US, nên
+ *     kịch bản "việc nhẹ lương cao" viết bằng tiếng Anh lọt hoàn toàn.
+ *   · `FIN_TRANSFER_REQUEST` bên vi-VN bắt được số tiền viết trần
+ *     ("nạp 1.200.000d") còn en-US thì đòi dấu `$` hoặc chữ "money" — mà tin
+ *     nhắn nhắm vào người Việt, dù viết tiếng Anh, gần như luôn ghi số trần.
+ *   · Ngược lại, `DEV_INSTALL_APK_UNKNOWN` bên vi-VN chỉ nhận "qua link" nên
+ *     "tải ứng dụng TẠI link…" lọt, trong khi en-US bắt được ngay.
+ *
+ * Ba lỗ, cùng một nguyên nhân: hai pack được viết ở hai thời điểm khác nhau và
+ * không ai so chúng với nhau. Test này là chỗ so.
+ */
+test('§6.10 · hai pack ngôn ngữ phủ cùng một tập tín hiệu', () => {
+  const vi = require(path.join(GOC, 'backend', 'src', 'analysis', 'locale-packs', 'vi-VN.js'));
+  const en = require(path.join(GOC, 'backend', 'src', 'analysis', 'locale-packs', 'en-US.js'));
+
+  const kvi = Object.keys(vi.directPatterns);
+  const ken = Object.keys(en.directPatterns);
+
+  const thieuEn = kvi.filter((k) => !ken.includes(k));
+  const thieuVi = ken.filter((k) => !kvi.includes(k));
+
+  /*
+   * ⚠️ DANH SÁCH NGOẠI LỆ CHỈ ĐƯỢC NHỎ ĐI. Mỗi mã ở đây là một kịch bản mà một
+   * ngôn ngữ bắt được còn ngôn ngữ kia thì không — tức một nửa người dùng
+   * không được bảo vệ. Thêm mã vào đây là hợp thức hoá một lỗ.
+   */
+  const CHAP_NHAN_LECH = ['CRED_CARD_SECRET', 'DEV_ACCESSIBILITY_PERMISSION'];
+
+  assert.deepEqual(thieuEn.filter((k) => !CHAP_NHAN_LECH.includes(k)), [],
+    `tín hiệu có mẫu ở vi-VN nhưng THIẾU ở en-US: ${thieuEn.join(', ')}`);
+  assert.deepEqual(thieuVi.filter((k) => !CHAP_NHAN_LECH.includes(k)), [],
+    `tín hiệu có mẫu ở en-US nhưng THIẾU ở vi-VN: ${thieuVi.join(', ')}`);
+});
+
+/**
+ * Cùng nội dung, hai ngôn ngữ, tầng luật thuần phải cùng phát hiện.
+ *
+ * ⚠️ CHẠY TRÊN `/api/analyze/so-bo` — KHÔNG AI. Nếu để AI chạy thì test này đo
+ * model chứ không đo bộ luật, và nó sẽ đỏ hoặc xanh tuỳ nhà cung cấp hôm đó
+ * có sống hay không.
+ */
+test('§6.10 · tầng luật bắt được cùng kịch bản ở cả hai ngôn ngữ', async () => {
+  const cap = [
+    {
+      ten: 'việc nhẹ lương cao / task prepay',
+      vi: 'Chi oi ben em tuyen CTV lam nhiem vu don hang, hoa hong 15%. '
+        + 'Chi nap 1.200.000d lam nhiem vu cuoi la rut duoc ca von lan thuong ngay a',
+      en: 'Hi, we are recruiting part time helpers to complete simple order tasks, 15% commission. '
+        + 'Just top up 1,200,000 for the final task and you can withdraw both your capital and the bonus right away.',
+    },
+    {
+      ten: 'giả danh điện lực / utility impersonation',
+      vi: 'Thong bao: Hoa don dien thang nay cua quy khach qua han. '
+        + 'Vui long tai ung dung tai link evn-thanhtoan.xyz de thanh toan trong 2 gio, neu khong se bi cat dien.',
+      en: 'Notice from the Electricity Department: your household has an unpaid bill and power will be cut off '
+        + 'within 2 hours. Please install our support app from this link and pay right away to avoid disconnection.',
+    },
+  ];
+
+  for (const c of cap) {
+    for (const ngonNgu of ['vi', 'en']) {
+      const { than } = await goi('/api/analyze/so-bo', { vanBan: c[ngonNgu] });
+      assert.ok(['CAO', 'NGHI_NGO'].includes(than.nhan),
+        `[${ngonNgu}] tầng luật bỏ sót "${c.ten}": ${than.nhan}`);
+    }
+  }
+
+  // Và tin nhắn lành ở cả hai ngôn ngữ vẫn phải sạch.
+  for (const lanh of [
+    'Me oi chieu nay con qua don me di kham, me nho mang the bao hiem nhe',
+    'Mum, I will pick you up this afternoon for the check up, remember to bring your health insurance card.',
+    'Tai khoan cua quy khach vua bi tru 1.200.000d. So du con lai 3.450.000d.',
+    'Your account has been debited 1,200,000. Remaining balance 3,450,000.',
+  ]) {
+    const { than } = await goi('/api/analyze/so-bo', { vanBan: lanh });
+    assert.equal(than.nhan, 'CHUA_THAY', `báo oan tin nhắn lành: "${lanh.slice(0, 45)}…"`);
+  }
+});
