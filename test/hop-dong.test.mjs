@@ -170,11 +170,19 @@ test('§6.8 · CSP, x-frame-options, referrer-policy có mặt', async () => {
   const csp = r.headers.get('content-security-policy');
   assert.ok(csp, 'thiếu content-security-policy');
   assert.match(csp, /default-src 'self'/);
-  assert.match(csp, /frame-ancestors 'none'/);
+  /*
+   * ⚠️ `'self'`, KHÔNG PHẢI `'none'`, VÀ KHÔNG PHẢI `*`.
+   *  · `'none'` chặn luôn khung điện thoại của chính mình (iframe cùng nguồn),
+   *    và chặn im lặng — khung hiện ra rỗng, không báo lỗi;
+   *  · `*` hay bỏ hẳn dòng này thì trang của kẻ khác nhúng được app vào để
+   *    lừa bác bấm nhầm. Test này chốt đúng ở giữa.
+   */
+  assert.match(csp, /frame-ancestors 'self'/);
+  assert.ok(!/frame-ancestors[^;]*\*/.test(csp), "frame-ancestors mở cho mọi tên miền");
   // img-src KHÔNG được mở cho https: bên ngoài — ảnh từ máy chủ lạ là một lượt
   // gọi ra ngoài mỗi lần bác mở app.
   assert.ok(!/img-src[^;]*https:/.test(csp), 'img-src đã mở cho máy chủ ngoài');
-  assert.equal(r.headers.get('x-frame-options'), 'DENY');
+  assert.equal(r.headers.get('x-frame-options'), 'SAMEORIGIN');
   assert.equal(r.headers.get('referrer-policy'), 'no-referrer');
   assert.equal(r.headers.get('x-content-type-options'), 'nosniff');
 });
@@ -862,4 +870,93 @@ test('§6.10 · nửa lành của bộ 100 đủ khó để phép đo có nghĩa
   assert.ok(tiLe >= 60,
     `chỉ ${soKho}/${lanh.length} (${tiLe.toFixed(0)}%) tin lành có yếu tố dễ gây báo oan — `
     + 'bộ thử quá hiền, tỉ lệ báo oan 0% sẽ không chứng minh được gì');
+});
+
+/**
+ * ══════ KHUNG ĐIỆN THOẠI TRÊN MÀN HÌNH RỘNG ══════
+ *
+ * Ban giám khảo mở bản demo trên máy tính, nên thứ họ thấy phải là giao diện
+ * điện thoại thật — không phải bố cục máy tính bị bóp vào một cột hẹp.
+ *
+ * ⚠️ HAI LẦN ĐÃ HỎNG Ở ĐÚ NG CHỖ NÀY, GHI LẠI ĐỂ KHÔNG HỎNG LẦN BA:
+ *
+ * 1. Bọc bằng CSS (`#root { width: 390px }`). Không đủ: 285 lớp `sm:`/`md:`/`lg:`
+ *    của Tailwind là media query, mà media query đo **cửa sổ trình duyệt** chứ
+ *    không đo khối chứa. Kết quả: chữ rơi dọc từng ký tự.
+ *    → Phải là <iframe>, vì chỉ iframe mới có viewport riêng.
+ *
+ * 2. Có iframe rồi nhưng CSP để `frame-ancestors 'none'`. Trình duyệt chặn
+ *    thẳng, và chặn **im lặng**: viền máy vẫn vẽ đủ, bên trong trống trơn.
+ *    → Test `§6.8` chốt `'self'`. Đừng đổi nó về `'none'` để "chặt hơn".
+ */
+test('§6.9 · khung điện thoại dùng iframe, không dùng CSS bóp #root', () => {
+  const khung = readFileSync(path.join(GOC, 'src', 'khung-dien-thoai.ts'), 'utf8');
+  assert.match(khung, /createElement\('iframe'\)/,
+    'khung phải dựng bằng <iframe> — xem khối chú thích đầu tệp trước khi đổi');
+  assert.match(khung, /allow\s*=\s*'[^']*microphone/,
+    'thiếu allow="microphone" — nút "Bấm để nói" sẽ chết lặng trong iframe');
+
+  const css = readFileSync(path.join(GOC, 'src', 'index.css'), 'utf8');
+  const khoiCSS = css.replace(/\/\*[\s\S]*?\*\//g, '');   // bỏ chú thích trước khi soi
+  assert.ok(!/@media[^{]*min-width:\s*9\d\dpx/.test(khoiCSS),
+    'index.css đã bọc lại khung bằng media query — cách đó không dùng được, xem src/khung-dien-thoai.ts');
+});
+
+/**
+ * Vào thẳng `?khung=1` thì KHÔNG được bọc thêm một lần nữa. Bọc lồng nghĩa là
+ * hai bản app cùng chạy: hai service worker, hai bộ localStorage ghi đè nhau, hai
+ * lượt gọi `/api/analyze` cho một tin nhắn.
+ */
+test('§6.9 · khung tự nhận ra mình đang ở trong khung', () => {
+  const khung = readFileSync(path.join(GOC, 'src', 'khung-dien-thoai.ts'), 'utf8');
+  assert.match(khung, /window\.self\s*!==\s*window\.top/, 'thiếu chốt chống bọc lồng');
+  assert.match(khung, /searchParams\.set\(DAU_TRONG_KHUNG/, 'thiếu dấu đánh khung trên URL');
+  const main = readFileSync(path.join(GOC, 'src', 'main.tsx'), 'utf8');
+  assert.match(main, /if\s*\(!dungKhungDienThoai\(\)\)/,
+    'main.tsx phải bỏ qua việc gắn React khi trang ngoài chỉ là cái vỏ máy');
+});
+
+/**
+ * KHÓA TRÙNG TRONG LOCALE PACK — MẤT MẪU MÀ KHÔNG AI BIẾT.
+ *
+ * Đo 20/8/2026: `DEV_ACCESSIBILITY_PERMISSION` bị khai hai lần trong `en-US.js`.
+ * JavaScript không báo lỗi — nó lấy bản sau và vứt bản trước, nên mẫu
+ * "accessibility service" biến mất khỏi tầng luật.
+ *
+ * ⚠️ TEST "hai pack phủ cùng tập tín hiệu" KHÔNG BẮT ĐƯỢC CA NÀY, vì nó hỏi
+ * object đã dựng xong — lúc đó khóa trùng đã gộp mất rồi. Phải soi MÃ NGUỒN.
+ * Đó cũng là lý do test này đọc trên văn bản chứ không `import`.
+ */
+test('§6.10 · locale pack không có khóa tín hiệu trùng', () => {
+  /*
+   * ⚠️ PHẢI SOI THEO TỪNG OBJECT, KHÔNG SOI CẢ TỆP MỘT LƯỢT.
+   * Mỗi pack có nhiều object con (`directPatterns`, `suppressors`, …) và cùng
+   * một mã tín hiệu XUẤT HIỆN Ở NHIỀU OBJECT LÀ ĐÚNG: `FIN_TRANSFER_REQUEST`
+   * vừa có mẫu nhận dạng, vừa có mẫu triệt tiêu. Soi cả tệp một lượt thì bốn
+   * cặp hợp lệ đó bị báo là trùng — đã đo 20/8/2026.
+   */
+  for (const ten of ['vi-VN', 'en-US']) {
+    const ma = readFileSync(
+      path.join(GOC, 'backend', 'src', 'analysis', 'locale-packs', `${ten}.js`), 'utf8');
+
+    // Cắt tệp theo các object con khai ở mức thụt 2 dấu cách: `  directPatterns: {`
+    const moc = [...ma.matchAll(/^ {2}([a-zA-Z][\w]*):\s*\{/gm)];
+    assert.ok(moc.length >= 2, `${ten}.js chỉ soi ra ${moc.length} object con — biểu thức soi đã hỏng`);
+
+    let tongKhoa = 0;
+    for (let k = 0; k < moc.length; k += 1) {
+      const dau = moc[k].index;
+      const cuoi = k + 1 < moc.length ? moc[k + 1].index : ma.length;
+      const khoa = [...ma.slice(dau, cuoi).matchAll(/^ {4}([A-Z][A-Z0-9_]{3,}):/gm)].map((m) => m[1]);
+      tongKhoa += khoa.length;
+
+      const dem = new Map();
+      for (const x of khoa) dem.set(x, (dem.get(x) || 0) + 1);
+      const trung = [...dem].filter(([, n]) => n > 1).map(([x, n]) => `${x} (×${n})`);
+      assert.deepEqual(trung, [],
+        `${ten}.js → ${moc[k][1]} khai trùng khóa: ${trung.join(', ')}`
+        + ' — JavaScript lặng lẽ lấy bản sau và vứt bản trước');
+    }
+    assert.ok(tongKhoa > 20, `${ten}.js chỉ soi ra ${tongKhoa} khóa — biểu thức soi đã hỏng`);
+  }
 });

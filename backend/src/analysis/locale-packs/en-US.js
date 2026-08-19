@@ -94,8 +94,18 @@ module.exports = {
       { pattern: '\\b(share|mirror|cast)\\b[^.]{0,16}\\bscreen\\b[^.]{0,44}\\b(bank|banking|account)\\b', scope: 'action' },
       { pattern: '\\bscreen ?shar(e|ing)\\b[^.]{0,40}\\b(bank|banking)\\b', scope: 'action' },
     ],
+    /*
+     * ⚠️ BA MẪU, MỘT KHÓA. Ngày 19/8/2026 chính khóa này bị khai HAI LẦN trong
+     * cùng một object — JavaScript không báo lỗi, nó lặng lẽ lấy bản sau và vứt
+     * bản trước. Mẫu "accessibility service" biến mất trong khi toàn bộ test vẫn
+     * xanh, vì test chỉ hỏi "khóa này có tồn tại không". Chỉ cảnh báo của esbuild
+     * lúc dựng mới nói ra — và cảnh báo thì rất dễ lướt qua.
+     * Thêm mẫu thì thêm vào ĐÂY, đừng khai một khóa mới cùng tên.
+     */
     DEV_ACCESSIBILITY_PERMISSION: [
       { pattern: '\\baccessibility (service|permission|setting)\\b', scope: 'action' },
+      { pattern: '\\b(enable|allow|turn on|grant)\\b[^.]{0,24}\\b(accessibility|assistive)\\b', scope: 'action' },
+      { pattern: '\\b(allow|accept|grant)\\b[^.]{0,20}\\b(all|every)\\b[^.]{0,16}\\bpermissions?\\b', scope: 'action' },
     ],
     ID_AUTHORITY_IMPERSONATION: [
       { pattern: '\\bthis is (officer|detective|inspector|sergeant|agent)\\b', scope: 'any' },
@@ -168,10 +178,6 @@ module.exports = {
      * thêm một bên — và nó đỏ ĐÚNG: một kịch bản mà tiếng Việt bắt được còn
      * tiếng Anh thì không nghĩa là một nửa người dùng không được bảo vệ.
      */
-    DEV_ACCESSIBILITY_PERMISSION: [
-      { pattern: '\\b(enable|allow|turn on|grant)\\b[^.]{0,24}\\b(accessibility|assistive)\\b', scope: 'action' },
-      { pattern: '\\b(allow|accept|grant)\\b[^.]{0,20}\\b(all|every)\\b[^.]{0,16}\\bpermissions?\\b', scope: 'action' },
-    ],
     MAN_EXTORTION_MEDIA_THREAT: [
       { pattern: '\\b(have|got|holding)\\b[^.]{0,26}\\b(photos?|videos?|clips?|images?)\\b[^.]{0,20}\\b(private|intimate|of you)\\b', scope: 'any' },
       { pattern: '\\b(send|post|share|leak)\\b[^.]{0,30}\\b(to|on)\\b[^.]{0,24}\\b(contacts|friends|family|facebook|everyone)\\b', scope: 'any' },

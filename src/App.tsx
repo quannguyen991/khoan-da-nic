@@ -172,22 +172,22 @@ export interface HistoryRecord {
 const DEFAULT_HISTORY: HistoryRecord[] = [];
 
 /**
- * BỀ RỘNG THẬT SỰ MÀ APP ĐANG CÓ — không phải bề rộng màn hình.
+ * BỀ RỘNG THẬT SỰ MÀ APP ĐANG CÓ.
  *
- * ⚠️ `window.innerWidth` LÀ SAI TỪ LÚC CÓ KHUNG ĐIỆN THOẠI.
+ * ⚠️ CHÚ THÍCH CŨ Ở ĐÂY ĐÃ SAI TỪ 20/8/2026 — được viết lại, không xóa.
  *
- * Trên máy tính, `src/index.css` bọc app trong một khung 390px căn giữa để
- * người xem thử thấy đúng thứ bác sẽ thấy. Nhưng `window.innerWidth` vẫn trả
- * về bề rộng màn hình (1920), nên app kết luận "đang ở máy tính" và dựng bố
- * cục máy tính BÊN TRONG một khung rộng 390px — thanh điều hướng ngang, lưới
- * nhiều cột, mọi thứ chen nhau trong một cột hẹp.
+ * Bản cũ nói: trên máy tính, `index.css` bọc app trong `#root` rộng 390px,
+ * nên `window.innerWidth` (1920) là sai và phải đọc `#root.clientWidth`.
  *
- * Hỏng theo kiểu khó đoán: CSS thì đúng, JavaScript cũng đúng theo cách nó
- * hỏi, chỉ là hai bên đo hai thứ khác nhau.
+ * Cách bọc đó **không dùng được** và đã gỡ. Thu `#root` xuống 390px chỉ sửa
+ * được phía JavaScript; 285 lớp `sm:`/`md:`/`lg:` của Tailwind vẫn đo cửa sổ
+ * trình duyệt và vẫn dựng bố cục máy tính bên trong cột 390px. Khung giờ là
+ * một <iframe> (`src/khung-dien-thoai.ts`), nên bên trong khung
+ * `window.innerWidth` đã trả đúng 390 — hai nguồn giờ trùng nhau.
  *
- * `#root` là chính cái khung, nên `clientWidth` của nó là bề rộng thật app có.
- * Không có `#root` (kết xuất phía máy chủ, môi trường test) thì rơi về
- * `innerWidth` như cũ.
+ * Hàm này **vẫn giữ**: nó đúng trong mọi trường hợp, kể cả khi app được
+ * nhúng vào một khung khác về sau. Không có `#root` (khởi tạo sớm, môi trường
+ * test) thì rơi về `innerWidth`.
  */
 function beRongKhung(): number {
   if (typeof window === 'undefined') return 0;

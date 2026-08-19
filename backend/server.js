@@ -115,12 +115,29 @@ const CSP = [
   LA_BAN_CHAY_THAT ? "connect-src 'self'" : "connect-src 'self' ws: wss:",
   "object-src 'none'",
   "base-uri 'none'",
-  "frame-ancestors 'none'",
+  /*
+   * ⚠️ `'self'` CHỨ KHÔNG PHẢI `'none'` — VÌ KHUNG ĐIỆN THOẠI LÀ MỘT <iframe>
+   * CÙNG NGUỒN.
+   *
+   * Trên màn hình rộng, `src/khung-dien-thoai.ts` bọc app trong một iframe 390px
+   * để media query của Tailwind thấy đúng bề rộng điện thoại. Với `'none'`,
+   * trình duyệt chặn thẳng iframe đó — và chặn **không báo gì cho người dùng**:
+   * khung vẫn vẽ ra đủ viền máy, bên trong trống trơn. Đo 20/8/2026, chỉ có
+   * console nói "violates frame-ancestors 'none'".
+   *
+   * `'self'` vẫn chặn đúng thứ cần chặn: trang của kẻ khác **không** nhúng được
+   * app này vào để lừa bác bấm nhầm (clickjacking). Chỉ chính tên miền này mới
+   * nhúng được chính nó.
+   *
+   * ⚠️ `x-frame-options` ở dưới PHẢI ĐỔI THEO. Nó là header cũ nhưng trình
+   * duyệt vẫn tôn trọng; để `DENY` thì nó chặn iframe bất kể CSP nói gì.
+   */
+  "frame-ancestors 'self'",
 ].join('; ');
 
 app.use((req, res, next) => {
   res.setHeader('x-content-type-options', 'nosniff');
-  res.setHeader('x-frame-options', 'DENY');
+  res.setHeader('x-frame-options', 'SAMEORIGIN');   // đi cặp với frame-ancestors 'self' ở trên
   res.setHeader('referrer-policy', 'no-referrer');
   res.setHeader('content-security-policy', CSP);
 
