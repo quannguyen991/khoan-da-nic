@@ -558,6 +558,13 @@ export const translations: Record<Lang, Record<string, string>> = {
     "Có tin bình thường bị báo động. Với người cao tuổi, báo oan đắt hơn bỏ sót — một app kêu nhầm vài lần sẽ bị gỡ trước khi kịp cứu ai.": "Có tin bình thường bị báo động. Với người cao tuổi, báo oan đắt hơn bỏ sót — một app kêu nhầm vài lần sẽ bị gỡ trước khi kịp cứu ai.",
     "Xem giao diện của bác": "Xem giao diện của bác",
     "Ba công tắc trên chưa nối được với máy của bố mẹ — chúng cho thấy dự định, không phải trạng thái đang chạy.": "Ba công tắc trên chưa nối được với máy của bố mẹ — chúng cho thấy dự định, không phải trạng thái đang chạy.",
+    "Khi bác đang lo": "Khi bác đang lo",
+    "Dừng lại 60 giây": "Dừng lại 60 giây",
+    "Chưa làm gì vội. Đếm ngược rồi tính tiếp.": "Chưa làm gì vội. Đếm ngược rồi tính tiếp.",
+    "Cháu mở sẵn tin, bác chỉ việc bấm Gửi": "Cháu mở sẵn tin, bác chỉ việc bấm Gửi",
+    "Cẩm Nang & Hotline": "Cẩm Nang & Hotline",
+    "Nhận diện bẫy lừa & số khẩn cấp": "Nhận diện bẫy lừa & số khẩn cấp",
+    "Cỡ chữ, ngôn ngữ, bóng nổi ngoài màn hình": "Cỡ chữ, ngôn ngữ, bóng nổi ngoài màn hình",
   },
   en: {
     // Navigation & General
@@ -1108,6 +1115,13 @@ export const translations: Record<Lang, Record<string, string>> = {
     "Có tin bình thường bị báo động. Với người cao tuổi, báo oan đắt hơn bỏ sót — một app kêu nhầm vài lần sẽ bị gỡ trước khi kịp cứu ai.": "An ordinary message was flagged. For older people a false alarm costs more than a miss — an app that cries wolf gets uninstalled before it ever helps.",
     "Xem giao diện của bác": "See the elder view",
     "Ba công tắc trên chưa nối được với máy của bố mẹ — chúng cho thấy dự định, không phải trạng thái đang chạy.": "These three switches are not connected to your parent’s phone yet — they show intent, not a running state.",
+    "Khi bác đang lo": "When you are worried",
+    "Dừng lại 60 giây": "Pause for 60 seconds",
+    "Chưa làm gì vội. Đếm ngược rồi tính tiếp.": "Do nothing yet. Count down first.",
+    "Cháu mở sẵn tin, bác chỉ việc bấm Gửi": "I will open the message; you just tap Send",
+    "Cẩm Nang & Hotline": "Guide & Hotlines",
+    "Nhận diện bẫy lừa & số khẩn cấp": "Spot the tricks, and emergency numbers",
+    "Cỡ chữ, ngôn ngữ, bóng nổi ngoài màn hình": "Text size, language, floating button",
   }
 };
 

@@ -920,7 +920,16 @@ function HomeView({
       
       <div className="hidden md:flex flex-col items-center text-center mb-8 relative z-20">
          <h2 className="text-5xl font-black text-[#2e1065] tracking-tight mb-4">{t("Bác đang cần kiểm tra điều gì?")}</h2>
-         <p className="text-lg text-[#6b7280]">{t("Chỉ cần kể tình huống hoặc tải ảnh chụp màn hình, Khoan Đã AI sẽ giúp bác nhận diện an toàn.")}</p>
+         {/*
+           ⚠️ DÒNG PHỤ ĐỀ ĐÃ BỎ — 19/8/2026, và có hai lý do chứ không phải một.
+
+           Thẩm mỹ: nó lặp lại đúng ý câu hỏi ngay phía trên, và trên máy tính
+           nó đẩy khối nhập xuống thấp.
+
+           §11: nó kết thúc bằng "giúp bác NHẬN DIỆN AN TOÀN" — một lời hứa app
+           không giữ được. App chỉ nói *chưa thấy dấu hiệu trong thứ bác đưa*, và
+           câu chữ ở màn chính không được mạnh hơn câu chữ ở màn kết quả.
+         */}
       </div>
 
       {/*
