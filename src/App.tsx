@@ -923,81 +923,23 @@ function HomeView({
          <p className="text-lg text-[#6b7280]">{t("Chỉ cần kể tình huống hoặc tải ảnh chụp màn hình, Khoan Đã AI sẽ giúp bác nhận diện an toàn.")}</p>
       </div>
 
-      {/* Desktop Search Bar with Image & Text support */}
-      <div className="hidden md:flex flex-col relative z-20 w-full max-w-4xl mx-auto mb-10">
-        <div className="bg-white/90 backdrop-blur-xl rounded-[2rem] p-3 pl-6 pr-3 shadow-[0_15px_40px_rgba(100,50,150,0.1)] border border-white items-center gap-3 focus-within:ring-4 ring-[#c084fc]/30 transition-all flex">
-          <Search className="w-6 h-6 text-[#9ca3af]" />
-          <input 
-              type="text" 
-              value={inputText}
-              onChange={(e) => setInputText(e.target.value)}
-              placeholder={t("Hãy kể tình huống của bác, hoặc chọn ảnh bên dưới...")} 
-              className="flex-1 bg-transparent border-none outline-none px-2 py-3 text-[#311068] placeholder:text-[#9ca3af] text-lg font-medium"
-              onKeyDown={(e) => { if(e.key === 'Enter') submitAnalysis(); }}
-          />
-          <button 
-            type="button"
-            onClick={() => fileInputRefDesktop.current?.click()}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transition-colors ${selectedImage ? 'bg-purple-600 text-white' : 'bg-[#f3e8ff] text-[#7e22ce] hover:bg-[#e9d5ff]'}`}
-          >
-            <ImageIcon className="w-5 h-5" />
-            {selectedImage ? t("Đã chọn ảnh") : t("Tải ảnh lên")}
-          </button>
-          <button aria-label={t("Bấm để nói")} onClick={() => setView('voice')} className="w-12 h-12 flex items-center justify-center text-[#7e22ce] bg-white rounded-full shadow-sm border border-gray-100 hover:bg-gray-50 transition-colors">
-              <Mic className="w-5 h-5" />
-          </button>
-          <button 
-            onClick={submitAnalysis} 
-            disabled={isAnalyzing}
-            className="px-6 py-3 rounded-full bg-gradient-to-r from-[#8b5cf6] to-[#7e22ce] text-white font-semibold shadow-lg hover:opacity-90 active:scale-95 transition-all flex items-center gap-2"
-          >
-            <Sparkles className="w-5 h-5 text-yellow-300" />
-            {isAnalyzing ? t("Đang phân tích...") : t("Phân tích ngay")}
-          </button>
-        </div>
+      {/*
+        HAI KHOI NHAP DESKTOP DA GO — 19/8/2026, theo anh chup ban cong khai.
 
-        {/* Desktop Image Preview */}
-        {selectedImage && (
-          <div className="mt-3 flex items-center gap-3 p-3 bg-purple-50 rounded-2xl border border-purple-200">
-            <img src={selectedImage} alt="Preview" draggable={false} className="w-14 h-14 object-cover rounded-xl border border-purple-300 shadow-sm pointer-events-none select-none" />
-            <div className="flex-1">
-              <p className="text-[14px] font-bold text-purple-900">{t("Ảnh đã được đính kèm để AI phân tích")}</p>
-              <p className="text-[14px] text-purple-700">{t("Hệ thống sẽ trích xuất chữ và nhận diện các yếu tố lừa đảo từ ảnh này.")}</p>
-            </div>
-            <button aria-label={t("Đóng")} 
-              onClick={() => setSelectedImage(null)}
-              className="p-2 text-purple-700 hover:bg-purple-200 rounded-full transition-colors"
-              title={t("Xóa ảnh")}
-            >
-              <X size={18} />
-            </button>
-          </div>
-        )}
-      </div>
+        Man chinh tung dung CA HAI duong nhap cung luc tren may tinh:
+          - o lon "Hay ke tinh huong... / Tai anh len / Phan tich ngay" + 5 nut nhanh
+          - khoi linh vat + ba nut tron (Khan cap - Cham de noi - Goi con cai) + o chat
 
-      {/* Desktop Quick Actions */}
-      <div className="hidden md:flex flex-wrap justify-center gap-4 mb-14 relative z-20 max-w-5xl mx-auto w-full">
-         <button onClick={() => setView('search')} className="flex items-center gap-3 px-6 py-3.5 bg-white rounded-2xl shadow-sm border border-white/50 hover:shadow-md transition-all text-[#4c1d95] font-semibold">
-            <Phone className="w-5 h-5 text-[#8b5cf6]" /> {t("Tôi bị gọi lạ")}
-         </button>
-         <button onClick={() => setView('search')} className="flex items-center gap-3 px-6 py-3.5 bg-white rounded-2xl shadow-sm border border-white/50 hover:shadow-md transition-all text-[#4c1d95] font-semibold">
-            <svg className="w-5 h-5 text-[#8b5cf6]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/><path d="M8 12h.01"/><path d="M12 12h.01"/><path d="M16 12h.01"/></svg>
-            {t("Tin nhắn đáng ngờ")}
-         </button>
-         <button onClick={() => setView('search')} className="flex items-center gap-3 px-6 py-3.5 bg-white rounded-2xl shadow-sm border border-white/50 hover:shadow-md transition-all text-[#4c1d95] font-semibold">
-            <svg className="w-5 h-5 text-[#8b5cf6]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-            {t("Link / QR lạ")}
-         </button>
-         <button onClick={() => setView('search')} className="flex items-center gap-3 px-6 py-3.5 bg-white rounded-2xl shadow-sm border border-white/50 hover:shadow-md transition-all text-[#4c1d95] font-semibold">
-            <ShieldCheck className="w-5 h-5 text-[#8b5cf6]" /> {t("Trước khi chuyển tiền")}
-         </button>
-         <button onClick={() => setView('family')} className="flex items-center gap-3 px-6 py-3.5 bg-white rounded-2xl shadow-sm border border-white/50 hover:shadow-md transition-all text-[#4c1d95] font-semibold">
-            <User className="w-5 h-5 text-[#8b5cf6]" /> {t("Gọi cho người thân")}
-         </button>
-      </div>
+        Hai khoi lam dung mot viec, nen khoi duoi bi day xuong va DE LEN ba the
+        tin o cuoi trang. Voi nguoi cao tuoi, hai o nhap canh nhau con te hon
+        chuyen de: ho dung lai de chon xem phai go vao dau.
 
+        Giu khoi linh vat vi no moi la thu dac trung cua app - ba nut tron to, co
+        nhan chu, va nut giua la NOI chu khong phai go. O lon kia chi la mot thanh
+        tim kiem nhu moi trang web khac.
+      */}
       {/* Desktop News Section */}
-      <div className="hidden md:flex flex-col relative z-20 max-w-5xl mx-auto w-full">
+      <div className="hidden md:flex flex-col relative z-20 max-w-5xl mx-auto w-full md:order-3 md:mt-10">
          <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
                <div className="w-12 h-12 bg-white rounded-2xl shadow-sm flex items-center justify-center">
@@ -1054,7 +996,7 @@ function HomeView({
 
 
       {/* Mobile & Tablet Mascot Area - LARGER MASCOT */}
-      <div className="relative flex-1 w-full flex items-center justify-center z-10 my-auto min-h-0 select-none pointer-events-none px-4">
+      <div className="relative flex-1 w-full flex items-center justify-center z-10 my-auto min-h-0 select-none pointer-events-none px-4 md:order-1 md:flex-none md:my-2">
         <motion.div 
           animate={{ y: [-6, 6, -6] }}
           transition={{ repeat: Infinity, duration: 4.5, ease: "easeInOut" }}
@@ -1071,7 +1013,7 @@ function HomeView({
       </div>
 
       {/* Mobile & Tablet Input Area & Action Task Controls */}
-      <div className="flex flex-col items-center w-full z-20 mt-auto shrink-0 select-none max-w-2xl mx-auto">
+      <div className="flex flex-col items-center w-full z-20 mt-auto shrink-0 select-none max-w-2xl mx-auto md:order-2 md:mt-0">
         {/* Action Buttons Row: Emergency | Mic | Call Family - LARGER & TOUCH FRIENDLY */}
         <div className="relative flex items-center justify-center gap-5 sm:gap-8 md:gap-10 w-full mb-3.5 sm:mb-4 px-4">
           {/* Emergency Button (Left) */}
