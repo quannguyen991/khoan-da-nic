@@ -596,3 +596,33 @@ test('§4.2 · máy sạch KHÔNG hạ mức so với khi không gửi trạng t
   assert.ok(bac[sach.than.nhan] >= bac[khong.than.nhan],
     `máy sạch làm tụt mức: ${khong.than.nhan} -> ${sach.than.nhan}`);
 });
+
+/**
+ * §4.3 — ĐƯỜNG DỰ PHÒNG PHẢI DÙNG MODEL CỦA ĐÚNG NHÀ CUNG CẤP.
+ *
+ * Bẫy đặt ra ngày 19/8/2026 khi chuyển đường AI chính sang gateway: cấu hình
+ * triển khai đặt `RISK_LLM_MODEL=gpt-5.4`, còn `GEMINI_API_KEY` giữ làm dự
+ * phòng. Nhưng `model` đọc chung ở đầu hàm, nên nhánh Gemini nhận nguyên
+ * `gpt-5.4` và Google trả 404 cho một tên model nó chưa từng có.
+ *
+ * Hỏng đúng lúc tệ nhất — đường dự phòng chỉ được dùng khi đường chính đã chết.
+ * Và nhìn từ ngoài nó giống hệt "khoá Gemini sai" chứ không giống "tên model
+ * của nhà cung cấp khác", nên rất dễ đi tìm nhầm chỗ.
+ */
+test('§4.3 · Gemini dự phòng không nhận model của gateway', () => {
+  const { layCauHinh } = require(path.join(GOC, 'backend', 'src', 'ai', 'fable-client.js'));
+
+  const duPhong = layCauHinh({ GEMINI_API_KEY: 'g', RISK_LLM_MODEL: 'gpt-5.4' });
+  assert.equal(duPhong.noiChay, 'gemini');
+  assert.ok(/^gemini/i.test(duPhong.model),
+    `nhánh Gemini nhận model của nhà cung cấp khác: ${duPhong.model}`);
+
+  // Gateway vẫn phải nhận đúng model được đặt cho nó.
+  const chinh = layCauHinh({ LLM_API_BASE: 'https://x/v1', LLM_API_KEY: 'k', RISK_LLM_MODEL: 'gpt-5.4' });
+  assert.equal(chinh.noiChay, 'gateway');
+  assert.equal(chinh.model, 'gpt-5.4');
+
+  // Và vẫn đè được khi Google đổi tên model.
+  const de = layCauHinh({ GEMINI_API_KEY: 'g', GEMINI_MODEL: 'gemini-2.0-flash' });
+  assert.equal(de.model, 'gemini-2.0-flash');
+});

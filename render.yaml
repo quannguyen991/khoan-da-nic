@@ -8,8 +8,29 @@
 #
 # Đo được: bỏ AI đi, độ nhạy phát hiện rơi từ 67,6% xuống 3,8%.
 #
-# Nên đặt `GEMINI_API_KEY` trong bảng Environment của Render (lấy free tại
-# https://aistudio.google.com/apikey). Mã đã có sẵn nhánh nhận khoá này.
+# ══════ ĐƯỜNG AI: ĐO ĐƯỢC 19/8/2026, TRÊN CÙNG 10 TÌNH HUỐNG THỬ ══════
+#
+#   model                    trung vị   chậm nhất   bắt lừa đảo   báo oan
+#   gpt-5.4 (gateway)           5,3s        7,4s        5/5         0/5
+#   gpt-5.4-mini                5,2s       27,2s        5/5         0/5
+#   claude-fable-5              7,3s       20,8s        5/5*        0/5
+#   claude-sonnet-5            20,8s       32,2s         —           —
+#   gemini-3.6-flash           28,8s       48,2s        5/5         0/5
+#
+#   * fable-5 trả JSON sai lược đồ 3/10 lượt, bị Zod chặn — phần đó do tầng
+#     luật gánh chứ không phải AI.
+#
+# ⚠️ CHẤT LƯỢNG BẰNG NHAU, TỐC ĐỘ CHÊNH 5,5 LẦN. Chọn `gpt-5.4` vì ĐUÔI ngắn
+# nhất (7,4s so với 48,2s của Gemini). Với app này, "lượt chậm nhất" quan trọng
+# hơn "trung bình": người dùng đang bị thúc chuyển tiền, không phải đang lướt.
+#
+# Vì sao Gemini chậm: nó TỪ CHỐI `reasoning_effort: none` (trả 400), nên buộc
+# phải chịu phần "suy nghĩ" cho một việc không cần suy nghĩ — xem chú thích dài
+# trong `backend/src/ai/fable-client.js`.
+#
+# ⚠️ GIỮ `GEMINI_API_KEY` LÀM ĐƯỜNG DỰ PHÒNG. Gateway là máy chủ cá nhân, không
+# có cam kết uptime. Mã tự chọn đường theo thứ tự: LLM_API_BASE trước, không có
+# thì tới GEMINI_API_KEY, không có nữa thì chạy thuần luật và NÓI RA điều đó.
 services:
   - type: web
     name: khoan-da
@@ -22,6 +43,14 @@ services:
         value: production
       # ⚠️ ĐẶT TAY TRONG BẢNG ENVIRONMENT, ĐỪNG VIẾT KHOÁ VÀO TỆP NÀY.
       # Tệp này đi vào git; khoá viết ở đây là khoá đã lộ.
+      # ── Đường AI chính: gateway (nhanh hơn Gemini 5,5 lần, xem bảng trên) ──
+      - key: LLM_API_BASE
+        sync: false
+      - key: LLM_API_KEY
+        sync: false
+      - key: RISK_LLM_MODEL
+        value: gpt-5.4
+      # ── Đường dự phòng: Gemini. Để trống thì bỏ qua. ──
       - key: GEMINI_API_KEY
         sync: false
       # Cho phép bản APK / tên miền khác gọi vào. Để trống nếu chỉ chạy web.

@@ -162,7 +162,25 @@ function layCauHinh(env = process.env) {
      * Google sẽ còn đổi nữa. Đè bằng biến `RISK_LLM_MODEL` khi cần, đừng chờ
      * sửa mã.
      */
-    model = model || 'gemini-3.6-flash';
+    /*
+     * ⚠️ BỎ QUA `RISK_LLM_MODEL` NẾU NÓ KHÔNG PHẢI MODEL GEMINI — BẪY ĐẶT RA
+     * NGÀY 19/8/2026 KHI CHUYỂN ĐƯỜNG AI CHÍNH SANG GATEWAY.
+     *
+     * Cấu hình triển khai giờ đặt `RISK_LLM_MODEL=gpt-5.4` cho gateway, và giữ
+     * `GEMINI_API_KEY` làm đường dự phòng. Nhưng `model` được đọc chung ở đầu
+     * hàm, nên khi rơi về nhánh Gemini thì `model || 'gemini-3.6-flash'` giữ
+     * nguyên `gpt-5.4` — và Google trả 404 cho một tên model nó chưa từng có.
+     *
+     * Hỏng đúng lúc tệ nhất: đường dự phòng chỉ được dùng khi đường chính đã
+     * chết, tức là lúc không còn gì đỡ. Và nhìn từ ngoài nó giống hệt "khoá
+     * Gemini sai" chứ không giống "tên model của nhà cung cấp khác".
+     *
+     * Chọn model theo NHÀ CUNG CẤP đang dùng, không theo biến người vận hành
+     * đặt cho nhà cung cấp khác. Vẫn đè được bằng `GEMINI_MODEL` khi Google
+     * đổi tên model.
+     */
+    model = (env.GEMINI_MODEL || (model && /^gemini/i.test(model) ? model : null))
+      || 'gemini-3.6-flash';
     /**
      * ⚠️ HẠ MỨC SUY LUẬN — CÙNG BÀI HỌC ĐÃ ĐO TRÊN GATEWAY, LẶP LẠI Ở GEMINI.
      *
