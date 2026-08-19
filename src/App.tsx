@@ -891,7 +891,14 @@ function HomeView({
       />
 
       {/* Mobile & Tablet Top Header with Menu and Actions */}
-      <div className="pt-2 sm:pt-4 px-4 sm:px-6 z-50 flex items-center justify-between pointer-events-auto shrink-0 select-none max-w-2xl mx-auto w-full">
+      {/*
+        ⚠️ TRÊN MÁY TÍNH HAI NÚT NÀY RA SÁT HAI MÉP.
+        `max-w-2xl mx-auto` kẹp cả hàng vào giữa 672px, nên trên màn rộng "Menu
+        tác vụ" và "Ghim tin" dồn vào nhau giữa màn — trông như hai nút rời rạc
+        thả giữa khoảng trống. Ở khổ điện thoại thì kẹp là đúng, nên chỉ nới từ
+        `lg` trở lên.
+      */}
+      <div className="pt-2 sm:pt-4 px-4 sm:px-6 lg:px-8 z-50 flex items-center justify-between pointer-events-auto shrink-0 select-none max-w-2xl lg:max-w-none mx-auto w-full">
         <button 
           onClick={onOpenMenu}
           className="p-2 sm:p-2.5 px-3.5 sm:px-5 bg-white/90 hover:bg-white rounded-2xl shadow-sm backdrop-blur-md active:scale-95 transition-all text-[#6d28d9] flex items-center gap-2 border border-purple-200"
@@ -2273,7 +2280,7 @@ function NotificationsView({
           height: 240,
         });
         const pipDoc = pipWindow.document;
-        pipDoc.title = 'Khoan Đã • Bong Bóng Nổi Ngoài Màn Hình';
+        pipDoc.title = 'Khoan Đã • Cửa sổ nổi';
         pipDoc.body.innerHTML = `
           <style>
             * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -2435,16 +2442,28 @@ function NotificationsView({
               <Zap size={26} className="animate-pulse" />
             </div>
             <div>
-              <h3 className="font-black text-lg text-white leading-tight">{t("Ghim thông báo thường trực")}</h3>
+              <h3 className="font-black text-lg text-white leading-tight">{t("Nhắc cảnh giác trên thanh thông báo")}</h3>
               <span className="inline-block text-[14px] text-amber-300 font-bold bg-amber-400/10 px-2 py-0.5 rounded-md border border-amber-300/30 mt-0.5">
-                {t("Cố định trên thanh thông báo điện thoại")}
+                {t("Chỉ hiện khi Khoan Đã còn mở")}
               </span>
             </div>
           </div>
         </div>
 
         <p className="text-[14px] text-purple-200 leading-relaxed mb-4 relative z-10">
-          {t("Khi được bật, thông báo sẽ luôn ở nguyên trên thanh thông báo (không bị xóa hay trôi mất). Bác có thể chạm vào để mở ứng dụng bất cứ lúc nào, hoặc bấm cảnh giác khi gặp cuộc gọi đe dọa.")}
+          {/*
+            ⚠️ §11 — NÓI ĐÚNG THỨ `new Notification()` LÀM ĐƯỢC.
+            Câu cũ ghi thông báo "luôn ở nguyên trên thanh thông báo, không bị
+            xoá hay trôi mất". Notification API của trình duyệt KHÔNG làm được
+            điều đó: đóng tab hoặc tắt trình duyệt là thông báo biến mất, và nó
+            không ghim được.
+
+            Thông báo tồn tại khi app đã đóng cần Push API + service worker +
+            khoá VAPID. `backend/src/push.js` đã dựng sẵn phần máy chủ, nhưng
+            frontend chưa nối vào — nên tới khi nối xong, câu chữ ở đây phải nói
+            đúng cái đang có.
+          */}
+          {t("Khi được bật, Khoan Đã hiện một thông báo để bác chạm vào là mở được app ngay. Thông báo này chỉ còn khi Khoan Đã đang mở — đóng trình duyệt là nó mất.")}
         </p>
 
         {/* Master Toggle */}
@@ -2478,14 +2497,25 @@ function NotificationsView({
               <Maximize2 size={20} />
             </div>
             <div>
-              <h3 className="font-extrabold text-sm text-white leading-tight">Cửa Sổ Nổi Ngoài Màn Hình (PiP)</h3>
-              <p className="text-[14px] text-purple-200">Luôn nổi trên mọi ứng dụng khác ngoài điện thoại/máy tính</p>
+              <h3 className="font-extrabold text-[15px] text-white leading-tight">{t("Cửa sổ nổi — chỉ trên máy tính")}</h3>
+              <p className="text-[14px] text-purple-200">{t("Chrome hoặc Edge trên máy tính. Điện thoại chưa có cửa sổ nổi.")}</p>
             </div>
           </div>
         </div>
 
         <p className="text-[14px] text-purple-100/90 leading-relaxed mb-3">
-          Khi thu nhỏ trình duyệt hoặc mở Zalo, Facebook, YouTube, cửa sổ Khoan Đã vẫn luôn nổi bên ngoài để bác bấm quét ảnh hoặc bấm SOS khẩn cấp tức thì.
+          {/*
+            ⚠️ §11 — CỬA SỔ NỔI CHỈ CHẠY TRÊN MÁY TÍNH.
+            `documentPictureInPicture` là API thật, và mã đã kiểm tra hỗ trợ
+            trước khi gọi. Nhưng nó CHỈ có trên Chrome/Edge bản máy tính —
+            Android và iOS không có API này.
+
+            Câu cũ hứa "luôn nổi trên mọi ứng dụng khác ngoài điện thoại", tức
+            hứa đúng thứ web không làm được. Nổi đè lên app khác trên Android cần
+            quyền `SYSTEM_ALERT_WINDOW`, chỉ app cài đặt mới xin được — đó là lý
+            do bản APK tồn tại.
+          */}
+          {t("Trên máy tính, cửa sổ nhỏ này nổi trên các cửa sổ khác để bác bấm nhanh. Trên điện thoại, web chưa làm được việc đó — cần bản cài đặt.")}
         </p>
 
         <button
@@ -2493,7 +2523,7 @@ function NotificationsView({
           className="w-full py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 active:scale-95 text-white font-extrabold rounded-xl text-[14px] flex items-center justify-center gap-2 shadow-md transition-all"
         >
           <Sparkles size={15} />
-          <span>🚀 Bật Cửa Sổ Nổi Ra Ngoài Màn Hình Ngay</span>
+          <span>{t("Mở cửa sổ nổi")}</span>
         </button>
       </div>
 

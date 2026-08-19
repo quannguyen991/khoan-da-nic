@@ -565,6 +565,13 @@ export const translations: Record<Lang, Record<string, string>> = {
     "Cẩm Nang & Hotline": "Cẩm Nang & Hotline",
     "Nhận diện bẫy lừa & số khẩn cấp": "Nhận diện bẫy lừa & số khẩn cấp",
     "Cỡ chữ, ngôn ngữ, bóng nổi ngoài màn hình": "Cỡ chữ, ngôn ngữ, bóng nổi ngoài màn hình",
+    "Nhắc cảnh giác trên thanh thông báo": "Nhắc cảnh giác trên thanh thông báo",
+    "Chỉ hiện khi Khoan Đã còn mở": "Chỉ hiện khi Khoan Đã còn mở",
+    "Khi được bật, Khoan Đã hiện một thông báo để bác chạm vào là mở được app ngay. Thông báo này chỉ còn khi Khoan Đã đang mở — đóng trình duyệt là nó mất.": "Khi được bật, Khoan Đã hiện một thông báo để bác chạm vào là mở được app ngay. Thông báo này chỉ còn khi Khoan Đã đang mở — đóng trình duyệt là nó mất.",
+    "Cửa sổ nổi — chỉ trên máy tính": "Cửa sổ nổi — chỉ trên máy tính",
+    "Chrome hoặc Edge trên máy tính. Điện thoại chưa có cửa sổ nổi.": "Chrome hoặc Edge trên máy tính. Điện thoại chưa có cửa sổ nổi.",
+    "Trên máy tính, cửa sổ nhỏ này nổi trên các cửa sổ khác để bác bấm nhanh. Trên điện thoại, web chưa làm được việc đó — cần bản cài đặt.": "Trên máy tính, cửa sổ nhỏ này nổi trên các cửa sổ khác để bác bấm nhanh. Trên điện thoại, web chưa làm được việc đó — cần bản cài đặt.",
+    "Mở cửa sổ nổi": "Mở cửa sổ nổi",
   },
   en: {
     // Navigation & General
@@ -1122,6 +1129,13 @@ export const translations: Record<Lang, Record<string, string>> = {
     "Cẩm Nang & Hotline": "Guide & Hotlines",
     "Nhận diện bẫy lừa & số khẩn cấp": "Spot the tricks, and emergency numbers",
     "Cỡ chữ, ngôn ngữ, bóng nổi ngoài màn hình": "Text size, language, floating button",
+    "Nhắc cảnh giác trên thanh thông báo": "A reminder in your notification bar",
+    "Chỉ hiện khi Khoan Đã còn mở": "Only while Khoan Đã is open",
+    "Khi được bật, Khoan Đã hiện một thông báo để bác chạm vào là mở được app ngay. Thông báo này chỉ còn khi Khoan Đã đang mở — đóng trình duyệt là nó mất.": "When on, Khoan Đã shows a notification you can tap to open the app. It only lasts while Khoan Đã is open — close the browser and it goes away.",
+    "Cửa sổ nổi — chỉ trên máy tính": "Floating window — desktop only",
+    "Chrome hoặc Edge trên máy tính. Điện thoại chưa có cửa sổ nổi.": "Chrome or Edge on a computer. Phones cannot do floating windows yet.",
+    "Trên máy tính, cửa sổ nhỏ này nổi trên các cửa sổ khác để bác bấm nhanh. Trên điện thoại, web chưa làm được việc đó — cần bản cài đặt.": "On a computer this small window floats above other windows for quick access. On a phone the web cannot do this — it needs the installed app.",
+    "Mở cửa sổ nổi": "Open floating window",
   }
 };
 
