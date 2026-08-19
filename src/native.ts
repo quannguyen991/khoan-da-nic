@@ -44,6 +44,11 @@ interface CauNoi {
    */
   hienCanhBaoHeadsUp(o: { tieuDe: string; noiDung: string }): Promise<{ daHien: boolean }>;
   anCanhBaoHeadsUp(): Promise<void>;
+  /**
+   * Lối tắt thường trực: bác đã chọn bật chưa, và nó có đang nằm trên thanh
+   * thật không. Hai giá trị KHÁC NHAU — xem chú thích bên Java.
+   */
+  trangThaiThongBaoThuongTruc(): Promise<{ daChon: boolean; dangHien: boolean }>;
   trangThaiBoNghe(): Promise<{ daCo: boolean; lyDo?: string; sdk?: number }>;
   moCaiDatGiongNoi(): Promise<void>;
   batDauNghe(o: { ngonNgu?: string }): Promise<{
@@ -550,6 +555,39 @@ export const dangBatThongBaoThuongTruc = () => localStorage.getItem(KEY_TT) === 
  * và công tắc PHẢI ở lại vị trí cũ — tự bật rồi im lặng là để bác tin rằng có
  * một lối tắt đang chờ sẵn, trong khi không có gì cả (§4.3).
  */
+/**
+ * TRẠNG THÁI THẬT CỦA LỐI TẮT THƯỜNG TRỰC.
+ *
+ * ⚠️ ĐỌC CÁI NÀY, ĐỪNG ĐỌC localStorage — LỖI ĐO ĐƯỢC 19/8/2026.
+ *
+ * `dangBatThongBaoThuongTruc()` ngay dưới chỉ đọc localStorage, và localStorage
+ * không biết gì về những chuyện xảy ra bên ngoài WebView: máy khởi động lại
+ * (Android xoá sạch thông báo), app được cập nhật, người dùng tắt thông báo
+ * trong Cài đặt hệ thống, ROM chặn ở tầng riêng của hãng.
+ *
+ * Sau mỗi ca đó, localStorage vẫn ghi `'1'` và công tắc vẫn xanh — trong khi
+ * trên thanh thông báo không còn gì. Bác tin có một lối tắt chờ sẵn cho lúc bị
+ * gọi thúc, và lúc cần thì không có. §4.3, ở đúng chỗ nguy hiểm nhất.
+ *
+ * `null` = không phải APK, hoặc cầu nối không trả lời. KHÔNG BIẾT thì nói không
+ * biết, đừng bịa ra `false` — bản web không có tính năng này, mà "không có" và
+ * "có nhưng đang tắt" là hai câu khác nhau.
+ */
+export async function trangThaiThuongTruc(): Promise<{
+  daChon: boolean; dangHien: boolean;
+} | null> {
+  const c = (await cauHoacNull())?.cau;
+  if (!c) return null;
+  try {
+    return await hanGio(
+      c.trangThaiThongBaoThuongTruc(),
+      null as unknown as { daChon: boolean; dangHien: boolean },
+    );
+  } catch {
+    return null;
+  }
+}
+
 export async function datThongBaoThuongTruc(bat: boolean): Promise<{
   dangBat: boolean; maLoi?: string;
 }> {

@@ -644,6 +644,32 @@ public class KhoanDaPlugin extends Plugin {
         call.resolve(r);
     }
 
+    /**
+     * LỐI TẮT CÓ ĐANG NẰM TRÊN THANH THẬT KHÔNG — hỏi Android, đừng hỏi localStorage.
+     *
+     * ⚠️ TRẢ VỀ HAI GIÁ TRỊ, VÀ KHOẢNG CÁCH GIỮA CHÚNG MỚI LÀ THỨ ĐÁNG NÓI.
+     *
+     *   `daChon`   — bác đã bật công tắc này (lưu ở SharedPreferences, sống qua
+     *                khởi động máy và qua cập nhật app).
+     *   `dangHien` — nó có THẬT SỰ nằm trên thanh thông báo lúc này không.
+     *
+     * Hai giá trị này lệch nhau được, và mỗi lần lệch đều có nghĩa: người dùng
+     * đã tắt thông báo của app trong Cài đặt, ROM chặn ở tầng riêng của hãng,
+     * hoặc kênh bị hạ mức. Gộp thành một `boolean` là vứt mất đúng thông tin
+     * cần để nói thật với bác (§4.3) — và tầng web sẽ lại quay về đoán.
+     *
+     * ⚠️ ĐÂY LÀ THỨ CHỮA CON BUG "CÔNG TẮC XANH MÀ THANH TRỐNG". Trước đây tầng
+     * web chỉ đọc localStorage, mà localStorage không biết gì về những chuyện
+     * xảy ra bên ngoài WebView.
+     */
+    @PluginMethod
+    public void trangThaiThongBaoThuongTruc(PluginCall call) {
+        JSObject r = new JSObject();
+        r.put("daChon", ThongBaoThuongTruc.daChonBat(getContext()));
+        r.put("dangHien", ThongBaoThuongTruc.dangHien(getContext()));
+        call.resolve(r);
+    }
+
     @PluginMethod
     public void dungKenhCanhBao(PluginCall call) {
         JSObject r = new JSObject();

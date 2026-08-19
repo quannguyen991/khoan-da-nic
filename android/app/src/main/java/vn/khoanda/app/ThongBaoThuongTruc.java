@@ -69,6 +69,73 @@ public final class ThongBaoThuongTruc {
      * @return true nếu đã gửi được. false khi chưa có quyền POST_NOTIFICATIONS —
      *         và tầng web PHẢI nói ra, không được để công tắc tự bật (§4.3).
      */
+    /**
+     * ══════════ NHỚ TRẠNG THÁI Ở TẦNG NATIVE, KHÔNG PHẢI localStorage ══════════
+     *
+     * ⚠️ VÌ SAO KHÔNG DÙNG localStorage CỦA WEBVIEW.
+     *
+     * Trạng thái "bác đã bật lối tắt" trước đây chỉ nằm trong localStorage. Mà
+     * localStorage sống trong WebView, và WebView chỉ tồn tại khi app đang mở.
+     * Lúc máy vừa khởi động lại, thứ cần bật lại thông báo là một
+     * BroadcastReceiver chạy KHI CHƯA CÓ WEBVIEW NÀO — nó không có cách nào đọc
+     * được localStorage.
+     *
+     * Hệ quả đo được: bác bật lối tắt, tắt máy đi ngủ, sáng bật máy lên —
+     * thanh thông báo TRỐNG. Nhưng localStorage vẫn ghi `'true'`, nên vào app
+     * thì công tắc vẫn xanh và vẫn ghi "Đang BẬT túc trực 24/7".
+     *
+     * Đó đúng là §4.3: app khai một thứ đang chạy trong khi nó không chạy. Và
+     * nó tệ hơn một lỗi thường, vì thứ bị mất chính là lối tắt cho lúc khẩn cấp
+     * — bác chỉ phát hiện ra vào đúng lúc cần tới nó.
+     *
+     * SharedPreferences nằm ở tầng native nên receiver đọc được, và nó sống qua
+     * khởi động lại máy lẫn cài đè phiên bản mới.
+     */
+    private static final String KHO = "khoanda_thong_bao";
+    private static final String KHOA_BAT = "thuong_truc_dang_bat";
+
+    /** Bác có muốn giữ lối tắt này không. Khác với "nó có đang hiện không". */
+    public static boolean daChonBat(Context ctx) {
+        try {
+            return ctx.getSharedPreferences(KHO, Context.MODE_PRIVATE)
+                      .getBoolean(KHOA_BAT, false);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private static void ghiNho(Context ctx, boolean bat) {
+        try {
+            ctx.getSharedPreferences(KHO, Context.MODE_PRIVATE)
+               .edit().putBoolean(KHOA_BAT, bat).apply();
+        } catch (Exception e) {
+            // Không ghi được thì thôi — lần sau bác bật lại. Không đáng để ném.
+        }
+    }
+
+    /**
+     * Thông báo có ĐANG NẰM TRÊN THANH thật không.
+     *
+     * ⚠️ KHÁC HẲN `daChonBat()`, VÀ KHOẢNG CÁCH GIỮA HAI CÁI LÀ THỨ ĐÁNG NÓI RA.
+     * Bác đã chọn bật, nhưng người dùng có thể vào Cài đặt tắt thông báo của
+     * app, ROM có thể chặn, kênh có thể bị hạ mức. Khi hai giá trị này lệch nhau
+     * thì màn Cài đặt phải nói ra, chứ không được chọn bừa một cái để hiển thị.
+     */
+    public static boolean dangHien(Context ctx) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return daChonBat(ctx);
+        try {
+            NotificationManager nm = ctx.getSystemService(NotificationManager.class);
+            if (nm == null) return false;
+            for (android.service.notification.StatusBarNotification n : nm.getActiveNotifications()) {
+                if (n.getId() == MA) return true;
+            }
+            return false;
+        } catch (Exception e) {
+            // Không đo được ⇒ KHÔNG kết luận. Trả về thứ ta biết chắc: bác đã chọn gì.
+            return daChonBat(ctx);
+        }
+    }
+
     public static boolean bat(Context ctx) {
         try {
             NotificationManager nm = ctx.getSystemService(NotificationManager.class);
@@ -135,12 +202,44 @@ public final class ThongBaoThuongTruc {
                      */
                     .setOngoing(true)
                     .setShowWhen(false)
+                    /*
+                     * ⚠️ `setOngoing(true)` KHÔNG ĐỦ ĐỂ CHỐNG NÚT "XOÁ TẤT CẢ".
+                     *
+                     * `setOngoing` đặt FLAG_ONGOING_EVENT — nó khiến thông báo
+                     * không vuốt-lẻ được, và Android gốc cũng chừa nó ra khi bấm
+                     * "Xoá tất cả". Nhưng nhiều ROM phổ thông ở Việt Nam (Xiaomi,
+                     * Oppo, Vivo, Realme) tự viết lại nút đó và quét sạch mọi
+                     * thông báo, kể cả ongoing.
+                     *
+                     * FLAG_NO_CLEAR nói thẳng với hệ thống: đừng xoá cái này khi
+                     * dọn hàng loạt. Đặt cả hai thì "cố định" mới thật sự cố định
+                     * trên đúng những máy mà người dùng của app này đang cầm.
+                     *
+                     * §4.6 vẫn nguyên: công tắc trong Cài đặt của app tắt được
+                     * bất cứ lúc nào. Không vuốt mất KHÁC không thoát được.
+                     */
                     .setContentIntent(pi)
                     .setStyle(new Notification.BigTextStyle()
                             .bigText(ctx.getString(R.string.tb_thuong_truc_noi_dung)))
                     .build();
 
+            tb.flags |= Notification.FLAG_NO_CLEAR;
+
             nm.notify(MA, tb);
+
+            /*
+             * ⚠️ GHI Ý ĐỊNH NGAY TẠI ĐÂY, TRƯỚC KHI ĐO LẠI.
+             *
+             * Ta đã qua hai cửa kiểm quyền ở trên và `notify()` không ném —
+             * nghĩa là hệ thống đã NHẬN yêu cầu. Đó là đủ để nói "bác muốn giữ
+             * lối tắt này", và ý định thì không phụ thuộc vào việc phép đo bên
+             * dưới có kịp thấy hay không.
+             *
+             * Đặt sau phần đo là mắc lại đúng cuộc đua vừa mô tả, chỉ đổi chiều:
+             * lần bật đầu tiên rơi trúng lúc đo hụt thì ý định KHÔNG được ghi,
+             * và lối tắt lặng lẽ không quay lại sau lần tắt máy đầu tiên.
+             */
+            ghiNho(ctx, true);
 
             /*
              * ⚠️ ĐỌC LẠI, ĐỪNG TIN. `getActiveNotifications()` cho biết thông báo
@@ -153,6 +252,30 @@ public final class ThongBaoThuongTruc {
                     for (android.service.notification.StatusBarNotification n : nm.getActiveNotifications()) {
                         if (n.getId() == MA) return true;
                     }
+                    /*
+                     * ⚠️ TRẢ VỀ `false`, NHƯNG TUYỆT ĐỐI KHÔNG XOÁ Ý ĐỊNH ĐÃ GHI.
+                     *
+                     * ĐO ĐƯỢC 19/8/2026 — và bản vá đầu của chính hàm này đã mắc:
+                     * nó gọi `ghiNho(ctx, false)` ngay tại đây, "cho nhất quán".
+                     * Kết quả trên máy ảo Android 14: khởi động lại máy, thông báo
+                     * hiện lên bình thường, mà kho lại ghi `false` — tức lần khởi
+                     * động sau sẽ KHÔNG dựng lại nữa. Lối tắt tự tắt sau đúng hai
+                     * lần tắt máy, không có gì báo.
+                     *
+                     * Nguyên nhân là một cuộc đua: `notify()` KHÔNG đồng bộ. Nó
+                     * đẩy yêu cầu qua binder sang NotificationManagerService rồi
+                     * trả về ngay. `getActiveNotifications()` gọi ngay sau đó có
+                     * thể chạy TRƯỚC khi dịch vụ kia kịp ghi nhận — hay xảy ra
+                     * nhất lúc máy vừa khởi động, đúng lúc `KhoiDongLai` chạy.
+                     *
+                     * Nên "không thấy" ở đây có HAI nghĩa: bị chặn thật, hoặc hỏi
+                     * quá sớm. Ta phân biệt được không, nên:
+                     *   · trả `false` — tầng web nói "chưa lên thanh", đúng §4.3;
+                     *   · giữ nguyên ý định — nó là lựa chọn của bác, không phải
+                     *     một phép đo, và không một phép đo nào được quyền huỷ nó.
+                     *
+                     * Ý định chỉ bị xoá ở đúng một chỗ: `tat()`, khi bác tự tắt.
+                     */
                     return false;
                 } catch (Exception e) {
                     /*
@@ -173,8 +296,16 @@ public final class ThongBaoThuongTruc {
         }
     }
 
-    /** Tắt. §4.6 — luôn có lối ra, kể cả với `setOngoing(true)`. */
+    /**
+     * Tắt. §4.6 — luôn có lối ra, kể cả với `setOngoing(true)`.
+     *
+     * ⚠️ QUÊN Ý ĐỊNH TRƯỚC, GỠ THÔNG BÁO SAU. Ngược thứ tự thì một lần ném ở
+     * `cancel()` để lại `true` trong kho — và lần khởi động máy kế tiếp, thông
+     * báo bác vừa tắt lại tự hiện lên. Một công tắc tắt rồi mà tự bật lại thì
+     * bác sẽ không tin cái công tắc nào của app này nữa.
+     */
     public static void tat(Context ctx) {
+        ghiNho(ctx, false);
         try {
             ctx.getSystemService(NotificationManager.class).cancel(MA);
         } catch (Exception e) {

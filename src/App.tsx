@@ -56,6 +56,7 @@ import {
   datThongBaoThuongTruc, noiDungChiaSe, quyenPopup, xinQuyenPopup,
   ngheGiongNoi, dungNghe as dungNgheNative, coBoNghe, moCaiDatGiongNoi,
   quyenDocThongBao, xinQuyenDocThongBao, tinMoiNhat, xoaTinDaBat,
+  trangThaiThuongTruc,
   type QuyenNative,
 } from './native';
 import { GuardianIntroView, GuardianAuthView, GuardianView } from './components/Guardian';
@@ -183,6 +184,40 @@ export default function App() {
    */
   const [dangChayApk, setDangChayApk] = useState(false);
   useEffect(() => { void laApk().then(setDangChayApk); }, []);
+
+  /**
+   * ĐỒNG BỘ CÔNG TẮC THEO SỰ THẬT, KHÔNG THEO localStorage.
+   *
+   * ⚠️ CHẠY LẠI MỖI LẦN APP TRỞ LẠI TIỀN CẢNH, không chỉ một lần lúc mở.
+   * Ba việc đều xảy ra khi app đang ở nền và đều xoá mất thông báo: bác vào
+   * Cài đặt hệ thống tắt thông báo của app, ROM dọn nền, hoặc máy khởi động
+   * lại. Chỉ đọc một lần lúc dựng thì công tắc đứng yên ở trạng thái cũ và tiếp
+   * tục khai một thứ không còn đúng.
+   *
+   * ⚠️ ĐỌC `dangHien`, KHÔNG PHẢI `daChon`. `daChon` là ý muốn của bác — nó
+   * đúng kể cả khi thông báo đang bị chặn. `dangHien` mới là thứ bác thấy trên
+   * thanh, và công tắc là thứ mô tả cái bác thấy (§4.3).
+   */
+  useEffect(() => {
+    let huy = false;
+
+    const dongBo = async () => {
+      const t = await trangThaiThuongTruc();
+      if (huy || !t) return;   // null ⇒ bản web, không có gì để đồng bộ
+      setPinnedNotification(t.dangHien);
+      localStorage.setItem('pinnedNotification', String(t.dangHien));
+      /*
+       * Bác đã chọn bật mà nó không hiện ⇒ có thứ gì đó đang chặn. Nói ra, chứ
+       * đừng lặng lẽ gạt công tắc về TẮT như thể bác chưa từng bật.
+       */
+      setLoiThongBaoNative(t.daChon && !t.dangHien ? 'BI_CHAN_SAU_KHI_BAT' : null);
+    };
+
+    void dongBo();
+    const khiHien = () => { if (document.visibilityState === 'visible') void dongBo(); };
+    document.addEventListener('visibilitychange', khiHien);
+    return () => { huy = true; document.removeEventListener('visibilitychange', khiHien); };
+  }, []);
   const [historyItems, setHistoryItems] = useState<HistoryRecord[]>(() => {
     const saved = localStorage.getItem('khoan_da_history');
     if (saved) {
@@ -3099,8 +3134,22 @@ function NotificationsView({
         */}
         {loiThongBaoNative && (
           <div className="mt-3 p-3.5 bg-amber-400/15 border border-amber-300/40 rounded-2xl relative z-10">
+            {/*
+              ⚠️ HAI CA KHÁC NHAU, HAI CÂU KHÁC NHAU — §4.3.
+
+              `CHUA_CO_QUYEN_THONG_BAO`: bác vừa bấm bật và máy từ chối ngay.
+              `BI_CHAN_SAU_KHI_BAT`: bác ĐÃ bật thành công trước đó, nhưng bây
+              giờ nó không còn trên thanh nữa — ai đó tắt thông báo của app
+              trong Cài đặt, hoặc ROM chặn ở tầng riêng của hãng.
+
+              Ca thứ hai nguy hiểm hơn và dễ bị nuốt hơn: không có thao tác nào
+              của bác gây ra nó, nên nếu app im lặng gạt công tắc về TẮT thì bác
+              sẽ nghĩ mình quên bật — chứ không nghĩ là có thứ gì đó đã tắt nó.
+            */}
             <p className="text-[15px] font-bold text-amber-100 leading-snug">
-              {t("Chưa bật được: máy chưa cho Khoan Đã gửi thông báo.")}
+              {loiThongBaoNative === 'BI_CHAN_SAU_KHI_BAT'
+                ? t("Lối tắt đã tắt mất. Bác bật lại thì nó chưa ở trên thanh thông báo.")
+                : t("Chưa bật được: máy chưa cho Khoan Đã gửi thông báo.")}
             </p>
             <p className="text-[14px] text-amber-200/90 leading-relaxed mt-1">
               {t("Bác vào Cài đặt của máy › Ứng dụng › Khoan Đã › Thông báo và bật lên, rồi quay lại bấm công tắc này.")}
@@ -3129,6 +3178,40 @@ function NotificationsView({
             </motion.div>
           </button>
         </div>
+
+        {/*
+          ⚠️ CHỈ NÓI BA ĐIỀU NÀY Ở BẢN APK, VÀ CHỈ KHI ĐANG BẬT THẬT.
+
+          Cả ba đều là thứ chỉ bản cài đặt làm được, và cả ba đều đã đo được
+          trên máy: `FLAG_NO_CLEAR` chống nút "Xoá tất cả" của ROM, `setOngoing`
+          chống vuốt lẻ, `KhoiDongLai` dựng lại sau khi khởi động máy và sau khi
+          cập nhật app.
+
+          Hiện ba dòng này ở bản web là hứa ba thứ không tồn tại — Notification
+          API của trình duyệt mất sạch khi đóng tab. Và hiện chúng lúc công tắc
+          đang TẮT là mô tả một trạng thái không có thật.
+
+          `pinnedNotification` ở đây đã được đồng bộ theo `dangHien` từ Android,
+          không phải theo localStorage — nên "đang bật" ở đây là đang bật thật.
+        */}
+        {dangChayApk && pinnedNotification && !loiThongBaoNative && (
+          <div className="mt-3 p-3.5 bg-emerald-400/15 border border-emerald-300/40 rounded-2xl relative z-10">
+            <p className="text-[15px] font-bold text-emerald-100 leading-snug mb-1.5">
+              {t("Dòng nhắc đã được ghim cố định")}
+            </p>
+            <ul className="space-y-1">
+              <li className="text-[14px] text-emerald-50/90 leading-relaxed">
+                {t("· Không vuốt mất được, kể cả khi bác bấm Xoá tất cả thông báo.")}
+              </li>
+              <li className="text-[14px] text-emerald-50/90 leading-relaxed">
+                {t("· Tắt máy rồi bật lại, Khoan Đã tự đặt nó về chỗ cũ.")}
+              </li>
+              <li className="text-[14px] text-emerald-50/90 leading-relaxed">
+                {t("· Muốn bỏ thì gạt công tắc ở ngay trên — luôn tắt được.")}
+              </li>
+            </ul>
+          </div>
+        )}
       </div>
 
       {/*
@@ -3800,8 +3883,15 @@ function IntroView({
               <div className="w-16 h-16 mb-2">
                 <img src="/logo.webp" alt="Logo" className="w-full h-full object-contain drop-shadow-md" />
               </div>
-              <h3 className="text-xl font-black text-[#1e1b4b] mb-1">{t("Chào mừng đến với Khoan Đã")}</h3>
-              <p className="text-[14px] text-slate-500 mb-5">{t("Vui lòng chọn vai trò để tối ưu giao diện phù hợp nhất:")}</p>
+              {/*
+                ⚠️ MÀN NÀY CHỈ HỎI MỘT CÂU. Càng ít chữ càng tốt.
+                Bản trước có năm khối chữ cho một lựa chọn hai nút: lời chào,
+                câu hướng dẫn, hai dòng mô tả tính năng bị cắt cụt giữa chừng,
+                và một dòng trấn an. Người phải đọc hết chỗ đó chính là người
+                khó đọc nhất — và họ đọc nó trước khi thấy app làm được gì.
+                Mô tả tính năng thuộc về lúc dùng, không thuộc màn hỏi tên vai.
+              */}
+              <h3 className="text-xl font-black text-[#1e1b4b] mb-5">{t("Ai đang dùng máy này?")}</h3>
 
               <div className="w-full space-y-3 mb-4">
                 {/* Option 1: Elder */}
@@ -3813,9 +3903,9 @@ function IntroView({
                     👵
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h4 className="font-extrabold text-sm text-purple-950">{t("Tôi là Người cao tuổi (Bác / Bố Mẹ)")}</h4>
-                    <p className="text-[14px] text-purple-800 font-medium line-clamp-1 mt-0.5">
-                      {t("Chữ to rõ, quét ảnh, giọng nói, dừng 60s an toàn")}
+                    <h4 className="font-extrabold text-base text-purple-950">{t("Bác / bố mẹ")}</h4>
+                    <p className="text-[14px] text-purple-800 font-medium mt-0.5">
+                      {t("Chữ to, dễ bấm")}
                     </p>
                   </div>
                 </button>
@@ -3829,15 +3919,15 @@ function IntroView({
                     🛡️
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h4 className="font-extrabold text-sm text-sky-950">{t("Tôi là Con cháu (Người bảo hộ)")}</h4>
-                    <p className="text-[14px] text-sky-800 font-medium line-clamp-1 mt-0.5">
-                      {t("Bảng điều khiển máy tính, theo sát bố mẹ từ xa, nhắc khi có số lạ gọi")}
+                    <h4 className="font-extrabold text-base text-sky-950">{t("Con cháu")}</h4>
+                    <p className="text-[14px] text-sky-800 font-medium mt-0.5">
+                      {t("Trông chừng giúp bố mẹ")}
                     </p>
                   </div>
                 </button>
               </div>
 
-              <span className="text-[14px] text-slate-400">{t("Bạn có thể dễ dàng chuyển đổi vai trò bất kỳ lúc nào")}</span>
+              <span className="text-[14px] text-slate-400">{t("Đổi lại lúc nào cũng được")}</span>
             </motion.div>
           </motion.div>
         )}

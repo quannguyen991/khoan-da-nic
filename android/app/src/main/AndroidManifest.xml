@@ -112,6 +112,40 @@
             </intent-filter>
         </service>
 
+        <!--
+          DỰNG LẠI LỐI TẮT SAU KHI KHỞI ĐỘNG MÁY / SAU KHI CẬP NHẬT APP.
+
+          ⚠️ THÔNG BÁO KHÔNG SỐNG QUA MỘT LẦN TẮT MÁY. Android xoá sạch thông
+          báo khi khởi động lại, kể cả `ongoing`. Không có receiver này thì bác
+          bật lối tắt tối nay, sáng mai thanh thông báo trống — mà công tắc
+          trong app vẫn xanh. §4.3: app khai một thứ đang chạy trong khi không.
+
+          ⚠️ `exported="true"` LÀ BẮT BUỘC, KHÔNG PHẢI SƠ SUẤT. Broadcast
+          BOOT_COMPLETED do HỆ THỐNG gửi tới, tức là từ ngoài app — receiver
+          không exported thì không bao giờ nhận được, và nó hỏng trong im lặng
+          y như thứ nó sinh ra để chữa.
+
+          Bề mặt mở ra là có thật nhưng hẹp: app khác gửi broadcast giả tới thì
+          việc duy nhất xảy ra là dựng lại đúng thông báo mà bác ĐÃ chọn bật —
+          `KhoiDongLai` lọc action và kiểm `daChonBat()` trước khi làm gì.
+
+          `directBootAware` để nhận cả `LOCKED_BOOT_COMPLETED` trên máy có mã
+          hoá theo tệp — máy vừa bật mà bác chưa mở khoá lần nào.
+        -->
+        <receiver
+            android:name=".KhoiDongLai"
+            android:enabled="true"
+            android:exported="true"
+            android:directBootAware="true">
+            <intent-filter android:priority="1000">
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />
+            </intent-filter>
+        </receiver>
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
@@ -131,6 +165,19 @@
       lỗi nào báo cho biết.
     -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!--
+      ⚠️ NGHE MÁY KHỞI ĐỘNG — CHỈ ĐỂ DỰNG LẠI LỐI TẮT BÁC ĐÃ BẬT.
+
+      Quyền này KHÔNG cho app chạy nền, không cho theo dõi gì, không tốn pin:
+      `KhoiDongLai` gửi đúng một thông báo rồi kết thúc trong vài mili giây.
+
+      Nó ở đây vì thông báo trên thanh không sống qua một lần tắt máy — xem chú
+      thích của `<receiver>` bên trên. Bỏ quyền này đi thì lối tắt khẩn cấp âm
+      thầm biến mất sau mỗi lần khởi động, và bác chỉ phát hiện ra vào đúng lúc
+      cần tới nó.
+    -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <!--
       ⚠️ POPUP ĐÈ LÊN MÀN HÌNH.
