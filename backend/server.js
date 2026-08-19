@@ -890,6 +890,26 @@ app.get('/api/suc-khoe', (req, res) => {
     ok: true,
     // §11 — nói thật AI có cấu hình hay không. KHÔNG lộ khoá, không lộ base URL.
     aiCauHinh: chay,
+    /**
+     * ⚠️ CHỈ TÊN BIẾN, TUYỆT ĐỐI KHÔNG GIÁ TRỊ — §6.9.
+     *
+     * Thêm 20/8/2026 sau khi mất gần một tiếng đoán mò: deploy báo thành công,
+     * đúng commit, mà `aiCauHinh` vẫn false. Từ bên ngoài không có cách nào
+     * phân biệt ba ca: người vận hành chưa đặt biến, đặt sai TÊN, hay đặt đúng
+     * mà nền tảng chưa nạp.
+     *
+     * Ba ca đó cần ba cách sửa khác nhau, và §4.3 nói đúng chuyện này: không
+     * đo được thì phải nói ra là không đo được, đừng để người ta đoán.
+     *
+     * `true` ở đây chỉ có nghĩa "biến này có giá trị khác rỗng". Không lộ giá
+     * trị, không lộ độ dài, không lộ vài ký tự đầu — một khoá lộ bốn ký tự đầu
+     * vẫn là một khoá đã bắt đầu rò.
+     */
+    bienDaDat: Object.fromEntries(
+      ['LLM_API_BASE', 'LLM_API_KEY', 'RISK_LLM_MODEL', 'GEMINI_API_KEY',
+       'LLM_DU_PHONG_BASE', 'LLM_DU_PHONG_MODEL', 'NODE_ENV']
+        .map((k) => [k, Boolean(process.env[k])]),
+    ),
     model: chay ? c.model : null,
     /**
      * `tren_may_nguoi_dung`      — người dùng chạy cả app lẫn mô hình trên máy
