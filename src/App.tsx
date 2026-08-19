@@ -572,7 +572,7 @@ export default function App() {
 
       {/* MOBILE & TABLET & NORMAL ELDER MODE */}
       {!((isDesktopScreen && userRole !== 'elder') || userRole === 'guardian' || isUltraZoomedOut) ? (
-        <div className="flex w-full h-[100dvh] max-h-[100dvh] flex-col lg:flex-row relative overflow-hidden bg-[#f8f4ff] select-none touch-none overscroll-none
+        <div className="flex w-full h-[100dvh] max-h-[100dvh] flex-col relative overflow-hidden bg-[#f8f4ff] select-none touch-none overscroll-none
           md:max-w-3xl md:mx-auto md:my-auto md:h-[96vh] md:max-h-[1000px] md:rounded-[2.5rem] md:shadow-[0_25px_60px_rgba(76,29,149,0.18)] md:border-2 md:border-purple-200/80
           lg:max-w-none lg:mx-0 lg:my-0 lg:h-[100dvh] lg:max-h-[100dvh] lg:rounded-none lg:border-0 lg:shadow-none">
           {/* Background ambient lighting */}
@@ -644,22 +644,34 @@ export default function App() {
           {/* Bottom Nav */}
           <AnimatePresence>
             {['home', 'search', 'history', 'family', 'profile'].includes(view) && (
-              <motion.div 
-                initial={{ y: 100 }} 
-                animate={{ y: 0 }} 
-                exit={{ y: 100 }}
+              <motion.div
+                /*
+                  ⚠️ HIỆU ỨNG TRƯỢT CHỈ DÀNH CHO ĐIỆN THOẠI.
+                  `y: 100` là "trượt lên từ đáy màn" — hợp lý với thanh nổi ở
+                  dưới, vô nghĩa với thanh cố định ở đỉnh. Đo được trên máy tính:
+                  thanh bị đẩy xuống 100px so với chỗ đáng ra nó phải nằm, vì
+                  transform chưa về 0.
+
+                  Đây là dạng nhẹ của bẫy đã ghi trong dự án: hiệu ứng không được
+                  quyết định VỊ TRÍ hay việc nội dung có hiện hay không. Nó chỉ
+                  được làm đẹp thêm cho thứ vốn đã đúng chỗ.
+                */
+                initial={isDesktopScreen ? false : { y: 100 }}
+                animate={{ y: 0 }}
+                exit={isDesktopScreen ? undefined : { y: 100 }}
                 /*
                   ⚠️ HAI HÌNH DẠNG CHO HAI KHỔ MÀN.
                   Điện thoại: thanh nổi ở đáy, đúng tầm ngón cái.
-                  Máy tính: cột dọc bên trái. Thanh nổi trên màn rộng vừa che mất
-                  phần dưới nội dung (lớp gradient phủ lên), vừa bắt mắt phải đi
-                  từ giữa màn xuống tận đáy mỗi lần đổi mục.
+                  Máy tính: thanh ngang bo tròn ở TRÊN CÙNG. Thanh nổi ở đáy trên
+                  màn rộng vừa che mất phần dưới nội dung (lớp gradient phủ lên),
+                  vừa bắt mắt phải đi từ giữa màn xuống tận đáy mỗi lần đổi mục —
+                  còn trên máy tính thì chỗ người ta nhìn đầu tiên là đỉnh màn.
                 */
                 className="absolute bottom-0 left-0 w-full px-4 pb-6 pt-10 bg-gradient-to-t from-[#cfb8f8] via-[#e2d2f9]/80 to-transparent z-50 pointer-events-none
-                  lg:static lg:order-first lg:w-[15rem] lg:h-full lg:shrink-0 lg:p-4 lg:bg-none lg:bg-white lg:border-r lg:border-purple-100"
+                  lg:static lg:order-first lg:w-full lg:h-auto lg:shrink-0 lg:px-8 lg:pt-5 lg:pb-3 lg:bg-none"
               >
                 <div className="bg-gradient-to-r from-[#9e76ea] via-[#ad8af0] to-[#9e76ea] rounded-full p-[6px] px-3 sm:px-4 flex justify-between items-center shadow-[0_15px_30px_rgba(90,30,160,0.3)] border border-white/20 h-16 sm:h-18 max-w-lg sm:max-w-xl mx-auto relative overflow-hidden pointer-events-auto
-                  lg:flex-col lg:justify-start lg:items-stretch lg:gap-1.5 lg:h-auto lg:max-w-none lg:rounded-3xl lg:p-3 lg:bg-none lg:bg-[#f6f1ff] lg:border-purple-100 lg:shadow-none">
+                  lg:justify-center lg:gap-2 lg:h-[4.25rem] lg:max-w-3xl lg:rounded-full lg:px-3 lg:shadow-[0_10px_28px_rgba(90,30,160,0.22)]">
                   <div className="absolute inset-0 bg-gradient-to-t from-white/10 to-transparent pointer-events-none"></div>
                   
                   {[
@@ -676,10 +688,10 @@ export default function App() {
                         key={item.id}
                         onClick={() => setView(item.id as ViewState)} 
                         className={`relative z-10 transition-all duration-300 flex items-center justify-center rounded-full active:scale-95
-                          lg:justify-start lg:w-full lg:rounded-2xl lg:px-4 lg:h-[3.4rem] lg:gap-3 ${
+                          lg:rounded-full lg:px-5 lg:h-[3.4rem] lg:gap-2.5 lg:w-auto ${
                           isActive
-                            ? 'bg-white/25 shadow-[0_0_20px_rgba(255,255,255,0.4)] text-white px-3.5 sm:px-4 h-[3.25rem] sm:h-[3.6rem] lg:bg-[#7e22ce] lg:text-white lg:shadow-md'
-                            : 'text-white/70 hover:text-white w-[3.25rem] h-[3.25rem] sm:w-[3.6rem] sm:h-[3.6rem] lg:text-[#4c1d95] lg:hover:bg-white lg:w-full'
+                            ? 'bg-white/25 shadow-[0_0_20px_rgba(255,255,255,0.4)] text-white px-3.5 sm:px-4 h-[3.25rem] sm:h-[3.6rem] lg:bg-white lg:text-[#6d28d9] lg:shadow-md'
+                            : 'text-white/70 hover:text-white w-[3.25rem] h-[3.25rem] sm:w-[3.6rem] sm:h-[3.6rem] lg:text-white/85 lg:hover:bg-white/20 lg:w-auto'
                         }`}
                       >
                         <Icon size={24} fill={isActive && item.id !== 'search' ? "currentColor" : "none"} strokeWidth={isActive ? 2 : 2} />
