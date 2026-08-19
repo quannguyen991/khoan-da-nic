@@ -171,6 +171,30 @@ export interface HistoryRecord {
  */
 const DEFAULT_HISTORY: HistoryRecord[] = [];
 
+/**
+ * BỀ RỘNG THẬT SỰ MÀ APP ĐANG CÓ — không phải bề rộng màn hình.
+ *
+ * ⚠️ `window.innerWidth` LÀ SAI TỪ LÚC CÓ KHUNG ĐIỆN THOẠI.
+ *
+ * Trên máy tính, `src/index.css` bọc app trong một khung 390px căn giữa để
+ * người xem thử thấy đúng thứ bác sẽ thấy. Nhưng `window.innerWidth` vẫn trả
+ * về bề rộng màn hình (1920), nên app kết luận "đang ở máy tính" và dựng bố
+ * cục máy tính BÊN TRONG một khung rộng 390px — thanh điều hướng ngang, lưới
+ * nhiều cột, mọi thứ chen nhau trong một cột hẹp.
+ *
+ * Hỏng theo kiểu khó đoán: CSS thì đúng, JavaScript cũng đúng theo cách nó
+ * hỏi, chỉ là hai bên đo hai thứ khác nhau.
+ *
+ * `#root` là chính cái khung, nên `clientWidth` của nó là bề rộng thật app có.
+ * Không có `#root` (kết xuất phía máy chủ, môi trường test) thì rơi về
+ * `innerWidth` như cũ.
+ */
+function beRongKhung(): number {
+  if (typeof window === 'undefined') return 0;
+  const goc = document.getElementById('root');
+  return goc?.clientWidth || window.innerWidth;
+}
+
 export default function App() {
   const [view, setView] = useState<ViewState>('intro');
   const [analyzeResult, setAnalyzeResult] = useState<any>(null);
@@ -328,13 +352,13 @@ export default function App() {
   const [userRole, setUserRole] = useState<'elder' | 'guardian'>(() => {
     const saved = localStorage.getItem('khoan_da_user_role');
     if (saved === 'elder' || saved === 'guardian') return saved;
-    if (typeof window !== 'undefined' && window.innerWidth >= 1024) return 'guardian';
+    if (beRongKhung() >= 1024) return 'guardian';
     return 'elder';
   });
 
   const [isDesktopScreen, setIsDesktopScreen] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
-      return window.innerWidth >= 1024;
+      return beRongKhung() >= 1024;
     }
     return false;
   });
@@ -345,7 +369,7 @@ export default function App() {
 
   useEffect(() => {
     const handleResize = () => {
-      setIsDesktopScreen(window.innerWidth >= 1024);
+      setIsDesktopScreen(beRongKhung() >= 1024);
     };
     handleResize();
     window.addEventListener('resize', handleResize);

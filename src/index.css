@@ -24,6 +24,62 @@ html, body, #root {
   -webkit-touch-callout: none;
 }
 
+/*
+ * ⚠️ KHỐI NÀY PHẢI NẰM SAU `html, body, #root { width: 100% }` — nếu không thì
+ * quy tắc kia thắng theo thứ tự cascade và khung lại rộng bằng cả màn hình.
+ * Đo được 19/8/2026: bo góc và viền máy áp dụng đúng, chỉ mỗi bề rộng không —
+ * một dạng hỏng nhìn rất giống "media query không chạy".
+ */
+/* ═══════════════ KHUNG ĐIỆN THOẠI TRÊN MÀN HÌNH RỘNG ═══════════════
+ *
+ * Trên máy tính, app hiện trong một khung 390×844 căn giữa thay vì trải rộng
+ * hết màn hình.
+ *
+ * ⚠️ VÌ SAO CỐ ĐỊNH KHUNG THAY VÌ LÀM GIAO DIỆN MÁY TÍNH RIÊNG.
+ *
+ * Đây là app cho người cao tuổi cầm điện thoại. Người mở nó trên máy tính gần
+ * như luôn là người ĐANG XEM THỬ — ban giám khảo, con cháu đang tìm hiểu, hoặc
+ * chính người soạn. Cho họ thấy đúng thứ bác sẽ thấy là cách trình bày trung
+ * thực nhất, và tránh hẳn việc phải bảo trì hai bộ bố cục cho hai loại màn
+ * hình mà chỉ một loại có người dùng thật.
+ *
+ * ⚠️ KHUNG PHẢI CÓ `position: relative`. Gần như mọi màn trong app dùng
+ * `absolute inset-0`; không có khối chứa thì chúng bám vào viewport và tràn ra
+ * ngoài khung — nhìn như app vỡ.
+ *
+ * ⚠️ CHIỀU CAO DÙNG `min()`. Màn hình laptop 13 inch cao chưa tới 844px kể cả
+ * khi trừ thanh trình duyệt; để cứng 844px thì đáy app bị cắt, và cái bị cắt
+ * đầu tiên là thanh điều hướng dưới cùng.
+ *
+ * ⚠️ SÀN TIẾP CẬN KHÔNG ĐỔI (§4.4). Khung rộng 390px là kích thước điện thoại
+ * thật, nên vùng chạm 52px và cỡ chữ 14px vẫn đúng như trên máy bác.
+ */
+@media (min-width: 900px) {
+  body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background:
+      radial-gradient(1200px 800px at 50% -10%, #ede9fe 0%, transparent 60%),
+      linear-gradient(160deg, #f5f3ff 0%, #eef2ff 50%, #faf5ff 100%);
+  }
+
+  #root {
+    position: relative;
+    width: 390px;
+    height: min(844px, 94vh);
+    flex: 0 0 auto;
+    border-radius: 34px;
+    overflow: hidden;
+    background: #f8f4ff;
+    box-shadow:
+      0 0 0 10px #1e1b3a,
+      0 0 0 12px #2e2a52,
+      0 30px 70px -20px rgba(30, 27, 58, 0.55);
+  }
+}
+
+
 img {
   -webkit-user-drag: none;
   user-select: none;
