@@ -228,8 +228,18 @@ function locTheoDauHieu(signals = [], ctx, pack) {
   const giu = [];
   const loai = [];
   for (const s of signals) {
-    if (s.source === 'direct' || s.source === 'deterministic' || s.source === 'user_confirmed') {
-      giu.push(s); continue;                        // ba nguồn này không do model đoán
+    if (s.source === 'direct' || s.source === 'deterministic'
+        || s.source === 'user_confirmed' || s.source === 'device_state') {
+      /*
+       * Bốn nguồn này KHÔNG do model đoán, nên không có gì để đối chiếu với mẫu.
+       *
+       * `device_state` là quan sát đọc thẳng từ Android: có một ứng dụng đang
+       * bật quyền trợ năng, cài từ ngoài chợ chính thức. Bằng chứng của nó là
+       * một sự kiện của thiết bị, không phải một đoạn chữ trong tin nhắn — nên
+       * bộ lọc "bằng chứng phải mang dấu hiệu" không áp dụng được, và ép nó qua
+       * đó thì tín hiệu luôn bị loại.
+       */
+      giu.push(s); continue;
     }
     if (bangChungMangDauHieu(s, ctx, pack)) giu.push(s);
     else loai.push({ id: s.id, lyDo: 'bang_chung_khong_mang_dau_hieu' });

@@ -190,6 +190,25 @@ function unreadableInputFloor(input = {}) {
     else daKiem.push('thong_bao_tin_nhan');
   }
 
+  /**
+   * NGUỒN ĐẦU VÀO THỨ NĂM: TRẠNG THÁI MÁY (chỉ bản APK).
+   *
+   * §4.3 gọi tên đích danh: "THÊM NGUỒN ĐẦU VÀO MỚI NÀO THÌ THÊM CA VÀO ĐÂY."
+   *
+   * ⚠️ BA CA, KHÔNG PHẢI HAI:
+   *   · không gửi trường này  ⇒ bản web, KHÔNG khai gì cả (không phải "đã xem")
+   *   · gửi kèm `docDuoc:false` ⇒ có APK nhưng không xem được ⇒ `chuaKiem`
+   *   · gửi kèm `docDuoc:true`  ⇒ đã xem thật ⇒ `daKiem`
+   *
+   * Gộp ca một và ca ba là lỗi §4.3 kinh điển: bản web không có cách nào nhìn
+   * vào trong máy, mà lại khai "đã kiểm trạng thái máy" thì Phiếu tin cậy nói
+   * sai về đúng thứ nó sinh ra để nói thật.
+   */
+  if (input.trangThaiMay && typeof input.trangThaiMay === 'object') {
+    if (input.trangThaiMay.docDuoc === true) daKiem.push('trang_thai_may');
+    else chuaKiem.push('chua_xem_duoc_trang_thai_may');
+  }
+
   if (Array.isArray(input.urlUnresolved) && input.urlUnresolved.length > 0) {
     chuaKiem.push('khong_mo_duoc_link');
   } else if (Array.isArray(input.url) && input.url.length > 0) {
@@ -442,7 +461,63 @@ function analyze(input = {}, nguCanhTinCay = {}) {
     }],
   }] : [];
 
-  const signals = ghepTinHieu([...direct, ...web, ...boHoiNhanh, ...kyTuChoi], llm);
+  /**
+   * TÍN HIỆU TỪ TRẠNG THÁI MÁY — bước ③ của kịch bản lừa đảo.
+   *
+   * ══════════ ⚠️ KHÔNG THÊM TÍN HIỆU MỚI, VÀ ĐÓ LÀ CHỦ Ý ══════════
+   *
+   * Hai tín hiệu dưới đây ĐÃ CÓ trong Phụ lục A. Máy quan sát được không tạo ra
+   * một loại nguy hiểm mới — nó là BẰNG CHỨNG CỨNG cho đúng thứ mà tới giờ bộ
+   * luật chỉ suy được từ chữ trong tin nhắn. Cùng cách `kyTuChoi` ngay trên
+   * dùng lại `ID_FAMILY_IMPERSONATION` thay vì đẻ ra tín hiệu riêng.
+   *
+   * Khác biệt về chất: `DEV_ACCESSIBILITY_PERMISSION` rút từ tin nhắn nghĩa là
+   * "có người ĐANG BẢO bác cấp quyền trợ năng". Rút từ thiết bị nghĩa là "bác
+   * ĐÃ CẤP RỒI, cho một ứng dụng đến từ ngoài chợ chính thức". Cái thứ hai là
+   * bước ③ đã xảy ra, không còn là lời dụ.
+   *
+   * ⚠️ `source: 'device_state'` — được miễn bộ lọc "bằng chứng phải mang dấu
+   * hiệu", vì bằng chứng ở đây là một sự kiện của máy chứ không phải đoạn chữ.
+   *
+   * ⚠️ CHỈ CÓ NHÁNH LÀM TĂNG (§4.2). Máy sạch KHÔNG trừ điểm, KHÔNG hạ mức,
+   * KHÔNG tạo tín hiệu "an toàn". Đọc được và không thấy gì chỉ có nghĩa là
+   * `daKiem` có thêm `trang_thai_may` — không hơn.
+   */
+  const trangThaiMay = [];
+  if (input.trangThaiMay && input.trangThaiMay.docDuoc === true) {
+    const soLa = Number(input.trangThaiMay.soUngDungLa) || 0;
+    if (soLa > 0) {
+      trangThaiMay.push({
+        id: 'DEV_ACCESSIBILITY_PERMISSION',
+        state: 'present',
+        source: 'device_state',
+        confidence: 1.0,
+        evidence: [{
+          quote: `UNG_DUNG_TRO_NANG_LA:${soLa}`, start: 0, end: 0,
+          sourceId: 'khoan_device',
+        }],
+      });
+      /*
+       * Vừa cài trong tuần ⇒ nhiều khả năng chính là app vừa được dụ cài, chứ
+       * không phải thứ bác dùng từ lâu. Đây là chỗ tín hiệu mạnh lên — và nó
+       * vẫn đi qua đúng bộ luật, đúng trần nhóm, như mọi tín hiệu khác.
+       */
+      if (input.trangThaiMay.coCaiTrongTuan === true) {
+        trangThaiMay.push({
+          id: 'DEV_INSTALL_APK_UNKNOWN',
+          state: 'present',
+          source: 'device_state',
+          confidence: 1.0,
+          evidence: [{
+            quote: 'UNG_DUNG_TRO_NANG_VUA_CAI_TRONG_TUAN', start: 0, end: 0,
+            sourceId: 'khoan_device',
+          }],
+        });
+      }
+    }
+  }
+
+  const signals = ghepTinHieu([...direct, ...web, ...boHoiNhanh, ...kyTuChoi, ...trangThaiMay], llm);
   const nhanDuoc = signals.filter((s) => s.state === 'present').map((s) => s.id);
 
   const kq = decide(signals);

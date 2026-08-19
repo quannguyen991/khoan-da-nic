@@ -58,6 +58,29 @@ public class KhoiDongLai extends BroadcastReceiver {
                 || Intent.ACTION_LOCKED_BOOT_COMPLETED.equals(viec);
 
         if (!dungViec) return;
+
+        /*
+         * ⚠️ DỰNG LẠI CẢ PHẦN TRÔNG CHỪNG CUỘC GỌI — LỖ HỔNG TÌM ĐƯỢC 19/8/2026.
+         *
+         * Foreground service KHÔNG sống qua một lần tắt máy, y như thông báo.
+         * Bản đầu của lớp này chỉ dựng lại dòng nhắc trên thanh, nên sau khi
+         * bác tắt máy đi ngủ, phần trông chừng cuộc gọi im lặng biến mất — mà
+         * công tắc trong app vẫn ở vị trí BẬT.
+         *
+         * Hai tính năng, cùng một cách hỏng, cùng một cách chữa: hỏi kho xem
+         * bác đã chọn gì, rồi dựng lại đúng thứ đó.
+         */
+        try {
+            android.content.SharedPreferences sp =
+                    ctx.getSharedPreferences(TheoDoiCuocGoi.KHO, Context.MODE_PRIVATE);
+            if (sp.getBoolean(TheoDoiCuocGoi.KHOA_BAT, false)) {
+                TheoDoiCuocGoi.bat(ctx);
+            }
+        } catch (Throwable t) {
+            // ROM chặn khởi động foreground service từ nền là chuyện có thật.
+            // Không có gì làm thêm ở đây; bác mở app là công tắc đồng bộ lại.
+        }
+
         if (!ThongBaoThuongTruc.daChonBat(ctx)) return;
 
         /*

@@ -540,3 +540,59 @@ test('§4.3 · vector drawable không dùng cú pháp arc nén (Android không �
     'biểu tượng trong im lặng. Giãn hai cờ ra: "a 4 4 0 0 0 -2 2".',
   );
 });
+
+/**
+ * §4.3 — NGUỒN ĐẦU VÀO THỨ NĂM: TRẠNG THÁI MÁY.
+ *
+ * Ba ca phải KHÁC NHAU ở đầu ra, và đây là chỗ dễ gộp nhầm nhất:
+ *
+ *   · bản web (không gửi trường)   ⇒ không khai gì — KHÔNG được nói "đã kiểm"
+ *   · APK nhưng không đọc được     ⇒ `chuaKiem`
+ *   · APK, đọc được                ⇒ `daKiem`
+ *
+ * Gộp ca một với ca ba là lỗi §4.3 kinh điển: bản web không có cách nào nhìn
+ * vào bên trong máy, mà Phiếu tin cậy lại khai "đã xem trạng thái máy".
+ */
+test('§4.3 · trạng thái máy — ba ca khác nhau, không gộp', async () => {
+  const web = await goi('/api/analyze', { vanBan: 'Chào bác, con là con trai đây.' });
+  assert.ok(!web.than.daKiem.includes('trang_thai_may'),
+    'bản web không nhìn được vào trong máy, không được khai là đã xem');
+  assert.ok(!web.than.chuaKiem.includes('chua_xem_duoc_trang_thai_may'),
+    'bản web KHÔNG có tính năng này — nói "chưa xem được" là bịa ra một giới hạn không tồn tại');
+
+  const hong = await goi('/api/analyze', {
+    vanBan: 'Chào bác, con là con trai đây.',
+    trangThaiMay: { docDuoc: false, soUngDungLa: 0, coCaiTrongTuan: false },
+  });
+  assert.ok(hong.than.chuaKiem.includes('chua_xem_duoc_trang_thai_may'),
+    'không đọc được trạng thái máy thì PHẢI nói ra');
+  assert.ok(!hong.than.daKiem.includes('trang_thai_may'));
+
+  const oke = await goi('/api/analyze', {
+    vanBan: 'Chào bác, con là con trai đây.',
+    trangThaiMay: { docDuoc: true, soUngDungLa: 0, coCaiTrongTuan: false },
+  });
+  assert.ok(oke.than.daKiem.includes('trang_thai_may'),
+    'đọc được thì khai là đã kiểm');
+  assert.ok(!oke.than.chuaKiem.includes('chua_xem_duoc_trang_thai_may'));
+});
+
+/**
+ * §4.2 — TRẠNG THÁI MÁY CHỈ ĐƯỢC LÀM TĂNG CẢNH GIÁC.
+ *
+ * ⚠️ MÁY SẠCH KHÔNG ĐƯỢC HẠ MỨC. Đây đúng là chỗ dễ "tối ưu" nhầm: thấy máy
+ * không có ứng dụng lạ nào thì trừ điểm cho đỡ báo động giả. Làm vậy là tặng
+ * kẻ lừa đảo một câu thần chú mới — chúng chỉ cần bảo nạn nhân gỡ app đi trước
+ * khi kiểm, cùng bài học với "đừng tải trên CH Play" (§12).
+ */
+test('§4.2 · máy sạch KHÔNG hạ mức so với khi không gửi trạng thái máy', async () => {
+  const tin = 'Toi la can bo Cong an. Bac chuyen 50 trieu vao tai khoan an toan va doc ma OTP ngay, khong duoc noi voi ai.';
+  const khong = await goi('/api/analyze', { vanBan: tin });
+  const sach = await goi('/api/analyze', {
+    vanBan: tin,
+    trangThaiMay: { docDuoc: true, soUngDungLa: 0, coCaiTrongTuan: false },
+  });
+  const bac = { CHUA_THAY: 0, NGHI_NGO: 1, CAO: 2 };
+  assert.ok(bac[sach.than.nhan] >= bac[khong.than.nhan],
+    `máy sạch làm tụt mức: ${khong.than.nhan} -> ${sach.than.nhan}`);
+});

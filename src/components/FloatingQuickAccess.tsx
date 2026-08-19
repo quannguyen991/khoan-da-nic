@@ -427,7 +427,14 @@ export function FloatingQuickAccess({
         <motion.div
           drag
           dragMomentum={false}
-          className="fixed right-3 bottom-24 z-[90] select-none cursor-grab active:cursor-grabbing pointer-events-auto"
+          /*
+              ⚠️ `bottom-40`, KHÔNG PHẢI `bottom-24` — ĐO 19/8/2026.
+              Ở 96px, nút ngồi đúng lên ô "Nhập hoặc bấm máy ảnh" của trang chủ,
+              che mất chữ và cả nút máy ảnh bên trong ô. 160px đưa nó vào khoảng
+              trống giữa hàng nút tròn và ô nhập.
+              Đổi số này thì phải chụp lại trang chủ để xem nó rơi trúng cái gì.
+            */
+            className="fixed right-3 bottom-40 z-[90] select-none cursor-grab active:cursor-grabbing pointer-events-auto"
         >
           <div className="relative flex flex-col items-end">
             {/* Quick Access Menu Popover */}
@@ -586,30 +593,63 @@ export function FloatingQuickAccess({
             <div className="relative group">
               <button
                 onClick={handleBallClick}
-                className="relative w-16 h-16 sm:w-18 sm:h-18 rounded-full bg-gradient-to-tr from-[#7e22ce] via-[#9333ea] to-[#c084fc] p-0.5 shadow-[0_10px_35px_rgba(126,34,206,0.55)] border-2 border-white flex items-center justify-center active:scale-90 transition-transform cursor-pointer"
-                title="Bong bóng Khoan Đã nổi ngoài màn hình"
+                /*
+                  ⚠️ 56px LÀ SÀN, KHÔNG PHẢI GỢI Ý — `--touch-target-primary` (§4.4).
+                  Đừng hạ xuống nữa cho "gọn": nút này dành cho ngón tay run.
+
+                  ⚠️ VÀ ĐỪNG TĂNG LÊN NỮA. Bản trước là 64px, lên 72px ở màn rộng,
+                  cộng huy hiệu lấn ra hai góc, bóng đổ 35px và MỘT VÒNG `animate-ping`
+                  nhấp nháy vĩnh viễn. Vùng nó chiếm thật là ~100px, và trên máy
+                  360dp nó che mất nút "Xem thử một lần" ở màn Cài đặt cùng dòng
+                  mô tả ở màn chọn vai trò. Người dùng báo 19/8/2026.
+
+                  ⚠️ `animate-ping` ĐÃ BỎ HẲN, và không nên quay lại. Một quầng
+                  sáng nhấp nháy không ngừng ở góc màn hình dạy người dùng đúng một
+                  điều: bỏ qua chuyển động của app này. Đến lượt dải cảnh báo mức
+                  CAO nhấp nháy thật, nó cũng bị bỏ qua theo (§4.6).
+                */
+                className="relative w-14 h-14 rounded-full bg-gradient-to-tr from-[#7e22ce] via-[#9333ea] to-[#c084fc] p-0.5 shadow-[0_4px_16px_rgba(126,34,206,0.4)] border-2 border-white flex items-center justify-center active:scale-90 transition-transform cursor-pointer"
+                title={hasPermission ? "Nút tròn quét nhanh của Khoan Đã" : "Nút tròn quét nhanh — máy chưa cho dùng máy ảnh"}
               >
-                {/* Outer pulsing ring */}
-                <span className="absolute -inset-1 rounded-full bg-purple-400 opacity-40 animate-ping pointer-events-none"></span>
                 
                 <div className="w-full h-full rounded-full bg-gradient-to-b from-white/30 to-transparent flex items-center justify-center relative z-10 overflow-hidden">
                   <img
                     src="/logo.webp"
                     alt="Khoan Đã Fast Shortcut"
-                    className="w-10 h-10 sm:w-11 sm:h-11 object-contain drop-shadow-md group-hover:scale-110 transition-transform"
+                    className="w-9 h-9 object-contain drop-shadow-md group-hover:scale-110 transition-transform"
                   />
                 </div>
 
                 {/* Little Camera Badge */}
-                <div className="absolute -bottom-0.5 -left-0.5 w-6 h-6 bg-gradient-to-r from-red-500 to-amber-500 rounded-full border-2 border-white flex items-center justify-center text-white shadow-xs z-20">
-                  <Camera size={13} />
+                <div className="absolute -bottom-0.5 -left-0.5 w-5 h-5 bg-gradient-to-r from-red-500 to-amber-500 rounded-full border-2 border-white flex items-center justify-center text-white shadow-xs z-20">
+                  <Camera size={11} />
                 </div>
 
                 {/* Status Indicator */}
                 {!hasPermission && (
-                  <div className="absolute -top-1 -right-1 w-5 h-5 bg-amber-500 rounded-full border-2 border-white flex items-center justify-center text-[14px] text-white font-bold animate-bounce z-20">
-                    !
-                  </div>
+                  /*
+                    ⚠️ BỎ `animate-bounce`. Chấm này hiện SUỐT khi chưa cấp quyền
+                    camera — tức là nó nảy không ngừng, mỗi lần bác mở app, ở mọi
+                    màn hình. Với người cao tuổi, một dấu chấm than cam nhảy liên
+                    tục đọc ra là "app đang hỏng", chứ không phải "còn một việc
+                    nhỏ chưa làm". Tĩnh thì vẫn thấy, mà không hét vào mặt.
+                  */
+                  /*
+                    ⚠️ CHẤM TRƠN, KHÔNG CÓ CHỮ — VÀ ĐÂY LÀ LÝ DO.
+
+                    Bản trước nhét dấu "!" vào một chấm 16px, nên phải hạ cỡ chữ
+                    xuống 10px để nó vừa. `test/hop-dong.test.mjs` chặn ngay: sàn
+                    §4.4 là 14px, không có ngoại lệ cho "chữ chỉ là trang trí".
+
+                    Sàn đó đúng, và cách sửa đúng không phải là làm chấm to lên —
+                    một dấu chấm than to ở góc màn hình đọc ra là "app hỏng". Một
+                    chấm cam trơn nói vừa đủ: còn một việc chưa xong. Nội dung
+                    thật nằm ở nhãn của nút, nơi trình đọc màn hình lấy được.
+                  */
+                  <div
+                    aria-hidden="true"
+                    className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-amber-500 rounded-full border-2 border-white z-20"
+                  />
                 )}
               </button>
             </div>

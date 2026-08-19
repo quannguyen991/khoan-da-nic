@@ -266,6 +266,16 @@ export const DA_KIEM: Record<string, Cap> = {
 //   chua_thay_yeu_cau_da_xac_thuc  — CHƯA ai hỏi ai cả. Bình thường.
 
 export const CHUA_KIEM: Record<string, Cap> = {
+  /**
+   * §4.3 — CÓ BẢN APK NHƯNG KHÔNG XEM ĐƯỢC TRẠNG THÁI MÁY.
+   * Khác hẳn "đã xem, máy không có gì lạ" — và cũng khác bản web, nơi trường
+   * này không được gửi đi chút nào.
+   */
+  chua_xem_duoc_trang_thai_may: c(
+    'Cháu chưa xem được trong máy có ứng dụng nào bấm thay bác không',
+    'Could not check whether any app can tap on your behalf',
+  ),
+
   chua_nghe_duoc_cuoc_goi: c(
     'Khoan Đã chưa nghe được cuộc gọi',
     'Khoan Đã could not hear the call',
@@ -578,6 +588,67 @@ export const CUM_TU: Record<string, Cap> = {
 export const MA_LOI_RA: Record<string, Cap> = {
   quay_lai_trang_chu: c('Quay lại trang chủ', 'Back to home'),
   toi_on_khong_co_gi_nguy_hiem: c('Tôi ổn, không có gì nguy hiểm', 'I’m fine, nothing dangerous here'),
+};
+
+// ═══════════════ Nhắc cuộc gọi dài ═══════════════
+//
+// ⚠️ APP KHÔNG BIẾT AI ĐANG GỌI, NÊN KHÔNG CÂU NÀO ĐƯỢC NÓI VỀ NGƯỜI GỌI.
+//
+// Cố ý không xin `READ_CALL_LOG` (xem `TheoDoiCuocGoi.java`), nên thứ duy nhất
+// app biết là: máy đang trong một cuộc gọi, và nó đã kéo dài 25 phút. Không số,
+// không danh bạ, không biết đó là con gái hay kẻ lừa đảo.
+//
+// Vì vậy mọi câu ở đây chỉ được nói về THỜI LƯỢNG và hỏi về YÊU CẦU. Một câu
+// như "người này có thể đang lừa bác" là bịa ra một điều app không hề đo được —
+// và nếu người bên kia là con gái bác thật, đó là một lời vu cho người nhà (§11).
+//
+// ⚠️ CÂU HỎI, KHÔNG PHẢI CẢNH BÁO. Bác đang nghe điện thoại; một dòng đỏ báo
+// nguy hiểm giữa cuộc gọi với con là cách nhanh nhất để bác tắt tính năng này.
+
+export const NHAC_CUOC_GOI: Record<string, Cap> = {
+  tieu_de: c(
+    'Cuộc gọi này đã lâu rồi',
+    'This call has been going a while',
+  ),
+  /**
+   * ⚠️ HAI CÂU HỎI, KHÔNG CÓ CÂU KHẲNG ĐỊNH NÀO.
+   * Đây là toàn bộ thứ app được phép nói ở đây: nhắc bác tự nhìn lại yêu cầu
+   * mình đang nhận, chứ không phán về người đang nói chuyện với bác.
+   */
+  noi_dung: c(
+    'Bác có đang được yêu cầu chuyển tiền, đọc mã, hay cài ứng dụng nào không? Nếu có, khoan đã — hỏi cháu một câu trước.',
+    'Are you being asked to transfer money, read out a code, or install an app? If so, wait — check with me first.',
+  ),
+  nut_mo: c('Hỏi cháu', 'Ask me'),
+  nut_on: c('Tôi ổn, tắt đi', 'I’m fine, dismiss'),
+};
+
+// ═══════════════ Trạng thái máy — §11, nói về sự việc, không kết tội ═══════════════
+//
+// ⚠️ KHÔNG CÂU NÀO ĐƯỢC GỌI MỘT ỨNG DỤNG LÀ "ĐỘC HẠI" (§11).
+// App đọc được đúng ba điều: tên, có phải cài sẵn không, cài từ đâu. Từ ba điều
+// đó tới kết luận "đây là phần mềm gián điệp" là một bước nhảy mà không dữ liệu
+// nào ở đây đỡ được — và nếu đoán sai, bác gỡ mất một ứng dụng mình cần.
+//
+// Nói SỰ VIỆC ("ứng dụng này xem và bấm được thay bác") và nói HOÀN CẢNH ("kẻ
+// lừa đảo hay bảo bác cài rồi bấm cho phép"), rồi để bác quyết.
+
+export const TRANG_THAI_MAY: Record<string, Cap> = {
+  tieu_de: c(
+    'Có ứng dụng đang xem và bấm được thay bác',
+    'An app can see and tap for you',
+  ),
+  giai_thich: c(
+    'Kẻ lừa đảo thường bảo bác cài một ứng dụng rồi bấm cho phép. Nếu bác không nhớ đã cài cái này, nên tắt nó đi.',
+    'Scammers often ask you to install an app and grant it permission. If you do not remember installing this, turn it off.',
+  ),
+  nut_cai_dat: c('Mở Cài đặt để tắt', 'Open settings to turn it off'),
+  nut_tu_cai: c('Cái này tôi tự cài', 'I installed this myself'),
+
+  // Nguồn cài — nói đúng cái đọc được, không suy diễn thêm.
+  tu_tep: c('cài từ một tệp, không qua chợ ứng dụng', 'installed from a file, not from an app store'),
+  khong_ro: c('không rõ cài từ đâu', 'unknown where it came from'),
+  vua_cai: c('vừa cài trong tuần này', 'installed this week'),
 };
 
 // ═══════════════ Chữ cho lớp native của bản APK ═══════════════

@@ -49,6 +49,16 @@ interface CauNoi {
    * thật không. Hai giá trị KHÁC NHAU — xem chú thích bên Java.
    */
   trangThaiThongBaoThuongTruc(): Promise<{ daChon: boolean; dangHien: boolean }>;
+  napChuCuocGoi(o: {
+    tieuDe: string; noiDung: string; nutMo: string; nutOn: string; phut?: number;
+  }): Promise<void>;
+  trangThaiTheoDoiCuocGoi(): Promise<{ coQuyen: boolean; dangBat: boolean }>;
+  datTheoDoiCuocGoi(o: { bat: boolean }): Promise<{ dangBat: boolean; maLoi?: string }>;
+  trangThaiMay(): Promise<{
+    docDuoc: boolean;
+    dichVuTroNang: { goi: string; ten: string; nguonCai: string; ngayCai: number }[];
+  }>;
+  moCaiDatTroNang(): Promise<void>;
   trangThaiBoNghe(): Promise<{ daCo: boolean; lyDo?: string; sdk?: number }>;
   moCaiDatGiongNoi(): Promise<void>;
   batDauNghe(o: { ngonNgu?: string }): Promise<{
@@ -586,6 +596,158 @@ export async function trangThaiThuongTruc(): Promise<{
   } catch {
     return null;
   }
+}
+
+// ═══════════ Trạng thái máy — nguồn đầu vào thứ tư (§4.3) ═══════════
+
+/** Một ứng dụng đang có thể xem và bấm thay người dùng. */
+export interface UngDungXemVaBam {
+  /** Tên hiển thị — CHỈ dùng trong máy, không gửi đi đâu (§6.9). */
+  ten: string;
+  goi: string;
+  nguonCai: 'cai_san' | 'ch_play' | 'tu_tep' | 'khong_ro';
+  /** Mốc thời gian cài (ms). 0 = không đọc được. */
+  ngayCai: number;
+  /** Cài trong 7 ngày qua — dấu hiệu mạnh hơn hẳn (§4.2: chỉ bật cờ). */
+  vuaCai: boolean;
+}
+
+export interface TrangThaiMay {
+  /**
+   * ⚠️ `false` KHÔNG PHẢI "MÁY SẠCH". Nó là "chưa xem được".
+   * Tầng gọi PHẢI đẩy `chua_xem_duoc_trang_thai_may` vào `chuaKiem` (§4.3).
+   */
+  docDuoc: boolean;
+  /** Chỉ những ứng dụng ĐÁNG NÓI: không phải app cài sẵn của máy. */
+  dangNgo: UngDungXemVaBam[];
+  /** Tổng số dịch vụ trợ năng đang bật, kể cả app hệ thống. */
+  tongSo: number;
+}
+
+const BAY_NGAY = 7 * 24 * 60 * 60 * 1000;
+
+/**
+ * ĐỌC TRẠNG THÁI MÁY.
+ *
+ * ⚠️ LỌC APP CÀI SẴN RA KHỎI `dangNgo` — VÀ ĐÂY LÀ PHẦN DỄ GÂY HẠI NHẤT.
+ *
+ * TalkBack là mắt của người khiếm thị. Bàn phím nào cũng cần đúng quyền này.
+ * Nếu app đem chúng ra kể như một mối nguy, bác sẽ tắt đúng thứ mình cần —
+ * và đó là một tác hại thật do app này gây ra, không phải do kẻ lừa đảo.
+ *
+ * Nên chỉ app KHÔNG cài sẵn và KHÔNG từ CH Play mới được nêu tên. `khong_ro`
+ * cũng vào danh sách: không đọc được nguồn cài thì nói ra, đừng cho qua (§4.3).
+ *
+ * `null` = không phải APK. Bản web không có cách nào biết, và cũng không nên có.
+ */
+export async function trangThaiMay(): Promise<TrangThaiMay | null> {
+  const c = (await cauHoacNull())?.cau;
+  if (!c) return null;
+  try {
+    const r = await hanGio(
+      c.trangThaiMay(),
+      { docDuoc: false, dichVuTroNang: [] },
+    );
+    const tat = r.dichVuTroNang ?? [];
+    const bayGio = Date.now();
+    return {
+      docDuoc: r.docDuoc === true,
+      tongSo: tat.length,
+      dangNgo: tat
+        .filter((m) => m.nguonCai !== 'cai_san' && m.nguonCai !== 'ch_play')
+        .map((m) => ({
+          ten: m.ten || m.goi,
+          goi: m.goi,
+          nguonCai: (m.nguonCai as UngDungXemVaBam['nguonCai']) ?? 'khong_ro',
+          ngayCai: m.ngayCai ?? 0,
+          vuaCai: m.ngayCai > 0 && bayGio - m.ngayCai < BAY_NGAY,
+        })),
+    };
+  } catch {
+    // Ném ⇒ chưa xem được. KHÔNG trả về danh sách rỗng với `docDuoc: true`.
+    return { docDuoc: false, dangNgo: [], tongSo: 0 };
+  }
+}
+
+/**
+ * PHẦN DUY NHẤT ĐƯỢC PHÉP RỜI KHỎI MÁY.
+ *
+ * ⚠️ KHÔNG CÓ TÊN ỨNG DỤNG NÀO Ở ĐÂY, VÀ ĐÓ LÀ CHỦ Ý.
+ *
+ * Danh sách ứng dụng đã cài là một trong những dấu vân tay mạnh nhất của một
+ * người: nó lộ ngân hàng bác dùng, tôn giáo, bệnh, xu hướng chính trị. Gửi nó
+ * lên máy chủ để "phân tích cho chính xác hơn" là đánh đổi mà bác không hề được
+ * hỏi — và §6.9 không cho đánh đổi đó.
+ *
+ * Bộ luật chỉ cần biết CÓ HAY KHÔNG và MỚI CÀI HAY CHƯA. Ba con số dưới đây đủ
+ * để ra quyết định, và không con số nào chỉ về một người cụ thể.
+ */
+export function tomTatChoMayChu(t: TrangThaiMay | null): {
+  docDuoc: boolean; soUngDungLa: number; coCaiTrongTuan: boolean;
+} | undefined {
+  if (!t) return undefined;   // bản web — không gửi trường này đi
+  return {
+    docDuoc: t.docDuoc,
+    soUngDungLa: t.dangNgo.length,
+    coCaiTrongTuan: t.dangNgo.some((m) => m.vuaCai),
+  };
+}
+
+// ═══════════ Nhắc cuộc gọi dài ═══════════
+
+/**
+ * NẠP CHỮ CHO LỜI NHẮC — phải gọi TRƯỚC khi bật, và mỗi lần đổi ngôn ngữ.
+ *
+ * ⚠️ §11 — SERVICE CHẠY KHI APP ĐÃ ĐÓNG, nên lúc cần hiện lời nhắc thì không
+ * còn tầng web nào để hỏi chữ. Chữ nằm sẵn trong SharedPreferences, đã qua
+ * catalog i18n. Thiếu chữ ⇒ lớp native KHÔNG hiện gì.
+ */
+export async function napChuCuocGoi(o: {
+  tieuDe: string; noiDung: string; nutMo: string; nutOn: string; phut?: number;
+}): Promise<void> {
+  const c = (await cauHoacNull())?.cau;
+  if (!c) return;
+  try {
+    await hanGio(c.napChuCuocGoi(o), undefined as unknown as void);
+  } catch {
+    // Không nạp được thì tính năng im lặng không hiện — đúng hơn là hiện bậy.
+  }
+}
+
+/**
+ * ⚠️ TRẢ VỀ CẢ `coQuyen`, KHÔNG CHỈ `dangBat`.
+ * "Chưa bật bao giờ" và "đã bật nhưng máy vừa rút quyền" là hai câu khác nhau,
+ * và giao diện phải nói được câu thứ hai chứ không lặng lẽ gạt công tắc về tắt.
+ */
+export async function trangThaiTheoDoiCuocGoi(): Promise<{
+  coQuyen: boolean; dangBat: boolean;
+} | null> {
+  const c = (await cauHoacNull())?.cau;
+  if (!c) return null;
+  try {
+    return await hanGio(c.trangThaiTheoDoiCuocGoi(), null as unknown as {
+      coQuyen: boolean; dangBat: boolean;
+    });
+  } catch {
+    return null;
+  }
+}
+
+export async function datTheoDoiCuocGoi(bat: boolean): Promise<{
+  dangBat: boolean; maLoi?: string;
+}> {
+  const c = (await cauHoacNull())?.cau;
+  if (!c) return { dangBat: false, maLoi: 'KHONG_PHAI_APK' };
+  try {
+    return await hanGio(c.datTheoDoiCuocGoi({ bat }), { dangBat: false, maLoi: 'HET_GIO' });
+  } catch {
+    return { dangBat: false, maLoi: 'KHONG_BAT_DUOC' };
+  }
+}
+
+/** Mở màn Cài đặt trợ năng của hệ điều hành. */
+export async function moCaiDatTroNang(): Promise<void> {
+  (await cauHoacNull())?.cau.moCaiDatTroNang();
 }
 
 export async function datThongBaoThuongTruc(bat: boolean): Promise<{

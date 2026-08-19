@@ -132,6 +132,27 @@
           `directBootAware` để nhận cả `LOCKED_BOOT_COMPLETED` trên máy có mã
           hoá theo tệp — máy vừa bật mà bác chưa mở khoá lần nào.
         -->
+        <!--
+          THEO DÕI THỜI LƯỢNG CUỘC GỌI — không nghe, không biết số nào.
+
+          ⚠️ `specialUse` LÀ LOẠI ĐÚNG, VÀ PHẢI GIẢI TRÌNH ĐƯỢC. Android 14 bắt
+          mọi foreground service khai loại. Việc này không rơi vào loại nào có
+          sẵn: không phải phát nhạc, không phải định vị, không phải cuộc gọi của
+          chính app. Nó chỉ đếm thời gian một cuộc gọi đang diễn ra.
+
+          ⚠️ CH Play SẼ HỎI. Chuẩn bị sẵn: app KHÔNG ghi âm, KHÔNG đọc nhật ký
+          cuộc gọi, KHÔNG biết số điện thoại — chỉ đọc trạng thái máy có đang
+          trong cuộc gọi hay không, để nhắc người cao tuổi ở phút thứ 25.
+        -->
+        <service
+            android:name=".TheoDoiCuocGoi"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Nhac nguoi cao tuoi khi mot cuoc goi keo dai bat thuong. Khong ghi am, khong doc nhat ky cuoc goi, khong doc so dien thoai." />
+        </service>
+
         <receiver
             android:name=".KhoiDongLai"
             android:enabled="true"
@@ -178,6 +199,24 @@
       cần tới nó.
     -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+    <!--
+      ⚠️ TRẠNG THÁI CUỘC GỌI — CHỈ "CÓ ĐANG GỌI HAY KHÔNG".
+
+      Quyền này KHÔNG cho đọc nội dung, KHÔNG cho ghi âm, và KHÔNG cho đọc nhật
+      ký cuộc gọi. Nó cho biết đúng một điều: máy đang trong cuộc gọi hay không.
+
+      ⚠️ CỐ Ý KHÔNG XIN `READ_CALL_LOG`. Muốn biết SỐ của người gọi thì phải có
+      quyền đó — và nó mở ra toàn bộ lịch sử ai gọi cho bác, lúc nào, bao lâu.
+      Đổi lấy khả năng phân biệt "số lạ" với "con gái", cái giá là một kho dữ
+      liệu về đời sống của bác nằm trong app này. Không đáng.
+
+      Hệ quả phải sống chung: app không biết ai đang gọi, nên nó chỉ được nói về
+      THỜI LƯỢNG, và không câu nào được hàm ý người bên kia là kẻ xấu (§11).
+    -->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
 
     <!--
       ⚠️ POPUP ĐÈ LÊN MÀN HÌNH.

@@ -40,7 +40,7 @@ import {
   Smartphone,
   Sliders,
   Maximize2,
-  EyeOff,
+  EyeOff, Users
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { translations, Lang, t as translate } from './i18n';
@@ -49,18 +49,20 @@ import { translations, Lang, t as translate } from './i18n';
  * Backend trả ENUM và MÃ; chữ tiếng Việt / tiếng Anh nằm ở `catalog.ts`, và
  * CHỈ ở đó. Hệ quả cố ý: đổi ngôn ngữ KHÔNG THỂ làm đổi kết luận.
  */
-import { NHAN, MA_LY_DO, CHUA_KIEM, CHUA_LAY_TIN, NOI_CHAY_AI, tra, traNhieu, CHU_NATIVE } from './catalog';
+import { NHAN, MA_LY_DO, CHUA_KIEM, CHUA_LAY_TIN, NOI_CHAY_AI, tra, traNhieu, CHU_NATIVE , TRANG_THAI_MAY, NHAC_CUOC_GOI} from './catalog';
 import { api } from './api-goc';
 import {
   laApk, hienCanhBaoHeadsUp, hienPopupCanhBao, anPopup,
   datThongBaoThuongTruc, noiDungChiaSe, quyenPopup, xinQuyenPopup,
   ngheGiongNoi, dungNghe as dungNgheNative, coBoNghe, moCaiDatGiongNoi,
   quyenDocThongBao, xinQuyenDocThongBao, tinMoiNhat, xoaTinDaBat,
-  trangThaiThuongTruc,
-  type QuyenNative,
+  trangThaiThuongTruc, trangThaiMay, tomTatChoMayChu, moCaiDatTroNang,
+  napChuCuocGoi, trangThaiTheoDoiCuocGoi, datTheoDoiCuocGoi,
+  type QuyenNative, type TrangThaiMay,
 } from './native';
 import { GuardianIntroView, GuardianAuthView, GuardianView } from './components/Guardian';
 import { AppMenuModal } from './components/AppMenuModal';
+import { MatKhauGiaDinh, docMatKhauGiaDinh } from './components/MatKhauGiaDinh';
 import { FloatingQuickAccess } from './components/FloatingQuickAccess';
 import { HoiNhanhView } from './components/HoiNhanh';
 /**
@@ -134,7 +136,7 @@ function KhungTaiTre({ t, children }: { t: any; children: React.ReactNode }) {
 }
 import { EMERGENCY_NUMBERS } from './data/so-khan-cap';
 
-export type ViewState = 'intro' | 'home' | 'voice' | 'phone' | 'link' | 'qr' | 'learn' | 'profile' | 'settings' | 'history' | 'family' | 'search' | 'login' | 'add_family' | 'warning' | 'guardian' | 'account' | 'privacy' | 'notifications' | 'device_data' | 'hoi_nhanh';
+export type ViewState = 'intro' | 'home' | 'voice' | 'phone' | 'link' | 'qr' | 'learn' | 'profile' | 'settings' | 'history' | 'family' | 'search' | 'login' | 'add_family' | 'warning' | 'guardian' | 'account' | 'privacy' | 'notifications' | 'device_data' | 'hoi_nhanh' | 'mat_khau_gia_dinh';
 
 export interface HistoryRecord {
   id: number;
@@ -182,8 +184,36 @@ export default function App() {
    * hứa với bác những khả năng bản web không có (§4.3); đoán nhầm về phía
    * ngược lại chỉ là khiêm tốn thừa trong khoảnh khắc đầu.
    */
+  /**
+   * TRẠNG THÁI MÁY — giữ ở đây để màn cảnh báo nêu ĐÍCH DANH ứng dụng.
+   *
+   * ⚠️ BIẾN NÀY KHÔNG BAO GIỜ ĐƯỢC GỬI NGUYÊN LÊN MÁY CHỦ. Tên ứng dụng đã cài
+   * là dấu vân tay rất mạnh của một người — nó lộ ngân hàng, bệnh, tôn giáo.
+   * Thứ đi lên máy chủ là `tomTatChoMayChu()`: ba con số, không tên nào (§6.9).
+   */
+  const [mayCoUngDungLa, setMayCoUngDungLa] = useState<TrangThaiMay | null>(null);
+
   const [dangChayApk, setDangChayApk] = useState(false);
   useEffect(() => { void laApk().then(setDangChayApk); }, []);
+
+  /**
+   * ĐỌC LẠI TRẠNG THÁI MÁY MỖI LẦN APP TRỞ LẠI TIỀN CẢNH.
+   *
+   * ⚠️ KHÔNG CHỈ ĐỌC MỘT LẦN LÚC MỞ. Kịch bản cần bắt là: bác đang mở Khoan Đã,
+   * kẻ lừa đảo giục cài app, bác chuyển sang cài rồi quay lại. Đúng lúc quay
+   * lại là lúc thông tin thay đổi — và cũng là lúc duy nhất app còn cơ hội nói.
+   */
+  useEffect(() => {
+    let huy = false;
+    const doc = async () => {
+      const t = await trangThaiMay();
+      if (!huy) setMayCoUngDungLa(t);
+    };
+    void doc();
+    const khiHien = () => { if (document.visibilityState === 'visible') void doc(); };
+    document.addEventListener('visibilitychange', khiHien);
+    return () => { huy = true; document.removeEventListener('visibilitychange', khiHien); };
+  }, []);
 
   /**
    * ĐỒNG BỘ CÔNG TẮC THEO SỰ THẬT, KHÔNG THEO localStorage.
@@ -202,6 +232,19 @@ export default function App() {
     let huy = false;
 
     const dongBo = async () => {
+      /*
+       * ⚠️ HỎI TRẠNG THÁI TRÔNG CHỪNG CUỘC GỌI Ở ĐÂY, KHÔNG CHỈ TRONG MÀN CÀI ĐẶT.
+       *
+       * Lời gọi này có tác dụng phụ CỐ Ý: phía native, `trangThaiTheoDoiCuocGoi`
+       * dựng lại service nếu bác đã chọn bật mà nó đã chết (ROM dọn nền, buộc
+       * dừng app, broadcast khởi động bị chặn).
+       *
+       * Đặt nó trong `NhacCuocGoiDai` là chỉ chữa khi bác tình cờ đi vào đúng
+       * màn Cài đặt thông báo — tức gần như không bao giờ. Ở đây thì mỗi lần
+       * bác mở app là một lần service được dựng lại.
+       */
+      void trangThaiTheoDoiCuocGoi();
+
       const t = await trangThaiThuongTruc();
       if (huy || !t) return;   // null ⇒ bản web, không có gì để đồng bộ
       setPinnedNotification(t.dangHien);
@@ -450,7 +493,20 @@ export default function App() {
       const res = await fetch(api('/api/analyze'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ vanBan: text || '', anh: image || undefined })
+        /*
+         * ⚠️ `tomTatChoMayChu` CHỨ KHÔNG PHẢI `mayCoUngDungLa`.
+         * Hàm đó bỏ hết tên ứng dụng, chỉ còn ba con số. Nối thẳng biến kia vào
+         * đây là gửi danh sách app của bác lên máy chủ — §6.9 cấm, và không ai
+         * hỏi bác về chuyện đó.
+         *
+         * `undefined` khi chạy bản web ⇒ JSON.stringify bỏ trường này luôn, nên
+         * backend biết là KHÔNG CÓ DỮ LIỆU chứ không phải "đã xem, máy sạch".
+         */
+        body: JSON.stringify({
+          vanBan: text || '',
+          anh: image || undefined,
+          trangThaiMay: tomTatChoMayChu(mayCoUngDungLa),
+        })
       });
       if (!res.ok) {
         throw new Error(`Server returned ${res.status}`);
@@ -845,7 +901,8 @@ export default function App() {
             {view === 'learn' && <KhungTaiTre t={t}><LearnView setView={setView} t={t} lang={lang} onTriggerEmergency={triggerEmergencyAlert} /></KhungTaiTre>}
             {view === 'login' && <LoginView setView={setView} t={t} setIsLoggedIn={setIsLoggedIn} userRole={userRole} setUserRole={setUserRole} />}
             {view === 'add_family' && <AddFamilyView setView={setView} t={t} setFamilyMembers={setFamilyMembers} />}
-            {view === 'warning' && <WarningView setView={setView} t={t} lang={lang} result={analyzeResult} familyMembers={familyMembers} noiChayAi={noiChayAi} />}
+            {view === 'mat_khau_gia_dinh' && <MatKhauGiaDinh setView={setView} t={t} />}
+            {view === 'warning' && <WarningView setView={setView} t={t} lang={lang} result={analyzeResult} familyMembers={familyMembers} noiChayAi={noiChayAi} mayCoUngDungLa={mayCoUngDungLa} />}
             {view === 'guardian' && <GuardianView setView={setView} t={t} lang={lang} setUserRole={setUserRole} isDesktop={false} isLoggedIn={isLoggedIn} onAnalyze={handleAnalyze} familyMembers={familyMembers} onTriggerEmergency={triggerEmergencyAlert} />}
             {view === 'account' && <AccountView setView={setView} t={t} setIsLoggedIn={setIsLoggedIn} />}
             {view === 'privacy' && <PrivacyView setView={setView} t={t} />}
@@ -862,6 +919,7 @@ export default function App() {
                 loiThongBaoNative={loiThongBaoNative}
                 dangChayApk={dangChayApk}
                 onAnalyzeText={(txt) => handleAnalyze(txt)}
+                lang={lang}
                 showInAppBanner={showInAppBanner}
                 setShowInAppBanner={setShowInAppBanner}
               />
@@ -1040,7 +1098,19 @@ export default function App() {
         setShowFloatingBall={setShowFloatingBall}
       />
 
-      {/* Floating Quick Access / Outside Mode Shortcut */}
+      {/*
+        ⚠️ NÚT NỔI PHẢI BIẾN MẤT KHI CÓ HỘP THOẠI ĐANG MỞ.
+
+        Nó nổi trên mọi thứ theo đúng thiết kế, nên ở màn giới thiệu và màn chọn
+        vai trò nó đè lên chính hộp thoại đang hỏi bác một câu — và câu trả lời
+        nằm ngay dưới nó. Người dùng báo 19/8/2026 kèm ảnh chụp.
+
+        Lý do sâu hơn để ẩn, không chỉ để dời chỗ: nút này là lối tắt QUÉT NHANH.
+        Ở màn chưa chọn xong vai trò thì chưa có gì để quét, và ở màn menu thì đã
+        có sẵn mục quét trong danh sách. Một nút không làm được việc gì mà vẫn
+        nằm chắn đường là thứ khiến bác chạm nhầm rồi lạc.
+      */}
+      {view !== 'intro' && view !== 'login' && !isMenuOpen && (
       <FloatingQuickAccess
         setView={setView}
         t={t}
@@ -1052,6 +1122,7 @@ export default function App() {
         showFloatingBall={showFloatingBall}
         setShowFloatingBall={setShowFloatingBall}
       />
+      )}
     </div>
   );
 }
@@ -2852,6 +2923,124 @@ function DocTinNhanNative({ t, onAnalyze }: { t: any; onAnalyze?: (text: string)
   );
 }
 
+/**
+ * NHẮC KHI CUỘC GỌI KÉO DÀI — công tắc và lời giải trình.
+ *
+ * ⚠️ MÀN NÀY PHẢI NÓI TRƯỚC KHI XIN, VÀ NÓI ĐỦ BA ĐIỀU.
+ *
+ * Bác sắp cho một ứng dụng quyền biết mình có đang gọi điện hay không. Đó là
+ * một quyền nghe rất đáng sợ nếu không giải thích, và đáng sợ đúng — nhiều app
+ * xin nó để làm chuyện khác hẳn. Nên phải nói thẳng ba điều app KHÔNG làm:
+ * không nghe, không ghi âm, không biết số nào.
+ *
+ * Giấu ba điều đó đi để bác dễ bấm đồng ý hơn là một cách để có thêm người
+ * dùng, và là cách chắc chắn nhất để mất họ lúc họ đọc kỹ.
+ */
+function NhacCuocGoiDai({ t, lang }: { t: any; lang: Lang }) {
+  const [dangBat, setDangBat] = useState(false);
+  const [coQuyen, setCoQuyen] = useState(false);
+  const [loi, setLoi] = useState<string | null>(null);
+
+  const doLai = () => {
+    void trangThaiTheoDoiCuocGoi().then((r) => {
+      if (!r) return;
+      setDangBat(r.dangBat);
+      setCoQuyen(r.coQuyen);
+    });
+  };
+
+  useEffect(() => {
+    doLai();
+    const khiHien = () => { if (document.visibilityState === 'visible') doLai(); };
+    document.addEventListener('visibilitychange', khiHien);
+    return () => document.removeEventListener('visibilitychange', khiHien);
+  }, []);
+
+  const lat = async () => {
+    const muon = !dangBat;
+    setLoi(null);
+
+    /*
+     * ⚠️ NẠP CHỮ TRƯỚC KHI BẬT — §11.
+     * Service sẽ cần chữ lúc app đã đóng. Nạp sau khi bật thì có một khoảng
+     * thời gian service chạy mà không có gì để hiện, và nó im lặng bỏ qua lời
+     * nhắc đầu tiên — đúng lời nhắc quan trọng nhất.
+     */
+    if (muon) {
+      await napChuCuocGoi({
+        tieuDe: tra(NHAC_CUOC_GOI, 'tieu_de', lang) ?? '',
+        noiDung: tra(NHAC_CUOC_GOI, 'noi_dung', lang) ?? '',
+        nutMo: tra(NHAC_CUOC_GOI, 'nut_mo', lang) ?? '',
+        nutOn: tra(NHAC_CUOC_GOI, 'nut_on', lang) ?? '',
+      });
+    }
+
+    const r = await datTheoDoiCuocGoi(muon);
+    setDangBat(r.dangBat);
+    if (muon && !r.dangBat) setLoi(r.maLoi ?? 'KHONG_BAT_DUOC');
+    doLai();
+  };
+
+  return (
+    <div className="w-full max-w-[420px] bg-white rounded-[26px] p-5 shadow-md border border-[#e9d5ff] mb-5">
+      <h3 className="font-black text-[16px] text-[#311068] mb-1 flex items-center gap-2">
+        <PhoneCall size={18} className="text-[#6d28d9]" />
+        {t('Nhắc khi cuộc gọi kéo dài')}
+      </h3>
+
+      <p className="text-[14px] text-slate-600 leading-relaxed mb-3">
+        {t('Các vụ lừa đảo giả danh công an thường kéo dài hàng giờ trong một cuộc gọi, và bác được dặn là không được tắt máy. Sau 25 phút, Khoan Đã hiện một dòng hỏi bác: có ai đang bảo bác chuyển tiền không?')}
+      </p>
+
+      {/*
+        ⚠️ BA DÒNG NÀY KHÔNG ĐƯỢC RÚT GỌN. Chúng là lý do bác đồng ý — hoặc từ
+        chối — một cách hiểu chuyện. Bỏ chúng đi để màn hình gọn hơn là lấy mất
+        của bác thứ duy nhất giúp bác quyết định đúng.
+      */}
+      <ul className="flex flex-col gap-1 mb-3 p-3 bg-slate-50 rounded-2xl border border-slate-200">
+        <li className="text-[14px] text-slate-700 leading-snug">{t('· Khoan Đã KHÔNG nghe cuộc gọi.')}</li>
+        <li className="text-[14px] text-slate-700 leading-snug">{t('· KHÔNG ghi âm, không lưu lại gì.')}</li>
+        <li className="text-[14px] text-slate-700 leading-snug">{t('· KHÔNG biết ai đang gọi cho bác — chỉ đếm thời gian.')}</li>
+      </ul>
+
+      {loi && (
+        <div className="p-3 bg-amber-50 border border-amber-300 rounded-2xl mb-3">
+          <p className="text-[14px] text-amber-900 leading-snug">
+            {loi === 'CHUA_CO_QUYEN_CUOC_GOI'
+              ? t('Máy chưa cho Khoan Đã biết lúc nào bác đang gọi điện. Bác vào Cài đặt của máy › Ứng dụng › Khoan Đã › Quyền › Điện thoại để bật.')
+              : t('Máy chưa cho Khoan Đã chạy nền. Một số điện thoại cần bật thêm trong phần Tiết kiệm pin.')}
+          </p>
+        </div>
+      )}
+
+      <div className="flex items-center justify-between p-3.5 bg-purple-50 rounded-2xl border border-purple-200">
+        <span className="text-[15px] font-extrabold text-[#311068]">
+          {dangBat ? t('Đang trông chừng') : t('Đang tắt')}
+        </span>
+        <button
+          onClick={lat}
+          aria-label={dangBat ? t('Tắt nhắc cuộc gọi dài') : t('Bật nhắc cuộc gọi dài')}
+          className={`w-16 h-9 rounded-full transition-colors relative shadow-inner p-1 ${dangBat ? 'bg-emerald-500' : 'bg-slate-300'}`}
+        >
+          <motion.div
+            className="w-7 h-7 bg-white rounded-full shadow-md flex items-center justify-center text-emerald-700"
+            animate={{ x: dangBat ? 28 : 0 }}
+            transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+          >
+            {dangBat ? <CheckCircle2 size={16} /> : null}
+          </motion.div>
+        </button>
+      </div>
+
+      {dangBat && !coQuyen && (
+        <p className="text-[14px] text-amber-800 leading-snug mt-2">
+          {t('Bác đã bật, nhưng máy vừa rút quyền — lời nhắc sẽ không hiện.')}
+        </p>
+      )}
+    </div>
+  );
+}
+
 function NotificationsView({ 
   setView, 
   t, 
@@ -2865,7 +3054,8 @@ function NotificationsView({
   setShowInAppBanner,
   loiThongBaoNative,
   dangChayApk,
-  onAnalyzeText
+  onAnalyzeText,
+  lang = 'vi'
 }: { 
   setView: (v: ViewState) => void, 
   t: any, 
@@ -2882,7 +3072,9 @@ function NotificationsView({
   /** Bản APK hay bản web — hai nơi có khả năng KHÁC NHAU, và phải nói khác nhau. */
   dangChayApk?: boolean,
   /** Gửi một đoạn chữ đi kiểm — dùng cho tin nhắn bắt được từ thông báo. */
-  onAnalyzeText?: (text: string) => void
+  onAnalyzeText?: (text: string) => void,
+  /** §11 — chữ nạp xuống lớp native phải theo đúng ngôn ngữ bác đang dùng. */
+  lang?: Lang
 }) {
   const [testSentToast, setTestSentToast] = useState(false);
   const [pipActiveToast, setPipActiveToast] = useState(false);
@@ -3274,6 +3466,12 @@ function NotificationsView({
         Hiện khối này ở bản web là bày ra một tính năng không tồn tại (§11).
       */}
       {dangChayApk && <DocTinNhanNative t={t} onAnalyze={onAnalyzeText} />}
+
+      {/*
+        Chỉ bản APK. Web không có cách nào biết máy đang gọi điện, và cũng không
+        nên có — bày ra công tắc này ở bản web là hứa một thứ không tồn tại.
+      */}
+      {dangChayApk && <NhacCuocGoiDai t={t} lang={lang} />}
 
       {/* 4. Action Mode Selector */}
       <div className="w-full max-w-[420px] bg-white rounded-[26px] p-5 shadow-md border border-[#e9d5ff] mb-5">
@@ -3671,6 +3869,31 @@ function SettingsView({
 
       <h2 className="text-3xl font-black text-[#3b1d7d] mt-2 mb-8">{t("Cài đặt")}</h2>
 
+      {/*
+        MẬT KHẨU GIA ĐÌNH — đặt TRÊN CÙNG màn Cài đặt, không chôn xuống dưới.
+
+        Đây là tính năng rẻ nhất và mạnh nhất trong cả app: nó không cần AI,
+        không cần mạng, không xin quyền nào, và là thứ duy nhất ở đây mà một
+        cuộc gọi video giả mặt con cháu không vượt qua được. Thứ tự trên màn
+        hình là một lời phát biểu về mức quan trọng — để nó ở đáy là nói rằng
+        nó phụ.
+      */}
+      <button
+        onClick={() => setView('mat_khau_gia_dinh')}
+        className="w-full max-w-[360px] bg-white rounded-3xl p-5 shadow-md border-2 border-emerald-200 mb-6 flex items-center gap-3 text-left active:scale-[0.98] transition-transform"
+      >
+        <div className="w-12 h-12 rounded-2xl bg-emerald-100 border border-emerald-300 flex items-center justify-center text-emerald-700 shrink-0">
+          <Users size={24} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <h3 className="font-black text-[16px] text-[#311068] leading-snug">{t("Mật khẩu gia đình")}</h3>
+          <p className="text-[14px] text-slate-600 leading-snug mt-0.5">
+            {t("Câu chỉ nhà mình biết — chống giả giọng, giả mặt")}
+          </p>
+        </div>
+        <ChevronRight size={20} className="text-emerald-600 shrink-0" />
+      </button>
+
       {/* Floating Assistive Ball & Outside Mode Card */}
       <div className="w-full max-w-[360px] bg-gradient-to-br from-purple-900 to-indigo-950 rounded-3xl p-5 shadow-md border border-purple-400/30 text-white mb-6">
         <div className="flex items-center gap-3 mb-3">
@@ -3678,13 +3901,29 @@ function SettingsView({
             <Layers size={22} />
           </div>
           <div>
-            <h3 className="font-extrabold text-[15px] text-white">{t("Bóng trợ năng nổi ngoài màn hình")}</h3>
-            <span className="text-[14px] text-purple-300 font-semibold">{t("Chụp ảnh / Quét tức thì khi ở app khác")}</span>
+            {/*
+              ⚠️ §11 — HAI CÂU NÀY TỪNG HỨA MỘT THỨ KHÔNG TỒN TẠI.
+
+              Bản trước ghi "Bóng trợ năng NỔI NGOÀI MÀN HÌNH" và "Chụp ảnh /
+              Quét tức thì KHI Ở APP KHÁC". Nút tròn đó là một phần tử React
+              trong chính trang này — `FloatingQuickAccess.tsx` không gọi một
+              lượt native nào. Đóng app là nó biến mất cùng app.
+
+              Nổi đè lên app khác cần `SYSTEM_ALERT_WINDOW` và một View của
+              Android (`PopupDeManHinh` làm đúng việc đó cho dải cảnh báo). Nút
+              này chưa đi qua đường ấy.
+
+              Hứa sai ở đây không phải lỗi thẩm mỹ: bác đọc xong tin rằng lúc
+              đang ở Zalo mà thấy tin lạ thì có sẵn một nút để chạm. Lúc cần thì
+              không có nút nào — và bác sẽ nghĩ mình bấm sai chỗ.
+            */}
+            <h3 className="font-extrabold text-[15px] text-white">{t("Nút tròn quét nhanh")}</h3>
+            <span className="text-[14px] text-purple-300 font-semibold">{t("Nổi ở góc, trong lúc dùng Khoan Đã")}</span>
           </div>
         </div>
 
         <p className="text-[14px] text-purple-200 leading-relaxed mb-4">
-          {t("Bóng tròn Khoan Đã luôn hiển thị ở góc màn hình, cho phép bác chạm để chụp màn hình tin nhắn/QR lạ và chuyển thẳng vào app phân tích.")}
+          {t("Một nút tròn nổi ở góc màn hình khi bác đang mở Khoan Đã — chạm là quét ảnh hoặc mã QR ngay, không phải đi tìm menu. Nút này chỉ có trong Khoan Đã; ra ngoài app thì không còn.")}
         </p>
 
         {setShowFloatingBall && (
@@ -4599,13 +4838,19 @@ function WarningView({
   lang = 'vi',
   result,
   familyMembers,
-  noiChayAi
+  noiChayAi,
+  mayCoUngDungLa
 }: {
   setView: (v: ViewState) => void,
   t: any,
   lang?: Lang,
   result?: any,
   familyMembers?: any[],
+  /**
+   * Ứng dụng đang xem và bấm được thay bác — đọc thẳng từ Android.
+   * ⚠️ Dữ liệu này KHÔNG đến từ máy chủ và KHÔNG đi lên máy chủ (§6.9).
+   */
+  mayCoUngDungLa?: TrangThaiMay | null,
   /** 'cuc_bo' | 'gateway' | 'gemini' | 'khong_chay' — từ /api/suc-khoe. */
   noiChayAi?: string | null
 }) {
@@ -4623,6 +4868,42 @@ function WarningView({
    * và luôn phải có lối ra (§4.6, dưới cùng màn hình).
    */
   const laKhanCap = canThiep === 'PROTECTED_CRITICAL';
+
+  /**
+   * ỨNG DỤNG BÁC ĐÃ NÓI "TÔI TỰ CÀI" — nhớ theo TÊN GÓI, không phải một công
+   * tắc tắt-hết.
+   *
+   * ⚠️ NHỚ THEO TỪNG ỨNG DỤNG LÀ RÀNG BUỘC AN TOÀN, KHÔNG PHẢI TIỆN NGHI.
+   * Một cái công tắc "đừng nhắc nữa" sẽ tắt luôn cảnh báo cho ứng dụng lừa đảo
+   * được cài SAU đó — tức là bác tự tay vô hiệu hoá đúng thứ cần nhất, bằng một
+   * thao tác trông hoàn toàn vô hại. Nhớ theo gói thì app lạ mới xuất hiện vẫn
+   * được nêu.
+   */
+  /**
+   * ⚠️ ĐỌC MỘT LẦN LÚC DỰNG MÀN, KHÔNG THEO DÕI LIÊN TỤC.
+   * Đây là màn hình bác nhìn khi đang bị thúc; nó không nên đổi nội dung giữa
+   * chừng vì một thay đổi ở màn khác.
+   */
+  const [matKhauNha] = useState(() => docMatKhauGiaDinh());
+
+  const [daBoQua, setDaBoQua] = useState<string[]>(() => {
+    try {
+      const t = JSON.parse(localStorage.getItem('khoan_da_tro_nang_tu_cai') || '[]');
+      return Array.isArray(t) ? t : [];
+    } catch {
+      return [];
+    }
+  });
+  const dangNgo = (mayCoUngDungLa?.dangNgo ?? []).filter((u) => !daBoQua.includes(u.goi));
+  const boQuaNhungCaiNay = () => {
+    const moi = Array.from(new Set([...daBoQua, ...dangNgo.map((u) => u.goi)]));
+    setDaBoQua(moi);
+    try {
+      localStorage.setItem('khoan_da_tro_nang_tu_cai', JSON.stringify(moi));
+    } catch {
+      // Không lưu được thì lần sau hỏi lại — phiền, nhưng không sai.
+    }
+  };
 
   // Đồng hồ 60 giây: chỉ chạy khi thật sự có gì đó để dừng lại.
   const initialTime = (laChuaThay || khongGoiDuoc) ? 0 : 60;
@@ -4829,6 +5110,120 @@ function WarningView({
               </li>
             ))}
           </ul>
+        )}
+
+        {/*
+          MẬT KHẨU GIA ĐÌNH — CHỐNG DEEPFAKE BẰNG THỨ KHÔNG CẦN AI.
+
+          ⚠️ CHỈ HIỆN Ở MỨC CAO. Đây là một câu lệnh cho bác làm ngay ("hỏi họ
+          câu đó đi"), không phải một mẹo hay. Hiện ở mọi mức thì nó thành nền,
+          và lúc cần thật thì bác đọc lướt qua như mọi lần trước (§4.6).
+
+          ⚠️ APP KHÔNG BIẾT MẬT KHẨU, NÊN KHÔNG KIỂM HỘ ĐƯỢC — và điều đó là cố
+          ý. Xem chú thích đầu `MatKhauGiaDinh.tsx`: nếu nó nằm trong máy thì nó
+          lộ ngay trong đúng kịch bản mà nó sinh ra để chống.
+
+          Chưa lập thì rủ bác lập — nhưng KHÔNG chen vào giữa lúc khẩn cấp bằng
+          một biểu mẫu. Chỉ một dòng, và bấm được lúc bác rảnh.
+        */}
+        {laCao && (
+          <div className="w-full bg-emerald-950/55 border-2 border-emerald-400/60 rounded-2xl p-4 backdrop-blur-md mb-2">
+            <div className="flex items-start gap-2 mb-1.5">
+              <Users size={20} className="text-emerald-300 shrink-0 mt-0.5" />
+              <h3 className="text-white font-black text-[17px] leading-snug">
+                {matKhauNha
+                  ? t('Hỏi họ mật khẩu gia đình')
+                  : t('Nhà bác chưa có mật khẩu gia đình')}
+              </h3>
+            </div>
+            {matKhauNha ? (
+              <>
+                <p className="text-emerald-50 text-[15px] leading-relaxed">
+                  {t('Người nhà thật trả lời được ngay. Giọng nói và khuôn mặt bây giờ làm giả được, còn câu này thì không.')}
+                </p>
+                {matKhauNha.goiY && (
+                  <p className="text-emerald-100/90 text-[14px] leading-relaxed mt-1.5">
+                    {t('Câu nhắc:')} <strong>{matKhauNha.goiY}</strong>
+                  </p>
+                )}
+              </>
+            ) : (
+              <>
+                <p className="text-emerald-50 text-[15px] leading-relaxed mb-3">
+                  {t('Một câu chỉ nhà mình biết, để lần sau ai xưng là con cháu thì bác hỏi ngay. Làm mất hai phút.')}
+                </p>
+                <button
+                  onClick={() => setView('mat_khau_gia_dinh')}
+                  className="w-full min-h-[52px] px-4 bg-emerald-400 hover:bg-emerald-300 active:scale-95 text-[#04301f] font-extrabold rounded-xl text-[16px] transition-all"
+                >
+                  {t('Lập mật khẩu gia đình')}
+                </button>
+              </>
+            )}
+          </div>
+        )}
+
+        {/*
+          BƯỚC ③ CỦA KỊCH BẢN — ỨNG DỤNG ĐANG XEM VÀ BẤM THAY BÁC.
+
+          ⚠️ CHỈ HIỆN KHI CÓ THẬT, VÀ CHỈ NÊU ỨNG DỤNG KHÔNG ĐẾN TỪ CHỢ CHÍNH
+          THỨC. `native.ts` đã lọc app cài sẵn và app từ CH Play / GetApps /
+          Galaxy Store ra khỏi `dangNgo` — TalkBack là mắt của người khiếm thị,
+          và một cảnh báo sai ở đây khiến bác tắt mất thứ mình cần.
+
+          ⚠️ TÊN ỨNG DỤNG CHỈ SỐNG TRONG MÁY. Nó tới từ plugin native, không
+          từ `result` của máy chủ, và không có đường nào đi ngược lên (§6.9).
+
+          ⚠️ KHÔNG GỌI NÓ LÀ PHẦN MỀM ĐỘC HẠI (§11). App biết ba điều: tên, có
+          phải cài sẵn không, cài từ đâu. Từ đó tới "đây là mã độc" là một bước
+          nhảy không dữ liệu nào ở đây đỡ được.
+        */}
+        {dangNgo.length > 0 && (
+          <div className="w-full bg-amber-950/60 border-2 border-amber-400/60 rounded-2xl p-4 backdrop-blur-md mb-2">
+            <div className="flex items-start gap-2 mb-2">
+              <Smartphone size={20} className="text-amber-300 shrink-0 mt-0.5" />
+              <h3 className="text-white font-black text-[17px] leading-snug">
+                {tra(TRANG_THAI_MAY, 'tieu_de', lang)}
+              </h3>
+            </div>
+
+            <ul className="flex flex-col gap-1.5 mb-2.5">
+              {dangNgo.slice(0, 4).map((u) => (
+                <li key={u.goi} className="px-3 py-2 bg-black/35 rounded-xl border border-white/15">
+                  <span className="block text-white font-bold text-[16px] leading-snug">{u.ten}</span>
+                  <span className="block text-amber-100/90 text-[14px] leading-snug mt-0.5">
+                    {tra(TRANG_THAI_MAY, u.nguonCai === 'khong_ro' ? 'khong_ro' : 'tu_tep', lang)}
+                    {u.vuaCai ? ` · ${tra(TRANG_THAI_MAY, 'vua_cai', lang)}` : ''}
+                  </span>
+                </li>
+              ))}
+            </ul>
+
+            <p className="text-amber-50 text-[15px] leading-relaxed mb-3">
+              {tra(TRANG_THAI_MAY, 'giai_thich', lang)}
+            </p>
+
+            <div className="flex flex-col gap-2">
+              <button
+                onClick={() => { void moCaiDatTroNang(); }}
+                className="w-full min-h-[52px] px-4 bg-amber-400 hover:bg-amber-300 active:scale-95 text-[#3b1f00] font-extrabold rounded-xl text-[16px] transition-all"
+              >
+                {tra(TRANG_THAI_MAY, 'nut_cai_dat', lang)}
+              </button>
+              {/*
+                §4.6 — LỐI RA. Bác tự cài một ứng dụng trợ năng thật (bàn phím,
+                trình đọc màn hình tải ngoài) là chuyện có thật. Không có nút này
+                thì mỗi lần kiểm bác lại phải đọc lại đúng cảnh báo đó, và đó là
+                cách nhanh nhất để dạy bác bỏ qua nó.
+              */}
+              <button
+                onClick={boQuaNhungCaiNay}
+                className="w-full min-h-[52px] px-4 bg-white/15 hover:bg-white/25 active:scale-95 text-white font-bold rounded-xl text-[15px] border border-white/25 transition-all"
+              >
+                {tra(TRANG_THAI_MAY, 'nut_tu_cai', lang)}
+              </button>
+            </div>
+          </div>
         )}
 
         {/*

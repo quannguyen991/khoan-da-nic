@@ -253,13 +253,46 @@ function locTraLoiBoHoiNhanh(raw) {
   return Object.keys(sach).length > 0 ? sach : undefined;
 }
 
+/**
+ * TRẠNG THÁI MÁY — nguồn đầu vào thứ năm, chỉ bản APK gửi.
+ *
+ * ⚠️ LỌC THÀNH BA TRƯỜNG, ĐÚNG KIỂU, KHÔNG GIỮ GÌ KHÁC.
+ *
+ * Bản APK cố tình KHÔNG gửi tên ứng dụng lên đây (xem `tomTatChoMayChu` bên
+ * `src/native.ts`) — danh sách app đã cài là dấu vân tay rất mạnh của một
+ * người. Bộ lọc này là hàng rào thứ hai cho đúng điều đó: kể cả khi ai đó sửa
+ * frontend để gửi tên app lên, máy chủ vẫn vứt đi trước khi chạm tới bộ luật,
+ * và không có đường nào để nó lọt vào nhật ký (§6.9).
+ *
+ * ⚠️ NGƯỜI GỌI TỰ KHAI, NÊN CHỈ ĐƯỢC LÀM TĂNG CẢNH GIÁC (§4.2).
+ * `soUngDungLa: 0` KHÔNG trừ điểm, KHÔNG hạ mức, KHÔNG sinh tín hiệu "an toàn"
+ * — nó chỉ khiến `daKiem` có thêm `trang_thai_may`, mà `daKiem` không nằm trong
+ * công thức điểm. Hàng rào: test §4.2 "máy sạch KHÔNG hạ mức".
+ *
+ * Nếu có ngày ai đó muốn cho máy sạch trừ điểm cho đỡ báo động giả: đó chính là
+ * câu thần chú §12 nói tới. Kẻ lừa đảo chỉ cần dặn nạn nhân gỡ app trước khi
+ * kiểm, và cả hệ thống tự hạ mức giúp chúng.
+ */
+function locTrangThaiMay(raw) {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return undefined;
+  if (typeof raw.docDuoc !== 'boolean') return undefined;
+  const so = Number(raw.soUngDungLa);
+  return {
+    docDuoc: raw.docDuoc,
+    soUngDungLa: Number.isFinite(so) && so > 0 ? Math.min(Math.floor(so), 50) : 0,
+    coCaiTrongTuan: raw.coCaiTrongTuan === true,
+  };
+}
+
 async function xuLyPhanTich(req, res) {
   const {
     vanBan, anh, ghiAm, ghiAmConfidence, ghiAmFailed, ghiAmMaLoi,
     traLoiBoHoiNhanh: traLoiBoHoiNhanhRaw,
+    trangThaiMay: trangThaiMayRaw,
   } = req.body || {};
 
   const traLoiBoHoiNhanh = locTraLoiBoHoiNhanh(traLoiBoHoiNhanhRaw);
+  const trangThaiMay = locTrangThaiMay(trangThaiMayRaw);
 
   // §6.10 — giới hạn kích thước, báo lỗi rõ, KHÔNG âm thầm cắt.
   if (typeof anh === 'string' && anh.length > GIOI_HAN_TEP) {
@@ -300,7 +333,7 @@ async function xuLyPhanTich(req, res) {
    * lừa đảo thúc trên điện thoại ngồi chờ gateway là đánh đổi sai. 60 giây đã
    * mất thì không lấy lại được.
    */
-  const soBo = analyze({ vanBan: coVanBan ? vanBan : '', anh, traLoiBoHoiNhanh, ...nguonGhiAm });
+  const soBo = analyze({ vanBan: coVanBan ? vanBan : '', anh, traLoiBoHoiNhanh, trangThaiMay, ...nguonGhiAm });
   if (soBo.overrides.length > 0) {
     return res.json(toHopDong(soBo));
   }
@@ -381,7 +414,7 @@ async function xuLyPhanTich(req, res) {
   }
 
   const envelope = analyze({
-    vanBan: coVanBan ? vanBan : '', anh, llmSignals, aiError, traLoiBoHoiNhanh,
+    vanBan: coVanBan ? vanBan : '', anh, llmSignals, aiError, traLoiBoHoiNhanh, trangThaiMay,
     // Ảnh có mà không mô hình nào nhìn ⇒ "chưa đọc được", không phải "đã đọc".
     ...(anhBiBoQua ? { ocrFailed: true } : {}),
     ...nguonGhiAm,
@@ -444,7 +477,7 @@ app.post('/api/analyze/so-bo', chanPhanTich, (req, res) => {
   if (!coVanBan && !anh && !ghiAm && !coBoHoiNhanh) return res.status(400).json({ maLoi: 'THIEU_DAU_VAO' });
 
   return res.json(toHopDong(analyze({
-    vanBan: coVanBan ? vanBan : '', anh, ghiAm, ghiAmConfidence, ghiAmFailed, ghiAmMaLoi, traLoiBoHoiNhanh,
+    vanBan: coVanBan ? vanBan : '', anh, ghiAm, ghiAmConfidence, ghiAmFailed, ghiAmMaLoi, traLoiBoHoiNhanh, trangThaiMay,
   })));
 });
 

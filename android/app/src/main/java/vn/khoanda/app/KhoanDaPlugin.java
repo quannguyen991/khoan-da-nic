@@ -61,7 +61,14 @@ import org.json.JSONException;
                  * Capacitor trả DENIED vĩnh viễn và công tắc không bao giờ bật
                  * được, trên chính những máy mà nó vốn chạy tốt.
                  */
-                @Permission(alias = "thongBao", strings = { "android.permission.POST_NOTIFICATIONS" })
+                @Permission(alias = "thongBao", strings = { "android.permission.POST_NOTIFICATIONS" }),
+                /*
+                 * ⚠️ CHỈ `READ_PHONE_STATE`, KHÔNG KÈM `READ_CALL_LOG`.
+                 * Nó cho biết máy có đang trong cuộc gọi hay không — không nội
+                 * dung, không số điện thoại, không lịch sử. Xem chú thích trong
+                 * `TheoDoiCuocGoi.java` về vì sao cố ý không xin quyền kia.
+                 */
+                @Permission(alias = "cuocGoi", strings = { Manifest.permission.READ_PHONE_STATE })
         }
 )
 public class KhoanDaPlugin extends Plugin {
@@ -505,6 +512,178 @@ public class KhoanDaPlugin extends Plugin {
         // §4.3 — ca hỏng có mã riêng, KHÔNG im lặng.
         if (k.maLoi != null) r.put("maLoi", k.maLoi);
         call.resolve(r);
+    }
+
+    // ─────────── Nhắc cuộc gọi dài ───────────
+
+    /**
+     * ⚠️ NẠP CHỮ XUỐNG TRƯỚC, RỒI MỚI BẬT — §11.
+     *
+     * Service chạy khi app đã đóng, nên lúc cần hiện lời nhắc thì không còn
+     * tầng web nào để hỏi chữ. Chữ phải nằm sẵn trong SharedPreferences, đã
+     * qua catalog i18n. Thiếu chữ thì `TheoDoiCuocGoi.nhac()` KHÔNG hiện gì —
+     * thà im còn hơn hiện một câu lớp Java tự nghĩ ra.
+     *
+     * ⚠️ NẠP LẠI MỖI LẦN BẬT, VÀ MỖI LẦN ĐỔI NGÔN NGỮ. Không nạp lại thì bác
+     * chuyển sang tiếng Anh mà lời nhắc vẫn ra tiếng Việt — nửa app một thứ
+     * tiếng là đúng thứ §4.1 cấm.
+     */
+    @PluginMethod
+    public void napChuCuocGoi(PluginCall call) {
+        String tieuDe = call.getString("tieuDe");
+        String noiDung = call.getString("noiDung");
+        String nutMo = call.getString("nutMo");
+        String nutOn = call.getString("nutOn");
+        if (tieuDe == null || noiDung == null || nutMo == null || nutOn == null) {
+            call.reject("THIEU_CHU_HIEN_THI");
+            return;
+        }
+        int phut = call.getInt("phut", TheoDoiCuocGoi.PHUT_MAC_DINH);
+        getContext().getSharedPreferences(TheoDoiCuocGoi.KHO, android.content.Context.MODE_PRIVATE)
+                .edit()
+                .putString(TheoDoiCuocGoi.KHOA_TIEU_DE, tieuDe)
+                .putString(TheoDoiCuocGoi.KHOA_NOI_DUNG, noiDung)
+                .putString(TheoDoiCuocGoi.KHOA_NUT_MO, nutMo)
+                .putString(TheoDoiCuocGoi.KHOA_NUT_ON, nutOn)
+                .putInt(TheoDoiCuocGoi.KHOA_PHUT, phut < 5 ? TheoDoiCuocGoi.PHUT_MAC_DINH : phut)
+                .apply();
+        call.resolve();
+    }
+
+    @PluginMethod
+    public void trangThaiTheoDoiCuocGoi(PluginCall call) {
+        JSObject r = new JSObject();
+        boolean coQuyen = getPermissionState("cuocGoi") == PermissionState.GRANTED;
+        boolean dangBat = getContext()
+                .getSharedPreferences(TheoDoiCuocGoi.KHO, android.content.Context.MODE_PRIVATE)
+                .getBoolean(TheoDoiCuocGoi.KHOA_BAT, false);
+        r.put("coQuyen", coQuyen);
+
+        /*
+         * ⚠️ BẢO ĐẢM SERVICE ĐANG CHẠY, ĐỪNG CHỈ ĐỌC CỜ — LỖ HỔNG ĐO ĐƯỢC 19/8/2026.
+         *
+         * Cờ trong SharedPreferences nói "bác đã chọn bật". Nó KHÔNG nói service
+         * có đang sống hay không, và hai thứ đó lệch nhau rất dễ:
+         *   · ROM dọn nền và Android chưa kịp dựng lại theo START_STICKY;
+         *   · người dùng buộc dừng app trong Cài đặt;
+         *   · máy vừa khởi động lại mà broadcast bị ROM chặn.
+         *
+         * Bản trước chỉ đọc cờ, nên công tắc hiện XANH trong khi không có gì
+         * trông chừng cuộc gọi cả — đúng dạng §4.3 tệ nhất: khai một thứ đang
+         * chạy trong khi nó đã chết, và bác chỉ phát hiện lúc cần tới nó.
+         *
+         * `startForegroundService` là idempotent: gọi khi service đã chạy chỉ
+         * kích hoạt `onStartCommand`, không dựng lại gì. Nên mỗi lần giao diện
+         * hỏi trạng thái cũng là một lần dựng lại nếu nó đã chết.
+         */
+        if (dangBat && coQuyen) {
+            try {
+                TheoDoiCuocGoi.bat(getContext());
+            } catch (Throwable t) {
+                // ROM chặn khởi động từ nền. Giao diện vẫn nói "đang bật" theo
+                // lựa chọn của bác; lần bác mở app tới nó sẽ thử lại.
+            }
+        }
+
+        /*
+         * ⚠️ `dangBat` PHẢI KÈM `coQuyen`. Quyền bị thu hồi trong Cài đặt thì
+         * service tự dừng, mà cờ trong kho có thể còn `true` một lúc. Trả cả
+         * hai để giao diện nói được "bác đã bật, nhưng máy vừa rút quyền" thay
+         * vì im lặng gạt công tắc về tắt (§4.3).
+         */
+        r.put("dangBat", dangBat && coQuyen);
+        call.resolve(r);
+    }
+
+    @PluginMethod
+    public void datTheoDoiCuocGoi(PluginCall call) {
+        boolean muonBat = Boolean.TRUE.equals(call.getBoolean("bat", false));
+        if (!muonBat) {
+            getContext().getSharedPreferences(TheoDoiCuocGoi.KHO, android.content.Context.MODE_PRIVATE)
+                    .edit().putBoolean(TheoDoiCuocGoi.KHOA_BAT, false).apply();
+            TheoDoiCuocGoi.tat(getContext());
+            JSObject r = new JSObject();
+            r.put("dangBat", false);
+            call.resolve(r);
+            return;
+        }
+        if (getPermissionState("cuocGoi") != PermissionState.GRANTED) {
+            requestPermissionForAlias("cuocGoi", call, "sauKhiXinCuocGoi");
+            return;
+        }
+        batTheoDoi(call);
+    }
+
+    @PermissionCallback
+    private void sauKhiXinCuocGoi(PluginCall call) {
+        if (getPermissionState("cuocGoi") != PermissionState.GRANTED) {
+            // Từ chối là kết quả hợp lệ, không phải lỗi (§4.3).
+            JSObject r = new JSObject();
+            r.put("dangBat", false);
+            r.put("maLoi", "CHUA_CO_QUYEN_CUOC_GOI");
+            call.resolve(r);
+            return;
+        }
+        batTheoDoi(call);
+    }
+
+    private void batTheoDoi(PluginCall call) {
+        JSObject r = new JSObject();
+        try {
+            getContext().getSharedPreferences(TheoDoiCuocGoi.KHO, android.content.Context.MODE_PRIVATE)
+                    .edit().putBoolean(TheoDoiCuocGoi.KHOA_BAT, true).apply();
+            TheoDoiCuocGoi.bat(getContext());
+            r.put("dangBat", true);
+        } catch (Throwable t) {
+            /*
+             * ⚠️ ROM CÓ THỂ TỪ CHỐI KHỞI ĐỘNG FOREGROUND SERVICE — nhất là khi
+             * app đang ở nền, hoặc trên máy có trình quản lý pin của hãng. Nói
+             * ra, đừng để công tắc sáng lên trong khi không có gì chạy.
+             */
+            getContext().getSharedPreferences(TheoDoiCuocGoi.KHO, android.content.Context.MODE_PRIVATE)
+                    .edit().putBoolean(TheoDoiCuocGoi.KHOA_BAT, false).apply();
+            r.put("dangBat", false);
+            r.put("maLoi", "KHONG_KHOI_DONG_DUOC");
+        }
+        call.resolve(r);
+    }
+
+    // ─────────── Trạng thái máy — nguồn đầu vào thứ tư (§4.3) ───────────
+
+    /**
+     * Máy có ứng dụng nào đang xem và bấm được thay bác không.
+     *
+     * ⚠️ TRẢ CẢ `docDuoc`. Danh sách rỗng có hai nghĩa hoàn toàn khác nhau:
+     * "đã xem, không có gì" và "không xem được". Tầng web có nhánh riêng cho ca
+     * thứ hai và đẩy nó vào `chuaKiem`.
+     */
+    @PluginMethod
+    public void trangThaiMay(PluginCall call) {
+        try {
+            call.resolve(JSObject.fromJSONObject(KiemTraMay.doc(getContext())));
+        } catch (JSONException e) {
+            /*
+             * ⚠️ HỎNG THÌ TRẢ VỀ `docDuoc: false`, ĐỪNG `reject`.
+             * `reject` làm tầng web rơi vào nhánh catch chung và mất mã lý do —
+             * lúc đó nó không phân biệt được "máy không có gì" với "không đọc
+             * được", tức là mất đúng thứ §4.3 sinh ra để giữ.
+             */
+            JSObject r = new JSObject();
+            r.put("docDuoc", false);
+            r.put("dichVuTroNang", new JSArray());
+            call.resolve(r);
+        }
+    }
+
+    /** Mở màn Cài đặt trợ năng để bác tự tắt ứng dụng lạ. */
+    @PluginMethod
+    public void moCaiDatTroNang(PluginCall call) {
+        try {
+            getContext().startActivity(KiemTraMay.manCaiDat());
+            call.resolve();
+        } catch (Exception e) {
+            call.reject("KHONG_MO_DUOC_CAI_DAT");
+        }
     }
 
     // ─────────── Cảnh báo heads-up khi mức CAO ───────────

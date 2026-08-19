@@ -45,4 +45,22 @@
     <string name="kenh_canh_bao_v2_ten">Cảnh báo nguy hiểm cao</string>
     <string name="kenh_canh_bao_v2_mo_ta">Heads-up khi Khoan Đã thấy dấu hiệu nguy hiểm cao</string>
     <string name="tb_canh_bao_tieu_de">Khoan Đã cảnh báo</string>
+
+    <!--
+      THEO DÕI THỜI LƯỢNG CUỘC GỌI.
+
+      ⚠️ BỐN CHUỖI NÀY PHẢI NÓI ĐÚNG APP LÀM GÌ, VÌ NGƯỜI ĐỌC CHÚNG ĐANG NGHI
+      NGỜ. Dòng thường trực nằm trên thanh suốt ngày; nếu nó mơ hồ ("Khoan Đã
+      đang chạy") thì bác sẽ đoán, và đoán về một app đọc trạng thái cuộc gọi
+      thì đoán xấu là hợp lý. Nói thẳng: đếm thời gian, không nghe.
+
+      ⚠️ CHỮ CỦA LỜI NHẮC KHÔNG NẰM Ở ĐÂY. Nó do tầng web nạp xuống qua catalog
+      i18n (§11) — hai chuỗi dưới đây chỉ dành cho thông báo thường trực của
+      service, thứ Android bắt buộc phải có ngay lúc khởi động, trước khi tầng
+      web kịp nói gì.
+    -->
+    <string name="kenh_cuoc_goi_ten">Nhắc cuộc gọi dài</string>
+    <string name="kenh_cuoc_goi_mo_ta">Nhắc bác khi một cuộc gọi kéo dài bất thường</string>
+    <string name="cuoc_goi_thuong_truc_tieu_de">Khoan Đã đang trông chừng cuộc gọi</string>
+    <string name="cuoc_goi_thuong_truc_noi_dung">Chỉ đếm thời gian, không nghe nội dung. Chạm để tắt.</string>
 </resources>
