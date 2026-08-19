@@ -18,6 +18,8 @@ import {
 } from 'lucide-react';
 import { ViewState } from '../App';
 import { api } from '../api-goc';
+import { dangNhap as dangNhapTaiKhoan, type HoSo as HoSoTaiKhoan } from '../tai-khoan';
+import { MA_TAI_KHOAN } from '../catalog';
 import { Lang, NHAN, CHUA_KIEM, MA_LY_DO, tra, traNhieu } from '../catalog';
 import { ThuTinhHuong } from './ThuTinhHuong';
 
@@ -100,28 +102,42 @@ export function GuardianIntroView({
 // --- Guardian Auth View ---
 export function GuardianAuthView({ 
   setView, 
-  setIsLoggedIn,
+  onDangNhapXong,
   setUserRole,
   t
 }: { 
   setView: (v: ViewState) => void; 
-  setIsLoggedIn: (v: boolean) => void;
+  /** Gọi khi máy chủ đã công nhận phiên. `null` nghĩa là chưa đăng nhập. */
+  onDangNhapXong: (hs: HoSoTaiKhoan | null) => void;
   setUserRole?: (role: 'elder' | 'guardian') => void;
   t?: (key: string) => string;
 }) {
   const [phone, setPhone] = useState('');
+  const [matKhau, setMatKhau] = useState('');
+  const [loi, setLoi] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const tr = (k: string) => (t ? t(k) : k);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  /**
+   * ⚠️ MÀN NÀY TỪNG LÀ MỘT CÁI VỎ, GIỐNG HỆT `LoginView`.
+   * `setTimeout(600ms)` rồi `setIsLoggedIn(true)` — một ô số điện thoại không
+   * đi tới đâu, không mật khẩu, không lượt gọi mạng nào. Nay gọi máy chủ thật.
+   */
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoi(null);
+    if (!phone.trim() || !matKhau) { setLoi('THIEU_THONG_TIN'); return; }
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      setIsLoggedIn(true);
+    try {
+      const hs = await dangNhapTaiKhoan(phone.trim(), matKhau);
+      onDangNhapXong(hs);
       if (setUserRole) setUserRole('guardian');
       setView('guardian');
-    }, 600);
+    } catch (err: any) {
+      setLoi(err?.ma || 'KHONG_GOI_DUOC');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -153,6 +169,32 @@ export function GuardianAuthView({
               className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-900 outline-none focus:border-sky-500 focus:bg-white transition-all"
             />
           </div>
+
+          {/*
+            ⚠️ Ô MẬT KHẨU — TRƯỚC ĐÂY MÀN NÀY KHÔNG CÓ.
+            Chỉ một ô số điện thoại, và bấm là vào thẳng. Tức bất kỳ ai cầm máy
+            cũng mở được bảng điều khiển theo dõi bố mẹ bằng cách gõ một số bất kỳ.
+          */}
+          <div>
+            <label htmlFor="g-mk" className="text-[14px] font-bold text-slate-600 mb-1.5 block">{tr("Mật khẩu")}</label>
+            <input
+              id="g-mk"
+              type="password"
+              required
+              value={matKhau}
+              onChange={(e) => setMatKhau(e.target.value)}
+              autoComplete="current-password"
+              className="w-full min-h-[52px] bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-[16px] font-medium text-slate-900 outline-none focus:border-sky-500 focus:bg-white transition-all"
+            />
+          </div>
+
+          {loi && (
+            <div role="alert" className="p-3 bg-amber-50 border-2 border-amber-300 rounded-2xl">
+              <p className="text-[15px] font-bold text-amber-900 leading-snug">
+                {tra(MA_TAI_KHOAN, loi, 'vi') ?? tra(MA_TAI_KHOAN, 'KHONG_GOI_DUOC', 'vi')}
+              </p>
+            </div>
+          )}
 
           <button
             type="submit"

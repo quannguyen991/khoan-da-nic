@@ -49,8 +49,14 @@ import { translations, Lang, t as translate } from './i18n';
  * Backend trả ENUM và MÃ; chữ tiếng Việt / tiếng Anh nằm ở `catalog.ts`, và
  * CHỈ ở đó. Hệ quả cố ý: đổi ngôn ngữ KHÔNG THỂ làm đổi kết luận.
  */
-import { NHAN, MA_LY_DO, CHUA_KIEM, CHUA_LAY_TIN, NOI_CHAY_AI, tra, traNhieu, CHU_NATIVE , TRANG_THAI_MAY, NHAC_CUOC_GOI} from './catalog';
+import { NHAN, MA_LY_DO, CHUA_KIEM, CHUA_LAY_TIN, NOI_CHAY_AI, tra, traNhieu, CHU_NATIVE , TRANG_THAI_MAY, NHAC_CUOC_GOI, MA_TAI_KHOAN} from './catalog';
 import { api } from './api-goc';
+import {
+  dangKy as dangKyTaiKhoan, dangNhap as dangNhapTaiKhoan,
+  dangXuat as dangXuatTaiKhoan, layHoSo as layHoSoTaiKhoan,
+  docPhien as docPhienTaiKhoan, suaHoSo as suaHoSoTaiKhoan,
+  type HoSo as HoSoTaiKhoan,
+} from './tai-khoan';
 import {
   laApk, hienCanhBaoHeadsUp, hienPopupCanhBao, anPopup,
   datThongBaoThuongTruc, noiDungChiaSe, quyenPopup, xinQuyenPopup,
@@ -712,7 +718,44 @@ export default function App() {
 
   const [lang, setLang] = useState<Lang>(() => (localStorage.getItem('lang') as Lang) || 'vi');
   const [fontSize, setFontSize] = useState(() => localStorage.getItem('fontSize') || 'normal');
-  const [isLoggedIn, setIsLoggedIn] = useState(() => localStorage.getItem('isLoggedIn') === 'true');
+  /**
+   * HỒ SƠ TÀI KHOẢN — nguồn sự thật duy nhất cho "đã đăng nhập hay chưa".
+   *
+   * ⚠️ KHÔNG CÒN CỜ `isLoggedIn` TRONG localStorage. Bản trước lưu chuỗi
+   * `'true'` và tin nó — nghĩa là ai mở công cụ nhà phát triển gõ một dòng là
+   * "đăng nhập" được, và quan trọng hơn: cờ đó chẳng liên quan gì tới việc máy
+   * chủ có công nhận phiên hay không.
+   *
+   * Nay `hoSo` chỉ khác `null` khi có một phiên thật, và phiên đó được hỏi lại
+   * máy chủ mỗi lần mở app. Hết hạn ⇒ về `null` ⇒ giao diện nói đúng sự thật.
+   */
+  const [hoSo, setHoSo] = useState<HoSoTaiKhoan | null>(() => docPhienTaiKhoan()?.hoSo ?? null);
+  const isLoggedIn = hoSo !== null;
+
+  /**
+   * ⚠️ HỎI LẠI MÁY CHỦ MỖI LẦN MỞ APP.
+   *
+   * Hồ sơ trong máy chỉ nói "lần trước bác đã đăng nhập". Nó không biết phiên
+   * đã hết hạn, hay bác đã đăng xuất ở máy khác. Không hỏi lại thì giao diện
+   * hiện tên bác như đang đăng nhập, rồi mọi thao tác cần tài khoản đều lặng lẽ
+   * hỏng — §4.3, ở đúng chỗ người dùng khó đoán ra nhất.
+   *
+   * `layHoSo()` trả `null` khi phiên không còn giá trị, và tự xoá token hỏng.
+   */
+  useEffect(() => {
+    if (!docPhienTaiKhoan()) return;
+    void layHoSoTaiKhoan().then((hs) => setHoSo(hs));
+  }, []);
+
+  /**
+   * ⚠️ ĐĂNG XUẤT PHẢI GỌI MÁY CHỦ HUỶ TOKEN, không chỉ xoá ở máy.
+   * Xoá mỗi ở máy thì token vẫn sống trên máy chủ tới khi hết hạn — bác đăng
+   * xuất khỏi máy con cháu mượn, tưởng đã ra, mà phiên vẫn còn.
+   */
+  const dangXuat = async () => {
+    await dangXuatTaiKhoan();
+    setHoSo(null);
+  };
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showFloatingBall, setShowFloatingBall] = useState(() => localStorage.getItem('showFloatingBall') !== 'false');
   const [isOutsideMode, setIsOutsideMode] = useState(false);
@@ -803,8 +846,13 @@ export default function App() {
   }, [fontSize]);
 
   useEffect(() => {
-    localStorage.setItem('isLoggedIn', String(isLoggedIn));
-  }, [isLoggedIn]);
+    /*
+     * ⚠️ DỌN CỜ CŨ. Máy đã cài bản trước còn `isLoggedIn: 'true'` nằm lại; nó
+     * không còn được đọc, nhưng để lại một cờ đăng nhập vô chủ trong máy người
+     * dùng là thói quen xấu.
+     */
+    localStorage.removeItem('isLoggedIn');
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('showFloatingBall', String(showFloatingBall));
@@ -908,16 +956,16 @@ export default function App() {
             )}
             {view === 'voice' && <VoiceView setView={setView} t={t} onAnalyze={handleAnalyze} isAnalyzing={isAnalyzing} />}
             {view === 'search' && <SearchView setView={setView} t={t} lang={lang} onAnalyze={handleAnalyze} isAnalyzing={isAnalyzing} />}
-            {view === 'history' && <HistoryView setView={setView} t={t} lang={lang} isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} historyItems={historyItems} setHistoryItems={setHistoryItems} setAnalyzeResult={setAnalyzeResult} />}
-            {view === 'profile' && <ProfileView setView={setView} t={t} isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} />}
+            {view === 'history' && <HistoryView setView={setView} t={t} lang={lang} isLoggedIn={isLoggedIn} historyItems={historyItems} setHistoryItems={setHistoryItems} setAnalyzeResult={setAnalyzeResult} />}
+            {view === 'profile' && <ProfileView setView={setView} t={t} isLoggedIn={isLoggedIn} hoSo={hoSo} onDangXuat={dangXuat} />}
             {view === 'family' && <FamilyView setView={setView} t={t} lang={lang} isLoggedIn={isLoggedIn} familyMembers={familyMembers} setFamilyMembers={setFamilyMembers} />}
             {view === 'learn' && <KhungTaiTre t={t}><LearnView setView={setView} t={t} lang={lang} onTriggerEmergency={triggerEmergencyAlert} /></KhungTaiTre>}
-            {view === 'login' && <LoginView setView={setView} t={t} setIsLoggedIn={setIsLoggedIn} userRole={userRole} setUserRole={setUserRole} />}
+            {view === 'login' && <LoginView setView={setView} t={t} lang={lang} onDangNhapXong={setHoSo} userRole={userRole} setUserRole={setUserRole} />}
             {view === 'add_family' && <AddFamilyView setView={setView} t={t} setFamilyMembers={setFamilyMembers} />}
             {view === 'mat_khau_gia_dinh' && <MatKhauGiaDinh setView={setView} t={t} />}
             {view === 'warning' && <WarningView setView={setView} t={t} lang={lang} result={analyzeResult} familyMembers={familyMembers} noiChayAi={noiChayAi} mayCoUngDungLa={mayCoUngDungLa} />}
             {view === 'guardian' && <GuardianView setView={setView} t={t} lang={lang} setUserRole={setUserRole} isDesktop={false} isLoggedIn={isLoggedIn} onAnalyze={handleAnalyze} familyMembers={familyMembers} onTriggerEmergency={triggerEmergencyAlert} />}
-            {view === 'account' && <AccountView setView={setView} t={t} setIsLoggedIn={setIsLoggedIn} />}
+            {view === 'account' && <AccountView setView={setView} t={t} hoSo={hoSo} onDangXuat={dangXuat} onLuuTen={async (ten) => setHoSo(await suaHoSoTaiKhoan({ ten }))} />}
             {view === 'privacy' && <PrivacyView setView={setView} t={t} />}
             {view === 'notifications' && (
               <NotificationsView 
@@ -948,13 +996,12 @@ export default function App() {
                 fontSize={fontSize} 
                 setFontSize={setFontSize} 
                 isLoggedIn={isLoggedIn} 
-                setIsLoggedIn={setIsLoggedIn} 
                 pinnedNotification={pinnedNotification} 
                 togglePinnedNotification={togglePinnedNotification}
                 showFloatingBall={showFloatingBall}
                 setShowFloatingBall={setShowFloatingBall}
                 onOpenOutsideMode={() => setIsOutsideMode(true)}
-              />
+               onDangXuat={dangXuat}/>
             )}
           </AnimatePresence>
 
@@ -1067,7 +1114,7 @@ export default function App() {
                  <button onClick={() => setIsMenuOpen(true)} className="flex items-center gap-1.5 text-slate-700 bg-slate-100 hover:bg-slate-200 px-3.5 py-1.5 rounded-xl font-bold text-[14px] transition-colors">
                    <LayoutGrid className="w-3.5 h-3.5" /> {t("Menu")}
                  </button>
-                 <button onClick={() => { if(isLoggedIn) { setIsLoggedIn(false); setView('login'); } else { setView('login'); } }} className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white px-4 py-1.5 rounded-xl font-bold text-[14px] shadow-xs transition-opacity">
+                 <button onClick={() => { if (isLoggedIn) { void dangXuat(); } else { setView('login'); } }} className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white px-4 py-1.5 rounded-xl font-bold text-[14px] shadow-xs transition-opacity">
                    {isLoggedIn ? <><LogOut className="w-3.5 h-3.5" /> {t("Đăng xuất")}</> : <><UserCircle className="w-3.5 h-3.5" /> {t("Đăng nhập")}</>}
                  </button>
               </div>
@@ -1076,7 +1123,7 @@ export default function App() {
            {/* Render Guardian Views on Desktop */}
            <AnimatePresence mode="wait">
               {view === 'intro' && <GuardianIntroView setView={setView} setUserRole={setUserRole} />}
-              {view === 'login' && <GuardianAuthView setView={setView} setIsLoggedIn={setIsLoggedIn} setUserRole={setUserRole} />}
+              {view === 'login' && <GuardianAuthView setView={setView} onDangNhapXong={setHoSo} setUserRole={setUserRole} />}
               {view === 'hoi_nhanh' && <HoiNhanhView setView={setView} t={t} lang={lang} onTriggerEmergency={triggerEmergencyAlert} />}
               {view === 'learn' && <KhungTaiTre t={t}><LearnView setView={setView} t={t} lang={lang} onTriggerEmergency={triggerEmergencyAlert} /></KhungTaiTre>}
               {view !== 'intro' && view !== 'login' && view !== 'hoi_nhanh' && view !== 'learn' && (
@@ -2228,7 +2275,6 @@ function HistoryView({
   t,
   lang = 'vi',
   isLoggedIn,
-  setIsLoggedIn,
   historyItems,
   setHistoryItems,
   setAnalyzeResult
@@ -2237,7 +2283,6 @@ function HistoryView({
   t: any,
   lang?: Lang,
   isLoggedIn: boolean,
-  setIsLoggedIn: (v: boolean) => void,
   historyItems: HistoryRecord[],
   setHistoryItems: React.Dispatch<React.SetStateAction<HistoryRecord[]>>,
   setAnalyzeResult: (data: any) => void
@@ -2606,7 +2651,39 @@ function FamilyView({
 
 
 // --- Account View ---
-function AccountView({ setView, t, setIsLoggedIn }: { setView: (v: ViewState) => void, t: any, setIsLoggedIn: (v: boolean) => void }) {
+function AccountView({ setView, t, hoSo, onDangXuat, onLuuTen }: {
+  setView: (v: ViewState) => void,
+  t: any,
+  hoSo: HoSoTaiKhoan | null,
+  onDangXuat: () => Promise<void>,
+  onLuuTen: (ten: string) => Promise<void>,
+}) {
+  /*
+   * ⚠️ MÀN NÀY TỪNG KHÔNG LƯU GÌ CẢ.
+   * Hai ô "Họ và tên" và "Số điện thoại" là `useState` thuần, không một lượt
+   * gọi lưu trữ nào. Bác gõ tên mình, bấm ra, quay lại — trống trơn. Không lỗi,
+   * không thông báo; bác chỉ nghĩ là mình chưa bấm đúng nút nào đó.
+   *
+   * Nay: tên lưu thật qua `PATCH /api/tai-khoan/toi`. Số điện thoại thì KHÔNG
+   * sửa được — nó là khoá đăng nhập, đổi số là chuyện khác hẳn với sửa hồ sơ.
+   */
+  const [ten, setTen] = useState(hoSo?.ten ?? '');
+  const [dangLuu, setDangLuu] = useState(false);
+  const [xong, setXong] = useState(false);
+
+  const luuTen = async () => {
+    if (!ten.trim() || !hoSo) return;
+    setDangLuu(true);
+    setXong(false);
+    try {
+      await onLuuTen(ten.trim());
+      setXong(true);
+    } catch {
+      // Không lưu được — ô vẫn giữ chữ bác vừa gõ để bấm lại, không xoá mất.
+    } finally {
+      setDangLuu(false);
+    }
+  };
   return (
     <motion.div 
       initial={{ opacity: 0, x: 20 }}
@@ -2625,19 +2702,64 @@ function AccountView({ setView, t, setIsLoggedIn }: { setView: (v: ViewState) =>
       <div className="w-full max-w-[360px] flex flex-col gap-4">
          <div className="bg-white rounded-[20px] p-5 shadow-sm border border-[#f3e8ff]">
             <h3 className="font-bold text-[#1e1b4b] mb-4 text-[16px]">{t("Thông tin cá nhân")}</h3>
+            {/*
+              ⚠️ HAI DÒNG NÀY TỪNG LÀ CHỮ CỨNG: "Bác An" và "0987 *** 321".
+              Bác mở màn Tài khoản của mình và đọc được tên người khác cùng một
+              số điện thoại không phải của mình — rồi tin rằng app đang giữ
+              thông tin đó. Nay đọc từ hồ sơ thật của máy chủ.
+            */}
+            {!hoSo ? (
+              <div className="flex flex-col gap-2">
+                <p className="text-[15px] text-slate-600 leading-relaxed">
+                  {t("Bác chưa đăng nhập nên chưa có thông tin nào ở đây.")}
+                </p>
+                <button
+                  onClick={() => setView('login')}
+                  className="w-full min-h-[52px] px-4 bg-[#7c3aed] text-white rounded-2xl font-extrabold text-[15px] active:scale-95 transition-transform"
+                >
+                  {t("Đăng nhập")}
+                </button>
+              </div>
+            ) : (
             <div className="flex flex-col gap-3">
                <div>
-                  <label className="text-[14px] text-[#6b7280] font-medium">{t("Họ và tên")}</label>
-                  <p className="font-bold text-[#1e1b4b] text-[15px]">Bác An</p>
+                  <label htmlFor="o-ten-tk" className="text-[14px] text-[#6b7280] font-medium block mb-1">{t("Họ và tên")}</label>
+                  <div className="flex gap-2">
+                    <input
+                      id="o-ten-tk"
+                      value={ten}
+                      onChange={(e) => { setTen(e.target.value); setXong(false); }}
+                      maxLength={60}
+                      className="flex-1 min-h-[52px] px-3 rounded-xl border-2 border-purple-200 bg-white text-[15px] font-bold text-[#1e1b4b] focus:outline-none focus:border-[#7c3aed]"
+                    />
+                    <button
+                      onClick={() => void luuTen()}
+                      disabled={dangLuu || !ten.trim() || ten.trim() === hoSo.ten}
+                      className="min-h-[52px] px-4 bg-[#7c3aed] text-white rounded-xl font-bold text-[15px] disabled:opacity-40 active:scale-95 transition-transform"
+                    >
+                      {dangLuu ? '…' : t("Lưu")}
+                    </button>
+                  </div>
+                  {xong && (
+                    <p className="text-[14px] text-emerald-700 font-bold mt-1">{t("Đã lưu")}</p>
+                  )}
                </div>
                <div>
                   <label className="text-[14px] text-[#6b7280] font-medium">{t("Số điện thoại")}</label>
-                  <p className="font-bold text-[#1e1b4b] text-[15px]">0987 *** 321</p>
+                  <p className="font-bold text-[#1e1b4b] text-[15px]">{hoSo.so}</p>
+                  {/*
+                    Số điện thoại là khoá đăng nhập nên không sửa ở đây. Nói ra
+                    thay vì để một ô xám không bấm được — bác sẽ tưởng app hỏng.
+                  */}
+                  <p className="text-[14px] text-slate-500 leading-snug mt-0.5">
+                    {t("Số này dùng để đăng nhập nên không đổi ở đây được.")}
+                  </p>
                </div>
             </div>
+            )}
          </div>
          
-         <button onClick={() => { setIsLoggedIn(false); setView('home'); }} className="w-full py-4 bg-white text-[#ef4444] rounded-[20px] font-bold text-[16px] shadow-sm border border-[#fee2e2] active:bg-[#fef2f2] transition-colors mt-4">
+         <button onClick={() => { void onDangXuat().then(() => setView('home')); }} className="w-full min-h-[56px] px-4 bg-white text-[#ef4444] rounded-[20px] font-bold text-[16px] shadow-sm border border-[#fee2e2] active:bg-[#fef2f2] transition-colors mt-4">
            {t("Đăng xuất")}
          </button>
       </div>
@@ -3753,7 +3875,14 @@ function DeviceDataView({ setView, t }: { setView: (v: ViewState) => void, t: an
 }
 
 // --- Profile View ---
-function ProfileView({ setView, t, isLoggedIn, setIsLoggedIn }: { setView: (v: ViewState) => void, t: any, isLoggedIn: boolean, setIsLoggedIn: (v: boolean) => void }) {
+function ProfileView({ setView, t, isLoggedIn, hoSo, onDangXuat }: {
+  setView: (v: ViewState) => void,
+  t: any,
+  isLoggedIn: boolean,
+  /** Hồ sơ thật từ máy chủ. `null` = chưa đăng nhập. */
+  hoSo: HoSoTaiKhoan | null,
+  onDangXuat: () => Promise<void>,
+}) {
   return (
     <motion.div 
       initial={{ opacity: 0, x: 20 }}
@@ -3862,7 +3991,7 @@ function SettingsView({
   fontSize, 
   setFontSize, 
   isLoggedIn, 
-  setIsLoggedIn, 
+  onDangXuat, 
   pinnedNotification, 
   togglePinnedNotification,
   showFloatingBall,
@@ -3876,7 +4005,7 @@ function SettingsView({
   fontSize: string, 
   setFontSize: (s:string)=>void, 
   isLoggedIn: boolean, 
-  setIsLoggedIn: (v:boolean)=>void, 
+  onDangXuat: () => Promise<void>, 
   pinnedNotification?: boolean, 
   togglePinnedNotification?: () => Promise<void> | void,
   showFloatingBall?: boolean,
@@ -4043,7 +4172,7 @@ function SettingsView({
            </div>
            
            {isLoggedIn ? (
-             <div onClick={() => setIsLoggedIn(false)} className="p-5 flex items-center gap-3 cursor-pointer active:bg-red-50 transition-colors">
+             <div onClick={() => { void onDangXuat(); }} className="p-5 flex items-center gap-3 cursor-pointer active:bg-red-50 transition-colors">
                 <LogOut size={22} className="text-[#ef4444]" />
                 <span className="font-bold text-[#ef4444] text-[16px]">{t("Đăng xuất")}</span>
              </div>
@@ -4599,115 +4728,188 @@ function SearchView({
 }
 
 // --- Login View ---
-function LoginView({ 
-  setView, 
-  t, 
-  setIsLoggedIn,
+/**
+ * ĐĂNG NHẬP — GỌI MÁY CHỦ THẬT.
+ *
+ * ══════════ ⚠️ MÀN NÀY TỪNG LÀ MỘT CÁI VỎ ══════════
+ *
+ * Bản trước: bấm nút → `setTimeout(800ms)` → `setIsLoggedIn(true)`. Không số
+ * điện thoại, không mật khẩu, không một lượt gọi mạng nào. Kèm theo là một nút
+ * "Đăng nhập bằng Google" có đủ logo bốn màu, trong khi không có một dòng OAuth
+ * nào trong cả dự án.
+ *
+ * Máy chủ thì đã có sẵn phần đăng nhập tử tế từ lâu — scrypt, muối riêng, chống
+ * dò thời gian, một mã lỗi duy nhất cho mọi ca sai — chỉ là không ai gọi tới.
+ *
+ * ⚠️ NÚT GOOGLE ĐÃ BỎ HẲN. Đừng vẽ lại nó cho tới khi có OAuth thật: một nút
+ * mang logo của người khác, hứa một cách đăng nhập không tồn tại, là dạng nói
+ * dối mà người dùng phát hiện ra ngay lần đầu bấm — và sau đó họ có lý do để
+ * nghi ngờ mọi thứ khác app này nói (§11).
+ *
+ * ⚠️ VÀ ĐĂNG NHẬP KHÔNG PHẢI CỬA VÀO APP. Nút quay lại luôn ở đó, mọi đường
+ * kiểm tin nhắn chạy được khi chưa đăng nhập. Tài khoản chỉ để nối vòng tròn
+ * gia đình và ký xác nhận — xem chú thích đầu `tai-khoan.ts`.
+ */
+function LoginView({
+  setView,
+  t,
+  lang = 'vi',
+  onDangNhapXong,
   userRole,
-  setUserRole 
-}: { 
-  setView: (v: ViewState) => void; 
-  t: any; 
-  setIsLoggedIn: (v: boolean) => void;
+  setUserRole
+}: {
+  setView: (v: ViewState) => void;
+  t: any;
+  lang?: Lang;
+  onDangNhapXong: (hs: HoSoTaiKhoan) => void;
   userRole?: 'elder' | 'guardian';
   setUserRole?: (role: 'elder' | 'guardian') => void;
 }) {
+  const [dangTao, setDangTao] = useState(false);
+  const [so, setSo] = useState('');
+  const [matKhau, setMatKhau] = useState('');
+  const [ten, setTen] = useState('');
   const [loading, setLoading] = useState(false);
+  const [loi, setLoi] = useState<string | null>(null);
   const [selectedRole, setSelectedRole] = useState<'elder' | 'guardian'>(userRole || 'elder');
 
-  const handleLogin = () => {
+  const gui = async () => {
+    setLoi(null);
+    if (!so.trim() || !matKhau || (dangTao && !ten.trim())) {
+      setLoi('THIEU_THONG_TIN');
+      return;
+    }
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      setIsLoggedIn(true);
+    try {
+      const hs = dangTao
+        ? await dangKyTaiKhoan(so.trim(), matKhau, ten.trim())
+        : await dangNhapTaiKhoan(so.trim(), matKhau);
+      onDangNhapXong(hs);
       if (setUserRole) setUserRole(selectedRole);
-      if (selectedRole === 'guardian') {
-        setView('guardian');
-      } else {
-        setView('home');
-      }
-    }, 800);
+      setView(selectedRole === 'guardian' ? 'guardian' : 'home');
+    } catch (e: any) {
+      /*
+       * ⚠️ TRA MÃ QUA CATALOG, ĐỪNG HIỆN MÃ THÔ. Máy chủ trả
+       * `SAI_SO_HOAC_MAT_KHAU`; bác đọc chuỗi đó không hiểu gì, và nó cũng
+       * không phải tiếng Việt. §HĐ luật 2: mã đi trên đường truyền, chữ nằm ở
+       * catalog. Mã lạ thì rơi về câu "chưa nối được máy chủ".
+       */
+      const ma = e?.ma || 'KHONG_GOI_DUOC';
+      setLoi(tra(MA_TAI_KHOAN, ma, lang) ? ma : 'KHONG_GOI_DUOC');
+    } finally {
+      setLoading(false);
+    }
   };
 
+  const oNhap = 'w-full min-h-[52px] px-4 rounded-2xl border-2 border-purple-200 bg-white text-[16px] text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-[#7c3aed]';
+
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, y: 50 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 50 }}
-      className="absolute inset-0 z-50 bg-[#f8f4ff] flex flex-col items-center justify-center px-6"
+      className="absolute inset-0 z-50 bg-[#f8f4ff] flex flex-col items-center justify-start overflow-y-auto [&>*]:shrink-0 px-6 pt-14 pb-24"
     >
-      <button aria-label={t("Quay lại")} 
+      <button
+        aria-label={t("Quay lại")}
         onClick={() => setView(selectedRole === 'guardian' ? 'guardian' : 'home')}
-        className="absolute top-6 left-6 p-2 bg-white/60 rounded-full shadow-sm text-[#6d28d9] active:scale-95 transition-all"
+        className="absolute top-6 left-6 p-2.5 bg-white/70 rounded-full shadow-sm text-[#6d28d9] active:scale-95 transition-all"
       >
         <ChevronLeft size={24} />
       </button>
 
-      <div className="w-20 h-20 mb-3">
+      <div className="w-16 h-16 mb-2">
         <img src="/logo.webp" alt="Logo" className="w-full h-full object-contain drop-shadow-md" />
       </div>
-      <h2 className="text-[28px] font-black text-[#1e1b4b] mb-1">{t("Khoan Đã")}</h2>
-      <p className="text-[#6d28d9]/80 text-[14px] font-semibold mb-6 text-center">{t("Cùng bác an toàn trong thế giới số")}</p>
+      <h2 className="text-[26px] font-black text-[#1e1b4b] mb-1">
+        {dangTao ? t("Tạo tài khoản") : t("Đăng nhập")}
+      </h2>
 
-      {/* Role Selection Segmented Control */}
-      <div className="w-full max-w-sm mb-6 bg-white/80 p-1.5 rounded-2xl border border-purple-200/80 shadow-xs flex items-center gap-1.5">
+      {/*
+        ⚠️ NÓI RÕ ĐĂNG NHẬP ĐỂ LÀM GÌ — VÀ KHÔNG ĐỂ LÀM GÌ.
+        Người cao tuổi có lý do chính đáng để ngại đưa số điện thoại cho một
+        app. Câu này trả lời trước câu hỏi đó, và nó nói đúng sự thật: nội dung
+        tin nhắn vẫn nằm trong máy, tài khoản chỉ để nối với người nhà.
+      */}
+      <p className="text-[15px] text-purple-900/80 font-medium mb-5 text-center max-w-sm leading-relaxed">
+        {t("Tài khoản để nối bác với người nhà. Tin nhắn bác kiểm vẫn nằm trong máy, không gửi lên đâu cả — và bác kiểm được cả khi chưa đăng nhập.")}
+      </p>
+
+      <div className="w-full max-w-sm mb-5 bg-white/80 p-1.5 rounded-2xl border border-purple-200/80 shadow-xs flex items-center gap-1.5">
         <button
           type="button"
           onClick={() => setSelectedRole('elder')}
-          className={`flex-1 py-2.5 px-3 rounded-xl font-bold text-[14px] flex items-center justify-center gap-1.5 transition-all ${
-            selectedRole === 'elder'
-              ? 'bg-purple-600 text-white shadow-sm'
-              : 'text-slate-600 hover:text-slate-900'
+          className={`flex-1 min-h-[52px] px-3 rounded-xl font-bold text-[15px] flex items-center justify-center gap-1.5 transition-all ${
+            selectedRole === 'elder' ? 'bg-purple-600 text-white shadow-sm' : 'text-slate-600'
           }`}
         >
-          <span>👵</span>
-          <span>{t("Bác (Người già)")}</span>
+          <span>👵</span><span>{t("Bác / bố mẹ")}</span>
         </button>
-
         <button
           type="button"
           onClick={() => setSelectedRole('guardian')}
-          className={`flex-1 py-2.5 px-3 rounded-xl font-bold text-[14px] flex items-center justify-center gap-1.5 transition-all ${
-            selectedRole === 'guardian'
-              ? 'bg-sky-600 text-white shadow-sm'
-              : 'text-slate-600 hover:text-slate-900'
+          className={`flex-1 min-h-[52px] px-3 rounded-xl font-bold text-[15px] flex items-center justify-center gap-1.5 transition-all ${
+            selectedRole === 'guardian' ? 'bg-sky-600 text-white shadow-sm' : 'text-slate-600'
           }`}
         >
-          <span>🛡️</span>
-          <span>{t("Con cháu (Guardian)")}</span>
+          <span>🛡️</span><span>{t("Con cháu")}</span>
         </button>
       </div>
 
-      <div className="w-full max-w-sm flex flex-col gap-3.5">
-        <button 
-          onClick={handleLogin}
-          disabled={loading}
-          className="w-full bg-white border border-[#e9d5ff] text-[#1e1b4b] py-3.5 rounded-2xl font-bold text-[15px] shadow-sm flex items-center justify-center gap-3 active:scale-95 transition-transform"
-        >
-          {loading ? (
-            <div className="w-5 h-5 border-2 border-[#6d28d9] border-t-transparent rounded-full animate-spin"></div>
-          ) : (
-            <>
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-              </svg>
-              {t("Đăng nhập bằng Google")}
-            </>
-          )}
-        </button>
+      <div className="w-full max-w-sm flex flex-col gap-3">
+        {dangTao && (
+          <div>
+            <label htmlFor="o-ten" className="text-[14px] font-bold text-[#6d28d9] mb-1 block">{t("Tên của bác")}</label>
+            <input
+              id="o-ten" className={oNhap} value={ten} onChange={(e) => setTen(e.target.value)}
+              placeholder={t("Ví dụ: Bác Tám")} maxLength={60} autoComplete="name"
+            />
+          </div>
+        )}
 
-        <button 
-          onClick={handleLogin}
+        <div>
+          <label htmlFor="o-so" className="text-[14px] font-bold text-[#6d28d9] mb-1 block">{t("Số điện thoại")}</label>
+          <input
+            id="o-so" className={oNhap} value={so} onChange={(e) => setSo(e.target.value)}
+            type="tel" inputMode="numeric" placeholder="0912 345 678" autoComplete="tel"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="o-mk" className="text-[14px] font-bold text-[#6d28d9] mb-1 block">{t("Mật khẩu")}</label>
+          <input
+            id="o-mk" className={oNhap} value={matKhau} onChange={(e) => setMatKhau(e.target.value)}
+            type="password" placeholder={t("Ít nhất 6 ký tự")}
+            autoComplete={dangTao ? 'new-password' : 'current-password'}
+            onKeyDown={(e) => { if (e.key === 'Enter') void gui(); }}
+          />
+        </div>
+
+        {loi && (
+          <div role="alert" className="p-3.5 bg-amber-50 border-2 border-amber-300 rounded-2xl">
+            <p className="text-[15px] font-bold text-amber-900 leading-snug">
+              {tra(MA_TAI_KHOAN, loi, lang) ?? tra(MA_TAI_KHOAN, 'KHONG_GOI_DUOC', lang)}
+            </p>
+          </div>
+        )}
+
+        <button
+          onClick={() => void gui()}
           disabled={loading}
-          className={`w-full text-white py-3.5 rounded-2xl font-bold text-[15px] shadow-md flex items-center justify-center gap-2.5 active:scale-95 transition-transform ${
-            selectedRole === 'guardian' ? 'bg-sky-600 hover:bg-sky-700' : 'bg-[#8b5cf6] hover:bg-[#7c3aed]'
+          className={`w-full min-h-[56px] px-4 text-white rounded-2xl font-extrabold text-[17px] shadow-md flex items-center justify-center gap-2.5 active:scale-95 disabled:opacity-60 transition-transform ${
+            selectedRole === 'guardian' ? 'bg-sky-600' : 'bg-[#7c3aed]'
           }`}
         >
-          <Phone size={20} />
-          {t("Đăng nhập bằng Số điện thoại")}
+          {loading
+            ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            : <><Phone size={20} />{dangTao ? t("Tạo tài khoản") : t("Đăng nhập")}</>}
+        </button>
+
+        <button
+          onClick={() => { setDangTao(!dangTao); setLoi(null); }}
+          className="w-full min-h-[52px] px-4 bg-white border-2 border-purple-200 text-[#6d28d9] rounded-2xl font-bold text-[15px] active:scale-95 transition-transform"
+        >
+          {dangTao ? t("Tôi đã có tài khoản") : t("Bác chưa có tài khoản? Tạo mới")}
         </button>
       </div>
     </motion.div>

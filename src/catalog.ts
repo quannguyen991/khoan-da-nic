@@ -590,6 +590,58 @@ export const MA_LOI_RA: Record<string, Cap> = {
   toi_on_khong_co_gi_nguy_hiem: c('Tôi ổn, không có gì nguy hiểm', 'I’m fine, nothing dangerous here'),
 };
 
+// ═══════════════ Tài khoản ═══════════════
+//
+// ⚠️ §11 — KHÔNG CÂU NÀO TRÁCH NGƯỜI DÙNG. "Bác nhập sai rồi" là trách; "cháu
+// chưa tìm thấy" là nói việc. Người đọc những câu này thường đang vội, và với
+// người cao tuổi thì một câu trách làm họ bỏ luôn, không thử lại.
+//
+// ⚠️ VÀ KHÔNG CÂU NÀO ĐƯỢC NÓI SỐ ĐÓ CÓ TỒN TẠI HAY KHÔNG. Máy chủ cố ý gộp
+// "chưa đăng ký" với "sai mật khẩu" thành một mã duy nhất, vì phân biệt hai ca
+// là dựng sẵn một máy dò xem số nào đang dùng Khoan Đã — danh sách người cao
+// tuổi quan tâm tới lừa đảo là thứ kẻ lừa đảo rất muốn có. Chữ ở đây phải giữ
+// nguyên sự mập mờ đó, đừng "cho rõ ràng hơn".
+
+export const MA_TAI_KHOAN: Record<string, Cap> = {
+  SAI_SO_HOAC_MAT_KHAU: c(
+    'Số điện thoại hoặc mật khẩu chưa đúng. Bác thử lại nhé.',
+    'That phone number or password is not right. Please try again.',
+  ),
+  SO_DA_DUOC_DANG_KY: c(
+    'Số này đã có tài khoản rồi. Bác bấm "Tôi đã có tài khoản" để vào.',
+    'This number already has an account. Tap “I already have an account”.',
+  ),
+  MAT_KHAU_QUA_NGAN: c(
+    'Mật khẩu cần ít nhất 6 ký tự.',
+    'The password needs at least 6 characters.',
+  ),
+  SO_KHONG_HOP_LE: c(
+    'Số điện thoại chưa đúng dạng. Bác xem lại giúp cháu.',
+    'That phone number does not look right. Please check it.',
+  ),
+  THIEU_THONG_TIN: c(
+    'Bác điền giúp cháu đủ các ô nhé.',
+    'Please fill in all the fields.',
+  ),
+  /**
+   * ⚠️ CÂU NÀY PHẢI NÓI RÕ LÀ CHỜ, KHÔNG PHẢI SAI.
+   * Nó xuất hiện sau vài lần gõ nhầm, tức người đọc đang bắt đầu lo là mình
+   * quên mật khẩu. Nói "chờ mấy giây" thì bác chờ; nói "có lỗi" thì bác bỏ.
+   */
+  THU_LAI_SAU: c(
+    'Bác thử hơi nhanh. Chờ một chút rồi bấm lại giúp cháu.',
+    'That was a bit quick. Please wait a moment and try again.',
+  ),
+  CHUA_DANG_NHAP: c(
+    'Phiên đăng nhập đã hết hạn. Bác đăng nhập lại nhé.',
+    'Your session has expired. Please sign in again.',
+  ),
+  KHONG_GOI_DUOC: c(
+    'Chưa nối được với máy chủ. Bác kiểm tra mạng rồi thử lại.',
+    'Could not reach the server. Please check your connection and try again.',
+  ),
+};
+
 // ═══════════════ Nhắc cuộc gọi dài ═══════════════
 //
 // ⚠️ APP KHÔNG BIẾT AI ĐANG GỌI, NÊN KHÔNG CÂU NÀO ĐƯỢC NÓI VỀ NGƯỜI GỌI.
