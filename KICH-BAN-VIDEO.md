@@ -108,6 +108,65 @@ Giọng AI đọc kịch bản xoá mất đúng thứ họ đang tìm.
 
 ---
 
+## Bản tiếng Anh — để thử, và để làm phụ đề
+
+Dùng bản này theo một trong hai cách:
+- **Nói tiếng Anh:** đọc thẳng bản dưới đây.
+- **Nói tiếng Việt:** dùng nó làm phụ đề, chia theo đúng các cảnh ở bảng trên.
+
+> I'm [name], a [grade]th-grade student. In Vietnam in 2025, **impersonating the
+> police was the most common online scam** — and only **32% of victims ever
+> report it**. Which means helping someone *after* they lose the money almost
+> never happens.
+>
+> When the call is happening, an older person can't type anything. So Khoan Đã
+> asks one question: **what are they asking you to do?** Three taps, eight
+> seconds. The answer: **High risk**.
+>
+> Here's a message written **without diacritics**, impersonating nobody. No rule
+> or regex catches this — take the AI layer out and our detection rate **drops
+> from 67% to under 4%**.
+>
+> But AI can be wrong. So it **only raises flags** — a fixed rule engine makes
+> the final call. And every result states what it **could not** check.
+>
+> The app has **no word for "safe"**. It never promised that — it only says it
+> found no signals in what you gave it.
+>
+> The model runs **on our own machine**, an RTX 3060. Nothing is sent to any
+> other company. One check takes **1.8 seconds**.
+>
+> We tested ten scenarios — five scams, and **five ordinary messages**. Because
+> for older people, **a false alarm costs more than a miss**: cry wolf a few
+> times and the app gets uninstalled.
+>
+> Beyond warnings, it teaches how to spot these tactics and keeps family numbers
+> ready. It works **even with no internet**.
+>
+> Next we want to bring it to local elder associations, and build a version that
+> warns during the incoming call itself. **Khoan Đã: pause, verify, then act.**
+> Open source — anyone can check it.
+
+**Ba cụm phải giữ nguyên chữ chính thức** (chúng khớp với chữ hiện trên màn hình,
+lấy từ `src/catalog.ts`):
+
+| Trên màn hình | Trong lời thoại / phụ đề |
+|---|---|
+| Nguy hiểm cao | **High risk** |
+| Chưa thấy dấu hiệu rủi ro | **No clear risk signals found** |
+| Dừng lại trước, kiểm sau | **Pause. Verify. Protect.** |
+
+⚠️ **Bài kiểm tra trước khi quyết định nói tiếng Anh.** Đọc to đoạn này, không
+nhìn giấy:
+
+> *"The AI only raises flags — a fixed rule engine makes the final call. Because a
+> language model should never be the thing deciding whether someone loses fifty
+> million dong."*
+
+Trôi và hiểu mình đang nói gì ⇒ quay tiếng Anh. Phải học thuộc, hoặc vấp ⇒ quay
+tiếng Việt rồi làm phụ đề bằng bản trên. Rubric chấm bạn **hiểu tới đâu**, không
+chấm bạn nói **ngôn ngữ nào** — và người đọc thuộc lòng nghe khác hẳn người hiểu.
+
 ## Chuẩn bị trước khi bấm ghi
 
 **Số phải kiểm lại — đừng đọc số cũ:**
