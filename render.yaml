@@ -16,9 +16,23 @@
 #   claude-fable-5              7,3s       20,8s        5/5*        0/5
 #   claude-sonnet-5            20,8s       32,2s         —           —
 #   gemini-3.6-flash           28,8s       48,2s        5/5         0/5
+#   qwen2.5:7b (cục bộ)         2,4s       10,4s        3/5**       0/5
 #
 #   * fable-5 trả JSON sai lược đồ 3/10 lượt, bị Zod chặn — phần đó do tầng
 #     luật gánh chứ không phải AI.
+#
+# ⚠️⚠️ MẤY CON SỐ "BẮT LỪA ĐẢO" TRÊN ĐÂY LÀ MỘT LƯỢT ĐO, VÀ CHÚNG KHÔNG ỔN ĐỊNH.
+#
+# Đo lại nhiều lượt trên cùng một tình huống (19/8/2026):
+#   · `viec-nhe-luong-cao` — gpt-5.4 bắt 1/4 lượt, qwen2.5:7b bắt 0/5 lượt.
+#   · `gia-danh-dien-luc`  — gpt-5.4 bắt 4/4, qwen bắt 0/5.
+#
+# Nghĩa là "5/5" của gpt-5.4 có một ca chỉ đúng nhờ may. ** qwen ban đầu đo
+# được 4/5, đo lại ra 3/5 — lần 4/5 mới là ngoại lệ.
+#
+# Bộ thử có 10 mẫu. Chênh lệch một ca nằm gọn trong nhiễu, nên ĐỪNG dùng bảng
+# này để nói model nào "chính xác hơn" — nó chỉ đủ để nói về TỐC ĐỘ (chênh 5-12
+# lần, vượt xa nhiễu) và để loại thứ hỏng hẳn.
 #
 # ⚠️ CHẤT LƯỢNG BẰNG NHAU, TỐC ĐỘ CHÊNH 5,5 LẦN. Chọn `gpt-5.4` vì ĐUÔI ngắn
 # nhất (7,4s so với 48,2s của Gemini). Với app này, "lượt chậm nhất" quan trọng

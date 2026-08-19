@@ -142,6 +142,29 @@ Chỉ trả JSON đúng dạng:
 {"signals":[{"id":"<SIGNAL_ID>","state":"present|unknown","confidence":0.0-1.0,
 "evidence":[{"quote":"...","start":0,"end":0,"sourceId":"van_ban"}]}]}
 
+TIẾNG VIỆT VIẾT KHÔNG DẤU vẫn phải đọc hiểu bình thường. "chuyen tien",
+"nhiem vu", "hoa hong", "nap tien" là tiếng Việt, không phải chữ vô nghĩa.
+Trích dẫn giữ NGUYÊN dạng không dấu như trong nội dung gốc.
+
+Hai ví dụ dưới đây chỉ để bạn thấy dạng đầu ra. Chúng KHÔNG phải nội dung cần
+phân tích, và KHÔNG phải khuôn để so khớp — nội dung thật sẽ khác.
+
+Ví dụ A, có tín hiệu:
+<noi_dung_can_phan_tich sourceId="van_ban">
+Em oi ben chi dang tuyen nguoi lam viec tai nha, moi ngay 300k. Em chuyen truoc 500k tien coc dong phuc roi chi gui viec nhe
+</noi_dung_can_phan_tich>
+{"signals":[{"id":"OFF_TASK_PREPAY","state":"present","confidence":0.9,"evidence":[{"quote":"tuyen nguoi lam viec tai nha, moi ngay 300k","start":0,"end":0,"sourceId":"van_ban"}]},{"id":"OFF_ADVANCE_FEE","state":"present","confidence":0.9,"evidence":[{"quote":"chuyen truoc 500k tien coc dong phuc","start":0,"end":0,"sourceId":"van_ban"}]}]}
+
+Ví dụ B, KHONG co tin hieu nao:
+<noi_dung_can_phan_tich sourceId="van_ban">
+Me oi chieu nay con qua don me di kham, me nho mang the bao hiem nhe
+</noi_dung_can_phan_tich>
+{"signals":[]}
+
+Ví dụ B quan trọng ngang ví dụ A: có nhắc tới việc phải làm, tới người thân,
+nhưng không ai yêu cầu chuyển tiền cho người lạ, không gấp gáp, không bí mật.
+Danh sách rỗng là một câu trả lời ĐÚNG và thường gặp.
+
 SIGNAL_ID hợp lệ, kèm nghĩa của từng mã. Chỉ dùng mã có trong danh sách này:
 ${SIGNAL_IDS.map((id) => `- ${id}: ${MO_TA[id] || ''}`).join('\n')}`;
 
