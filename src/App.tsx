@@ -572,7 +572,9 @@ export default function App() {
 
       {/* MOBILE & TABLET & NORMAL ELDER MODE */}
       {!((isDesktopScreen && userRole !== 'elder') || userRole === 'guardian' || isUltraZoomedOut) ? (
-        <div className="flex w-full h-[100dvh] max-h-[100dvh] flex-col relative overflow-hidden bg-[#f8f4ff] select-none touch-none overscroll-none md:max-w-3xl lg:max-w-5xl xl:max-w-6xl md:mx-auto md:my-auto md:h-[96vh] md:max-h-[1000px] md:rounded-[2.5rem] md:shadow-[0_25px_60px_rgba(76,29,149,0.18)] md:border-2 md:border-purple-200/80">
+        <div className="flex w-full h-[100dvh] max-h-[100dvh] flex-col lg:flex-row relative overflow-hidden bg-[#f8f4ff] select-none touch-none overscroll-none
+          md:max-w-3xl md:mx-auto md:my-auto md:h-[96vh] md:max-h-[1000px] md:rounded-[2.5rem] md:shadow-[0_25px_60px_rgba(76,29,149,0.18)] md:border-2 md:border-purple-200/80
+          lg:max-w-none lg:mx-0 lg:my-0 lg:h-[100dvh] lg:max-h-[100dvh] lg:rounded-none lg:border-0 lg:shadow-none">
           {/* Background ambient lighting */}
           <div className="absolute top-[-5%] left-[-10%] w-72 h-72 bg-white opacity-60 rounded-full blur-3xl pointer-events-none select-none"></div>
           <div className="absolute bottom-1/4 right-[-20%] w-80 h-80 bg-[#d8b4fe] opacity-30 rounded-full blur-[80px] pointer-events-none select-none"></div>
@@ -646,9 +648,18 @@ export default function App() {
                 initial={{ y: 100 }} 
                 animate={{ y: 0 }} 
                 exit={{ y: 100 }}
-                className="absolute bottom-0 left-0 w-full px-4 pb-6 pt-10 bg-gradient-to-t from-[#cfb8f8] via-[#e2d2f9]/80 to-transparent z-50 pointer-events-none"
+                /*
+                  ⚠️ HAI HÌNH DẠNG CHO HAI KHỔ MÀN.
+                  Điện thoại: thanh nổi ở đáy, đúng tầm ngón cái.
+                  Máy tính: cột dọc bên trái. Thanh nổi trên màn rộng vừa che mất
+                  phần dưới nội dung (lớp gradient phủ lên), vừa bắt mắt phải đi
+                  từ giữa màn xuống tận đáy mỗi lần đổi mục.
+                */
+                className="absolute bottom-0 left-0 w-full px-4 pb-6 pt-10 bg-gradient-to-t from-[#cfb8f8] via-[#e2d2f9]/80 to-transparent z-50 pointer-events-none
+                  lg:static lg:order-first lg:w-[15rem] lg:h-full lg:shrink-0 lg:p-4 lg:bg-none lg:bg-white lg:border-r lg:border-purple-100"
               >
-                <div className="bg-gradient-to-r from-[#9e76ea] via-[#ad8af0] to-[#9e76ea] rounded-full p-[6px] px-3 sm:px-4 flex justify-between items-center shadow-[0_15px_30px_rgba(90,30,160,0.3)] border border-white/20 h-16 sm:h-18 max-w-lg sm:max-w-xl mx-auto relative overflow-hidden pointer-events-auto">
+                <div className="bg-gradient-to-r from-[#9e76ea] via-[#ad8af0] to-[#9e76ea] rounded-full p-[6px] px-3 sm:px-4 flex justify-between items-center shadow-[0_15px_30px_rgba(90,30,160,0.3)] border border-white/20 h-16 sm:h-18 max-w-lg sm:max-w-xl mx-auto relative overflow-hidden pointer-events-auto
+                  lg:flex-col lg:justify-start lg:items-stretch lg:gap-1.5 lg:h-auto lg:max-w-none lg:rounded-3xl lg:p-3 lg:bg-none lg:bg-[#f6f1ff] lg:border-purple-100 lg:shadow-none">
                   <div className="absolute inset-0 bg-gradient-to-t from-white/10 to-transparent pointer-events-none"></div>
                   
                   {[
@@ -664,20 +675,27 @@ export default function App() {
                       <button 
                         key={item.id}
                         onClick={() => setView(item.id as ViewState)} 
-                        className={`relative z-10 transition-all duration-300 flex items-center justify-center rounded-full active:scale-95 ${
-                          isActive 
-                            ? 'bg-white/25 shadow-[0_0_20px_rgba(255,255,255,0.4)] text-white px-3.5 sm:px-4 h-[3.25rem] sm:h-[3.6rem]' 
-                            : 'text-white/70 hover:text-white w-[3.25rem] h-[3.25rem] sm:w-[3.6rem] sm:h-[3.6rem]'
+                        className={`relative z-10 transition-all duration-300 flex items-center justify-center rounded-full active:scale-95
+                          lg:justify-start lg:w-full lg:rounded-2xl lg:px-4 lg:h-[3.4rem] lg:gap-3 ${
+                          isActive
+                            ? 'bg-white/25 shadow-[0_0_20px_rgba(255,255,255,0.4)] text-white px-3.5 sm:px-4 h-[3.25rem] sm:h-[3.6rem] lg:bg-[#7e22ce] lg:text-white lg:shadow-md'
+                            : 'text-white/70 hover:text-white w-[3.25rem] h-[3.25rem] sm:w-[3.6rem] sm:h-[3.6rem] lg:text-[#4c1d95] lg:hover:bg-white lg:w-full'
                         }`}
                       >
                         <Icon size={24} fill={isActive && item.id !== 'search' ? "currentColor" : "none"} strokeWidth={isActive ? 2 : 2} />
+                        {/*
+                          Trên máy tính nhãn hiện thường trực — có chỗ, và người
+                          cao tuổi đọc chữ nhanh hơn đoán biểu tượng. Trên điện
+                          thoại mới cần giấu để vừa bề ngang.
+                        */}
+                        <span className="hidden lg:inline font-bold text-[15px]">{item.label}</span>
                         <AnimatePresence>
                           {isActive && (
-                            <motion.span 
+                            <motion.span
                               initial={{ width: 0, opacity: 0, marginLeft: 0 }}
                               animate={{ width: 'auto', opacity: 1, marginLeft: 6 }}
                               exit={{ width: 0, opacity: 0, marginLeft: 0 }}
-                              className="font-bold text-[14px] sm:text-[14px] whitespace-nowrap overflow-hidden"
+                              className="lg:hidden font-bold text-[14px] whitespace-nowrap overflow-hidden"
                             >
                               {item.label}
                             </motion.span>
@@ -891,8 +909,14 @@ function HomeView({
         <h1 className="text-xl sm:text-2xl font-extrabold text-[#321379] tracking-tight">{t("Khoan Đã")}</h1>
       </div>
 
-      {/* Main Headings */}
-      <h2 className="text-center text-[1.85rem] sm:text-3xl md:text-4xl leading-[1.18] font-black text-[#2e1065] px-4 shrink-0 select-none" dangerouslySetInnerHTML={{__html: t("Hãy kể tình huống<br />của Bác")}}></h2>
+      {/*
+        ⚠️ HAI TIÊU ĐỀ, MỖI KHỔ MÀN MỘT CÁI — VÀ CÁI NÀY TỪNG THIẾU `md:hidden`.
+        Hệ quả trên máy tính: hiện CẢ HAI, thành ra hỏi hai lần cùng một câu
+        ("Hãy kể tình huống của Bác" rồi "Bác đang cần kiểm tra điều gì?").
+        Người cao tuổi đọc chậm, và hai câu hỏi chồng nhau làm họ dừng lại tìm
+        xem phải trả lời cái nào.
+      */}
+      <h2 className="md:hidden text-center text-[1.85rem] sm:text-3xl leading-[1.18] font-black text-[#2e1065] px-4 shrink-0 select-none" dangerouslySetInnerHTML={{__html: t("Hãy kể tình huống<br />của Bác")}}></h2>
       
       <div className="hidden md:flex flex-col items-center text-center mb-8 relative z-20">
          <h2 className="text-5xl font-black text-[#2e1065] tracking-tight mb-4">{t("Bác đang cần kiểm tra điều gì?")}</h2>
@@ -1832,7 +1856,7 @@ function HistoryView({
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
-      className="flex-1 flex flex-col w-full relative z-10 pt-6 md:pt-16 pb-24 md:pb-12 px-4 md:px-12 overflow-y-auto"
+      className="flex-1 flex flex-col w-full relative z-10 pt-6 md:pt-16 pb-24 lg:pb-10 px-4 md:px-12 lg:px-16 overflow-y-auto"
     >
       <div className="md:hidden flex flex-col items-center mb-4">
          <div className="w-10 h-10 bg-white rounded-2xl flex items-center justify-center shadow-xs mb-1.5 border border-purple-100">
@@ -2021,7 +2045,7 @@ function FamilyView({
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
-      className="flex-1 flex flex-col w-full relative z-10 pt-6 md:pt-16 pb-24 md:pb-12 px-4 md:px-12 overflow-y-auto"
+      className="flex-1 flex flex-col w-full relative z-10 pt-6 md:pt-16 pb-24 lg:pb-10 px-4 md:px-12 lg:px-16 overflow-y-auto"
     >
       {/* Mobile Header */}
       <div className="md:hidden flex flex-col items-center mb-4">
@@ -3380,7 +3404,7 @@ function SearchView({
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
-      className="flex-1 flex flex-col w-full relative z-10 pt-6 md:pt-16 pb-24 md:pb-12 px-4 md:px-12 overflow-y-auto"
+      className="flex-1 flex flex-col w-full relative z-10 pt-6 md:pt-16 pb-24 lg:pb-10 px-4 md:px-12 lg:px-16 overflow-y-auto"
     >
       <input 
         type="file"
