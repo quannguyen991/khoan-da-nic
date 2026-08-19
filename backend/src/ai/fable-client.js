@@ -107,6 +107,8 @@ const laThongBaoDichVu = (s) => typeof s === 'string'
  */
 const CUC_BO_MAC_DINH = 'http://127.0.0.1:11434/v1';
 const MODEL_CUC_BO_MAC_DINH = 'qwen2.5:3b-instruct-q4_K_M';
+/** Địa chỉ Gemini theo giao diện tương thích OpenAI. Dùng chung cho cả hai chỗ. */
+const GEMINI_BASE = 'https://generativelanguage.googleapis.com/v1beta/openai';
 
 function layCauHinh(env = process.env) {
   let base = env.LLM_API_BASE || env.LLM_BASE_URL;
@@ -143,7 +145,7 @@ function layCauHinh(env = process.env) {
       ? 'tren_may_nguoi_dung'
       : 'tren_may_chu_tu_van_hanh';
   } else if (!key && env.GEMINI_API_KEY) {
-    base = 'https://generativelanguage.googleapis.com/v1beta/openai';
+    base = GEMINI_BASE;
     key = env.GEMINI_API_KEY;
     /**
      * ⚠️ GOOGLE NGỪNG CẤP MODEL CŨ CHO TÀI KHOẢN MỚI, VÀ BÁO BẰNG 404.
@@ -288,10 +290,112 @@ function layCauHinh(env = process.env) {
 }
 
 /** @returns {string} nội dung thô của lượt trả lời. Ném LoiNhaCungCap nếu hỏng. */
-async function goiChat(messages, opts = {}) {
-  const cauHinh = layCauHinh(opts.env);
-  if (!cauHinh.daCauHinh) throw new LoiNhaCungCap('AI_NOT_CONFIGURED');
+/**
+ * ══════════ CHUỖI ĐƯỜNG AI — CHÍNH RỒI DỰ PHÒNG ══════════
+ *
+ * `layCauHinh` chọn ĐÚNG MỘT đường. Hàm này dựng cả DANH SÁCH, theo thứ tự thử.
+ *
+ * ⚠️ THỨ TỰ XẾP THEO SỐ ĐO, KHÔNG THEO CẢM TÍNH (đo 19/8/2026, 10 tình huống):
+ *
+ *   gateway gpt-5.4     5,3s · đuôi  7,4s · bắt 5/5 · oan 0/5   ← chính
+ *   qwen2.5:7b cục bộ   2,4s · đuôi 10,4s · bắt 4/5 · oan 0/5   ← dự phòng 1
+ *   gemini-3.6-flash   28,8s · đuôi 48,2s · bắt 5/5 · oan 0/5   ← dự phòng 2
+ *
+ * ⚠️ QWEN ĐỨNG TRƯỚC GEMINI DÙ BẮT ÍT HƠN MỘT CA. Nó nhanh hơn Gemini 12 lần
+ * và không báo oan lần nào. Khi đường chính đã chết, thứ người dùng cần là một
+ * câu trả lời trong vài giây, không phải câu trả lời hoàn hảo sau gần một phút
+ * — lúc đó bác đang bị thúc chuyển tiền.
+ *
+ * ⚠️ QWEN BỎ SÓT CA "việc nhẹ lương cao" (viết không dấu, không giả danh ai).
+ * Đó đúng là ca mà tầng AI sinh ra để xử lý, nên qwen KHÔNG được làm đường
+ * chính — chỉ làm lưới đỡ khi không còn gì khác.
+ *
+ * ⚠️ MỖI ĐƯỜNG MỘT TIMEOUT RIÊNG. Thử tuần tự với timeout dài là cộng dồn:
+ * gateway chết (35s) + Gemini chậm (35s) = bác nhìn màn chờ 70 giây. Đường dự
+ * phòng cục bộ để 12s là đủ — nó ở trong mạng LAN, đo được 2,4s; quá 12s nghĩa
+ * là máy đã tắt hoặc Tailscale rớt, và chờ thêm không giúp gì.
+ */
+function layCacDuong(env = process.env) {
+  const ds = [];
+  const chinh = layCauHinh(env);
+  if (chinh.daCauHinh) ds.push(chinh);
 
+  /*
+   * Dự phòng cục bộ: chỉ dựng khi người vận hành khai địa chỉ. Không tự đoán
+   * `127.0.0.1:11434` — đoán sai thì mỗi lượt hỏng lại tốn thêm một timeout
+   * cho một máy chủ không tồn tại.
+   */
+  const duBase = env.LLM_DU_PHONG_BASE;
+  if (duBase && !ds.some((d) => d.base === duBase)) {
+    ds.push({
+      daCauHinh: true,
+      base: duBase,
+      key: env.LLM_DU_PHONG_KEY || 'khong-can-khoa',
+      model: env.LLM_DU_PHONG_MODEL || MODEL_CUC_BO_MAC_DINH,
+      mucSuyLuan: undefined,          // mô hình nhỏ không có phần suy luận
+      noiChay: env.LLM_DU_PHONG_TREN_MAY_NGUOI_DUNG === '1'
+        ? 'tren_may_nguoi_dung' : 'tren_may_chu_tu_van_hanh',
+      coThiGiac: env.LLM_DU_PHONG_CO_THI_GIAC === '1',
+      timeout: Number(env.LLM_DU_PHONG_TIMEOUT_MS) || 12_000,
+      laDuPhong: true,
+    });
+  }
+
+  /*
+   * Dự phòng Gemini: chỉ khi đường chính KHÔNG phải Gemini (tránh thử lại đúng
+   * nhà cung cấp vừa chết) và có khoá riêng.
+   */
+  if (env.GEMINI_API_KEY && !ds.some((d) => d.noiChay === 'gemini')) {
+    ds.push({
+      daCauHinh: true,
+      base: GEMINI_BASE,
+      key: env.GEMINI_API_KEY,
+      model: env.GEMINI_MODEL || 'gemini-3.6-flash',
+      mucSuyLuan: env.LLM_REASONING_EFFORT || 'low',
+      noiChay: 'gemini',
+      coThiGiac: env.LLM_KHONG_CO_THI_GIAC !== '1',
+      timeout: Number(env.LLM_TIMEOUT_MS) || TIMEOUT_MAC_DINH,
+      laDuPhong: true,
+    });
+  }
+
+  return ds;
+}
+
+/**
+ * Gọi AI, thử lần lượt các đường cho tới khi có câu trả lời.
+ *
+ * ⚠️ TRẢ VỀ CẢ ĐƯỜNG ĐÃ DÙNG, KHÔNG CHỈ NỘI DUNG — §11.
+ *
+ * Màn kết quả nói với bác "AI chạy ở đâu". Nếu đường chính chết và app rơi
+ * xuống qwen trên máy chủ tự vận hành, mà giao diện vẫn khai tên đường chính,
+ * thì đó là lời khai sai về đúng thứ bác cần biết để quyết định có gõ nội dung
+ * nhạy cảm vào hay không.
+ */
+async function goiChatCoDuPhong(messages, opts = {}) {
+  const duong = layCacDuong(opts.env);
+  if (duong.length === 0) throw new LoiNhaCungCap('AI_NOT_CONFIGURED');
+
+  let loiCuoi;
+  for (const c of duong) {
+    try {
+      const noiDung = await goiMotDuong(messages, c, opts);
+      return { noiDung, cauHinh: c };
+    } catch (e) {
+      loiCuoi = e;
+      /*
+       * ⚠️ KHÔNG THỬ ĐƯỜNG SAU KHI LỖI LÀ DO LỜI NHẮC, KHÔNG PHẢI DO ĐƯỜNG.
+       * Nội dung quá dài hay lược đồ sai thì đường nào cũng hỏng y hệt — thử
+       * tiếp chỉ tốn thêm thời gian của một người đang chờ.
+       */
+      if (e instanceof LoiNhaCungCap && e.ma === 'AI_SCHEMA_INVALID') throw e;
+    }
+  }
+  throw loiCuoi;
+}
+
+/** Gọi ĐÚNG MỘT đường đã cho. Phần dựng chuỗi nằm ở `goiChatCoDuPhong`. */
+async function goiMotDuong(messages, cauHinh, opts = {}) {
   const huy = new AbortController();
   const dongHo = setTimeout(() => huy.abort(), cauHinh.timeout);
 
@@ -385,6 +489,7 @@ async function goiChat(messages, opts = {}) {
 }
 
 module.exports = {
-  goiChat, layCauHinh, LoiNhaCungCap, TIMEOUT_MAC_DINH,
+  goiChat: goiChatCoDuPhong, goiMotDuong, layCauHinh, layCacDuong,
+  LoiNhaCungCap, TIMEOUT_MAC_DINH,
   laThongBaoDichVu, MAU_THONG_BAO_DICH_VU,
 };

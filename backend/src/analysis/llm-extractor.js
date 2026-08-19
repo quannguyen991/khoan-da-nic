@@ -186,7 +186,13 @@ function dungLoiNhac(vanBan, sourceId = 'van_ban', anh = null) {
 async function trichTinHieu(vanBan, opts = {}) {
   try {
     const { messages } = dungLoiNhac(vanBan, opts.sourceId, opts.anh);
-    const tho = await goiChat(messages, opts);
+    /*
+     * ⚠️ `goiChat` NAY TRẢ VỀ CẢ ĐƯỜNG ĐÃ DÙNG, không chỉ nội dung.
+     * Có chuỗi dự phòng (gateway → qwen cục bộ → Gemini), nên đường thật sự trả
+     * lời có thể không phải đường chính. §11: màn kết quả nói với bác "AI chạy ở
+     * đâu", và câu đó phải đúng với lượt này chứ không đúng với cấu hình.
+     */
+    const { noiDung: tho, cauHinh: duongDaDung } = await goiChat(messages, opts);
     const doc = parseJsonLoose(tho);
     if (!doc) {
       /**
@@ -204,7 +210,12 @@ async function trichTinHieu(vanBan, opts = {}) {
       };
     }
     const kq = validateExtraction(doc, opts.sourceId);
-    return { ...kq, aiDaChay: true, loi: null };
+    /*
+     * `noiChayThat` là đường ĐÃ TRẢ LỜI cho lượt này, không phải đường được
+     * cấu hình. Khi đường chính chết và app rơi xuống qwen cục bộ, hai thứ đó
+     * khác nhau — và bác cần biết cái thứ nhất (§11).
+     */
+    return { ...kq, aiDaChay: true, loi: null, noiChayThat: duongDaDung?.noiChay ?? null };
   } catch (e) {
     const ma = e instanceof LoiNhaCungCap ? e.ma : 'AI_NETWORK';
     return { signals: [], rejected: [], aiDaChay: false, loi: ma, chiTiet: e };

@@ -50,7 +50,23 @@ services:
         sync: false
       - key: RISK_LLM_MODEL
         value: gpt-5.4
-      # ── Đường dự phòng: Gemini. Để trống thì bỏ qua. ──
+      # ── Dự phòng 1: qwen trên máy chủ tự vận hành ──
+      #
+      # ⚠️ ĐỨNG TRƯỚC GEMINI DÙ BẮT ÍT HƠN MỘT CA (4/5 so với 5/5).
+      # Nó nhanh hơn Gemini 12 lần (2,4s so với 28,8s) và không báo oan lần nào.
+      # Khi đường chính đã chết, thứ người dùng cần là câu trả lời trong vài
+      # giây — lúc đó bác đang bị thúc chuyển tiền, không phải đang lướt.
+      #
+      # ⚠️ ĐỂ TRỐNG THÌ BỎ QUA HẲN, không tự đoán 127.0.0.1:11434 — đoán sai thì
+      # mỗi lượt hỏng lại tốn thêm một timeout cho máy chủ không tồn tại.
+      #
+      # Máy chủ này phải mở cổng ra mạng riêng (Tailscale). Timeout để 12s: nó
+      # ở trong LAN, đo được 2,4s; quá 12s nghĩa là máy đã tắt, chờ thêm vô ích.
+      - key: LLM_DU_PHONG_BASE
+        sync: false
+      - key: LLM_DU_PHONG_MODEL
+        value: qwen2.5:7b
+      # ── Dự phòng 2: Gemini. Để trống thì bỏ qua. ──
       - key: GEMINI_API_KEY
         sync: false
       # Cho phép bản APK / tên miền khác gọi vào. Để trống nếu chỉ chạy web.
