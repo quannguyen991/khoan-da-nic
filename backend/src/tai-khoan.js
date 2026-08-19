@@ -118,6 +118,68 @@ async function dangKy(kho, { ten, soDienThoai, matKhau, vai = 'nguoi_dung' }, ba
 }
 
 /**
+ * CHỐNG DÒ MẬT KHẨU — BACKOFF LUỸ TIẾN THEO SỐ ĐIỆN THOẠI.
+ *
+ * ══════════ ⚠️ VÌ SAO RATE LIMIT THEO IP KHÔNG ĐỦ ══════════
+ *
+ * ĐO ĐƯỢC 19/8/2026: thử sai 12 lần liên tiếp, không bị chặn lần nào. Giới hạn
+ * tần suất của máy chủ là 30 lượt/phút/IP và dùng CHUNG cho cả nhóm Khoan Proof,
+ * nên với một số điện thoại cụ thể, kẻ tấn công thử được ~43.000 mật khẩu mỗi
+ * ngày. Mật khẩu tối thiểu 6 ký tự — mà `123456` đi qua được — thì danh sách
+ * mật khẩu phổ biến dò xong trong vài phút.
+ *
+ * Và đếm theo IP thì đổi IP là bộ đếm về 0. Đếm theo SỐ ĐIỆN THOẠI thì không.
+ *
+ * ══════════ ⚠️ VÌ SAO KHÔNG KHOÁ CỨNG TÀI KHOẢN ══════════
+ *
+ * "Sai 5 lần thì khoá 15 phút" là cách quen thuộc, và nó mở ra một cửa khác:
+ * kẻ xấu biết số của bác chỉ cần gõ sai 5 lần là bác không đăng nhập được nữa,
+ * lặp lại vô hạn. Với app này, người bị khoá có thể là người đang cần nó nhất.
+ *
+ * Backoff luỹ tiến chặn được máy dò mà không cho ai khoá được ai: bác gõ nhầm
+ * hai ba lần vẫn vào bình thường, còn máy dò thì mỗi lần phải chờ tới một phút.
+ *
+ * ⚠️ ĐẾM CẢ SỐ CHƯA ĐĂNG KÝ. Chỉ đếm số có thật thì thời gian phản hồi khác
+ * nhau giữa hai ca, và chênh lệch đó tự nó nói cho kẻ dò biết số nào đang dùng
+ * Khoan Đã — đúng thứ mà mã lỗi gộp ở dưới sinh ra để giấu.
+ */
+const CHO_SAI = new Map();
+const TRE_GIAY = [0, 0, 2, 5, 15, 30, 60];
+
+function treBaoLau(soLanSai) {
+  return TRE_GIAY[Math.min(soLanSai, TRE_GIAY.length - 1)] * 1000;
+}
+
+function kiemCho(so, bayGio) {
+  const m = CHO_SAI.get(so);
+  if (!m) return;
+  const can = treBaoLau(m.soLanSai);
+  const daCho = bayGio - m.lanCuoi;
+  if (daCho < can) {
+    const e = new LoiTaiKhoan('THU_LAI_SAU');
+    e.giay = Math.ceil((can - daCho) / 1000);
+    throw e;
+  }
+}
+
+function ghiSai(so, bayGio) {
+  const m = CHO_SAI.get(so) || { soLanSai: 0, lanCuoi: 0 };
+  m.soLanSai += 1;
+  m.lanCuoi = bayGio;
+  CHO_SAI.set(so, m);
+  /*
+   * Dọn bản ghi cũ để Map không phình mãi. Một số bị bỏ quên nửa tiếng thì
+   * coi như chưa từng sai — người dùng thật quay lại sau bữa cơm không đáng
+   * phải chờ thêm.
+   */
+  if (CHO_SAI.size > 5000) {
+    for (const [k, v] of CHO_SAI) {
+      if (bayGio - v.lanCuoi > 30 * 60 * 1000) CHO_SAI.delete(k);
+    }
+  }
+}
+
+/**
  * Đăng nhập.
  *
  * ⚠️ MỘT MÃ LỖI DUY NHẤT CHO MỌI CA SAI. Phân biệt "số chưa đăng ký" với "sai
@@ -126,6 +188,7 @@ async function dangKy(kho, { ten, soDienThoai, matKhau, vai = 'nguoi_dung' }, ba
  */
 async function dangNhap(kho, { soDienThoai, matKhau }, bayGio = Date.now()) {
   const so = chuanHoaSo(soDienThoai);
+  kiemCho(so, bayGio);
   const tro = await kho.doc(BANG_SO, so);
   const banGhi = tro ? await kho.doc(BANG, tro.id) : null;
 
@@ -137,15 +200,17 @@ async function dangNhap(kho, { soDienThoai, matKhau }, bayGio = Date.now()) {
   const muoi = banGhi?.muoi ?? 'muoi-gia-de-ton-dung-tung-ay-thoi-gian';
   const thu = bam(matKhau ?? '', muoi);
 
-  if (!banGhi) throw new LoiTaiKhoan('SAI_SO_HOAC_MAT_KHAU');
+  if (!banGhi) { ghiSai(so, bayGio); throw new LoiTaiKhoan('SAI_SO_HOAC_MAT_KHAU'); }
 
   const a = Buffer.from(thu);
   const b = Buffer.from(banGhi.bam);
   if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) {
+    ghiSai(so, bayGio);
     await kho.themAudit({ viec: 'dang_nhap_that_bai', taiKhoanId: banGhi.id, luc: bayGio });
     throw new LoiTaiKhoan('SAI_SO_HOAC_MAT_KHAU');
   }
 
+  CHO_SAI.delete(so);          // vào được rồi thì quên hết lần sai trước
   await kho.themAudit({ viec: 'dang_nhap', taiKhoanId: banGhi.id, luc: bayGio });
   return hoSoCongKhai(banGhi);
 }

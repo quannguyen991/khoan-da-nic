@@ -46,19 +46,31 @@ export function AppMenuModal({
 }: AppMenuModalProps) {
   if (!isOpen) return null;
 
-  const firstContact = familyMembers && familyMembers.length > 0 
-    ? familyMembers[0] 
-    : { name: 'Người thân', phone: '0988888888' };
+  /**
+   * ⚠️ `null` KHI CHƯA CÓ AI — KHÔNG CÓ SỐ DỰ PHÒNG.
+   *
+   * Bản trước rơi về `{ name: 'Người thân', phone: '0988888888' }`. Đó là số
+   * thật của một người lạ, và nút bấm nó tên là "Gọi Cho Con Cháu". Một cụ
+   * đang hoảng bấm vào đấy sẽ gọi cho người không quen — và tin rằng mình vừa
+   * gọi cho con.
+   *
+   * Chưa thêm ai thì đưa bác tới màn thêm người thân, đừng quay số bừa.
+   */
+  const firstContact = familyMembers && familyMembers.length > 0
+    ? familyMembers[0]
+    : null;
 
   const handleCall = () => {
     onClose();
-    window.open(`tel:${firstContact.phone || '0988888888'}`, '_self');
+    if (!firstContact?.phone) { setView('family'); return; }
+    window.open(`tel:${firstContact.phone}`, '_self');
   };
 
   const handleSosSms = () => {
     onClose();
     const text = `[KHOAN ĐÃ - CẦU CỨU] Bố/Mẹ đang gặp tình huống nghi ngờ lừa đảo. Con hãy gọi lại ngay cho bố mẹ nhé!`;
-    window.open(`sms:${firstContact.phone || '0988888888'}?body=${encodeURIComponent(text)}`, '_self');
+    if (!firstContact?.phone) { setView('family'); return; }
+    window.open(`sms:${firstContact.phone}?body=${encodeURIComponent(text)}`, '_self');
   };
 
   const handleGo = (view: ViewState) => {

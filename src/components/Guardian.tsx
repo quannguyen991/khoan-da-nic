@@ -219,11 +219,16 @@ export function GuardianView({
    * Băng thông báo ngay đầu màn là chỗ nói ra. Đừng gỡ nó đi trước khi có đường
    * dữ liệu thật.
    */
-  const [parentData] = useState({
-    name: 'Bố Nguyễn Văn An',
-    phone: '0912 345 678',
-    network: '4G Viettel',
-  });
+  /*
+   * ⚠️ RỖNG, KHÔNG PHẢI DỮ LIỆU MẪU.
+   *
+   * Bản trước để sẵn "Bố Nguyễn Văn An · 0912 345 678 · 4G Viettel". Màn này
+   * dành cho người con đang muốn biết bố mẹ có an toàn không — và ba dòng đó
+   * trả lời câu hỏi ấy bằng thông tin bịa. Hai băng cảnh báo bên dưới đã nói
+   * "máy của bố mẹ chưa nối vào đây", nhưng một cái tên cụ thể nằm ngay trên
+   * đầu màn thì mạnh hơn mọi lời cải chính đặt ở dưới.
+   */
+  const [parentData] = useState<{ name: string; phone: string; network: string } | null>(null);
 
   // Protection Toggles
   const [rules, setRules] = useState({
@@ -283,6 +288,12 @@ export function GuardianView({
    * đúng chuyện đã xảy ra: cửa sổ soạn tin đã mở, người bấm Gửi là con cháu.
    */
   const sendSafetyReminderToParent = () => {
+    /*
+     * ⚠️ CHƯA NỐI MÁY NÀO THÌ KHÔNG NHẮN ĐI ĐÂU CẢ.
+     * Trước đây chỗ này lấy số từ dữ liệu mẫu — tức bấm "Nhắc bố mẹ" sẽ mở
+     * cửa sổ soạn tin gửi tới một số bịa. Người con tưởng đã nhắc được.
+     */
+    if (!parentData?.phone) return;
     const so = parentData.phone.replace(/\s/g, '');
     const noiDung = tr('Bố/mẹ ơi, có ai gọi hỏi tiền hay hỏi mã thì bố/mẹ cúp máy rồi gọi lại cho con nhé.');
     window.open(`sms:${so}?body=${encodeURIComponent(noiDung)}`, '_self');
@@ -365,9 +376,11 @@ export function GuardianView({
                 </div>
                 <div>
                   <h3 className="font-extrabold text-lg sm:text-xl text-slate-900">
-                    {parentData.name}
+                    {parentData?.name ?? tr('Chưa nối máy nào')}
                   </h3>
-                  <p className="text-[14px] font-semibold text-slate-500">{parentData.phone}</p>
+                  <p className="text-[14px] font-semibold text-slate-500">
+                    {parentData?.phone ?? tr('Thêm máy của bố mẹ để theo dõi')}
+                  </p>
                   {/*
                     ⚠️ §4.1 CẤM TUYỆT ĐỐI nhãn "An toàn" / "Safe". Bản trước gắn
                     huy hiệu xanh "Đang an toàn" ngay dưới tên bố mẹ, trong khi
@@ -402,7 +415,8 @@ export function GuardianView({
           {/* Quick Action Buttons */}
           <div className="grid grid-cols-3 gap-2.5 pt-4 border-t border-slate-100">
             <a
-              href={`tel:${parentData.phone.replace(/\s/g, '')}`}
+              href={parentData?.phone ? `tel:${parentData.phone.replace(/\s/g, '')}` : undefined}
+              aria-disabled={!parentData?.phone}
               className="py-2.5 px-3 bg-slate-900 hover:bg-slate-800 active:scale-95 text-white rounded-xl font-bold text-[14px] flex items-center justify-center gap-1.5 transition-transform"
             >
               <Phone size={14} className="text-sky-400" />

@@ -60,7 +60,12 @@ export function FloatingQuickAccess({
 
   const primaryContact = familyMembers && familyMembers.length > 0
     ? familyMembers[0]
-    : { name: 'Con cái', phone: '0988888888' };
+    /*
+     * ⚠️ `null`, KHÔNG PHẢI MỘT SỐ MẶC ĐỊNH. Trước đây chỗ này rơi về
+     * '0988888888' — số thật của một người lạ — và nút gọi nó nằm trong lối
+     * tắt khẩn cấp. Chưa thêm người thân thì đưa bác đi thêm, đừng quay số bừa.
+     */
+    : null;
 
   // Sync permission to localStorage
   useEffect(() => {
@@ -364,7 +369,12 @@ export function FloatingQuickAccess({
 
   const handleCallClick = () => {
     setIsMenuOpen(false);
-    window.location.href = `tel:${primaryContact.phone || '0988888888'}`;
+    /*
+     * ⚠️ CHƯA CÓ NGƯỜI THÂN THÌ ĐI THÊM, ĐỪNG QUAY SỐ BỪA.
+     * Chỗ này từng rơi về '0988888888' — số thật của một người lạ.
+     */
+    if (!primaryContact?.phone) { setView('family'); return; }
+    window.location.href = `tel:${primaryContact.phone}`;
   };
 
   // If user clicks floating ball but has not granted overlay permission yet

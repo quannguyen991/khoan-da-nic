@@ -35,3 +35,17 @@ android/build/
 android/.gradle/
 android/local.properties
 android/capacitor-cordova-android-plugins/build/
+
+# ⚠️ KHO DỮ LIỆU CỦA MÁY CHỦ — TUYỆT ĐỐI KHÔNG ĐẨY LÊN.
+#
+# `backend/.du-lieu/` là SQLite chứa TÀI KHOẢN THẬT: số điện thoại, băm mật
+# khẩu, muối, nhật ký audit, vòng tròn gia đình. Nó bị lọt vào một commit ngày
+# 19/8/2026 (dữ liệu thử lúc kiểm bảo mật) và đã gỡ ra ngay.
+#
+# Băm scrypt không đọc ngược ra mật khẩu, nhưng một tệp như thế nằm trong lịch
+# sử git công khai là danh sách số điện thoại người cao tuổi đang dùng app
+# chống lừa đảo — đúng danh sách kẻ lừa đảo muốn có nhất.
+backend/.du-lieu/
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal

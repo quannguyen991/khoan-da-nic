@@ -723,10 +723,23 @@ export default function App() {
         return JSON.parse(saved);
       } catch (e) {}
     }
-    return [
-      { id: 1, name: 'Anh Nam (Con trai)', phone: '0988888888', relation: 'Con trai', avatar: '' },
-      { id: 2, name: 'Chị Linh (Con gái)', phone: '0977777777', relation: 'Con gái', avatar: '' }
-    ];
+    /**
+     * ⚠️ DANH SÁCH RỖNG. TRƯỚC ĐÂY Ở ĐÂY CÓ HAI NGƯỜI BỊA, KÈM SỐ ĐIỆN THOẠI THẬT.
+     *
+     * Bản trước dựng sẵn "Anh Nam (Con trai) — 0988888888" và "Chị Linh (Con
+     * gái) — 0977777777" cho MỌI máy vừa cài app. Hai số đó là số thật của
+     * người nào đó, và nút gọi chúng nằm ngay trang chủ, tên là "Gọi con cái".
+     *
+     * Hệ quả không phải là một danh sách mẫu trông cho đẹp. Nó là: một cụ đang
+     * bị kẻ lừa đảo thúc, hoảng, bấm "Gọi con cái" — và máy quay số cho một
+     * người lạ. Cụ tưởng đang gọi con mình. Người lạ nhận một cuộc gọi cầu cứu
+     * từ người không quen. Không ai trong hai người hiểu chuyện gì đang xảy ra.
+     *
+     * ⚠️ ĐỪNG ĐẶT LẠI DỮ LIỆU MẪU Ở ĐÂY, kể cả số "trông có vẻ giả" như
+     * 0000000000. Màn Vòng tròn gia đình đã có trạng thái rỗng tử tế, và một
+     * danh sách rỗng là một lời khai TRUNG THỰC: bác chưa thêm ai cả.
+     */
+    return [];
   });
 
   /**
@@ -2432,16 +2445,22 @@ function FamilyView({
   const emergencyList = EMERGENCY_NUMBERS[lang] || EMERGENCY_NUMBERS['vi'];
   const topEmergencies = emergencyList.slice(0, 4);
 
+  /**
+   * ⚠️ KHÔNG CÓ SỐ DỰ PHÒNG. Trước đây thiếu số thì rơi về '0988888888' —
+   * nghĩa là kể cả khi bác đã xoá hết danh bạ, nút gọi vẫn quay số cho một
+   * người lạ. Thà không làm gì còn hơn gọi nhầm người trong lúc khẩn cấp.
+   */
   const handleCall = (phone?: string) => {
-    const phoneNumber = phone || '0988888888';
-    window.open(`tel:${phoneNumber}`, '_self');
+    if (!phone || !phone.trim()) return;
+    window.open(`tel:${phone.trim()}`, '_self');
   };
 
   const handleSms = (member: any) => {
     const text = lang === 'en'
       ? `[WAIT A MOMENT - SOS] I just encountered a suspicious scam situation. Please call me back right away!`
       : `[KHOAN ĐÃ - CẦU CỨU] Bố/Mẹ vừa gặp tình huống nghi vấn lừa đảo. Con gọi lại kiểm tra giúp bố/mẹ nhé!`;
-    window.open(`sms:${member.phone || '0988888888'}?body=${encodeURIComponent(text)}`, '_self');
+    if (!member?.phone || !String(member.phone).trim()) return;
+    window.open(`sms:${String(member.phone).trim()}?body=${encodeURIComponent(text)}`, '_self');
   };
 
   const handleDeleteMember = (id: number) => {
@@ -3765,7 +3784,18 @@ function ProfileView({ setView, t, isLoggedIn, setIsLoggedIn }: { setView: (v: V
                </div>
             </div>
             <div className="flex-1">
-              <h3 className="font-extrabold text-[#1e1b4b] text-[22px] mb-1">Nguyễn Văn An</h3>
+              {/*
+                ⚠️ KHÔNG DỰNG SẴN MỘT CÁI TÊN. Bản trước hiện cứng "Nguyễn Văn
+                An" cho mọi máy — bác mở màn hồ sơ và thấy tên người lạ ở chỗ
+                đáng lẽ là tên mình. Với người cao tuổi, chuyện đó không đọc ra
+                là "dữ liệu mẫu"; nó đọc ra là máy đang nhầm mình với ai khác.
+
+                Chưa có tên thì nói chưa có. Ô nhập tên nằm ngay trong màn Tài
+                khoản bên dưới.
+              */}
+              <h3 className="font-extrabold text-[#1e1b4b] text-[22px] mb-1">
+                {t("Bác chưa đặt tên")}
+              </h3>
               <div className="inline-flex items-center gap-1.5 bg-[#f3e8ff] text-[#7e22ce] px-3 py-1.5 rounded-lg text-[14px] font-bold">
                  <Lock size={14} /> {t("Thiết bị hiện tại")}
               </div>

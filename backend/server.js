@@ -123,6 +123,31 @@ app.use((req, res, next) => {
   res.setHeader('x-frame-options', 'DENY');
   res.setHeader('referrer-policy', 'no-referrer');
   res.setHeader('content-security-policy', CSP);
+
+  /*
+   * ⚠️ HSTS — CHỈ KHI CHẠY THẬT, VÀ ĐÂY LÀ LÝ DO PHẢI CÓ ĐIỀU KIỆN.
+   *
+   * Header này bảo trình duyệt "từ nay chỉ nói chuyện với tên miền này qua
+   * HTTPS" và nhớ trong một năm. Gửi nó từ máy dev chạy `http://localhost` là
+   * tự khoá chính mình: trình duyệt sẽ từ chối mọi lần mở localhost sau đó,
+   * kể cả của dự án khác cùng cổng, và gỡ ra phải vào tận trang cấu hình nội
+   * bộ của trình duyệt.
+   *
+   * Với app này HSTS không phải trang trí: bản APK gọi sang máy chủ qua mạng
+   * di động ở nơi công cộng, và một lần bị hạ cấp xuống http là toàn bộ nội
+   * dung tin nhắn bác gửi đi kiểm nằm trần trên đường truyền.
+   */
+  if (process.env.NODE_ENV === 'production') {
+    res.setHeader('strict-transport-security', 'max-age=31536000; includeSubDomains');
+  }
+
+  /*
+   * Máy chủ này không cần camera, micro, vị trí hay cảm biến nào. Khai ra để
+   * nếu có ngày một tệp tĩnh bị chèn mã lạ, nó cũng không xin được những thứ đó.
+   */
+  res.setHeader('permissions-policy',
+    'camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()');
+
   next();
 });
 
@@ -540,7 +565,17 @@ const taiKhoan = (fn) => async (req, res) => {
     return res.json(await fn(req));
   } catch (e) {
     if (e instanceof TK.LoiTaiKhoan) {
-      // 401 cho ca sai thông tin đăng nhập, 400 cho ca đầu vào hỏng.
+      /*
+       * 429 cho ca phải chờ, 401 cho ca sai thông tin, 400 cho ca đầu vào hỏng.
+       *
+       * ⚠️ `THU_LAI_SAU` PHẢI LÀ 429, KHÔNG PHẢI 400. Bốn trăm nghĩa là "bác
+       * gửi sai", và giao diện sẽ hiện một câu kiểu "dữ liệu không hợp lệ" cho
+       * một người vừa gõ đúng mọi thứ, chỉ hơi vội. Kèm `giay` để màn hình nói
+       * được điều duy nhất có ích lúc đó: chờ bao lâu nữa.
+       */
+      if (e.ma === 'THU_LAI_SAU') {
+        return res.status(429).json({ maLoi: e.ma, giay: e.giay ?? 5 });
+      }
       const http = e.ma === 'SAI_SO_HOAC_MAT_KHAU' || e.ma === 'SAI_MAT_KHAU_CU' ? 401 : 400;
       return res.status(http).json({ maLoi: e.ma });
     }
