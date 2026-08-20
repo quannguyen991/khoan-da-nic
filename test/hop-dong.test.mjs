@@ -1039,3 +1039,47 @@ test('§6.7 · mô học vừa nghĩ vừa trả lời: tắt nghĩ thì không 
   assert.equal(nenTatSuyNghi('gpt-5.4', { LLM_TAT_SUY_NGHI: '1' }), true);
   assert.equal(nenTatSuyNghi('qwen3.7-flash', { LLM_TAT_SUY_NGHI: '0' }), false);
 });
+
+/**
+ * GATEWAY THỨ HAI PHẢI VÀO CHUỖI — VÀ PHẢI KHAI THẬT LÀ ĐƯỜNG RA BÊN THỨ BA.
+ *
+ * Ngày 20/8/2026 cả chuỗi trên bản chạy thật chết cùng lúc: gateway chính
+ * không hồi đáp (6 lượt dừng đúng ở trần chờ), Gemini trả 429 hết hạn mức.
+ * Một nhà cung cấp chết là chuyện bình thường; chuỗi chỉ có một gateway thì
+ * ngày đó tầng AI của app chết theo.
+ */
+test('§6.7 · gateway thứ hai vào chuỗi, vẫn khai là đường ra bên thứ ba', () => {
+  const { layCacDuong } = require(path.join(GOC, 'backend', 'src', 'ai', 'fable-client.js'));
+  const duong = layCacDuong({
+    LLM_API_BASE: 'https://mot.test/v1', LLM_API_KEY: 'a', RISK_LLM_MODEL: 'gpt-5.4',
+    LLM_API_BASE2: 'https://hai.test/v1', LLM_API_KEY2: 'b', RISK_LLM_MODEL2: 'glm-5.2',
+    GEMINI_API_KEY: 'c',
+  });
+
+  assert.equal(duong.length, 3, 'phải có đủ ba đường: chính → gateway 2 → Gemini');
+  assert.equal(duong[0].base, 'https://mot.test/v1');
+  assert.equal(duong[1].base, 'https://hai.test/v1', 'gateway 2 phải đứng TRƯỚC Gemini');
+  assert.equal(duong[2].noiChay, 'gemini');
+
+  /*
+   * ⚠️ §11 — KHÔNG ĐẶT TÊN KHÁC CHO SANG. Nội dung của bác vẫn rời khỏi máy
+   * đi sang một bên thứ ba; đường thứ hai không làm điều đó khác đi một chút nào.
+   * `/api/suc-khoe` đọc `noiChay` để nói với bác AI chạy ở đâu.
+   */
+  assert.equal(duong[1].noiChay, 'gateway',
+    'gateway 2 khai `' + duong[1].noiChay + '` — phải là `gateway`, nội dung vẫn ra bên thứ ba');
+
+  // Trần riêng, không thừa trần chặt của đường chính (cùng bài học với đường cuối).
+  const duong2 = layCacDuong({
+    LLM_API_BASE: 'https://mot.test/v1', LLM_API_KEY: 'a',
+    LLM_API_BASE2: 'https://hai.test/v1', LLM_API_KEY2: 'b', RISK_LLM_MODEL2: 'glm-5.2',
+    LLM_TIMEOUT_MS: '8000',
+  });
+  assert.equal(duong2[0].timeout, 8_000);
+  assert.ok(duong2[1].timeout > 8_000,
+    `gateway 2 đang thừa trần của đường chính (${duong2[1].timeout}ms) — chính hỏng thì nó hỏng theo`);
+
+  // Model họ vừa nghĩ vừa trả lời ở đường 2 cũng phải được tắt nghĩ.
+  assert.equal(duong[1].tatSuyNghi, true, 'glm-5.2 ở đường 2 phải tắt phần nghĩ');
+  assert.equal(duong[1].mucSuyLuan, undefined, 'đường 2 tắt nghĩ nhưng vẫn gửi reasoning_effort');
+});

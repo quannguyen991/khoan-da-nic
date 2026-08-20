@@ -923,8 +923,10 @@ app.get('/api/suc-khoe', (req, res) => {
      * vẫn là một khoá đã bắt đầu rò.
      */
     bienDaDat: Object.fromEntries(
-      ['LLM_API_BASE', 'LLM_API_KEY', 'RISK_LLM_MODEL', 'GEMINI_API_KEY',
-       'LLM_DU_PHONG_BASE', 'LLM_DU_PHONG_MODEL', 'LLM_TIMEOUT_MS', 'NODE_ENV']
+      ['LLM_API_BASE', 'LLM_API_KEY', 'RISK_LLM_MODEL',
+       'LLM_API_BASE2', 'LLM_API_KEY2', 'RISK_LLM_MODEL2',
+       'GEMINI_API_KEY', 'LLM_DU_PHONG_BASE', 'LLM_DU_PHONG_MODEL',
+       'LLM_TIMEOUT_MS', 'NODE_ENV']
         .map((k) => [k, Boolean(process.env[k])]),
     ),
     /*

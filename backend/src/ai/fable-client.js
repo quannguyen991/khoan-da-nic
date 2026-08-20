@@ -368,6 +368,43 @@ function layCacDuong(env = process.env) {
   if (chinh.daCauHinh) ds.push(chinh);
 
   /*
+   * ═════ GATEWAY THỨ HAI — CÙNG HẠNG VỚI ĐƯỜNG CHÍNH, KHÁC NHÀ CUNG CẤP ═════
+   *
+   * Vì sao cần: ngày 20/8/2026 gateway chính **ngừng hồi đáp hoàn toàn**. Đo sạch,
+   * không có gì chạy song song: 35,44 · 35,44 · 35,45 · 35,50 · 39,36 giây — sáu
+   * lần dừng đúng ở trần chờ, AI chạy 1/5 lượt. Cùng lúc đó khoá Gemini dưới
+   * đây trả **429 hết hạn mức**. Cả chuỗi không còn đường nào sống.
+   *
+   * Một nhà cung cấp chết là chuyện bình thường. Chuỗi chỉ có một gateway thì
+   * ngày nó chết, tầng AI của app cũng chết theo.
+   *
+   * ⚠️ `noiChay` VẪN LÀ `gateway`, KHÔNG ĐẶT TÊN KHÁC CHO SANG (§11).
+   * Nội dung của bác vẫn rời khỏi máy đi sang một bên thứ ba — đường thứ hai
+   * không làm điều đó khác đi, nên màn hình phải nói y hệt.
+   *
+   * ⚠️ TRẦN CHỜ RIÊNG (`LLM_TIMEOUT_MS2`). Xem bài học ở đường cuối bên dưới:
+   * thừa trần chặt của đường chính là hỏng cả hai đường cùng một lúc.
+   */
+  const base2 = env.LLM_API_BASE2;
+  const key2 = env.LLM_API_KEY2;
+  if (base2 && key2 && !ds.some((d) => d.base === base2)) {
+    const model2 = env.RISK_LLM_MODEL2 || env.LLM_MODEL2;
+    const tat2 = nenTatSuyNghi(model2, env);
+    ds.push({
+      daCauHinh: true,
+      base: base2,
+      key: key2,
+      model: model2,
+      tatSuyNghi: tat2,
+      mucSuyLuan: tat2 ? undefined : (env.LLM_REASONING_EFFORT2 || env.LLM_REASONING_EFFORT || 'low'),
+      noiChay: 'gateway',
+      coThiGiac: env.LLM_KHONG_CO_THI_GIAC2 !== '1',
+      timeout: Number(env.LLM_TIMEOUT_MS2) || TIMEOUT_MAC_DINH,
+      laDuPhong: true,
+    });
+  }
+
+  /*
    * Dự phòng cục bộ: chỉ dựng khi người vận hành khai địa chỉ. Không tự đoán
    * `127.0.0.1:11434` — đoán sai thì mỗi lượt hỏng lại tốn thêm một timeout
    * cho một máy chủ không tồn tại.
