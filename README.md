@@ -1,146 +1,202 @@
 # Khoan Đã
 
-**Trợ lý cảnh giác lừa đảo cho người cao tuổi Việt Nam.**
-Dừng lại trước, kiểm sau, rồi hãy làm.
+**A scam-awareness assistant for older people.**
+Hold on. Verify. Then act.
 
-> Bài dự thi **Intel® Vietnam AI Impact Festival 2026** — bảng AI Changemakers (13–17 tuổi).
+*Khoan Đã* is Vietnamese for "hold on a moment" — the sentence someone needs to
+hear before they transfer their savings to a stranger.
 
----
-
-## Vấn đề
-
-**Giả danh công an là hình thức lừa đảo trực tuyến phổ biến nhất Việt Nam năm
-2025** — theo khảo sát 60.300 người của Hiệp hội An ninh mạng Quốc gia (NCA),
-thực hiện 1–18/12/2025. Kẻ lừa đảo nay dựng cả phòng làm việc giả, mặc đồng phục
-và gọi video để tăng độ tin cậy.
-
-Ba con số nói rõ vì sao cần một công cụ can thiệp **trước** lúc mất tiền:
-
-| Số liệu | Nguồn |
-|---|---|
-| Thiệt hại do lừa đảo trực tuyến **hơn 6.000 tỷ đồng** trong 11 tháng đầu 2025 | Bộ Công an |
-| **Chỉ 32,12%** nạn nhân trình báo cơ quan chức năng; **12,03%** chấp nhận mất, không làm gì | NCA, khảo sát 60.300 người, 12/2025 |
-| Tỷ lệ nạn nhân 2025 là **0,18%** (1/555 người), giảm từ 0,45% năm 2024 | NCA |
-
-Hai phần ba nạn nhân không báo với ai. Nghĩa là **can thiệp sau khi mất tiền gần
-như không xảy ra** — chỉ còn cách chặn ở đúng lúc kẻ lừa đảo đang gọi.
-
-Người cao tuổi dễ bị nhắm vì ba lý do cùng lúc: khoảng cách kỹ năng số, thường
-sống một mình và ít giao tiếp nên dễ tin một giọng nói quan tâm, và kẻ lừa đảo
-tiếp cận bằng đúng giọng điệu người nhà. Ở Mỹ, thiệt hại ở nhóm trên 60 tuổi năm
-2024 là **2,4 tỷ USD, tăng 26,3%** so với năm trước (FTC) — đây không phải vấn đề
-riêng của Việt Nam.
-
-Và cái khó không phải thiếu thông tin cảnh báo — mà là **lúc đang bị gọi, người ta
-không có ai để hỏi trong 60 giây tiếp theo.**
-
-> **Nguồn** *(truy cập 18/8/2026 — nên kiểm lại trước khi nộp, số liệu có thể được
-> cập nhật)*:
-> · [Hiệp hội An ninh mạng Quốc gia — khảo sát an ninh mạng 2025](https://antoanthongtin.vn/tin/nguoi-dung-viet-nam-thiet-hai-hon-6000-ty-dong-do-lua-dao-truc-tuyen-trong-nam-2025)
-> · [Báo Chính phủ — Dự báo 2026: mức độ tinh vi của lừa đảo trực tuyến sẽ tăng](https://baochinhphu.vn/du-bao-nam-2026-muc-do-tinh-vi-cua-cac-hinh-thuc-lua-dao-truc-tuyen-se-tang-102260107101756364.htm)
-> · [VnEconomy — Ngăn chặn lừa đảo tài chính nhắm vào người cao tuổi](https://vneconomy.vn/bao-ve-nguoi-cao-tuoi-truoc-nguy-co-lua-dao-tai-chinh-online.htm)
-
-## Cách giải quyết
-
-Ba đường vào, một bộ luật, và một nguyên tắc không đổi: **app không bao giờ nói
-nó biết nhiều hơn thứ nó thật sự đọc được.**
-
-| Đường vào | Dùng khi |
-|---|---|
-| **Bộ hỏi nhanh 4 nhánh** | Đang áp điện thoại vào tai, không gõ được. Chạm 1 lần, trả lời 2–3 câu CÓ/KHÔNG, ra kết luận trong ~8 giây |
-| **Dán tin nhắn / chia sẻ từ Zalo** | Nhận được tin đáng ngờ |
-| **Chụp ảnh màn hình · quét QR · nói ra** | Không biết gõ lại nội dung |
+Built by **Nguyen Xuan Minh Quan**, 16, Hanoi, Vietnam.
+Vietnamese version of this document: [README.vi.md](README.vi.md)
 
 ---
 
-## Kiến trúc: AI đọc hiểu, luật cứng quyết định
+## The problem
+
+Impersonating the police was the most common online scam in Vietnam in 2025,
+according to a survey of 60,300 people by the National Cyber Security
+Association (NCA), conducted 1–18 December 2025. Scammers now build fake offices,
+wear uniforms, and make video calls to look convincing.
+
+Three numbers explain why a tool has to intervene **before** the money moves:
+
+| Figure | Source |
+|---|---|
+| Over **6,000 billion VND** lost to online scams in the first 11 months of 2025 | Ministry of Public Security |
+| Only **32.12%** of victims reported it to the authorities; **12.03%** accepted the loss and did nothing | NCA, survey of 60,300 people, Dec 2025 |
+| Victim rate in 2025 was **0.18%** (1 in 555), down from 0.45% in 2024 | NCA |
+
+Two thirds of victims tell no one. Intervention after the money is gone barely
+happens — which leaves one moment that matters: while the scammer is still on
+the phone.
+
+Older people are targeted for three reasons at once: a digital skills gap, living
+alone often enough that a caring voice is welcome, and scammers who arrive
+speaking exactly like family.
+
+---
+
+## How it works
+
+A person pastes a message, speaks, or sends a screenshot. The app returns one of
+three levels, the reasons behind it, and **what it could not check**.
+
+### Two layers, and only one of them decides
 
 ```
-Người dùng ──► Tầng luật (CPU, <50ms) ──┬──► đủ rõ  ──► Kết luận ngay, KHÔNG gọi AI
-                                        │
-                                        └──► cần đọc hiểu ──► LLM trích tín hiệu
-                                                                     │
-                                                       Bộ luật quy đổi ra mức
+AI layer          reads the text and raises FLAGS   (present | unknown)
+                  it never returns a score or a level
+        ↓
+Rule engine       the ONLY thing that decides the level
+                  deterministic, offline-capable, testable
 ```
 
-**Vì sao tách làm hai.** Một mô hình ngôn ngữ không được phép là thứ quyết định
-người dùng có mất 50 triệu hay không: nó có thể bịa, và nó có thể bị chính tin
-nhắn của kẻ lừa đảo dụ. Nên AI làm việc nó giỏi nhất — đọc hiểu tiếng Việt đời
-thường, viết tắt, không dấu, lẫn tiếng lóng — còn quyết định cuối cùng đi qua một
-bộ luật **kiểm tra được, giải thích được, và không thể bị dụ bằng câu chữ**.
+The AI extracts signals with evidence quotes. A fixed rule engine turns signals
+into a level. This is not a stylistic choice — it means the verdict can be
+explained, tested, and reproduced, and that a model having a bad day cannot
+invent a risk level or talk itself out of one.
 
-**Và AI là không thể thiếu.** Đo trên bộ 445 mẫu: bỏ tầng AI đi, độ nhạy phát hiện
-rơi từ **67,6% xuống 3,8%**. Không luật nào hay biểu thức chính quy nào đọc được
-một câu người thật viết ra.
+The schema **forbids** the model from returning `riskScore`, `riskLabel`,
+`critical`, `interventionLevel` or `safe`. If a model returns one, validation
+rejects the response.
 
-### Bốn luật bất biến
+### Four rules that never bend
 
-1. **Ba nhãn, không có nhãn thứ tư.** `Nguy hiểm cao` · `Nghi ngờ` ·
-   `Chưa thấy dấu hiệu rủi ro`. **Không có nhãn "An toàn"** — hệ thống không hứa
-   an toàn, nó chỉ nói chưa thấy dấu hiệu *trong thông tin được cung cấp*.
-2. **"Không kiểm được" ≠ "đã kiểm, không thấy gì".** Mỗi kết quả đều mang danh
-   sách `chuaKiem`, hiện **cùng cỡ chữ với nhãn**: chưa nghe được cuộc gọi, không
-   đọc được ảnh, lượt này không có AI đọc…
-3. **Mọi thứ thêm vào chỉ được làm TĂNG cảnh giác.** Trả lời "KHÔNG" trong bộ hỏi
-   nhanh **không trừ điểm** — nó nghĩa là "chưa thấy dấu hiệu này", không phải
-   bằng chứng vắng mặt.
-4. **Luôn có lối ra.** Kể cả ở màn khẩn cấp, luôn có nút *"Tôi ổn, không có gì
-   nguy hiểm"* — báo động giả mà không thoát được thì người ta gỡ ứng dụng.
+1. **Three levels, fixed wording.** `High risk` · `Suspicious` · `No clear risk
+   signals found`. There is deliberately **no "Safe" label**, in any language.
+   The system reports what it did not find in what it was given; it does not
+   promise safety.
+2. **Codes, not sentences.** The engine emits enum codes; display text is looked
+   up in a catalog. Switching language cannot change a verdict.
+3. **"Could not check" ≠ "checked, found nothing."** If the image was unreadable,
+   the domain did not resolve, or no AI ran, the screen says so at the same text
+   size as the verdict.
+4. **Anything clever may only raise caution, never lower it.**
 
 ---
 
-## Chạy AI ngay trên máy
+## Features
 
-App nói giao thức OpenAI nên cắm thẳng vào **Ollama / llama.cpp / LM Studio**:
+### Checking
+- **Type, speak, or send a photo.** Speech recognition runs on the device where
+  the platform supports it; the app says which one it used.
+- **Message capture (Android).** With permission, the app reads new message
+  notifications so one tap checks them instead of copying by hand. Content stays
+  on the phone and is only sent for checking when the user taps.
+- **QR and link inspection.** Domains are analysed deterministically — the app
+  never opens a link on the user's behalf.
+- **Quick questions.** While a call is happening, a short structured set of
+  questions gathers signals without needing the message text.
 
-```bash
-LLM_CUC_BO=1
-LLM_CUC_BO_MODEL=qwen2.5:3b-instruct-q4_K_M
-```
+### Intervening
+The verdict decides the **label**; a separate ladder decides the **screen**:
 
-Khi đó **nội dung tin nhắn không rời khỏi máy**, và màn kết quả tự hiện dòng
-🔒 *"AI chạy ngay trên máy này"*. Xem [HUONG-DAN-AI-CUC-BO.md](HUONG-DAN-AI-CUC-BO.md).
-
-Mô hình 3B lượng tử hoá 4-bit được chọn **vì** GPU đích chỉ có 4 GB VRAM — ràng
-buộc phần cứng quyết định lựa chọn mô hình, không phải ngược lại.
-
-## Tiêu thụ năng lượng
-
-Thiết kế để **giảm** số lượt gọi AI, không phải tăng:
-
-- Tầng luật trả kết quả dưới 50ms; khi tín hiệu đã đủ rõ, máy chủ **kết luận
-  luôn và không gọi mô hình lượt nào**.
-- Hạ mức suy luận: token sinh ra giảm từ ~1.796 xuống ~427 mỗi lượt (−76%), thời
-  gian từ 23,5s xuống 6,7s — mà độ nhạy còn **tăng** từ 62,5% lên 71,9%.
-- **Không huấn luyện mô hình mới.**
-
-## Quyền riêng tư
-
-- Máy chủ **không lưu nội dung thô**. Bản ghi vụ việc chỉ mang thực thể đã trích.
-- CSP `default-src 'self'` — không một ảnh, font hay lượt gọi nào ra máy chủ ngoài.
-- Không đồng bộ tài khoản mặc định.
-- ⚠️ **Một ngoại lệ được khai báo thẳng trong app:** nút nói dùng Web Speech API
-  của trình duyệt, và API đó gửi âm thanh lên máy chủ của hãng trình duyệt. Màn
-  ghi âm nói rõ điều này thay vì im lặng.
-
-## Tiếp cận
-
-Sàn cứng, có test chặn: vùng chạm ≥52px (nút chính ≥56px), cỡ chữ ≥14px ở cả ba
-bậc 15/17/20px, tương phản 4,5:1, không cắt dấu tiếng Việt, nhãn ARIA cho nút chỉ
-có biểu tượng, chạy được khi mất mạng.
-
----
-
-## Công nghệ
-
-| Tầng | Dùng gì |
+| Intervention | What it does |
 |---|---|
-| Giao diện | React 19 · TypeScript (strict) · Vite 6 · Tailwind 4 · PWA + service worker |
-| Máy chủ | Node · Express · bộ luật thuần, không phụ thuộc mạng |
-| AI | LLM qua giao thức OpenAI — chạy cục bộ (Ollama) hoặc qua gateway |
-| Đo lường | Bộ eval 445 mẫu, 25 test tự động |
+| `TRUST_RECEIPT` | Shows what was checked, what was not, and why |
+| `VERIFY_PATH` | A safe way to verify, e.g. call the number on the back of the card |
+| `PAUSE_60S` | A one-minute countdown with the family call button in reach |
+| `PROTECTED_CRITICAL` | Strips navigation for genuinely critical combinations |
+| `RECOVERY` | Steps that improve the chances of a case being handled |
 
-## Chạy thử
+Every screen, including the critical one, keeps an "I'm fine, nothing dangerous"
+exit. A false alarm the user cannot escape is how an app gets uninstalled.
+
+### Protecting, on Android
+- **Overlay warning banner.** With the system overlay permission, a strip appears
+  over whatever is on screen — including the call screen. It never covers the
+  full screen, never takes input outside its own two buttons, and always has a
+  dismiss button.
+- **Pinned notification.** One tap into the app, surviving reboot.
+- **Long-call reminder.** Police-impersonation calls run for hours. After 25
+  minutes the app asks one question: is someone telling you to transfer money?
+  It does **not** listen to, record, or identify the call — it counts time.
+- **Family password.** One phrase only the family knows, agreed out loud. Voices
+  and faces can be faked; this cannot. The app stores only a hint, never the
+  phrase, because the phone itself may be compromised.
+- **Device check.** Flags side-loaded installs and unexpected accessibility
+  services — two things present in most remote-control scams.
+
+### For family
+A guardian view lets adult children connect, receive alerts, and send a safety
+reminder. Accounts link people; they are not required to check a message.
+
+### Learning
+A lesson module teaches the tactics rather than listing individual cases, plus
+verified emergency numbers.
+
+---
+
+## Measurements
+
+Numbers below are measured, not targets. They come from the test suite in this
+repository and can be reproduced with `npm test`.
+
+| Layer | Catches | False alarms | Set |
+|---|---|---|---|
+| Rule engine, Vietnamese | **80%** | **0%** | 100 scenarios (49 scam / 51 benign) |
+| Rule engine, English | **70%** | **0%** | 200 scenarios (100 / 100) |
+
+Both benign halves are written to be *hard*: 60–68% of them contain money
+amounts, urgency words, bank names, links or one-time-code language. A benign set
+of "the cat has been fed" would make a 0% false-alarm rate meaningless.
+
+The two error types are not priced the same. Missing a scam costs one warning;
+a false alarm teaches someone to ignore the next warning, including the correct
+one. The thresholds are asymmetric on purpose.
+
+Typical response times on the hosted demo: a clear impersonation scam returns in
+**under one second** from the rule layer alone, without calling AI. Ambiguous
+messages that need the AI layer return in about **3 seconds**.
+
+**50 contract tests** guard the invariants — the three labels, the absence of a
+fourth, the touch-target and text-size floors, the security headers, and the
+rule that every user-facing string comes from the translation catalog.
+
+---
+
+## Privacy
+
+- Message content is not stored on the server. Case records keep extracted
+  entities (phone numbers, domains, impersonated organisations) — enough to link
+  a case, not enough to reconstruct a message.
+- The app states where the AI ran, every time. If no AI ran, it says so.
+- No third-party fonts, analytics, or trackers. The content security policy keeps
+  `connect-src`, `font-src` and `img-src` on the app's own origin.
+- Device-state checks send three numbers, never a list of installed apps.
+
+---
+
+## Accessibility
+
+Floors are enforced in CSS that loads last and are guarded by tests:
+
+| Item | Floor |
+|---|---|
+| Touch targets | 52px, primary buttons 56px |
+| Text size | 14px at the smallest of three text scales |
+| Text contrast | 4.5:1 |
+| Non-text contrast | 3:1 |
+
+Vietnamese is roughly 30% longer than English and stacks diacritics above and
+below the line, so buttons are never sized to fit their label exactly and line
+height never drops below 1.25. Target: WCAG 2.2 AA.
+
+---
+
+## Technology
+
+| Layer | Stack |
+|---|---|
+| Frontend | React 19 · TypeScript (strict) · Vite 6 · Tailwind 4 · PWA + service worker |
+| Backend | Node · Express · pure rule engine with no network dependency |
+| Mobile | Capacitor + native Android (Java) for overlay, notifications, call state |
+| AI | Any OpenAI-compatible model — local via Ollama, or a hosted gateway |
+| Testing | 50 contract tests · 300 labelled scenarios across two languages |
+
+---
+
+## Running it
 
 ```bash
 npm install
@@ -151,43 +207,57 @@ npm run dev
 npm test
 ```
 
-## Cấu trúc
+Building the Android app:
 
-| Đường dẫn | Vai trò |
+```bash
+npm run build && npx cap sync android
+```
+
+---
+
+## Repository map
+
+| Path | Role |
 |---|---|
-| `backend/src/analysis/decision-engine.js` | **Bộ luật duy nhất** ra mức rủi ro |
-| `backend/src/analysis/critical-overrides.js` | 10 tổ hợp buộc vào chế độ bảo vệ |
-| `backend/src/bo-hoi-nhanh.js` | Bộ hỏi nhanh lúc đang bị gọi |
-| `src/catalog.ts` | Mã → chữ hiển thị (đổi ngôn ngữ không đổi được kết luận) |
-| `src/config/ma-hop-dong.json` | Hợp đồng mã giữa hai nửa |
-| `test/hop-dong.test.mjs` | Hàng rào cho các luật bất biến |
+| `backend/src/analysis/decision-engine.js` | The single place a risk level is decided |
+| `backend/src/analysis/critical-overrides.js` | Combinations that force protected mode |
+| `backend/src/analysis/locale-packs/` | Signal patterns per language |
+| `backend/src/analysis/context-builder.js` | Sentence segmentation and speech-act classification |
+| `src/catalog.ts` | Codes → display text, so language cannot change a verdict |
+| `test/hop-dong.test.mjs` | Guards for every invariant above |
+| `test/du-lieu/` | Labelled scenario sets |
+| `android/app/src/main/java/vn/khoanda/app/` | Native Android layer |
 
-## Mục tiêu Phát triển Bền vững
+---
 
-Khoan Đã hướng tới bốn chỉ tiêu SDG của Liên Hợp Quốc:
+## Sustainable Development Goals
 
-| SDG | Chỉ tiêu | Liên hệ |
+| SDG | Target | Link |
 |---|---|---|
-| **16** Hoà bình, công lý | 16.4 giảm dòng tiền bất hợp pháp và tội phạm có tổ chức | Lừa đảo trực tuyến ở Việt Nam do các nhóm có tổ chức thực hiện; chặn ở phía nạn nhân là cắt dòng tiền tại nguồn |
-| **10** Giảm bất bình đẳng | 10.2 hoà nhập cho mọi lứa tuổi | Người cao tuổi bị đẩy ra khỏi thế giới số vì sợ bị lừa; app hạ rào cản thay vì bảo họ tránh xa |
-| **3** Sức khoẻ và hạnh phúc | 3.4 sức khoẻ tinh thần | Mất tiền tiết kiệm cả đời gây sang chấn kéo dài — hậu quả không dừng ở tiền |
-| **4** Giáo dục chất lượng | 4.4 kỹ năng số | Module Bài học dạy nhận diện chiêu trò, không chỉ cảnh báo từng vụ |
+| **16** Peace and justice | 16.4 reduce illicit financial flows and organised crime | Online scams in Vietnam are run by organised groups; stopping the transfer cuts the flow at its source |
+| **10** Reduced inequalities | 10.2 inclusion regardless of age | Older people are pushed out of digital life by fear of being scammed; this lowers the barrier instead of telling them to stay away |
+| **3** Good health and well-being | 3.4 mental health | Losing a lifetime of savings causes lasting harm — the damage does not stop at money |
+| **4** Quality education | 4.4 digital skills | The lesson module teaches how tactics work, not just individual warnings |
 
-## Con đường đưa tới người dùng
+---
 
-1. **PWA** — cài từ trình duyệt, không qua cửa hàng ứng dụng, không cần tài khoản.
-2. **Con cháu cài cho bố mẹ** — đây là con đường thật: người cao tuổi hiếm khi tự
-   tìm app, nhưng con cháu tìm hộ. Bảng điều khiển cho con cháu phục vụ đúng việc đó.
-3. **Hội người cao tuổi, tổ dân phố, thư viện phường** — nơi đã có sẵn niềm tin và
-   có người hướng dẫn trực tiếp.
-4. **Mã nguồn mở** — bất kỳ ai cũng kiểm được bộ luật quyết định mức rủi ro. Với
-   một app nói "đừng tin ai", việc tự nó kiểm chứng được là điều kiện cần.
+## Honest limits
 
-Chi phí vận hành gần bằng không khi chạy mô hình cục bộ, nên không phụ thuộc vào
-nguồn tài trợ để tiếp tục sống.
+- The rule engine catches most but not all scams. The remaining cases are the
+  genuinely ambiguous ones — a relative asking for money, a marketplace listing —
+  where reading the text alone is not enough to be sure.
+- The AI layer needs a network connection. Without one, the rule engine still
+  runs and the app says that no AI read the message.
+- The app cannot block calls or bank transfers, and does not claim to. It
+  intervenes with information and time.
+- Nothing here recovers money that has already been sent. The recovery screen
+  lists steps that improve the chances of a case being handled.
 
-## Ghi nhận
+---
 
-Dự án dùng công cụ AI hỗ trợ trong quá trình phát triển. Các quyết định thiết kế
-và ràng buộc an toàn — ba nhãn rủi ro, nguyên tắc "không kiểm được ≠ đã kiểm",
-danh sách câu không được viết — do nhóm đặt ra và được ghi lại trong `CLAUDE.md`.
+## Licence and credits
+
+Statistics are attributed inline to the National Cyber Security Association and
+the Ministry of Public Security. Any warning shown in the app carries its source.
+The app never accuses a specific person of a crime — it reports that a request
+shows signals commonly seen in scams.

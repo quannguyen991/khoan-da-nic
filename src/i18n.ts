@@ -2,6 +2,11 @@ export type Lang = 'vi' | 'en';
 
 export const translations: Record<Lang, Record<string, string>> = {
   vi: {
+    "Kiểm tin nhắn": "Kiểm tin nhắn",
+    "Gọi người nhà": "Gọi người nhà",
+    "Xem đầy đủ": "Xem đầy đủ",
+    "Chế độ siêu đơn giản": "Chế độ siêu đơn giản",
+    "Một màn hình, ba nút to. Bấm được ngay cả khi tay run.": "Một màn hình, ba nút to. Bấm được ngay cả khi tay run.",
     "👮 Giả danh công an": "👮 Giả danh công an",
     "Số lạ tự xưng cán bộ điều tra công an, báo tài khoản của bác liên quan đường dây rửa tiền, yêu cầu chuyển gấp 50 triệu vào tài khoản tạm giữ trong 15 phút.": "Số lạ tự xưng cán bộ điều tra công an, báo tài khoản của bác liên quan đường dây rửa tiền, yêu cầu chuyển gấp 50 triệu vào tài khoản tạm giữ trong 15 phút.",
     "🏦 Giả danh ngân hàng, xin OTP": "🏦 Giả danh ngân hàng, xin OTP",
@@ -753,6 +758,11 @@ export const translations: Record<Lang, Record<string, string>> = {
     "Mở cửa sổ nổi": "Mở cửa sổ nổi",
   },
   en: {
+    "Kiểm tin nhắn": "Check a message",
+    "Gọi người nhà": "Call family",
+    "Xem đầy đủ": "Show the full app",
+    "Chế độ siêu đơn giản": "Super simple mode",
+    "Một màn hình, ba nút to. Bấm được ngay cả khi tay run.": "One screen, three big buttons. Easy to tap even with shaky hands.",
     "👮 Giả danh công an": "👮 Police impersonation",
     "Số lạ tự xưng cán bộ điều tra công an, báo tài khoản của bác liên quan đường dây rửa tiền, yêu cầu chuyển gấp 50 triệu vào tài khoản tạm giữ trong 15 phút.": "An unknown number claims to be a police investigator, says your account is linked to a money-laundering ring, and demands you transfer 50 million to a holding account within 15 minutes.",
     "🏦 Giả danh ngân hàng, xin OTP": "🏦 Fake bank, asks for your OTP",

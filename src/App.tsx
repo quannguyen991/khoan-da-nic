@@ -345,6 +345,28 @@ export default function App() {
     }
   }, []);
 
+  /**
+   * ══════════ CHẾ ĐỘ SIÊU ĐƠN GIẢN ══════════
+   *
+   * Một màn hình, ba nút, không thanh điều hướng, không tin tức, không thẻ nào
+   * khác. Dành cho người chỉ cần đúng một việc: hỏi xem tin này có phải lừa đảo
+   * không, và gọi được cho con cháu.
+   *
+   * ⚠️ ĐÂY KHÔNG PHẢI "BẢN RÚT GỌN CỦA APP" MÀ LÀ MỘT LỐI DÙNG KHÁC.
+   * Mọi thứ bị ẩn đều vẫn chạy: bộ luật y hệt, tầng AI y hệt, ba nhãn y hệt.
+   * Chỉ có số thứ phải nhìn là ít đi. Đừng ai nghĩ tới việc hạ mức cảnh báo hay
+   * bỏ bớt câu `chuaKiem` trong chế độ này — §HĐ luật 3 không có ngoại lệ.
+   *
+   * ⚠️ LUÔN CÓ LỐI RA (§4.6): nút "Xem đầy đủ" ở cuối màn tắt chế độ này ngay.
+   * Người bật nhầm mà không thoát ra được sẽ gỡ ứng dụng.
+   */
+  const [sieuDonGian, setSieuDonGian] = useState<boolean>(
+    () => localStorage.getItem('khoan_da_sieu_don_gian') === '1',
+  );
+  useEffect(() => {
+    localStorage.setItem('khoan_da_sieu_don_gian', sieuDonGian ? '1' : '0');
+  }, [sieuDonGian]);
+
   const [pinnedActionType, setPinnedActionType] = useState<'both' | 'app' | 'danger'>(() => {
     return (localStorage.getItem('pinnedActionType') as 'both' | 'app' | 'danger') || 'both';
   });
@@ -965,7 +987,16 @@ export default function App() {
           
           <AnimatePresence mode="wait">
             {view === 'intro' && <IntroView setView={setView} t={t} setUserRole={setUserRole} />}
-            {view === 'home' && (
+            {view === 'home' && sieuDonGian && (
+              <ManSieuDonGian
+                t={t}
+                setView={setView}
+                familyMembers={familyMembers}
+                onTriggerEmergency={triggerEmergencyAlert}
+                onTat={() => setSieuDonGian(false)}
+              />
+            )}
+            {view === 'home' && !sieuDonGian && (
               <HomeView 
                 setView={setView} 
                 t={t} 
@@ -1012,7 +1043,9 @@ export default function App() {
             {view === 'device_data' && <DeviceDataView setView={setView} t={t} />}
             {view === 'hoi_nhanh' && <HoiNhanhView setView={setView} t={t} lang={lang} onTriggerEmergency={triggerEmergencyAlert} />}
             {view === 'settings' && (
-              <SettingsView 
+              <SettingsView
+                sieuDonGian={sieuDonGian}
+                setSieuDonGian={setSieuDonGian} 
                 setView={setView} 
                 t={t} 
                 lang={lang} 
@@ -1029,7 +1062,30 @@ export default function App() {
             )}
           </AnimatePresence>
 
+          {/*
+            ⚠️ §4.6 — CHẾ ĐỘ SIÊU ĐƠN GIẢN VẪN PHẢI CÓ ĐƯỜNG VỀ.
+            Đo trong trình duyệt 20/8/2026: bấm "Kiểm tin nhắn" sang màn Kiểm
+            tra, và màn đó KHÔNG có nút quay lại — bình thường người dùng bấm
+            thanh điều hướng, mà chế độ này đã ẩn nó. Bác vào là kẹt, không
+            thoát ra được bằng thao tác nào trong app.
+
+            Một thanh, một nút, chữ to. Không dựng lại năm biểu tượng — cả màn
+            chỉ có ba việc, không cần một bản đồ.
+          */}
+          {sieuDonGian && view !== 'home' && (
+            <div className="absolute bottom-0 left-0 w-full px-4 pb-5 pt-3 bg-gradient-to-t from-[#f8f4ff] via-[#f8f4ff] to-transparent z-50">
+              <button
+                onClick={() => setView('home')}
+                className="w-full py-4 rounded-full bg-gradient-to-r from-[#9e76ea] via-[#ad8af0] to-[#9e76ea] text-white font-black text-[18px] flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-transform"
+              >
+                <ChevronLeft size={24} strokeWidth={3} />
+                {t('Quay lại')}
+              </button>
+            </div>
+          )}
+
           {/* Bottom Nav */}
+          {!sieuDonGian && (
           <AnimatePresence>
             {['home', 'search', 'history', 'family', 'profile'].includes(view) && (
               <motion.div
@@ -1043,6 +1099,10 @@ export default function App() {
                   Đây là dạng nhẹ của bẫy đã ghi trong dự án: hiệu ứng không được
                   quyết định VỊ TRÍ hay việc nội dung có hiện hay không. Nó chỉ
                   được làm đẹp thêm cho thứ vốn đã đúng chỗ.
+                */
+                /*
+                  Chế độ siêu đơn giản KHÔNG có thanh điều hướng: năm biểu tượng
+                  là năm thứ phải hiểu, mà cả màn chỉ có ba việc để làm.
                 */
                 initial={isDesktopScreen ? false : { y: 100 }}
                 animate={{ y: 0 }}
@@ -1117,6 +1177,7 @@ export default function App() {
               </motion.div>
             )}
           </AnimatePresence>
+          )}
         </div>
       ) : (
         /* DESKTOP GUARDIAN DASHBOARD (Optimized for Child / Guardian) */
@@ -1237,6 +1298,96 @@ export default function App() {
 }
 
 // --- Home View ---
+/**
+ * ══════════════ MÀN SIÊU ĐƠN GIẢN ══════════════
+ *
+ * Ba việc, ba nút, hết. Không thanh điều hướng, không tin tức, không thẻ phụ.
+ *
+ * ⚠️ ÍT THỨ TRÊN MÀN, KHÔNG PHẢI ÍT BẢO VỆ. Bấm "Kiểm tin nhắn" ở đây đi vào
+ * đúng đường phân tích của màn thường: cùng bộ luật, cùng tầng AI, cùng ba nhãn,
+ * cùng câu `chuaKiem`. §HĐ luật 3 không có ngoại lệ cho chế độ này.
+ *
+ * ⚠️ NÚT CAO 96px, GẤP GẦN HAI LẦN SÀN §4.4 (56px). Người cần chế độ này là
+ * người bấm trượt ở cỡ thường — giữ đúng sàn thì không giải quyết được gì.
+ *
+ * ⚠️ §4.6 — LUÔN CÓ LỐI RA. Dòng "Xem đầy đủ" ở cuối tắt chế độ này ngay lập
+ * tức. Người bật nhầm mà không thoát ra được sẽ gỡ ứng dụng.
+ */
+function ManSieuDonGian({
+  t,
+  setView,
+  familyMembers,
+  onTriggerEmergency,
+  onTat,
+}: {
+  t: any,
+  setView: (v: ViewState) => void,
+  familyMembers?: any[],
+  onTriggerEmergency?: () => void,
+  onTat: () => void,
+}) {
+  const nguoiDauTien = familyMembers && familyMembers.length > 0 ? familyMembers[0] : null;
+
+  const goiNguoiNha = () => {
+    if (nguoiDauTien?.phone) window.open(`tel:${String(nguoiDauTien.phone).replace(/\s/g, '')}`, '_self');
+    else setView('family');
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="flex-1 flex flex-col w-full relative z-10 px-5 pt-6 pb-6 overflow-y-auto"
+    >
+      <div className="flex items-center justify-center gap-2 mb-6 shrink-0">
+        <img src="/logo.webp" alt="" className="w-9 h-9 object-contain" />
+        <span className="text-[22px] font-black text-[#2e1065]">Khoan Đã</span>
+      </div>
+
+      {/*
+        ⚠️ CHIỀU CAO DỰNG BẰNG ĐỆM, KHÔNG BẰNG `min-height`.
+        `public/vung-cham-san.css` khai `min-block-size: max(--touch-target,
+        3.25rem)` cho mọi nút, và tệp đó nạp SAU CÙNG không dùng `@layer` nên
+        thắng mọi utility của Tailwind — kể cả một giá trị LỚN HƠN. Đo 20/8/2026:
+        `min-h-[96px]` bị ép xuống 55px. Đệm thì không đụng vào thuộc tính đó.
+      */}
+      <div className="flex flex-col gap-4 flex-1 justify-center [&>*]:shrink-0">
+        <button
+          onClick={() => setView('search')}
+          className="w-full py-7 rounded-3xl bg-gradient-to-r from-[#9e76ea] via-[#ad8af0] to-[#9e76ea] text-white font-black text-[22px] leading-snug flex items-center justify-center gap-3 px-5 shadow-lg active:scale-95 transition-transform"
+        >
+          <Search size={30} strokeWidth={2.5} className="shrink-0" />
+          <span>{t('Kiểm tin nhắn')}</span>
+        </button>
+
+        <button
+          onClick={goiNguoiNha}
+          className="w-full py-7 rounded-3xl bg-emerald-600 text-white font-black text-[22px] leading-snug flex items-center justify-center gap-3 px-5 shadow-lg active:scale-95 transition-transform"
+        >
+          <PhoneCall size={30} strokeWidth={2.5} className="shrink-0" />
+          <span>{nguoiDauTien?.name ? t('Gọi người nhà') : t('Thêm người thân')}</span>
+        </button>
+
+        <button
+          onClick={() => (onTriggerEmergency ? onTriggerEmergency() : setView('warning'))}
+          className="w-full py-7 rounded-3xl bg-red-600 text-white font-black text-[22px] leading-snug flex items-center justify-center gap-3 px-5 shadow-lg active:scale-95 transition-transform"
+        >
+          <ShieldAlert size={30} strokeWidth={2.5} className="shrink-0" />
+          <span>{t('Khẩn cấp')}</span>
+        </button>
+      </div>
+
+      {/* §4.6 — lối ra, luôn có, không giấu */}
+      <button
+        onClick={onTat}
+        className="w-full min-h-[52px] mt-6 rounded-full border-2 border-purple-200 bg-white text-[#6d28d9] font-bold text-[15px] active:scale-95 transition-transform shrink-0"
+      >
+        {t('Xem đầy đủ')}
+      </button>
+    </motion.div>
+  );
+}
+
 function HomeView({ 
   setView, 
   t, 
@@ -4082,7 +4233,9 @@ function SettingsView({
   togglePinnedNotification,
   showFloatingBall,
   setShowFloatingBall,
-  onOpenOutsideMode
+  onOpenOutsideMode,
+  sieuDonGian,
+  setSieuDonGian
 }: { 
   setView: (view: ViewState) => void, 
   t: any, 
@@ -4096,7 +4249,9 @@ function SettingsView({
   togglePinnedNotification?: () => Promise<void> | void,
   showFloatingBall?: boolean,
   setShowFloatingBall?: (v: boolean) => void,
-  onOpenOutsideMode?: () => void
+  onOpenOutsideMode?: () => void,
+  sieuDonGian?: boolean,
+  setSieuDonGian?: (v: boolean) => void
 }) {
   return (
     <motion.div 
@@ -4201,6 +4356,34 @@ function SettingsView({
           </button>
         )}
       </div>
+
+      {/*
+        ⚠️ ĐẶT NGAY TRÊN CỠ CHỮ, KHÔNG GIẤU DƯỚI ĐÁY.
+        Hai thứ này giải quyết cùng một khó khăn — nhìn không rõ, bấm không trúng
+        — nên người đang tìm cái này thường đang tìm cả cái kia.
+      */}
+      {setSieuDonGian && (
+        <div className="w-full max-w-[360px] bg-white rounded-3xl p-5 shadow-sm border border-[#e9d5ff] mb-6">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex-1">
+              <h3 className="text-[17px] font-black text-[#4c1d95] leading-snug">
+                {t('Chế độ siêu đơn giản')}
+              </h3>
+              <p className="text-[14px] text-slate-600 leading-snug mt-1">
+                {t('Một màn hình, ba nút to. Bấm được ngay cả khi tay run.')}
+              </p>
+            </div>
+            <button
+              onClick={() => setSieuDonGian(!sieuDonGian)}
+              aria-label={t('Chế độ siêu đơn giản')}
+              aria-pressed={!!sieuDonGian}
+              className={`w-14 h-8 rounded-full transition-colors relative p-0.5 shrink-0 ${sieuDonGian ? 'bg-emerald-500' : 'bg-slate-300'}`}
+            >
+              <div className={`w-7 h-7 rounded-full bg-white shadow-md transition-transform ${sieuDonGian ? 'translate-x-6' : 'translate-x-0'}`} />
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="w-full max-w-[360px] bg-white rounded-3xl p-6 shadow-sm border border-[#e9d5ff] mb-6">
         <h3 className="text-xl font-bold text-[#4c1d95] mb-4">{t("Cỡ chữ")}</h3>
