@@ -1083,3 +1083,49 @@ test('§6.7 · gateway thứ hai vào chuỗi, vẫn khai là đường ra bên 
   assert.equal(duong[1].tatSuyNghi, true, 'glm-5.2 ở đường 2 phải tắt phần nghĩ');
   assert.equal(duong[1].mucSuyLuan, undefined, 'đường 2 tắt nghĩ nhưng vẫn gửi reasoning_effort');
 });
+
+/**
+ * CẦU DAO — ĐƯỜNG ĐÃ CHẾT THÌ ĐỪNG XẾP HÀNG CHỜ NÓ MÃI.
+ *
+ * Đo trên bản chạy thật 20/8/2026: gateway chính ngừng hồi đáp, sáu lượt liên
+ * tiếp dừng đúng ở trần chờ 35 giây. Không có cầu dao thì MỌI lượt hỏi AI của
+ * MỌI người đều trả đủ 35 giây đó cho tới khi có người vào sửa cấu hình.
+ */
+test('§6.7 · cầu dao bỏ qua đường hỏng, nhưng không bao giờ bỏ đường cuối cùng', () => {
+  const { locDuongConSong, ghiHong, ghiChay, xoaCauDao } =
+    require(path.join(GOC, 'backend', 'src', 'ai', 'fable-client.js'));
+  xoaCauDao();
+
+  const a = { base: 'https://mot.test/v1', model: 'm1' };
+  const b = { base: 'https://hai.test/v1', model: 'm2' };
+  const t0 = 1_000_000;
+
+  assert.deepEqual(locDuongConSong([a, b], t0), [a, b], 'chưa hỏng thì không bỏ ai');
+
+  // Hai lần hỏng chưa đủ — trắt mạng một hai lượt là chuyện thường.
+  ghiHong(a, t0); ghiHong(a, t0);
+  assert.deepEqual(locDuongConSong([a, b], t0), [a, b], 'hai lần hỏng chưa được ngắt');
+
+  ghiHong(a, t0);
+  assert.deepEqual(locDuongConSong([a, b], t0), [b], 'ba lần hỏng thì phải bỏ qua đường đó');
+
+  /*
+   * ⚠️ ĐƯỜNG CUỐI CÙNG KHÔNG BAO GIỜ BỊ Bỏ. Thà chờ lâu mà có câu trả lời,
+   * còn hơn khai "không có AI" trong khi chưa thử đường nào ở lượt này (§4.3).
+   */
+  assert.deepEqual(locDuongConSong([a], t0), [a], 'đường duy nhất thì vẫn phải thử');
+  ghiHong(b, t0); ghiHong(b, t0); ghiHong(b, t0);
+  assert.deepEqual(locDuongConSong([a, b], t0), [a, b], 'ngắt hết thì dùng lại cả danh sách');
+
+  // Hết thời gian ngắt thì đường đó được thử lại.
+  xoaCauDao();
+  ghiHong(a, t0); ghiHong(a, t0); ghiHong(a, t0);
+  assert.deepEqual(locDuongConSong([a, b], t0 + 4 * 60_000), [b], 'chưa hết 5 phút thì vẫn ngắt');
+  assert.deepEqual(locDuongConSong([a, b], t0 + 6 * 60_000), [a, b], 'hết ngắt thì phải thử lại');
+
+  // Chạy được một lượt là xóa sạch đếm — không để lỗi cũ dồn lại rồi ngắt oan.
+  xoaCauDao();
+  ghiHong(a, t0); ghiHong(a, t0); ghiChay(a); ghiHong(a, t0);
+  assert.deepEqual(locDuongConSong([a, b], t0), [a, b], 'chạy được thì phải xóa đếm hỏng');
+  xoaCauDao();
+});

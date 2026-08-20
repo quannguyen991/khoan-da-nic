@@ -473,14 +473,83 @@ function layCacDuong(env = process.env) {
  * thì đó là lời khai sai về đúng thứ bác cần biết để quyết định có gõ nội dung
  * nhạy cảm vào hay không.
  */
+/**
+ * ══════════ CẦU DAO: ĐƯỜNG ĐÃ CHẾT THÌ ĐỪNG XẾP HÀNG CHỜ NÓ MÃI ══════════
+ *
+ * Đo trên bản chạy thật 20/8/2026: gateway chính ngừng hồi đáp hoàn toàn — sáu
+ * lượt liên tiếp dừng đúng ở trần chờ 35 giây. Không có cầu dao thì **mọi lượt
+ * hỏi AI của mọi người đều trả đủ 35 giây đó**, mãi mãi, cho tới khi có người
+ * vào sửa cấu hình. Bác đang bị thúc chuyển tiền không chờ nổi 35 giây để
+ * biết một nhà cung cấp ở đâu đó đang hỏng.
+ *
+ * Một nhà cung cấp chết là chuyện bình thường, không phải sự cố hiếm. Đây là
+ * sự bền bỉ của mã, không phải chuyện của cấu hình.
+ *
+ * ⚠️ CHỈ NGẮT VÌ LỖI CỦA ĐƯỜNG, KHÔNG NGẮT VÌ LỖI CỦA LỜI NHẮC.
+ * `AI_SCHEMA_INVALID` là lỗi của mình — đổi nhà cung cấp không chữa được, và
+ * đếm nó vào cầu dao là tự cắt hết đường của mình vì một lỗi mình tự gây ra.
+ *
+ * ⚠️ KHÔNG BAO GIỜ Bỏ QUA ĐƯỜNG CUỐI CÙNG CÒN LẠI. Thà chờ lâu mà có câu trả
+ * lời, còn hơn trả về "không có AI" trong khi đường đó có thể đã sống lại.
+ * Cầu dao là để đi nhanh tới đường sống, không phải để từ chối phục vụ.
+ */
+const SO_LAN_HONG_THI_NGAT = 3;
+const NGAT_TRONG_MS = 5 * 60_000;
+
+/** khoá = base + model. Một model hỏng không nên làm tội model khác cùng gateway. */
+const soHong = new Map();
+
+function khoaDuong(c) { return `${c.base}::${c.model}`; }
+
+function dangNgat(c, bayGio) {
+  const t = soHong.get(khoaDuong(c));
+  return Boolean(t && t.ngatToi > bayGio);
+}
+
+function ghiHong(c, bayGio) {
+  const k = khoaDuong(c);
+  const t = soHong.get(k) || { lan: 0, ngatToi: 0 };
+  t.lan += 1;
+  if (t.lan >= SO_LAN_HONG_THI_NGAT) { t.ngatToi = bayGio + NGAT_TRONG_MS; t.lan = 0; }
+  soHong.set(k, t);
+}
+
+function ghiChay(c) { soHong.delete(khoaDuong(c)); }
+
+/** Cho test dọn trạng thái giữa các ca — không dùng trong mã chạy thật. */
+function xoaCauDao() { soHong.clear(); }
+
+/**
+ * Bỏ những đường đang ngắt — nhưng nếu ngắt hết thì trả lại cả danh sách.
+ *
+ * ⚠️ "Không còn đường nào" phải là sự thật ĐO ĐƯỢC Ở LƯỢT NÀY, không phải
+ * kết luận suy ra từ vài phút trước. Trả về `aiDaChay: false` trong khi chưa thử
+ * đường nào là khai không đúng về việc đã kiểm tới đâu — §4.3.
+ *
+ * Hàm thuần để test được mà không cần mạng.
+ */
+function locDuongConSong(duong, bayGio) {
+  const conSong = duong.filter((c) => !dangNgat(c, bayGio));
+  return conSong.length > 0 ? conSong : duong;
+}
+
 async function goiChatCoDuPhong(messages, opts = {}) {
   const duong = layCacDuong(opts.env);
   if (duong.length === 0) throw new LoiNhaCungCap('AI_NOT_CONFIGURED');
 
+  const bayGio = Date.now();
+  /*
+   * Bỏ qua những đường đang ngắt — nhưng nếu ngắt hết thì dùng lại cả danh sách.
+   * "Không còn đường nào" phải là sự thật đo được ở lượt này, không phải kết luận
+   * suy ra từ vài phút trước.
+   */
+  const thuTu = locDuongConSong(duong, bayGio);
+
   let loiCuoi;
-  for (const c of duong) {
+  for (const c of thuTu) {
     try {
       const noiDung = await goiMotDuong(messages, c, opts);
+      ghiChay(c);
       return { noiDung, cauHinh: c };
     } catch (e) {
       loiCuoi = e;
@@ -490,6 +559,7 @@ async function goiChatCoDuPhong(messages, opts = {}) {
        * tiếp chỉ tốn thêm thời gian của một người đang chờ.
        */
       if (e instanceof LoiNhaCungCap && e.ma === 'AI_SCHEMA_INVALID') throw e;
+      ghiHong(c, bayGio);
     }
   }
   throw loiCuoi;
@@ -591,7 +661,7 @@ async function goiMotDuong(messages, cauHinh, opts = {}) {
 }
 
 module.exports = {
-  goiChat: goiChatCoDuPhong, goiMotDuong, layCauHinh, layCacDuong, nenTatSuyNghi,
+  goiChat: goiChatCoDuPhong, goiMotDuong, layCauHinh, layCacDuong, nenTatSuyNghi, xoaCauDao, locDuongConSong, ghiHong, ghiChay,
   LoiNhaCungCap, TIMEOUT_MAC_DINH,
   laThongBaoDichVu, MAU_THONG_BAO_DICH_VU,
 };
