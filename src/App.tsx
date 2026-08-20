@@ -4463,7 +4463,7 @@ function IntroView({
               </p>
             </div>
 
-            <div className="flex-1 w-full flex items-center justify-center min-h-0 max-h-[62vh] my-1">
+            <div className="flex-1 w-full flex items-center justify-center min-h-0 max-h-[70vh] my-1">
               <motion.img 
                 initial={{ scale: 0.95, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
@@ -4471,7 +4471,7 @@ function IntroView({
                 src={slides[currentSlide]?.image} 
                 alt="Mascot illustration" 
                 draggable={false}
-                className="h-[45vh] max-h-[450px] w-auto max-w-[95%] sm:max-w-[480px] object-contain drop-shadow-[0_25px_50px_rgba(109,40,217,0.25)] scale-135 sm:scale-145 pointer-events-none select-none my-auto"
+                className="h-[56vh] max-h-[560px] w-auto max-w-full sm:max-w-[560px] object-contain drop-shadow-[0_25px_50px_rgba(109,40,217,0.25)] scale-150 sm:scale-160 pointer-events-none select-none my-auto"
               />
             </div>
           </motion.div>
