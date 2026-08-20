@@ -110,9 +110,24 @@ export function AppMenuModal({
 
         {/* Modal Sheet - Optimized for Mobile & iPad/Tablet */}
         <motion.div
-          initial={{ y: '100%', opacity: 0.5 }}
+          /*
+            ⚠️ KHÔNG BẮT ĐẦU Ở NGOÀI MÀN HÌNH.
+            `initial={{ y: '100%' }}` đẩy tấm thẻ xuống dưới đáy rồi trông chờ
+            hiệu ứng kéo nó về 0. Hiệu ứng nào không chạy — máy bật "giảm chuyển
+            động", trang không được vẽ, hay WebView chặn requestAnimationFrame —
+            thì tấm thẻ NẰM NGOÀI MÀN HÌNH VĨNH VIỄN. Người dùng bấm Menu tác vụ
+            và thấy không có gì hiện ra, đo trên máy thật 20/8/2026.
+
+            Đây đúng cái bẫy đã ghi trong `App.tsx` cho thanh điều hướng: hiệu
+            ứng không được quyết định VỊ TRÍ hay việc nội dung có hiện hay không.
+            Nó chỉ được làm đẹp thêm cho thứ vốn đã đúng chỗ.
+
+            Giờ chỉ chạy độ mờ và một quãng trượt NGẮN (24px). Hiệu ứng hỏng thì
+            tệ nhất là thẻ hiện ra không mượt — vẫn đọc được, vẫn bấm được.
+          */
+          initial={{ y: 24, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          exit={{ y: '100%', opacity: 0 }}
+          exit={{ y: 24, opacity: 0 }}
           transition={{ type: 'spring', damping: 26, stiffness: 280 }}
           className="relative w-full max-w-lg md:max-w-2xl lg:max-w-3xl bg-[#fbf9fe] rounded-t-[2.5rem] sm:rounded-[2.5rem] shadow-2xl overflow-hidden max-h-[92vh] flex flex-col z-10 border-2 border-purple-200/80"
         >

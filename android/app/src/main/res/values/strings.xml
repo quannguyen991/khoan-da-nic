@@ -63,4 +63,8 @@
     <string name="kenh_cuoc_goi_mo_ta">Nhắc bác khi một cuộc gọi kéo dài bất thường</string>
     <string name="cuoc_goi_thuong_truc_tieu_de">Khoan Đã đang trông chừng cuộc gọi</string>
     <string name="cuoc_goi_thuong_truc_noi_dung">Chỉ đếm thời gian, không nghe nội dung. Chạm để tắt.</string>
+
+    <!-- Sang loc tai cho: KHONG mang nhan rui ro nao, chi moi bac kiem. -->
+    <string name="tb_sang_loc_tieu_de">Có tin nhắn đáng kiểm</string>
+    <string name="tb_sang_loc_noi_dung">Tin nhắn vừa đến có dấu hiệu nên xem lại. Chạm để cháu kiểm giúp bác.</string>
 </resources>

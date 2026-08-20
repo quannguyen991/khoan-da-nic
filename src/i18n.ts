@@ -2,6 +2,10 @@ export type Lang = 'vi' | 'en';
 
 export const translations: Record<Lang, Record<string, string>> = {
   vi: {
+    "Màn hình mô phỏng": "Màn hình mô phỏng",
+    "Đây là màn hình mô phỏng do Khoan Đã vẽ ra để bác xem thử.": "Đây là màn hình mô phỏng do Khoan Đã vẽ ra để bác xem thử.",
+    "Muốn xem dải cảnh báo thật hiện ra ngoài app: vào Cài đặt › Dải cảnh báo › Xem thử một lần.": "Muốn xem dải cảnh báo thật hiện ra ngoài app: vào Cài đặt › Dải cảnh báo › Xem thử một lần.",
+    "Bắn thử một thông báo ra máy": "Bắn thử một thông báo ra máy",
     "Vì sao?": "Vì sao?",
     "Bật theo thứ tự này": "Bật theo thứ tự này",
     "Bật dòng nhắc — để mở app nhanh khi có người gọi.": "Bật dòng nhắc — để mở app nhanh khi có người gọi.",
@@ -766,6 +770,10 @@ export const translations: Record<Lang, Record<string, string>> = {
     "Mở cửa sổ nổi": "Mở cửa sổ nổi",
   },
   en: {
+    "Màn hình mô phỏng": "Simulated screen",
+    "Đây là màn hình mô phỏng do Khoan Đã vẽ ra để bác xem thử.": "This is a simulated screen drawn by Khoan Đã so you can see how it works.",
+    "Muốn xem dải cảnh báo thật hiện ra ngoài app: vào Cài đặt › Dải cảnh báo › Xem thử một lần.": "To see the real banner appear outside the app: Settings › Warning banner › Show me once.",
+    "Bắn thử một thông báo ra máy": "Send a test notification to this phone",
     "Vì sao?": "Why?",
     "Bật theo thứ tự này": "Turn these on in order",
     "Bật dòng nhắc — để mở app nhanh khi có người gọi.": "Turn on the reminder line — to open the app quickly when someone calls.",

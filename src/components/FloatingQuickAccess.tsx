@@ -883,7 +883,7 @@ export function FloatingQuickAccess({
               <div className="flex items-center gap-2">
                 <span className="px-2.5 py-0.5 bg-purple-900/90 border border-purple-400/50 rounded-full text-[14px] text-purple-200 font-extrabold flex items-center gap-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                  {t('Ngoài app')}
+                  {t('Màn hình mô phỏng')}
                 </span>
                 <button
                   onClick={() => setIsOutsideMode(false)}
@@ -891,6 +891,36 @@ export function FloatingQuickAccess({
                 >
                   <X size={14} /> {t('Về app')}
                 </button>
+              </div>
+            </div>
+
+            {/*
+              ══════ NÓI THẲNG ĐÂY LÀ MÔ PHỎNG — §11 ══════
+
+              ⚠️ MÀN NÀY DO KHOAN ĐÃ TỰ VẼ RA, NÓ KHÔNG PHẢI MÀN HÌNH THẬT CỦA MÁY.
+              Đồng hồ, biểu tượng ứng dụng, thanh thông báo — tất cả đều là hình
+              vẽ trong app. Người dùng phát hiện 20/8/2026 và nói đúng: nhãn cũ
+              ghi "Ngoài app" khiến người xem tưởng popup đang thật sự hiện ra
+              ngoài điện thoại.
+
+              Đó là cùng một họ lỗi với "đã gửi cho người thân" khi mới chỉ mở
+              bảng chia sẻ (§11): khai một việc chưa xảy ra.
+
+              ⚠️ POPUP THẬT CÓ TỒN TẠI, và nó chạy bằng `PopupDeManHinh` với
+              quyền `SYSTEM_ALERT_WINDOW`. Nhưng nó KHÔNG phải màn này. Chỗ xem
+              popup thật là Cài đặt › Dải cảnh báo › Xem thử một lần.
+
+              ⚠️ ĐỪNG XOÁ DÒNG NÀY CHO GỌN. Không có nó thì màn mô phỏng lại trở
+              thành một lời khai sai.
+            */}
+            <div className="w-full px-4 pt-2 z-30">
+              <div className="bg-amber-100/95 border border-amber-400 rounded-2xl px-3 py-2">
+                <p className="text-[14px] font-bold text-amber-950 leading-snug">
+                  {t('Đây là màn hình mô phỏng do Khoan Đã vẽ ra để bác xem thử.')}
+                </p>
+                <p className="text-[14px] text-amber-900 leading-snug mt-0.5">
+                  {t('Muốn xem dải cảnh báo thật hiện ra ngoài app: vào Cài đặt › Dải cảnh báo › Xem thử một lần.')}
+                </p>
               </div>
             </div>
 

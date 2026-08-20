@@ -1086,7 +1086,15 @@ export default function App() {
             Một thanh, một nút, chữ to. Không dựng lại năm biểu tượng — cả màn
             chỉ có ba việc, không cần một bản đồ.
           */}
-          {sieuDonGian && view !== 'home' && (
+          {/*
+            ⚠️ ĐỪNG HIỆN THANH NÀY TRÊN MÀN ĐÃ CÓ NÚT CỦA RIÊNG NÓ.
+            Đo trên máy thật 20/8/2026: ở màn "Thêm người thân", thanh "Quay lại"
+            nằm đè lên đúng hai nút "Huỷ" và "Lưu người thân" — người dùng nhìn
+            thấy ba nút chồng nhau và không bấm được nút lưu.
+            Mấy màn dưới đây đều tự có đường ra; thêm một đường nữa là che mất
+            đường sẵn có.
+          */}
+          {sieuDonGian && !['home', 'add_family', 'login', 'warning', 'hoi_nhanh', 'mat_khau_gia_dinh'].includes(view) && (
             <div className="absolute bottom-0 left-0 w-full px-4 pb-5 pt-3 bg-gradient-to-t from-[#f8f4ff] via-[#f8f4ff] to-transparent z-50">
               <button
                 onClick={() => setView('home')}
@@ -4039,73 +4047,28 @@ function NotificationsView({
         </div>
       )}
 
-      {/* 5. Live Interactive Notification Preview Drawer */}
-      <div className="w-full max-w-[420px] bg-slate-900 text-white rounded-[26px] p-5 shadow-lg border border-slate-700 mb-5">
-        <div className="flex items-center justify-between mb-3">
-          <span className="text-[14px] font-extrabold text-purple-300 flex items-center gap-1.5">
-            <Smartphone size={15} />
-            {t("Mô phỏng thanh thông báo trên điện thoại")}
-          </span>
-          <span className="text-[14px] font-bold bg-purple-900/80 text-purple-200 border border-purple-400/40 px-2 py-0.5 rounded-full">
-            {t("Bấm thử trực tiếp")}
-          </span>
-        </div>
+      {/*
+        ══════ ĐÃ BỎ THẺ "MÔ PHỎNG THANH THÔNG BÁO" — 20/8/2026 ══════
 
-        {/* The Notification Item on Lockscreen/Tray */}
-        <div className="bg-white/95 text-slate-900 rounded-2xl p-4 shadow-md border border-purple-200">
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded-lg bg-purple-700 flex items-center justify-center text-white shadow-xs">
-                <ShieldCheck size={14} />
-              </div>
-              <span className="font-black text-[14px] text-purple-950 uppercase tracking-wide">{t("Khoan Đã • Bảo vệ thường trực")}</span>
-            </div>
-            <span className="text-[14px] text-slate-400 font-medium">{t("Bây giờ • Ghim")}</span>
-          </div>
+        Thẻ cũ vẽ lại một thanh thông báo giả ngay trong app: hộp đen to bằng
+        một phần ba màn hình, kèm bốn nút giả không làm gì ngoài việc trông
+        giống thật. Người dùng báo nó "rất rất nhiều chữ" và đúng như vậy.
 
-          <p className="text-[14px] text-slate-700 font-medium leading-relaxed mb-3">
-            {pinnedActionType === 'app'
-              ? t("🛡️ Trợ lý túc trực: Chạm để mở ứng dụng Khoan Đã kiểm tra an toàn bất cứ lúc nào.")
-              : pinnedActionType === 'danger'
-                ? t("🚨 Cảnh giác khẩn cấp: Chạm khi gặp cuộc gọi lạ, bị giục chuyển tiền hoặc đe dọa!")
-                : t("🛡️ Luôn ghim cố định: Chạm [Mở App] để vào kiểm tra hoặc [Nguy hiểm SOS] khi bị đe dọa.")}
-          </p>
+        ⚠️ VÀ NÓ CÒN LÀ MỘT LỜI KHAI SAI — cùng họ với màn "ngoài app": vẽ ra
+        một thứ trông như thông báo thật, trong khi thông báo thật nằm ở thanh
+        thông báo của máy chứ không nằm trong app.
 
-          {/* Action Buttons in Notification */}
-          <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100">
-            <button
-              onClick={() => setView('home')}
-              className="py-2 px-3 bg-purple-100 hover:bg-purple-200 active:scale-95 text-[#5b21b6] font-extrabold rounded-xl text-[14px] flex items-center justify-center gap-1.5 transition-all shadow-xs"
-            >
-              <Home size={14} />
-              <span>{t("🏠 Mở ứng dụng")}</span>
-            </button>
-
-            <button
-              onClick={() => {
-                if (onTriggerEmergency) {
-                  onTriggerEmergency();
-                } else {
-                  setView('warning');
-                }
-              }}
-              className="py-2 px-3 bg-red-600 hover:bg-red-700 active:scale-95 text-white font-extrabold rounded-xl text-[14px] flex items-center justify-center gap-1.5 transition-all shadow-xs shadow-red-500/30"
-            >
-              <ShieldAlert size={14} />
-              <span>{t("🚨 Nguy hiểm SOS")}</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Test Trigger Button */}
-        <button
-          onClick={handleTestNotification}
-          className="w-full mt-3 py-2.5 bg-white/10 hover:bg-white/20 active:scale-95 text-purple-200 font-bold rounded-xl text-[14px] flex items-center justify-center gap-2 border border-white/15 transition-all"
-        >
-          <Bell size={14} className="text-amber-300" />
-          <span>{t("🔔 Bắn thử thông báo thật ra máy")}</span>
-        </button>
-      </div>
+        Giữ lại đúng một nút — nút BẮN THÔNG BÁO THẬT. Nó làm đúng việc mà cả
+        thẻ kia chỉ giả vờ làm, và bác kiểm chứng bằng cách vuốt thanh thông báo
+        của chính máy mình.
+      */}
+      <button
+        onClick={handleTestNotification}
+        className="w-full max-w-[420px] min-h-[56px] mb-5 py-3.5 px-4 bg-white hover:bg-purple-50 active:scale-95 text-[#5b21b6] font-bold rounded-2xl text-[15px] flex items-center justify-center gap-2.5 border-2 border-purple-200 shadow-sm transition-all"
+      >
+        <Bell size={18} className="text-amber-500 shrink-0" />
+        <span>{t('Bắn thử một thông báo ra máy')}</span>
+      </button>
 
       {/* 6. Other Standard Alert Toggles */}
       <div className="w-full max-w-[420px] bg-white rounded-[24px] p-5 shadow-sm border border-[#f3e8ff]">
