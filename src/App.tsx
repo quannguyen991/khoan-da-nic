@@ -4872,6 +4872,8 @@ function SearchView({
                type="button"
                onClick={() => fileInputRef.current?.click()}
                className={`w-9 h-9 flex items-center justify-center rounded-xl transition-colors shrink-0 ${searchImage ? 'bg-[#7e22ce] text-white shadow-xs' : 'text-[#6d28d9] hover:bg-[#f3e8ff]'}`}
+               /* `title` chỉ hiện khi rê chuột — điện thoại không có chuột. */
+               aria-label={t("Chọn ảnh")}
                title={t("Chọn ảnh")}
              >
                <ImageIcon size={18} />
@@ -4886,6 +4888,7 @@ function SearchView({
               />
              <button 
                onClick={() => handleRunSearch()}
+               aria-label={t("Kiểm tra ngay")}
                disabled={isAnalyzing}
                className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#8b5cf6] to-[#7c3aed] flex items-center justify-center text-white shadow-xs active:scale-95 transition-transform shrink-0 disabled:opacity-50"
              >
