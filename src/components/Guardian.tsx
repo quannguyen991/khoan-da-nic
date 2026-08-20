@@ -45,7 +45,15 @@ export function GuardianIntroView({
 }: { 
   setView: (v: ViewState) => void; 
   setUserRole?: (role: 'elder' | 'guardian') => void;
-  t?: (key: string) => string;
+  /*
+   * ⚠️ BẮT BUỘC, KHÔNG PHẢI TUỲ CHỌN.
+   * Khi khai `t?:`, component rơi về `(k) => k` nếu thiếu — mà khoá trong dự án
+   * này LÀ tiếng Việt. Nên quên truyền `t` không gây lỗi, không cảnh báo, và
+   * bản tiếng Việt chạy đúng y như cũ. Đo 20/8/2026: cả màn giới thiệu vai
+   * người con hiện tiếng Việt trong khi phần còn lại của app đã sang tiếng Anh.
+   * Bỏ dấu `?` để trình biên dịch bắt — rẻ hơn mọi hàng rào test.
+   */
+  t: (key: string) => string;
 }) {
   const tr = (k: string) => (t ? t(k) : k);
 
@@ -110,7 +118,7 @@ export function GuardianAuthView({
   /** Gọi khi máy chủ đã công nhận phiên. `null` nghĩa là chưa đăng nhập. */
   onDangNhapXong: (hs: HoSoTaiKhoan | null) => void;
   setUserRole?: (role: 'elder' | 'guardian') => void;
-  t?: (key: string) => string;
+  t: (key: string) => string;
 }) {
   const [phone, setPhone] = useState('');
   const [matKhau, setMatKhau] = useState('');

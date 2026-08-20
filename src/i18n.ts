@@ -2,6 +2,7 @@ export type Lang = 'vi' | 'en';
 
 export const translations: Record<Lang, Record<string, string>> = {
   vi: {
+    "Vai của bác": "Vai của bác",
     "Tài khoản để nối bác với người nhà. Bác kiểm được cả khi chưa đăng nhập.": "Tài khoản để nối bác với người nhà. Bác kiểm được cả khi chưa đăng nhập.",
     "Bóng nổi Khoan Đã": "Bóng nổi Khoan Đã",
     "Luôn ở góc màn hình": "Luôn ở góc màn hình",
@@ -740,6 +741,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     "Mở cửa sổ nổi": "Mở cửa sổ nổi",
   },
   en: {
+    "Vai của bác": "Senior mode",
     "Tài khoản để nối bác với người nhà. Bác kiểm được cả khi chưa đăng nhập.": "An account links you with your family. You can check without signing in.",
     "Bóng nổi Khoan Đã": "Floating bubble",
     "Luôn ở góc màn hình": "Always in the corner of the screen",

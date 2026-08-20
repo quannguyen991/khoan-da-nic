@@ -1134,15 +1134,22 @@ export default function App() {
                     <p className="text-[14px] text-slate-500 font-medium">{t("Bảng điều khiển an toàn dành cho con cháu")}</p>
                  </div>
               </div>
-              <div className="flex items-center gap-3">
-                 <button 
+              {/*
+                ⚠️ CHO HÀNG XUỐNG DÒNG. Ba tấm chip xếp một hàng ở khổ 390px thì
+                mỗi cái còn ~110px, và "Chuyển sang vai Bác (Người già)" dịch ra
+                "Switch to Senior Mode" vỡ BỐN dòng — đo được 20/8/2026. Nhãn đã
+                rút ngắn, nhưng vẫn phải cho phép xuống dòng: tiếng nào cũng có
+                thể dài hơn chỗ mình đoán.
+              */}
+              <div className="flex flex-wrap items-center gap-2">
+                 <button
                    onClick={() => {
                      setUserRole('elder');
                      setView('home');
                    }} 
                    className="flex items-center gap-1.5 text-purple-700 bg-purple-50 hover:bg-purple-100 border border-purple-200 px-3.5 py-1.5 rounded-xl font-bold text-[14px] transition-colors shadow-2xs"
                  >
-                   <Smartphone className="w-3.5 h-3.5" /> {t("Chuyển sang vai Bác (Người già)")}
+                   <Smartphone className="w-3.5 h-3.5" /> {t("Vai của bác")}
                  </button>
                  <button onClick={() => setIsMenuOpen(true)} className="flex items-center gap-1.5 text-slate-700 bg-slate-100 hover:bg-slate-200 px-3.5 py-1.5 rounded-xl font-bold text-[14px] transition-colors">
                    <LayoutGrid className="w-3.5 h-3.5" /> {t("Menu")}
@@ -1155,8 +1162,16 @@ export default function App() {
 
            {/* Render Guardian Views on Desktop */}
            <AnimatePresence mode="wait">
-              {view === 'intro' && <GuardianIntroView setView={setView} setUserRole={setUserRole} />}
-              {view === 'login' && <GuardianAuthView setView={setView} onDangNhapXong={setHoSo} setUserRole={setUserRole} />}
+              {/*
+                ⚠️ PHẢI TRUYỀN `t`. Hai view này khai `t?:` (tuỳ chọn) và rơi về
+                `(k) => k` khi thiếu — mà khoá trong dự án này LÀ tiếng Việt. Nên
+                quên truyền `t` không gây lỗi, không cảnh báo: bản tiếng Việt chạy
+                đúng y như cũ, chỉ người chọn English mới thấy nguyên màn chữ Việt.
+                Đo 20/8/2026: cả màn giới thiệu vai người con hiện tiếng Việt
+                trong khi phần còn lại của app đã sang tiếng Anh.
+              */}
+              {view === 'intro' && <GuardianIntroView setView={setView} setUserRole={setUserRole} t={t} />}
+              {view === 'login' && <GuardianAuthView setView={setView} onDangNhapXong={setHoSo} setUserRole={setUserRole} t={t} />}
               {view === 'hoi_nhanh' && <HoiNhanhView setView={setView} t={t} lang={lang} onTriggerEmergency={triggerEmergencyAlert} />}
               {view === 'learn' && <KhungTaiTre t={t}><LearnView setView={setView} t={t} lang={lang} onTriggerEmergency={triggerEmergencyAlert} /></KhungTaiTre>}
               {view !== 'intro' && view !== 'login' && view !== 'hoi_nhanh' && view !== 'learn' && (
