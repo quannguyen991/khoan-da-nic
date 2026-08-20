@@ -2,6 +2,7 @@ export type Lang = 'vi' | 'en';
 
 export const translations: Record<Lang, Record<string, string>> = {
   vi: {
+    "Số khẩn cấp": "Số khẩn cấp",
     /* ═════ 98 KHOÁ BỊ THIẾU — THÊM 20/8/2026 ═════
      *
      * ⚠️ `t()` TRẢ VỀ CHÍNH CÁI KHOÁ KHI THIẾU BẢN DỊCH, MÀ KHOÁ LÀ TIẾNG VIỆT.
@@ -684,6 +685,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     "Mở cửa sổ nổi": "Mở cửa sổ nổi",
   },
   en: {
+    "Số khẩn cấp": "Hotlines",
     /* ═════ 98 KHOÁ BỊ THIẾU — THÊM 20/8/2026 ═════
      *
      * ⚠️ `t()` TRẢ VỀ CHÍNH CÁI KHOÁ KHI THIẾU BẢN DỊCH, MÀ KHOÁ LÀ TIẾNG VIỆT.

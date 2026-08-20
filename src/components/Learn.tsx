@@ -164,10 +164,19 @@ export function LearnView({ setView, t, lang = 'vi', onTriggerEmergency }: Learn
           }`}
         >
           <BookOpen size={17} />
-          <span>{lang === 'en' ? 'Scam Lessons & Quizzes' : 'Bài Học Bẫy Lừa Đảo'}</span>
-          <span className="text-[14px] px-1.5 py-0.5 rounded-md bg-white/20 font-bold ml-0.5">
-            {lessons.length}
-          </span>
+          {/*
+            ⚠️ NHÃN NGẮN, VÀ BỎ HẲN CON SỐ ĐẾM.
+
+            Ảnh người dùng gửi 20/8/2026: nhãn "Hotlines & Authorities" dài tới
+            mức vỡ ra thành "Authoritie" / "s" trên hai dòng. Tiếng Việt còn dài
+            hơn tiếng Anh ~30% (§4.5), nên nhãn nào vừa khít ở một thứ tiếng thì
+            vỡ ở thứ tiếng kia.
+
+            Con số "6" bên cạnh cũng đã bỏ: nó không giúp bác quyết định gì —
+            bác không chọn thẻ vì nó có 6 hay 9 mục — mà lại chiếm chỗ đúng ở
+            chỗ nhãn đang thiếu.
+          */}
+          <span>{t('Bài học')}</span>
         </button>
 
         <button
@@ -182,10 +191,7 @@ export function LearnView({ setView, t, lang = 'vi', onTriggerEmergency }: Learn
           }`}
         >
           <PhoneCall size={17} />
-          <span>{lang === 'en' ? 'Hotlines & Authorities' : 'Số Khẩn Cấp & Công An'}</span>
-          <span className="text-[14px] px-1.5 py-0.5 rounded-md bg-white/20 font-bold ml-0.5">
-            {emergencyContacts.length}
-          </span>
+          <span>{t('Số khẩn cấp')}</span>
         </button>
       </div>
 

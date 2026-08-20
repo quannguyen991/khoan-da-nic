@@ -1072,8 +1072,17 @@ export default function App() {
                     const isActive = view === item.id;
                     const Icon = item.icon;
                     return (
-                      <button 
+                      <button
                         key={item.id}
+                        /*
+                          ⚠️ `aria-label` Ở MỌI NÚT, KHÔNG CHỈ NÚT ĐANG CHỌN.
+                          Đo 20/8/2026: năm nút điều hướng chỉ có biểu tượng; nhãn chữ
+                          `hidden lg:inline` nên trên điện thoại không hề có trong DOM,
+                          và nhãn của nút đang chọn thuộc một nhánh khác. Kết quả:
+                          TalkBack đọc bốn nút kia là "nút" — không tên.
+                          Nhãn lấy từ `item.label`, tức từ catalog i18n (§4.1).
+                        */
+                        aria-label={item.label}
                         onClick={() => setView(item.id as ViewState)} 
                         className={`relative z-10 transition-all duration-300 flex items-center justify-center rounded-full active:scale-95
                           lg:rounded-full lg:px-5 lg:h-[3.4rem] lg:gap-2.5 lg:w-auto ${
@@ -2623,27 +2632,40 @@ function FamilyView({
               <div className="flex items-center justify-between mb-2.5">
                 <h3 className="text-[14px] font-black text-[#2e1065] flex items-center gap-1.5">
                   <Zap className="w-4 h-4 text-red-600" />
-                  {lang === 'en' ? 'Emergency & Anti-Scam Hotlines' : t("Số khẩn cấp quốc gia")}
+                  {t("Số khẩn cấp")}
                 </h3>
                 <span className="text-[14px] font-bold text-purple-700 bg-purple-100 px-2 py-0.5 rounded-full">
                   {lang === 'en' ? 'Global' : 'Việt Nam'}
                 </span>
               </div>
               
-              <div className="grid grid-cols-2 gap-2">
-                 {topEmergencies.map((item) => (
-                   <button 
+              {/*
+                ⚠️ MỘT CỘT, KHÔNG `truncate`, VÀ CHỈ BA SỐ.
+
+                Bản trước xếp 4 số thành lưới 2 cột rồi cắt cụt chữ bằng
+                `truncate`. Ảnh người dùng gửi 20/8/2026: "Emergen…",
+                "US FTC Fr…", "UK Actio…", "Australia …" — bác phải ĐOÁN mình
+                sắp gọi cho ai. Với một nút gọi khẩn cấp thì đoán là hỏng.
+
+                `truncate` không phải cách bớt chữ, nó là cách GIẤU chữ. Muốn
+                bớt thì bớt SỐ MỤC, không bớt chữ của từng mục.
+
+                Ba số một cột, mỗi hàng đủ rộng để tên hiện nguyên vẹn và tự
+                xuống dòng khi cần — tiếng Việt dài hơn tiếng Anh ~30% (§4.5)
+                nên phải chừa chỗ xuống dòng, không được nowrap.
+              */}
+              <div className="flex flex-col gap-2">
+                 {topEmergencies.slice(0, 3).map((item) => (
+                   <button
                      key={item.id}
                      onClick={() => handleCall(item.phone.replace(/[^0-9+]/g, ''))}
-                     className="flex items-center gap-2 p-2.5 rounded-xl bg-purple-50/70 hover:bg-purple-100 text-left transition-all border border-purple-100 active:scale-95 group"
+                     className="flex items-center gap-3 p-3 rounded-xl bg-purple-50/70 hover:bg-purple-100 text-left transition-all border border-purple-100 active:scale-95 group"
                    >
-                      <div className="w-8 h-8 bg-purple-600 text-white rounded-lg flex items-center justify-center font-black text-[14px] shrink-0 group-hover:bg-red-600 transition-colors">
+                      <div className="w-11 h-11 bg-purple-600 text-white rounded-xl flex items-center justify-center font-black text-[14px] shrink-0 group-hover:bg-red-600 transition-colors">
                          {item.phone.length > 5 ? 'SOS' : item.phone}
                       </div>
-                      <div className="flex-1 overflow-hidden">
-                         <h4 className="font-bold text-[#1e1b4b] text-[14px] truncate">{item.name}</h4>
-                         <p className="text-[14px] text-purple-700 font-semibold truncate">{item.tag || item.description}</p>
-                      </div>
+                      <h4 className="flex-1 font-bold text-[#1e1b4b] text-[14px] leading-snug">{item.name}</h4>
+                      <PhoneCall size={18} className="text-purple-600 shrink-0" />
                    </button>
                  ))}
               </div>
@@ -2655,7 +2677,7 @@ function FamilyView({
               >
                 <div className="flex items-center gap-2">
                   <BookOpen size={16} className="text-amber-600 shrink-0" />
-                  <span>{lang === 'en' ? 'View all lessons & worldwide hotlines' : 'Xem cẩm nang bẫy lừa & tất cả hotline'}</span>
+                  <span>{t('Xem tất cả')}</span>
                 </div>
                 <ChevronRight size={16} className="text-purple-600" />
               </button>
