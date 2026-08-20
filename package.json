@@ -10,7 +10,8 @@
     "clean": "rm -rf dist server.js",
     "lint": "tsc --noEmit",
     "start": "node dist/server.cjs",
-    "test": "node --test \"test/**/*.test.mjs\""
+    "test": "node --test \"test/**/*.test.mjs\"",
+    "build:apk": "vite build --mode apk && npx cap sync android"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.117.1",

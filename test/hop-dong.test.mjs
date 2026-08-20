@@ -1278,3 +1278,65 @@ test('§6.10 · nửa lành của bộ 200 tiếng Anh đủ khó để phép đ
     `chỉ ${soKho}/${lanh.length} (${tiLe.toFixed(0)}%) tin lành có yếu tố dễ gây báo oan — `
     + 'bộ thử quá hiền, tỉ lệ báo oan thấp sẽ không chứng minh được gì');
 });
+
+/**
+ * ══════ BẢN APK PHẢI BIẾT ĐỊA CHỈ MÁY CHỦ ══════
+ *
+ * ⚠️ HỎNG IM LẶNG, VÀ HỎNG TOÀN BỘ CHỨC NĂNG CHÍNH.
+ *
+ * Capacitor phục vụ giao diện ở `https://localhost` — một origin CHỈ CÓ TỆP
+ * TĨNH. Đường dẫn tương đối `/api/analyze` ở đó trỏ vào hư không. Bản dựng vẫn
+ * xanh, app vẫn mở, chỉ là mọi lượt kiểm đều thất bại, và nhìn từ máy chủ thì
+ * im lặng hoàn toàn vì chưa từng có lượt gọi nào tới.
+ *
+ * Đo 20/8/2026: bản APK đã gửi cho người dùng KHÔNG có địa chỉ máy chủ — dựng
+ * bằng `npm run build` trơn thay vì `npm run build:apk`. Tài khoản không đăng
+ * nhập được, hồ sơ không sửa được, và không tin nhắn nào kiểm được.
+ *
+ * ⚠️ `.env.apk` PHẢI ĐƯỢC GIT THEO DÕI dù `.gitignore` có dòng `.env*`. Nó
+ * không chứa bí mật nào — chỉ một địa chỉ công khai. Thiếu nó thì người clone
+ * về dựng ra một bản APK chết.
+ */
+test('§6.7 · bản APK có địa chỉ máy chủ, và tệp cấu hình đó được theo dõi', () => {
+  const duong = path.join(GOC, '.env.apk');
+  assert.ok(existsSync(duong),
+    '.env.apk không tồn tại — bản APK dựng ra sẽ gọi vào https://localhost và hỏng im lặng');
+
+  const noi = readFileSync(duong, 'utf8');
+  const m = noi.match(/^VITE_API_GOC\s*=\s*(\S+)\s*$/m);
+  assert.ok(m, '.env.apk thiếu VITE_API_GOC');
+  assert.match(m[1], /^https:\/\//,
+    `VITE_API_GOC phải là https — WebView chặn nội dung hỗn hợp, và chặn im lặng (đang là "${m[1]}")`);
+
+  const pkg = JSON.parse(readFileSync(path.join(GOC, 'package.json'), 'utf8'));
+  assert.ok(pkg.scripts['build:apk'],
+    'thiếu script build:apk — không có nó thì rất dễ lại dựng APK bằng `npm run build` trơn');
+  assert.match(pkg.scripts['build:apk'], /--mode apk/,
+    'build:apk phải chạy `vite build --mode apk` để nạp .env.apk');
+});
+
+/**
+ * ══════ CHỮ HỆ THỐNG PHẢI CÓ CẢ HAI NGÔN NGỮ ══════
+ *
+ * ⚠️ Android rơi về `res/values/` khi không có thư mục theo ngôn ngữ. Đo
+ * 20/8/2026: thông báo thường trực hiện tiếng Việt kể cả khi người dùng đã chọn
+ * English, vì `values-en/` không tồn tại.
+ *
+ * ⚠️ Hai chuỗi kỹ thuật KHÔNG được dịch: `package_name` và `custom_url_scheme`
+ * là định danh, dịch chúng là làm hỏng liên kết sâu và intent filter.
+ */
+test('§4.1 · chuỗi hệ thống Android có đủ bản tiếng Anh', () => {
+  const doc = (l) => readFileSync(
+    path.join(GOC, 'android', 'app', 'src', 'main', 'res', l, 'strings.xml'), 'utf8');
+  const khoa = (x) => new Set([...x.matchAll(/<string name="(\w+)"/g)].map((m) => m[1]));
+
+  const vi = khoa(doc('values'));
+  const en = khoa(doc('values-en'));
+  const KY_THUAT = new Set(['package_name', 'custom_url_scheme']);
+
+  const thieu = [...vi].filter((k) => !en.has(k) && !KY_THUAT.has(k));
+  assert.deepEqual(thieu, [],
+    `values-en/strings.xml thiếu: ${thieu.join(', ')} — Android sẽ rơi về bản tiếng Việt`);
+
+  assert.ok(vi.size > 15, `values/strings.xml chỉ soi ra ${vi.size} chuỗi — biểu thức soi đã hỏng`);
+});
