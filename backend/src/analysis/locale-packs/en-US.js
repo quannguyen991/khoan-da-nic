@@ -42,6 +42,8 @@ module.exports = {
       { pattern: '\\b(cvv|cvc|card number|expiry date)\\b', scope: 'action' },
     ],
     CRED_BANK_LOGIN: [
+      { pattern: '\\blink\\b[^.]{0,30}\\b(confirm|verify|enter)\\b[^.]{0,24}\\b(my|your) details\\b', scope: 'any' },
+      { pattern: '\\bclick to pay\\b', scope: 'any' },
       { pattern: '\\bscan\\b[^.]{0,20}\\bqr\\b[^.]{0,40}\\b(confirm|verify|account|receive|payment)\\b', scope: 'any' },
       { pattern: '\\bqr code\\b[^.]{0,40}\\b(login|log in|sign in|banking|account)\\b', scope: 'any' },
       { pattern: '\\blog ?in\\b[^.]{0,16}\\b(here|now|at|via|through)\\b', scope: 'any' },
@@ -52,6 +54,12 @@ module.exports = {
       { pattern: '\\b(your )?(bank|banking) (login|credentials|username)\\b', scope: 'action' },
     ],
     FIN_TRANSFER_REQUEST: [
+      /*
+       * "I need 1,500 for the repair" — đòi tiền KHÔNG có động từ chuyển.
+       * Và "told me to put 5,000 into the platform" — dạng kể lại.
+       */
+      { pattern: '\\b(i need|need|needs)\\b[^.]{0,20}\\b[\\d][\\d,.]{2,}\\b', scope: 'any' },
+      { pattern: '\\btold (me|us|him|her) to (put|invest|move|transfer|send|pay)\\b', scope: 'any' },
       /*
        * ĐÒI TIỀN KHÔNG KÈM SỐ. Đo trên bộ 200: ca điện lực được 15 điểm, thiếu đúng
        * 5 điểm, chỉ vì "Pay now to avoid disconnection" không có con số nên
@@ -96,6 +104,14 @@ module.exports = {
     ],
     FIN_SAFE_ACCOUNT: [
       /*
+       * ⚠️ DẠNG KỂ LẠI CẦN `scope: 'any'`. Mẫu gốc để `action`, mà câu "Police told
+       * me I need to move my savings to a protected account" là lời TƯỜNG THUẬT —
+       * `quoted_report` nằm trong NON_ACTIONABLE_ACTS nên mẫu `action` bị vứt.
+       * Vẫn đòi một động từ tường thuật đứng trước, không lấy trần "protected account".
+       */
+      { pattern: '\\b(told|asked|said|instructed)\\b[^.]{0,44}\\b(safe|secure|protected|holding)( \\w+)? account\\b', scope: 'any' },
+      { pattern: '\\b(your own|a new|new)\\b[^.]{0,20}\\baccount\\b[^.]{0,44}\\b(still yours|protecting|protect|keep it safe)\\b', scope: 'any' },
+      /*
        * ⚠️ MỘT CHỮ CHÈN VÀO GIỮA LÀM TRƯỢT CẢ MẪU. Đo 20/8/2026:
        *   "transfer to a safe account"       → bắt được
        *   "transfer to a safe bank account"  → TRƯỢT
@@ -107,6 +123,11 @@ module.exports = {
       { pattern: '\\b(bitcoin|btc|crypto|cryptocurrency|ethereum|usdt)\\b', scope: 'action' },
     ],
     FIN_RECOVERY_FEE: [
+      /*
+       * "I earned 500 already but I have to pay a 700 tax before I can take the
+       * money out" — phí để LẤY RA tiền của chính mình, dấu hiệu định nghĩa của họ này.
+       */
+      { pattern: '\\b(pay|paying|send)\\b[^.]{0,30}\\b(tax|fee|charge|commission)\\b[^.]{0,40}\\b(withdraw|take .{0,12}out|release|get .{0,12}out)\\b', scope: 'any' },
       { pattern: '\\b(unlock|release|processing|clearance|admin|activation) fee\\b', scope: 'action' },
       { pattern: '\\bfee\\b[^.]{0,34}\\b(refund|recover|get your money back|released)', scope: 'action' },
     ],
@@ -149,6 +170,8 @@ module.exports = {
       { pattern: '\\bcome to your (home|house|address)\\b[^.]{0,40}\\b(cash|money|collect)', scope: 'action' },
     ],
     DEV_REMOTE_CONTROL_APP: [
+      { pattern: '\\binstall\\b[^.]{0,34}\\b(so (we|i) can|to let (us|me)|remotely|remote)\\b', scope: 'any' },
+      { pattern: '\\b(asked|wanted|needs?)\\b[^.]{0,26}\\b(to )?(take|have) control\\b', scope: 'any' },
       { pattern: '\\b(anydesk|teamviewer|ultraviewer|quicksupport|airdroid)\\b', scope: 'action' },
       { pattern: '\\bremote (control|desktop|access|support) (app|software|tool)\\b', scope: 'action' },
     ],
@@ -173,6 +196,11 @@ module.exports = {
       { pattern: '\\b(allow|accept|grant)\\b[^.]{0,20}\\b(all|every)\\b[^.]{0,16}\\bpermissions?\\b', scope: 'action' },
     ],
     ID_AUTHORITY_IMPERSONATION: [
+      { pattern: '\\b(social security|ssn|national insurance)\\b[^.]{0,30}\\b(suspended|blocked|frozen|compromised)\\b', scope: 'any' },
+      { pattern: '\\b(federal|official|government) notice\\b', scope: 'any' },
+      { pattern: '\\b(officer|detective|inspector|sergeant|agent|constable) \\w+ (here|speaking)\\b', scope: 'any' },
+      { pattern: '\\b(warrant|case file|investigation)\\b[^.]{0,26}\\bin your name\\b', scope: 'any' },
+      { pattern: '\\b(visa|residence|immigration) (status|documents?|permit|papers)\\b[^.]{0,34}\\b(expired|problem|issue|invalid)\\b', scope: 'any' },
       { pattern: '\\bthis is (officer|detective|inspector|sergeant|agent)\\b', scope: 'any' },
       { pattern: '\\b(an|the) officer will\\b', scope: 'any' },
       { pattern: '\\bfrom the (police|federal|ministry|department of)\\b', scope: 'any' },
@@ -212,6 +240,7 @@ module.exports = {
       { pattern: '\\bkhoan da\\b[^.]{0,20}\\b(asks?|requires?|needs?) you to\\b', scope: 'any' },
     ],
     ID_FAMILY_IMPERSONATION: [
+      { pattern: '\\bvideo call\\b[^.]{0,44}\\b(looked|sounded|exactly like|just like)\\b', scope: 'any' },
       /*
        * ⚠️ "SỐ MỚI" + "MÁY HỎNG" LÀ DẤU HIỆU MẠNH NHẤT CỦA HỌ NÀY, và mẫu cũ
        * không có. Kẻ giả danh con cháu luôn phải giải thích vì sao số lạ.
@@ -254,6 +283,8 @@ module.exports = {
       { pattern: '\\bdo not hang up\\b', scope: 'any' },
     ],
     OFF_INVESTMENT_GUARANTEE: [
+      { pattern: '\\bpre.?ipo\\b', scope: 'any' },
+      { pattern: '\\b(guaranteed|no) (approval|checks?)\\b', scope: 'any' },
       /*
        * Lối kể lại: "A man I met online showed me his trading profits and told me
        * to put 5,000 into the platform he uses." Không có chữ "guaranteed".
@@ -289,6 +320,8 @@ module.exports = {
       { pattern: '\\b(send|post|share|leak)\\b[^.]{0,30}\\b(to|on)\\b[^.]{0,24}\\b(contacts|friends|family|facebook|everyone)\\b', scope: 'any' },
     ],
     MAN_ISOLATION: [
+      { pattern: '\\b(telling|talking to|speaking to)\\b[^.]{0,34}\\b(daughter|son|family|children|anyone)\\b[^.]{0,34}\\b(worse|harder|trouble|problem)\\b', scope: 'any' },
+      { pattern: '\\b(not to|do not|don.t)\\b[^.]{0,20}\\b(talk|speak) to\\b[^.]{0,20}\\b(son|daughter|family|anyone)\\b', scope: 'any' },
       /*
        * "Do not hang up" và "stay on the line" là hai câu định nghĩa của kịch bản
        * giữ máy hàng giờ — cùng thủ đoạn mà `MAN_KEEP_CALL_ACTIVE` mô tả, nhưng
@@ -325,9 +358,14 @@ module.exports = {
       { pattern: '\\b(parcel|package|shipment)\\b[^.]{0,36}\\b(held|on hold|customs|detained|stuck)\\b', scope: 'any' },
     ],
     ID_EMPLOYER_JOB_IMPERSONATION: [
+      { pattern: '\\bhiring now\\b', scope: 'any' },
+      { pattern: '\\bjoin\\b[^.]{0,24}\\b(telegram|whatsapp|zalo|signal)\\b[^.]{0,20}\\bgroup\\b', scope: 'any' },
+      { pattern: '\\b(no experience needed|no experience required)\\b', scope: 'any' },
       { pattern: '\\b(recruiting|hiring|looking for)\\b[^.]{0,40}\\b(part.?time|work from home|collaborators?|helpers?)\\b', scope: 'any' },
     ],
     OFF_ROMANCE_EMERGENCY: [
+      { pattern: '\\b(card|account) is blocked\\b[^.]{0,30}\\b(abroad|overseas|here)\\b', scope: 'any' },
+      { pattern: '\\b(receive|accept)\\b[^.]{0,34}\\b(and )?(forward|pass on|send on|transfer on)\\b', scope: 'any' },
       /*
        * Mẫu cũ đòi (met|chatting) rồi (online|never met) rồi (send) THEO ĐÚNG
        * THỨ TỰ ĐÓ. Câu thật: "I have never met you in person but I need you to
@@ -351,10 +389,14 @@ module.exports = {
       { pattern: '\\b(won|winner|prize|reward)\\b[^.]{0,40}\\b(fee|pay|transfer|deposit)\\b', scope: 'any' },
     ],
     MAN_SCARCITY_PRESSURE: [
+      { pattern: '\\b(exclusive|selected clients|invitation only|limited spots?|few (boxes|places|spots) left)\\b', scope: 'any' },
+      { pattern: '\\b(much )?cheaper than\\b[^.]{0,26}\\b(the )?(others|market|usual|normal)\\b', scope: 'any' },
       { pattern: '\\b(only|last|limited)\\b[^.]{0,26}\\b(spot|slot|place|today|tonight|hours?)\\b', scope: 'any' },
       { pattern: '\\b(reserve|secure|hold)\\b[^.]{0,20}\\b(your )?(spot|slot|place)\\b[^.]{0,20}\\b(today|now|tonight)\\b', scope: 'action' },
     ],
     OFF_ADVANCE_FEE: [
+      { pattern: '\\b(loan|credit)\\b[^.]{0,30}\\b(approved|approval)\\b[^.]{0,40}\\b(fee|deposit|payment|upfront)\\b', scope: 'any' },
+      { pattern: '\\b(bad credit|no credit check)\\b', scope: 'any' },
       /*
        * Hai họ dùng chung một cấu trúc: TRẢ TRƯỚC rồi mới được thứ mình muốn.
        *   thuê nhà : "send the deposit today and I will post the keys"
@@ -374,6 +416,7 @@ module.exports = {
       { pattern: '\\b(pay|transfer|send)\\b[^.]{0,20}\\b(upfront|in advance)\\b', scope: 'action' },
     ],
     OFF_TASK_PREPAY: [
+      { pattern: '\\btop ?up\\b[^.]{0,26}\\b(wallet|balance|account)\\b', scope: 'any' },
       /*
        * Mẫu cũ đòi chữ "task/mission". Tin thật viết "deposit 200 to activate
        * your account and earn 100 commission every day" — cấu trúc là NỘP TRƯỚC

@@ -1218,7 +1218,7 @@ test('§4.1 · mọi khoá t() dùng trong mã đều có trong catalog tiếng 
  *   · báo oan  ≤ 4%   — trần
  * Lịch sử của con số này, để sau đọc còn hiểu: 26% (lúc dựng bộ) → 35% (vá mẫu
  * cho tám họ trượt sạch) → 45% (vá lớp thoát bị heredoc nuốt) → 52% (vá lối kể
- * lại). Mỗi lần vá thì NÂNG sàn — đừng để nó nằm yên rồi tưởng là đã ổn.
+ * lại) → 70% (vá tín hiệu thứ hai cho 28 ca sát ngưỡng). Mỗi lần vá thì NÂNG sàn — đừng để nó nằm yên rồi tưởng là đã ổn.
  */
 test('§6.10 · bộ 200 tình huống tiếng Anh — tầng luật giữ được mức đã đo', () => {
   const { analyze } = require(path.join(GOC, 'backend', 'src', 'analysis', 'pipeline.js'));
@@ -1248,8 +1248,8 @@ test('§6.10 · bộ 200 tình huống tiếng Anh — tầng luật giữ đư�
 
   assert.ok(tiLeOan <= 2,
     `BÁO OAN vượt trần 2%: ${baoOan}/${lanh} (${tiLeOan.toFixed(0)}%) — ${oan.join(', ')}`);
-  assert.ok(tiLeBat >= 50,
-    `BẮT ĐƯỢC tụt dưới sàn 50%: ${batDuoc}/${luaDao} (${tiLeBat.toFixed(0)}%)`
+  assert.ok(tiLeBat >= 65,
+    `BẮT ĐƯỢC tụt dưới sàn 65%: ${batDuoc}/${luaDao} (${tiLeBat.toFixed(0)}%)`
     + ` — bỏ sót: ${sot.slice(0, 12).join(', ')}${sot.length > 12 ? ` …và ${sot.length - 12} ca nữa` : ''}`);
 });
 
