@@ -2,6 +2,16 @@ export type Lang = 'vi' | 'en';
 
 export const translations: Record<Lang, Record<string, string>> = {
   vi: {
+    /* ═══ Rút gọn màn "Mật khẩu gia đình" — 20/8/2026 ═══
+     * Đo trên bản chạy thật ở khổ 390px: màn này 600 ký tự, bốn đoạn ba dòng,
+     * là màn nhiều chữ nhất còn lại sau khi các màn khác đã gọn. Ba bước
+     * hướng dẫn giữ nguyên NỘI DUNG — chỉ bỏ phần diễn giải lặp lại.
+     */
+    "Gọi cả nhà lại: con cháu, vợ chồng.": "Gọi cả nhà lại: con cháu, vợ chồng.",
+    "Chọn MỘT câu người ngoài không đoán được. Ví dụ: tên con chó hồi ở quê.": "Chọn MỘT câu người ngoài không đoán được. Ví dụ: tên con chó hồi ở quê.",
+    "Nói miệng thôi. ĐỪNG nhắn qua Zalo hay tin nhắn.": "Nói miệng thôi. ĐỪNG nhắn qua Zalo hay tin nhắn.",
+    "Khoan Đã KHÔNG giữ mật khẩu. Đây chỉ là câu nhắc cho bác.": "Khoan Đã KHÔNG giữ mật khẩu. Đây chỉ là câu nhắc cho bác.",
+    "Một câu chỉ nhà mình biết. Ai xưng là con cháu mà không nói được — đừng làm theo.": "Một câu chỉ nhà mình biết. Ai xưng là con cháu mà không nói được — đừng làm theo.",
     "Ghim": "Ghim",
     /* ═══ Màn giả lập "ngoài app" — thêm 20/8/2026 ═══
      * Toàn bộ màn này trước đây viết chữ Việt thẳng vào JSX, nên người chọn
@@ -716,6 +726,16 @@ export const translations: Record<Lang, Record<string, string>> = {
     "Mở cửa sổ nổi": "Mở cửa sổ nổi",
   },
   en: {
+    /* ═══ Rút gọn màn "Mật khẩu gia đình" — 20/8/2026 ═══
+     * Đo trên bản chạy thật ở khổ 390px: màn này 600 ký tự, bốn đoạn ba dòng,
+     * là màn nhiều chữ nhất còn lại sau khi các màn khác đã gọn. Ba bước
+     * hướng dẫn giữ nguyên NỘI DUNG — chỉ bỏ phần diễn giải lặp lại.
+     */
+    "Gọi cả nhà lại: con cháu, vợ chồng.": "Gather the family: children and spouse.",
+    "Chọn MỘT câu người ngoài không đoán được. Ví dụ: tên con chó hồi ở quê.": "Pick ONE phrase outsiders can't guess. For example, the name of your old dog.",
+    "Nói miệng thôi. ĐỪNG nhắn qua Zalo hay tin nhắn.": "Say it out loud. Do NOT send it over Zalo or SMS.",
+    "Khoan Đã KHÔNG giữ mật khẩu. Đây chỉ là câu nhắc cho bác.": "Khoan Đã does NOT keep the password. This is only a hint for you.",
+    "Một câu chỉ nhà mình biết. Ai xưng là con cháu mà không nói được — đừng làm theo.": "One phrase only your family knows. If a caller claims to be family and can't say it, don't do what they ask.",
     "Ghim": "Pinned",
     /* ═══ Màn giả lập "ngoài app" — thêm 20/8/2026 ═══
      * Toàn bộ màn này trước đây viết chữ Việt thẳng vào JSX, nên người chọn

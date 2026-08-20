@@ -106,7 +106,7 @@ export function MatKhauGiaDinh({
         </div>
         <h2 className="text-2xl font-black text-[#3b1d7d] mb-1">{t('Mật khẩu gia đình')}</h2>
         <p className="text-[15px] text-purple-900/80 leading-relaxed">
-          {t('Một câu chỉ nhà mình biết. Ai gọi điện xưng là con cháu mà không nói được câu đó, bác đừng làm theo.')}
+          {t('Một câu chỉ nhà mình biết. Ai xưng là con cháu mà không nói được — đừng làm theo.')}
         </p>
       </div>
 
@@ -123,9 +123,9 @@ export function MatKhauGiaDinh({
             <h3 className="font-black text-[17px] text-[#311068] mb-3">{t('Cách làm')}</h3>
             <ol className="flex flex-col gap-3">
               {[
-                t('Gọi cả nhà lại — con cháu, vợ chồng, ai hay gọi điện cho bác.'),
-                t('Cùng chọn MỘT câu dễ nhớ mà người ngoài không đoán được. Ví dụ: tên con chó nhà mình hồi ở quê.'),
-                t('Nói miệng với nhau. ĐỪNG nhắn câu đó qua Zalo, tin nhắn hay email — nhắn là nó ra khỏi nhà mình.'),
+                t('Gọi cả nhà lại: con cháu, vợ chồng.'),
+                t('Chọn MỘT câu người ngoài không đoán được. Ví dụ: tên con chó hồi ở quê.'),
+                t('Nói miệng thôi. ĐỪNG nhắn qua Zalo hay tin nhắn.'),
               ].map((cau, i) => (
                 <li key={i} className="flex items-start gap-3">
                   <span className="w-7 h-7 rounded-full bg-[#7c3aed] text-white font-black text-[15px] flex items-center justify-center shrink-0">
@@ -144,7 +144,7 @@ export function MatKhauGiaDinh({
               gõ mật khẩu vào đây — đó là phản xạ tự nhiên với mọi ô nhập.
             */}
             <p className="text-[14px] text-slate-600 leading-relaxed mb-3">
-              {t('Khoan Đã KHÔNG giữ mật khẩu của nhà bác. Bác chỉ ghi một câu để tự nhớ ra nó, người khác đọc được cũng không đoán ra.')}
+              {t('Khoan Đã KHÔNG giữ mật khẩu. Đây chỉ là câu nhắc cho bác.')}
             </p>
             <input
               value={goiY}
