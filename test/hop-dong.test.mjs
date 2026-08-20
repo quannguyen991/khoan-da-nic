@@ -1129,3 +1129,57 @@ test('§6.7 · cầu dao bỏ qua đường hỏng, nhưng không bao giờ bỏ
   assert.deepEqual(locDuongConSong([a, b], t0), [a, b], 'chạy được thì phải xóa đếm hỏng');
   xoaCauDao();
 });
+
+/**
+ * ══════ §4.1 — MỌI KHOÁ `t()` PHẢI CÓ TRONG CATALOG TIẾNG ANH ══════
+ *
+ * ⚠️ VÌ SAO LỖI NÀY KHÔNG BAO GIỜ TỰ LỘ RA.
+ *
+ * `t()` trả về CHÍNH CÁI KHOÁ khi thiếu bản dịch, mà khoá trong dự án này là
+ * tiếng Việt. Nên một khoá thiếu chạy đúng y như một khoá có bản dịch — khi thử
+ * bằng tiếng Việt. Không lỗi, không cảnh báo, không dấu hiệu nào.
+ *
+ * Chỉ người chọn English mới thấy, và họ thấy nguyên một màn hình chữ Việt.
+ *
+ * Đo 20/8/2026: 98 trên 356 khoá (28%) không hề có trong catalog — toàn bộ màn
+ * "Mật khẩu gia đình" và phần lớn màn Cài đặt. Không test nào đỏ, vì mọi test
+ * đều chạy ở tiếng Việt.
+ *
+ * ⚠️ SOI MÃ NGUỒN, KHÔNG `import`. Khoá nằm rải trong JSX; muốn biết khoá nào
+ * ĐANG ĐƯỢC DÙNG thì phải đọc mã, chứ hỏi object đã dựng xong thì chỉ biết
+ * catalog có gì, không biết mã đang xin gì.
+ *
+ * ⚠️ BỎ CHÚ THÍCH TRƯỚC KHI SOI. Chú thích trong dự án này CỐ Ý nhắc lại nguyên
+ * văn đoạn hỏng — `t("An toàn")` được ghi lại để nhớ rằng §4.1 cấm tuyệt đối
+ * nhãn đó. Soi cả chú thích thì test này đòi thêm ĐÚNG CÁI NHÃN BỊ CẤM vào
+ * catalog. Đã suýt xảy ra khi dựng test này.
+ */
+test('§4.1 · mọi khoá t() dùng trong mã đều có trong catalog tiếng Anh', () => {
+  const DAU = 'àáảãạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵđ';
+  const boDau = new Set([...(DAU + DAU.toUpperCase())]);
+  const coDau = (x) => [...x].some((c) => boDau.has(c));
+
+  // Khoá của khối `en` trong catalog — đọc bằng văn bản, không import TypeScript.
+  const nguon = doc('src/i18n.ts');
+  const dauEn = nguon.indexOf('\n  en: {');
+  assert.ok(dauEn > 0, 'không tìm thấy khối `en` trong src/i18n.ts');
+  const khoiEn = nguon.slice(dauEn);
+  const coTrongEn = new Set(
+    [...khoiEn.matchAll(/^\s*"((?:[^"\\]|\\.)*)":/gm)].map((m) => m[1].replace(/\\"/g, '"')),
+  );
+  assert.ok(coTrongEn.size > 400, `khối en chỉ soi ra ${coTrongEn.size} khoá — biểu thức soi đã hỏng`);
+
+  const thieu = new Map();
+  for (const tep of TEP_GIAO_DIEN) {
+    const ma = boChuThich(doc(tep));
+    for (const m of ma.matchAll(/\bt\(\s*(['"])((?:(?!\1).)*)\1/g)) {
+      const k = m[2];
+      if (!coDau(k) || coTrongEn.has(k)) continue;
+      if (!thieu.has(k)) thieu.set(k, tep);
+    }
+  }
+
+  assert.deepEqual([...thieu.keys()], [],
+    'khoá t() không có trong catalog tiếng Anh — người chọn English sẽ thấy nguyên chữ Việt:\n'
+    + [...thieu].map(([k, f]) => `  · ${f}: ${k.slice(0, 60)}`).join('\n'));
+});
