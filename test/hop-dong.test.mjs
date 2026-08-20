@@ -1197,3 +1197,83 @@ test('§4.1 · mọi khoá t() dùng trong mã đều có trong catalog tiếng 
     'khoá t() không có trong catalog tiếng Anh — người chọn English sẽ thấy nguyên chữ Việt:\n'
     + [...thieu].map(([k, f]) => `  · ${f}: ${k.slice(0, 60)}`).join('\n'));
 });
+
+/**
+ * ══════ BỘ 200 TÌNH HUỐNG TIẾNG ANH — HÀNG RÀO CHỐNG THỤT LÙI ══════
+ *
+ * ⚠️ VÌ SAO PHẢI CÓ BỘ RIÊNG CHO TIẾNG ANH.
+ *
+ * Pack tiếng Việt có bộ 100 và lên được 79% nhờ đo liên tục: đo 60%, thấy chỗ
+ * hụt, vá, đo lại. Pack tiếng Anh chưa từng qua bước đó lần nào — hai lỗ hổng
+ * tìm thấy ngày 20/8/2026 đều lộ ra vì người dùng tình cờ gõ một câu, không
+ * phải vì có ai đi tìm.
+ *
+ * ⚠️ PHÉP THỬ NHỎ TỰ CHẤM BÀI MÌNH — ĐÃ DÍNH ĐÚNG NGÀY DỰNG BỘ NÀY.
+ * Bộ thử 16 ca viết nhanh cho 50%. Bộ 200 viết theo lối người thật nói cho 26%.
+ * Chênh 24 điểm không phải vì bộ luật đổi, mà vì 16 ca kia được viết theo đúng
+ * lối mà mẫu đang bắt. Bộ thử do chính người viết mẫu soạn thì luôn dễ hơn thực tế.
+ *
+ * ⚠️ HAI NGƯỠNG BẤT ĐỐI XỨNG, GIỐNG BỘ TIẾNG VIỆT:
+ *   · bắt được ≥ 25%  — sàn TẠM THỜI, ghi lại mức đo được để không tụt
+ *   · báo oan  ≤ 4%   — trần
+ * Sàn bắt được ĐANG THẤP và đó là sự thật của hôm nay, không phải mục tiêu.
+ * Mỗi lần vá mẫu thì NÂNG sàn này lên — đừng để nó nằm yên rồi tưởng là đã ổn.
+ */
+test('§6.10 · bộ 200 tình huống tiếng Anh — tầng luật giữ được mức đã đo', () => {
+  const { analyze } = require(path.join(GOC, 'backend', 'src', 'analysis', 'pipeline.js'));
+  const bo = JSON.parse(readFileSync(
+    path.join(GOC, 'test', 'du-lieu', 'tinh-huong-200-en.json'), 'utf8'));
+  const th = bo.tinhHuong;
+
+  assert.equal(th.length, 200, 'bộ thử phải có đúng 200 tình huống');
+
+  const BAC = { NO_SIGNS_FOUND: 0, SUSPICIOUS: 1, HIGH: 2 };
+  let luaDao = 0; let batDuoc = 0; let lanh = 0; let baoOan = 0;
+  const sot = []; const oan = [];
+
+  for (const x of th) {
+    const muc = BAC[analyze({ vanBan: x.noiDung }).riskLabel] ?? 0;
+    if (x.nhom === 'lua_dao') {
+      luaDao += 1;
+      if (muc >= 1) batDuoc += 1; else sot.push(x.ma);
+    } else {
+      lanh += 1;
+      if (muc >= 1) { baoOan += 1; oan.push(x.ma); }
+    }
+  }
+
+  const tiLeBat = (batDuoc / luaDao) * 100;
+  const tiLeOan = (baoOan / lanh) * 100;
+
+  assert.ok(tiLeOan <= 4,
+    `BÁO OAN vượt trần 4%: ${baoOan}/${lanh} (${tiLeOan.toFixed(0)}%) — ${oan.join(', ')}`);
+  assert.ok(tiLeBat >= 25,
+    `BẮT ĐƯỢC tụt dưới sàn 25%: ${batDuoc}/${luaDao} (${tiLeBat.toFixed(0)}%)`
+    + ` — bỏ sót: ${sot.slice(0, 12).join(', ')}${sot.length > 12 ? ` …và ${sot.length - 12} ca nữa` : ''}`);
+});
+
+/**
+ * ⚠️ NỬA LÀNH CỦA BỘ 200 PHẢI KHÓ — cùng lý do với bộ tiếng Việt.
+ * Một bộ toàn "the cat has been fed" thì tỉ lệ báo oan 0% không nói lên điều gì.
+ */
+test('§6.10 · nửa lành của bộ 200 tiếng Anh đủ khó để phép đo có nghĩa', () => {
+  const bo = JSON.parse(readFileSync(
+    path.join(GOC, 'test', 'du-lieu', 'tinh-huong-200-en.json'), 'utf8'));
+  const lanh = bo.tinhHuong.filter((x) => x.nhom === 'lanh');
+
+  const KHO = new RegExp([
+    '\\d[\\d.,]{2,}',
+    '\\b(urgent|now|today|tonight|immediately|quick|hurry|last chance)\\b',
+    '\\b(link|http|gov\\.uk|co\\.uk|nhs\\.uk)\\b',
+    '\\b(otp|passcode|code|pin)\\b',
+    '\\b(bank|police|tax|hmrc|irs|council|insurance|hospital|pharmacy|parcel|delivery|customs|pension|payroll)\\b',
+    '\\b(transfer|pay|paid|payment|deposit|refund|account)\\b',
+  ].join('|'), 'i');
+
+  const soKho = lanh.filter((x) => KHO.test(x.noiDung)).length;
+  const tiLe = (soKho / lanh.length) * 100;
+
+  assert.ok(tiLe >= 60,
+    `chỉ ${soKho}/${lanh.length} (${tiLe.toFixed(0)}%) tin lành có yếu tố dễ gây báo oan — `
+    + 'bộ thử quá hiền, tỉ lệ báo oan thấp sẽ không chứng minh được gì');
+});
