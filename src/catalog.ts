@@ -613,6 +613,78 @@ export const MA_LOI_RA: Record<string, Cap> = {
 // nguyên sự mập mờ đó, đừng "cho rõ ràng hơn".
 
 export const MA_TAI_KHOAN: Record<string, Cap> = {
+  /*
+   * ═════ MỌI MÃ MÁY CHỦ TRẢ PHẢI CÓ MỘT CÂU Ở ĐÂY ═════
+   *
+   * `LoginView` rơi về `KHONG_GOI_DUOC` khi tra không ra mã — tức là một lỗi
+   * hoàn toàn bình thường (gõ sai dạng số điện thoại) hiện thành
+   * "Chưa nối được với máy chủ".
+   *
+   * Đo 20/8/2026: máy chủ trả 19 mã, catalog có 8, và hai trong số đó còn
+   * lệch tên (`SO_KHONG_HOP_LE` vs `SO_DIEN_THOAI_KHONG_HOP_LE`). Người dùng
+   * báo đúng triệu chứng: đăng nhập con cháu báo "could not reach the server".
+   *
+   * ⚠️ §11 — CÂU ĐÓ CÒN SAI SỰ THẬT. Máy chủ đã trả lời đàng hoàng; nói
+   * "chưa nối được" đẩy bác đi kiểm wifi trong khi việc cần làm là sửa ô nhập.
+   *
+   * Hàng rào: test '§HĐ — mọi mã lỗi tài khoản đều có câu trong catalog'.
+   */
+  SO_DIEN_THOAI_KHONG_HOP_LE: c(
+    'Số điện thoại chưa đúng dạng. Bác xem lại giúp cháu.',
+    'That phone number does not look right. Please check it.',
+  ),
+  KHONG_CO_TAI_KHOAN: c(
+    'Số này chưa có tài khoản. Bác bấm "Tạo tài khoản mới" nhé.',
+    'There is no account for this number yet. Tap “Create a new account”.',
+  ),
+  THIEU_TEN: c(
+    'Bác điền giúp cháu tên để hiển thị.',
+    'Please enter a name to show.',
+  ),
+  THIEU_DAU_VAO: c(
+    'Bác điền giúp cháu đủ các ô nhé.',
+    'Please fill in all the fields.',
+  ),
+  MAT_KHAU_QUA_DAI: c(
+    'Mật khẩu dài quá. Bác rút ngắn lại giúp cháu.',
+    'That password is too long. Please shorten it.',
+  ),
+  SAI_MAT_KHAU_CU: c(
+    'Mật khẩu cũ chưa đúng. Bác thử lại nhé.',
+    'The old password is not right. Please try again.',
+  ),
+  RATE_LIMITED: c(
+    'Bác thử hơi nhiều lần trong một lúc. Bác chờ một chút rồi thử lại.',
+    'Too many attempts in a short time. Please wait a moment and try again.',
+  ),
+  INPUT_TOO_LONG: c(
+    'Nội dung dài quá mức cháu nhận được.',
+    'That content is longer than we can accept.',
+  ),
+  FILE_TOO_LARGE: c(
+    'Ảnh nặng quá mức cháu nhận được. Bác chụp lại ảnh nhỏ hơn nhé.',
+    'That image is larger than we can accept. Please try a smaller one.',
+  ),
+  JSON_KHONG_HOP_LE: c(
+    'Cháu chưa đọc được dữ liệu gửi lên. Bác thử lại nhé.',
+    'We could not read the data that was sent. Please try again.',
+  ),
+  LOI_MAY_CHU: c(
+    'Máy chủ đang trục trặc. Bác thử lại sau một lúc.',
+    'The server ran into a problem. Please try again in a moment.',
+  ),
+  VAI_KHONG_HOP_LE: c(
+    'Cháu chưa nhận ra vai này. Bác chọn lại giúp cháu.',
+    'We did not recognise that role. Please choose again.',
+  ),
+  THIEU_VONG_TRON: c(
+    'Bác chưa có vòng tròn gia đình nào.',
+    'You do not have a trusted circle yet.',
+  ),
+  CHUA_XAC_NHAN_GOP: c(
+    'Việc này cần bác xác nhận thêm một bước nữa.',
+    'This needs one more confirmation from you.',
+  ),
   SAI_SO_HOAC_MAT_KHAU: c(
     'Số điện thoại hoặc mật khẩu chưa đúng. Bác thử lại nhé.',
     'That phone number or password is not right. Please try again.',

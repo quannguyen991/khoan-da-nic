@@ -1173,7 +1173,20 @@ export default function App() {
                             : 'text-white/70 hover:text-white w-[3.25rem] h-[3.25rem] sm:w-[3.6rem] sm:h-[3.6rem] lg:text-white/85 lg:hover:bg-white/20 lg:w-auto'
                         }`}
                       >
-                        <Icon size={24} fill={isActive && item.id !== 'search' ? "currentColor" : "none"} strokeWidth={isActive ? 2 : 2} />
+                        {/*
+                          ⚠️ 28px, KHÔNG PHẢI 24px. Người dùng báo 20/8/2026:
+                          "cái icon taskbar bị bé tí luôn".
+
+                          §4.4 đặt sàn cho VÙNG CHẠM (52px) và CỠ CHỮ (14px), nhưng
+                          KHÔNG đặt sàn cho cỡ BIỂU TƯỢNG — nên một biểu tượng 24px nằm
+                          giữa vùng chạm 52px vẫn qua được mọi test. Vùng chạm đủ to
+                          không có nghĩa là NHÌN THẤY được cái gì trong đó.
+
+                          ⚠️ BỐN MUỐI NHÃN ĐỀU ẨN trên điện thoại (`hidden lg:inline`),
+                          nên biểu tượng là THỨ DUY NHẤT phân biệt được chúng. Ở đây
+                          nó không phải trang trí — nó là nhãn.
+                        */}
+                        <Icon size={28} fill={isActive && item.id !== 'search' ? "currentColor" : "none"} strokeWidth={isActive ? 2.4 : 2.2} />
                         {/*
                           Trên máy tính nhãn hiện thường trực — có chỗ, và người
                           cao tuổi đọc chữ nhanh hơn đoán biểu tượng. Trên điện

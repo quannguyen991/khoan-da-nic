@@ -1418,3 +1418,54 @@ test('§4.3 — đời nào mô hình chỉ-đọc-chữ cũng không được k
     assert.strictEqual(coThiGiacTheoTen(m, {}), true, m + ' nhìn được ảnh');
   }
 });
+
+/*
+ * ═════ CORS PHẢI CHO ĐỦ MỌI PHƯƠNG THỨC MÁY CHỦ THẬT SỰ NHẬN ═════
+ *
+ * Đo 20/8/2026: `app.patch('/api/tai-khoan/toi')` tồn tại, nhưng hàng CORS chỉ
+ * khai `GET, POST, OPTIONS`. Bản APK (origin `https://localhost`) bị trình duyệt
+ * chặn ngay tại preflight — sửa hồ sơ không bao giờ hoạt động.
+ *
+ * Lỗi này IM LẶNG ở phía máy chủ: preflight trả 204, yêu cầu thật không tới nơi
+ * để ghi log. Nên nó phải được bắt bằng test, không phải bằng đọc log.
+ */
+test('§6.7 — CORS khai đủ mọi phương thức mà server.js thực sự đăng ký', () => {
+  const nguon = readFileSync(path.join(GOC, 'backend', 'server.js'), 'utf8');
+  const dungTrongCors = (nguon.match(/access-control-allow-methods',\s*'([^']+)'/) || [])[1] || '';
+  const choPhep = new Set(dungTrongCors.split(',').map((x) => x.trim().toUpperCase()));
+
+  const daDangKy = new Set();
+  for (const m of nguon.matchAll(/^app\.(get|post|patch|put|delete)\(/gm)) {
+    daDangKy.add(m[1].toUpperCase());
+  }
+  const thieu = [...daDangKy].filter((m) => !choPhep.has(m));
+  assert.deepStrictEqual(thieu, [],
+    'server.js đăng ký những phương thức này nhưng CORS không cho: ' + thieu.join(', ')
+    + ' — bản APK sẽ bị chặn ngay tại preflight, và máy chủ không thấy gì cả.');
+});
+
+/*
+ * ═════ MỌI MÃ LỖI TÀI KHOẢN PHẢI CÓ CÂU TRONG CATALOG ═════
+ *
+ * Đo 20/8/2026: máy chủ trả 19 mã, `MA_TAI_KHOAN` có 8. Mã không tra được thì
+ * `LoginView` rơi về `KHONG_GOI_DUOC` — "Chưa nối được với máy chủ".
+ *
+ * Câu đó SAI SỰ THẬT (§11): máy chủ đã trả lời đàng hoàng, chỉ là giao diện
+ * không biết nói gì. Nó đẩy bác đi kiểm wifi trong khi việc cần làm là sửa ô nhập.
+ */
+test('§HĐ — mọi mã lỗi tài khoản máy chủ trả đều có câu trong catalog', () => {
+  const nguonSv = readFileSync(path.join(GOC, 'backend', 'server.js'), 'utf8')
+    + readFileSync(path.join(GOC, 'backend', 'src', 'tai-khoan.js'), 'utf8');
+  const cat = readFileSync(path.join(GOC, 'src', 'catalog.ts'), 'utf8');
+  const khoiCat = cat.slice(cat.indexOf('export const MA_TAI_KHOAN'));
+  const coTrongCat = new Set([...khoiCat.slice(0, khoiCat.indexOf('};')).matchAll(/^  ([A-Z_]{3,}):/gm)].map((m) => m[1]));
+
+  const maSv = new Set();
+  for (const m of nguonSv.matchAll(/maLoi:\s*'([A-Z_]{3,})'/g)) maSv.add(m[1]);
+  for (const m of nguonSv.matchAll(/LoiTaiKhoan\('([A-Z_]{3,})'/g)) maSv.add(m[1]);
+
+  const thieu = [...maSv].filter((x) => !coTrongCat.has(x)).sort();
+  assert.deepStrictEqual(thieu, [],
+    'Máy chủ trả những mã này mà catalog không có câu: ' + thieu.join(', ')
+    + ' — bác sẽ thấy "Chưa nối được với máy chủ" cho một lỗi không liên quan gì tới mạng.');
+});

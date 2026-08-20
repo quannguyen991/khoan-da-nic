@@ -210,18 +210,63 @@ public class KhoanDaPlugin extends Plugin {
             call.reject("CHUA_BAT_QUYEN_POPUP");
             return;
         }
-        getActivity().runOnUiThread(() ->
-                PopupDeManHinh.hien(getContext(), tieuDe, nutMo, nutOn));
+        chayTrenUi(null, "POPUP_KHONG_HIEN_DUOC",
+                () -> PopupDeManHinh.hien(getContext(), tieuDe, nutMo, nutOn));
         call.resolve();
     }
 
     @PluginMethod
     public void anPopup(PluginCall call) {
-        getActivity().runOnUiThread(() -> PopupDeManHinh.an(getContext()));
+        chayTrenUi(null, "POPUP_KHONG_AN_DUOC", () -> PopupDeManHinh.an(getContext()));
         call.resolve();
     }
 
     // ─────────── Nghe giọng nói — §4.3 nguồn đầu vào thứ sáu ───────────
+
+    /*
+     * ══════ LƯỚI CHO MỌI VIỆC CHẠY TRÊN LUỒNG UI ══════
+     *
+     * ⚠️ NGOẠI LỆ NÉM TRONG `runOnUiThread` KHÔNG ĐƯỢC CAPACITOR BẮT.
+     * Nó đi thẳng lên `Thread.UncaughtExceptionHandler` của Android và GIẾT APP
+     * — không hộp thoại, không thông báo, màn hình văng về desktop.
+     *
+     * Người dùng báo 20/8/2026: "ấn vào phần ghi âm xong cấp quyền thì bị out
+     * ra ngoài, cứ ấn vào voice là bị out". Đúng triệu chứng của lỗi này.
+     *
+     * Hai chỗ hở đo được:
+     *   ① `dungNghe`   — `dungBoNghe()` và `resolve()` nằm NGOÀI khối try. Bộ nghe
+     *                    đã bị huỷ hoặc tiến trình của ROM chết thì `destroy()` ném.
+     *   ② `hienPopup`  — `WindowManager.addView` ném `BadTokenException` khi quyền
+     *                    vẽ đè bị thu hồi giữa chừng. Hoàn toàn không có lưới.
+     *
+     * ⚠️ BẮT `Throwable`, KHÔNG PHẢI `Exception`. `NoSuchMethodError` và
+     * `BadTokenException` đều không phải `Exception` ở mọi nhánh — và đây là
+     * biên giới ngoài cùng, dưới nó không còn ai để bắt nữa.
+     *
+     * ⚠️ §4.3 — HUỲ LƯỢT BẰNG MỘT LỖI CÓ TÊN, ĐỪNG NUỐT IM. Nuốt xong
+     * thì giao diện đứng mãi ở "Cháu đang nghe…" — đổi một cú sập lấy một
+     * cú treo thì không phải là sửa.
+     */
+    private void chayTrenUi(PluginCall call, String maLoi, Runnable viec) {
+        final android.app.Activity hoatDong = getActivity();
+        if (hoatDong == null) {
+            if (call != null) call.reject(maLoi);
+            return;
+        }
+        hoatDong.runOnUiThread(() -> {
+            try {
+                viec.run();
+            } catch (Throwable t) {
+                android.util.Log.e("KhoanDa", maLoi, t);
+                PluginCall dangCho = luotNghe;
+                luotNghe = null;
+                if (dangCho != null) dangCho.reject(maLoi);
+                if (call != null && call != dangCho) {
+                    try { call.reject(maLoi); } catch (Throwable bo) { /* đã trả rồi */ }
+                }
+            }
+        });
+    }
 
     private SpeechRecognizer boNghe;
 
@@ -283,7 +328,7 @@ public class KhoanDaPlugin extends Plugin {
         call.setKeepAlive(true);
         luotNghe = call;
 
-        getActivity().runOnUiThread(() -> {
+        chayTrenUi(call, "NGHE_HONG", () -> {
             /*
              * ⚠️ TOÀN BỘ RUNNABLE NÀY PHẢI CÓ LƯỚI — 16/8/2026.
              *
@@ -358,7 +403,7 @@ public class KhoanDaPlugin extends Plugin {
      */
     @PluginMethod
     public void dungNghe(PluginCall call) {
-        getActivity().runOnUiThread(() -> {
+        chayTrenUi(call, "DUNG_NGHE_HONG", () -> {
             /*
              * ⚠️ `stopListening()` PHẢI CÓ try/catch RIÊNG — LỖI ĐÃ MẮC 16/8/2026.
              *
@@ -418,7 +463,7 @@ public class KhoanDaPlugin extends Plugin {
 
     @Override
     protected void handleOnDestroy() {
-        getActivity().runOnUiThread(this::dungBoNghe);
+        chayTrenUi(null, "DUNG_BO_NGHE_HONG", this::dungBoNghe);
         super.handleOnDestroy();
     }
 

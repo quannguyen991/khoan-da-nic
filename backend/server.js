@@ -200,7 +200,23 @@ app.use((req, res, next) => {
     res.setHeader('access-control-allow-origin', o);
     res.setHeader('vary', 'Origin');
     res.setHeader('access-control-allow-headers', 'content-type, authorization');
-    res.setHeader('access-control-allow-methods', 'GET, POST, OPTIONS');
+    /*
+     * ⚠️ PATCH PHẢI CÓ Ở ĐÂY. `app.patch('/api/tai-khoan/toi')` là đường
+     * DUY NHẤT để sửa hồ sơ, và thiếu nó trong danh sách này thì trình duyệt
+     * chặn ngay từ preflight — yêu cầu thật không bao giờ rời máy.
+     *
+     * Đo 20/8/2026: preflight PATCH từ origin `https://localhost` (bản APK) trả
+     * 204 kèm `allow-methods: GET, POST, OPTIONS` ⇒ bị chặn. Người dùng báo
+     * đúng triệu chứng: "ấn vào edit profile vẫn k thể edit được".
+     *
+     * ⚠️ LỖI NÀY IM LẶNG PHÍA MÁY CHỦ. Nhìn từ log thì không có gì sai —
+     * preflight trả 204 đẹp đẽ, và yêu cầu PATCH thật không bao giờ tới nơi
+     * để mà ghi log. Chỉ phía người dùng mới thấy.
+     *
+     * ⚠️ THÊM PHƯƠNG THỨC MỚI VÀO `server.js` THÌ THÊM VÀO ĐÂY LUÔN.
+     * Hàng rào: test 'CORS cho đủ mọi phương thức máy chủ thật sự nhận'.
+     */
+    res.setHeader('access-control-allow-methods', 'GET, POST, PATCH, OPTIONS');
     res.setHeader('access-control-max-age', '600');
   }
   // Preflight: trả sớm, đừng để nó rơi xuống handler thật.
