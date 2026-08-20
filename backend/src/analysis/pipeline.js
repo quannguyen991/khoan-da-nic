@@ -22,6 +22,12 @@ const { chonMuc } = require('../intervention-ladder');
 const { tinHieuTuTraLoi } = require('../bo-hoi-nhanh');
 
 const GIOI_HAN_VAN_BAN = 5000;      // §6.10
+/**
+ * Dưới ngưỡng này mà không tìm ra tín hiệu nào thì KHÔNG kết luận "không thấy
+ * gì" — xem khối §4.3 ở cuối `analyze()`. Sáu chữ là chỗ "police told me bank
+ * 50$" (5 chữ) rơi vào, còn một câu tin nhắn thật thường dài hơn nhiều.
+ */
+const NGUONG_TU_QUA_NGAN = 6;
 const NGUONG_CHAP_NHAN_LLM = 0.72;  // §6.4 — 0.55–0.71 → unknown; < 0.55 → drop
 const NGUONG_OCR = 0.5;
 
@@ -628,6 +634,38 @@ function analyze(input = {}, nguCanhTinCay = {}) {
     speechActs: ctx.segments.map((d) => d.speechAct),
   };
   if (quaDai) envelope.loi = 'INPUT_TOO_LONG';
+
+  /*
+   * ══════ §4.3 — QUÁ NGẮN ĐỂ KẾT LUẬN, KHÔNG PHẢI "ĐÃ KIỂM, KHÔNG THẤY GÌ" ══════
+   *
+   * Đã có sàn cho nội dung QUÁ DÀI (`noi_dung_qua_dai`) nhưng không có sàn cho
+   * quá ngắn — một sự bất đối xứng lặng lẽ.
+   *
+   * Đo 20/8/2026, người dùng gõ đúng năm chữ: "police told me bank 50$".
+   * Bộ luật không đủ cấu trúc để chấm, tầng AI cũng không trích được câu nào để
+   * làm bằng chứng. Màn hình trả về "Chưa thấy dấu hiệu rủi ro" — đọc thành
+   * "cháu đã xem và thấy ổn", trong khi sự thật là KHÔNG ĐỦ ĐỂ XEM.
+   *
+   * Đây đúng dạng lỗi §4.3, chỉ khác nguồn: trước là ảnh không đọc được và tên
+   * miền không phân giải được, giờ là một mẩu chữ quá ngắn để có nghĩa.
+   *
+   * ⚠️ ĐIỀU KIỆN LÀ "CHƯA KẾT LUẬN ĐƯỢC", KHÔNG PHẢI "KHÔNG TÌM THẤY GÌ".
+   * Bản đầu chỉ khai khi `maLyDo` rỗng. Nhưng "police told me bank 50$" BẮT ĐƯỢC
+   * một tín hiệu giả danh (10 điểm, dưới ngưỡng 20) — tức có mã trong `maLyDo`
+   * mà nhãn vẫn là "chưa thấy dấu hiệu". Đúng lúc mâu thuẫn nhất thì sàn lại
+   * không áp. Năm chữ mà đã đủ để ra NGHI_NGO hoặc CAO thì không khai — lúc đó
+   * nói "quá ngắn" là tự phủ nhận chính kết luận vừa đưa ra.
+   *
+   * ⚠️ KHÔNG HẠ MỨC, KHÔNG NÂNG MỨC. Nó chỉ thêm một câu vào `chuaKiem`; §HĐ luật
+   * 3 buộc frontend hiện câu đó cùng cỡ chữ với nhãn. Mức vẫn do bộ luật quyết.
+   */
+  const soTu = String(vanBan).trim().split(/\s+/).filter(Boolean).length;
+  if (soTu > 0 && soTu <= NGUONG_TU_QUA_NGAN
+      && riskLabel === 'NO_SIGNS_FOUND'
+      && !envelope.chuaKiem.includes('noi_dung_qua_ngan')) {
+    envelope.chuaKiem = [...envelope.chuaKiem, 'noi_dung_qua_ngan'];
+  }
+
   return envelope;
 }
 

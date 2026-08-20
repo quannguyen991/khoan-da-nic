@@ -1943,7 +1943,8 @@ function VoiceView({
           }
           console.warn('Speech recognition notice:', event.error);
           if (event.error === 'not-allowed') {
-            setErrorMessage('Vui lòng cho phép quyền truy cập Micro trên trình duyệt để nhận diện giọng nói.');
+            // Dùng lại đúng câu đã có trong catalog — cùng một sự việc thì cùng một câu.
+            setErrorMessage(t('Máy chưa cho Khoan Đã dùng micro. Bác gõ chữ hoặc gửi ảnh giúp cháu nhé.'));
           }
         };
 
@@ -2029,30 +2030,41 @@ function VoiceView({
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
 
+  /*
+   * ⚠️ TIÊU ĐỀ NGẮN, VÀ CẢ NỘI DUNG CŨNG PHẢI TRA CATALOG.
+   *
+   * Tiêu đề cũ dài tới 52 ký tự nên bị `truncate` cắt cụt: "Công an dọa phong …",
+   * "Ngân hàng dọa khó…" — thấy trong ảnh người dùng gửi 20/8/2026. Bác không
+   * đọc được mình sắp thử tình huống nào.
+   *
+   * Phần `text` cũng phải dịch, dù nó KHÔNG hiện trên tấm thẻ: bấm vào là nó
+   * chạy thẳng vào ô nội dung và ra màn kết quả. Để nguyên tiếng Việt thì người
+   * chọn English bấm "Police impersonation" rồi nhận về một màn chữ Việt.
+   */
   const sampleScenarios = [
     {
-      title: '👮 Công an dọa phong tỏa tài sản & yêu cầu chuyển tiền',
-      text: 'Số lạ tự xưng cán bộ điều tra công an thông báo tài khoản của bác liên quan đến đường dây rửa tiền, yêu cầu chuyển gấp 50 triệu vào tài khoản tạm giữ an toàn trong 15 phút để bảo lãnh.'
+      title: t('👮 Giả danh công an'),
+      text: t('Số lạ tự xưng cán bộ điều tra công an, báo tài khoản của bác liên quan đường dây rửa tiền, yêu cầu chuyển gấp 50 triệu vào tài khoản tạm giữ trong 15 phút.')
     },
     {
-      title: '🏦 Ngân hàng dọa khóa thẻ & yêu cầu đọc mã OTP',
-      text: 'Có người gọi tự xưng tổng đài ngân hàng báo có giao dịch 20 triệu vừa phát sinh, yêu cầu bác đọc ngay mã OTP gửi về điện thoại để hủy giao dịch.'
+      title: t('🏦 Giả danh ngân hàng, xin OTP'),
+      text: t('Người gọi tự xưng tổng đài ngân hàng, báo vừa có giao dịch 20 triệu, yêu cầu bác đọc ngay mã OTP gửi về máy để huỷ giao dịch.')
     },
     {
-      title: '🎁 Thông báo trúng thưởng xe SH nộp trước thuế',
-      text: 'Chúc mừng bác đã trúng thưởng giải đặc biệt xe máy SH và 100 triệu đồng từ chương trình tri ân khách hàng, yêu cầu bác nạp trước 3 triệu phí vận chuyển.'
+      title: t('🎁 Báo trúng thưởng'),
+      text: t('Báo bác trúng thưởng xe máy SH và 100 triệu đồng, yêu cầu nạp trước 3 triệu phí vận chuyển.')
     },
     {
-      title: '🏥 Con cấp cứu ở viện yêu cầu chuyển tiền gấp',
-      text: 'Số lạ gọi tự xưng bác sĩ bệnh viện cấp cứu, báo tin con của bác vừa bị tai nạn nguy kịch, yêu cầu chuyển ngay 30 triệu tiền viện phí mổ cấp cứu.'
+      title: t('🏥 Con cấp cứu, xin tiền gấp'),
+      text: t('Số lạ tự xưng bác sĩ cấp cứu, báo con của bác vừa bị tai nạn nguy kịch, yêu cầu chuyển ngay 30 triệu tiền mổ.')
     },
     {
-      title: '📦 Bưu điện báo có bưu kiện cấm phạt tiền',
-      text: 'Tổng đài bưu điện thông báo bác có bưu phẩm chuyển ra nước ngoài chứa tài liệu cấm, yêu cầu chuyển 15 triệu để xác minh không bị khởi tố.'
+      title: t('📦 Bưu kiện cấm'),
+      text: t('Tổng đài bưu điện báo bác có bưu phẩm chứa tài liệu cấm, yêu cầu chuyển 15 triệu để xác minh, nếu không sẽ bị khởi tố.')
     },
     {
-      title: '💰 Việc nhẹ lương cao xem video kiếm tiền',
-      text: 'Mời bác tham gia làm cộng tác viên online xem video trên mạng xã hội, chỉ cần nạp 2 triệu tiền cọc để nhận hoa hồng 500 nghìn mỗi ngày.'
+      title: t('💰 Việc nhẹ lương cao'),
+      text: t('Mời bác làm cộng tác viên xem video kiếm tiền, chỉ cần nạp 2 triệu tiền cọc để nhận hoa hồng 500 nghìn mỗi ngày.')
     }
   ];
 
@@ -2274,7 +2286,7 @@ function VoiceView({
               }}
               className="text-left bg-white/90 hover:bg-purple-50 p-2.5 rounded-xl border border-purple-100 shadow-2xs text-[14px] text-[#1e1b4b] font-medium flex items-center justify-between active:scale-98 transition-all group"
             >
-              <span className="font-bold truncate mr-2 text-slate-800 group-hover:text-purple-900">{sc.title}</span>
+              <span className="font-bold mr-2 text-slate-800 group-hover:text-purple-900">{sc.title}</span>
               <span className="text-[14px] text-purple-700 bg-purple-100 group-hover:bg-purple-200 px-2 py-0.5 rounded-md font-bold shrink-0">{t("Thử ngay")}</span>
             </button>
           ))}

@@ -304,6 +304,16 @@ export const CHUA_KIEM: Record<string, Cap> = {
     'Nội dung quá dài, Khoan Đã chưa đọc hết',
     'The content was too long to read in full',
   ),
+  /*
+   * §4.3 — QUÁ NGẮN ĐỂ KẾT LUẬN, ĐỐI XỨNG VỚI QUÁ DÀI Ở TRÊN.
+   * Đo 20/8/2026: người dùng gõ "police told me bank 50$" và nhận về "Chưa thấy
+   * dấu hiệu rủi ro" — đọc thành "cháu đã xem và thấy ổn", trong khi sự thật là
+   * không đủ chữ để xem. Câu này hiện cùng cỡ chữ với nhãn (§HĐ luật 3).
+   */
+  noi_dung_qua_ngan: c(
+    'Bác kể thêm vài câu nữa thì cháu mới đủ để kiểm',
+    'Tell me a bit more — that is not enough to check yet',
+  ),
   chi_doc_duoc_mot_phan_tin: c(
     'Khoan Đã chỉ đọc được một phần tin nhắn',
     'Khoan Đã could only read part of the message',

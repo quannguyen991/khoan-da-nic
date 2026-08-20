@@ -234,8 +234,27 @@ function bocRss(xml, tenBao) {
   const ra = [];
   for (const m of xml.matchAll(/<item[^>]*>([\s\S]*?)<\/item>/gi)) {
     const khoi = m[1];
-    const tieuDe = lamSachChu(lay(khoi, 'title'));
-    const lienKet = lay(khoi, 'link');
+    const tieuDeTho = lay(khoi, 'title');
+    const tieuDe = lamSachChu(tieuDeTho);
+
+    /*
+     * ⚠️ THẺ `<link>` CỦA MỘT SỐ FEED LÀ RÁC — PHẢI NHẬN RA VÀ VÒNG QUA.
+     *
+     * Đo 20/8/2026, feed của FTC trả về:
+     *   <link>https://consumer.ftc.gov/%3Ca%20href%3D%22https%3A//consumer.ftc.gov/
+     *         consumer-alerts/2026/08/...%22%20hreflang%3D%22en%22%3Eview%3C/a%3E</link>
+     * Tức cả một thẻ <a> bị mã hoá URL nhét vào chỗ đáng lẽ là địa chỉ. Nó
+     * VẪN qua được phép kiểm `^https?://` vì phần đầu trông như URL thật — nên
+     * mọi tin FTC hiện ra bình thường, bấm vào mới ra "page not found".
+     *
+     * Địa chỉ thật nằm trong `href` của thẻ <a> ở tiêu đề. Dấu hiệu nhận biết
+     * là `%3C` (dấu `<` đã mã hoá) hoặc `%22` (dấu nháy kép) nằm trong đường dẫn.
+     */
+    const hrefTrongTieuDe = (tieuDeTho.match(/href="(https?:\/\/[^"]+)"/i) || [])[1];
+    const lienKetTho = lay(khoi, 'link');
+    const lienKet = (/%3C|%3E|%22|<a[\s>]/i.test(lienKetTho) && hrefTrongTieuDe)
+      ? hrefTrongTieuDe
+      : lienKetTho;
 
     // §11 — thiếu tiêu đề hoặc thiếu link thì LOẠI, không hiện nửa vời.
     if (!tieuDe || !/^https?:\/\//.test(lienKet)) continue;

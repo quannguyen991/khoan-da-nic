@@ -64,7 +64,13 @@ module.exports = {
       { pattern: '\\b(transfer|send|deposit|top ?up|pay|remit|wire)\\b[^.]{0,24}\\b\\d+\\s*(vnd|dong|million|k|m)\\b', scope: 'action' },
     ],
     FIN_SAFE_ACCOUNT: [
-      { pattern: '\\b(safe|secure|protected|holding) (account|wallet)\\b', scope: 'action' },
+      /*
+       * ⚠️ MỘT CHỮ CHÈN VÀO GIỮA LÀM TRƯỢT CẢ MẪU. Đo 20/8/2026:
+       *   "transfer to a safe account"       → bắt được
+       *   "transfer to a safe bank account"  → TRƯỢT
+       * Chỉ vì chữ "bank" nằm giữa hai từ. Cho phép một chữ đệm tuỳ ý.
+       */
+      { pattern: '\\b(safe|secure|protected|holding)( \\w+)? (account|wallet)\\b', scope: 'action' },
     ],
     FIN_CRYPTO_TRANSFER: [
       { pattern: '\\b(bitcoin|btc|crypto|cryptocurrency|ethereum|usdt)\\b', scope: 'action' },
@@ -111,6 +117,19 @@ module.exports = {
       { pattern: '\\bthis is (officer|detective|inspector|sergeant|agent)\\b', scope: 'any' },
       { pattern: '\\b(an|the) officer will\\b', scope: 'any' },
       { pattern: '\\bfrom the (police|federal|ministry|department of)\\b', scope: 'any' },
+      /*
+       * ⚠️ BẮT CẢ DẠNG NGƯỜI DÙNG KỂ LẠI, KHÔNG CHỈ DẠNG KẺ LỪA TỰ XƯNG.
+       *
+       * Ba mẫu trên đều bắt lời của KẺ LỪA ("this is officer…"). Nhưng bác không
+       * dán nguyên lời thoại vào — bác KỂ LẠI: "police told me…". Đo 20/8/2026,
+       * người dùng gõ "police told me bank 50$" và nhận về KHÔNG một tín hiệu
+       * nào. Đó mới là cách người ta thật sự gõ vào ô tìm kiếm.
+       *
+       * ⚠️ VẪN ĐÒI CẤU TRÚC, KHÔNG LẤY MỖI CHỮ "police". "Police arrest three in
+       * fraud ring" là tin báo, không phải việc của bác — cùng bài học với cụm
+       * 'cong an' ở pack tiếng Việt. Phải có ai đó nói VỚI một người.
+       */
+      { pattern: '\\b(police|officer|investigator|detective|prosecutor)\\b[^.]{0,24}\\b(told|called|contacted|says|said)\\b[^.]{0,16}\\b(me|us|you|my)\\b', scope: 'any' },
     ],
     ID_TAX_BENEFIT_IMPERSONATION: [
       { pattern: '\\b(irs|hmrc|ato)\\b', scope: 'any' },
