@@ -381,7 +381,29 @@ function docNguCanhTinCay(nguCanhTinCay) {
 
 function analyze(input = {}, nguCanhTinCay = {}) {
   const quaDai = typeof input.vanBan === 'string' && input.vanBan.length > GIOI_HAN_VAN_BAN;
-  const vanBan = quaDai ? '' : (input.vanBan || '');
+  const vanBanGoc = quaDai ? '' : (input.vanBan || '');
+
+  /*
+   * ═════ CHỮ ĐỌC ĐƯỢC TỪ ẢNH CŨNG LÀ VĂN BẢN CỦA BÁC ═════
+   *
+   * Đo 20/8/2026: cùng nội dung giả danh công an, dạng chữ ra NGUY HIỂM CAO
+   * còn dạng ảnh ra CHƯA THẤY. Ảnh đi một đường riêng, hoàn toàn phụ thuộc
+   * vào AI, và tầng luật không hề được nhìn nội dung đó.
+   *
+   * §4.2 nói AI CHỈ BẬT CỜ còn `decision-engine.js` mới quyết — nhưng ở
+   * đường ảnh thì bộ luật không có gì để đọc, nên nó vắng mặt hẳn. Nối bản
+   * chép vào đây là trả bộ luật về đúng chỗ của nó.
+   *
+   * ⚠️ NỐI THÊM, KHÔNG THAY THẾ. Bác có thể vừa dán chữ vừa gửi ảnh; bỏ
+   * mất một trong hai là bỏ đúng nửa đang mang tín hiệu.
+   *
+   * ⚠️ CHỈ LÀM TĂNG CẢNH GIÁC (§4.2). Thêm chữ chỉ có thể thêm tín hiệu.
+   * Nếu một ngày nào đó có luật HẠ mức theo nội dung, thì phải xem lại đây
+   * — vì lúc đó kẻ lừa chỉ cần viết câu thần chú đó vào ảnh (§12).
+   */
+  const chuTrongAnh = typeof input.ocrText === 'string'
+    ? input.ocrText.slice(0, GIOI_HAN_VAN_BAN).trim() : '';
+  const vanBan = [vanBanGoc, chuTrongAnh].filter(Boolean).join(String.fromCharCode(10));
 
   // §6.1 bước 3 — có URL thì phân tích DETERMINISTIC. KHÔNG tự mở link.
   const urlList = trichUrl(vanBan);

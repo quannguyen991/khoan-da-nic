@@ -1340,3 +1340,81 @@ test('§4.1 · chuỗi hệ thống Android có đủ bản tiếng Anh', () => 
 
   assert.ok(vi.size > 15, `values/strings.xml chỉ soi ra ${vi.size} chuỗi — biểu thức soi đã hỏng`);
 });
+
+/*
+ * ═════ KHÔNG CÓ CÂU THẦN CHÚ HẠ MỨC VÔ ĐIỀU KIỆN (§12) ═════
+ *
+ * 20/8/2026 — người dùng báo "tin nhắn đọc OTP vẫn chưa tự cảnh báo".
+ * Đo ra: thêm "Ngân hàng thông báo" vào đầu đưa cả câu từ 25đ xuống 0đ,
+ * vì khung "bài cảnh báo" nuốt trọn câu. Cùng họ với "please hold" và "ch play".
+ *
+ * Hai nửa của hàng rào này phải đi cùng nhau. Chỉ giữ nửa trên thì cách "sửa"
+ * dễ nhất là bỏ khung giáo dục đi — và thế là tin thuế THẬT bị báo đỏ.
+ */
+test('§12 — "Ngân hàng thông báo" không xóa được tín hiệu đòi OTP', () => {
+  const { analyze } = require(path.join(GOC, 'backend', 'src', 'analysis', 'pipeline.js'));
+  const k = analyze({ vanBan: 'Ngân hàng thông báo có giao dịch lạ, bác đọc mã OTP vừa gửi về máy cho tôi để huỷ ngay.' });
+  assert.notStrictEqual(k.riskLabel, 'NO_SIGNS_FOUND',
+    'Mở đầu bằng "Ngân hàng thông báo" đang hạ mức vô điều kiện — đó là câu thần chú tặng kẻ lừa.');
+});
+
+test('§12 — nhưng bài cảnh báo và thông báo thật vẫn không bị báo oan', () => {
+  const { analyze } = require(path.join(GOC, 'backend', 'src', 'analysis', 'pipeline.js'));
+  for (const cau of [
+    'Chi cục Thuế thông báo hộ kinh doanh nộp tờ khai quý 3 trước ngày 30/10 tại cơ quan thuế hoặc cổng dịch vụ công quốc gia.',
+    'Công an TP Hà Nội cảnh báo: kẻ gian giả danh cán bộ để yêu cầu chuyển tiền.',
+    'Ngân hàng khuyến cáo không cung cấp mã OTP cho bất kỳ ai.',
+  ]) {
+    assert.strictEqual(analyze({ vanBan: cau }).riskLabel, 'NO_SIGNS_FOUND', cau);
+  }
+});
+
+/*
+ * ═════ CHỮ ĐỌC ĐƯỢC TỪ ẢNH PHẢI ĐI QUA TẦNG LUẬT (§4.2 + §4.3) ═════
+ *
+ * Đo 20/8/2026 trên bản chạy thật — cùng nội dung giả danh công an:
+ *   dạng CHỮ → NGHI_NGỜ/CAO
+ *   dạng ẢNH → CHƯA_THẤY, maLyDo=[], daKiem=['anh_ocr']
+ *
+ * `daKiem: ['anh_ocr']` là lời khai ĐÃ ĐỌC ẢNH về một tấm ảnh chưa ai nhìn —
+ * §4.3 lần thứ tư. Gốc: `validateEvidence()` đòi trích dẫn là chuỗi con của
+ * `vanBan`, mà lượt chỉ-có-ảnh thì `vanBan` rỗng ⇒ vứt sạch tín hiệu.
+ *
+ * Hai nửa phải đi cùng nhau, nếu không "sửa" dễ nhất là bỏ kiểm chứng cho ảnh
+ * — tức mở đúng cửa cho mô hình bịa trích dẫn.
+ */
+test('§4.2 — chữ chép từ ảnh được tầng luật chấm, không chỉ dựa vào AI', () => {
+  const { analyze } = require(path.join(GOC, 'backend', 'src', 'analysis', 'pipeline.js'));
+  const ocr = [
+    'CONG AN TP HA NOI',
+    'Tai khoan cua ong lien quan vu an rua tien.',
+    'Yeu cau chuyen 250.000.000d vao tai khoan an toan trong 2 gio.',
+    'Khong duoc ke cho ai.',
+  ].join(String.fromCharCode(10));
+
+  // KHÔNG có llmSignals — cố tình, để chứng minh TẦNG LUẬT tự làm được.
+  const k = analyze({ anh: 'data:image/png;base64,AAAA', ocrText: ocr });
+  assert.notStrictEqual(k.riskLabel, 'NO_SIGNS_FOUND',
+    'Chữ trong ảnh không tới được tầng luật — ảnh đang phụ thuộc hoàn toàn vào AI.');
+  assert.ok(k.maLyDo.length > 0, 'Phải có mã lý do từ chữ trong ảnh.');
+});
+
+test('§4.3 — ảnh không chép ra chữ nào thì KHÔNG được khai là đã đọc', () => {
+  const { analyze } = require(path.join(GOC, 'backend', 'src', 'analysis', 'pipeline.js'));
+  const k = analyze({ anh: 'data:image/png;base64,AAAA', ocrText: '', ocrFailed: true });
+  assert.ok(!k.daKiem.includes('anh_ocr'),
+    'Khai "đã đọc chữ trong ảnh" về một tấm ảnh không đọc được chữ nào.');
+  assert.ok(k.chuaKiem.includes('khong_doc_duoc_anh'),
+    'Phải nói thật là chưa đọc được ảnh.');
+});
+
+test('§4.3 — đời nào mô hình chỉ-đọc-chữ cũng không được khai là nhìn được ảnh', () => {
+  const { coThiGiacTheoTen } = require(path.join(GOC, 'backend', 'src', 'ai', 'fable-client.js'));
+  // Đo được: `glm-5.2` nhận khối image_url rồi lặng lẽ bỏ qua, trả 200 danh sách rỗng.
+  for (const m of ['glm-5.2', 'qwen3-max', 'deepseek-v3', 'kimi-k2', 'minimax-m2']) {
+    assert.strictEqual(coThiGiacTheoTen(m, {}), false, m + ' không nhìn được ảnh');
+  }
+  for (const m of ['gemini-3.6-flash', 'glm-4.5v', 'qwen2.5-vl-72b', 'gpt-4o', 'claude-sonnet-5']) {
+    assert.strictEqual(coThiGiacTheoTen(m, {}), true, m + ' nhìn được ảnh');
+  }
+});

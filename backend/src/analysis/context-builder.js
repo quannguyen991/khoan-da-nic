@@ -325,7 +325,7 @@ const KHUNG_GIAO_DUC = new RegExp([
   '^\\s*không\\s+(cài|chuyển|đọc|bấm|tải)',
 
   // Cơ quan / tổ chức đứng TRƯỚC động từ cảnh báo: "Công an TP Hà Nội cảnh báo:"
-  '(công an|cảnh sát|cơ quan|ngân hàng|tổ dân phố|bộ|cục|chi cục)[^.]{0,40}'
+'(công an|cảnh sát|cơ quan|ngân hàng|tổ dân phố|bộ|cục|chi cục)[^.]{0,40}'
     + '(cảnh báo|khuyến cáo|lưu ý|thông báo)',
 
   // Khung TƯỜNG THUẬT về nạn nhân, hoặc về kẻ giả danh.
@@ -439,6 +439,47 @@ function viTriDongTuRuiRo(n) {
   return ra;
 }
 
+/*
+ * ══════ PHẢN KHUNG: THU HỒI TƯ CÁCH "BÀI GIÁO DỤC" ══════
+ *
+ * Đo được 20/8/2026 trên bản chạy thật:
+ *   "Bác đọc mã OTP cho tôi để xác minh"                    → NGHI_NGỜ (25đ)
+ *   "Ngân hàng thông báo có giao dịch lạ, bác đọc mã OTP…" → CHƯA_THẤY (0đ)
+ *
+ * Thêm bốn chữ "Ngân hàng thông báo" vào đầu là xóa sạch mọi tín hiệu — cả câu
+ * bị xếp `warning_education`, mà lớp đó tự loại mình khỏi action-risk.
+ * Đó đúng là MỘT CÂU THẦN CHÚ TẶNG CHO KẺ LỪA ĐẢO (§12) — cùng bài học với
+ * "please hold" và "ch play": cụm nào hạ mức VÔ ĐIỀU KIỆN thì kẻ lừa chỉ cần
+ * chép nó vào đầu tin nhắn là xong.
+ *
+ * ⚠️ VÌ SAO KHÔNG ĐƠN GIẢN BỎI 'thông báo' KHỎI KHUNG. ĐÃ THỬ, ĐÃ ĐO, ĐÃ BỎai:
+ * bỏ xong thì tin thuế THẬT "Chi cục Thuế thông báo hộ kinh doanh nộp tờ khai
+ * quý 3 trước ngày 30/10…" vọt lên NGUY HIỂM CAO (49đ). Đổi một lỗ thủng
+ * lấy một quả báo oan vào mặt người dùng thật thì không phải là sửa.
+ *
+ * Nên thu hẹp vào ĐÚNG thứ phân biệt được hai bên: NGƯỜI NHẬN LÀ CHÍNH
+ * NGƯỜI GỬI. Một bài cảnh báo mô tả việc kẻ gian LÀM; nó không bảo bác đưa
+ * cái gì CHO NÓ. Tin thuế thật bảo nộp "tại cơ quan thuế", không phải "cho tôi".
+ *
+ * ⚠️ ĐÒI CẢ ĐỘNG TỪ LẪN NGƯỜI NHẬN, và đòi đứng gần nhau. Chỉ "cho tôi" thôi
+ * thì "hãy kể cho tôi nghe bác bị lừa thế nào" cũng dính.
+ */
+const PHAN_KHUNG_GIAO_DUC = /(\b(đọc|doc|cung cấp|cung cap|gửi|gui|nhập|nhap|chuyển|chuyen|nộp|nop|đưa|dua|kết nối|ket noi)\b[^.!?]{0,60}?\b(cho|tới|toi|đến|den|về|ve|sang)\s+(tôi|toi|em|anh|chị|chi|mình|minh|bên (tôi|toi|em|anh|chị|chi))\b)|(\b(số|so) (tài khoản|tai khoan) (này|nay|dưới đây|duoi day)\b)/i;
+
+/*
+ * ⚠️ NGỪ PHỦ ĐỊNH. "Ngân hàng khuyến cáo KHÔNG cung cấp mã OTP cho bất kỳ ai"
+ * là lời khuyên thật — có động từ, nhưng đứng sau một chữ phủ định.
+ * (Ở trên nó đã không khớp vì người nhận là "bất kỳ ai" chứ không phải "tôi" —
+ * nhưng giữ hàng rào này để khung có nới ra sau cũng không vỡ.)
+ */
+const PHU_DINH_TRUOC_DONG_TU = /(không|khong|đừng|dung|chớ|cho|tuyệt đối không|never|do not|don'?t)\s+(đọc|doc|cung cấp|cung cap|gửi|gui|nhập|nhap|chuyển|chuyen|đưa|dua)/i;
+
+function coLoiNhoTruTiep(n) {
+  if (!PHAN_KHUNG_GIAO_DUC.test(n)) return false;
+  if (PHU_DINH_TRUOC_DONG_TU.test(n)) return false;
+  return true;
+}
+
 function phanLoai(n) {
   // Thông báo được kiểm TRƯỚC khung giáo dục: "Không cung cấp mã này cho bất kỳ ai."
   // là đuôi của một SMS ngân hàng thật, không phải bài giáo dục.
@@ -452,7 +493,9 @@ function phanLoai(n) {
     // rủi ro đứng TRƯỚC khung là mệnh lệnh thật ở mệnh đề chính —
     // "Please transfer the money now and do not tell Mum." KHÔNG phải bài giáo dục.
     const coRuiRoNgoaiKhung = viTriRuiRo.some((v) => v < viTriEdu);
-    if (!coRuiRoNgoaiKhung) {
+    // Thu hồi: câu vừa đội lốt bài cảnh báo vừa nhờ bác đưa thứ gì đó CHO CHÍNH NÓ.
+    // Xem chú thích ở `PHAN_KHUNG_GIAO_DUC` — đây là lỗ hổng đo được, không phải giả định.
+    if (!coRuiRoNgoaiKhung && !coLoiNhoTruTiep(n)) {
       return /kẻ (lừa đảo|gian)|scammers?\b.*\b(told|said) me/.test(n)
         && /\btôi\b|\bme\b/.test(n) ? 'quoted_report' : 'warning_education';
     }

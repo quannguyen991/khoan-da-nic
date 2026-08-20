@@ -18,7 +18,7 @@ const express = require('express');
 const { analyze, toHopDong } = require('./src/analysis/pipeline');
 const { CAU_HOI } = require('./src/bo-hoi-nhanh');
 const { trichTinHieu } = require('./src/analysis/llm-extractor');
-const { layCauHinh } = require('./src/ai/fable-client');
+const { layCauHinh, layCacDuong, locDuongThiGiac} = require('./src/ai/fable-client');
 const { dungSafetyCard } = require('./src/safety-card');
 const { dungTrang } = require('./src/safety-card-page');
 const { layKeHoachPhucHoi } = require('./src/analysis/recovery-adapters');
@@ -399,17 +399,32 @@ async function xuLyPhanTich(req, res) {
    * chữ trong ảnh".
    */
   const cauHinhAi = layCauHinh();
-  const moHinhDocDuocAnh = cauHinhAi.coThiGiac;
+  /*
+   * ⚠️ HỎI CẢ CHUỖI, KHÔNG HỎI MỖI ĐƯỜNG ĐẦU.
+   *
+   * `layCauHinh()` chỉ tả đường chính. Đo 20/8/2026: đường chính là `glm-5.2`
+   * (chỉ đọc chữ) nhưng Gemini nằm ngay sau nó trong chuỗi và nhìn được ảnh.
+   * Hỏi mỗi đường đầu thì bác gửi ảnh lên và nhận "chưa đọc được ảnh"
+   * trong khi máy chủ HOÀN TOÀN đọc được — chỉ là nó không chịu đi đường sau.
+   *
+   * `goiChatCoDuPhong` đã tự lọc chuỗi theo `canThiGiac`, nên chỉ cần biết
+   * "có ít nhất một đường nhìn được" là đủ để quyết định có gửi ảnh hay không.
+   */
+  const moHinhDocDuocAnh = locDuongThiGiac(layCacDuong()).length > 0;
   const anhBiBoQua = Boolean(anh) && !moHinhDocDuocAnh;
+  let chuTrongAnh = '';
 
   if (epLoi) {
     aiError = epLoi;
   } else if (!KHONG_GOI_AI && cauHinhAi.daCauHinh && (coVanBan || (anh && moHinhDocDuocAnh))) {
     const kq = await trichTinHieu(coVanBan ? vanBan : '', {
       anh: moHinhDocDuocAnh ? anh : undefined,
+      sourceId: (anh && moHinhDocDuocAnh && !coVanBan) ? 'anh_ocr' : 'van_ban',
     });
     llmSignals = kq.signals;
     aiError = kq.loi;
+    // Bản chép chữ trong ảnh — xem `DOI_CHEP_CHU` ở llm-extractor.
+    chuTrongAnh = typeof kq.ocrText === 'string' ? kq.ocrText : '';
     if (kq.loi) {
       // §6.7 — lỗi vứt mất nguyên nhân là sự cố không chẩn đoán được.
       // Chỉ vào log, và KHÔNG kèm nội dung người dùng (§6.9).
@@ -457,8 +472,17 @@ async function xuLyPhanTich(req, res) {
 
   const envelope = analyze({
     vanBan: coVanBan ? vanBan : '', anh, llmSignals, aiError, traLoiBoHoiNhanh, trangThaiMay,
-    // Ảnh có mà không mô hình nào nhìn ⇒ "chưa đọc được", không phải "đã đọc".
-    ...(anhBiBoQua ? { ocrFailed: true } : {}),
+    ocrText: chuTrongAnh,
+    /*
+     * ⚠️ §4.3 — HAI CÁCH KHÔNG ĐỌC ĐƯỢC ẢNH, CẢ HAI ĐỀU PHẢI KHAI.
+     *   ① không đường nào nhìn được ảnh    ⇒ `anhBiBoQua`
+     *   ② nhìn được nhưng chép ra chuỗi rỗng ⇒ `!chuTrongAnh`
+     *
+     * Trước 20/8/2026 chỉ có ca ①. Ca ② lọt thẳng thành `daKiem: ['anh_ocr']`
+     * — màn hình nói "đã đọc chữ trong ảnh" về một tấm ảnh không ai đọc được
+     * chữ nào. Đó là "không kiểm được" đội lốt "đã kiểm, không thấy gì".
+     */
+    ...((anhBiBoQua || (anh && !chuTrongAnh)) ? { ocrFailed: true } : {}),
     ...nguonGhiAm,
   });
   return res.json(toHopDong(envelope));

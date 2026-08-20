@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'motion/react';
 import { 
   Camera, 
   ShieldAlert, 
-  Home,
   PhoneCall, 
   Mic, 
   X, 
@@ -11,16 +10,14 @@ import {
   Smartphone, 
   Layers,
   ChevronRight, 
-  AlertTriangle,
   ArrowRight,
   Maximize2,
   CheckCircle2,
   Settings,
   Play,
-  MessageSquare,
-  Globe,
 } from 'lucide-react';
 import { ViewState } from '../App';
+import { laApk, quyenPopup, xinQuyenPopup, hienPopupCanhBao, anPopup } from '../native';
 
 interface FloatingQuickAccessProps {
   setView: (view: ViewState) => void;
@@ -62,7 +59,6 @@ export function FloatingQuickAccess({
    * là hiếm. Bày sẵn thứ hiếm dùng đè lên thứ hay dùng là đổi chỗ hai việc.
    */
   const [xemHuongDan, setXemHuongDan] = useState(false);
-  const [activeSimApp, setActiveSimApp] = useState<'home' | 'zalo' | 'sms' | 'call'>('home');
   const [isPipActive, setIsPipActive] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -224,29 +220,29 @@ export function FloatingQuickAccess({
           <div class="header">
             <div class="title-wrap">
               <span style="font-size: 14px;">🛡️</span>
-              <strong style="font-size: 12px; letter-spacing: -0.2px;">Khoan Đã Nổi Ngoài OS</strong>
+              <strong style="font-size: 12px; letter-spacing: -0.2px;">{t('Khoan Đã đang nổi ngoài màn hình')}</strong>
             </div>
             <div class="badge-live">
               <span class="dot"></span>
-              <span>Đang nổi</span>
+              <span>{t('Đang nổi')}</span>
             </div>
           </div>
           <div class="grid-btns">
             <button id="pipScan" class="btn btn-camera">
               <span style="font-size: 16px;">📸</span>
-              <span>Quét Ảnh / Màn Hình</span>
+              <span>{t('Quét ảnh hoặc màn hình')}</span>
             </button>
             <button id="pipSos" class="btn btn-danger">
               <span style="font-size: 16px;">🚨</span>
-              <span>Dừng 60s (SOS)</span>
+              <span>{t('Dừng 60 giây')}</span>
             </button>
             <button id="pipVoice" class="btn btn-voice">
               <span style="font-size: 16px;">🎙️</span>
-              <span>Kể Tình Huống</span>
+              <span>{t('Kể tình huống')}</span>
             </button>
             <button id="pipCall" class="btn btn-call">
               <span style="font-size: 16px;">📞</span>
-              <span>Gọi Con Cái</span>
+              <span>{t('Gọi con cháu')}</span>
             </button>
           </div>
           <div class="footer">
@@ -343,6 +339,8 @@ export function FloatingQuickAccess({
     }
   };
 
+  const [loiPopup, setLoiPopup] = useState<null | 'web' | 'chua_bat'>(null);
+
   const handleCameraScan = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -370,6 +368,34 @@ export function FloatingQuickAccess({
     } else {
       setView('warning');
     }
+  };
+
+  /*
+   * ══════ MỞ POPUP THẬT — KHÔNG VẼ LẠI MÀN HÌNH NỮA ══════
+   *
+   * Chỗ này trước đây bật một màn hình điện thoại GIẢ vẽ bằng div. Người
+   * dùng phát hiện và nói thẳng: "pop up phải hiện hẳn ra bên ngoài như
+   * messenger". Đúng. Giờ nút này gọi `PopupDeManHinh` thật.
+   *
+   * ⚠️ BA CẢNH, NÓI RÕ TẮNG CẢNH. §4.3 — gộp lại là đẩy bác đi tìm một thứ
+   * không tồn tại trên máy của mình rồi tự trách là mình làm sai:
+   *   1. Đang chạy trên web — trình duyệt KHÔNG cho vẽ đè lên app khác. Không
+   *      có cách nào làm được, và nói thật thì hơn là vẽ một bản nhái.
+   *   2. Có app nhưng chưa bật quyền — mở thẳng màn Cài đặt.
+   *   3. Đã bật — bắn ra ngoài luôn, tự tắt sau 6 giây để bản thử không nằm lại.
+   */
+  const moPopupThat = async () => {
+    setIsMenuOpen(false);
+    if (!(await laApk())) { setLoiPopup('web'); return; }
+    if ((await quyenPopup()) !== 'da_bat') { setLoiPopup('chua_bat'); return; }
+    setLoiPopup(null);
+    await hienPopupCanhBao({
+      nhan: 'CAO',
+      tieuDe: t('Đây là dải cảnh báo — bác đang xem thử'),
+      nutMo: t('Mở Khoan Đã'),
+      nutOn: t('Tôi ổn, tắt đi'),
+    });
+    setTimeout(() => { void anPopup(); }, 6000);
   };
 
   const handleVoiceClick = () => {
@@ -428,8 +454,8 @@ export function FloatingQuickAccess({
               <CheckCircle2 size={20} />
             </div>
             <div className="flex-1 text-left">
-              <p className="font-extrabold text-[14px]">Đã cấp quyền Bong bóng nổi!</p>
-              <p className="text-[14px] text-emerald-100">Khoan Đã sẽ luôn hiện nổi sẵn sàng ở mép màn hình chính.</p>
+              <p className="font-extrabold text-[14px]">{t('Máy bác đã cho phép hiện bong bóng nổi.')}</p>
+              <p className="text-[14px] text-emerald-100">{t('Khoan Đã sẽ nằm sẵn ở mép màn hình.')}</p>
             </div>
             <button aria-label={t("Đóng")}
               onClick={() => setPermissionSuccessToast(false)}
@@ -471,13 +497,13 @@ export function FloatingQuickAccess({
                   <div className="flex items-center justify-between px-2 py-1 border-b border-purple-100 pb-2">
                     <div className="flex items-center gap-2">
                       <img src="/logo.webp" alt="Logo" className="w-6 h-6 object-contain rounded-lg shadow-xs" />
-                      <span className="font-black text-[#2e1065] text-sm sm:text-base">Phím Tắt Khoan Đã</span>
+                      <span className="font-black text-[#2e1065] text-sm sm:text-base">{t('Phím tắt Khoan Đã')}</span>
                     </div>
                     <div className="flex items-center gap-1.5">
                       <button aria-label={t("Cài đặt")}
                         onClick={() => setShowPermissionModal(true)}
                         className="p-1.5 text-purple-600 hover:bg-purple-100 rounded-xl text-[14px] flex items-center gap-1 font-bold"
-                        title="Xem quyền & hướng dẫn"
+                        title={t('Xem quyền và hướng dẫn')}
                       >
                         <Settings size={15} />
                       </button>
@@ -503,8 +529,8 @@ export function FloatingQuickAccess({
                       <PhoneCall size={22} className="text-white" />
                     </div>
                     <div className="flex-1 text-left">
-                      <p className="font-black text-sm leading-tight text-yellow-300">Đang nghe điện thoại lạ (8s)</p>
-                      <p className="text-[14px] text-purple-200 mt-0.5">Hỏi nhanh nhận diện bẫy ngay</p>
+                      <p className="font-black text-sm leading-tight text-yellow-300">{t('Đang nghe điện thoại lạ')}</p>
+                      <p className="text-[14px] text-purple-200 mt-0.5">{t('Hỏi nhanh để nhận ra bẫy')}</p>
                     </div>
                   </button>
 
@@ -517,8 +543,8 @@ export function FloatingQuickAccess({
                       <Camera size={24} className="text-white" />
                     </div>
                     <div className="flex-1 text-left">
-                      <p className="font-black text-sm leading-tight">Chụp ảnh quét ngay</p>
-                      <p className="text-[14px] text-purple-100 opacity-90 mt-0.5">Chụp màn hình / QR để AI kiểm tra tức thì</p>
+                      <p className="font-black text-sm leading-tight">{t('Chụp ảnh để kiểm')}</p>
+                      <p className="text-[14px] text-purple-100 opacity-90 mt-0.5">{t('Chụp màn hình hoặc mã QR để kiểm')}</p>
                     </div>
                   </button>
 
@@ -531,8 +557,8 @@ export function FloatingQuickAccess({
                       <ShieldAlert size={20} />
                     </div>
                     <div className="flex-1 text-left">
-                      <p className="font-black text-sm leading-tight text-red-900">Báo động Khẩn cấp 60s</p>
-                      <p className="text-[14px] text-red-600 mt-0.5">Dừng thao tác chuyển tiền & gọi hỗ trợ</p>
+                      <p className="font-black text-sm leading-tight text-red-900">{t('Báo động khẩn cấp 60 giây')}</p>
+                      <p className="text-[14px] text-red-600 mt-0.5">{t('Dừng việc chuyển tiền và gọi người giúp')}</p>
                     </div>
                   </button>
 
@@ -545,8 +571,8 @@ export function FloatingQuickAccess({
                       <Mic size={20} />
                     </div>
                     <div className="flex-1 text-left">
-                      <p className="font-black text-sm leading-tight text-[#3b0764]">Chạm để nói tình huống</p>
-                      <p className="text-[14px] text-purple-700 mt-0.5">Kể lại cuộc gọi hoặc tin nhắn lạ</p>
+                      <p className="font-black text-sm leading-tight text-[#3b0764]">{t('Chạm để nói')}</p>
+                      <p className="text-[14px] text-purple-700 mt-0.5">{t('Kể lại cuộc gọi hoặc tin nhắn lạ')}</p>
                     </div>
                   </button>
 
@@ -559,7 +585,7 @@ export function FloatingQuickAccess({
                       <PhoneCall size={20} />
                     </div>
                     <div className="flex-1 text-left">
-                      <p className="font-black text-sm leading-tight text-green-900">Gọi ngay cho con cháu</p>
+                      <p className="font-black text-sm leading-tight text-green-900">{t('Gọi ngay cho con cháu')}</p>
                       <p className="text-[14px] text-green-700 truncate mt-0.5">{primaryContact.name} ({primaryContact.phone})</p>
                     </div>
                   </button>
@@ -584,7 +610,7 @@ export function FloatingQuickAccess({
                         <p className="font-black text-[14px] leading-tight">
                           {isPipActive ? '🟢 Cửa sổ nổi đang bật ngoài OS' : '🌟 Đẩy Bong Bóng Ra Ngoài Màn Hình'}
                         </p>
-                        <p className="text-[14px] text-indigo-700/80 font-medium">Nổi đè lên mọi ứng dụng (Always-on-top PiP)</p>
+                        <p className="text-[14px] text-indigo-700/80 font-medium">{t('Nổi đè lên các ứng dụng khác')}</p>
                       </div>
                     </span>
                     <span className="text-[14px] bg-indigo-600 text-white px-2 py-0.5 rounded-full font-bold shadow-xs shrink-0">
@@ -592,20 +618,35 @@ export function FloatingQuickAccess({
                     </span>
                   </button>
 
-                  {/* 6. Simulate Outside Phone Screen Mode */}
+                  {/* 6. Dải cảnh báo THẬT đè lên màn hình — xem `moPopupThat` */}
                   <button
-                    onClick={() => {
-                      setIsMenuOpen(false);
-                      setIsOutsideMode(true);
-                    }}
+                    onClick={() => { void moPopupThat(); }}
                     className="flex items-center justify-between p-2.5 bg-gray-50 hover:bg-gray-100 rounded-xl text-gray-700 text-[14px] font-bold border border-gray-200 transition-colors"
                   >
                     <span className="flex items-center gap-2 text-[14px] text-gray-800">
                       <Smartphone size={16} className="text-purple-600" />
-                      Mô phỏng Màn hình Điện thoại Ngoài App
+                      {t('Hiện dải cảnh báo ra ngoài app')}
                     </span>
                     <ArrowRight size={15} className="text-gray-400" />
                   </button>
+
+                  {loiPopup === 'web' && (
+                    <div className="p-2.5 bg-amber-50 border border-amber-300 rounded-xl">
+                      <p className="text-[14px] text-amber-900 leading-snug font-medium">
+                        {t('Trình duyệt không cho vẽ đè lên app khác. Phần này chỉ chạy được trên bản đã cài vào máy.')}
+                      </p>
+                    </div>
+                  )}
+                  {loiPopup === 'chua_bat' && (
+                    <button
+                      onClick={() => { void xinQuyenPopup(); }}
+                      className="p-2.5 bg-amber-50 border border-amber-300 rounded-xl text-left"
+                    >
+                      <p className="text-[14px] text-amber-900 leading-snug font-medium">
+                        {t('Máy chưa cho phép vẽ đè. Chạm vào đây để mở Cài đặt, tìm dòng Khoan Đã rồi gạt sang bật.')}
+                      </p>
+                    </button>
+                  )}
                 </motion.div>
               )}
             </AnimatePresence>
@@ -636,7 +677,7 @@ export function FloatingQuickAccess({
                 <div className="w-full h-full rounded-full bg-gradient-to-b from-white/30 to-transparent flex items-center justify-center relative z-10 overflow-hidden">
                   <img
                     src="/logo.webp"
-                    alt="Khoan Đã Fast Shortcut"
+                    alt={t('Phím tắt nhanh Khoan Đã')}
                     className="w-9 h-9 object-contain drop-shadow-md group-hover:scale-110 transition-transform"
                   />
                 </div>
@@ -782,15 +823,15 @@ export function FloatingQuickAccess({
                   <div className="bg-gray-50 rounded-2xl p-3 border border-gray-200 text-[14px] text-gray-700 space-y-2">
                     <div className="flex items-start gap-2">
                       <span className="w-5 h-5 rounded-full bg-purple-200 text-purple-800 font-bold flex items-center justify-center shrink-0 text-[14px]">1</span>
-                      <p>Vào <span className="font-bold">Cài đặt (Settings)</span> của điện thoại → Chọn mục <span className="font-bold">Ứng dụng</span>.</p>
+                      <p>{t('Mở Cài đặt của điện thoại, rồi chọn mục Ứng dụng.')}</p>
                     </div>
                     <div className="flex items-start gap-2">
                       <span className="w-5 h-5 rounded-full bg-purple-200 text-purple-800 font-bold flex items-center justify-center shrink-0 text-[14px]">2</span>
-                      <p>Tìm và chọn <span className="font-bold">Khoan Đã</span> (hoặc trình duyệt Chrome).</p>
+                      <p>{t('Tìm và chọn Khoan Đã, hoặc trình duyệt Chrome.')}</p>
                     </div>
                     <div className="flex items-start gap-2">
                       <span className="w-5 h-5 rounded-full bg-purple-200 text-purple-800 font-bold flex items-center justify-center shrink-0 text-[14px]">3</span>
-                      <p>Bật công tắc <span className="font-bold text-purple-700">"Xuất hiện trên cùng"</span> (hoặc <em>Hiển thị trên ứng dụng khác / Draw over other apps</em>).</p>
+                      <p>{t('Gạt bật dòng Xuất hiện trên cùng, có máy ghi là Hiển thị trên ứng dụng khác.')}</p>
                     </div>
                   </div>
                 )}
@@ -800,15 +841,15 @@ export function FloatingQuickAccess({
                   <div className="bg-gray-50 rounded-2xl p-3 border border-gray-200 text-[14px] text-gray-700 space-y-2">
                     <div className="flex items-start gap-2">
                       <span className="w-5 h-5 rounded-full bg-blue-200 text-blue-800 font-bold flex items-center justify-center shrink-0 text-[14px]">1</span>
-                      <p>Mở <span className="font-bold">Cài đặt Samsung</span> → <span className="font-bold">Ứng dụng</span> → Bấm dấu 3 chấm góc trên.</p>
+                      <p>{t('Mở Cài đặt của Samsung, vào Ứng dụng, rồi bấm dấu ba chấm ở góc trên.')}</p>
                     </div>
                     <div className="flex items-start gap-2">
                       <span className="w-5 h-5 rounded-full bg-blue-200 text-blue-800 font-bold flex items-center justify-center shrink-0 text-[14px]">2</span>
-                      <p>Chọn <span className="font-bold">Truy cập đặc biệt (Special access)</span> → <span className="font-bold">Xuất hiện trên cùng</span>.</p>
+                      <p>{t('Chọn Truy cập đặc biệt, rồi chọn Xuất hiện trên cùng.')}</p>
                     </div>
                     <div className="flex items-start gap-2">
                       <span className="w-5 h-5 rounded-full bg-blue-200 text-blue-800 font-bold flex items-center justify-center shrink-0 text-[14px]">3</span>
-                      <p>Gạt BẬT cho ứng dụng <span className="font-bold text-blue-700">Khoan Đã</span>.</p>
+                      <p>{t('Gạt bật cho ứng dụng Khoan Đã.')}</p>
                     </div>
                   </div>
                 )}
@@ -818,11 +859,11 @@ export function FloatingQuickAccess({
                   <div className="bg-gray-50 rounded-2xl p-3 border border-gray-200 text-[14px] text-gray-700 space-y-2">
                     <div className="flex items-start gap-2">
                       <span className="w-5 h-5 rounded-full bg-indigo-200 text-indigo-800 font-bold flex items-center justify-center shrink-0 text-[14px]">1</span>
-                      <p><span className="font-bold">Thêm vào màn hình chính:</span> Mở Safari, bấm nút <span className="font-bold">Chia sẻ 📤</span> → chọn <span className="font-bold">"Thêm vào MH chính" (Add to Home Screen)</span>.</p>
+                      <p>{t('Thêm vào màn hình chính: mở Safari, bấm nút Chia sẻ, rồi chọn Thêm vào màn hình chính.')}</p>
                     </div>
                     <div className="flex items-start gap-2">
                       <span className="w-5 h-5 rounded-full bg-indigo-200 text-indigo-800 font-bold flex items-center justify-center shrink-0 text-[14px]">2</span>
-                      <p><span className="font-bold">Nút AssistiveTouch:</span> Vào Cài đặt → Trợ năng → Cảm ứng → Bật AssistiveTouch và gán chạm 2 lần để mở nhanh Khoan Đã.</p>
+                      <p>{t('Nút AssistiveTouch: vào Cài đặt, Trợ năng, Cảm ứng, rồi bật AssistiveTouch.')}</p>
                     </div>
                   </div>
                 )}
@@ -830,8 +871,8 @@ export function FloatingQuickAccess({
                 {/* Tab 4: PiP Window */}
                 {activeTabGuide === 'pip' && (
                   <div className="bg-gray-50 rounded-2xl p-3 border border-gray-200 text-[14px] text-gray-700 space-y-2">
-                    <p className="font-semibold text-purple-900">Tính năng Cửa Sổ Nổi Trực Tiếp (Picture-in-Picture):</p>
-                    <p>Ứng dụng sử dụng công nghệ PiP hiện đại để tạo một khung cửa sổ nhỏ luôn nổi trên màn hình điện thoại khi bác thoát ra ngoài.</p>
+                    <p className="font-semibold text-purple-900">{t('Cửa sổ nổi')}</p>
+                    <p>{t('Khoan Đã mở một khung nhỏ nổi trên màn hình, để bác vẫn thấy nó khi đang dùng app khác.')}</p>
                     <button
                       onClick={() => {
                         setShowPermissionModal(false);
@@ -861,358 +902,27 @@ export function FloatingQuickAccess({
         )}
       </AnimatePresence>
 
-      {/* ========================================================
-          2. OUTSIDE APP SIMULATION (MÔ PHỎNG NGOÀI MÀN HÌNH ĐIỆN THOẠI)
-      ======================================================== */}
-      <AnimatePresence>
-        {isOutsideMode && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[150] bg-slate-950 text-white flex flex-col justify-between overflow-hidden select-none"
-            style={{
-              backgroundImage: 'radial-gradient(circle at 50% 20%, #312e81 0%, #0f172a 70%, #020617 100%)'
-            }}
-          >
-            {/* Top Status Bar & Exit Button */}
-            <div className="w-full px-5 pt-3 pb-2 flex items-center justify-between text-[14px] text-slate-300 relative z-30">
-              <span className="font-semibold tracking-wider">
-                {new Date().toLocaleTimeString(lang === 'en' ? 'en-US' : 'vi-VN', { hour: '2-digit', minute: '2-digit' })}
-              </span>
-              <div className="flex items-center gap-2">
-                <span className="px-2.5 py-0.5 bg-purple-900/90 border border-purple-400/50 rounded-full text-[14px] text-purple-200 font-extrabold flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                  {t('Màn hình mô phỏng')}
-                </span>
-                <button
-                  onClick={() => setIsOutsideMode(false)}
-                  className="p-1.5 px-3 bg-white/20 hover:bg-white/30 rounded-full text-white text-[14px] font-bold active:scale-95 transition-all flex items-center gap-1"
-                >
-                  <X size={14} /> {t('Về app')}
-                </button>
-              </div>
-            </div>
+      {/*
+        ══════ ĐÃ XOÁ "MÔ PHỎNG NGOÀI APP" — 351 DÒNG, 20/8/2026 ══════
 
-            {/*
-              ══════ NÓI THẲNG ĐÂY LÀ MÔ PHỎNG — §11 ══════
+        Khối cũ vẽ tay một màn hình điện thoại giả — đồng hồ, thanh thông báo,
+        biểu tượng ứng dụng — rồi đặt "dải cảnh báo" lên trên.
 
-              ⚠️ MÀN NÀY DO KHOAN ĐÃ TỰ VẼ RA, NÓ KHÔNG PHẢI MÀN HÌNH THẬT CỦA MÁY.
-              Đồng hồ, biểu tượng ứng dụng, thanh thông báo — tất cả đều là hình
-              vẽ trong app. Người dùng phát hiện 20/8/2026 và nói đúng: nhãn cũ
-              ghi "Ngoài app" khiến người xem tưởng popup đang thật sự hiện ra
-              ngoài điện thoại.
+        Người dùng nói thẳng hai lần, và đúng cả hai lần:
+          "pop up đã hiện ra ngoài điện thoại thật đâu, tất cả chỉ là do bạn dựng
+           1 cái giao diện như web thật"
+          "pop up phải hiện hẳn ra bên ngoài như messenger"
 
-              Đó là cùng một họ lỗi với "đã gửi cho người thân" khi mới chỉ mở
-              bảng chia sẻ (§11): khai một việc chưa xảy ra.
+        ⚠️ THÊM MỘT DÒNG "đây là mô phỏng" KHÔNG CỨU ĐƯỢC KHỐI NÀY. Đã thử —
+        dải cảnh báo màu hổ phách vẫn đứng đó, và người dùng vẫn hỏi lại.
+        Một thứ TRÔNG NHƯ tính năng thật thì không chứng minh được tính năng thật
+        chạy được — nó chỉ tốn chỗ và gây hiểu nhầm. §11: không khai một việc
+        chưa xảy ra.
 
-              ⚠️ POPUP THẬT CÓ TỒN TẠI, và nó chạy bằng `PopupDeManHinh` với
-              quyền `SYSTEM_ALERT_WINDOW`. Nhưng nó KHÔNG phải màn này. Chỗ xem
-              popup thật là Cài đặt › Dải cảnh báo › Xem thử một lần.
-
-              ⚠️ ĐỪNG XOÁ DÒNG NÀY CHO GỌN. Không có nó thì màn mô phỏng lại trở
-              thành một lời khai sai.
-            */}
-            <div className="w-full px-4 pt-2 z-30">
-              <div className="bg-amber-100/95 border border-amber-400 rounded-2xl px-3 py-2">
-                <p className="text-[14px] font-bold text-amber-950 leading-snug">
-                  {t('Đây là màn hình mô phỏng do Khoan Đã vẽ ra để bác xem thử.')}
-                </p>
-                <p className="text-[14px] text-amber-900 leading-snug mt-0.5">
-                  {t('Muốn xem dải cảnh báo thật hiện ra ngoài app: vào Cài đặt › Dải cảnh báo › Xem thử một lần.')}
-                </p>
-              </div>
-            </div>
-
-            {/* Pinned Khoan Đã Shortcut Notification Banner Outside Phone */}
-            <div className="w-full px-4 pt-1 z-30">
-              <motion.div
-                initial={{ y: -30, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                className="w-full bg-white/95 text-slate-900 rounded-3xl p-3.5 shadow-2xl border border-purple-200 backdrop-blur-xl flex flex-col gap-2.5"
-              >
-                <div 
-                  onClick={() => {
-                    setIsOutsideMode(false);
-                    setView('home');
-                  }}
-                  className="flex items-center justify-between cursor-pointer hover:opacity-90 active:scale-[0.99] transition-transform"
-                >
-                  <div className="flex items-center gap-2">
-                    <img src="/logo.webp" alt="Logo" className="w-6 h-6 rounded-lg object-contain shadow-xs" />
-                    <div>
-                      {/*
-                        ⚠️ TÊN NGẮN. "Khoan Đã - Bảo Vệ Thường Trực" xuống ba dòng
-                        trong dải thông báo hẹp; dòng phụ bên dưới đã nói đúng
-                        việc chạm vào thì được gì, nên phần "Bảo Vệ Thường Trực"
-                        chỉ lặp lại điều người đọc vừa thấy.
-                      */}
-                      <h4 className="font-black text-[14px] text-[#2e1065] leading-none">Khoan Đã</h4>
-                      <p className="text-[14px] text-purple-700 font-medium">{t('Chạm để mở')}</p>
-                    </div>
-                  </div>
-                  <span className="text-[14px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
-                    {t('Ghim')}
-                  </span>
-                </div>
-
-                {/* Instant Action Buttons on the Notification */}
-                <div className="grid grid-cols-4 gap-1.5 pt-1 border-t border-purple-100">
-                  <button
-                    onClick={() => {
-                      setIsOutsideMode(false);
-                      setView('home');
-                    }}
-                    className="flex flex-col items-center justify-center p-2 bg-purple-50 hover:bg-purple-100 text-[#5b21b6] rounded-2xl active:scale-95 transition-all border border-purple-200"
-                  >
-                    <Home size={17} className="mb-0.5" />
-                    <span className="font-extrabold text-[14px] leading-tight">{t('Mở app')}</span>
-                  </button>
-
-                  <button
-                    onClick={triggerCameraInput}
-                    className="flex flex-col items-center justify-center p-2 bg-purple-600 hover:bg-purple-700 text-white rounded-2xl active:scale-95 transition-all shadow-md shadow-purple-500/20 group"
-                  >
-                    <Camera size={17} className="mb-0.5 group-hover:scale-110 transition-transform" />
-                    <span className="font-extrabold text-[14px] leading-tight">{t('Chụp ảnh')}</span>
-                  </button>
-
-                  <button
-                    onClick={handleVoiceClick}
-                    className="flex flex-col items-center justify-center p-2 bg-purple-100 hover:bg-purple-200 text-[#5b21b6] rounded-2xl active:scale-95 transition-all"
-                  >
-                    <Mic size={17} className="mb-0.5" />
-                    <span className="font-bold text-[14px] leading-tight">{t('Ghi âm')}</span>
-                  </button>
-
-                  <button
-                    onClick={handleEmergencyClick}
-                    className="flex flex-col items-center justify-center p-2 bg-red-600 hover:bg-red-700 text-white rounded-2xl active:scale-95 transition-all shadow-md shadow-red-500/20"
-                  >
-                    <ShieldAlert size={17} className="mb-0.5" />
-                    <span className="font-extrabold text-[14px] leading-tight">SOS 60s</span>
-                  </button>
-                </div>
-              </motion.div>
-            </div>
-
-            {/* App Switching Simulator Tabs */}
-            <div className="px-4 mt-2 z-30">
-              {/*
-                ⚠️ NHÃN NGẮN VÀ CÙNG HÌNH DẠNG VỚI THANH ĐIỀU HƯỚNG.
-                Bốn nhãn cũ — "MH Chính", "SMS Lạ", "Zalo Giả Mạo", "Cuộc Gọi Lạ"
-                — vỡ xuống hai dòng trên khổ 390px, thấy trong ảnh người dùng gửi
-                20/8/2026. "Lạ" và "Giả Mạo" là phần thân của tấm thẻ nói rồi,
-                nhắc lại trên nhãn chỉ tốn chỗ.
-              */}
-              <div className="flex items-center justify-center gap-1 p-[5px] bg-gradient-to-r from-[#9e76ea] via-[#ad8af0] to-[#9e76ea] rounded-full border border-white/20 text-[14px] font-bold">
-                <button
-                  onClick={() => setActiveSimApp('home')}
-                  className={`flex-1 px-2 py-1.5 rounded-full transition-all ${activeSimApp === 'home' ? 'bg-white text-[#6d28d9] shadow-sm' : 'text-white/85'}`}
-                >
-                  {t('Màn chính')}
-                </button>
-                <button
-                  onClick={() => setActiveSimApp('sms')}
-                  className={`flex-1 px-2 py-1.5 rounded-full transition-all ${activeSimApp === 'sms' ? 'bg-white text-[#6d28d9] shadow-sm' : 'text-white/85'}`}
-                >
-                  SMS
-                </button>
-                <button
-                  onClick={() => setActiveSimApp('zalo')}
-                  className={`flex-1 px-2 py-1.5 rounded-full transition-all ${activeSimApp === 'zalo' ? 'bg-white text-[#6d28d9] shadow-sm' : 'text-white/85'}`}
-                >
-                  Zalo
-                </button>
-                <button
-                  onClick={() => setActiveSimApp('call')}
-                  className={`flex-1 px-2 py-1.5 rounded-full transition-all ${activeSimApp === 'call' ? 'bg-white text-[#6d28d9] shadow-sm' : 'text-white/85'}`}
-                >
-                  {t('Cuộc gọi')}
-                </button>
-              </div>
-            </div>
-
-            {/* Phone Lockscreen/Homescreen Middle Area */}
-            <div className="flex-1 px-4 flex flex-col justify-center gap-3 relative z-20 my-auto overflow-y-auto py-2">
-              {activeSimApp === 'home' && (
-                <div className="space-y-4">
-                  <div className="text-center">
-                    <p className="text-5xl font-light text-white/90">
-                      {new Date().toLocaleTimeString(lang === 'en' ? 'en-US' : 'vi-VN', { hour: '2-digit', minute: '2-digit' })}
-                    </p>
-                    <p className="text-[14px] text-purple-200/80 font-medium mt-1">
-                      {new Date().toLocaleDateString(lang === 'en' ? 'en-US' : 'vi-VN', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })}
-                    </p>
-                  </div>
-
-                  {/* App Grid on Phone Screen */}
-                  <div className="grid grid-cols-4 gap-4 px-4 py-2">
-                    <div className="flex flex-col items-center gap-1">
-                      <div className="w-13 h-13 rounded-2xl bg-blue-500 flex items-center justify-center text-white shadow-md">
-                        <MessageSquare size={24} />
-                      </div>
-                      <span className="text-[14px] text-white/80 font-medium">{t('Tin nhắn')}</span>
-                    </div>
-                    <div className="flex flex-col items-center gap-1">
-                      <div className="w-13 h-13 rounded-2xl bg-emerald-500 flex items-center justify-center text-white shadow-md">
-                        <PhoneCall size={24} />
-                      </div>
-                      <span className="text-[14px] text-white/80 font-medium">{t('Danh bạ')}</span>
-                    </div>
-                    <div className="flex flex-col items-center gap-1">
-                      <div className="w-13 h-13 rounded-2xl bg-sky-600 flex items-center justify-center text-white shadow-md">
-                        <Globe size={24} />
-                      </div>
-                      <span className="text-[14px] text-white/80 font-medium">{t('Trình duyệt')}</span>
-                    </div>
-                    <div 
-                      onClick={() => {
-                        setIsOutsideMode(false);
-                        setView('home');
-                      }}
-                      className="flex flex-col items-center gap-1 cursor-pointer active:scale-90 transition-transform"
-                    >
-                      <div className="w-13 h-13 rounded-2xl bg-gradient-to-tr from-purple-600 to-indigo-600 p-1 flex items-center justify-center text-white shadow-lg border border-purple-300 ring-2 ring-purple-400/50">
-                        <img src="/logo.webp" alt="Logo" className="w-9 h-9 object-contain" />
-                      </div>
-                      <span className="text-[14px] text-amber-300 font-bold">Khoan Đã</span>
-                    </div>
-                  </div>
-
-                  <div className="p-3 bg-purple-950/60 border border-purple-500/40 rounded-2xl text-center text-[14px] text-purple-200">
-                    {t('Kéo quả bóng đi bất cứ đâu trên màn hình.')}
-                  </div>
-                </div>
-              )}
-
-              {activeSimApp === 'sms' && (
-                <motion.div
-                  initial={{ scale: 0.95, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  className="w-full bg-slate-900/90 backdrop-blur-md rounded-3xl p-4 border border-red-500/40 text-left shadow-2xl space-y-3"
-                >
-                  <div className="flex items-center justify-between text-[14px] text-red-300 border-b border-slate-700/60 pb-2">
-                    <span className="flex items-center gap-1.5 font-bold">
-                      <AlertTriangle size={14} className="text-red-400" /> {t('Tin nhắn từ số lạ')}
-                    </span>
-                    <span className="text-[14px] text-slate-400">{t('Vừa nhận')}</span>
-                  </div>
-                  <div className="p-3 bg-slate-800/90 rounded-2xl text-[14px] text-slate-200 leading-relaxed border border-slate-700">
-                    {t('"THÔNG BÁO TỪ BỘ CÔNG AN: Bác có liên quan đường dây rửa tiền. Chuyển 50 triệu vào tài khoản 098… để điều tra, nếu không sẽ bị tạm giam trong 24h!"')}
-                  </div>
-                  <div className="flex items-center justify-between pt-1">
-                    <button
-                      onClick={triggerCameraInput}
-                      className="px-3 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-[14px] font-bold flex items-center gap-1.5 shadow-md active:scale-95 transition-transform"
-                    >
-                      <Camera size={13} /> {t('Kiểm tin này')}
-                    </button>
-                  </div>
-                </motion.div>
-              )}
-
-              {activeSimApp === 'zalo' && (
-                <motion.div
-                  initial={{ scale: 0.95, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  className="w-full bg-slate-900/90 backdrop-blur-md rounded-3xl p-4 border border-blue-500/40 text-left shadow-2xl space-y-3"
-                >
-                  <div className="flex items-center justify-between text-[14px] text-blue-300 border-b border-slate-700/60 pb-2">
-                    <span className="flex items-center gap-1.5 font-bold">
-                      <MessageSquare size={14} className="text-blue-400" /> {t('Zalo: xin tiền gấp')}
-                    </span>
-                    <span className="text-[14px] text-slate-400">{t('1 phút trước')}</span>
-                  </div>
-                  <div className="p-3 bg-slate-800/90 rounded-2xl text-[14px] text-slate-200 leading-relaxed border border-slate-700">
-                    {t('"Mẹ ơi con bị tai nạn đang cấp cứu, điện thoại con hỏng nên nhắn nick này. Mẹ chuyển gấp 20 triệu vào tài khoản 1903… VCB giúp con."')}
-                  </div>
-                  <div className="flex items-center justify-between pt-1">
-                    <button
-                      onClick={handleEmergencyClick}
-                      className="px-3 py-1.5 bg-red-600 text-white rounded-xl text-[14px] font-bold flex items-center gap-1.5 shadow-md active:scale-95 transition-transform"
-                    >
-                      <ShieldAlert size={13} /> {t('Báo động')}
-                    </button>
-                    <button
-                      onClick={handleCallClick}
-                      className="px-3 py-1.5 bg-green-600 text-white rounded-xl text-[14px] font-bold flex items-center gap-1.5 shadow-md active:scale-95 transition-transform"
-                    >
-                      <PhoneCall size={13} /> {t('Gọi số thật')}
-                    </button>
-                  </div>
-                </motion.div>
-              )}
-
-              {activeSimApp === 'call' && (
-                <motion.div
-                  initial={{ scale: 0.95, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  className="w-full bg-slate-900/90 backdrop-blur-md rounded-3xl p-4 border border-amber-500/40 text-left shadow-2xl space-y-3"
-                >
-                  <div className="flex items-center justify-between text-[14px] text-amber-300 border-b border-slate-700/60 pb-2">
-                    <span className="flex items-center gap-1.5 font-bold">
-                      <PhoneCall size={14} className="text-amber-400 animate-pulse" /> {t('Xưng là nhân viên điện lực')}
-                    </span>
-                    <span className="text-[14px] text-amber-400 font-bold">{t('Đang đổ chuông')}</span>
-                  </div>
-                  <div className="p-3 bg-slate-800/90 rounded-2xl text-[14px] text-slate-200 leading-relaxed border border-slate-700">
-                    {t('"Tiền điện tháng này nhà mình chưa đóng, 2 tiếng nữa sẽ bị cắt điện. Bác đọc mã OTP vừa gửi về máy để gia hạn…"')}
-                  </div>
-                  <div className="flex items-center justify-end gap-2 pt-1">
-                    <button
-                      onClick={handleVoiceClick}
-                      className="px-3 py-1.5 bg-purple-600 text-white rounded-xl text-[14px] font-bold flex items-center gap-1.5 shadow-md active:scale-95 transition-transform"
-                    >
-                      <Mic size={13} /> {t('Kể lại')}
-                    </button>
-                  </div>
-                </motion.div>
-              )}
-            </div>
-
-            {/* Draggable Floating Bubble on Simulated Screen */}
-            <motion.div
-              drag
-              dragMomentum={false}
-              className="fixed right-4 bottom-28 z-50 cursor-grab active:cursor-grabbing select-none"
-            >
-              <button
-                onClick={() => {
-                  setIsOutsideMode(false);
-                  setView('home');
-                }}
-                className="relative w-15 h-15 rounded-full bg-gradient-to-tr from-[#7e22ce] via-[#9333ea] to-[#c084fc] p-0.5 shadow-[0_10px_35px_rgba(126,34,206,0.7)] border-2 border-white flex items-center justify-center active:scale-90 transition-transform group"
-                title="Bấm để vào app Khoan Đã"
-              >
-                <span className="absolute -inset-1 rounded-full bg-purple-400 opacity-50 animate-ping pointer-events-none"></span>
-                <div className="w-full h-full rounded-full bg-gradient-to-b from-white/30 to-transparent flex items-center justify-center overflow-hidden">
-                  <img src="/logo.webp" alt="Logo" className="w-9 h-9 object-contain" />
-                </div>
-                <div className="absolute -bottom-1 -left-1 w-5 h-5 bg-gradient-to-r from-red-500 to-amber-500 rounded-full border border-white flex items-center justify-center text-white shadow-xs">
-                  <Camera size={11} />
-                </div>
-              </button>
-            </motion.div>
-
-            {/* Bottom Dock / Home Bar */}
-            <div className="w-full pb-6 pt-2 flex flex-col items-center justify-center relative z-20">
-              <button
-                onClick={() => {
-                  setIsOutsideMode(false);
-                  setView('home');
-                }}
-                className="px-6 py-2.5 bg-white text-[#2e1065] rounded-full font-black text-[14px] shadow-xl active:scale-95 transition-transform flex items-center gap-2"
-              >
-                <img src="/logo.webp" alt="Logo" className="w-4 h-4 object-contain" />
-                {t('Mở Khoan Đã')}
-              </button>
-              <div className="w-32 h-1 bg-white/40 rounded-full mt-3"></div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+        Popup THẬT chạy bằng `PopupDeManHinh.java` + quyền `SYSTEM_ALERT_WINDOW`,
+        và giờ nút trong menu gọi THẮNG vào đó (xem `moPopupThat` ở trên).
+        Không còn đường nào trong app dẫn tới một bản vẽ nữa.
+      */}
     </>
   );
 }

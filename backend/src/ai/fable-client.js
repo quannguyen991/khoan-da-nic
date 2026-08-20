@@ -293,9 +293,11 @@ function layCauHinh(env = process.env) {
    *
    * Gateway và Gemini đều dùng mô hình đa phương thức nên mặc định là có.
    */
-  const coThiGiac = noiChay === 'gateway' || noiChay === 'gemini'
+  const coThiGiac = noiChay === 'gemini'
     ? env.LLM_KHONG_CO_THI_GIAC !== '1'
-    : env.LLM_CUC_BO_CO_THI_GIAC === '1';
+    : noiChay === 'gateway'
+      ? (env.LLM_KHONG_CO_THI_GIAC !== '1' && coThiGiacTheoTen(model, env))
+      : env.LLM_CUC_BO_CO_THI_GIAC === '1';
 
   // Xem `HO_VUA_NGHI_VUA_TRA_LOI`: tắt thì phải tắt cả `reasoning_effort`, nếu không
   // phần nghĩ bật lại và lượt gọi từ 2,5s vọt lên 30s.
@@ -398,7 +400,9 @@ function layCacDuong(env = process.env) {
       tatSuyNghi: tat2,
       mucSuyLuan: tat2 ? undefined : (env.LLM_REASONING_EFFORT2 || env.LLM_REASONING_EFFORT || 'low'),
       noiChay: 'gateway',
-      coThiGiac: env.LLM_KHONG_CO_THI_GIAC2 !== '1',
+      // Cùng luật với đường chính — xem `TEN_MO_HINH_CO_THI_GIAC`. Đường thứ hai
+      // cũng là gateway, nên nó nói dối được y hệt nếu để mặc định là có.
+      coThiGiac: env.LLM_KHONG_CO_THI_GIAC2 !== '1' && coThiGiacTheoTen(model2, env),
       timeout: Number(env.LLM_TIMEOUT_MS2) || TIMEOUT_MAC_DINH,
       laDuPhong: true,
     });
@@ -528,6 +532,54 @@ function xoaCauDao() { soHong.clear(); }
  *
  * Hàm thuần để test được mà không cần mạng.
  */
+/*
+ * ══════ MÔ HÌNH NÀO THẬT SỰ NHÌN ĐƯỢC ẢNH ══════
+ *
+ * Đo được 20/8/2026 trên bản chạy thật (`glm-5.2` qua gateway). Cùng một
+ * nội dung giả danh công an, gửi hai kiểu:
+ *   dạng CHỮ → NGHI_NGỜ, maLyDo=[MAN_FEAR_THREAT, ID_AUTHORITY_IMPERSONATION]
+ *   dạng ẢNH → CHƯA_THẤY, maLyDo=[], daKiem=['anh_ocr']
+ *
+ * `daKiem: ['anh_ocr']` là lời khai ĐÃ ĐỌC ẢNH về một tấm ảnh chưa ai nhìn.
+ * Đó đúng là §4.3: "không kiểm được" bị trình bày thành "đã kiểm, không
+ * thấy gì". Người dùng báo đúng triệu chứng: "cho ảnh có tin nhắn dấu hiệu
+ * lừa đảo vẫn ghi là chưa thấy dấu hiệu rủi ro".
+ *
+ * Nguyên nhân: gateway nhận khối `image_url` rồi LẶNG LẼ BỎQUA nó khi mô hình
+ * chỉ đọc chữ. Không báo lỗi, không cảnh báo — trả về 200 với danh sách rỗng,
+ * trông y hệt một tấm ảnh sạch.
+ *
+ * ⚠️ MẶC ĐỊNH ĐỔI CHIỀU: TRƯỚC ĐÂY "gateway ⇒ có thị giác", GIỜ LÀ
+ * "chỉ khi TÊN MÔ HÌNH là bản vision". Hai hướng đoán sai KHÔNG cùng giá:
+ *   đoán thừa thị giác ⇒ NÓI DỐI người dùng rằng đã đọc ảnh
+ *   đoán thiếu thị giác ⇒ chuyển sang Gemini, chậm hơn vài giây
+ * Nên mặc định phải là KHÔNG, và phải biết chắc mới khai CÓ.
+ *
+ * ⚠️ `glm-5.2` KHÁC `glm-4.5v`. Bản vision của họ GLM có hậu tố `v`; bỏ sót
+ * chữ `v` đó là toàn bộ gốc của lỗi này.
+ *
+ * ⚠️ CÓ CỬA THOÁT. `LLM_CO_THI_GIAC=1` để người vận hành khai tay khi dùng một
+ * mô hình vision mới chưa có trong danh sách — đừng bắt họ sửa mã nguồn.
+ */
+const TEN_MO_HINH_CO_THI_GIAC = /(gpt-4o|gpt-4\.1|gpt-5|(^|[^a-z])o[34]([^a-z]|$)|claude|gemini|llava|pixtral|internvl|minicpm-v|gemma-?3|molmo|idefics|kosmos|florence)|(^|[-_.])vl([-_.]|$)|[0-9]vl?([-_.]|$)|vision/i;
+
+function coThiGiacTheoTen(model, env) {
+  if (env && env.LLM_CO_THI_GIAC === '1') return true;
+  if (!model || typeof model !== 'string') return false;
+  return TEN_MO_HINH_CO_THI_GIAC.test(model);
+}
+
+/*
+ * Lọc chuỗi xuống những đường THẬT SỰ nhìn được ảnh.
+ *
+ * ⚠️ KHÔNG CÒN ĐƯỜNG NÀO THÌ TRẢ RỖNG, không âm thầm dùng đường mù. Gọi
+ * một mô hình chỉ-đọc-chữ rồi nhận danh sách rỗng chính là cái bẫy vừa gỡ.
+ * Rỗng ⇒ tầng trên khai `khong_doc_duoc_anh` (§4.3).
+ */
+function locDuongThiGiac(duong) {
+  return (duong || []).filter((d) => d.coThiGiac);
+}
+
 function locDuongConSong(duong, bayGio) {
   const conSong = duong.filter((c) => !dangNgat(c, bayGio));
   return conSong.length > 0 ? conSong : duong;
@@ -543,7 +595,22 @@ async function goiChatCoDuPhong(messages, opts = {}) {
    * "Không còn đường nào" phải là sự thật đo được ở lượt này, không phải kết luận
    * suy ra từ vài phút trước.
    */
-  const thuTu = locDuongConSong(duong, bayGio);
+  let thuTu = locDuongConSong(duong, bayGio);
+
+  /*
+   * Lượt này có ảnh ⇒ chỉ đi đường nhìn được ảnh. Xem `coThiGiacTheoTen`.
+   * Hết đường thì ném `AI_KHONG_CO_THI_GIAC` để tầng trên khai thật, chứ
+   * không rơi về một đường mù rồi báo "không thấy dấu hiệu".
+   */
+  if (opts.canThiGiac) {
+    const nhinDuoc = locDuongThiGiac(thuTu);
+    if (nhinDuoc.length === 0) {
+      const eh = new LoiNhaCungCap('AI_KHONG_CO_THI_GIAC',
+        'Không có đường nào nhìn được ảnh trong lượt này.');
+      throw eh;
+    }
+    thuTu = nhinDuoc;
+  }
 
   let loiCuoi;
   for (const c of thuTu) {
@@ -661,7 +728,7 @@ async function goiMotDuong(messages, cauHinh, opts = {}) {
 }
 
 module.exports = {
-  goiChat: goiChatCoDuPhong, goiMotDuong, layCauHinh, layCacDuong, nenTatSuyNghi, xoaCauDao, locDuongConSong, ghiHong, ghiChay,
+  goiChat: goiChatCoDuPhong, goiMotDuong, layCauHinh, layCacDuong, nenTatSuyNghi, xoaCauDao, locDuongConSong, locDuongThiGiac, coThiGiacTheoTen, ghiHong, ghiChay,
   LoiNhaCungCap, TIMEOUT_MAC_DINH,
   laThongBaoDichVu, MAU_THONG_BAO_DICH_VU,
 };

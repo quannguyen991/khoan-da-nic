@@ -3605,17 +3605,17 @@ function NotificationsView({
             .btn-home { background: linear-gradient(135deg, #15803d, #16a34a); border-color: #86efac; }
           </style>
           <div class="header">
-            <strong style="font-size: 12px;">🛡️ Khoan Đã Nổi Ngoài OS</strong>
-            <span class="badge-live">🟢 Đang nổi</span>
+            <strong style="font-size: 12px;">${t('Khoan Đã')}</strong>
+            <span class="badge-live">${t('Đang nổi')}</span>
           </div>
           <div class="grid-btns">
-            <button id="pipCam" class="btn btn-camera"><span>📸 Quét Ảnh / QR</span></button>
-            <button id="pipSos" class="btn btn-danger"><span>🚨 Dừng 60s SOS</span></button>
-            <button id="pipVoice" class="btn btn-voice"><span>🎙️ Giọng Nói</span></button>
-            <button id="pipHome" class="btn btn-home"><span>🏠 Mở Ứng Dụng</span></button>
+            <button id="pipCam" class="btn btn-camera"><span>${t('Quét ảnh')}</span></button>
+            <button id="pipSos" class="btn btn-danger"><span>${t('Dừng 60 giây')}</span></button>
+            <button id="pipVoice" class="btn btn-voice"><span>${t('Chạm để nói')}</span></button>
+            <button id="pipHome" class="btn btn-home"><span>${t('Mở ứng dụng')}</span></button>
           </div>
           <div style="font-size: 9px; color: #d8b4fe; text-align: center; margin-top: 4px;">
-            Luôn hiển thị trên mọi ứng dụng và màn hình desktop
+            ${t('Khung này nổi trên các cửa sổ khác.')}
           </div>
         `;
         const cam = pipDoc.getElementById('pipCam');
@@ -3739,7 +3739,7 @@ function NotificationsView({
             className="w-full max-w-[420px] mb-4 bg-purple-700 text-white p-3.5 rounded-2xl shadow-lg flex items-center gap-2.5 text-[14px] font-bold"
           >
             <Sparkles size={18} className="shrink-0 text-amber-300" />
-            <span>Đã bật Cửa Sổ Nổi ngoài màn hình! Bác có thể dùng đồng thời khi mở app khác.</span>
+            <span>{t('Đã bật cửa sổ nổi. Bác mở app khác vẫn thấy nó.')}</span>
           </motion.div>
         )}
       </AnimatePresence>
@@ -4035,8 +4035,8 @@ function NotificationsView({
       {setShowInAppBanner && (
         <div className="w-full max-w-[420px] bg-white rounded-[24px] p-4 shadow-sm border border-[#e9d5ff] mb-5 flex items-center justify-between">
           <div className="flex flex-col pr-2">
-            <span className="font-bold text-[#1e1b4b] text-[14px]">Hiển thị thanh ghim bên trong Web App</span>
-            <span className="text-[#64748b] text-[14px]">Bật nếu muốn xem dải tím trên đầu trang web, tắt nếu chỉ muốn thông báo bên ngoài máy</span>
+            <span className="font-bold text-[#1e1b4b] text-[14px]">{t('Hiện dải ghim ở đầu trang web')}</span>
+            <span className="text-[#64748b] text-[14px]">{t('Bật thì thấy dải tím ở đầu trang. Tắt thì chỉ nhận thông báo ngoài máy.')}</span>
           </div>
           <button
             onClick={() => setShowInAppBanner(!showInAppBanner)}

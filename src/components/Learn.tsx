@@ -296,7 +296,7 @@ export function LearnView({ setView, t, lang = 'vi', onTriggerEmergency }: Learn
                       <div className="flex items-center gap-1 text-[14px] text-slate-400 font-medium">
                         <span>{lesson.readTime}</span>
                         {hasCompletedQuiz && (
-                          <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-[14px]" title="Đã làm bài tập">
+                          <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-[14px]" title={t('Đã làm bài tập')}>
                             ✓
                           </span>
                         )}
