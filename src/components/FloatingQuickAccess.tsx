@@ -9,7 +9,8 @@ import {
   X, 
   Sparkles, 
   Smartphone, 
-  Layers, 
+  Layers,
+  ChevronRight, 
   AlertTriangle,
   ArrowRight,
   Maximize2,
@@ -54,6 +55,13 @@ export function FloatingQuickAccess({
   });
   const [permissionSuccessToast, setPermissionSuccessToast] = useState(false);
   const [activeTabGuide, setActiveTabGuide] = useState<'android' | 'ios' | 'samsung' | 'pip'>('android');
+  /*
+   * Hướng dẫn theo từng dòng máy MẶC ĐỊNH ĐÓNG.
+   * Bốn thẻ hệ điều hành × ba bước là mười hai đoạn chữ, trước đây hiện hết
+   * ngay khi mở popup. Nhưng bác chỉ cần tới chúng KHI NÚT KIA KHÔNG ĂN — tức
+   * là hiếm. Bày sẵn thứ hiếm dùng đè lên thứ hay dùng là đổi chỗ hai việc.
+   */
+  const [xemHuongDan, setXemHuongDan] = useState(false);
   const [activeSimApp, setActiveSimApp] = useState<'home' | 'zalo' | 'sms' | 'call'>('home');
   const [isPipActive, setIsPipActive] = useState(false);
 
@@ -694,8 +702,8 @@ export function FloatingQuickAccess({
                     <Layers size={26} />
                   </div>
                   <div>
-                    <h3 className="text-lg font-black text-[#2e1065]">Quyền Hiển Thị Trên Màn Hình Chính</h3>
-                    <p className="text-[14px] text-purple-600 font-semibold">Để Khoan Đã luôn có mặt khi bác cần</p>
+                    <h3 className="text-lg font-black text-[#2e1065]">{t('Bóng nổi Khoan Đã')}</h3>
+                    <p className="text-[14px] text-purple-600 font-semibold">{t('Luôn ở góc màn hình')}</p>
                   </div>
                 </div>
                 <button aria-label={t("Đóng")}
@@ -707,14 +715,17 @@ export function FloatingQuickAccess({
               </div>
 
               {/* Description for elderly users */}
-              <div className="bg-purple-50/80 border border-purple-200 rounded-2xl p-4 mb-4">
-                <p className="text-[14px] text-purple-900 leading-relaxed font-medium mb-2">
-                  ✨ <span className="font-bold">Bác ơi:</span> Khi được cấp quyền, quả bóng tròn <span className="font-bold text-purple-700">Khoan Đã</span> sẽ luôn nổi nhẹ nhàng ở góc màn hình điện thoại (kể cả khi bác đang đọc tin nhắn SMS, lướt Zalo, Facebook hay ở màn hình chính).
+              {/*
+                ⚠️ MỘT CÂU, KHÔNG PHẢI HAI ĐOẠN.
+                Bản trước liệt kê "kể cả khi bác đang đọc tin nhắn SMS, lướt Zalo,
+                Facebook hay ở màn hình chính" — bốn ví dụ cho một ý mà câu trước đã
+                nói xong. Ví dụ chỉ giúp khi ý còn mơ hồ; ở đây nó chỉ dài thêm.
+              */}
+              <div className="bg-purple-50/80 border border-purple-200 rounded-2xl p-3.5 mb-4 flex items-start gap-2">
+                <CheckCircle2 size={16} className="text-emerald-600 shrink-0 mt-0.5" />
+                <p className="text-[14px] text-purple-900 leading-relaxed font-medium">
+                  {t('Gặp số lạ hay link lạ, chạm quả bóng là kiểm được ngay.')}
                 </p>
-                <div className="flex items-center gap-2 text-[14px] text-purple-700">
-                  <CheckCircle2 size={14} className="text-emerald-600 shrink-0" />
-                  <span>Bác gặp số lạ / link lạ chỉ cần chạm quả bóng là có AI kiểm tra ngay.</span>
-                </div>
               </div>
 
               {/* Main Action Button to Grant Permission & Activate PiP */}
@@ -723,12 +734,22 @@ export function FloatingQuickAccess({
                 className="w-full py-3.5 bg-gradient-to-r from-purple-700 via-purple-600 to-indigo-600 hover:from-purple-800 hover:to-indigo-700 text-white rounded-2xl font-black text-sm shadow-lg shadow-purple-600/30 flex items-center justify-center gap-2 active:scale-98 transition-all mb-4"
               >
                 <Sparkles size={18} />
-                {hasPermission ? 'Kích hoạt Cửa Sổ Nổi Ngay' : 'Cho Phép & Bật Bóng Nổi Màn Hình'}
+                {hasPermission ? t('Bật bóng nổi') : t('Cho phép hiện bóng')}
               </button>
 
               {/* Tabs for OS Guidance */}
               <div className="border-t border-gray-100 pt-4">
-                <p className="text-[14px] font-bold text-gray-700 mb-2">Hướng dẫn chi tiết theo dòng máy của bác:</p>
+                <button
+                  onClick={() => setXemHuongDan((x) => !x)}
+                  className="w-full flex items-center justify-between text-[14px] font-bold text-gray-700 py-2"
+                >
+                  <span>{t('Nút trên không ăn? Xem hướng dẫn')}</span>
+                  <ChevronRight
+                    size={16}
+                    className={`text-purple-600 transition-transform ${xemHuongDan ? 'rotate-90' : ''}`}
+                  />
+                </button>
+                {xemHuongDan && (<>
                 <div className="grid grid-cols-4 gap-1 p-1 bg-gray-100 rounded-xl mb-3 text-center text-[14px] font-bold text-gray-600">
                   <button
                     onClick={() => setActiveTabGuide('android')}
@@ -752,7 +773,7 @@ export function FloatingQuickAccess({
                     onClick={() => setActiveTabGuide('pip')}
                     className={`py-1.5 rounded-lg transition-all ${activeTabGuide === 'pip' ? 'bg-white text-purple-700 shadow-xs' : ''}`}
                   >
-                    Cửa Sổ PiP
+                    PiP
                   </button>
                 </div>
 
@@ -818,20 +839,21 @@ export function FloatingQuickAccess({
                       }}
                       className="w-full py-2 bg-purple-600 text-white rounded-xl font-bold flex items-center justify-center gap-1.5 mt-2"
                     >
-                      <Play size={13} /> Thử mở cửa sổ PiP ngay
+                      <Play size={13} /> {t('Thử mở cửa sổ PiP')}
                     </button>
                   </div>
                 )}
+                </>)}
               </div>
 
               {/* Bottom Close */}
               <div className="mt-4 flex items-center justify-between pt-3 border-t border-gray-100">
-                <span className="text-[14px] text-gray-400">Trạng thái: {hasPermission ? '✅ Đã được phép' : '⚠️ Chưa bật'}</span>
+                <span className="text-[14px] text-gray-400">{hasPermission ? t('Đã được phép') : t('Chưa bật')}</span>
                 <button
                   onClick={() => setShowPermissionModal(false)}
                   className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-[14px] font-bold"
                 >
-                  Đóng
+                  {t('Đóng')}
                 </button>
               </div>
             </motion.div>

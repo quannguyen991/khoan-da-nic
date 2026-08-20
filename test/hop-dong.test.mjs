@@ -1180,7 +1180,13 @@ test('§4.1 · mọi khoá t() dùng trong mã đều có trong catalog tiếng 
   const thieu = new Map();
   for (const tep of TEP_GIAO_DIEN) {
     const ma = boChuThich(doc(tep));
-    for (const m of ma.matchAll(/\bt\(\s*(['"])((?:(?!\1).)*)\1/g)) {
+    for (const m of /*
+     * ⚠️ SOI CẢ `tr(` — KHÔNG CHỈ `t(`.
+     * `Guardian.tsx` dùng `const tr = (k) => (t ? t(k) : k)` — cũng tra catalog,
+     * cũng rơi về chính cái khoá khi thiếu bản dịch. Để nó ngoài hàng rào thì
+     * bốn khoá của màn người con hiện nguyên chữ Việt — đo được 20/8/2026.
+     */
+    ma.matchAll(/\b(?:t|tr)\(\s*(['"])((?:(?!\1).)*)\1/g)) {
       const k = m[2];
       if (coTrongEn.has(k)) continue;
       if (!thieu.has(k)) thieu.set(k, tep);

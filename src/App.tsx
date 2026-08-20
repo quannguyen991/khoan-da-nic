@@ -2433,7 +2433,7 @@ function HistoryView({
             <p className="text-[14px] text-gray-500 max-w-xs mb-3">{t("Bác bấm micro hoặc quét ảnh ở trang chủ để kiểm tra an toàn.")}</p>
             <button 
               onClick={() => setView('home')} 
-              className="px-5 py-2 bg-[#8b5cf6] text-white font-bold rounded-xl text-[14px] shadow-sm active:scale-95 transition-transform"
+              className="min-h-[52px] px-6 py-2.5 bg-gradient-to-r from-[#9e76ea] via-[#ad8af0] to-[#9e76ea] text-white font-bold rounded-full text-[14px] shadow-sm active:scale-95 transition-transform"
             >
               {t("Kiểm tra ngay")}
             </button>
@@ -2616,7 +2616,7 @@ function FamilyView({
                    </button>
                    <button 
                      onClick={() => handleSms(member)}
-                     className="flex-1 sm:flex-none px-4 py-2.5 bg-[#7e22ce] hover:bg-[#6b21a8] text-white rounded-xl font-bold text-[15px] flex items-center justify-center gap-1.5 shadow-2xs active:scale-95 transition-transform"
+                     className="flex-1 sm:flex-none min-h-[52px] px-4 py-2.5 bg-gradient-to-r from-[#9e76ea] via-[#ad8af0] to-[#9e76ea] text-white rounded-full font-bold text-[15px] flex items-center justify-center gap-1.5 shadow-2xs active:scale-95 transition-transform"
                      title={t("Gửi tin nhắn nhờ hỗ trợ")}
                    >
                       <MessageSquare size={16} />
@@ -2633,7 +2633,7 @@ function FamilyView({
               </div>
             ))}
 
-            <button onClick={() => setView('add_family')} className="w-full mt-1 py-3 bg-gradient-to-r from-[#8b5cf6] to-[#7c3aed] text-white rounded-2xl font-bold text-[14px] shadow-sm flex items-center justify-center gap-1.5 active:scale-95 transition-transform">
+            <button onClick={() => setView('add_family')} className="w-full mt-1 min-h-[56px] py-3 bg-gradient-to-r from-[#9e76ea] via-[#ad8af0] to-[#9e76ea] text-white rounded-full font-bold text-[14px] shadow-sm flex items-center justify-center gap-1.5 active:scale-95 transition-transform">
                <Plus size={18} strokeWidth={2.5} /> {t("Thêm người thân")}
             </button>
           </div>
@@ -4899,7 +4899,7 @@ function LoginView({
         tin nhắn vẫn nằm trong máy, tài khoản chỉ để nối với người nhà.
       */}
       <p className="text-[15px] text-purple-900/80 font-medium mb-5 text-center max-w-sm leading-relaxed">
-        {t("Tài khoản để nối bác với người nhà. Tin nhắn bác kiểm vẫn nằm trong máy, không gửi lên đâu cả — và bác kiểm được cả khi chưa đăng nhập.")}
+        {t("Tài khoản để nối bác với người nhà. Bác kiểm được cả khi chưa đăng nhập.")}
       </p>
 
       <div className="w-full max-w-sm mb-5 bg-white/80 p-1.5 rounded-2xl border border-purple-200/80 shadow-xs flex items-center gap-1.5">
@@ -4963,8 +4963,8 @@ function LoginView({
         <button
           onClick={() => void gui()}
           disabled={loading}
-          className={`w-full min-h-[56px] px-4 text-white rounded-2xl font-extrabold text-[17px] shadow-md flex items-center justify-center gap-2.5 active:scale-95 disabled:opacity-60 transition-transform ${
-            selectedRole === 'guardian' ? 'bg-sky-600' : 'bg-[#7c3aed]'
+          className={`w-full min-h-[56px] px-4 text-white rounded-full font-extrabold text-[17px] shadow-md flex items-center justify-center gap-2.5 active:scale-95 disabled:opacity-60 transition-transform ${
+            selectedRole === 'guardian' ? 'bg-sky-600' : 'bg-gradient-to-r from-[#9e76ea] via-[#ad8af0] to-[#9e76ea]'
           }`}
         >
           {loading
@@ -4974,7 +4974,7 @@ function LoginView({
 
         <button
           onClick={() => { setDangTao(!dangTao); setLoi(null); }}
-          className="w-full min-h-[52px] px-4 bg-white border-2 border-purple-200 text-[#6d28d9] rounded-2xl font-bold text-[15px] active:scale-95 transition-transform"
+          className="w-full min-h-[52px] px-4 bg-white border-2 border-purple-200 text-[#6d28d9] rounded-full font-bold text-[15px] active:scale-95 transition-transform"
         >
           {dangTao ? t("Tôi đã có tài khoản") : t("Bác chưa có tài khoản? Tạo mới")}
         </button>
@@ -5291,7 +5291,20 @@ function WarningView({
    * `#b91c1c` chứ không `#dc2626`: chữ trắng trên `#dc2626` chỉ đạt 4,53:1, sát
    * mép sàn 4,5:1 và trượt ngay khi ai đó chỉnh sáng lên.
    */
-  const bgColor = laCao
+  /*
+   * ⚠️ LƯỢT BÁC TỰ BẤM "DỪNG 60 GIÂY" DÙNG NỀN ĐỎ — VÀ ĐÂY LÀ CHỦ Ý, KHÔNG PHẢI
+   * NHẦM VỚI NHÃN "NGUY HIỂM CAO".
+   *
+   * Màn này KHÔNG hiện nhãn rủi ro nào: tiêu đề là "Bác dừng lại 60 giây đã",
+   * không phải "Nguy hiểm cao". Đỏ ở đây đọc là DỪNG LẠI, không đọc là "đã kết
+   * luận nguy hiểm" — và nó nối liền với tấm thẻ đỏ ở Menu tác vụ mà bác vừa bấm
+   * để tới đây. Nền tím trước đó nhìn như một màn thông tin, đúng lúc cần nhất
+   * thì không có sức dừng ai lại.
+   *
+   * ⚠️ ĐỪNG SUY NGƯỢC: có nền đỏ KHÔNG có nghĩa là được phép hiện nhãn "Nguy
+   * hiểm cao" ở đây. Nhãn đến từ bộ luật (§4.2), không đến từ màu.
+   */
+  const bgColor = (laCao || (tuBamDung && !nhan))
     ? 'from-[#b91c1c] to-[#7f1d1d]'
     : laNghiNgo
       ? 'from-[#b45309] to-[#78350f]'

@@ -455,7 +455,15 @@ export function GuardianView({
           </div>
 
           {/* Quick Action Buttons */}
-          <div className="grid grid-cols-3 gap-2.5 pt-4 border-t border-slate-100">
+          {/*
+            ⚠️ XẾP DỌC, KHÔNG XẾP BA CỘT.
+            Ở khổ 390px, lưới 3 cột cho mỗi ô ~110px — "Gửi nhắc an toàn" dịch ra
+            "Send Safety Reminder" vỡ thành BA dòng, "SOS Alarm" hai dòng, thấy
+            trong ảnh người dùng gửi 20/8/2026. Tiếng Việt dài hơn tiếng Anh ~30%
+            (§4.5) nên ô hẹp là hỏng ở cả hai thứ tiếng, chỉ khác chỗ vỡ.
+            Ba hàng dọc: nhãn nằm trọn một dòng, vùng chạm rộng hết bề ngang.
+          */}
+          <div className="flex flex-col gap-2 pt-4 border-t border-slate-100 sm:grid sm:grid-cols-3 sm:gap-2.5">
             <a
               href={parentData?.phone ? `tel:${parentData.phone.replace(/\s/g, '')}` : undefined}
               aria-disabled={!parentData?.phone}

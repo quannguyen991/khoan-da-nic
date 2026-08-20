@@ -2,6 +2,20 @@ export type Lang = 'vi' | 'en';
 
 export const translations: Record<Lang, Record<string, string>> = {
   vi: {
+    "Tài khoản để nối bác với người nhà. Bác kiểm được cả khi chưa đăng nhập.": "Tài khoản để nối bác với người nhà. Bác kiểm được cả khi chưa đăng nhập.",
+    "Bóng nổi Khoan Đã": "Bóng nổi Khoan Đã",
+    "Luôn ở góc màn hình": "Luôn ở góc màn hình",
+    "Gặp số lạ hay link lạ, chạm quả bóng là kiểm được ngay.": "Gặp số lạ hay link lạ, chạm quả bóng là kiểm được ngay.",
+    "Bật bóng nổi": "Bật bóng nổi",
+    "Cho phép hiện bóng": "Cho phép hiện bóng",
+    "Nút trên không ăn? Xem hướng dẫn": "Nút trên không ăn? Xem hướng dẫn",
+    "Đã được phép": "Đã được phép",
+    "Chưa bật": "Chưa bật",
+    "Thử mở cửa sổ PiP": "Thử mở cửa sổ PiP",
+    "Chưa nối máy nào": "Chưa nối máy nào",
+    "Thêm máy của bố mẹ để theo dõi": "Thêm máy của bố mẹ để theo dõi",
+    "Nhật ký sự vụ gần đây": "Nhật ký sự vụ gần đây",
+    "Tin tức lừa đảo": "Tin tức lừa đảo",
     /* ═══ Rút gọn màn "Mật khẩu gia đình" — 20/8/2026 ═══
      * Đo trên bản chạy thật ở khổ 390px: màn này 600 ký tự, bốn đoạn ba dòng,
      * là màn nhiều chữ nhất còn lại sau khi các màn khác đã gọn. Ba bước
@@ -726,6 +740,20 @@ export const translations: Record<Lang, Record<string, string>> = {
     "Mở cửa sổ nổi": "Mở cửa sổ nổi",
   },
   en: {
+    "Tài khoản để nối bác với người nhà. Bác kiểm được cả khi chưa đăng nhập.": "An account links you with your family. You can check without signing in.",
+    "Bóng nổi Khoan Đã": "Floating bubble",
+    "Luôn ở góc màn hình": "Always in the corner of the screen",
+    "Gặp số lạ hay link lạ, chạm quả bóng là kiểm được ngay.": "See an unknown number or link? Tap the bubble to check it right away.",
+    "Bật bóng nổi": "Turn the bubble on",
+    "Cho phép hiện bóng": "Allow the bubble",
+    "Nút trên không ăn? Xem hướng dẫn": "Button didn't work? See the steps",
+    "Đã được phép": "Allowed",
+    "Chưa bật": "Not on",
+    "Thử mở cửa sổ PiP": "Try the PiP window",
+    "Chưa nối máy nào": "No phone connected yet",
+    "Thêm máy của bố mẹ để theo dõi": "Add your parent's phone to keep watch",
+    "Nhật ký sự vụ gần đây": "Recent activity",
+    "Tin tức lừa đảo": "Scam news",
     /* ═══ Rút gọn màn "Mật khẩu gia đình" — 20/8/2026 ═══
      * Đo trên bản chạy thật ở khổ 390px: màn này 600 ký tự, bốn đoạn ba dòng,
      * là màn nhiều chữ nhất còn lại sau khi các màn khác đã gọn. Ba bước
