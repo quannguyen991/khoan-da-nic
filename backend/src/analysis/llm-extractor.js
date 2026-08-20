@@ -172,6 +172,41 @@ ${SIGNAL_IDS.map((id) => `- ${id}: ${MO_TA[id] || ''}`).join('\n')}`;
  * §12 — nội dung người dùng nằm trong THẺ DỮ LIỆU, không trộn vào chỉ thị.
  * Đây là hàng rào chống tiêm nhiễm lời nhắc, không phải chuyện định dạng.
  */
+/*
+ * ═════ ĐÒI MÔ HÌNH CHÉP LẠI CHỮ TRONG ẢNH, KHÔNG CHỈ ĐÒI TÍN HIỆU ═════
+ *
+ * Đo 20/8/2026 — cùng một nội dung giả danh công an:
+ *   dạng CHỮ → NGUY HIỂM CAO
+ *   dạng ẢNH → CHƯA THẤY DẤU HIỆU (maLyDo rỗng)
+ *
+ * Và KHÔNG phải vì mô hình mù. Gọi thẳng `trichTinHieu` với đúng tấm ảnh đó:
+ * nó trả về FIN_TRANSFER_REQUEST, FIN_SAFE_ACCOUNT, MAN_FEAR_THREAT — tất cả
+ * `present`, 0 cái bị loại.
+ *
+ * Ở tầng sau, `validateEvidence()` đòi mọi trích dẫn phải là chuỗi con của
+ * `ctx.normalized` — dựng từ `vanBan`. Lượt chỉ-có-ảnh thì `vanBan` RỖNG, nên
+ * MỌI trích dẫn đều trượt và MỌI tín hiệu bị vứt. Nhìn từ ngoài giống hệt
+ * một tấm ảnh sạch — §4.3 lần thứ tư, ở một chỗ độc lập nữa.
+ *
+ * ⚠️ ĐỪNG "SỪA" BẰNG CÁCH BỎQUA KIỂM CHỨNG CHO ẢNH. Hàng rào đó là thứ
+ * chặn mô hình bịa trích dẫn; bỏ nó cho ảnh là mở đúng cửa đó.
+ *
+ * Cách đúng: ĐÒI BẢN CHÉP. Có bản chép thì:
+ *   ① trích dẫn kiểm chứng được — hàng rào giữ nguyên tác dụng
+ *   ② TẦNG LUẬT chạy được trên nội dung ảnh — cái được nhiều nhất.
+ *     §4.2: AI chỉ bật cờ, bộ luật mới quyết. Trước đây ảnh đi đường riêng
+ *     hoàn toàn dựa vào AI — trái tinh thần đó.
+ *   ③ không có bản chép ⇒ khai `khong_doc_duoc_anh` thật, thay vì
+ *     `daKiem: ['anh_ocr']` về một tấm ảnh chưa ai đọc.
+ *
+ * ⚠️ BẢN CHÉP LÀ NỘI DUNG CỦA BÁC (§6.9). Nó vào tầng luật trong bộ nhớ rồi
+ * bỏ — KHÔNG ghi log, KHÔNG trả ra ngoài phong bì §HĐ.
+ */
+const DOI_CHEP_CHU = 'Ngoài danh sách tín hiệu, hãy thêm trường "ocrText": chép lại NGUYÊN VĂN '
+  + 'toàn bộ chữ nhìn thấy trong ảnh, đúng ngôn ngữ gốc, không dịch, không tóm tắt, '
+  + 'không thêm nhận xét. Không đọc được chữ nào thì để chuỗi rỗng. '
+  + 'Mọi quote phải là chuỗi con của "ocrText".';
+
 function dungLoiNhac(vanBan, sourceId = 'van_ban', anh = null) {
   let userContent;
   if (anh && typeof anh === 'string' && anh.trim()) {
@@ -179,7 +214,7 @@ function dungLoiNhac(vanBan, sourceId = 'van_ban', anh = null) {
     userContent = [
       {
         type: 'text',
-        text: `<noi_dung_can_phan_tich sourceId="${sourceId}">\n${vanBan || '(Người dùng gửi ảnh tình huống cần kiểm tra lừa đảo)'}\n</noi_dung_can_phan_tich>\n\nLiệt kê tín hiệu quan sát được từ ảnh và văn bản.`,
+        text: `<noi_dung_can_phan_tich sourceId="${sourceId}">\n${vanBan || '(Người dùng gửi ảnh tình huống cần kiểm tra lừa đảo)'}\n</noi_dung_can_phan_tich>\n\n${DOI_CHEP_CHU}`,
       },
       {
         type: 'image_url',
@@ -215,7 +250,8 @@ async function trichTinHieu(vanBan, opts = {}) {
      * lời có thể không phải đường chính. §11: màn kết quả nói với bác "AI chạy ở
      * đâu", và câu đó phải đúng với lượt này chứ không đúng với cấu hình.
      */
-    const { noiDung: tho, cauHinh: duongDaDung } = await goiChat(messages, opts);
+    const coAnh = Boolean(opts.anh && String(opts.anh).trim());
+    const { noiDung: tho, cauHinh: duongDaDung } = await goiChat(messages, { ...opts, canThiGiac: coAnh });
     const doc = parseJsonLoose(tho);
     if (!doc) {
       /**
@@ -233,15 +269,18 @@ async function trichTinHieu(vanBan, opts = {}) {
       };
     }
     const kq = validateExtraction(doc, opts.sourceId);
+    // Bản chép chữ trong ảnh — xem `DOI_CHEP_CHU`. Cắt trần để một mô hình đi
+    // lạc không bơm được vài trăm KB vào tầng luật.
+    const ocrText = typeof doc?.ocrText === 'string' ? doc.ocrText.slice(0, 5000).trim() : '';
     /*
      * `noiChayThat` là đường ĐÃ TRẢ LỜI cho lượt này, không phải đường được
      * cấu hình. Khi đường chính chết và app rơi xuống qwen cục bộ, hai thứ đó
      * khác nhau — và bác cần biết cái thứ nhất (§11).
      */
-    return { ...kq, aiDaChay: true, loi: null, noiChayThat: duongDaDung?.noiChay ?? null };
+    return { ...kq, ocrText, aiDaChay: true, loi: null, noiChayThat: duongDaDung?.noiChay ?? null };
   } catch (e) {
     const ma = e instanceof LoiNhaCungCap ? e.ma : 'AI_NETWORK';
-    return { signals: [], rejected: [], aiDaChay: false, loi: ma, chiTiet: e };
+    return { signals: [], rejected: [], ocrText: '', aiDaChay: false, loi: ma, chiTiet: e };
   }
 }
 
