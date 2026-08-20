@@ -1730,8 +1730,27 @@ function HomeView({
                 </svg>
               </div>
               
-              <span className="text-white font-black text-[14px] sm:text-sm md:text-base tracking-wide relative z-10 drop-shadow-md">{t("Chạm để nói")}</span>
             </button>
+
+            {/*
+              ═════ NHÃN RA NGOÀI VÒNG TRÒN — 20/8/2026 ═════
+
+              Trước đây "Chạm để nói" nằm BÊN TRONG vòng tròn 96px, ngay dưới
+              biểu tượng micro. Ảnh chụp của người dùng cho thấy chữ tràn ra khỏi
+              mép vòng tròn và đè lên viền.
+
+              §4.5 — tiếng Việt dài hơn tiếng Anh ~30%: "Tap to speak" 12 ký tự
+              vừa, "Chạm để nói" 12 ký tự nhưng chữ Việt rộng hơn và còn mang dấu.
+              Nhét chữ vào trong một hình TRÒN còn tệ hơn hình chữ nhật: bề ngang
+              dùng được hẹp dần về hai đầu.
+
+              ⚠️ HAI NÚT BÊN CẠNH ĐỀU ĐẶT NHÃN DƯỚI VÒNG TRÒN ("Khẩn cấp",
+              "Gọi con cái"). Chỉ nút giữa làm khác — và nó là nút có chữ dài nhất.
+              Để nhãn ra ngoài thì chữ có cả bề ngang của cột, và cả hàng đồng bộ.
+            */}
+            <span className="mt-2 text-[#4c1d95] font-black text-[14px] sm:text-base tracking-wide text-center leading-snug">
+              {t("Chạm để nói")}
+            </span>
           </div>
 
           {/* Call Family Button (Right) */}
