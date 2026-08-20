@@ -1216,8 +1216,9 @@ test('§4.1 · mọi khoá t() dùng trong mã đều có trong catalog tiếng 
  * ⚠️ HAI NGƯỠNG BẤT ĐỐI XỨNG, GIỐNG BỘ TIẾNG VIỆT:
  *   · bắt được ≥ 25%  — sàn TẠM THỜI, ghi lại mức đo được để không tụt
  *   · báo oan  ≤ 4%   — trần
- * Sàn bắt được ĐANG THẤP và đó là sự thật của hôm nay, không phải mục tiêu.
- * Mỗi lần vá mẫu thì NÂNG sàn này lên — đừng để nó nằm yên rồi tưởng là đã ổn.
+ * Lịch sử của con số này, để sau đọc còn hiểu: 26% (lúc dựng bộ) → 35% (vá mẫu
+ * cho tám họ trượt sạch) → 45% (vá lớp thoát bị heredoc nuốt) → 52% (vá lối kể
+ * lại). Mỗi lần vá thì NÂNG sàn — đừng để nó nằm yên rồi tưởng là đã ổn.
  */
 test('§6.10 · bộ 200 tình huống tiếng Anh — tầng luật giữ được mức đã đo', () => {
   const { analyze } = require(path.join(GOC, 'backend', 'src', 'analysis', 'pipeline.js'));
@@ -1245,10 +1246,10 @@ test('§6.10 · bộ 200 tình huống tiếng Anh — tầng luật giữ đư�
   const tiLeBat = (batDuoc / luaDao) * 100;
   const tiLeOan = (baoOan / lanh) * 100;
 
-  assert.ok(tiLeOan <= 4,
-    `BÁO OAN vượt trần 4%: ${baoOan}/${lanh} (${tiLeOan.toFixed(0)}%) — ${oan.join(', ')}`);
-  assert.ok(tiLeBat >= 25,
-    `BẮT ĐƯỢC tụt dưới sàn 25%: ${batDuoc}/${luaDao} (${tiLeBat.toFixed(0)}%)`
+  assert.ok(tiLeOan <= 2,
+    `BÁO OAN vượt trần 2%: ${baoOan}/${lanh} (${tiLeOan.toFixed(0)}%) — ${oan.join(', ')}`);
+  assert.ok(tiLeBat >= 50,
+    `BẮT ĐƯỢC tụt dưới sàn 50%: ${batDuoc}/${luaDao} (${tiLeBat.toFixed(0)}%)`
     + ` — bỏ sót: ${sot.slice(0, 12).join(', ')}${sot.length > 12 ? ` …và ${sot.length - 12} ca nữa` : ''}`);
 });
 

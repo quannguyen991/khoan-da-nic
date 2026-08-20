@@ -272,10 +272,37 @@ const DONG_TU_RUI_RO = new RegExp([
 
 /** Khung GIÁO DỤC / CẢNH BÁO. Vị trí của nó quyết định phạm vi chi phối. */
 const KHUNG_GIAO_DUC = new RegExp([
-  'never\\s+(share|give|send|tell|provide|reveal|install)',
+  'never\\s+(share|give|send|tell|provide|reveal|install|ask|request)',
   'scammers?\\b[^.]{0,40}\\b(may|might|will|often|can)',
   'fraudsters?\\b', 'warns?\\s+(that|you)', 'be (aware|careful)',
   'if\\s+(someone|anyone|a caller)',
+
+  /**
+   * ── KHUNG CẢNH BÁO TIẾNG ANH BỔ SUNG — 20/8/2026 ──
+   *
+   * Đo trên bộ 200 tiếng Anh: cả BA ca báo oan đều là lời khuyên an toàn.
+   *   "The bank will never ask you to transfer money to a safe account"
+   *   "no one from HMRC will ever ask you to pay with gift cards"
+   * Khung cũ có `never (share|give|send|tell…)` nhưng THIẾU `ask` — mà "sẽ không
+   * bao giờ HỎI" mới là câu khuyên hay gặp nhất. Thiếu đúng một động từ.
+   *
+   * Đây chính là bẫy Phụ lục C: câu cảnh báo chứa ĐỦ MỌI từ khoá của vụ lừa mà
+   * nó đang cảnh báo. Bên tiếng Việt đã có khung cho chuyện này từ lâu.
+   *
+   * ⚠️ MỖI KHUNG Ở ĐÂY LÀ MỘT LẦN HẠ CẢNH GIÁC — PHẢI ĐÒI CẤU TRÚC.
+   * Không lấy từ khoá trần. "scam" một mình thì kẻ lừa cũng viết được
+   * ("this is not a scam"); phải là dạng câu mà chỉ người ĐANG KHUYÊN mới viết.
+   *
+   * ⚠️ VÀ NÓ CHỈ TẮT ĐÚNG MỘT ĐOẠN, KHÔNG TẮT CẢ TIN. Kẻ lừa viết "We will never
+   * ask for your PIN. Now read me the code." thì câu sau vẫn nguyên vẹn — đó là
+   * lý do phân đoạn theo câu có giá trị.
+   */
+  'will\\s+(never|not)\\s+(ask|call|contact|request|phone)',
+  '(no one|nobody)\\b[^.]{0,30}\\b(will|would)\\s+(ever\\s+)?(ask|call|request)',
+  'is\\s+(always\\s+)?a\\s+scam\\b',
+  'how to (spot|avoid|recognise|recognize)\\b',
+  '(watch out for|beware of|look out for)\\b',
+  '(hang up|put the phone down)\\b[^.]{0,30}\\b(call|ring|check)\\b',
   /**
    * ── KHUNG TIẾNG VIỆT ──
    *
