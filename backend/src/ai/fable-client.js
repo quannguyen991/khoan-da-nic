@@ -118,6 +118,39 @@ const MODEL_CUC_BO_MAC_DINH = 'qwen2.5:3b-instruct-q4_K_M';
 /** Địa chỉ Gemini theo giao diện tương thích OpenAI. Dùng chung cho cả hai chỗ. */
 const GEMINI_BASE = 'https://generativelanguage.googleapis.com/v1beta/openai';
 
+/**
+ * ═════ HỌC MÔ HÌNH VỪA NGHIĨ VỪA TRẢ LỜI — PHẢI TẮT PHẦN NGHIĨ ═════
+ *
+ * Đo 20/8/2026 trên gateway `api.ai-box.vn`, cùng một lời nhắc thật (2.214 token
+ * vào), cần đúng một mẩu JSON ~170 token ra:
+ *
+ *   qwen3.7-flash  để nguyên            22,05s · 30,57s   — ra 4.084 token
+ *   qwen3.7-flash  enable_thinking:false    2,03s · 2,36s   — ra   169 token
+ *
+ * **Gấp 11 lần.** Thời gian không mất ở đường truyền hay ở lời nhắc — nó mất vào
+ * việc model viết ra hàng nghìn token suy nghĩ mà mình vứt đi không đọc.
+ *
+ * ⚠️ GỬI KÈM `reasoning_effort` LÀ BẬT LẠI PHẦN NGHIĨ. Đo cùng ngày:
+ *
+ *   enable_thinking:false                        2,51s — ra   169 token
+ *   enable_thinking:false + reasoning_effort    30,17s — ra 3.569 token
+ *
+ * Hai tham số đá nhau và `reasoning_effort` thắng. Nên khi tắt thì phải tắt CẢ
+ * HAI — đây là lý do `mucSuyLuan` bị xóa ngay bên dưới, không phải thừa.
+ *
+ * ⚠️ NHẬN DIỆN THEO TÊN MÔ HÌNH LÀ CHỦ Ý, DÙ KHÔNG CHẮC CHẮN BẮNG MỘT CỜ RIÊNG.
+ * Bắt người vận hành nhớ đặt thêm một biến nữa thì phần đông sẽ không đặt, và
+ * app chạy chậm gấp 11 lần mà không ai biết tại sao — một lỗi im lặng. Đặt
+ * `LLM_TAT_SUY_NGHI=0` để ép gửi như cũ, `=1` để ép tắt cho mô hình ngoài danh sách.
+ */
+const HO_VUA_NGHI_VUA_TRA_LOI = /^(qwen3|glm-?[45]|deepseek-v[34]|kimi-k[23]|minimax-m[23]|mimo-v)/i;
+
+function nenTatSuyNghi(model, env) {
+  if (env.LLM_TAT_SUY_NGHI === '0') return false;
+  if (env.LLM_TAT_SUY_NGHI === '1') return true;
+  return typeof model === 'string' && HO_VUA_NGHI_VUA_TRA_LOI.test(model.replace(/^.*\//, ''));
+}
+
 function layCauHinh(env = process.env) {
   let base = env.LLM_API_BASE || env.LLM_BASE_URL;
   let key = env.LLM_API_KEY;
@@ -264,7 +297,13 @@ function layCauHinh(env = process.env) {
     ? env.LLM_KHONG_CO_THI_GIAC !== '1'
     : env.LLM_CUC_BO_CO_THI_GIAC === '1';
 
+  // Xem `HO_VUA_NGHI_VUA_TRA_LOI`: tắt thì phải tắt cả `reasoning_effort`, nếu không
+  // phần nghĩ bật lại và lượt gọi từ 2,5s vọt lên 30s.
+  const tatSuyNghi = nenTatSuyNghi(model, env);
+  if (tatSuyNghi) mucSuyLuan = undefined;
+
   return {
+    tatSuyNghi,
     base,
     key,
     model: model || 'claude-sonnet-5',
@@ -341,6 +380,7 @@ function layCacDuong(env = process.env) {
       key: env.LLM_DU_PHONG_KEY || 'khong-can-khoa',
       model: env.LLM_DU_PHONG_MODEL || MODEL_CUC_BO_MAC_DINH,
       mucSuyLuan: undefined,          // mô hình nhỏ không có phần suy luận
+      tatSuyNghi: nenTatSuyNghi(env.LLM_DU_PHONG_MODEL || MODEL_CUC_BO_MAC_DINH, env),
       noiChay: env.LLM_DU_PHONG_TREN_MAY_NGUOI_DUNG === '1'
         ? 'tren_may_nguoi_dung' : 'tren_may_chu_tu_van_hanh',
       coThiGiac: env.LLM_DU_PHONG_CO_THI_GIAC === '1',
@@ -458,6 +498,7 @@ async function goiMotDuong(messages, cauHinh, opts = {}) {
          */
         ...(cauHinh.noiChay === 'gemini' ? { response_format: { type: 'json_object' } } : {}),
         // `tat` = không gửi tham số, để gateway tự quyết như trước.
+        ...(cauHinh.tatSuyNghi ? { enable_thinking: false } : {}),
         ...(cauHinh.mucSuyLuan && cauHinh.mucSuyLuan !== 'tat'
           ? { reasoning_effort: cauHinh.mucSuyLuan } : {}),
       }),
@@ -513,7 +554,7 @@ async function goiMotDuong(messages, cauHinh, opts = {}) {
 }
 
 module.exports = {
-  goiChat: goiChatCoDuPhong, goiMotDuong, layCauHinh, layCacDuong,
+  goiChat: goiChatCoDuPhong, goiMotDuong, layCauHinh, layCacDuong, nenTatSuyNghi,
   LoiNhaCungCap, TIMEOUT_MAC_DINH,
   laThongBaoDichVu, MAU_THONG_BAO_DICH_VU,
 };

@@ -1001,3 +1001,41 @@ test('§6.7 · trần chờ đường chính KHÔNG cắt luôn đường dự p
   });
   assert.equal(duong2[duong2.length - 1].timeout, 30_000, 'GEMINI_TIMEOUT_MS phải đổi được trần');
 });
+
+/**
+ * TẮT PHẦN NGHIĨ THÌ PHẢI TẮT CẢ `reasoning_effort` — KHÔNG PHẢI MỘT, LÀ HAI.
+ *
+ * Đo 20/8/2026 trên gateway `api.ai-box.vn`, cùng một lời nhắc thật:
+ *
+ *   để nguyên                                22,05s — sinh 4.084 token
+ *   enable_thinking:false                     2,03s — sinh   169 token
+ *   enable_thinking:false + reasoning_effort 30,17s — sinh 3.569 token
+ *
+ * Dòng thứ ba là cái bẫy: `reasoning_effort` BẬT LẠI phần nghĩ dù đã tắt, và mã
+ * này **đang gửi nó sẵn** cho đường chính. Ai đó thêm lại một dòng
+ * `mucSuyLuan = 'low'` vì thấy "để undefined nhìn như thiếu sót" là app chậm gấp
+ * 11 lần, không lỗi nào, không test nào đỏ. Test này là cái đỏ đó.
+ */
+test('§6.7 · mô học vừa nghĩ vừa trả lời: tắt nghĩ thì không gửi reasoning_effort', () => {
+  const { layCauHinh, nenTatSuyNghi } = require(path.join(GOC, 'backend', 'src', 'ai', 'fable-client.js'));
+  const nen = (model, them = {}) => layCauHinh({
+    LLM_API_BASE: 'https://vi-du.test/v1', LLM_API_KEY: 'x', RISK_LLM_MODEL: model, ...them });
+
+  for (const m of ['qwen3.7-flash', 'qwen3.8-max', 'glm-5.2', 'deepseek-v4-flash', 'kimi-k3']) {
+    const c = nen(m);
+    assert.equal(c.tatSuyNghi, true, `${m} thuộc họ vừa nghĩ vừa trả lời, phải tắt phần nghĩ`);
+    assert.equal(c.mucSuyLuan, undefined,
+      `${m} tắt nghĩ nhưng vẫn gửi reasoning_effort=${c.mucSuyLuan} — tham số này BẬT LẠI phần nghĩ`);
+  }
+
+  // Mô hình không thuộc họ đó thì giữ nguyên nếp cũ — đừng tự động gửi tham số lạ.
+  for (const m of ['gpt-5.4', 'gemini-3.6-flash']) {
+    const c = nen(m);
+    assert.equal(c.tatSuyNghi, false, `${m} không thuộc họ này, đừng gửi enable_thinking`);
+    assert.equal(c.mucSuyLuan, 'low');
+  }
+
+  // Phải đè được bằng biến, cho mô hình ngoài danh sách hoặc nhà cung cấp không hiểu.
+  assert.equal(nenTatSuyNghi('gpt-5.4', { LLM_TAT_SUY_NGHI: '1' }), true);
+  assert.equal(nenTatSuyNghi('qwen3.7-flash', { LLM_TAT_SUY_NGHI: '0' }), false);
+});
