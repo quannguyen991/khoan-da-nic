@@ -85,6 +85,14 @@ export default defineConfig(() => {
     },
     build: {
       cssMinify: 'lightningcss' as const,
+      /*
+       * ⚠️ MỐC DỰNG JAVASCRIPT CŨNG PHẢI HẠ THEO, KHÔNG CHỈ CSS.
+       * Vite 6 mặc định nhắm `baseline-widely-available` (~Chrome 107). Máy của
+       * người cao tuổi thường là máy cũ ba bốn năm với WebView không được cập
+       * nhật; cú pháp mới hơn thì gói KHÔNG PHÂN TÍCH ĐƯỢC, và một gói nạp động
+       * hỏng sẽ hiện ra đúng một khoảng trắng.
+       */
+      target: ['es2019', 'chrome87', 'safari14'],
       /**
        * ══════ MÀU PHẢI DỰNG CHO WEBVIEW CŨ, KHÔNG CHỈ CHO CHROME MỚI ══════
        *

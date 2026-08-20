@@ -19,7 +19,8 @@
     "eval": "node eval/run.js",
     "eval:ghi": "node eval/run.js --ghi",
     "eval:quocte": "node eval/khoanbench.js",
-    "eval:quocte:ghi": "node eval/khoanbench.js --ghi"
+    "eval:quocte:ghi": "node eval/khoanbench.js --ghi",
+    "build:apk": "vite build --mode apk && npx cap sync android"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.117.1",

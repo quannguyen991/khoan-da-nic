@@ -1,0 +1,53 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!--
+  ══════════ CHỮ HỆ THỐNG BẢN TIẾNG ANH ══════════
+
+  ⚠️ ĐO 20/8/2026: thông báo thường trực hiện tiếng Việt kể cả khi người dùng đã
+  chọn English trong app. Nguyên nhân: `res/values/` chỉ có một bản, và Android
+  luôn rơi về nó khi không tìm thấy thư mục theo ngôn ngữ.
+
+  ⚠️ ANDROID CHỌN THEO NGÔN NGỮ CỦA MÁY, KHÔNG THEO CÔNG TẮC TRONG APP.
+  Máy để tiếng Việt mà app để English thì thông báo vẫn ra tiếng Việt — đó là
+  cách Android hoạt động, không phải lỗi. Những thông báo do tầng web truyền chữ
+  xuống (`CHU_NATIVE`) thì mới đi theo công tắc trong app.
+
+  ⚠️ TÊN THƯƠNG HIỆU GIỮ NGUYÊN Ở MỌI NGÔN NGỮ (§4.1) — "Khoan Đã" không dịch.
+
+  ⚠️ KHÔNG DÙNG CHỮ "SAFE" Ở BẤT KỲ ĐÂU (§4.1). Hệ thống không hứa an toàn.
+-->
+<resources>
+    <string name="app_name">Khoan Đã</string>
+    <string name="title_activity_main">Khoan Đã</string>
+
+    <!-- Lối tắt trên biểu tượng ứng dụng -->
+    <string name="loi_tat_goi_ngan">On a call</string>
+    <string name="loi_tat_goi_dai">Someone is calling and pushing me</string>
+
+    <string name="loi_tat_tin_ngan">Check</string>
+    <string name="loi_tat_tin_dai">Check a message or a link</string>
+
+    <string name="loi_tat_nguoi_than_ngan">Call family</string>
+    <string name="loi_tat_nguoi_than_dai">Call someone in the family</string>
+
+    <!-- Kênh thông báo -->
+    <string name="kenh_canh_bao_ten">Scam warnings</string>
+    <string name="kenh_canh_bao_mo_ta">Shown at the top when high-risk signals are found</string>
+
+    <string name="nhan_chia_se">Check with Khoan Đã</string>
+
+    <string name="kenh_loi_tat_ten">Khoan Đã shortcut</string>
+    <string name="kenh_loi_tat_mo_ta">A line kept in your notifications so you can open the app quickly when someone calls</string>
+
+    <string name="tb_thuong_truc_tieu_de">Khoan Đã</string>
+    <string name="tb_thuong_truc_noi_dung">Is someone telling you to transfer money or read out a code? Tap here and check first.</string>
+
+    <string name="kenh_canh_bao_v2_ten">High-risk warnings</string>
+    <string name="kenh_canh_bao_v2_mo_ta">Heads-up when Khoan Đã sees high-risk signals</string>
+    <string name="tb_canh_bao_tieu_de">Khoan Đã warning</string>
+
+    <!-- Nhắc cuộc gọi dài -->
+    <string name="kenh_cuoc_goi_ten">Long-call reminder</string>
+    <string name="kenh_cuoc_goi_mo_ta">Reminds you when a call runs unusually long</string>
+    <string name="cuoc_goi_thuong_truc_tieu_de">Khoan Đã is watching this call</string>
+    <string name="cuoc_goi_thuong_truc_noi_dung">Counting time only, not listening. Tap to turn off.</string>
+</resources>

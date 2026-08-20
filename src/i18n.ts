@@ -2,6 +2,14 @@ export type Lang = 'vi' | 'en';
 
 export const translations: Record<Lang, Record<string, string>> = {
   vi: {
+    "Vì sao?": "Vì sao?",
+    "Bật theo thứ tự này": "Bật theo thứ tự này",
+    "Bật dòng nhắc — để mở app nhanh khi có người gọi.": "Bật dòng nhắc — để mở app nhanh khi có người gọi.",
+    "Bật dải cảnh báo — để thấy cảnh báo cả khi đang nghe điện thoại.": "Bật dải cảnh báo — để thấy cảnh báo cả khi đang nghe điện thoại.",
+    "Bật đọc thông báo — để kiểm tin nhắn bằng một chạm.": "Bật đọc thông báo — để kiểm tin nhắn bằng một chạm.",
+    "Mỗi lần bật, máy sẽ hỏi một lần. Bác chọn Cho phép rồi quay lại đây.": "Mỗi lần bật, máy sẽ hỏi một lần. Bác chọn Cho phép rồi quay lại đây.",
+    "Phần này chưa mở được": "Phần này chưa mở được",
+    "Các phần khác của Khoan Đã vẫn dùng được bình thường.": "Các phần khác của Khoan Đã vẫn dùng được bình thường.",
     "Kiểm tin nhắn": "Kiểm tin nhắn",
     "Gọi người nhà": "Gọi người nhà",
     "Xem đầy đủ": "Xem đầy đủ",
@@ -855,6 +863,14 @@ export const translations: Record<Lang, Record<string, string>> = {
     "Tin này từ một số bác chưa lưu, mà lại hỏi tiền hoặc hỏi mã. Bác gọi lại bằng số đã lưu sẵn để kiểm.": "Tin này từ một số bác chưa lưu, mà lại hỏi tiền hoặc hỏi mã. Bác gọi lại bằng số đã lưu sẵn để kiểm.",
   },
   en: {
+    "Vì sao?": "Why?",
+    "Bật theo thứ tự này": "Turn these on in order",
+    "Bật dòng nhắc — để mở app nhanh khi có người gọi.": "Turn on the reminder line — to open the app quickly when someone calls.",
+    "Bật dải cảnh báo — để thấy cảnh báo cả khi đang nghe điện thoại.": "Turn on the warning banner — to see warnings even while you are on a call.",
+    "Bật đọc thông báo — để kiểm tin nhắn bằng một chạm.": "Turn on notification reading — to check a message with one tap.",
+    "Mỗi lần bật, máy sẽ hỏi một lần. Bác chọn Cho phép rồi quay lại đây.": "Each one asks your phone for permission once. Choose Allow, then come back here.",
+    "Phần này chưa mở được": "This part could not open",
+    "Các phần khác của Khoan Đã vẫn dùng được bình thường.": "The rest of Khoan Đã still works normally.",
     "Kiểm tin nhắn": "Check a message",
     "Gọi người nhà": "Call family",
     "Xem đầy đủ": "Show the full app",

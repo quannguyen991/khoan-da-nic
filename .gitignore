@@ -5,6 +5,11 @@ coverage/
 .DS_Store
 *.log
 .env*
+# ⚠️ NGOẠI LỆ: `.env.apk` PHẢI được theo dõi.
+# Nó không chứa bí mật nào — chỉ một địa chỉ máy chủ công khai. Nhưng thiếu nó
+# thì bản APK dựng ra KHÔNG CÓ máy chủ, và hỏng im lặng: bản dựng vẫn xanh, app
+# vẫn mở, chỉ là mọi lượt kiểm đều thất bại. Đã xảy ra 20/8/2026.
+!.env.apk
 !.env.example
 
 # ⚠️ ẢNH GỐC KHÔNG ĐẨY LÊN GIT — 34 MB, và không cần để chạy app.

@@ -72,6 +72,7 @@ import {
 } from './native';
 import { GuardianIntroView, GuardianAuthView, GuardianView } from './components/Guardian';
 import { AppMenuModal } from './components/AppMenuModal';
+import { HangRaoLoi } from './hang-rao-loi';
 import { MatKhauGiaDinh, docMatKhauGiaDinh } from './components/MatKhauGiaDinh';
 import { KhoiQuyTac, ManDatQuyTac } from './components/QuyTacGiaDinh';
 import { CanhBaoChinhThuc } from './components/CanhBaoChinhThuc';
@@ -1141,6 +1142,18 @@ export default function App() {
           <div className="absolute top-[-5%] left-[-10%] w-72 h-72 bg-white opacity-60 rounded-full blur-3xl pointer-events-none select-none"></div>
           <div className="absolute bottom-1/4 right-[-20%] w-80 h-80 bg-[#d8b4fe] opacity-30 rounded-full blur-[80px] pointer-events-none select-none"></div>
           
+          {/*
+            ⚠️ MỘT MÀN HỎNG THÌ CHỈ MÀN ĐÓ HIỆN LỖI.
+            Không có hàng rào, React gỡ nguyên cả nhánh và người dùng thấy một ô
+            trắng không chữ không nút — đo trên máy thật 20/8/2026, và vì màn
+            hình không nói gì nên ba vòng chẩn đoán đầu đều đoán sai nguyên nhân.
+          */}
+          <HangRaoLoi
+            loiChinh={t('Phần này chưa mở được')}
+            loiPhu={t('Các phần khác của Khoan Đã vẫn dùng được bình thường.')}
+            nhanThoat={t('Trang chủ')}
+            onThoat={() => setView('home')}
+          >
           <AnimatePresence mode="wait">
             {view === 'intro' && <IntroView setView={setView} t={t} setUserRole={setUserRole} />}
             {view === 'home' && sieuDonGian && (
@@ -1224,6 +1237,7 @@ export default function App() {
                onDangXuat={dangXuat}/>
             )}
           </AnimatePresence>
+          </HangRaoLoi>
 
           {/*
             ⚠️ §4.6 — CHẾ ĐỘ SIÊU ĐƠN GIẢN VẪN PHẢI CÓ ĐƯỜNG VỀ.
@@ -1310,41 +1324,64 @@ export default function App() {
                         className={`relative z-10 transition-all duration-300 flex items-center justify-center rounded-full active:scale-95 shrink-0
                           lg:rounded-full lg:px-5 lg:h-[3.4rem] lg:gap-2.5 lg:w-auto ${
                           isActive
-                            ? 'bg-white/25 shadow-[0_0_20px_rgba(255,255,255,0.4)] text-white px-4 h-[55px] lg:bg-white lg:text-[#6d28d9] lg:shadow-md'
-                            : 'text-white/70 hover:text-white w-[55px] h-[55px] lg:text-white/85 lg:hover:bg-white/20 lg:w-auto'
+                            ? 'bg-white/25 shadow-[0_0_20px_rgba(255,255,255,0.4)] text-white px-2.5 min-[375px]:px-3.5 h-[52px] sm:h-[3.6rem] lg:bg-white lg:text-[#6d28d9] lg:shadow-md'
+                            : 'text-white/70 hover:text-white w-[52px] h-[52px] sm:w-[3.6rem] sm:h-[3.6rem] lg:text-white/85 lg:hover:bg-white/20 lg:w-auto'
                         }`}
                         /*
                           ⚠️ §4.4 — SÀN 52px BẰNG PX CỐ ĐỊNH, KHÔNG BẰNG rem.
-                          Từng thử `w-[max(52px,3.25rem)]` — Tailwind KHÔNG sinh ra
-                          CSS nào cho lớp đó (kiểm bằng `document.styleSheets`, rỗng),
-                          lặng lẽ như không có gì hỏng. rem cũng vốn không cần thiết ở
-                          đây nữa: nút mobile giờ CHỈ có icon, không còn chữ nở ra, nên
-                          không có lý do bắt khung nút phình theo bậc chữ A/A+/A++.
-                          `shrink-0` để hàng 5 nút không co dưới sàn khi hẹp — trước đây
-                          nhãn nút đang chọn nở ra chiếm chỗ, ép bốn nút còn lại co
-                          xuống dưới 52px mà không hiển thị nào cảnh báo.
+                          Ở bậc chữ "nhỏ" (gốc 15px) `3.25rem` chỉ ra 48,75px — dưới sàn
+                          ngay cả khi flex không bóp gì. Từng thử `w-[max(52px,3.25rem)]`
+                          — Tailwind KHÔNG sinh ra CSS nào cho lớp đó, lặng lẽ như không
+                          có gì hỏng. `shrink-0` để hàng 5 nút không co dưới sàn khi hẹp:
+                          đo ở khổ 320px, bốn nút từng bị flex bóp còn 40px.
                         */
                       >
-                        <Icon size={24} fill={isActive && item.id !== 'search' ? "currentColor" : "none"} strokeWidth={isActive ? 2 : 2} />
+                        {/*
+                          ⚠️ 28px, KHÔNG PHẢI 24px. Người dùng báo 20/8/2026:
+                          "cái icon taskbar bị bé tí luôn".
+
+                          §4.4 đặt sàn cho VÙNG CHẠM (52px) và CỠ CHỮ (14px), nhưng
+                          KHÔNG đặt sàn cho cỡ BIỂU TƯỢNG — nên một biểu tượng 24px nằm
+                          giữa vùng chạm 52px vẫn qua được mọi test. Vùng chạm đủ to
+                          không có nghĩa là NHÌN THẤY được cái gì trong đó.
+
+                          Ở máy hẹp dưới 375px nhãn chữ ẩn, nên biểu tượng là THỨ DUY
+                          NHẤT phân biệt được các nút. Ở đó nó không phải trang trí — nó
+                          là nhãn.
+                        */}
+                        <Icon size={28} fill={isActive && item.id !== 'search' ? "currentColor" : "none"} strokeWidth={isActive ? 2.4 : 2.2} />
                         {/*
                           Trên máy tính nhãn hiện thường trực — có chỗ, và người
                           cao tuổi đọc chữ nhanh hơn đoán biểu tượng.
-
-                          ⚠️ TRÊN ĐIỆN THOẠI KHÔNG CÒN NHÃN CHỮ NỞ RA NỮA — đã BỎ
-                          9/2026. Bản cũ nở nhãn nút đang chọn bằng `width: 'auto'`
-                          trong một hàng 5 nút `justify-between` không dư khoảng nào:
-                          đo ở khổ 320px (mốc §4.4), "Trang chủ" bị flex-shrink cắt
-                          còn "Trang ch", và các nút CÒN LẠI cũng bị ép xuống dưới
-                          52px — tức đúng sàn `--touch-target` mà token khai lại
-                          không có gì đảm bảo ở màn thật. Đổi phông chữ (Quicksand)
-                          chỉ làm lộ ra vấn đề vốn đã treo lơ lửng.
-
-                          Nền phát sáng + icon tô đặc đã đủ báo nút nào đang chọn,
-                          không cần thêm chữ nở ra tranh chỗ. `aria-label` vẫn còn
-                          nguyên nên TalkBack đọc tên đúng bất kể có chữ hiện hay
-                          không (§4.4).
                         */}
                         <span className="hidden lg:inline font-bold text-[15px]">{item.label}</span>
+                        {/*
+                          ⚠️ NHÃN NÚT ĐANG CHỌN CHỈ HIỆN TỪ 375px.
+                          Ở 320px thì giữ nhãn VÀ đủ 52px là bất khả: năm nút cần
+                          ~338px trong khi khung chỉ có ~296px. Sàn vùng chạm là ràng
+                          buộc cứng, nhãn chữ thì không — bấm trượt là hỏng việc, mất
+                          chữ chỉ là bớt tiện. Nhánh dev từng bỏ hẳn nhãn (4/9 sáng);
+                          bản web chọn cách này chiều cùng ngày để máy 375px trở lên —
+                          phần lớn điện thoại — vẫn có chữ. `aria-label` còn nguyên ở
+                          mọi nút nên TalkBack không mất gì.
+
+                          ⚠️ ĐỪNG CHẠY HIỆU ỨNG TRÊN `width` KÈM `overflow-hidden`.
+                          Bản trước chạy `width: 0 → auto` rồi cắt phần thừa: khi thanh
+                          không đủ chỗ, chữ bị CẮT CỤT và nằm im như vậy — người dùng
+                          báo 20/8/2026. Chạy `opacity` thôi; nút tự co giãn theo nhãn.
+                        */}
+                        <AnimatePresence>
+                          {isActive && (
+                            <motion.span
+                              initial={{ opacity: 0, marginLeft: 0 }}
+                              animate={{ opacity: 1, marginLeft: 6 }}
+                              exit={{ opacity: 0, marginLeft: 0 }}
+                              className="hidden min-[375px]:inline lg:hidden font-bold text-[14px] shrink-0"
+                            >
+                              {item.label}
+                            </motion.span>
+                          )}
+                        </AnimatePresence>
                       </button>
                     );
                   })}
@@ -1428,6 +1465,12 @@ export default function App() {
       )}
 
       {/* Full App Menu & Quick Launcher Modal */}
+      <HangRaoLoi
+        loiChinh={t('Phần này chưa mở được')}
+        loiPhu={t('Các phần khác của Khoan Đã vẫn dùng được bình thường.')}
+        nhanThoat={t('Đóng')}
+        onThoat={() => setIsMenuOpen(false)}
+      >
       <AppMenuModal 
         isOpen={isMenuOpen}
         onClose={() => setIsMenuOpen(false)}
@@ -1441,6 +1484,7 @@ export default function App() {
         showFloatingBall={showFloatingBall}
         setShowFloatingBall={setShowFloatingBall}
       />
+      </HangRaoLoi>
 
       {/*
         ⚠️ NÚT NỔI PHẢI BIẾN MẤT KHI CÓ HỘP THOẠI ĐANG MỞ.
@@ -1473,6 +1517,10 @@ export default function App() {
       )}
 
       {view !== 'intro' && view !== 'login' && !isMenuOpen && !sieuDonGian && (
+      <HangRaoLoi
+        loiChinh={t('Phần này chưa mở được')}
+        loiPhu={t('Các phần khác của Khoan Đã vẫn dùng được bình thường.')}
+      >
       <FloatingQuickAccess
           lang={lang}
         setView={setView}
@@ -1485,6 +1533,7 @@ export default function App() {
         showFloatingBall={showFloatingBall}
         setShowFloatingBall={setShowFloatingBall}
       />
+      </HangRaoLoi>
       )}
     </div>
   );
@@ -3707,6 +3756,32 @@ function NhacCuocGoiDai({ t, lang }: { t: any; lang: Lang }) {
   );
 }
 
+/**
+ * Đoạn giải thích GẤP LẠI, mặc định đóng.
+ *
+ * ⚠️ VÌ SAO KHÔNG XOÁ HẲN CHO GỌN: mấy đoạn này nói ra thứ bác CẦN biết trước
+ * khi bật một quyền — cái gì được đọc, cái gì không. Xoá đi là bật quyền mà
+ * không nói rõ. Nhưng bày sẵn cả ba đoạn cùng lúc thì màn hình thành một bức
+ * tường chữ, và người cần đọc nhất lại là người bỏ qua trước nhất.
+ *
+ * Gấp lại: mặc định thấy công tắc, muốn hiểu thì mở ra.
+ */
+function GiaiThich({ t, children }: { t: any, children: React.ReactNode }) {
+  const [mo, setMo] = useState(false);
+  return (
+    <div className="mt-2">
+      <button
+        onClick={() => setMo((x) => !x)}
+        className="flex items-center gap-1.5 text-[14px] font-bold text-current opacity-80 py-1"
+      >
+        <span>{t('Vì sao?')}</span>
+        <ChevronRight size={15} className={`transition-transform ${mo ? 'rotate-90' : ''}`} />
+      </button>
+      {mo && <div className="mt-1">{children}</div>}
+    </div>
+  );
+}
+
 function NotificationsView({ 
   setView, 
   t, 
@@ -3883,6 +3958,33 @@ function NotificationsView({
       */
       className="absolute inset-0 z-50 bg-[#f8f4ff] flex flex-col items-center justify-start overflow-y-auto [&>*]:shrink-0 px-4 sm:px-6 pt-10 pb-28"
     >
+      {/*
+        ⚠️ HƯỚNG DẪN ĐẶT TRƯỚC CÁC CÔNG TẮC, KHÔNG ĐẶT SAU.
+        Màn này có ba công tắc và mỗi cái đòi một quyền khác nhau của máy. Không
+        có thứ tự thì bác bật cái nào trước cũng được, và cái nào hỏng thì không
+        biết vì sao. Ba dòng dưới đây nói đúng thứ tự nên bật, và bật để làm gì.
+      */}
+      <div className="w-full max-w-[420px] bg-white rounded-3xl p-4 shadow-sm border border-[#e9d5ff] mb-4">
+        <h3 className="text-[16px] font-black text-[#311068] mb-2">{t('Bật theo thứ tự này')}</h3>
+        <ol className="flex flex-col gap-2">
+          {[
+            t('Bật dòng nhắc — để mở app nhanh khi có người gọi.'),
+            t('Bật dải cảnh báo — để thấy cảnh báo cả khi đang nghe điện thoại.'),
+            t('Bật đọc thông báo — để kiểm tin nhắn bằng một chạm.'),
+          ].map((cau, i) => (
+            <li key={i} className="flex items-start gap-2.5">
+              <span className="w-7 h-7 rounded-full bg-[#7c3aed] text-white font-black text-[14px] flex items-center justify-center shrink-0">
+                {i + 1}
+              </span>
+              <span className="text-[14px] text-slate-700 leading-snug">{cau}</span>
+            </li>
+          ))}
+        </ol>
+        <p className="text-[14px] text-slate-500 leading-snug mt-2.5">
+          {t('Mỗi lần bật, máy sẽ hỏi một lần. Bác chọn Cho phép rồi quay lại đây.')}
+        </p>
+      </div>
+
       {/* Top Bar */}
       <div className="w-full max-w-[420px] flex items-center justify-between mb-4">
         <button 
@@ -3900,9 +4002,9 @@ function NotificationsView({
       <h2 className="text-2xl sm:text-3xl font-black text-[#3b1d7d] mb-1 text-center">
         {t("Thông báo & Cửa sổ nổi")}
       </h2>
-      <p className="text-[14px] sm:text-sm text-purple-800/80 mb-5 text-center max-w-xs font-medium">
-        {t("Ghim cố định trên khay hệ thống để truy cập tức thì hoặc kích hoạt cảnh giác khi gặp nguy hiểm")}
-      </p>
+      <GiaiThich t={t}>
+        <p className="text-[14px] sm:text-sm text-purple-800/80 mb-5 text-center max-w-xs font-medium">{t("Ghim cố định trên khay hệ thống để truy cập tức thì hoặc kích hoạt cảnh giác khi gặp nguy hiểm")}</p>
+      </GiaiThich>
 
       {/* Toast Alert: Notification Sent */}
       <AnimatePresence>
@@ -4009,9 +4111,9 @@ function NotificationsView({
                 ? t("Lối tắt đã tắt mất. Bác bật lại thì nó chưa ở trên thanh thông báo.")
                 : t("Chưa bật được: máy chưa cho Khoan Đã gửi thông báo.")}
             </p>
-            <p className="text-[14px] text-amber-200/90 leading-relaxed mt-1">
-              {t("Bác vào Cài đặt của máy › Ứng dụng › Khoan Đã › Thông báo và bật lên, rồi quay lại bấm công tắc này.")}
-            </p>
+            <GiaiThich t={t}>
+              <p className="text-[14px] text-amber-200/90 leading-relaxed mt-1">{t("Bác vào Cài đặt của máy › Ứng dụng › Khoan Đã › Thông báo và bật lên, rồi quay lại bấm công tắc này.")}</p>
+            </GiaiThich>
           </div>
         )}
 
@@ -4145,9 +4247,9 @@ function NotificationsView({
           <Sliders size={18} className="text-[#6d28d9]" />
           {t("Chọn hành động khi bấm vào thông báo:")}
         </h3>
-        <p className="text-[14px] text-slate-500 mb-4">
-          {t("Bác có thể tùy chọn để chạm vào sẽ mở ứng dụng hoặc bật ngay cảnh giác khẩn cấp:")}
-        </p>
+        <GiaiThich t={t}>
+          <p className="text-[14px] text-slate-500 mb-4">{t("Bác có thể tùy chọn để chạm vào sẽ mở ứng dụng hoặc bật ngay cảnh giác khẩn cấp:")}</p>
+        </GiaiThich>
 
         <div className="space-y-3">
           {/* Option 1: Dual mode (Recommended) */}
@@ -4169,9 +4271,9 @@ function NotificationsView({
                 <span className="font-extrabold text-[14px] text-[#1e1b4b]">{t("Chế độ Kép thông minh")}</span>
                 <span className="text-[14px] font-bold bg-amber-100 text-amber-800 px-2 py-0.2 rounded-full border border-amber-300">{t("Khuyên dùng")}</span>
               </div>
-              <p className="text-[14px] text-slate-600 mt-1 leading-snug">
-                {t("Trên thông báo có sẵn cả 2 nút: [🏠 Vào App] và [🚨 Báo nguy hiểm SOS] để bác chọn bất cứ lúc nào.")}
-              </p>
+              <GiaiThich t={t}>
+                <p className="text-[14px] text-slate-600 mt-1 leading-snug">{t("Trên thông báo có sẵn cả 2 nút: [🏠 Vào App] và [🚨 Báo nguy hiểm SOS] để bác chọn bất cứ lúc nào.")}</p>
+              </GiaiThich>
             </div>
           </div>
 
@@ -4191,9 +4293,9 @@ function NotificationsView({
             </div>
             <div className="flex-1">
               <span className="font-extrabold text-[14px] text-[#1e1b4b] block">{t("Mở ứng dụng ngay (Trang chủ)")}</span>
-              <p className="text-[14px] text-slate-600 mt-1 leading-snug">
-                {t("Chạm vào thông báo sẽ mở ngay màn hình chính Khoan Đã để hỏi trợ lý AI, chụp ảnh quét lừa đảo hoặc kiểm tra tin nhắn.")}
-              </p>
+              <GiaiThich t={t}>
+                <p className="text-[14px] text-slate-600 mt-1 leading-snug">{t("Chạm vào thông báo sẽ mở ngay màn hình chính Khoan Đã để hỏi trợ lý AI, chụp ảnh quét lừa đảo hoặc kiểm tra tin nhắn.")}</p>
+              </GiaiThich>
             </div>
           </div>
 
@@ -4213,9 +4315,9 @@ function NotificationsView({
             </div>
             <div className="flex-1">
               <span className="font-extrabold text-[14px] text-[#1e1b4b] block">{t("Báo động & Cảnh giác khẩn cấp (Nguy hiểm 60s)")}</span>
-              <p className="text-[14px] text-slate-600 mt-1 leading-snug">
-                {t("Chạm vào thông báo sẽ mở ngay chế độ Cảnh báo Rủi ro cao 60 giây, dừng ngay chuyển tiền và hiện phím gọi người thân.")}
-              </p>
+              <GiaiThich t={t}>
+                <p className="text-[14px] text-slate-600 mt-1 leading-snug">{t("Chạm vào thông báo sẽ mở ngay chế độ Cảnh báo Rủi ro cao 60 giây, dừng ngay chuyển tiền và hiện phím gọi người thân.")}</p>
+              </GiaiThich>
             </div>
           </div>
         </div>
