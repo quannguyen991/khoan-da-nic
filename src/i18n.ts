@@ -2,6 +2,8 @@ export type Lang = 'vi' | 'en';
 
 export const translations: Record<Lang, Record<string, string>> = {
   vi: {
+    "Chạm là quét ảnh hoặc mã QR ngay. Chỉ có khi bác đang mở Khoan Đã.": "Chạm là quét ảnh hoặc mã QR ngay. Chỉ có khi bác đang mở Khoan Đã.",
+    "Xem thử ngoài app": "Xem thử ngoài app",
     "Số khẩn cấp": "Số khẩn cấp",
     /* ═════ 98 KHOÁ BỊ THIẾU — THÊM 20/8/2026 ═════
      *
@@ -685,6 +687,8 @@ export const translations: Record<Lang, Record<string, string>> = {
     "Mở cửa sổ nổi": "Mở cửa sổ nổi",
   },
   en: {
+    "Chạm là quét ảnh hoặc mã QR ngay. Chỉ có khi bác đang mở Khoan Đã.": "Tap it to scan a photo or QR code. Only while Khoan Đã is open.",
+    "Xem thử ngoài app": "Preview outside the app",
     "Số khẩn cấp": "Hotlines",
     /* ═════ 98 KHOÁ BỊ THIẾU — THÊM 20/8/2026 ═════
      *

@@ -1483,7 +1483,14 @@ function HomeView({
               className="relative w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-full bg-gradient-to-b from-[#b886f8] via-[#8c52f4] to-[#6724d5] border-[3.5px] border-white/90 shadow-[0_10px_25px_rgba(90,30,160,0.35),inset_0_4px_10px_rgba(255,255,255,0.8)] flex flex-col items-center justify-center active:scale-95 transition-transform group overflow-hidden pointer-events-auto"
             >
               <div className="absolute top-0 inset-x-0 h-[45%] bg-gradient-to-b from-white/45 to-transparent rounded-t-full pointer-events-none"></div>
-              <div className="text-white mb-1 relative z-10 drop-shadow-md">
+              {/*
+                ⚠️ ĐÃ BỎ THANH SÓNG ÂM DƯỚI MICRO (20/8/2026).
+                Năm vạch nhấp nháy dưới biểu tượng micro trông như đang thu âm,
+                trong khi nút này CHƯA thu gì — nó chỉ mở màn ghi âm. Một hiệu
+                ứng mô tả trạng thái không có thật thì thà bỏ.
+                Bỏ nó cũng lấy lại chỗ cho biểu tượng và chữ thở ra.
+              */}
+              <div className="text-white mt-1.5 mb-0.5 relative z-10 drop-shadow-md">
                 <svg className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" fill="currentColor"/>
                   <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
@@ -1492,16 +1499,6 @@ function HomeView({
                 </svg>
               </div>
               
-              <div className="flex items-center justify-center gap-[3px] h-3 mb-1 relative z-10">
-                {[0.4, 0.8, 0.5, 1, 0.6].map((val, i) => (
-                  <motion.div
-                    key={i}
-                    className="w-[2.5px] sm:w-[3px] bg-white rounded-full opacity-95"
-                    animate={{ height: `${val * 9}px` }}
-                    transition={{ repeat: Infinity, duration: 1 + i * 0.1, ease: "easeInOut" }}
-                  />
-                ))}
-              </div>
               <span className="text-white font-black text-[14px] sm:text-sm md:text-base tracking-wide relative z-10 drop-shadow-md">{t("Chạm để nói")}</span>
             </button>
           </div>
@@ -2370,25 +2367,34 @@ function HistoryView({
       </div>
 
       {/* Tabs */}
-      <div className="flex bg-white/80 md:bg-white md:shadow-sm md:w-[420px] md:mx-auto backdrop-blur-md rounded-2xl p-1 mb-3 shadow-2xs border border-purple-100/60">
+      {/*
+        ⚠️ CÙNG HÌNH DẠNG VỚI THANH ĐIỀU HƯỚNG DƯỚI CÙNG.
+        Cùng `rounded-full`, cùng dải màu tím, cùng cách đánh dấu mục đang chọn.
+        Hai dải điều khiển nằm trên một màn hình mà mỗi cái một kiểu thì bác phải
+        học hai lần cùng một thao tác.
+
+        Con số trong ngoặc chỉ hiện KHI KHÁC 0. "Tất cả (0) · Nguy hiểm cao (0) ·
+        Đã lưu (0)" là ba con số không nói gì, chiếm đúng chỗ của nhãn.
+      */}
+      <div className="flex bg-gradient-to-r from-[#9e76ea] via-[#ad8af0] to-[#9e76ea] md:w-[420px] md:mx-auto rounded-full p-[6px] mb-3 shadow-[0_10px_24px_rgba(90,30,160,0.22)] border border-white/20">
         <button 
           onClick={() => setActiveTab('all')} 
-          className={`flex-1 py-2 rounded-xl font-bold text-[14px] transition-all ${activeTab === 'all' ? 'bg-[#7e22ce] text-white shadow-sm' : 'text-[#6d28d9] hover:bg-white/50'}`}
+          className={`flex-1 py-2.5 rounded-full font-bold text-[14px] transition-all ${activeTab === 'all' ? 'bg-white text-[#6d28d9] shadow-sm' : 'text-white/85 hover:bg-white/20'}`}
         >
-          {t("Tất cả")} ({historyItems.length})
+          {t("Tất cả")}{historyItems.length > 0 ? ` (${historyItems.length})` : ''}
         </button>
         <button 
           onClick={() => setActiveTab('high')} 
-          className={`flex-1 py-2 rounded-xl font-bold text-[14px] transition-all ${activeTab === 'high' ? 'bg-red-600 text-white shadow-sm' : 'text-red-600 hover:bg-red-50'}`}
+          className={`flex-1 py-2.5 rounded-full font-bold text-[14px] transition-all ${activeTab === 'high' ? 'bg-red-600 text-white shadow-sm' : 'text-white/85 hover:bg-white/20'}`}
         >
           {/* Tab lọc cũng dùng đúng nhãn của catalog — cùng một mức, cùng một chữ. */}
-          {tra(NHAN, 'CAO', lang)} ({historyItems.filter(i => i.risk === 'CAO').length})
+          {tra(NHAN, 'CAO', lang)}{historyItems.filter(i => i.risk === 'CAO').length > 0 ? ` (${historyItems.filter(i => i.risk === 'CAO').length})` : ''}
         </button>
         <button 
           onClick={() => setActiveTab('saved')} 
-          className={`flex-1 py-2 rounded-xl font-bold text-[14px] transition-all ${activeTab === 'saved' ? 'bg-[#7e22ce] text-white shadow-sm' : 'text-[#6d28d9] hover:bg-white/50'}`}
+          className={`flex-1 py-2.5 rounded-full font-bold text-[14px] transition-all ${activeTab === 'saved' ? 'bg-white text-[#6d28d9] shadow-sm' : 'text-white/85 hover:bg-white/20'}`}
         >
-          {t("Đã lưu")} ({historyItems.filter(i => i.saved).length})
+          {t("Đã lưu")}{historyItems.filter(i => i.saved).length > 0 ? ` (${historyItems.filter(i => i.saved).length})` : ''}
         </button>
       </div>
 
@@ -4128,7 +4134,7 @@ function SettingsView({
         </div>
 
         <p className="text-[14px] text-purple-200 leading-relaxed mb-4">
-          {t("Một nút tròn nổi ở góc màn hình khi bác đang mở Khoan Đã — chạm là quét ảnh hoặc mã QR ngay, không phải đi tìm menu. Nút này chỉ có trong Khoan Đã; ra ngoài app thì không còn.")}
+          {t("Chạm là quét ảnh hoặc mã QR ngay. Chỉ có khi bác đang mở Khoan Đã.")}
         </p>
 
         {setShowFloatingBall && (
@@ -4150,7 +4156,14 @@ function SettingsView({
             onClick={onOpenOutsideMode}
             className="w-full py-2.5 bg-white/15 hover:bg-white/25 active:scale-95 text-white rounded-xl text-[14px] font-bold transition-all flex items-center justify-center gap-2 border border-white/20"
           >
-            <Smartphone size={15} /> {t("Thử màn hình khóa / Màn hình ngoài")}
+            {/*
+              ⚠️ NHÃN NGẮN LẠI. Bản trước là "Thử màn hình khóa / Màn hình ngoài"
+              — tiếng Anh dịch ra "Try Lock Screen / Outside Screen" và vỡ thành
+              hai dòng lệch nhau, thấy trong ảnh người dùng gửi 20/8/2026.
+              Dấu gạch chéo giữa hai cụm dài là chỗ xuống dòng tệ nhất: mắt đọc
+              thành hai lựa chọn, mà thật ra chỉ có một nút.
+            */}
+            <Smartphone size={15} /> {t("Xem thử ngoài app")}
           </button>
         )}
       </div>
@@ -4477,7 +4490,7 @@ function TinLuaDaoGanDay({ t, lang = 'vi' }: { t: any, lang?: Lang }) {
     let huy = false;
     (async () => {
       try {
-        const res = await fetch(api('/api/tin-lua-dao'));
+        const res = await fetch(api(`/api/tin-lua-dao?lang=${lang}`));
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const d = await res.json();
         if (huy) return;
@@ -4491,7 +4504,8 @@ function TinLuaDaoGanDay({ t, lang = 'vi' }: { t: any, lang?: Lang }) {
       }
     })();
     return () => { huy = true; };
-  }, []);
+    // Đổi ngôn ngữ ⇒ lấy lại từ đúng bộ nguồn của ngôn ngữ đó.
+  }, [lang]);
 
   const cauChuaLayDuoc = traNhieu(CHUA_LAY_TIN, chuaLayDuoc, lang);
 

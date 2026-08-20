@@ -74,7 +74,65 @@ const LA_TIN_LUA_DAO = new RegExp(`\\b(${[
    */
 ].join('|')})\\b`, 'i');
 
-const TEP_DEM = path.join(__dirname, '..', '.cache', 'tin-lua-dao.json');
+/**
+ * ═════ NGUỒN TIẾNG ANH — đã dò sống ngày 20/8/2026 ═════
+ *
+ * Người chọn English vẫn nhận nguyên tin tiếng Việt: năm tờ báo trong `NGUON`
+ * đều là báo Việt, và bộ lọc `LA_TIN_LUA_DAO` cũng viết bằng tiếng Việt không
+ * dấu nên tiêu đề tiếng Anh không bao giờ khớp — người dùng English thấy một
+ * danh sách trống hoặc một danh sách tiếng Việt. Cả hai đều sai.
+ *
+ * ⚠️ ƯU TIÊN CƠ QUAN BẢO VỆ NGƯỜI TIÊU DÙNG, KHÔNG PHẢI BÁO CÔNG NGHỆ.
+ * FTC và FBI IC3 viết cho người bị nhắm tới, bằng câu thường; trang tin bảo mật
+ * viết cho quản trị hệ thống. Người dùng của app này thuộc nhóm thứ nhất.
+ *
+ * ⚠️ ĐÃ DÒ VÀ LOẠI: Action Fraud UK trả 403, Scamwatch AU và Which? trả 404.
+ * Để một mục chết trong danh sách rồi tưởng đang có sáu nguồn là tự lừa mình —
+ * cùng bài học với cand.com.vn ở `NGUON`.
+ */
+const NGUON_EN = [
+  { ten: 'FTC Consumer Alerts', rss: 'https://consumer.ftc.gov/blog/rss' },
+  { ten: 'FBI IC3', rss: 'https://www.ic3.gov/CSA/RSS' },
+  { ten: 'BleepingComputer', rss: 'https://www.bleepingcomputer.com/feed/' },
+  { ten: 'Krebs on Security', rss: 'https://krebsonsecurity.com/feed/' },
+];
+
+/**
+ * Lọc tin lừa đảo trong tiêu đề tiếng Anh.
+ *
+ * ⚠️ VIẾT ĐỦ BIẾN THỂ, ĐỪNG TRÔNG CHỜ VÀO GỐC TỪ. Biểu thức dùng `\b(...)\b`
+ * nên 'scammer' KHÔNG bắt được 'scammers', và 'impersonat' không bắt được gì
+ * cả. Thà liệt kê dài còn hơn im lặng trượt.
+ *
+ * ⚠️ CÙNG LUẬT VỚI BẢN TIẾNG VIỆT: cụm phải nói về THỦ ĐOẠN. Không thêm
+ * 'police', 'bank', 'crypto' đứng một mình — chúng kéo về mọi tin của ngành.
+ */
+const LA_TIN_LUA_DAO_EN = new RegExp(`\\b(${[
+  'scam', 'scams', 'scammer', 'scammers', 'scamming',
+  'fraud', 'frauds', 'fraudster', 'fraudsters', 'fraudulent',
+  'phishing', 'smishing', 'vishing', 'spoofing', 'spoofed',
+  'impersonation', 'impersonating', 'impersonator', 'impersonators',
+  'deepfake', 'deepfakes', 'sextortion', 'extortion',
+  'identity theft', 'gift card', 'gift cards', 'wire transfer',
+  'romance scam', 'tech support', 'robocall', 'robocalls',
+  'one-time passcode', 'otp', 'fake app', 'fake apps', 'malicious app',
+  'account takeover', 'money mule', 'con artist', 'swindle', 'swindled',
+].join('|')})\\b`, 'i');
+
+/** Chọn bộ nguồn và bộ lọc theo ngôn ngữ. Ngôn ngữ lạ ⇒ tiếng Việt. */
+function boNguon(lang) {
+  return lang === 'en'
+    ? { nguon: NGUON_EN, loc: LA_TIN_LUA_DAO_EN }
+    : { nguon: NGUON, loc: LA_TIN_LUA_DAO };
+}
+
+/*
+ * ⚠️ MỖI NGÔN NGỮ MỘT TỆP ĐỆM. Dùng chung một tệp thì lượt tiếng Anh ghi đè
+ * đệm tiếng Việt và ngược lại — người dùng sau nhận tin của ngôn ngữ khác,
+ * hoặc tệ hơn, nhận danh sách rỗng vì bộ lọc bên kia không khớp.
+ */
+const tepDem = (lang) => path.join(
+  __dirname, '..', '.cache', lang === 'en' ? 'tin-lua-dao-en.json' : 'tin-lua-dao.json');
 const HAN_DEM_MS = 30 * 60 * 1000;        // 30 phút
 const HAN_GOI_MS = 8000;                  // mỗi tờ báo tối đa 8 giây
 const SO_TIN = 12;
@@ -150,21 +208,39 @@ function lay(khoi, the) {
  * `<img>` trỏ ra ngoài). Đưa thẳng vào giao diện là mở đường chèn mã và phá
  * luôn CSP `img-src 'self'`. Ở đây gỡ sạch thẻ, chỉ giữ chữ.
  */
+/**
+ * Bỏ thẻ HTML và giải mã thực thể trong chữ lấy từ RSS.
+ *
+ * ⚠️ TIÊU ĐỀ CŨNG PHẢI LÀM SẠCH, KHÔNG CHỈ PHẦN TÓM TẮT.
+ * Đo 20/8/2026: feed của FTC gói tiêu đề trong một thẻ `<a href="…">`, nên màn
+ * hình hiện nguyên `<a href="https://consumer.ftc.gov/…` thay vì tên bài. Bản
+ * trước chỉ làm sạch `description` — mọi báo Việt để tiêu đề trần nên lỗi này
+ * nằm im cho tới khi thêm nguồn tiếng Anh.
+ */
+function lamSachChu(x) {
+  return String(x || '')
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#0?39;|&apos;|&#8217;/g, "'")
+    .replace(/&nbsp;/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 function bocRss(xml, tenBao) {
   const ra = [];
   for (const m of xml.matchAll(/<item[^>]*>([\s\S]*?)<\/item>/gi)) {
     const khoi = m[1];
-    const tieuDe = lay(khoi, 'title');
+    const tieuDe = lamSachChu(lay(khoi, 'title'));
     const lienKet = lay(khoi, 'link');
 
     // §11 — thiếu tiêu đề hoặc thiếu link thì LOẠI, không hiện nửa vời.
     if (!tieuDe || !/^https?:\/\//.test(lienKet)) continue;
 
-    const tom = lay(khoi, 'description')
-      .replace(/<[^>]*>/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim()
-      .slice(0, 220);
+    const tom = lamSachChu(lay(khoi, 'description')).slice(0, 220);
 
     const luc = Date.parse(lay(khoi, 'pubDate'));
 
@@ -198,18 +274,18 @@ async function lay1Nguon(n) {
   }
 }
 
-function docDem() {
+function docDem(lang) {
   try {
-    const d = JSON.parse(fs.readFileSync(TEP_DEM, 'utf8'));
+    const d = JSON.parse(fs.readFileSync(tepDem(lang), 'utf8'));
     if (Array.isArray(d?.tin) && Number.isFinite(d?.luc)) return d;
   } catch { /* chưa có đệm, hoặc đệm hỏng — cả hai đều xử như không có */ }
   return null;
 }
 
-function ghiDem(d) {
+function ghiDem(d, lang) {
   try {
-    fs.mkdirSync(path.dirname(TEP_DEM), { recursive: true });
-    fs.writeFileSync(TEP_DEM, JSON.stringify(d));
+    fs.mkdirSync(path.dirname(tepDem(lang)), { recursive: true });
+    fs.writeFileSync(tepDem(lang), JSON.stringify(d));
   } catch { /* đĩa chỉ đọc — vẫn chạy được, chỉ là lần sau phải lấy lại */ }
 }
 
@@ -218,11 +294,12 @@ function ghiDem(d) {
  *
  * @returns {Promise<{tin: object[], luc: number, chuaLayDuoc: string[], nguonHong: string[]}>}
  */
-async function layTinMoi() {
-  const ket = await Promise.all(NGUON.map(lay1Nguon));
+async function layTinMoi(lang = 'vi') {
+  const { nguon, loc } = boNguon(lang);
+  const ket = await Promise.all(nguon.map(lay1Nguon));
 
   const nguonHong = ket.filter((k) => k.loi).map((k) => k.ten);
-  const gop = ket.flatMap((k) => k.tin).filter((t) => LA_TIN_LUA_DAO.test(boDau(t.tieuDe.toLowerCase())));
+  const gop = ket.flatMap((k) => k.tin).filter((t) => loc.test(boDau(t.tieuDe.toLowerCase())));
 
   // Trùng bài giữa các báo — bỏ theo đường dẫn.
   const thay = new Set();
@@ -250,13 +327,13 @@ async function layTinMoi() {
  *
  * ⚠️ KHÔNG BAO GIỜ NÉM. Đây là tính năng phụ; §6.7 nói nó không được chặn gì.
  */
-async function tinLuaDao({ epLayMoi = false } = {}) {
-  const dem = docDem();
+async function tinLuaDao({ epLayMoi = false, lang = 'vi' } = {}) {
+  const dem = docDem(lang);
   const conHan = dem && Date.now() - dem.luc < HAN_DEM_MS;
   if (conHan && !epLayMoi) return { ...dem, tuDem: true };
 
   try {
-    const moi = await layTinMoi();
+    const moi = await layTinMoi(lang);
     /*
      * ⚠️ LẤY VỀ RỖNG THÌ GIỮ ĐỆM CŨ, ĐỪNG GHI ĐÈ BẰNG SỰ TRỐNG RỖNG.
      * Mọi tờ báo cùng lỗi một lúc (mất mạng) sẽ cho `tin: []`. Ghi cái đó vào
@@ -266,7 +343,7 @@ async function tinLuaDao({ epLayMoi = false } = {}) {
     if (moi.tin.length === 0 && dem?.tin?.length) {
       return { ...dem, chuaLayDuoc: ['khong_lay_duoc_tin_moi'], nguonHong: moi.nguonHong, tuDem: true };
     }
-    ghiDem(moi);
+    ghiDem(moi, lang);
     return { ...moi, tuDem: false };
   } catch {
     if (dem) return { ...dem, chuaLayDuoc: ['khong_lay_duoc_tin_moi'], tuDem: true };
@@ -275,4 +352,4 @@ async function tinLuaDao({ epLayMoi = false } = {}) {
   }
 }
 
-module.exports = { tinLuaDao, layTinMoi, bocRss, LA_TIN_LUA_DAO, NGUON };
+module.exports = { tinLuaDao, layTinMoi, bocRss, lamSachChu, LA_TIN_LUA_DAO, LA_TIN_LUA_DAO_EN, NGUON, NGUON_EN };

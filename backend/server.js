@@ -769,7 +769,10 @@ app.get('/api/kich-ban/:hoKichBan', chanDoc, (req, res) => {
  * giờ 8 giây mỗi tờ báo; không lượt `/api/analyze` nào chờ ở đây.
  */
 app.get('/api/tin-lua-dao', chanDoc, async (req, res) => {
-  const d = await tinLuaDao();
+  // Ngôn ngữ lạ ⇒ tiếng Việt. Tham số này KHÔNG phải nội dung người dùng,
+  // chỉ là một trong hai giá trị enum — không có gì để lọc thêm.
+  const lang = req.query.lang === 'en' ? 'en' : 'vi';
+  const d = await tinLuaDao({ lang });
   return res.json({
     tin: d.tin,
     luc: d.luc,
