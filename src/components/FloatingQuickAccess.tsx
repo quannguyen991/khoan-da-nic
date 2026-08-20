@@ -24,6 +24,8 @@ import { ViewState } from '../App';
 interface FloatingQuickAccessProps {
   setView: (view: ViewState) => void;
   t: (key: any) => string;
+  /** Ngôn ngữ hiện tại — cần cho định dạng ngày giờ, không chỉ cho chữ. */
+  lang?: string;
   onAnalyze: (text: string, image?: string | null) => void;
   onTriggerEmergency?: () => void;
   familyMembers?: any[];
@@ -34,6 +36,7 @@ interface FloatingQuickAccessProps {
 }
 
 export function FloatingQuickAccess({
+  lang = 'vi',
   setView,
   t,
   onAnalyze,
@@ -853,18 +856,18 @@ export function FloatingQuickAccess({
             {/* Top Status Bar & Exit Button */}
             <div className="w-full px-5 pt-3 pb-2 flex items-center justify-between text-[14px] text-slate-300 relative z-30">
               <span className="font-semibold tracking-wider">
-                {new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+                {new Date().toLocaleTimeString(lang === 'en' ? 'en-US' : 'vi-VN', { hour: '2-digit', minute: '2-digit' })}
               </span>
               <div className="flex items-center gap-2">
                 <span className="px-2.5 py-0.5 bg-purple-900/90 border border-purple-400/50 rounded-full text-[14px] text-purple-200 font-extrabold flex items-center gap-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                  Màn hình chính điện thoại
+                  {t('Ngoài app')}
                 </span>
                 <button
                   onClick={() => setIsOutsideMode(false)}
                   className="p-1.5 px-3 bg-white/20 hover:bg-white/30 rounded-full text-white text-[14px] font-bold active:scale-95 transition-all flex items-center gap-1"
                 >
-                  <X size={14} /> Về App
+                  <X size={14} /> {t('Về app')}
                 </button>
               </div>
             </div>
@@ -886,13 +889,19 @@ export function FloatingQuickAccess({
                   <div className="flex items-center gap-2">
                     <img src="/logo.webp" alt="Logo" className="w-6 h-6 rounded-lg object-contain shadow-xs" />
                     <div>
-                      <h4 className="font-black text-[14px] text-[#2e1065] leading-none">Khoan Đã - Bảo Vệ Thường Trực</h4>
-                      <p className="text-[14px] text-purple-700 font-medium">Chạm để vào thẳng ứng dụng hoặc kiểm tra</p>
+                      {/*
+                        ⚠️ TÊN NGẮN. "Khoan Đã - Bảo Vệ Thường Trực" xuống ba dòng
+                        trong dải thông báo hẹp; dòng phụ bên dưới đã nói đúng
+                        việc chạm vào thì được gì, nên phần "Bảo Vệ Thường Trực"
+                        chỉ lặp lại điều người đọc vừa thấy.
+                      */}
+                      <h4 className="font-black text-[14px] text-[#2e1065] leading-none">Khoan Đã</h4>
+                      <p className="text-[14px] text-purple-700 font-medium">{t('Chạm để mở')}</p>
                     </div>
                   </div>
                   <span className="text-[14px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full flex items-center gap-1">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
-                    Ghim cố định
+                    {t('Ghim')}
                   </span>
                 </div>
 
@@ -906,7 +915,7 @@ export function FloatingQuickAccess({
                     className="flex flex-col items-center justify-center p-2 bg-purple-50 hover:bg-purple-100 text-[#5b21b6] rounded-2xl active:scale-95 transition-all border border-purple-200"
                   >
                     <Home size={17} className="mb-0.5" />
-                    <span className="font-extrabold text-[14px] leading-tight">Vào App</span>
+                    <span className="font-extrabold text-[14px] leading-tight">{t('Mở app')}</span>
                   </button>
 
                   <button
@@ -914,7 +923,7 @@ export function FloatingQuickAccess({
                     className="flex flex-col items-center justify-center p-2 bg-purple-600 hover:bg-purple-700 text-white rounded-2xl active:scale-95 transition-all shadow-md shadow-purple-500/20 group"
                   >
                     <Camera size={17} className="mb-0.5 group-hover:scale-110 transition-transform" />
-                    <span className="font-extrabold text-[14px] leading-tight">Chụp ảnh</span>
+                    <span className="font-extrabold text-[14px] leading-tight">{t('Chụp ảnh')}</span>
                   </button>
 
                   <button
@@ -922,7 +931,7 @@ export function FloatingQuickAccess({
                     className="flex flex-col items-center justify-center p-2 bg-purple-100 hover:bg-purple-200 text-[#5b21b6] rounded-2xl active:scale-95 transition-all"
                   >
                     <Mic size={17} className="mb-0.5" />
-                    <span className="font-bold text-[14px] leading-tight">Ghi âm</span>
+                    <span className="font-bold text-[14px] leading-tight">{t('Ghi âm')}</span>
                   </button>
 
                   <button
@@ -938,30 +947,37 @@ export function FloatingQuickAccess({
 
             {/* App Switching Simulator Tabs */}
             <div className="px-4 mt-2 z-30">
-              <div className="flex items-center justify-center gap-1.5 p-1 bg-white/10 rounded-2xl backdrop-blur-md text-[14px] font-bold">
+              {/*
+                ⚠️ NHÃN NGẮN VÀ CÙNG HÌNH DẠNG VỚI THANH ĐIỀU HƯỚNG.
+                Bốn nhãn cũ — "MH Chính", "SMS Lạ", "Zalo Giả Mạo", "Cuộc Gọi Lạ"
+                — vỡ xuống hai dòng trên khổ 390px, thấy trong ảnh người dùng gửi
+                20/8/2026. "Lạ" và "Giả Mạo" là phần thân của tấm thẻ nói rồi,
+                nhắc lại trên nhãn chỉ tốn chỗ.
+              */}
+              <div className="flex items-center justify-center gap-1 p-[5px] bg-gradient-to-r from-[#9e76ea] via-[#ad8af0] to-[#9e76ea] rounded-full border border-white/20 text-[14px] font-bold">
                 <button
                   onClick={() => setActiveSimApp('home')}
-                  className={`px-3 py-1 rounded-xl transition-all ${activeSimApp === 'home' ? 'bg-purple-600 text-white shadow-xs' : 'text-slate-300'}`}
+                  className={`flex-1 px-2 py-1.5 rounded-full transition-all ${activeSimApp === 'home' ? 'bg-white text-[#6d28d9] shadow-sm' : 'text-white/85'}`}
                 >
-                  MH Chính
+                  {t('Màn chính')}
                 </button>
                 <button
                   onClick={() => setActiveSimApp('sms')}
-                  className={`px-3 py-1 rounded-xl transition-all ${activeSimApp === 'sms' ? 'bg-purple-600 text-white shadow-xs' : 'text-slate-300'}`}
+                  className={`flex-1 px-2 py-1.5 rounded-full transition-all ${activeSimApp === 'sms' ? 'bg-white text-[#6d28d9] shadow-sm' : 'text-white/85'}`}
                 >
-                  SMS Lạ
+                  SMS
                 </button>
                 <button
                   onClick={() => setActiveSimApp('zalo')}
-                  className={`px-3 py-1 rounded-xl transition-all ${activeSimApp === 'zalo' ? 'bg-purple-600 text-white shadow-xs' : 'text-slate-300'}`}
+                  className={`flex-1 px-2 py-1.5 rounded-full transition-all ${activeSimApp === 'zalo' ? 'bg-white text-[#6d28d9] shadow-sm' : 'text-white/85'}`}
                 >
-                  Zalo Giả Mạo
+                  Zalo
                 </button>
                 <button
                   onClick={() => setActiveSimApp('call')}
-                  className={`px-3 py-1 rounded-xl transition-all ${activeSimApp === 'call' ? 'bg-purple-600 text-white shadow-xs' : 'text-slate-300'}`}
+                  className={`flex-1 px-2 py-1.5 rounded-full transition-all ${activeSimApp === 'call' ? 'bg-white text-[#6d28d9] shadow-sm' : 'text-white/85'}`}
                 >
-                  Cuộc Gọi Lạ
+                  {t('Cuộc gọi')}
                 </button>
               </div>
             </div>
@@ -972,10 +988,10 @@ export function FloatingQuickAccess({
                 <div className="space-y-4">
                   <div className="text-center">
                     <p className="text-5xl font-light text-white/90">
-                      {new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+                      {new Date().toLocaleTimeString(lang === 'en' ? 'en-US' : 'vi-VN', { hour: '2-digit', minute: '2-digit' })}
                     </p>
                     <p className="text-[14px] text-purple-200/80 font-medium mt-1">
-                      {new Date().toLocaleDateString('vi-VN', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })}
+                      {new Date().toLocaleDateString(lang === 'en' ? 'en-US' : 'vi-VN', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })}
                     </p>
                   </div>
 
@@ -985,19 +1001,19 @@ export function FloatingQuickAccess({
                       <div className="w-13 h-13 rounded-2xl bg-blue-500 flex items-center justify-center text-white shadow-md">
                         <MessageSquare size={24} />
                       </div>
-                      <span className="text-[14px] text-white/80 font-medium">Tin nhắn</span>
+                      <span className="text-[14px] text-white/80 font-medium">{t('Tin nhắn')}</span>
                     </div>
                     <div className="flex flex-col items-center gap-1">
                       <div className="w-13 h-13 rounded-2xl bg-emerald-500 flex items-center justify-center text-white shadow-md">
                         <PhoneCall size={24} />
                       </div>
-                      <span className="text-[14px] text-white/80 font-medium">Danh bạ</span>
+                      <span className="text-[14px] text-white/80 font-medium">{t('Danh bạ')}</span>
                     </div>
                     <div className="flex flex-col items-center gap-1">
                       <div className="w-13 h-13 rounded-2xl bg-sky-600 flex items-center justify-center text-white shadow-md">
                         <Globe size={24} />
                       </div>
-                      <span className="text-[14px] text-white/80 font-medium">Trình duyệt</span>
+                      <span className="text-[14px] text-white/80 font-medium">{t('Trình duyệt')}</span>
                     </div>
                     <div 
                       onClick={() => {
@@ -1014,7 +1030,7 @@ export function FloatingQuickAccess({
                   </div>
 
                   <div className="p-3 bg-purple-950/60 border border-purple-500/40 rounded-2xl text-center text-[14px] text-purple-200">
-                    👆 <span className="font-bold text-white">Quả bóng Khoan Đã đang nổi bên phải:</span> Bác có thể dùng ngón tay <span className="text-amber-300 font-bold">kéo di chuyển</span> bóng đi bất cứ đâu trên màn hình!
+                    {t('Kéo quả bóng đi bất cứ đâu trên màn hình.')}
                   </div>
                 </div>
               )}
@@ -1027,20 +1043,19 @@ export function FloatingQuickAccess({
                 >
                   <div className="flex items-center justify-between text-[14px] text-red-300 border-b border-slate-700/60 pb-2">
                     <span className="flex items-center gap-1.5 font-bold">
-                      <AlertTriangle size={14} className="text-red-400" /> Tin nhắn đe dọa / giả mạo số lạ
+                      <AlertTriangle size={14} className="text-red-400" /> {t('Tin nhắn từ số lạ')}
                     </span>
-                    <span className="text-[14px] text-slate-400">Vừa nhận</span>
+                    <span className="text-[14px] text-slate-400">{t('Vừa nhận')}</span>
                   </div>
                   <div className="p-3 bg-slate-800/90 rounded-2xl text-[14px] text-slate-200 leading-relaxed border border-slate-700">
-                    "THÔNG BÁO TỪ BỘ CÔNG AN: Bác Nguyễn Văn A có liên quan đến đường dây rửa tiền xuyên quốc gia. Yêu cầu chuyển 50 triệu vào số tài khoản 098... để phục vụ điều tra nếu không sẽ bị tạm giam trong 24h!"
+                    {t('"THÔNG BÁO TỪ BỘ CÔNG AN: Bác có liên quan đường dây rửa tiền. Chuyển 50 triệu vào tài khoản 098… để điều tra, nếu không sẽ bị tạm giam trong 24h!"')}
                   </div>
                   <div className="flex items-center justify-between pt-1">
-                    <span className="text-[14px] text-amber-300 font-medium">Bấm bóng nổi bên phải để kiểm tra ngay 👉</span>
                     <button
                       onClick={triggerCameraInput}
                       className="px-3 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-[14px] font-bold flex items-center gap-1.5 shadow-md active:scale-95 transition-transform"
                     >
-                      <Camera size={13} /> Quét tin này
+                      <Camera size={13} /> {t('Kiểm tin này')}
                     </button>
                   </div>
                 </motion.div>
@@ -1054,25 +1069,25 @@ export function FloatingQuickAccess({
                 >
                   <div className="flex items-center justify-between text-[14px] text-blue-300 border-b border-slate-700/60 pb-2">
                     <span className="flex items-center gap-1.5 font-bold">
-                      <MessageSquare size={14} className="text-blue-400" /> Zalo: Tin nhắn mượn tiền gấp từ con
+                      <MessageSquare size={14} className="text-blue-400" /> {t('Zalo: xin tiền gấp')}
                     </span>
-                    <span className="text-[14px] text-slate-400">1 phút trước</span>
+                    <span className="text-[14px] text-slate-400">{t('1 phút trước')}</span>
                   </div>
                   <div className="p-3 bg-slate-800/90 rounded-2xl text-[14px] text-slate-200 leading-relaxed border border-slate-700">
-                    "Mẹ ơi con đang bị tai nạn ở viện cấp cứu, điện thoại con hỏng nên dùng nick này nhắn. Mẹ chuyển gấp 20 triệu vào số tài khoản viện trưởng này giúp con nhé: STK 1903... VCB"
+                    {t('"Mẹ ơi con bị tai nạn đang cấp cứu, điện thoại con hỏng nên nhắn nick này. Mẹ chuyển gấp 20 triệu vào tài khoản 1903… VCB giúp con."')}
                   </div>
                   <div className="flex items-center justify-between pt-1">
                     <button
                       onClick={handleEmergencyClick}
                       className="px-3 py-1.5 bg-red-600 text-white rounded-xl text-[14px] font-bold flex items-center gap-1.5 shadow-md active:scale-95 transition-transform"
                     >
-                      <ShieldAlert size={13} /> Báo động 60s
+                      <ShieldAlert size={13} /> {t('Báo động')}
                     </button>
                     <button
                       onClick={handleCallClick}
                       className="px-3 py-1.5 bg-green-600 text-white rounded-xl text-[14px] font-bold flex items-center gap-1.5 shadow-md active:scale-95 transition-transform"
                     >
-                      <PhoneCall size={13} /> Gọi số thật của con
+                      <PhoneCall size={13} /> {t('Gọi số thật')}
                     </button>
                   </div>
                 </motion.div>
@@ -1086,19 +1101,19 @@ export function FloatingQuickAccess({
                 >
                   <div className="flex items-center justify-between text-[14px] text-amber-300 border-b border-slate-700/60 pb-2">
                     <span className="flex items-center gap-1.5 font-bold">
-                      <PhoneCall size={14} className="text-amber-400 animate-pulse" /> Cuộc gọi lạ tự xưng Nhân viên Điện Lực
+                      <PhoneCall size={14} className="text-amber-400 animate-pulse" /> {t('Xưng là nhân viên điện lực')}
                     </span>
-                    <span className="text-[14px] text-amber-400 font-bold">Đang đổ chuông</span>
+                    <span className="text-[14px] text-amber-400 font-bold">{t('Đang đổ chuông')}</span>
                   </div>
                   <div className="p-3 bg-slate-800/90 rounded-2xl text-[14px] text-slate-200 leading-relaxed border border-slate-700">
-                    "Chào ông/bà, tiền điện tháng này của nhà mình chưa đóng và sẽ bị cắt điện sau 2 tiếng nữa. Đọc mã OTP gửi về máy để gia hạn..."
+                    {t('"Tiền điện tháng này nhà mình chưa đóng, 2 tiếng nữa sẽ bị cắt điện. Bác đọc mã OTP vừa gửi về máy để gia hạn…"')}
                   </div>
                   <div className="flex items-center justify-end gap-2 pt-1">
                     <button
                       onClick={handleVoiceClick}
                       className="px-3 py-1.5 bg-purple-600 text-white rounded-xl text-[14px] font-bold flex items-center gap-1.5 shadow-md active:scale-95 transition-transform"
                     >
-                      <Mic size={13} /> Kể lại cho AI nghe
+                      <Mic size={13} /> {t('Kể lại')}
                     </button>
                   </div>
                 </motion.div>
@@ -1139,7 +1154,7 @@ export function FloatingQuickAccess({
                 className="px-6 py-2.5 bg-white text-[#2e1065] rounded-full font-black text-[14px] shadow-xl active:scale-95 transition-transform flex items-center gap-2"
               >
                 <img src="/logo.webp" alt="Logo" className="w-4 h-4 object-contain" />
-                Mở ứng dụng Khoan Đã
+                {t('Mở Khoan Đã')}
               </button>
               <div className="w-32 h-1 bg-white/40 rounded-full mt-3"></div>
             </div>

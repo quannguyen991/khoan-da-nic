@@ -1205,6 +1205,7 @@ export default function App() {
       */}
       {view !== 'intro' && view !== 'login' && !isMenuOpen && (
       <FloatingQuickAccess
+          lang={lang}
         setView={setView}
         t={t}
         onAnalyze={handleAnalyze}
@@ -1320,7 +1321,13 @@ function HomeView({
 
         <div className="flex items-center gap-2 sm:gap-2.5">
           <button 
-            onClick={togglePinnedNotification} 
+            onClick={togglePinnedNotification}
+            /*
+              `title` chỉ hiện khi rê chuột — trên điện thoại không có chuột, và
+              trình đọc màn hình không phải lúc nào cũng đọc nó. `aria-label` mới
+              là tên của nút. Nút này chỉ có biểu tượng chuông, không có chữ.
+            */
+            aria-label={t("Bật/Tắt ghim thông báo cảnh giác")}
             title={t("Bật/Tắt ghim thông báo cảnh giác")}
             className={`p-2 sm:p-2.5 px-3 rounded-2xl shadow-sm backdrop-blur-md active:scale-95 transition-all flex items-center gap-1.5 ${pinnedNotification ? 'bg-red-500 text-white animate-pulse' : 'bg-white/80 text-[#6d28d9] border border-purple-100'}`}
           >

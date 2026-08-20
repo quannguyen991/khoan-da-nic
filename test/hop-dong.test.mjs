@@ -1155,10 +1155,18 @@ test('§6.7 · cầu dao bỏ qua đường hỏng, nhưng không bao giờ bỏ
  * catalog. Đã suýt xảy ra khi dựng test này.
  */
 test('§4.1 · mọi khoá t() dùng trong mã đều có trong catalog tiếng Anh', () => {
-  const DAU = 'àáảãạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵđ';
-  const boDau = new Set([...(DAU + DAU.toUpperCase())]);
-  const coDau = (x) => [...x].some((c) => boDau.has(c));
-
+  /*
+   * ⚠️ SOI MỌI KHOÁ, KHÔNG LỌC THEO DẤU TIẾNG VIỆT.
+   *
+   * Bản đầu của test này chỉ soi khoá CÓ DẤU, vì nghĩ rằng khoá tiếng Việt thì
+   * phải có dấu. Sai: `t('Ghim')` không có dấu nào, nên nó lọt qua hàng rào và
+   * hiện nguyên chữ "Ghim" trong bản tiếng Anh — đo được 20/8/2026, ngay trong
+   * lượt kiểm bằng trình duyệt sau khi test đã xanh.
+   *
+   * Một hàng rào có lỗ đúng ở chỗ mình không nghĩ tới thì tệ hơn không có, vì
+   * nó tạo cảm giác đã được che. Luật đúng đơn giản hơn: MỌI khoá `t()` phải có
+   * trong catalog, không có ngoại lệ.
+   */
   // Khoá của khối `en` trong catalog — đọc bằng văn bản, không import TypeScript.
   const nguon = doc('src/i18n.ts');
   const dauEn = nguon.indexOf('\n  en: {');
@@ -1174,7 +1182,7 @@ test('§4.1 · mọi khoá t() dùng trong mã đều có trong catalog tiếng 
     const ma = boChuThich(doc(tep));
     for (const m of ma.matchAll(/\bt\(\s*(['"])((?:(?!\1).)*)\1/g)) {
       const k = m[2];
-      if (!coDau(k) || coTrongEn.has(k)) continue;
+      if (coTrongEn.has(k)) continue;
       if (!thieu.has(k)) thieu.set(k, tep);
     }
   }

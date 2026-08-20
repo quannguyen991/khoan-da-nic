@@ -2,6 +2,35 @@ export type Lang = 'vi' | 'en';
 
 export const translations: Record<Lang, Record<string, string>> = {
   vi: {
+    "Ghim": "Ghim",
+    /* ═══ Màn giả lập "ngoài app" — thêm 20/8/2026 ═══
+     * Toàn bộ màn này trước đây viết chữ Việt thẳng vào JSX, nên người chọn
+     * English thấy một màn hình tiếng Việt. Kể cả nội dung tin nhắn lừa đảo
+     * mẫu cũng phải dịch — nó là thứ người xem đọc để hiểu app làm gì.
+     */
+    "Ngoài app": "Ngoài app",
+    "Về app": "Về app",
+    "Chạm để mở": "Chạm để mở",
+    "Mở app": "Mở app",
+    "Ghi âm": "Ghi âm",
+    "Màn chính": "Màn chính",
+    "Tin nhắn": "Tin nhắn",
+    "Danh bạ": "Danh bạ",
+    "Trình duyệt": "Trình duyệt",
+    "Kéo quả bóng đi bất cứ đâu trên màn hình.": "Kéo quả bóng đi bất cứ đâu trên màn hình.",
+    "Tin nhắn từ số lạ": "Tin nhắn từ số lạ",
+    "Vừa nhận": "Vừa nhận",
+    "\"THÔNG BÁO TỪ BỘ CÔNG AN: Bác có liên quan đường dây rửa tiền. Chuyển 50 triệu vào tài khoản 098… để điều tra, nếu không sẽ bị tạm giam trong 24h!\"": "\"THÔNG BÁO TỪ BỘ CÔNG AN: Bác có liên quan đường dây rửa tiền. Chuyển 50 triệu vào tài khoản 098… để điều tra, nếu không sẽ bị tạm giam trong 24h!\"",
+    "Kiểm tin này": "Kiểm tin này",
+    "Zalo: xin tiền gấp": "Zalo: xin tiền gấp",
+    "1 phút trước": "1 phút trước",
+    "\"Mẹ ơi con bị tai nạn đang cấp cứu, điện thoại con hỏng nên nhắn nick này. Mẹ chuyển gấp 20 triệu vào tài khoản 1903… VCB giúp con.\"": "\"Mẹ ơi con bị tai nạn đang cấp cứu, điện thoại con hỏng nên nhắn nick này. Mẹ chuyển gấp 20 triệu vào tài khoản 1903… VCB giúp con.\"",
+    "Báo động": "Báo động",
+    "Gọi số thật": "Gọi số thật",
+    "Xưng là nhân viên điện lực": "Xưng là nhân viên điện lực",
+    "Đang đổ chuông": "Đang đổ chuông",
+    "\"Tiền điện tháng này nhà mình chưa đóng, 2 tiếng nữa sẽ bị cắt điện. Bác đọc mã OTP vừa gửi về máy để gia hạn…\"": "\"Tiền điện tháng này nhà mình chưa đóng, 2 tiếng nữa sẽ bị cắt điện. Bác đọc mã OTP vừa gửi về máy để gia hạn…\"",
+    "Kể lại": "Kể lại",
     "Chạm là quét ảnh hoặc mã QR ngay. Chỉ có khi bác đang mở Khoan Đã.": "Chạm là quét ảnh hoặc mã QR ngay. Chỉ có khi bác đang mở Khoan Đã.",
     "Xem thử ngoài app": "Xem thử ngoài app",
     "Số khẩn cấp": "Số khẩn cấp",
@@ -687,6 +716,35 @@ export const translations: Record<Lang, Record<string, string>> = {
     "Mở cửa sổ nổi": "Mở cửa sổ nổi",
   },
   en: {
+    "Ghim": "Pinned",
+    /* ═══ Màn giả lập "ngoài app" — thêm 20/8/2026 ═══
+     * Toàn bộ màn này trước đây viết chữ Việt thẳng vào JSX, nên người chọn
+     * English thấy một màn hình tiếng Việt. Kể cả nội dung tin nhắn lừa đảo
+     * mẫu cũng phải dịch — nó là thứ người xem đọc để hiểu app làm gì.
+     */
+    "Ngoài app": "Outside the app",
+    "Về app": "Back",
+    "Chạm để mở": "Tap to open",
+    "Mở app": "Open",
+    "Ghi âm": "Record",
+    "Màn chính": "Home",
+    "Tin nhắn": "Messages",
+    "Danh bạ": "Contacts",
+    "Trình duyệt": "Browser",
+    "Kéo quả bóng đi bất cứ đâu trên màn hình.": "Drag the bubble anywhere on the screen.",
+    "Tin nhắn từ số lạ": "Message from an unknown number",
+    "Vừa nhận": "Just now",
+    "\"THÔNG BÁO TỪ BỘ CÔNG AN: Bác có liên quan đường dây rửa tiền. Chuyển 50 triệu vào tài khoản 098… để điều tra, nếu không sẽ bị tạm giam trong 24h!\"": "\"NOTICE FROM THE POLICE: You are linked to a money-laundering ring. Transfer 50 million to account 098… for the investigation, or you will be detained within 24h!\"",
+    "Kiểm tin này": "Check this",
+    "Zalo: xin tiền gấp": "Zalo: urgent money request",
+    "1 phút trước": "1 minute ago",
+    "\"Mẹ ơi con bị tai nạn đang cấp cứu, điện thoại con hỏng nên nhắn nick này. Mẹ chuyển gấp 20 triệu vào tài khoản 1903… VCB giúp con.\"": "\"Mum, I've had an accident and I'm in the emergency room. My phone is broken so I'm messaging from this account. Please transfer 20 million to account 1903… VCB for me.\"",
+    "Báo động": "Alert",
+    "Gọi số thật": "Call the real number",
+    "Xưng là nhân viên điện lực": "Claims to be from the power company",
+    "Đang đổ chuông": "Ringing",
+    "\"Tiền điện tháng này nhà mình chưa đóng, 2 tiếng nữa sẽ bị cắt điện. Bác đọc mã OTP vừa gửi về máy để gia hạn…\"": "\"Your electricity bill hasn't been paid this month, the power will be cut in 2 hours. Read out the OTP we just sent to your phone to extend it…\"",
+    "Kể lại": "Tell Khoan Đã",
     "Chạm là quét ảnh hoặc mã QR ngay. Chỉ có khi bác đang mở Khoan Đã.": "Tap it to scan a photo or QR code. Only while Khoan Đã is open.",
     "Xem thử ngoài app": "Preview outside the app",
     "Số khẩn cấp": "Hotlines",
