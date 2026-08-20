@@ -68,4 +68,8 @@
     <!-- §11: không hứa lấy lại tiền. Chữ của từng lời nhắc do tầng web nạp xuống. -->
     <string name="kenh_theo_doi_72h_ten">Theo dõi 72 giờ sau sự cố</string>
     <string name="kenh_theo_doi_72h_mo_ta">Nhắc bác các việc cần làm trong 72 giờ sau khi lỡ chuyển tiền hoặc đọc mã</string>
+
+    <!-- Sang loc tai cho: KHONG mang nhan rui ro nao, chi moi bac kiem. -->
+    <string name="tb_sang_loc_tieu_de">Có tin nhắn đáng kiểm</string>
+    <string name="tb_sang_loc_noi_dung">Tin nhắn vừa đến có dấu hiệu nên xem lại. Chạm để cháu kiểm giúp bác.</string>
 </resources>

@@ -127,6 +127,86 @@ public class DocThongBao extends NotificationListenerService {
         }
 
         them(sbn.getPackageName(), noiDung, trangThai, sbn.getPostTime());
+        sangLocTaiCho(noiDung);
+    }
+
+    /**
+     * ══════════ SÀNG LỌC NGAY TRÊN MÁY — KHÔNG PHẢI CHẤM ĐIỂM ══════════
+     *
+     * Người dùng hỏi 20/8/2026: "tin nhắn đọc OTP hay công an chuyển tiền vẫn
+     * chưa tự cảnh báo". Đúng — trước đó app chỉ GIỮ tin lại, và chỉ kiểm khi
+     * bác tự mở app bấm nút.
+     *
+     * ⚠️ VÌ SAO KHÔNG TỰ GỬI TIN ĐI KIỂM. §6.9 nói rõ: "Tin chỉ nằm trong máy
+     * bác và chỉ được gửi đi kiểm khi bác bấm." Tự gửi MỌI tin nhắn đến cho máy
+     * chủ là đổi hẳn mô hình riêng tư của sản phẩm — thứ §12 cấm tự ý thay.
+     *
+     * Nên bước này chạy HOÀN TOÀN TRÊN MÁY: không mạng, không AI, không một byte
+     * nào rời khỏi thiết bị.
+     *
+     * ⚠️ VÀ NÓ KHÔNG RA KẾT LUẬN. §4.2 nói `decision-engine.js` là BỘ LUẬT DUY
+     * NHẤT ra mức rủi ro. Đoạn Java này không được phép nói "Nguy hiểm cao" hay
+     * chấm điểm gì — nó chỉ nói "cái này đáng kiểm" rồi mời bác mở app, nơi bộ
+     * luật thật chạy. Một cái CHUÔNG, không phải một cái CÂN.
+     *
+     * ⚠️ ĐÒI HAI DẤU HIỆU, KHÔNG LẤY MỘT. Chỉ "OTP" thôi thì tin thật của ngân
+     * hàng cũng có ("Mã OTP của quý khách là..."). Phải có thêm một vế NHỜ/ÉP
+     * thì mới đáng gọi bác. Cùng bài học với pack tiếng Việt: cụm phải nói về
+     * THỦ ĐOẠN, không phải về chủ đề.
+     */
+    private static final java.util.regex.Pattern DAU_HIEU_MA =
+            java.util.regex.Pattern.compile(
+                    "\\b(otp|m\u00e3 x\u00e1c th\u1ef1c|m\u00e3 giao d\u1ecbch|ma xac thuc|ma otp)\\b",
+                    java.util.regex.Pattern.CASE_INSENSITIVE);
+
+    private static final java.util.regex.Pattern DAU_HIEU_TIEN =
+            java.util.regex.Pattern.compile(
+                    "(chuy\u1ec3n kho\u1ea3n|chuy\u1ec3n ti\u1ec1n|chuyen tien|chuyen khoan"
+                    + "|t\u00e0i kho\u1ea3n an to\u00e0n|tai khoan an toan|n\u1ed9p ti\u1ec1n|nop tien)",
+                    java.util.regex.Pattern.CASE_INSENSITIVE);
+
+    private static final java.util.regex.Pattern DAU_HIEU_EP =
+            java.util.regex.Pattern.compile(
+                    "(cung c\u1ea5p|\u0111\u1ecdc m\u00e3|doc ma|g\u1eedi m\u00e3|gui ma|nh\u1eadp m\u00e3|nhap ma"
+                    + "|ngay|g\u1ea5p|gap|trong v\u00f2ng|trong vong|n\u1ebfu kh\u00f4ng|neu khong"
+                    + "|\u0111\u1eebng n\u00f3i|dung noi|kh\u00f4ng \u0111\u01b0\u1ee3c k\u1ec3|khong duoc ke)",
+                    java.util.regex.Pattern.CASE_INSENSITIVE);
+
+    private static final java.util.regex.Pattern DAU_HIEU_CO_QUAN =
+            java.util.regex.Pattern.compile(
+                    "(c\u00f4ng an|cong an|c\u1ea3nh s\u00e1t|canh sat|vi\u1ec7n ki\u1ec3m s\u00e1t|vien kiem sat"
+                    + "|to\u00e0 \u00e1n|toa an|c\u1ee5c thu\u1ebf|cuc thue|\u0111i\u1ec7n l\u1ef1c|dien luc)",
+                    java.util.regex.Pattern.CASE_INSENSITIVE);
+
+    private void sangLocTaiCho(String noiDung) {
+        if (noiDung == null || noiDung.trim().length() < 12) return;
+
+        boolean coMa = DAU_HIEU_MA.matcher(noiDung).find();
+        boolean coTien = DAU_HIEU_TIEN.matcher(noiDung).find();
+        boolean coEp = DAU_HIEU_EP.matcher(noiDung).find();
+        boolean coCoQuan = DAU_HIEU_CO_QUAN.matcher(noiDung).find();
+
+        // Hai vế trở lên mới gọi bác. Một vế là chưa đủ để làm phiền.
+        boolean dangKiem = (coMa && coEp) || (coTien && coEp) || (coCoQuan && (coTien || coMa));
+        if (!dangKiem) return;
+
+        try {
+            /*
+             * ⚠️ CHỮ Ở ĐÂY KHÔNG ĐƯỢC MANG NHÃN RỦI RO NÀO. Không "nguy hiểm",
+             * không "lừa đảo" — vì chưa có bộ luật nào chạy. Chỉ mời bác kiểm.
+             * §11: không khai một kết luận chưa có.
+             *
+             * ⚠️ KHÔNG KÈM NỘI DUNG TIN NHẮN vào thông báo. Thông báo hiện trên
+             * màn khoá, ai cầm máy cũng đọc được — chép nội dung vào đó là tự
+             * tay mang tin của bác ra chỗ dễ thấy hơn cả chỗ nó vừa nằm.
+             */
+            ThongBaoCanhBao.hien(this,
+                    getString(R.string.tb_sang_loc_tieu_de),
+                    getString(R.string.tb_sang_loc_noi_dung));
+        } catch (Throwable ignored) {
+            // Không gửi được thông báo thì thôi — tin vẫn nằm trong hàng đợi để
+            // bác kiểm khi mở app. Đừng để bước phụ này làm chết bước chính.
+        }
     }
 
     /**
