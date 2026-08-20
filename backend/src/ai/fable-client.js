@@ -49,6 +49,14 @@
  */
 const TIMEOUT_MAC_DINH = 35_000;
 
+/**
+ * Trần cho ĐƯỜNG CUỐI trong chuỗi dự phòng. Rộng hơn trần đường chính là cố ý:
+ * quá trần này thì không còn gì để thử nữa, nên bỏ sớm chỉ đổi một câu trả lời
+ * chậm lấy không có câu trả lời nào. 45s vẫn dưới ngưỡng bỏ cuộc của người dùng
+ * mà đủ cho Gemini (đo được trung vị ~28,8s, đuôi ~48s).
+ */
+const TIMEOUT_DU_PHONG_CUOI = 45_000;
+
 class LoiNhaCungCap extends Error {
   constructor(ma, { cause, providerStatus, providerMessage } = {}) {
     super(ma);
@@ -354,7 +362,23 @@ function layCacDuong(env = process.env) {
       mucSuyLuan: env.LLM_REASONING_EFFORT || 'low',
       noiChay: 'gemini',
       coThiGiac: env.LLM_KHONG_CO_THI_GIAC !== '1',
-      timeout: Number(env.LLM_TIMEOUT_MS) || TIMEOUT_MAC_DINH,
+      /*
+       * ⚠️ ĐƯỜNG DỰ PHÒNG KHÔNG ĐƯỢC THỪA TRẦN CHỜ CỦA ĐƯỜNG CHÍNH.
+       *
+       * Trước 20/8/2026 dòng này đọc `LLM_TIMEOUT_MS` — cùng biến với đường
+       * chính. Nghe thì gọn, nhưng nó phá đúng công dụng của dự phòng:
+       *
+       * Đo trên bản chạy thật với `LLM_TIMEOUT_MS=20000` — trần đặt để cắt
+       * gateway lúc nó treo. Nhưng nó cắt luôn Gemini, mà Gemini đo được
+       * trung vị ~28,8s. Kết quả: gateway hỏng (20s) → Gemini cũng bị bỏ (20s)
+       * → `aiDaChay: false` sau 37 giây chờ. Bác chờ lâu HƠN trước khi sửa, và
+       * còn MẤT luôn tầng AI — tệ cả hai đầu.
+       *
+       * Trần của đường chính là câu "bỏ sớm để còn kịp thử đường khác".
+       * Đường cuối cùng thì không còn đường nào để kịp nữa — nó cần ngân sách
+       * của riêng nó. Đặt `GEMINI_TIMEOUT_MS` nếu muốn đổi.
+       */
+      timeout: Number(env.GEMINI_TIMEOUT_MS) || TIMEOUT_DU_PHONG_CUOI,
       laDuPhong: true,
     });
   }

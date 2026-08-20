@@ -960,3 +960,44 @@ test('§6.10 · locale pack không có khóa tín hiệu trùng', () => {
     assert.ok(tongKhoa > 20, `${ten}.js chỉ soi ra ${tongKhoa} khóa — biểu thức soi đã hỏng`);
   }
 });
+
+/**
+ * ĐƯỜNG DỰ PHÒNG CUỐI CÙNG PHẢI CÓ NGÂN SÁCH RIÊNG.
+ *
+ * Đo trên bản chạy thật 20/8/2026, sau khi đặt `LLM_TIMEOUT_MS=20000` để cắt
+ * gateway lúc nó treo: cùng biến đó cắt luôn Gemini ở đường dự phòng, mà Gemini
+ * cần ~28,8s. Kết quả đo được: `aiDaChay: false` sau 37 giây chờ — bác chờ LÂU
+ * HƠN trước khi "tối ưu", và còn MẤT luôn tầng AI.
+ *
+ * Bài học: trần chờ của đường chính nghĩa là "bỏ sớm để còn kịp thử đường
+ * khác". Đường cuối không còn gì để kịp, nên nó không được thừa trần đó.
+ */
+test('§6.7 · trần chờ đường chính KHÔNG cắt luôn đường dự phòng cuối', () => {
+  const { layCacDuong } = require(path.join(GOC, 'backend', 'src', 'ai', 'fable-client.js'));
+  const duong = layCacDuong({
+    LLM_API_BASE: 'https://vi-du.test/v1',
+    LLM_API_KEY: 'không-phải-khoá-thật',
+    RISK_LLM_MODEL: 'gpt-5.4',
+    GEMINI_API_KEY: 'không-phải-khoá-thật',
+    LLM_TIMEOUT_MS: '20000',
+  });
+
+  const chinh = duong.find((d) => !d.laDuPhong);
+  const cuoi = duong[duong.length - 1];
+  assert.ok(chinh && cuoi && chinh !== cuoi, 'phải dựng được cả đường chính lẫn đường dự phòng');
+
+  assert.equal(chinh.timeout, 20_000, 'LLM_TIMEOUT_MS phải áp cho đường chính');
+  assert.ok(cuoi.timeout > 20_000,
+    `đường dự phòng cuối đang thừa trần của đường chính (${cuoi.timeout}ms) — `
+    + 'gateway hỏng thì Gemini cũng bị bỏ theo, bác chờ lâu hơn mà vẫn không có AI');
+
+  // Đặt riêng thì phải đổi được — không phải số cứng.
+  const duong2 = layCacDuong({
+    LLM_API_BASE: 'https://vi-du.test/v1',
+    LLM_API_KEY: 'x',
+    GEMINI_API_KEY: 'y',
+    LLM_TIMEOUT_MS: '20000',
+    GEMINI_TIMEOUT_MS: '30000',
+  });
+  assert.equal(duong2[duong2.length - 1].timeout, 30_000, 'GEMINI_TIMEOUT_MS phải đổi được trần');
+});

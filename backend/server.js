@@ -924,9 +924,20 @@ app.get('/api/suc-khoe', (req, res) => {
      */
     bienDaDat: Object.fromEntries(
       ['LLM_API_BASE', 'LLM_API_KEY', 'RISK_LLM_MODEL', 'GEMINI_API_KEY',
-       'LLM_DU_PHONG_BASE', 'LLM_DU_PHONG_MODEL', 'NODE_ENV']
+       'LLM_DU_PHONG_BASE', 'LLM_DU_PHONG_MODEL', 'LLM_TIMEOUT_MS', 'NODE_ENV']
         .map((k) => [k, Boolean(process.env[k])]),
     ),
+    /*
+     * ⚠️ TRẦN CHỜ LÀ SỐ CẤU HÌNH, KHÔNG PHẢI BÍ MẬT — khai hẳn giá trị.
+     *
+     * `bienDaDat` chỉ nói "có hay không", đúng cho khoá và địa chỉ. Nhưng trần
+     * chờ thì biết "có" là vô dụng: đặt 20000 hay 200000 đều ra "có", mà hai
+     * con số đó là hai sản phẩm khác hẳn nhau. Đo 20/8/2026: phải suy trần chờ
+     * từ phân bố thời gian đáp — chậm và không chắc chắn.
+     *
+     * Không có gì riêng tư ở đây: nó là số mili giây người vận hành tự đặt.
+     */
+    tranChoMs: Number(process.env.LLM_TIMEOUT_MS) || null,
     model: chay ? c.model : null,
     /**
      * `tren_may_nguoi_dung`      — người dùng chạy cả app lẫn mô hình trên máy
