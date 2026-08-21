@@ -83,6 +83,10 @@ rejects the response.
 - **Message capture (Android).** With permission, the app reads new message
   notifications so one tap checks them instead of copying by hand. Content stays
   on the phone and is only sent for checking when the user taps.
+- **Screenshots are transcribed first, then judged by the same rules.** The text
+  inside an image goes through the identical rule engine as typed text, so a scam
+  does not get a softer verdict for arriving as a picture. If the image cannot be
+  read, the app says *that* — it never reports an unread image as one it checked.
 - **QR and link inspection.** Domains are analysed deterministically — the app
   never opens a link on the user's behalf.
 - **Quick questions.** While a call is happening, a short structured set of
@@ -107,6 +111,11 @@ exit. A false alarm the user cannot escape is how an app gets uninstalled.
   over whatever is on screen — including the call screen. It never covers the
   full screen, never takes input outside its own two buttons, and always has a
   dismiss button.
+- **On-device pre-screening.** An arriving message showing two or more signals at
+  once — a code request plus pressure, an agency name plus a transfer demand —
+  raises a local prompt to check it. This runs entirely on the phone: no network
+  call, no AI, and it deliberately produces no verdict of its own. It is a bell,
+  not a scale; the rule engine still decides once the user taps.
 - **Pinned notification.** One tap into the app, surviving reboot.
 - **Long-call reminder.** Police-impersonation calls run for hours. After 25
   minutes the app asks one question: is someone telling you to transfer money?
@@ -129,29 +138,64 @@ verified emergency numbers.
 
 ## Measurements
 
-Numbers below are measured, not targets. They come from the test suite in this
-repository and can be reproduced with `npm test`.
+Numbers below are measured, not targets, and each one can be reproduced from this
+repository. They are reported against two different sets, because the difference
+between them is the point.
+
+**Development set** — `test/du-lieu/`, reproduced with `npm test`. The rule
+patterns were written and tuned against these scenarios, so read them as an upper
+bound rather than as a forecast.
 
 | Layer | Catches | False alarms | Set |
 |---|---|---|---|
-| Rule engine, Vietnamese | **80%** | **0%** | 100 scenarios (49 scam / 51 benign) |
-| Rule engine, English | **70%** | **0%** | 200 scenarios (100 / 100) |
+| Rule engine, Vietnamese | 80% | 0% | 100 scenarios (49 scam / 51 benign) |
+| Rule engine, English | 70% | 0% | 200 scenarios (100 / 100) |
 
-Both benign halves are written to be *hard*: 60–68% of them contain money
-amounts, urgency words, bank names, links or one-time-code language. A benign set
-of "the cat has been fed" would make a 0% false-alarm rate meaningless.
+**Held-out set** — `eval/dataset/`, 497 labelled samples the patterns were never
+tuned against. This is the number that predicts behaviour on a message nobody has
+seen before. Reproduce with `node eval/khoanbench.js`, which prints this table:
 
-The two error types are not priced the same. Missing a scam costs one warning;
-a false alarm teaches someone to ignore the next warning, including the correct
-one. The thresholds are asymmetric on purpose.
+| Layer | Recall | False alarms |
+|---|---|---|
+| Rule engine, Vietnamese | 14.4% | 3.3% |
+| Rule engine, English | 6.1% | no benign English samples yet, so not measurable |
+| Rule engine, mixed VI/EN | 11.4% | 0.0% |
+
+**The two tables count different things, so read the definitions before comparing
+them.** In the development table a scam counts as caught if it came back at
+*Suspicious* or above. In the harness, `recall` is stricter: the sample must come
+back at *High risk*. Under the looser definition the held-out set gives 34%
+Vietnamese and 33% English; under the strict one the development set gives 49%
+and 19%. Every one of those six numbers is reproducible from this repository, and
+none of them is the single headline figure.
+
+The distance between the two sets is what tuning on a set buys you. Publishing
+only the flattering half is how a project ends up believing its own demo, so both
+are here.
+
+The rule layer is deliberately conservative — it fires only where it is certain,
+and the AI layer covers the ambiguous remainder. The two error types are also not
+priced the same: missing a scam costs one warning, while a false alarm teaches
+someone to ignore the next warning, including the correct one. The thresholds are
+asymmetric on purpose.
+
+Three slices of the held-out set are worth naming, including the two that fail:
+
+| Slice | Result |
+|---|---|
+| 110 benign messages containing the exact keywords a detector hunts for — "Mum, install the bank app from the Play Store", "transfer the money, don't tell grandma" | **4% false alarms.** A benign set of "the cat has been fed" would make a low false-alarm rate meaningless. |
+| 35 published anti-scam warning articles | **20% wrongly flagged.** Teaching about fraud should not read as fraud. Open. |
+| 40 Vietnamese messages typed without diacritics | **42% caught, 19% false alarms** — the weakest slice, and a common way real messages arrive. Open. |
 
 Typical response times on the hosted demo: a clear impersonation scam returns in
 **under one second** from the rule layer alone, without calling AI. Ambiguous
-messages that need the AI layer return in about **3 seconds**.
+messages that need the AI layer return in about **3 seconds**. A screenshot takes
+longer, because the image is transcribed before the rule engine sees it.
 
-**50 contract tests** guard the invariants — the three labels, the absence of a
-fourth, the touch-target and text-size floors, the security headers, and the
-rule that every user-facing string comes from the translation catalog.
+**59 contract tests** guard the invariants — the three labels, the absence of a
+fourth, the touch-target and text-size floors, the security headers, the rule that
+every user-facing string comes from the translation catalog, and the rule that an
+input the app could not read may never be reported as an input it checked.
 
 ---
 
@@ -192,7 +236,7 @@ height never drops below 1.25. Target: WCAG 2.2 AA.
 | Backend | Node · Express · pure rule engine with no network dependency |
 | Mobile | Capacitor + native Android (Java) for overlay, notifications, call state |
 | AI | Any OpenAI-compatible model — local via Ollama, or a hosted gateway |
-| Testing | 50 contract tests · 300 labelled scenarios across two languages |
+| Testing | 59 contract tests · 300 tuned scenarios · 497 held-out samples |
 
 ---
 
@@ -206,6 +250,17 @@ npm run dev
 ```bash
 npm test
 ```
+
+Reproducing the held-out benchmark. The rule-only pass needs no API key and takes
+a few seconds; `--ai` adds the extraction layer and needs one configured.
+
+```bash
+node eval/khoanbench.js
+```
+
+The harness prints the per-language table **before** any combined figure, on
+purpose: an earlier version let Vietnamese fall 15.6 points behind while every
+aggregate metric stayed green.
 
 Building the Android app:
 
@@ -225,7 +280,9 @@ npm run build && npx cap sync android
 | `backend/src/analysis/context-builder.js` | Sentence segmentation and speech-act classification |
 | `src/catalog.ts` | Codes → display text, so language cannot change a verdict |
 | `test/hop-dong.test.mjs` | Guards for every invariant above |
-| `test/du-lieu/` | Labelled scenario sets |
+| `test/du-lieu/` | Tuned scenario sets, 300 samples |
+| `eval/dataset/` | Held-out evaluation set, 497 labelled samples |
+| `eval/khoanbench.js` | Benchmark harness — prints the per-language table before any total |
 | `android/app/src/main/java/vn/khoanda/app/` | Native Android layer |
 
 ---
@@ -243,9 +300,12 @@ npm run build && npx cap sync android
 
 ## Honest limits
 
-- The rule engine catches most but not all scams. The remaining cases are the
-  genuinely ambiguous ones — a relative asking for money, a marketplace listing —
-  where reading the text alone is not enough to be sure.
+- **The rule engine on its own misses most scams on unseen text** — 34% caught on
+  the held-out set, against 80% on the set it was tuned against. That is the
+  layer working as designed rather than a bug: it fires only where it is certain,
+  keeps false alarms at 4% on the hardest benign slice, and leaves the ambiguous
+  remainder to the AI layer. But a reader deserves the honest version of the
+  sentence, so: on its own, it misses more than it catches.
 - The AI layer needs a network connection. Without one, the rule engine still
   runs and the app says that no AI read the message.
 - The app cannot block calls or bank transfers, and does not claim to. It
