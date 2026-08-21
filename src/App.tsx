@@ -63,7 +63,7 @@ import {
   ngheGiongNoi, dungNghe as dungNgheNative, coBoNghe, moCaiDatGiongNoi,
   quyenDocThongBao, xinQuyenDocThongBao, tinMoiNhat, xoaTinDaBat,
   trangThaiThuongTruc, trangThaiMay, tomTatChoMayChu, moCaiDatTroNang,
-  napChuCuocGoi, trangThaiTheoDoiCuocGoi, datTheoDoiCuocGoi,
+  napChuCuocGoi, trangThaiTheoDoiCuocGoi, datTheoDoiCuocGoi, docTo, dungDocTo,
   type QuyenNative, type TrangThaiMay,
 } from './native';
 import { GuardianIntroView, GuardianAuthView, GuardianView } from './components/Guardian';
@@ -197,7 +197,28 @@ function beRongKhung(): number {
 }
 
 export default function App() {
-  const [view, setView] = useState<ViewState>('intro');
+  /*
+   * ═════ ĐÃ ĐĂNG NHẬP THÌ ĐỪNG BẮT XEM LẠI MÀN GIỚI THIỆU ═════
+   *
+   * Bản cũ mã cứng `'intro'`, nên MọI lần mở app đều bắt đầu bằng màn
+   * "Ai đang dùng máy này?" — kể cả khi bác đã đăng nhập và đã trả lời
+   * câu đó hôm qua. Người dùng báo 20/8/2026.
+   *
+   * ⚠️ QUAN TRỌNG HƠN MỘT PHIỀN PHỨC NHỎVẬT. Nhận xét của ban giám khảo:
+   * người dùng có thể sẽ không mở app. Mỗi màn chặn thêm giữa đường là
+   * một lý do nữa để không mở — và màn này chặn ĐÚNG lúc bác đang vội.
+   *
+   * Đọc phiên trực tiếp từ `docPhienTaiKhoan()`, không đợi state — `useState`
+   * chỉ chạy hàm khởi tạo một lần, và lần đó phải đúng ngay.
+   */
+  const [view, setView] = useState<ViewState>(() => {
+    try {
+      if (docPhienTaiKhoan()?.hoSo) return 'home';
+      // Chưa đăng nhập nhưng đã chọn vai rồi thì cũng không cần hỏi lại.
+      if (localStorage.getItem('daXemIntro') === '1') return 'home';
+    } catch { /* trình duyệt chặn localStorage ⇒ cứ hiện intro */ }
+    return 'intro';
+  });
   const [analyzeResult, setAnalyzeResult] = useState<any>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [pinnedNotification, setPinnedNotification] = useState(() => localStorage.getItem('pinnedNotification') === 'true');
@@ -1576,6 +1597,8 @@ function HomeView({
         Người cao tuổi đọc chậm, và hai câu hỏi chồng nhau làm họ dừng lại tìm
         xem phải trả lời cái nào.
       */}
+      <TinDangCho t={t} onAnalyze={onAnalyze} />
+
       <h2 className="md:hidden text-center text-[1.85rem] sm:text-3xl leading-[1.18] font-black text-[#2e1065] px-4 shrink-0 select-none" dangerouslySetInnerHTML={{__html: t("Hãy kể tình huống<br />của Bác")}}></h2>
       
       <div className="hidden md:flex flex-col items-center text-center mb-8 relative z-20">
@@ -1980,24 +2003,36 @@ function VoiceView({
      * ngược: khai THIẾU một khả năng đang có, và đẩy bác sang gõ tay không cần
      * thiết.
      */
+    /*
+     * ═════ DÒ NGUỒN NGHE XONG RỒI MỚI BẮT ĐẦU — 20/8/2026 ═════
+     *
+     * Bản cũ gọi `startRecording()` NGAY sau khối async này, tức chạy đồng bộ
+     * trong khi `nguonNghe` vẫn còn là `'dang_do'`. Bên trong `startRecording`
+     * có `if (nguonNghe === 'tren_may')` — điều kiện đó KHÔNG BAO GIỜ ĐÚNG ở
+     * lần vào đầu tiên, nên trên bản APK bộ nghe native không hề khởi động.
+     * Bác thấy một màn hình đang "ghi âm" mà không ai nghe cả.
+     *
+     * Nay chờ dò xong rồi truyền THẬT nguyên giá trị vào, không đọc qua state
+     * — state ở đây vẫn là giá trị cũ của lượt render này.
+     */
     void (async () => {
+      let nguon: 'trinh_duyet' | 'tren_may' | 'khong_co';
       if (await laApk()) {
         const co = await coBoNghe();
         if (!isComponentMounted.current) return;
         // `'chua_ro'` ⇒ chưa hỏi được ROM. Cho đi tiếp: lượt nghe thật sẽ trả
         // về mã lỗi cụ thể, và đó là thông tin đúng hơn một lời đoán ở đây.
-        setNguonNghe(co === false ? 'khong_co' : 'tren_may');
+        nguon = co === false ? 'khong_co' : 'tren_may';
         setSpeechApiSupported(co !== false);
-        return;
+      } else {
+        const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+        if (!isComponentMounted.current) return;
+        nguon = SR ? 'trinh_duyet' : 'khong_co';
+        setSpeechApiSupported(!!SR);
       }
-      const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-      if (!isComponentMounted.current) return;
-      setNguonNghe(SR ? 'trinh_duyet' : 'khong_co');
-      setSpeechApiSupported(!!SR);
+      setNguonNghe(nguon);
+      startRecording(nguon);
     })();
-
-    // Auto-start recording & microphone stream with smooth initialization
-    startRecording();
 
     return () => {
       isComponentMounted.current = false;
@@ -2072,13 +2107,27 @@ function VoiceView({
     }
   };
 
-  const startRecording = () => {
+  const startRecording = (nguon: typeof nguonNghe = nguonNghe) => {
     setErrorMessage(null);
     setIsRecording(true);
     setDuration(0);
 
-    // Init Web Audio Visualizer
-    initAudioVisualizer();
+    /*
+     * ═════ TRÊN APK: KHÔNG ĐỤNG VÀO MICRO TỪ TẦNG WEB ═════
+     *
+     * `initAudioVisualizer()` gọi `getUserMedia()` — chỉ để VẼ SÓNG ÂM trang trí.
+     * Nhưng trên APK, bộ nghe native cũng cần ĐÚNG cái micro đó.
+     *
+     * Đo được: hai bên giành micro, cộng thêm hai luồng xin quyền chạy song
+     * song (`requestPermissionForAlias` của Capacitor và `onPermissionRequest`
+     * của WebView). Người dùng báo 20/8/2026: "ấn vào phần ghi âm xong cấp
+     * quyền thì bị out ra ngoài, cứ ấn vào voice là bị out".
+     *
+     * ⚠️ MỘT HIỆU ỨNG TRANG TRÍ KHÔNG ĐƯỢC LẤY MẤT TÍNH NĂNG CHÍNH. Sóng âm
+     * chỉ để nhìn cho biết máy đang nghe; bộ nghe mới là việc thật. Trên APK
+     * bỏ sóng, giữ nhịp đập bằng CSS — không ai mất gì.
+     */
+    if (nguon !== 'tren_may') initAudioVisualizer();
 
     if (timerRef.current) clearInterval(timerRef.current);
     timerRef.current = setInterval(() => {
@@ -2096,7 +2145,7 @@ function VoiceView({
      * ⚠️ KHÔNG `await` Ở ĐÂY. `startRecording` được gọi từ `useEffect` lúc vào
      * màn; chờ ở đây là treo cả màn hình trong lúc bộ nghe khởi động (§6.7).
      */
-    if (nguonNghe === 'tren_may') {
+    if (nguon === 'tren_may') {
       dangNgheNativeRef.current = true;
       void ngheGiongNoi('vi-VN').then((kq) => {
         if (!isComponentMounted.current) return;
@@ -3270,6 +3319,80 @@ function CuaSoNoiNative({ t }: { t: any }) {
  * ⚠️ NÓI THẲNG APP ĐỌC ĐƯỢC GÌ, TRƯỚC KHI XIN. Không "để Khoan Đã bảo vệ bác
  * tốt hơn" rồi im chuyện nó đọc thông báo. Bác phải biết mình đang cho phép gì.
  */
+/*
+ * ══════ TIN ĐANG CHỜ — TỰ HIỆN, KHÔNG BẮT ĐI TÌM ══════
+ *
+ * Ban giám khảo nhận xét 20/8/2026: người dùng có thể sẽ không mở app, nên
+ * phải bớt thao tác. Đúng — trước đây tin đã bắt được nằm trong một thẻ ở
+ * Cài đặt › Thông báo, và bác phải tự mò vào đó rồi bấm "Kiểm tin nhắn".
+ * Ba thao tác cho một việc đáng lẽ tự xảy ra.
+ *
+ * Nay: mở app hoặc quay lại app ⇒ tự hỏi máy xem có tin nào đang chờ không,
+ * và nếu có thì thẻ hiện ngay đầu màn chính.
+ *
+ * ⚠️ TỰ HỎI MÁY KHÁC VỚI TỰ GỬI ĐI. `tinMoiNhat()` đọc hàng đợi nằm
+ * TRONG BỘ NHỚ CỦA MÁY — không mạng, không một byte nào rời thiết bị. Việc
+ * gửi nội dung đi kiểm VẪN chờ bác bấm, và phải giữ nguyên như thế:
+ * §6.9 nói "tin chỉ nằm trong máy bác và chỉ được gửi đi kiểm khi bác bấm",
+ * và §12 cấm tự đổi mô hình riêng tư. Tự gửi MỌI tin nhắn đến cho máy chủ
+ * là biến một tính năng trợ giúp thành một đường ống dữ liệu.
+ *
+ * ⚠️ THẺ NÀY KHÔNG MANG NHÃN RỦI RO NÀO. Chưa có bộ luật nào chạy trên tin
+ * này — nó chỉ nói "có tin chưa kiểm". Viết "tin này nguy hiểm" ở đây là
+ * khai một kết luận chưa tồn tại (§11).
+ *
+ * ⚠️ KHÔNG HIỆN NỘI DUNG TIN TRÊN THẺ. Màn chính có thể đang được ai đó cầm
+ * xem cùng. Chỉ nói có tin, để bác tự quyết định mở.
+ */
+function TinDangCho({ t, onAnalyze }: { t: any; onAnalyze?: (text: string) => void }) {
+  const [tin, setTin] = useState<{ noiDung: string } | null>(null);
+
+  const doLai = () => {
+    void (async () => {
+      if (!(await laApk())) return;
+      if ((await quyenDocThongBao()) !== 'da_bat') return;
+      const m = await tinMoiNhat();
+      setTin(m?.co && m.noiDung ? { noiDung: m.noiDung } : null);
+    })();
+  };
+
+  useEffect(() => {
+    doLai();
+    const khiHien = () => { if (document.visibilityState === 'visible') doLai(); };
+    document.addEventListener('visibilitychange', khiHien);
+    return () => document.removeEventListener('visibilitychange', khiHien);
+  }, []);
+
+  if (!tin) return null;
+
+  return (
+    <div className="w-full max-w-[420px] mx-auto mb-3 px-4 shrink-0">
+      <div className="bg-amber-50 border-2 border-amber-400 rounded-3xl p-4 shadow-sm">
+        <p className="text-[15px] font-extrabold text-amber-950 leading-snug mb-1">
+          {t('Có tin nhắn mới chưa kiểm')}
+        </p>
+        <p className="text-[14px] text-amber-900 leading-snug mb-3">
+          {t('Khoan Đã giữ nó trong máy bác. Chạm vào đây để gửi đi kiểm.')}
+        </p>
+        <div className="flex gap-2">
+          <button
+            onClick={() => { const n = tin.noiDung; setTin(null); void xoaTinDaBat(); onAnalyze?.(n); }}
+            className="flex-1 min-h-[52px] py-3 px-4 bg-[#7c3aed] hover:bg-[#6d28d9] active:scale-95 text-white font-extrabold rounded-2xl text-[15px] transition-all"
+          >
+            {t('Kiểm tin này')}
+          </button>
+          <button
+            onClick={() => { setTin(null); void xoaTinDaBat(); }}
+            className="min-h-[52px] py-3 px-4 bg-white hover:bg-slate-50 active:scale-95 text-slate-700 font-bold rounded-2xl text-[15px] border-2 border-slate-300 transition-all"
+          >
+            {t('Bỏ qua')}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function DocTinNhanNative({ t, onAnalyze }: { t: any; onAnalyze?: (text: string) => void }) {
   const [quyen, setQuyen] = useState<QuyenNative>('chua_bat');
   const [dangLay, setDangLay] = useState(false);
@@ -4600,11 +4723,18 @@ function IntroView({
     }
   ];
 
+  // Ghi lại là đã xem — xem chú thích ở chỗ khởi tạo `view`. Màn giới thiệu
+  // chỉ được hỏi MỘT LẦN; hỏi lại mỗi lần mở app là một lý do nữa để không mở.
+  const danhDauDaXem = () => {
+    try { localStorage.setItem('daXemIntro', '1'); } catch { /* bị chặn thì thôi */ }
+  };
+
   const handleNext = () => {
     if (currentSlide < slides.length - 1) {
       setCurrentSlide(prev => prev + 1);
     } else {
       if (setUserRole) setUserRole('elder');
+      danhDauDaXem();
       setView('home');
     }
   };
@@ -4612,6 +4742,7 @@ function IntroView({
   const handleSelectRole = (role: 'elder' | 'guardian') => {
     if (setUserRole) setUserRole(role);
     setShowRoleModal(false);
+    danhDauDaXem();
     if (role === 'guardian') {
       setView('guardian');
     }
@@ -5506,6 +5637,7 @@ function WarningView({
   const initialTime = (laChuaThay || khongGoiDuoc) ? 0 : 60;
   const [timeLeft, setTimeLeft] = useState(initialTime);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [loiDoc, setLoiDoc] = useState<string | null>(null);
 
   useEffect(() => {
     if (timeLeft > 0) {
@@ -5538,11 +5670,21 @@ function WarningView({
   }
   const chuaKiem = traNhieu(CHUA_KIEM, maChuaKiem, lang);
 
+  /*
+   * ⚠️ ĐI QUA `docTo()`, KHÔNG GỌI THẮNG `speechSynthesis`.
+   *
+   * Trong WebView của Android, `speechSynthesis` hỏng IM LẶNG: ở vài bản thì
+   * `'speechSynthesis' in window` vẫn true, `speak()` vẫn trả về, chỉ là không
+   * phát ra tiếng nào. Câu kiểm ở dòng đầu bản cũ vì thế KHÔNG bắt được ca
+   * này — nó chỉ bắt được ca API vắng hẳn.
+   *
+   * `docTo()` dùng bộ đọc của máy trên APK và của trình duyệt trên web, rồi
+   * trả về có đọc được hay không — để màn hình nói ra thay vì để bác ngồi
+   * chờ một giọng nói không bao giờ tới (§4.3).
+   */
   const handleToggleSpeak = () => {
-    if (!('speechSynthesis' in window)) return;
-
     if (isSpeaking) {
-      window.speechSynthesis.cancel();
+      void dungDocTo();
       setIsSpeaking(false);
       return;
     }
@@ -5572,14 +5714,16 @@ function WarningView({
       ? ` ${isEn ? 'What I could not check' : 'Những thứ cháu chưa kiểm được'}: ${chuaKiem.join('. ')}.`
       : '';
 
-    const utterance = new SpeechSynthesisUtterance(`${phanDau} ${phanKhuyen}${phanChuaKiem}`);
-    utterance.lang = isEn ? 'en-US' : 'vi-VN';
-    utterance.rate = 0.9;
-    utterance.onend = () => setIsSpeaking(false);
-    utterance.onerror = () => setIsSpeaking(false);
-
-    window.speechSynthesis.speak(utterance);
     setIsSpeaking(true);
+    setLoiDoc(null);
+    void docTo(`${phanDau} ${phanKhuyen}${phanChuaKiem}`, isEn ? 'en-US' : 'vi-VN')
+      .then((kq) => {
+        setIsSpeaking(false);
+        // §4.3 — không đọc được thì NÓI RA. Im lặng ở đây là tệ nhất: bác
+        // bấm nút, không nghe thấy gì, và không biết là máy thiếu giọng hay
+        // mình bấm sai.
+        if (!kq.ok) setLoiDoc(kq.ma || 'DOC_HONG');
+      });
   };
 
   /**
@@ -5664,6 +5808,24 @@ function WarningView({
             {isSpeaking ? t('Đang đọc...') : t('Đọc to')}
           </button>
         </div>
+
+        {/*
+          §4.3 — BẤM MÀ KHÔNG NGHE THẤY GÌ THÌ PHẢI BIẾT VÌ SAO.
+          Ba nguyên nhân khác hẳn nhau, và gộp chúng thành im lặng là để bác
+          tưởng mình bấm sai: máy không có bộ đọc, máy có nhưng thiếu giọng
+          tiếng Việt, hoặc bộ đọc báo lỗi.
+        */}
+        {loiDoc && (
+          <div className="w-full max-w-md px-4 mt-2">
+            <p className="text-[14px] text-amber-100 bg-amber-900/40 border border-amber-300/40 rounded-2xl px-3 py-2 leading-snug">
+              {loiDoc === 'MAY_CHUA_CO_GIONG'
+                ? t('Máy bác chưa có giọng đọc tiếng Việt. Bác vào Cài đặt › Ngôn ngữ để tải thêm nhé.')
+                : loiDoc === 'MAY_KHONG_CO_BO_DOC'
+                  ? t('Máy này chưa có bộ đọc chữ. Các phần khác vẫn dùng bình thường.')
+                  : t('Cháu chưa đọc được đoạn này. Bác thử lại giúp cháu.')}
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Center Main Card & Explanations */}

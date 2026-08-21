@@ -38,8 +38,34 @@ speaking exactly like family.
 
 ## How it works
 
-A person pastes a message, speaks, or sends a screenshot. The app returns one of
-three levels, the reasons behind it, and **what it could not check**.
+### The person being scammed does not have to open anything
+
+This is the first design constraint, not a feature. Someone who is being told by a
+fake police officer to stay on the line will not open an app, find a paste box, and
+wait for a result. An assistant that only works when opened does not work.
+
+So the phone runs a quiet local screen, and the intervention appears where the
+person is already looking:
+
+- **A message arrives carrying two or more signals** — a code request plus
+  pressure, an agency name plus a transfer demand — and a prompt appears. That
+  screening happens entirely on the device: no network call, no AI, and it
+  deliberately reaches no verdict of its own. It is a bell, not a scale.
+- **A warning strip draws over whatever is on screen**, including the call screen,
+  when the engine returns High risk.
+- **After 25 minutes on a call**, the app asks one question: is someone telling you
+  to transfer money? It counts time; it does not listen.
+- **An adult child gets the alert**, because the person who will reliably open an
+  app is not the person being scammed.
+
+The app's own interface is for setup and for the family — not for the moment of
+crisis. What it costs in permissions, what we refuse to take, and where every byte
+goes is written out in [PERMISSIONS-AND-POLICY.md](PERMISSIONS-AND-POLICY.md).
+
+### And when someone does open it
+
+They paste a message, speak, or send a screenshot, and the app returns one of three
+levels, the reasons behind it, and **what it could not check**.
 
 ### Two layers, and only one of them decides
 
@@ -280,6 +306,7 @@ npm run build && npx cap sync android
 | `backend/src/analysis/context-builder.js` | Sentence segmentation and speech-act classification |
 | `src/catalog.ts` | Codes → display text, so language cannot change a verdict |
 | `test/hop-dong.test.mjs` | Guards for every invariant above |
+| `PERMISSIONS-AND-POLICY.md` | Permission ladder, data flow, what we refuse and why |
 | `test/du-lieu/` | Tuned scenario sets, 300 samples |
 | `eval/dataset/` | Held-out evaluation set, 497 labelled samples |
 | `eval/khoanbench.js` | Benchmark harness — prints the per-language table before any total |

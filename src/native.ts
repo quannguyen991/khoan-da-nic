@@ -21,6 +21,8 @@
 type Nhan = 'CAO' | 'NGHI_NGO' | 'CHUA_THAY';
 
 interface CauNoi {
+  docTo(o: { chu: string; ngonNgu: string }): Promise<{ xong: boolean }>;
+  dungDocTo(): Promise<void>;
   trangThaiQuyenDocThongBao(): Promise<{ daBat: boolean }>;
   moCaiDatDocThongBao(): Promise<void>;
   /**
@@ -806,3 +808,46 @@ export async function tinhTrangNghe(): Promise<TinhTrangNghe> {
   return r;
 }
 
+
+
+/*
+ * ═════ ĐỌC TO — TRÊN APK DÙNG BỘ ĐỌC CỦA MÁY ═════
+ *
+ * `window.speechSynthesis` chạy trên Chrome nhưng KHÔNG chạy trong WebView của
+ * Android — và nó hỏng IM LẶNG: ở vài bản WebView, `'speechSynthesis' in window`
+ * vẫn true và `speak()` vẫn trả về bình thường, chỉ là không ai nghe thấy gì.
+ * Người dùng báo 20/8/2026: "ấn cái read aloud thì nó chưa hoạt động ở app".
+ *
+ * ⚠️ ĐÂY LÀ TÍNH NĂNG TIẾP CẬN. Với người mắt kém hoặc đang hoảng không
+ * đọc nổi chữ, đây là đường duy nhất để biết kết quả.
+ *
+ * Trả về `false` khi không đọc được, kèm mã lý do — để tầng giao diện nói
+ * ra thay vì để bác ngồi chờ một giọng nói không bao giờ tới (§4.3).
+ */
+export async function docTo(chu: string, ngonNgu = 'vi-VN'): Promise<{ ok: boolean; ma?: string }> {
+  const c = (await cauHoacNull())?.cau;
+  if (!c) {
+    // Không phải APK ⇒ dùng bộ đọc của trình duyệt, nơi nó thực sự chạy.
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return { ok: false, ma: 'MAY_KHONG_CO_BO_DOC' };
+    try {
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(chu);
+      u.lang = ngonNgu;
+      u.rate = 0.92;
+      window.speechSynthesis.speak(u);
+      return { ok: true };
+    } catch { return { ok: false, ma: 'DOC_HONG' }; }
+  }
+  try {
+    await c.docTo({ chu, ngonNgu });
+    return { ok: true };
+  } catch (e: any) {
+    return { ok: false, ma: String(e?.message || e?.code || 'DOC_HONG') };
+  }
+}
+
+export async function dungDocTo(): Promise<void> {
+  const c = (await cauHoacNull())?.cau;
+  if (!c) { try { window.speechSynthesis?.cancel(); } catch { /* không sao */ } return; }
+  try { await c.dungDocTo(); } catch { /* đã dừng rồi */ }
+}

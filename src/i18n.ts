@@ -770,6 +770,11 @@ export const translations: Record<Lang, Record<string, string>> = {
     "Mở cửa sổ nổi": "Mở cửa sổ nổi",
   },
   en: {
+    "Máy bác chưa có giọng đọc tiếng Việt. Bác vào Cài đặt › Ngôn ngữ để tải thêm nhé.": "Your phone does not have a Vietnamese speaking voice yet. You can add one in Settings › Language.",
+    "Máy này chưa có bộ đọc chữ. Các phần khác vẫn dùng bình thường.": "This phone has no text-to-speech engine. Everything else still works.",
+    "Cháu chưa đọc được đoạn này. Bác thử lại giúp cháu.": "We could not read this out. Please try again.",
+    "Có tin nhắn mới chưa kiểm": "A new message has not been checked yet",
+    "Khoan Đã giữ nó trong máy bác. Chạm vào đây để gửi đi kiểm.": "Khoan Đã is holding it on your phone. Tap here to send it for checking.",
     "Báo động khẩn cấp 60 giây": "Emergency alert, 60 seconds",
     "Bật thì thấy dải tím ở đầu trang. Tắt thì chỉ nhận thông báo ngoài máy.": "On: you see the purple bar at the top of the page. Off: you only get notifications outside the app.",
     "Chọn Truy cập đặc biệt, rồi chọn Xuất hiện trên cùng.": "Choose Special access, then Appear on top.",

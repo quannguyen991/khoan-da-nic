@@ -268,6 +268,30 @@ public class KhoanDaPlugin extends Plugin {
         });
     }
 
+    // ─────────── Đọc to kết quả — xem `DocVanBan` ───────────
+
+    @PluginMethod
+    public void docTo(PluginCall call) {
+        final String chu = call.getString("chu", "");
+        final String ngonNgu = call.getString("ngonNgu", "vi-VN");
+        call.setKeepAlive(true);
+        chayTrenUi(call, "DOC_HONG", () -> DocVanBan.doc(getContext(), chu, ngonNgu,
+                new DocVanBan.KetQua() {
+                    @Override public void xong() {
+                        JSObject r = new JSObject();
+                        r.put("xong", true);
+                        call.resolve(r);
+                    }
+                    @Override public void hong(String ma) { call.reject(ma); }
+                }));
+    }
+
+    @PluginMethod
+    public void dungDocTo(PluginCall call) {
+        chayTrenUi(null, "DUNG_DOC_HONG", DocVanBan::dungDoc);
+        call.resolve();
+    }
+
     private SpeechRecognizer boNghe;
 
     /**
@@ -464,6 +488,7 @@ public class KhoanDaPlugin extends Plugin {
     @Override
     protected void handleOnDestroy() {
         chayTrenUi(null, "DUNG_BO_NGHE_HONG", this::dungBoNghe);
+        chayTrenUi(null, "DUNG_BO_DOC_HONG", DocVanBan::dung);
         super.handleOnDestroy();
     }
 
