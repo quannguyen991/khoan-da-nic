@@ -67,4 +67,5 @@
     <!-- Sang loc tai cho: KHONG mang nhan rui ro nao, chi moi bac kiem. -->
     <string name="tb_sang_loc_tieu_de">Có tin nhắn đáng kiểm</string>
     <string name="tb_sang_loc_noi_dung">Tin nhắn vừa đến có dấu hiệu nên xem lại. Chạm để cháu kiểm giúp bác.</string>
+    <string name="tb_nut_kiem_tin">Kiểm tin mới nhất</string>
 </resources>

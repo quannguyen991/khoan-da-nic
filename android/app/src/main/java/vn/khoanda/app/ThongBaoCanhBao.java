@@ -68,7 +68,29 @@ public final class ThongBaoCanhBao {
      *         false khi quyền bị thu hồi, kênh bị tắt, hoặc ROM chặn — tầng web
      *         PHẢI biết ba ca này đều tồn tại, không được đoán.
      */
+    /*
+     * ═════ HAI NGƯỜI GỌI, HAI ĐÍCH ĐẾN KHÁC NHAU ═════
+     *
+     * ① `KhoanDaPlugin.hienCanhBaoHeadsUp` — bộ luật ĐÃ chạy và ra mức CAO.
+     *   Đích đúng là màn Dừng 60s: có kết luận rồi, việc cần làm là dừng.
+     * ② `DocThongBao.sangLocTaiCho` — lớp sàng lọc tại chỗ vừa thấy hai dấu
+     *   hiệu trong một tin đến. CHƯA có bộ luật nào chạy, chưa có kết luận nào.
+     *
+     * Đưa ca ② tới màn Dừng 60s là trưng ra một kết luận chưa tồn tại (§11).
+     * Thực tế còn tệ hơn: tầng web đọc `khoan_da_canh_bao_cao` từ bộ nhớ, không
+     * thấy gì (vì chưa chạy lượt nào) nên rơi về trang chủ — bác bấm vào một
+     * cảnh báo rồi đứng giữa trang chủ, không biết làm gì tiếp.
+     *
+     * Nay ca ② đi thẳng `kiem-tin-nhan`: mở ra là tin đó được đem đi kiểm.
+     */
+    static final String DICH_DUNG_60S = "khoanda://canh-bao/dung-lai-60s";
+    static final String DICH_KIEM_TIN = "khoanda://loi-tat/kiem-tin-nhan";
+
     public static boolean hien(Context ctx, String tieuDe, String noiDung) {
+        return hien(ctx, tieuDe, noiDung, DICH_DUNG_60S);
+    }
+
+    public static boolean hien(Context ctx, String tieuDe, String noiDung, String dichDen) {
         try {
             NotificationManager nm = ctx.getSystemService(NotificationManager.class);
             if (nm == null) return false;
@@ -94,7 +116,7 @@ public final class ThongBaoCanhBao {
              * → web đọc `loiTat === 'canh-bao-dung-lai-60s'` → set view 'warning'.
              */
             Intent mo = new Intent(Intent.ACTION_VIEW,
-                    Uri.parse("khoanda://canh-bao/dung-lai-60s"),
+                    Uri.parse(dichDen),
                     ctx, MainActivity.class);
             mo.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
 

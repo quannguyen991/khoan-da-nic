@@ -54,4 +54,5 @@
     <!-- Sang loc tai cho: KHONG mang nhan rui ro nao, chi moi bac kiem. -->
     <string name="tb_sang_loc_tieu_de">A message worth checking</string>
     <string name="tb_sang_loc_noi_dung">A message just arrived that is worth a look. Tap and I will check it.</string>
+    <string name="tb_nut_kiem_tin">Check the latest message</string>
 </resources>

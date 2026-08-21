@@ -738,6 +738,34 @@ export default function App() {
           setView('home');
           return;
         }
+        /*
+         * ═════ "KIỂM TIN NHẮN" — TỪ NGÓAI THẲNG VÀO KẾT QUẢ ═════
+         *
+         * `khoanda://loi-tat/kiem-tin-nhan` đã có trong `shortcuts.xml` và giờ có
+         * thêm một nút trên thông báo thường trực — nhưng KHÔNG CÓ NHÁNH NÀO
+         * bắt nó. Nó rơi xuống `: 'guardian'` ở cuối, tức bám vào "Kiểm tin
+         * nhắn" thì app mở… màn người giám hộ. Đo được 21/8/2026.
+         *
+         * ⚠️ CHẠM VÀO THÔNG BÁO CHÍNH LÀ CÁI BẤM. §6.9 đòi nội dung chỉ rời máy
+         * khi bác bấm — và bác vừa bấm. Không phải tự động gửi; là bớt cho bác
+         * ba thao tác tìm đường sau khi đã đồng ý.
+         *
+         * ⚠️ KHÔNG CÓ TIN THÌ NÓI KHÔNG CÓ TIN. Gửi chuỗi rỗng đi kiểm rồi hiện
+         * "Chưa thấy dấu hiệu rủi ro" là trả lời một câu chưa ai hỏi, và câu
+         * đó nghe như một lời bảo đảm (§4.3). Về trang chủ, thẻ `TinDangCho`
+         * ở đó sẽ tự nói đúng trạng thái.
+         */
+        if (d.loiTat === 'kiem-tin-nhan') {
+          const tin = await tinMoiNhat();
+          if (huy) return;
+          if (tin?.co && tin.noiDung) {
+            void xoaTinDaBat();
+            handleAnalyze(tin.noiDung);
+          } else {
+            setView('home');
+          }
+          return;
+        }
         setView(d.loiTat === 'dang-bi-goi' ? 'voice'
           : d.loiTat === 'goi-nguoi-than' ? 'family'
             : 'guardian');
