@@ -202,7 +202,10 @@ public class DocThongBao extends NotificationListenerService {
              */
             ThongBaoCanhBao.hien(this,
                     getString(R.string.tb_sang_loc_tieu_de),
-                    getString(R.string.tb_sang_loc_noi_dung));
+                    getString(R.string.tb_sang_loc_noi_dung),
+                    // Chưa có kết luận nào ⇒ đưa bác tới chỗ KIỂM, không phải
+                    // chỗ DỪNG. Xem chú thích ở `ThongBaoCanhBao.hien`.
+                    ThongBaoCanhBao.DICH_KIEM_TIN);
         } catch (Throwable ignored) {
             // Không gửi được thông báo thì thôi — tin vẫn nằm trong hàng đợi để
             // bác kiểm khi mở app. Đừng để bước phụ này làm chết bước chính.

@@ -4,6 +4,7 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.graphics.drawable.Icon;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -190,6 +191,32 @@ public final class ThongBaoThuongTruc {
                     ctx, 0, mo,
                     PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
+            /*
+             * ═════ NÚT "KIỂM TIN MỚI NHẤT" NGAY TRÊN THANH THÔNG BÁO ═════
+             *
+             * Nhận xét của ban giám khảo: người dùng có thể sẽ không mở app.
+             * Trước đây thông báo này chỉ có MỘT đích — mở màn ghi âm. Muốn kiểm
+             * tin nhắn vừa đến thì bác vẫn phải vào app rồi tự tìm.
+             *
+             * Nay có nút riêng: chạm phát là vào thẳng kết quả của tin mới nhất.
+             *
+             * ⚠️ CHẠM VÀO ĐÂY CHÍNH LÀ CÁI BẤM MÀ §6.9 ĐÒI. Không phải tự gửi
+             * — bác chủ động chọn. Thứ bỏ đi là ba thao tác tìm đường sau khi
+             * đã đồng ý, không phải bỏ đi sự đồng ý.
+             *
+             * ⚠️ `requestCode` KHÁC 0. Dùng chung mã với PendingIntent trên thì
+             * `FLAG_UPDATE_CURRENT` ghi đè cái này lên cái kia, và cả hai nút cùng
+             * mở một màn — hỏng im lặng, không báo lỗi gì.
+             */
+            Intent moKiemTin = new Intent(Intent.ACTION_VIEW,
+                    Uri.parse("khoanda://loi-tat/kiem-tin-nhan"),
+                    ctx, MainActivity.class);
+            moKiemTin.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+            PendingIntent piKiemTin = PendingIntent.getActivity(
+                    ctx, 2, moKiemTin,
+                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+
             Notification tb = new Notification.Builder(ctx, KENH)
                     .setSmallIcon(R.drawable.loi_tat_goi)
                     .setContentTitle(ctx.getString(R.string.tb_thuong_truc_tieu_de))
@@ -219,6 +246,12 @@ public final class ThongBaoThuongTruc {
                      * bất cứ lúc nào. Không vuốt mất KHÁC không thoát được.
                      */
                     .setContentIntent(pi)
+                    // Xem chú thích ở `piKiemTin`. Nhãn lấy từ strings.xml nên nó
+                    // đổi theo ngôn ngữ của MÁY (§4.1) — có bản values-en.
+                    .addAction(new Notification.Action.Builder(
+                            Icon.createWithResource(ctx, R.drawable.loi_tat_goi),
+                            ctx.getString(R.string.tb_nut_kiem_tin),
+                            piKiemTin).build())
                     .setStyle(new Notification.BigTextStyle()
                             .bigText(ctx.getString(R.string.tb_thuong_truc_noi_dung)))
                     .build();
