@@ -54,3 +54,8 @@ backend/.du-lieu/
 *.sqlite
 *.sqlite-shm
 *.sqlite-wal
+
+# Bộ nhớ đệm của eval — KHÔNG theo dõi.
+# Nó từng giữ kết quả cũ sau khi mã đổi, và một lượt eval hỏng 89,5% lượt gọi
+# vẫn in ra "chưa thấy dấu hiệu rủi ro". Bộ mẫu và kết quả thì theo dõi; đệm thì không.
+eval/cache/
