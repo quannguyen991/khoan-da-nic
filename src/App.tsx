@@ -3468,8 +3468,24 @@ function TinDangCho({ t, onAnalyze }: { t: any; onAnalyze?: (text: string) => vo
   if (!tin) return null;
 
   return (
-    <div className="w-full max-w-[420px] mx-auto mb-3 px-4 shrink-0">
-      <div className="bg-amber-50 border-2 border-amber-400 rounded-3xl p-4 shadow-sm">
+    /*
+     * ═════ ĐÈ LÊN MÀN CHÍNH, KHÔNG CHEN VÀO BỐ CỤC — 21/8/2026 ═════
+     *
+     * Bản trước đặt thẻ này trong dòng chảy của màn chính, ngay trên tiêu đề.
+     * Hậu quả: cả màn bị đẩy xuống — linh vật co lại, ba nút chính tụt xuống,
+     * ô nhập bị đẩy khỏi tầm nhìn. Một thẻ tạm thời không được phép xô lệch
+     * bố cục cố định mà bác đã quen vị trí.
+     *
+     * ⚠️ `pointer-events-none` Ở LỚP NGOÀI. Lớp phủ tràn cả màn; không tắt
+     * bắt sự kiện thì nó nuốt mọi cú chạm vào ba nút chính bên dưới. Chỉ
+     * riêng cái thẻ mới nhận chạm.
+     *
+     * ⚠️ NẰM TRÊN, KHÔNG PHẢI CHẶN NGANG. Không phủ tối nền, không khoá
+     * màn. Bác muốn lơ nó đi bấm việc khác thì vẫn bấm được — đây là một lời
+     * mời, chưa có bộ luật nào chạy để nó được quyền chặn đường (§11).
+     */
+    <div className="absolute inset-x-0 top-0 z-40 flex justify-center px-4 pt-3 pointer-events-none">
+      <div className="w-full max-w-[420px] bg-amber-50 border-2 border-amber-400 rounded-3xl p-4 shadow-[0_10px_30px_rgba(120,53,15,0.25)] pointer-events-auto">
         <p className="text-[15px] font-extrabold text-amber-950 leading-snug mb-1">
           {t('Có tin nhắn mới chưa kiểm')}
         </p>

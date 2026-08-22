@@ -4,6 +4,7 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.graphics.drawable.Icon;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -42,6 +43,8 @@ public final class ThongBaoCanhBao {
      */
     private static final String KENH = "khoanda_canh_bao_v2";
     private static final int MA = 2001;
+    /** Cho `BoQuaTinNhan` huỷ đúng thông báo này. */
+    static final int MA_CONG_KHAI = MA;
 
     private ThongBaoCanhBao() { }
 
@@ -125,6 +128,32 @@ public final class ThongBaoCanhBao {
                     ctx, 1, mo,
                     PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
+            /*
+             * ═════ HỎI MỘT CÂU, CÓ HAI NÚT TRẢ LỜI ─ 21/8/2026 ═════
+             *
+             * Bản cũ chỉ có một thông báo không nút: "Có tin nhắn đáng kiểm.
+             * Chạm để cháu kiểm giúp bác." Bác phải đoán rằng chạm vào thì sẽ
+             * xảy ra chuyện gì, và không có cách nào nói "không" ngoài vuốt đi.
+             *
+             * Nay nó HỎI, và cả hai câu trả lời đều bấm được ngay trên thanh thông
+             * báo — không phải mở app rồi đi tìm.
+             *
+             * ⚠️ "Bỏ qua" KHÔNG PHẢI NÚT TRANG TRÍ. §4.6 — luôn có lối ra. Một
+             * câu hỏi chỉ có một câu trả lời không phải là câu hỏi, và bác cần
+             * nói được "không" mà không thấy mình đang làm sai.
+             *
+             * ⚠️ CÂU HỎI KHÔNG ĐƯỢC MANG NHÃN RỦI RO. Chưa bộ luật nào chạy
+             * trên tin này — xem `DocThongBao.sangLocTaiCho`. Viết "tin này nguy
+             * hiểm" ở đây là khai một kết luận chưa tồn tại (§11).
+             *
+             * ⚠️ VÀ KHÔNG CHÉP NỘI DUNG TIN VÀO ĐÂY. Thông báo hiện trên màn
+             * khoá; ai cầm máy cũng đọc được.
+             */
+            Intent boQua = new Intent(ctx, BoQuaTinNhan.class);
+            PendingIntent piBoQua = PendingIntent.getBroadcast(
+                    ctx, 3, boQua,
+                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+
             Notification tb = new Notification.Builder(ctx, KENH)
                     .setSmallIcon(R.drawable.ic_launcher_foreground)
                     .setContentTitle(tieuDe)
@@ -148,6 +177,12 @@ public final class ThongBaoCanhBao {
                     .setAutoCancel(true)
                     .setShowWhen(true)
                     .setContentIntent(pi)
+                    .addAction(new Notification.Action.Builder(
+                            Icon.createWithResource(ctx, R.drawable.ic_launcher_foreground),
+                            ctx.getString(R.string.tb_nut_kiem_giup), pi).build())
+                    .addAction(new Notification.Action.Builder(
+                            Icon.createWithResource(ctx, R.drawable.ic_launcher_foreground),
+                            ctx.getString(R.string.tb_nut_bo_qua), piBoQua).build())
                     .build();
 
             nm.notify(MA, tb);

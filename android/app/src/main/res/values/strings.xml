@@ -65,7 +65,9 @@
     <string name="cuoc_goi_thuong_truc_noi_dung">Chỉ đếm thời gian, không nghe nội dung. Chạm để tắt.</string>
 
     <!-- Sang loc tai cho: KHONG mang nhan rui ro nao, chi moi bac kiem. -->
-    <string name="tb_sang_loc_tieu_de">Có tin nhắn đáng kiểm</string>
-    <string name="tb_sang_loc_noi_dung">Tin nhắn vừa đến có dấu hiệu nên xem lại. Chạm để cháu kiểm giúp bác.</string>
+    <string name="tb_sang_loc_tieu_de">Bác có muốn kiểm tin nhắn này không?</string>
+    <string name="tb_sang_loc_noi_dung">Một tin vừa đến có dấu hiệu nên xem lại. Cháu chưa gửi nó đi đâu cả.</string>
     <string name="tb_nut_kiem_tin">Kiểm tin mới nhất</string>
+    <string name="tb_nut_kiem_giup">Kiểm giúp tôi</string>
+    <string name="tb_nut_bo_qua">Bỏ qua</string>
 </resources>
