@@ -770,6 +770,8 @@ export const translations: Record<Lang, Record<string, string>> = {
     "Mở cửa sổ nổi": "Mở cửa sổ nổi",
   },
   en: {
+    "Không cần bật gì thêm. Từ giờ, mỗi khi Khoan Đã thấy dấu hiệu nguy hiểm cao, dải này tự hiện lên — kể cả khi bác đang ở app khác.": "Nothing else to switch on. From now on, whenever Khoan Đã sees high-risk signals, this strip appears by itself — even while you are in another app.",
+    "Bấm nút dưới đây để xem trước một lần. Khoan Đã sẽ tự thu nhỏ xuống để bác thấy dải nằm ngoài app thật, rồi nó tự tắt sau 5 giây.": "Tap below to preview it once. Khoan Đã will minimise itself so you can see the strip sitting outside the app, and it closes after 5 seconds.",
     "Ẩn bớt": "Show less",
     "Máy đã cho phép vẽ đè, nhưng hệ điều hành vẫn chặn. Máy Xiaomi, Oppo, Vivo, Realme còn một công tắc nữa tên “hiện cửa sổ khi chạy nền” — bác bật luôn dòng đó giúp cháu.": "Your phone allows drawing over other apps, but the system still blocked it. Xiaomi, Oppo, Vivo and Realme phones have a second switch called “display pop-up windows while running in the background” — please turn that one on too.",
     "Máy Xiaomi, Oppo, Vivo, Realme còn một công tắc nữa tên “hiện cửa sổ khi chạy nền”. Bác bật luôn cả dòng đó giúp cháu nhé.": "Xiaomi, Oppo, Vivo and Realme phones have a second switch called “display pop-up windows while running in the background”. Please turn that one on as well.",

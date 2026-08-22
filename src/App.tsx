@@ -3331,6 +3331,22 @@ function CuaSoNoiNative({ t }: { t: any }) {
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 shrink-0"></span>
             <span className="text-[14px] font-extrabold text-emerald-100">{t("Máy bác đã cho phép")}</span>
           </div>
+
+          {/*
+            ⚠️ KHÔNG CÓ CÔNG TẮC NÀO ĐỂ BẬT NỮA — VÀ PHẢI NÓI RA.
+            Cấp quyền xong là tính năng đã chạy. Nhưng bác không biết điều đó,
+            nên bác đi tìm một công tắc không tồn tại, không thấy, rồi kết luận
+            tính năng chưa bật. Người dùng báo 21/8/2026: "vẫn chưa hiểu cách
+            để bật nó lên, quyền thì cấp rồi".
+            Một trạng thái đúng mà không ai đọc được thì vẫn là một trạng
+            thái không dùng được.
+          */}
+          <p className="text-[14px] text-purple-100/90 leading-relaxed mb-3">
+            {t("Không cần bật gì thêm. Từ giờ, mỗi khi Khoan Đã thấy dấu hiệu nguy hiểm cao, dải này tự hiện lên — kể cả khi bác đang ở app khác.")}
+          </p>
+          <p className="text-[14px] text-purple-100/90 leading-relaxed mb-3">
+            {t("Bấm nút dưới đây để xem trước một lần. Khoan Đã sẽ tự thu nhỏ xuống để bác thấy dải nằm ngoài app thật, rồi nó tự tắt sau 5 giây.")}
+          </p>
           <button
             onClick={thu}
             disabled={dangThu}
@@ -3951,6 +3967,23 @@ function NotificationsView({
       <h2 className="text-2xl sm:text-3xl font-black text-[#3b1d7d] mb-1 text-center">
         {t("Thông báo & Cửa sổ nổi")}
       </h2>
+
+      {/*
+        ═════ THẺ NÀY ĐỨNG ĐẦU MÀN — 21/8/2026 ═════
+
+        Trước đây nó nằm cách đầu màn 406 dòng, sau một thẻ thông báo thường
+        trực dài 137 dòng. Người dùng báo 21/8/2026: "vẫn chưa hiểu cách để
+        bật nó lên, quyền thì cấp rồi".
+
+        ⚠️ QUYỀN ĐÃ CẤP MÀ KHÔNG TÌM THẤY NÚT THÌ VẪN LÀ KHÔNG DÙNG ĐƯỢC.
+        Và nó hỏng theo kiểu tệ nhất: bác đã làm phần khó nhất (đi vào Cài đặt
+        hệ thống gạt một công tắc), rồi kết luận tính năng không chạy — trong
+        khi nó chạy được, chỉ là nằm dưới năm thẻ khác.
+
+        Thứ tự trên màn cài đặt không phải chuyện thẩm mỹ: cái gì bác đang đi
+        tìm thì phải ở chỗ nhìn thấy ngay.
+      */}
+      {dangChayApk && <CuaSoNoiNative t={t} />}
       <GiaiThich t={t}>
         <p className="text-[14px] sm:text-sm text-purple-800/80 mb-5 text-center max-w-xs font-medium">{t("Ghim cố định trên khay hệ thống để truy cập tức thì hoặc kích hoạt cảnh giác khi gặp nguy hiểm")}</p>
       </GiaiThich>
@@ -4136,9 +4169,8 @@ function NotificationsView({
         trọng nhất: cái nào chạy được trên máy bác đang cầm. Gộp lại là hứa với
         người dùng điện thoại một thứ bản web không có (§11).
       */}
-      {dangChayApk ? (
-        <CuaSoNoiNative t={t} />
-      ) : (
+      {/* Bản APK: thẻ này đã đưa lên ĐẦU màn — xem chú thích ở trên. */}
+      {!dangChayApk && (
       <div className="w-full max-w-[420px] bg-gradient-to-r from-purple-900 via-indigo-900 to-purple-800 text-white rounded-[26px] p-5 shadow-lg border border-purple-400/50 mb-5 relative overflow-hidden">
         <div className="flex items-start justify-between gap-3 mb-2">
           <div className="flex items-center gap-2.5">
