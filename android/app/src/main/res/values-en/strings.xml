@@ -52,7 +52,9 @@
     <string name="cuoc_goi_thuong_truc_noi_dung">Counting time only, not listening. Tap to turn off.</string>
 
     <!-- Sang loc tai cho: KHONG mang nhan rui ro nao, chi moi bac kiem. -->
-    <string name="tb_sang_loc_tieu_de">A message worth checking</string>
-    <string name="tb_sang_loc_noi_dung">A message just arrived that is worth a look. Tap and I will check it.</string>
+    <string name="tb_sang_loc_tieu_de">Would you like this message checked?</string>
+    <string name="tb_sang_loc_noi_dung">A message just arrived that is worth a look. Nothing has been sent anywhere yet.</string>
     <string name="tb_nut_kiem_tin">Check the latest message</string>
+    <string name="tb_nut_kiem_giup">Yes, check it</string>
+    <string name="tb_nut_bo_qua">No thanks</string>
 </resources>
