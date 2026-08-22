@@ -184,7 +184,7 @@ seen before. Reproduce with `node eval/khoanbench.js`, which prints this table:
 | Layer | Recall | False alarms |
 |---|---|---|
 | Rule engine, Vietnamese | 14.4% | 3.3% |
-| Rule engine, English | 6.1% | 4% |
+| Rule engine, English | 6.1% | 1.0% |
 | Rule engine, mixed VI/EN | 11.4% | 0.0% |
 
 **The two tables count different things, so read the definitions before comparing
@@ -196,7 +196,10 @@ and 19%. Every one of those six numbers is reproducible from this repository, an
 none of them is the single headline figure.
 
 The English benign set was written after this table's first version, when the
-false-alarm cell read *not measurable*. It is deliberately held out: the four
+false-alarm cell read *not measurable*. Read that 1.0% with the harness definition
+in mind: one benign English message in a hundred comes back at *High risk*. Under
+the looser reading — anything at *Suspicious* or above — it is 5%, and four of
+those five exceed the ceiling each sample was allowed. It is deliberately held out: the four
 messages the engine gets wrong are listed here rather than quietly fixed, because
 tuning the rules against an evaluation set turns the number into a description of
 the tuning rather than of the engine.
@@ -225,7 +228,7 @@ Three slices of the held-out set are worth naming, including the two that fail:
 | 110 benign messages containing the exact keywords a detector hunts for — "Mum, install the bank app from the Play Store", "transfer the money, don't tell grandma" | **4% false alarms.** A benign set of "the cat has been fed" would make a low false-alarm rate meaningless. |
 | 35 published anti-scam warning articles | **20% wrongly flagged.** Teaching about fraud should not read as fraud. Open. |
 | 40 Vietnamese messages typed without diacritics | **42% caught, 19% false alarms** — the weakest slice, and a common way real messages arrive. Open. |
-| 100 benign English messages, written to the same difficulty | **4% false alarms.** The four failures are named below rather than tuned away. |
+| 100 benign English messages, written to the same difficulty | **1.0% at High risk, 4% over the allowed ceiling.** The four failures are named below rather than tuned away. |
 
 Typical response times on the hosted demo: a clear impersonation scam returns in
 **under one second** from the rule layer alone, without calling AI. Ambiguous
