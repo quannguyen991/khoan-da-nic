@@ -39,7 +39,7 @@ interface CauNoi {
   xoaTinDaBat(): Promise<void>;
   trangThaiQuyenPopup(): Promise<{ daBat: boolean }>;
   moCaiDatPopup(): Promise<void>;
-  hienPopup(o: { tieuDe: string; nutMo: string; nutOn: string }): Promise<void>;
+  hienPopup(o: { tieuDe: string; nutMo: string; nutOn: string }): Promise<{ ket: string }>;
   anPopup(): Promise<void>;
   /**
    * Heads-up notification khi mức CAO. Bấm vào → mở app vào màn Dừng 60s.
@@ -277,15 +277,21 @@ export async function xinQuyenPopup(): Promise<void> {
  */
 export async function hienPopupCanhBao(p: {
   nhan: Nhan; tieuDe: string; nutMo: string; nutOn: string;
-}): Promise<boolean> {
-  if (p.nhan !== 'CAO') return false;
+}): Promise<'hien' | 'chua_co_quyen' | 'thieu_chu' | 'rom_chan' | 'khong_phai_apk'> {
+  if (p.nhan !== 'CAO') return 'thieu_chu';
   const c = (await cauHoacNull())?.cau;
-  if (!c) return false;
+  if (!c) return 'khong_phai_apk';
   try {
-    await c.hienPopup({ tieuDe: p.tieuDe, nutMo: p.nutMo, nutOn: p.nutOn });
-    return true;
+    const r = await c.hienPopup({ tieuDe: p.tieuDe, nutMo: p.nutMo, nutOn: p.nutOn });
+    /*
+     * ⚠️ ĐỪNG QUY MỌI THỨ VỀ true/false NỮA.
+     * "ROM chặn" và "chưa có quyền" cần hai cách sửa khác hẳn nhau, và gộp
+     * chúng thành `false` là vứt đúng thông tin duy nhất giúp sửa được —
+     * đã trả giá ba vòng gỡ lỗi cho chuyện này.
+     */
+    return (r?.ket as any) || 'rom_chan';
   } catch {
-    return false;   // quyền bị thu hồi, hoặc ROM chặn. App vẫn phải chạy (§6.7).
+    return 'rom_chan';   // App vẫn phải chạy (§6.7) — nhưng giờ nó nói ra.
   }
 }
 

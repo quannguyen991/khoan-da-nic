@@ -339,7 +339,7 @@ export function FloatingQuickAccess({
     }
   };
 
-  const [loiPopup, setLoiPopup] = useState<null | 'web' | 'chua_bat'>(null);
+  const [loiPopup, setLoiPopup] = useState<null | 'web' | 'chua_bat' | 'hien' | 'chua_co_quyen' | 'thieu_chu' | 'rom_chan' | 'khong_phai_apk'>(null);
 
   const handleCameraScan = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -389,7 +389,7 @@ export function FloatingQuickAccess({
     if (!(await laApk())) { setLoiPopup('web'); return; }
     if ((await quyenPopup()) !== 'da_bat') { setLoiPopup('chua_bat'); return; }
     setLoiPopup(null);
-    await hienPopupCanhBao({
+    const ket = await hienPopupCanhBao({
       nhan: 'CAO',
       tieuDe: t('Đây là dải cảnh báo — bác đang xem thử'),
       nutMo: t('Mở Khoan Đã'),
@@ -402,6 +402,12 @@ export function FloatingQuickAccess({
      * 21/8/2026 "pop up vẫn chưa hiện bên ngoài", và nhìn từ phía họ thì
      * không có cách nào phân biệt được. Xem `dayAppXuong` bên Java.
      */
+    /*
+     * ⚠️ CHỈ ĐẨY APP XUỐNG KHI DẢI THẬT SỰ ĐÃ HIỆN.
+     * Đẩy xuống rồi mà không có gì trên màn hình thì bác chỉ thấy app tự
+     * nhiên biến mất — tệ hơn là không làm gì.
+     */
+    if (ket !== 'hien') { setLoiPopup(ket); return; }
     await dayAppXuong();
     setTimeout(() => { void anPopup(); }, 6000);
   };
@@ -645,7 +651,20 @@ export function FloatingQuickAccess({
                       </p>
                     </div>
                   )}
-                  {loiPopup === 'chua_bat' && (
+                  {/*
+                    ⚠️ ROM CHẶN LÀ MỘT CA RIÊNG, KHÔNG PHẢI "CHƯA BẬT".
+                    `canDrawOverlays` trả true nhưng `addView` vẫn bị từ chối ⇒ máy
+                    còn một công tắc thứ hai mà Android không cho đọc trạng thái.
+                    Đưa bác đi bật lại cái đã bật là đẩy bác vào vòng lặp.
+                  */}
+                  {loiPopup === 'rom_chan' && (
+                    <div className="p-2.5 bg-amber-50 border border-amber-300 rounded-xl">
+                      <p className="text-[14px] text-amber-900 leading-snug font-medium">
+                        {t('Máy đã cho phép vẽ đè, nhưng hệ điều hành vẫn chặn. Máy Xiaomi, Oppo, Vivo, Realme còn một công tắc nữa tên “hiện cửa sổ khi chạy nền” — bác bật luôn dòng đó giúp cháu.')}
+                      </p>
+                    </div>
+                  )}
+                  {(loiPopup === 'chua_bat' || loiPopup === 'chua_co_quyen') && (
                     <button
                       onClick={() => { void xinQuyenPopup(); }}
                       className="p-2.5 bg-amber-50 border border-amber-300 rounded-xl text-left"

@@ -3266,6 +3266,7 @@ function PrivacyView({ setView, t }: { setView: (v: ViewState) => void, t: any }
 function CuaSoNoiNative({ t }: { t: any }) {
   const [quyen, setQuyen] = useState<QuyenNative>('chua_bat');
   const [dangThu, setDangThu] = useState(false);
+  const [maHong, setMaHong] = useState<string | null>(null);
 
   const doLai = () => { void quyenPopup().then(setQuyen); };
 
@@ -3286,12 +3287,14 @@ function CuaSoNoiNative({ t }: { t: any }) {
   const thu = async () => {
     setDangThu(true);
     try {
-      await hienPopupCanhBao({
+      const ket = await hienPopupCanhBao({
         nhan: 'CAO',
         tieuDe: t("Đây là dải cảnh báo — bác đang xem thử"),
         nutMo: t("Mở Khoan Đã"),
         nutOn: t("Tôi ổn, tắt đi"),
       });
+      // Chỉ đẩy app xuống khi dải THẬT SỰ đã hiện — xem `PopupDeManHinh.hien`.
+      if (ket !== 'hien') { setMaHong(ket); setDangThu(false); doLai(); return; }
       // Rời app ra thì mới thấy dải nằm NGOÀI app — xem `dayAppXuong`.
       await dayAppXuong();
       // Tự tắt sau 5 giây để bản thử không nằm lại trên màn hình bác.
@@ -3336,6 +3339,11 @@ function CuaSoNoiNative({ t }: { t: any }) {
             <Sparkles size={15} />
             <span>{dangThu ? t("Đang hiện thử…") : t("Xem thử một lần")}</span>
           </button>
+          {maHong === 'rom_chan' && (
+            <p className="text-[14px] text-amber-100 bg-amber-900/40 border border-amber-300/40 rounded-2xl px-3 py-2 leading-snug mt-2">
+              {t('Máy đã cho phép vẽ đè, nhưng hệ điều hành vẫn chặn. Máy Xiaomi, Oppo, Vivo, Realme còn một công tắc nữa tên “hiện cửa sổ khi chạy nền” — bác bật luôn dòng đó giúp cháu.')}
+            </p>
+          )}
         </>
       ) : quyen === 'khong_ho_tro' ? (
         /*
@@ -5714,6 +5722,7 @@ function WarningView({
   // Đồng hồ 60 giây: chỉ chạy khi thật sự có gì đó để dừng lại.
   const initialTime = (laChuaThay || khongGoiDuoc) ? 0 : 60;
   const [timeLeft, setTimeLeft] = useState(initialTime);
+  const [moThem, setMoThem] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [loiDoc, setLoiDoc] = useState<string | null>(null);
 
@@ -5976,6 +5985,35 @@ function WarningView({
           Chưa lập thì rủ bác lập — nhưng KHÔNG chen vào giữa lúc khẩn cấp bằng
           một biểu mẫu. Chỉ một dòng, và bấm được lúc bác rảnh.
         */}
+        {/*
+          ═════ GIẤU BẮT BỘC — MÀN KHẨN CẤP CHỈ ĐƯỢC CÓ MỘT VIỆC ═════
+
+          Người dùng báo 21/8/2026: "lúc nguy hiểm cao, bạn cho quá nhiều tác vụ
+          bên trong đó, quá nhiều phần phải chọn, phải thao tác… dễ bị rối".
+
+          Đếm được 7 phần tử bấm được trên một màn hình dành cho người đang
+          bị thúc chuyển tiền. Mỗi lựa chọn thêm là một giây chần chừ, mà giây
+          chần chừ là thứ kẻ lừa đang đếm ngược cùng bác.
+
+          ⚠️ KHÔNG XOÁ, CHỈ XẾP LẠI. Mật khẩu gia đình và cảnh báo ứng dụng lạ
+          đều là thứ thật và có lúc cần. Chúng chỉ không được đứng ngang hàng
+          với việc duy nhất cần làm ngay: GỌI CHO CON CHÁU.
+
+          ⚠️ KHỐI "CHƯA KIỂM ĐƯỢC" KHÔNG NẰM TRONG ĐÂY. §HĐ luật 3 buộc nó
+          hiện cùng cỡ chữ với nhãn, tức không được nằm dưới nếp gấp. Giấu nó
+          đi cho gọn là đổi một màn rối lấy một màn nói thiếu sự thật.
+        */}
+        {laCao && (
+          <button
+            onClick={() => setMoThem((v) => !v)}
+            className="w-full py-2.5 px-3 rounded-2xl text-[15px] font-bold bg-white/15 hover:bg-white/25 text-white border border-white/25 backdrop-blur-md active:scale-98 transition-all flex items-center justify-center gap-1.5 mb-2"
+          >
+            <span>{moThem ? t('Ẩn bớt') : t('Xem thêm')}</span>
+            <ChevronRight size={16} className={moThem ? 'rotate-90 transition-transform' : 'transition-transform'} />
+          </button>
+        )}
+
+        {moThem && (<>
         {laCao && (
           <div className="w-full bg-emerald-950/55 border-2 border-emerald-400/60 rounded-2xl p-4 backdrop-blur-md mb-2">
             <div className="flex items-start gap-2 mb-1.5">
@@ -6076,6 +6114,7 @@ function WarningView({
           </div>
         )}
 
+        </>)}
         {/*
           §HĐ luật 3 — CÙNG CỠ CHỮ VỚI NHÃN, KHÔNG PHẢI CHÚ THÍCH NHỎ.
           "Không kiểm được" KHÁC "đã kiểm, không thấy gì" (§4.3). Khối này là chỗ

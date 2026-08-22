@@ -770,6 +770,8 @@ export const translations: Record<Lang, Record<string, string>> = {
     "Mở cửa sổ nổi": "Mở cửa sổ nổi",
   },
   en: {
+    "Ẩn bớt": "Show less",
+    "Máy đã cho phép vẽ đè, nhưng hệ điều hành vẫn chặn. Máy Xiaomi, Oppo, Vivo, Realme còn một công tắc nữa tên “hiện cửa sổ khi chạy nền” — bác bật luôn dòng đó giúp cháu.": "Your phone allows drawing over other apps, but the system still blocked it. Xiaomi, Oppo, Vivo and Realme phones have a second switch called “display pop-up windows while running in the background” — please turn that one on too.",
     "Máy Xiaomi, Oppo, Vivo, Realme còn một công tắc nữa tên “hiện cửa sổ khi chạy nền”. Bác bật luôn cả dòng đó giúp cháu nhé.": "Xiaomi, Oppo, Vivo and Realme phones have a second switch called “display pop-up windows while running in the background”. Please turn that one on as well.",
     "Cháu chưa nghe được câu nào. Bác thử nói lại, hoặc gõ vào ô bên dưới giúp cháu nhé.": "We did not catch anything. Please try speaking again, or type it in the box below.",
     "Cháu đang đọc chữ trong ảnh…": "Reading the text in your image…",

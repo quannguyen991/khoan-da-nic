@@ -210,9 +210,14 @@ public class KhoanDaPlugin extends Plugin {
             call.reject("CHUA_BAT_QUYEN_POPUP");
             return;
         }
-        chayTrenUi(null, "POPUP_KHONG_HIEN_DUOC",
-                () -> PopupDeManHinh.hien(getContext(), tieuDe, nutMo, nutOn));
-        call.resolve();
+        call.setKeepAlive(true);
+        chayTrenUi(call, "POPUP_KHONG_HIEN_DUOC", () -> {
+            // Xem chú thích ở `PopupDeManHinh.hien` — bốn mã, bốn cách sửa khác nhau.
+            String ma = PopupDeManHinh.hien(getContext(), tieuDe, nutMo, nutOn);
+            JSObject r = new JSObject();
+            r.put("ket", ma);
+            call.resolve(r);
+        });
     }
 
     /**
