@@ -60,4 +60,8 @@
     <string name="bong_bong_kenh">Floating button</string>
     <string name="bong_bong_tieu_de">The Khoan Đã button is floating on screen</string>
     <string name="bong_bong_noi_dung">Tap the round button at the edge of the screen to open the app. Tap here to turn it off.</string>
+    <string name="bb_kiem_tin">Check a message</string>
+    <string name="bb_gui_anh">Send a picture</string>
+    <string name="bb_dung_60s">Pause 60 seconds</string>
+    <string name="bb_dong">Close</string>
 </resources>

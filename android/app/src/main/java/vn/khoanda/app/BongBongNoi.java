@@ -82,6 +82,7 @@ public class BongBongNoi extends Service {
 
     @Override
     public void onDestroy() {
+        dongMenu();
         try { if (wm != null && bong != null) wm.removeView(bong); } catch (Throwable ignored) { }
         bong = null;
         dangChay = false;
@@ -154,7 +155,7 @@ public class BongBongNoi extends Service {
                         return true;
                     }
                     case MotionEvent.ACTION_UP:
-                        if (!daKeo) moApp();
+                        if (!daKeo) moMenu();
                         else hutVeMep();
                         return true;
                     default:
@@ -173,6 +174,102 @@ public class BongBongNoi extends Service {
             int rong = getResources().getDisplayMetrics().widthPixels;
             lp.x = (lp.x + bong.getWidth() / 2 < rong / 2) ? 0 : rong - bong.getWidth();
             wm.updateViewLayout(bong, lp);
+        } catch (Throwable ignored) { }
+    }
+
+    /*
+     * ═════ CHẠM VÀO BONG BÓNG ⇒ MỞ MỘT MENU BA VIỆC ═════
+     *
+     * Bản đầu chỉ mở app. Nhưng mở app xong bác vẫn phải đi tìm việc cần làm —
+     * tức bong bóng tiết kiệm được đúng một thao tác, còn ba thao tác sau vẫn
+     * nguyên. Với người đang bị thúc chuyển tiền thì không đủ.
+     *
+     * Ba việc, không hơn. Đây là menu khẩn cấp, không phải màn hình chính:
+     *   ① Kiểm tin nhắn vừa đến
+     *   ② Gửi ảnh màn hình đi kiểm
+     *   ③ Dừng 60 giây
+     *
+     * ⚠️ KHÔNG TỰ CHỤP MÀN HÌNH ĐƯỢC, VÀ KHÔNG GIẢ VỜ LÀ CÓ. Chụp màn hình từ
+     * nền đòi quyền MediaProjection — quyền cho phép đọc MỌI THỨ hiện trên màn
+     * hình bất kỳ lúc nào, kể cả màn hình ngân hàng. Thang quyền trong
+     * PERMISSIONS-AND-POLICY.md nói rõ ta đi đường ít phơi bày nhất: bác tự chụp
+     * bằng phím của máy, nút này mở chỗ chọn ảnh. Một thao tác đổi lấy việc
+     * không phải xin một quyền nhìn được màn hình ngân hàng của bác.
+     *
+     * ⚠️ LUÔN CÓ NÚT ĐÓNG (§4.6). Menu vẽ đè lên app khác; không đóng được là
+     * biến một lối tắt thành một vật cản.
+     */
+    private View menu;
+
+    private void moMenu() {
+        if (menu != null) { dongMenu(); return; }
+        try {
+            android.widget.LinearLayout khung = new android.widget.LinearLayout(this);
+            khung.setOrientation(android.widget.LinearLayout.VERTICAL);
+            GradientDrawable nen = new GradientDrawable();
+            nen.setCornerRadius(24 * getResources().getDisplayMetrics().density);
+            nen.setColor(0xF22E1065);
+            khung.setBackground(nen);
+            int d = (int) (10 * getResources().getDisplayMetrics().density);
+            khung.setPadding(d, d, d, d);
+
+            khung.addView(nutMenu(getString(R.string.bb_kiem_tin), "khoanda://loi-tat/kiem-tin-nhan"));
+            khung.addView(nutMenu(getString(R.string.bb_gui_anh), "khoanda://loi-tat/quet-anh"));
+            khung.addView(nutMenu(getString(R.string.bb_dung_60s), "khoanda://loi-tat/dung-lai-60s"));
+
+            android.widget.Button dong = new android.widget.Button(this);
+            dong.setText(getString(R.string.bb_dong));
+            dong.setTextSize(16);
+            dong.setAllCaps(false);
+            dong.setMinHeight((int) (52 * getResources().getDisplayMetrics().density));
+            dong.setOnClickListener(new View.OnClickListener() {
+                @Override public void onClick(View v) { dongMenu(); }
+            });
+            khung.addView(dong);
+
+            WindowManager.LayoutParams m = new WindowManager.LayoutParams(
+                    (int) (260 * getResources().getDisplayMetrics().density),
+                    WindowManager.LayoutParams.WRAP_CONTENT,
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
+                            ? WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+                            : WindowManager.LayoutParams.TYPE_PHONE,
+                    // Menu CẦN nhận chạm, nhưng vẫn không được nuốt chạm ngoài nó.
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                    PixelFormat.TRANSLUCENT);
+            m.gravity = Gravity.CENTER;
+
+            menu = khung;
+            wm.addView(menu, m);
+        } catch (Throwable t) {
+            android.util.Log.e("KhoanDa", "khong mo duoc menu bong bong", t);
+            menu = null;
+            moApp();   // hỏng menu thì ít nhất vẫn vào được app
+        }
+    }
+
+    private android.widget.Button nutMenu(String chu, final String dich) {
+        android.widget.Button b = new android.widget.Button(this);
+        b.setText(chu);
+        b.setTextSize(17);              // §4.5 — chữ tiếng Việt cần chỗ
+        b.setAllCaps(false);
+        b.setMinHeight((int) (56 * getResources().getDisplayMetrics().density));   // §4.4
+        b.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) { dongMenu(); moSau(dich); }
+        });
+        return b;
+    }
+
+    private void dongMenu() {
+        try { if (menu != null) wm.removeView(menu); } catch (Throwable ignored) { }
+        menu = null;
+    }
+
+    private void moSau(String dich) {
+        try {
+            Intent i = new Intent(Intent.ACTION_VIEW, android.net.Uri.parse(dich),
+                    this, MainActivity.class);
+            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(i);
         } catch (Throwable ignored) { }
     }
 

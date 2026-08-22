@@ -73,4 +73,8 @@
     <string name="bong_bong_kenh">Bong bóng nổi</string>
     <string name="bong_bong_tieu_de">Nút Khoan Đã đang nổi trên màn hình</string>
     <string name="bong_bong_noi_dung">Chạm vào nút tròn ở mép màn hình để mở nhanh. Chạm vào đây để tắt nó.</string>
+    <string name="bb_kiem_tin">Kiểm tin nhắn</string>
+    <string name="bb_gui_anh">Gửi ảnh đi kiểm</string>
+    <string name="bb_dung_60s">Dừng 60 giây</string>
+    <string name="bb_dong">Đóng</string>
 </resources>

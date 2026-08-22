@@ -770,6 +770,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     "Mở cửa sổ nổi": "Mở cửa sổ nổi",
   },
   en: {
+    "Chỉ chạy trên Chrome hoặc Edge của máy tính.": "Only works in Chrome or Edge on a computer.",
     "Nút tròn nổi trên màn hình": "Floating button on your screen",
     "Một nút tròn mờ nằm ở mép màn hình, giống nút tròn của iPhone. Bác đang dùng app nào cũng thấy nó, chạm vào là mở Khoan Đã ngay. Kéo được sang chỗ khác nếu nó vướng.": "A soft round button sits at the edge of your screen, like the round button on an iPhone. You can see it in any app, and one tap opens Khoan Đã. Drag it somewhere else if it gets in the way.",
     "Đang hiện trên màn hình": "Showing on your screen",

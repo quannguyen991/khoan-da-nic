@@ -781,6 +781,23 @@ export default function App() {
          * đó nghe như một lời bảo đảm (§4.3). Về trang chủ, thẻ `TinDangCho`
          * ở đó sẽ tự nói đúng trạng thái.
          */
+        /*
+         * `quet-anh` — từ menu của bong bóng nổi. Không tự chụp màn hình được
+         * (xem `BongBongNoi.moMenu`: chụp từ nền đòi quyền nhìn được MỌI màn hình,
+         * kể cả màn hình ngân hàng). Bác tự chụp bằng phím của máy, đây mở
+         * chỗ chọn ảnh — một thao tác đổi lấy việc không phải xin quyền đó.
+         */
+        if (d.loiTat === 'quet-anh') {
+          setView('home');
+          // Đợi màn chính dựng xong rồi mới mở chỗ chọn ảnh.
+          // Ô chọn tệp ẩn của HomeView. Dùng id thay vì luồn ref qua bốn tầng —
+          // ít mã hơn, và nếu ố đó đổi tên thì hỏng ngay chứ không hỏng im lặng.
+          setTimeout(() => {
+            const o = document.getElementById('mobile-image-upload') as HTMLInputElement | null;
+            o?.click();
+          }, 320);
+          return;
+        }
         if (d.loiTat === 'kiem-tin-nhan') {
           const tin = await tinMoiNhat();
           if (huy) return;
@@ -1570,6 +1587,35 @@ function HomeView({
   const [inputText, setInputText] = useState('');
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [showQuickCallModal, setShowQuickCallModal] = useState(false);
+
+  /*
+   * ═════ BÀN PHÍM MỞ THÌ THU GỮI PHẦN TRANG TRÍ — 21/8/2026 ═════
+   *
+   * Màn chính cao đúng `100dvh` và `overflow-hidden`. Bàn phím bật lên chiếm
+   * gần nửa màn, phần còn lại vẫn cố nhét đủ tiêu đề + linh vật + ba nút
+   * tròn + ô nhập — nên chúng đè lên nhau. Người dùng báo 21/8/2026.
+   *
+   * ⚠️ KHÔNG CHO CUỘN ĐỂ CHỮA. Cuộn được thì bố cục vẫn vỡ, chỉ là bác phải
+   * tự đẩy qua đống đè nhau. Cái đúng là BỚT THỨ ĐI: lúc đang gõ, thứ duy
+   * nhất cần thấy là ô nhập và chữ mình vừa gõ. Linh vật và tiêu đề là phần
+   * chào hỏi, không phải phần việc.
+   *
+   * ⚠️ BA NÚT TRÒN Ở LẠI. Chúng là việc, không phải trang trí — bác đang gõ
+   * mà muốn chuyển sang gọi con cháu thì phải bấm được ngay.
+   *
+   * ⚠️ `visualViewport` CHỨ KHÔNG `window.innerHeight`. Trên Android WebView,
+   * `innerHeight` KHÔNG đổi khi bàn phím bật (tùy `windowSoftInputMode`), nên
+   * đo bằng nó là không bao giờ thấy bàn phím.
+   */
+  const [banPhimMo, setBanPhimMo] = useState(false);
+  useEffect(() => {
+    const vv = (window as any).visualViewport;
+    if (!vv) return;
+    const caoGoc = vv.height;
+    const do_ = () => setBanPhimMo(vv.height < caoGoc * 0.75);
+    vv.addEventListener('resize', do_);
+    return () => vv.removeEventListener('resize', do_);
+  }, []);
   const fileInputRefMobile = useRef<HTMLInputElement>(null);
   const fileInputRefDesktop = useRef<HTMLInputElement>(null);
 
@@ -1678,7 +1724,7 @@ function HomeView({
       */}
       <TinDangCho t={t} onAnalyze={onAnalyze} />
 
-      <h2 className="md:hidden text-center text-[1.85rem] sm:text-3xl leading-[1.18] font-black text-[#2e1065] px-4 shrink-0 select-none" dangerouslySetInnerHTML={{__html: t("Hãy kể tình huống<br />của Bác")}}></h2>
+      <h2 className={`md:hidden text-center text-[1.85rem] sm:text-3xl leading-[1.18] font-black text-[#2e1065] px-4 shrink-0 select-none ${banPhimMo ? 'hidden' : ''}`} dangerouslySetInnerHTML={{__html: t("Hãy kể tình huống<br />của Bác")}}></h2>
       
       <div className="hidden md:flex flex-col items-center text-center mb-8 relative z-20">
          <h2 className="text-5xl font-black text-[#2e1065] tracking-tight mb-4">{t("Bác đang cần kiểm tra điều gì?")}</h2>
@@ -1771,7 +1817,7 @@ function HomeView({
         <motion.div 
           animate={{ y: [-6, 6, -6] }}
           transition={{ repeat: Infinity, duration: 4.5, ease: "easeInOut" }}
-          className="relative w-full max-w-[380px] sm:max-w-[440px] md:max-w-[500px] max-h-[40vh] sm:max-h-[44vh] cursor-pointer active:scale-95 transition-transform flex items-center justify-center pointer-events-auto select-none"
+          className={`relative w-full max-w-[380px] sm:max-w-[440px] md:max-w-[500px] max-h-[40vh] sm:max-h-[44vh] cursor-pointer active:scale-95 transition-transform items-center justify-center pointer-events-auto select-none ${banPhimMo ? 'hidden' : 'flex'}`}
           onClick={() => setView('voice')}
         >
           <img 
@@ -4255,17 +4301,24 @@ function NotificationsView({
             <p className="text-[15px] font-bold text-emerald-100 leading-snug mb-1.5">
               {t("Dòng nhắc đã được ghim cố định")}
             </p>
-            <ul className="space-y-1">
-              <li className="text-[14px] text-emerald-50/90 leading-relaxed">
-                {t("· Không vuốt mất được, kể cả khi bác bấm Xoá tất cả thông báo.")}
-              </li>
-              <li className="text-[14px] text-emerald-50/90 leading-relaxed">
-                {t("· Tắt máy rồi bật lại, Khoan Đã tự đặt nó về chỗ cũ.")}
-              </li>
-              <li className="text-[14px] text-emerald-50/90 leading-relaxed">
-                {t("· Muốn bỏ thì gạt công tắc ở ngay trên — luôn tắt được.")}
-              </li>
-            </ul>
+            {/*
+              Ba dòng này đúng và hữu ích, nhưng chúng trả lời câu "nếu tôi lỡ
+              vuốt mất thì sao" — câu đó chỉ nảy ra SAU. Để thường trực thì chúng
+              cạnh tranh chỗ với câu duy nhất cần đọc ngay: "đã ghim xong".
+            */}
+            <GiaiThich t={t}>
+              <ul className="space-y-1">
+                <li className="text-[14px] text-emerald-50/90 leading-relaxed">
+                  {t("· Không vuốt mất được, kể cả khi bác bấm Xoá tất cả thông báo.")}
+                </li>
+                <li className="text-[14px] text-emerald-50/90 leading-relaxed">
+                  {t("· Tắt máy rồi bật lại, Khoan Đã tự đặt nó về chỗ cũ.")}
+                </li>
+                <li className="text-[14px] text-emerald-50/90 leading-relaxed">
+                  {t("· Muốn bỏ thì gạt công tắc ở ngay trên — luôn tắt được.")}
+                </li>
+              </ul>
+            </GiaiThich>
           </div>
         )}
       </div>
@@ -4310,8 +4363,21 @@ function NotificationsView({
             quyền `SYSTEM_ALERT_WINDOW`, chỉ app cài đặt mới xin được — đó là lý
             do bản APK tồn tại.
           */}
-          {t("Trên máy tính, cửa sổ nhỏ này nổi trên các cửa sổ khác để bác bấm nhanh. Trên điện thoại, web chưa làm được việc đó — cần bản cài đặt.")}
+          {t("Chỉ chạy trên Chrome hoặc Edge của máy tính.")}
         </p>
+
+        {/*
+          Đoạn giải thích dài 185 ký tự để thường trực — người dùng báo "quá nhiều
+          chữ" 21/8/2026. Câu ngắn ở trên trả lời câu hỏi duy nhất đáng hỏi ngay
+          ("máy tôi có dùng được không"); phần còn lại là vì sao, để ai muốn thì mở.
+
+          ⚠️ KHÔNG LỒNG `GiaiThich` VÀO TRONG `<p>`. Nó dựng ra `<div>`, mà `<div>`
+          trong `<p>` là HTML không hợp lệ — trình duyệt tự đóng thẻ `<p>` sớm và
+          bố cục vỡ theo kiểu khó lần ra.
+        */}
+        <GiaiThich t={t}>
+          <p className="text-[14px] text-purple-200/90 leading-relaxed">{t("Trên máy tính, cửa sổ nhỏ này nổi trên các cửa sổ khác để bác bấm nhanh. Trên điện thoại, web chưa làm được việc đó — cần bản cài đặt.")}</p>
+        </GiaiThich>
 
         <button
           onClick={handleLaunchPipFromSettings}
