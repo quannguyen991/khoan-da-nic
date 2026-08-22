@@ -144,6 +144,16 @@
           cuộc gọi, KHÔNG biết số điện thoại — chỉ đọc trạng thái máy có đang
           trong cuộc gọi hay không, để nhắc người cao tuổi ở phút thứ 25.
         -->
+        <!-- Bong bóng nổi — xem BongBongNoi.java -->
+        <service
+            android:name=".BongBongNoi"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FOREGROUND_SERVICE_SUBTYPE"
+                android:value="Nut tat noi tren man hinh de nguoi cao tuoi mo nhanh khi bi lua dao" />
+        </service>
+
         <service
             android:name=".TheoDoiCuocGoi"
             android:exported="false"

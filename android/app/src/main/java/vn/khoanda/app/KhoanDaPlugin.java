@@ -239,6 +239,29 @@ public class KhoanDaPlugin extends Plugin {
      * `moveTaskToBack(true)` đưa app xuống nền giống như bấm nút Home — không
      * đóng, không mất trạng thái, bác mở lại là về đúng chỗ cũ.
      */
+    // ───── Bong bóng nổi — KHÁC dải cảnh báo, xem `BongBongNoi` ─────
+
+    @PluginMethod
+    public void batBongBong(PluginCall call) {
+        JSObject r = new JSObject();
+        r.put("ket", BongBongNoi.bat(getContext()));
+        call.resolve(r);
+    }
+
+    @PluginMethod
+    public void tatBongBong(PluginCall call) {
+        BongBongNoi.tat(getContext());
+        call.resolve();
+    }
+
+    @PluginMethod
+    public void trangThaiBongBong(PluginCall call) {
+        JSObject r = new JSObject();
+        r.put("dangChay", BongBongNoi.dangChay);
+        r.put("coQuyen", PopupDeManHinh.daBatQuyen(getContext()));
+        call.resolve(r);
+    }
+
     @PluginMethod
     public void dayAppXuong(PluginCall call) {
         chayTrenUi(null, "KHONG_DAY_XUONG_DUOC", () -> {

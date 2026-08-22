@@ -770,6 +770,11 @@ export const translations: Record<Lang, Record<string, string>> = {
     "Mở cửa sổ nổi": "Mở cửa sổ nổi",
   },
   en: {
+    "Nút tròn nổi trên màn hình": "Floating button on your screen",
+    "Một nút tròn mờ nằm ở mép màn hình, giống nút tròn của iPhone. Bác đang dùng app nào cũng thấy nó, chạm vào là mở Khoan Đã ngay. Kéo được sang chỗ khác nếu nó vướng.": "A soft round button sits at the edge of your screen, like the round button on an iPhone. You can see it in any app, and one tap opens Khoan Đã. Drag it somewhere else if it gets in the way.",
+    "Đang hiện trên màn hình": "Showing on your screen",
+    "Bật nút tròn": "Turn the button on",
+    "Tắt nút tròn": "Turn the button off",
     "Không cần bật gì thêm. Từ giờ, mỗi khi Khoan Đã thấy dấu hiệu nguy hiểm cao, dải này tự hiện lên — kể cả khi bác đang ở app khác.": "Nothing else to switch on. From now on, whenever Khoan Đã sees high-risk signals, this strip appears by itself — even while you are in another app.",
     "Bấm nút dưới đây để xem trước một lần. Khoan Đã sẽ tự thu nhỏ xuống để bác thấy dải nằm ngoài app thật, rồi nó tự tắt sau 5 giây.": "Tap below to preview it once. Khoan Đã will minimise itself so you can see the strip sitting outside the app, and it closes after 5 seconds.",
     "Ẩn bớt": "Show less",

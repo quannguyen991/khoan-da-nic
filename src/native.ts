@@ -21,6 +21,9 @@
 type Nhan = 'CAO' | 'NGHI_NGO' | 'CHUA_THAY';
 
 interface CauNoi {
+  batBongBong(): Promise<{ ket: string }>;
+  tatBongBong(): Promise<void>;
+  trangThaiBongBong(): Promise<{ dangChay: boolean; coQuyen: boolean }>;
   dayAppXuong(): Promise<void>;
   docTo(o: { chu: string; ngonNgu: string }): Promise<{ xong: boolean }>;
   dungDocTo(): Promise<void>;
@@ -869,4 +872,38 @@ export async function dayAppXuong(): Promise<void> {
   const c = (await cauHoacNull())?.cau;
   if (!c) return;
   try { await c.dayAppXuong(); } catch { /* ROM chặn thì thôi */ }
+}
+
+
+/*
+ * ═════ BONG BÓNG NỔI — KHÁC HẲN DẢI CẢNH BÁO ═════
+ *
+ * Hai thứ này đã bị gọi chung là "popup" và gây hiểu nhầm suốt nhiều vòng:
+ *   · `hienPopupCanhBao` — dải ĐỎonly khi bộ luật ra mức CAO, tự tắt.
+ *   · `batBongBong`      — nút tròn mờ LUÔN nằm trên màn hình, không mang cảnh
+ *                          báo gì cả, chạm vào là mở app. Giống AssistiveTouch.
+ *
+ * ⚠️ `FloatingQuickAccess` bên tang web KHÔNG PHẢI thứ này. Nó vẽ trong trang,
+ * nên chết ngay khi bác rời app — tức không bao giờ có mặt vào đúng lúc nó
+ * hứa sẽ có mặt. Bong bóng thật sống bằng tiến trình (foreground service).
+ */
+export async function batBongBong(): Promise<'bat' | 'chua_co_quyen' | 'rom_chan' | 'khong_phai_apk'> {
+  const c = (await cauHoacNull())?.cau;
+  if (!c) return 'khong_phai_apk';
+  try {
+    const r = await c.batBongBong();
+    return (r?.ket as any) || 'rom_chan';
+  } catch { return 'rom_chan'; }
+}
+
+export async function tatBongBong(): Promise<void> {
+  const c = (await cauHoacNull())?.cau;
+  if (!c) return;
+  try { await c.tatBongBong(); } catch { /* đã tắt rồi */ }
+}
+
+export async function trangThaiBongBong(): Promise<{ dangChay: boolean; coQuyen: boolean } | null> {
+  const c = (await cauHoacNull())?.cau;
+  if (!c) return null;
+  try { return await c.trangThaiBongBong(); } catch { return null; }
 }

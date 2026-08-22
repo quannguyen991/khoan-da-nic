@@ -70,4 +70,7 @@
     <string name="tb_nut_kiem_tin">Kiểm tin mới nhất</string>
     <string name="tb_nut_kiem_giup">Kiểm giúp tôi</string>
     <string name="tb_nut_bo_qua">Bỏ qua</string>
+    <string name="bong_bong_kenh">Bong bóng nổi</string>
+    <string name="bong_bong_tieu_de">Nút Khoan Đã đang nổi trên màn hình</string>
+    <string name="bong_bong_noi_dung">Chạm vào nút tròn ở mép màn hình để mở nhanh. Chạm vào đây để tắt nó.</string>
 </resources>

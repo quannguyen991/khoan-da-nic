@@ -64,6 +64,7 @@ import {
   quyenDocThongBao, xinQuyenDocThongBao, tinMoiNhat, xoaTinDaBat,
   trangThaiThuongTruc, trangThaiMay, tomTatChoMayChu, moCaiDatTroNang,
   napChuCuocGoi, trangThaiTheoDoiCuocGoi, datTheoDoiCuocGoi, docTo, dungDocTo, dayAppXuong,
+  batBongBong, tatBongBong, trangThaiBongBong,
   type QuyenNative, type TrangThaiMay,
 } from './native';
 import { GuardianIntroView, GuardianAuthView, GuardianView } from './components/Guardian';
@@ -3263,6 +3264,102 @@ function PrivacyView({ setView, t }: { setView: (v: ViewState) => void, t: any }
  * coi như xong là dạng lỗi quen thuộc: bác có thể đã bật, có thể bấm nhầm, có
  * thể ROM không có màn đó. Ba ca khác nhau, và chỉ đọc lại mới phân biệt được.
  */
+/*
+ * ══════ BONG BÓNG NỔI — NÚT TRÒN LUÔN NẰM TRÊN MÀN HÌNH ══════
+ *
+ * Giống AssistiveTouch của iPhone: một nút mờ ở mép màn hình, kéo được, chạm
+ * vào là mở Khoan Đã. CÓ MẶT KỂ CẢ KHI BÁC ĐANG Ở APP KHÁC.
+ *
+ * ⚠️ ĐỪNG GỌI CHUNG LÀ "POPUP" VỚI DẢI CẢNH BÁO. Hai thứ khác hẳn nhau và
+ * đã bị lẫn suốt nhiều vòng sửa — người dùng hỏi "làm sao để bật pop up" và
+ * nhận được hướng dẫn về một tính năng khác:
+ *   · dải cảnh báo — MÀU ĐỎonly khi bộ luật ra mức CAO, tự tắt sau vài giây
+ *   · bong bóng     — nút mờ, LUÔN có, không mang cảnh báo gì cả
+ * Hai thẻ riêng, hai tên riêng, đặt cạnh nhau để không ai nhầm nữa.
+ *
+ * ⚠️ ĐỌC TRẠNG THÁI TỪ SERVICE, KHÔNG NHỚ BẰNG localStorage. Công tắc nhớ
+ * "đang bật" trong khi service đã bị ROM giết là đúng loại lỗi §4.3: màn hình
+ * khai một thứ đang chạy mà không chạy.
+ */
+function BongBongNoiNative({ t }: { t: any }) {
+  const [dangChay, setDangChay] = useState(false);
+  const [coQuyen, setCoQuyen] = useState(true);
+  const [maHong, setMaHong] = useState<string | null>(null);
+
+  const doLai = () => {
+    void trangThaiBongBong().then((s) => {
+      if (!s) return;
+      setDangChay(s.dangChay);
+      setCoQuyen(s.coQuyen);
+    });
+  };
+
+  useEffect(() => {
+    doLai();
+    const khiHien = () => { if (document.visibilityState === 'visible') doLai(); };
+    document.addEventListener('visibilitychange', khiHien);
+    return () => document.removeEventListener('visibilitychange', khiHien);
+  }, []);
+
+  const bat = async () => {
+    setMaHong(null);
+    const ket = await batBongBong();
+    if (ket !== 'bat') { setMaHong(ket); doLai(); return; }
+    setDangChay(true);
+  };
+
+  return (
+    <div className="w-full max-w-[420px] bg-white rounded-[26px] p-5 shadow-md border border-[#e9d5ff] mb-5">
+      <h3 className="font-black text-[16px] text-[#311068] mb-1 flex items-center gap-2">
+        <Sparkles size={18} className="text-[#6d28d9]" />
+        {t('Nút tròn nổi trên màn hình')}
+      </h3>
+      <p className="text-[14px] text-slate-600 leading-relaxed mb-3">
+        {t('Một nút tròn mờ nằm ở mép màn hình, giống nút tròn của iPhone. Bác đang dùng app nào cũng thấy nó, chạm vào là mở Khoan Đã ngay. Kéo được sang chỗ khác nếu nó vướng.')}
+      </p>
+
+      {dangChay ? (
+        <>
+          <div className="flex items-center gap-2 mb-3 p-3 bg-emerald-50 border border-emerald-300 rounded-2xl">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0"></span>
+            <span className="text-[14px] font-extrabold text-emerald-900">{t('Đang hiện trên màn hình')}</span>
+          </div>
+          <button
+            onClick={() => { void tatBongBong().then(doLai); }}
+            className="w-full min-h-[52px] py-3 px-4 bg-white hover:bg-slate-50 active:scale-95 text-slate-700 font-bold rounded-2xl text-[15px] border-2 border-slate-300 transition-all"
+          >
+            {t('Tắt nút tròn')}
+          </button>
+        </>
+      ) : (
+        <>
+          <button
+            onClick={() => { void bat(); }}
+            className="w-full min-h-[56px] py-3.5 px-4 bg-[#7c3aed] hover:bg-[#6d28d9] active:scale-95 text-white font-extrabold rounded-2xl text-[16px] transition-all"
+          >
+            {t('Bật nút tròn')}
+          </button>
+          {(maHong === 'chua_co_quyen' || !coQuyen) && (
+            <button
+              onClick={() => { void xinQuyenPopup(); }}
+              className="w-full mt-2 p-3 bg-amber-50 border border-amber-300 rounded-2xl text-left"
+            >
+              <p className="text-[14px] text-amber-900 leading-snug font-medium">
+                {t('Máy chưa cho phép vẽ đè. Chạm vào đây để mở Cài đặt, tìm dòng Khoan Đã rồi gạt sang bật.')}
+              </p>
+            </button>
+          )}
+          {maHong === 'rom_chan' && (
+            <p className="text-[14px] text-amber-900 bg-amber-50 border border-amber-300 rounded-2xl px-3 py-2 leading-snug mt-2">
+              {t('Máy đã cho phép vẽ đè, nhưng hệ điều hành vẫn chặn. Máy Xiaomi, Oppo, Vivo, Realme còn một công tắc nữa tên “hiện cửa sổ khi chạy nền” — bác bật luôn dòng đó giúp cháu.')}
+            </p>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
 function CuaSoNoiNative({ t }: { t: any }) {
   const [quyen, setQuyen] = useState<QuyenNative>('chua_bat');
   const [dangThu, setDangThu] = useState(false);
@@ -3999,6 +4096,7 @@ function NotificationsView({
         Thứ tự trên màn cài đặt không phải chuyện thẩm mỹ: cái gì bác đang đi
         tìm thì phải ở chỗ nhìn thấy ngay.
       */}
+      {dangChayApk && <BongBongNoiNative t={t} />}
       {dangChayApk && <CuaSoNoiNative t={t} />}
       <GiaiThich t={t}>
         <p className="text-[14px] sm:text-sm text-purple-800/80 mb-5 text-center max-w-xs font-medium">{t("Ghim cố định trên khay hệ thống để truy cập tức thì hoặc kích hoạt cảnh giác khi gặp nguy hiểm")}</p>
@@ -4501,8 +4599,18 @@ function ProfileView({ setView, t, isLoggedIn, hoSo, onDangXuat }: {
                 Chưa có tên thì nói chưa có. Ô nhập tên nằm ngay trong màn Tài
                 khoản bên dưới.
               */}
+              {/*
+                ⚠️ ĐỌC TÊN THẬT, ĐỪNG MÃ CỨNG CÂU "CHƯA ĐẶT TÊN".
+                Bản cũ luôn hiện câu đó dù `hoSo` đã được truyền vào — tức bác
+                đăng ký tên "Bác Tám" xong vào hồ sơ vẫn thấy "Bác chưa đặt tên".
+                Người dùng báo 21/8/2026.
+
+                Chú thích ngay trên viết "Chưa có tên thì nói chưa có" — đúng ý định,
+                nhưng mã thì nói vậy trong MỌI trường hợp. Một ý định đúng không tự
+                biến thành hành vi đúng.
+              */}
               <h3 className="font-extrabold text-[#1e1b4b] text-[22px] mb-1">
-                {t("Bác chưa đặt tên")}
+                {hoSo?.ten?.trim() || t("Bác chưa đặt tên")}
               </h3>
               <div className="inline-flex items-center gap-1.5 bg-[#f3e8ff] text-[#7e22ce] px-3 py-1.5 rounded-lg text-[14px] font-bold">
                  <Lock size={14} /> {t("Thiết bị hiện tại")}
