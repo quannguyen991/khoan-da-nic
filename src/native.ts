@@ -50,7 +50,7 @@ interface CauNoi {
   }>;
   trangThaiQuyenPopup(): Promise<{ daBat: boolean }>;
   moCaiDatPopup(): Promise<void>;
-  hienPopup(o: { tieuDe: string; nutMo: string; nutOn: string }): Promise<void>;
+  hienPopup(o: { tieuDe: string; nutMo: string; nutOn: string }): Promise<{ ket: string }>;
   anPopup(): Promise<void>;
   /**
    * Heads-up notification khi mức CAO. Bấm vào → mở app vào màn Dừng 60s.
@@ -324,26 +324,30 @@ export async function xinQuyenPopup(): Promise<void> {
  */
 export async function hienPopupCanhBao(p: {
   nhan: Nhan; tieuDe: string; nutMo: string; nutOn: string;
-}): Promise<boolean> {
-  if (p.nhan !== 'CAO') return false;
+}): Promise<'hien' | 'chua_co_quyen' | 'thieu_chu' | 'rom_chan' | 'khong_phai_apk'> {
+  if (p.nhan !== 'CAO') return 'thieu_chu';
   const c = (await cauHoacNull())?.cau;
-  if (!c) return false;
+  if (!c) return 'khong_phai_apk';
   try {
-    await c.hienPopup({ tieuDe: p.tieuDe, nutMo: p.nutMo, nutOn: p.nutOn });
-    if (typeof console !== 'undefined') console.info('[KhoanĐã] popup đã gửi xuống lớp native');
-    return true;
+    const r = await c.hienPopup({ tieuDe: p.tieuDe, nutMo: p.nutMo, nutOn: p.nutOn });
+    /*
+     * ⚠️ ĐỪNG QUY MỌI THỨ VỀ true/false NỮA.
+     * "ROM chặn" và "chưa có quyền" cần hai cách sửa khác hẳn nhau, và gộp
+     * chúng thành `false` là vứt đúng thông tin duy nhất giúp sửa được —
+     * đã trả giá ba vòng gỡ lỗi cho chuyện này.
+     */
+    const ket = (r?.ket as any) || 'rom_chan';
+    if (typeof console !== 'undefined') console.info('[KhoanĐã] popup:', ket);
+    return ket;
   } catch (e) {
     /*
-     * §4.3 — "không hiện được" có ba nguyên nhân khác nhau:
-     *  ① CHUA_BAT_QUYEN_POPUP: thiếu SYSTEM_ALERT_WINDOW — bác phải tự bật.
-     *  ② THIEU_CHU_HIEN_THI: chữ tiếng Việt/Anh chưa truyền xuống — bug mình.
-     *  ③ ROM chặn ở tầng riêng (Xiaomi/Oppo/Vivo) — không cách nào từ app.
-     * Gộp thành một `false` rồi im lặng là vứt mất cả ba. In ra console để
-     * bác (hoặc người con cháu) biết tại sao.
+     * §4.3 — lớp native ném thay vì trả mã (bản APK cũ, hoặc lỗi lúc gọi cầu).
+     * App vẫn phải chạy (§6.7) — nhưng in nguyên nhân ra console để người sửa
+     * máy giúp bác còn biết vì sao.
      */
     const ma = (e && (e as { ma?: string }).ma) || String(e);
     if (typeof console !== 'undefined') console.warn('[KhoanĐã] popup KHÔNG hiện được:', ma);
-    return false;
+    return 'rom_chan';
   }
 }
 

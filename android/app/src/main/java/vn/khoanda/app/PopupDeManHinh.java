@@ -70,7 +70,30 @@ public class PopupDeManHinh {
      * @param nutMo   nhãn nút mở app
      * @param nutOn   nhãn nút "Tôi ổn" (§4.6 — BẮT BUỘC, không được null)
      */
-    public static void hien(final Context ctx, String tieuDe, String nutMo, String nutOn) {
+    /*
+     * ══════ TRẢ VỀ CHUYỆN GÌ ĐÃ XẢY RA, ĐỪNG NUỐT IM ══════
+     *
+     * Bản cũ là `void` và `catch` rỗng. Nghĩa là khi ROM chặn `addView`, tầng
+     * web nhận về một lời hứa đã hoàn thành và hiện "đang hiện thử…" — trong
+     * khi không có gì trên màn hình cả.
+     *
+     * Người dùng báo ba lần "pop up vẫn chưa hiện", và cả ba lần không ai —
+     * kể cả người viết mã — biết được nó hỏng ở đâu, vì chỗ duy nhất biết
+     * sự thật là cái `catch` này và nó không nói với ai.
+     *
+     * Đó là §4.3 ở tầng chẩn đoán: "không làm được" trình bày y hệt "đã làm
+     * xong". Và nó đắt hơn bình thường vì ba màn gỡ lỗi đã trôi qua mà không
+     * thu được một dữ kiện nào.
+     *
+     * Bốn mã trả về, mỗi mã một cách sửa khác hẳn nhau:
+     *   "hien"          — đã vẽ ra màn hình thật
+     *   "chua_co_quyen" — `canDrawOverlays` false ⇒ đưa bác tới Cài đặt
+     *   "thieu_chu"     — lỗi lập trình bên gọi, không phải lỗi của máy
+     *   "rom_chan"      — quyền CÓ nhưng WindowManager vẫn từ chối. Đây là ca
+     *                     Xiaomi/Oppo/Vivo/Realme: còn một công tắc thứ hai mà
+     *                     Android không cho đọc trạng thái.
+     */
+    public static String hien(final Context ctx, String tieuDe, String nutMo, String nutOn) {
         /*
          * ═════ DÙNG APPLICATION CONTEXT, KHÔNG DÙNG ACTIVITY — 21/8/2026 ═════
          *
@@ -84,10 +107,10 @@ public class PopupDeManHinh {
          */
         final Context ung = ctx.getApplicationContext();
 
-        if (!daBatQuyen(ung)) return;
+        if (!daBatQuyen(ung)) return "chua_co_quyen";
         // ⚠️ §11 — thiếu chữ thì KHÔNG hiện. Hiện một dải trống hoặc một câu mặc
         // định do lớp native bịa ra là phá luật "mọi chuỗi đến từ catalog".
-        if (tieuDe == null || nutMo == null || nutOn == null) return;
+        if (tieuDe == null || nutMo == null || nutOn == null) return "thieu_chu";
 
         an(ung);   // không chồng hai dải lên nhau
 
@@ -162,10 +185,14 @@ public class PopupDeManHinh {
         try {
             wm.addView(khung, lp);
             dangHien = khung;
-        } catch (Exception e) {
+            return "hien";
+        } catch (Throwable e) {
             // Quyền bị thu hồi giữa chừng, hoặc ROM chặn. KHÔNG làm sập app —
             // popup là đường phụ, mất nó thì app vẫn phải chạy (§6.7).
+            // Nhưng giờ nó NÓI RA, thay vì để màn hình khai là đã hiện.
+            android.util.Log.e("KhoanDa", "popup bi chan", e);
             dangHien = null;
+            return "rom_chan";
         }
     }
 
