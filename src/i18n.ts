@@ -770,6 +770,10 @@ export const translations: Record<Lang, Record<string, string>> = {
     "Mở cửa sổ nổi": "Mở cửa sổ nổi",
   },
   en: {
+    "Máy Xiaomi, Oppo, Vivo, Realme còn một công tắc nữa tên “hiện cửa sổ khi chạy nền”. Bác bật luôn cả dòng đó giúp cháu nhé.": "Xiaomi, Oppo, Vivo and Realme phones have a second switch called “display pop-up windows while running in the background”. Please turn that one on as well.",
+    "Cháu chưa nghe được câu nào. Bác thử nói lại, hoặc gõ vào ô bên dưới giúp cháu nhé.": "We did not catch anything. Please try speaking again, or type it in the box below.",
+    "Cháu đang đọc chữ trong ảnh…": "Reading the text in your image…",
+    "Ảnh lâu hơn chữ một chút, vì cháu phải chép chữ trong ảnh ra trước đã. Bác chờ cháu một lát nhé.": "Images take a little longer than text, because we transcribe what is in the picture first. Please hold on a moment.",
     "Máy bác chưa có giọng đọc tiếng Việt. Bác vào Cài đặt › Ngôn ngữ để tải thêm nhé.": "Your phone does not have a Vietnamese speaking voice yet. You can add one in Settings › Language.",
     "Máy này chưa có bộ đọc chữ. Các phần khác vẫn dùng bình thường.": "This phone has no text-to-speech engine. Everything else still works.",
     "Cháu chưa đọc được đoạn này. Bác thử lại giúp cháu.": "We could not read this out. Please try again.",

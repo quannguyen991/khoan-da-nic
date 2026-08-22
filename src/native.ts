@@ -21,6 +21,7 @@
 type Nhan = 'CAO' | 'NGHI_NGO' | 'CHUA_THAY';
 
 interface CauNoi {
+  dayAppXuong(): Promise<void>;
   docTo(o: { chu: string; ngonNgu: string }): Promise<{ xong: boolean }>;
   dungDocTo(): Promise<void>;
   trangThaiQuyenDocThongBao(): Promise<{ daBat: boolean }>;
@@ -850,4 +851,16 @@ export async function dungDocTo(): Promise<void> {
   const c = (await cauHoacNull())?.cau;
   if (!c) { try { window.speechSynthesis?.cancel(); } catch { /* không sao */ } return; }
   try { await c.dungDocTo(); } catch { /* đã dừng rồi */ }
+}
+
+
+/**
+ * Đẩy app xuống nền — xem chú thích ở `dayAppXuong` bên Java.
+ * Dùng sau khi bắn dải cảnh báo thử, để bác thấy nó nằm NGOÀI app thật.
+ * Ở bản web thì không làm gì — trình duyệt không tự thu nhỏ được.
+ */
+export async function dayAppXuong(): Promise<void> {
+  const c = (await cauHoacNull())?.cau;
+  if (!c) return;
+  try { await c.dayAppXuong(); } catch { /* ROM chặn thì thôi */ }
 }

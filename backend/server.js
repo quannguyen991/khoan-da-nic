@@ -575,6 +575,24 @@ app.post('/api/analyze/so-bo', chanPhanTich, (req, res) => {
 
   return res.json(toHopDong(analyze({
     vanBan: coVanBan ? vanBan : '', anh, ghiAm, ghiAmConfidence, ghiAmFailed, ghiAmMaLoi, traLoiBoHoiNhanh, trangThaiMay,
+    /*
+     * ⚠️ ĐƯỜNG NÀY KHÔNG BAO GIỜ ĐỌC ẢNH — PHẢI KHAI RA (§4.3).
+     *
+     * Đây là đường CHỈ BỘ LUẬT, không gọi AI. Mà chữ trong ảnh chỉ đọc được
+     * bằng mô hình có thị giác. Nên lượt sơ bộ có ảnh là lượt KHÔNG AI ĐỌC
+     * tấm ảnh đó — không có ngoại lệ nào.
+     *
+     * Đo 21/8/2026 trước khi vá: gửi ảnh vào đây trả về
+     *   daKiem: ['anh_ocr']  — khai ĐÃ ĐỌC ẢNH
+     *   aiDaChay: false      — trong khi không ai đọc gì cả
+     * Hai dòng đó muốn nói ngược nhau, và dòng sai là dòng to hơn.
+     *
+     * ⚠️ QUAN TRỌNG HƠN VỪA NHÌN: đây là ĐƯỜNG RƠI của tầng web. Khi
+     * `/api/analyze` hỏng hoặc quá hạn, app tự động gọi sang đây. Nghĩa là
+     * đúng lúc mọi thứ đang trục trặc nhất thì bác nhận được một lời khai
+     * "đã đọc ảnh, không thấy gì". Đó là §4.3 ở chỗ độc lập thứ năm.
+     */
+    ...(anh ? { ocrFailed: true } : {}),
   })));
 });
 

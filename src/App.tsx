@@ -63,7 +63,7 @@ import {
   ngheGiongNoi, dungNghe as dungNgheNative, coBoNghe, moCaiDatGiongNoi,
   quyenDocThongBao, xinQuyenDocThongBao, tinMoiNhat, xoaTinDaBat,
   trangThaiThuongTruc, trangThaiMay, tomTatChoMayChu, moCaiDatTroNang,
-  napChuCuocGoi, trangThaiTheoDoiCuocGoi, datTheoDoiCuocGoi, docTo, dungDocTo,
+  napChuCuocGoi, trangThaiTheoDoiCuocGoi, datTheoDoiCuocGoi, docTo, dungDocTo, dayAppXuong,
   type QuyenNative, type TrangThaiMay,
 } from './native';
 import { GuardianIntroView, GuardianAuthView, GuardianView } from './components/Guardian';
@@ -221,6 +221,7 @@ export default function App() {
   });
   const [analyzeResult, setAnalyzeResult] = useState<any>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [buocDangLam, setBuocDangLam] = useState<null | 'doc_chu' | 'doc_anh'>(null);
   const [pinnedNotification, setPinnedNotification] = useState(() => localStorage.getItem('pinnedNotification') === 'true');
   /**
    * Vì sao công tắc thông báo không bật lên được. `null` = không có gì để nói.
@@ -561,11 +562,33 @@ export default function App() {
   const handleAnalyze = async (text: string, image?: string | null) => {
     if (!text.trim() && !image) return;
     setIsAnalyzing(true);
+    setBuocDangLam(image ? 'doc_anh' : 'doc_chu');
     let finalResult: any = null;
+
+    /*
+     * ═════ TRẦN CHỜ: ẢNH ĐƯỢC CHỜ LÂU HƠN CHỮ — 21/8/2026 ═════
+     *
+     * Bản cũ gọi `fetch` KHÔNG CÓ TRẦN NÀO, nên WebView tự cắt theo mặc định
+     * của nó — mỗi ROM một kiểu, và không ai bên này biết nó cắt lúc nào.
+     *
+     * Hậu quả đo được 21/8/2026: lượt ảnh mất 5–19s vì phải chép chữ trong
+     * ảnh trước khi tầng luật được nhìn nó. Bị cắt giữa chừng ⇒ rơi sang
+     * `/api/analyze/so-bo` ⇒ đường đó không đọc được ảnh ⇒ bác nhận "lượt này
+     * không có AI đọc nội dung", rơi tiếp nữa thì "chưa gửi được nội dung đi
+     * kiểm". Người dùng báo đúng cả hai câu đó.
+     *
+     * ⚠️ ĐỪNG "SỬA" BẰNG CÁCH HẠ TRẦN CHO NHANH. Đã có bài học ở tầng máy chủ:
+     * trần 12s làm hỏng 100% lượt gọi, recall rơi từ 67,6% về 3,8%. Chờ nhanh
+     * mà mù thì tệ hơn chờ lâu mà thấy.
+     */
+    const TRAN_CHO_MS = image ? 75_000 : 30_000;
+    const huyLuot = new AbortController();
+    const dongHo = setTimeout(() => huyLuot.abort(), TRAN_CHO_MS);
 
     try {
       const res = await fetch(api('/api/analyze'), {
         method: 'POST',
+        signal: huyLuot.signal,
         headers: { 'Content-Type': 'application/json' },
         /*
          * ⚠️ `tomTatChoMayChu` CHỨ KHÔNG PHẢI `mayCoUngDungLa`.
@@ -621,6 +644,8 @@ export default function App() {
         };
       }
     } finally {
+      clearTimeout(dongHo);
+      setBuocDangLam(null);
       if (finalResult) {
         setAnalyzeResult(finalResult);
         /**
@@ -1021,8 +1046,33 @@ export default function App() {
             <div className="w-full h-full border-4 border-[#c084fc] border-t-transparent rounded-full animate-spin"></div>
             <ShieldCheck size={32} className="text-[#c084fc] absolute" />
           </div>
-          <h3 className="text-2xl font-black text-white mb-2">{t("Khoan Đã đang đọc dữ liệu...")}</h3>
-          <p className="text-purple-200 text-sm max-w-xs font-medium">{t("Hệ thống AI và bộ luật bảo vệ đang trích xuất tín hiệu, nhận diện dấu hiệu lừa đảo và kiểm tra an toàn cho bác.")}</p>
+          {/*
+            ═════ NÓI ĐANG LÀM GÌ, VÀ NÓI LƯỢT ẢNH LÂU HƠN ═════
+
+            Người dùng báo 21/8/2026: "khi tôi nhập ảnh thì nó đọc dữ liệu quá
+            lâu và không biết có hoạt động không".
+
+            Lượt ảnh thật sự lâu hơn — đo được 5–19s, vì phải chép chữ trong
+            ảnh ra trước rồi tầng luật mới đọc được. Đó không phải lỗi.
+
+            ⚠️ NHƯNG MỘT THANH XOAY KHÔNG NÓI ĐƯỢC ĐIỀU ĐÓ. Nó trông giống hệt
+            lúc đang chạy và lúc đã treo. Bác ngồi nhìn 15 giây rồi kết luận app
+            hỏng — đúng loại lỗi §4.3 nhưng ở tầng cảm giác: KHÔNG BIẾT KHÁC
+            VỚI KHÔNG CHẠY, và màn hình đang trình bày hai thứ đó giống nhau.
+
+            ⚠️ KHÔNG HỨA THỜI GIAN CỤ THỂ. "Khoảng 10 giây" mà hóa ra 30 thì
+            tệ hơn là không nói gì. Chỉ nói nó LÂU HƠN và VÌ SAO.
+          */}
+          <h3 className="text-2xl font-black text-white mb-2">
+            {buocDangLam === 'doc_anh'
+              ? t('Cháu đang đọc chữ trong ảnh…')
+              : t('Khoan Đã đang đọc dữ liệu...')}
+          </h3>
+          <p className="text-purple-200 text-sm max-w-xs font-medium">
+            {buocDangLam === 'doc_anh'
+              ? t('Ảnh lâu hơn chữ một chút, vì cháu phải chép chữ trong ảnh ra trước đã. Bác chờ cháu một lát nhé.')
+              : t('Hệ thống AI và bộ luật bảo vệ đang trích xuất tín hiệu, nhận diện dấu hiệu lừa đảo và kiểm tra an toàn cho bác.')}
+          </p>
         </div>
       )}
 
@@ -2319,9 +2369,27 @@ function VoiceView({
     }
   };
 
+  /*
+   * ⚠️ KHÔNG NGHE ĐƯỢC GÌ THÌ DỪNG LẠI, ĐỪNG BỊA MỘT CÂU.
+   *
+   * Bản cũ: nếu `transcript` rỗng thì rơi về MỘT KỊCH BẢN GIẢ DANH CÔNG AN
+   * VIẾT SẲN, rồi gửi nó đi phân tích như thể bác vừa nói ra.
+   *
+   * Nghĩa là: bác bấm micro, máy không nghe được (thiếu gói tiếng Việt,
+   * micro bị chặn, phòng ồn), và màn hình hiện "NGUY HIỂM CAO" về một vụ
+   * lừa đảo CHƯA TỪNG XẢY RA VỚI BÁC.
+   *
+   * Đó là dạng lỗi tệ nhất mà sản phẩm này có thể mắc: không phải bỏ sót
+   * một vụ lừa, mà là TỰ DỰNG RA một vụ rồi bảo là của họ. §4.3 và §11
+   * đều cấm — "chưa nghe được" phải hiện ra là chưa nghe được.
+   */
   const handleAnalyzeVoice = (textOverride?: string) => {
     stopRecording();
-    const fullText = (textOverride || transcript || interimText).trim() || "Số điện thoại lạ tự xưng công an thông báo tài khoản có liên quan đến vụ án ma túy và rửa tiền, yêu cầu chuyển 50 triệu vào tài khoản an toàn để bảo lãnh điều tra";
+    const fullText = (textOverride || transcript || interimText).trim();
+    if (!fullText) {
+      setErrorMessage(t('Cháu chưa nghe được câu nào. Bác thử nói lại, hoặc gõ vào ô bên dưới giúp cháu nhé.'));
+      return;
+    }
     if (onAnalyze) {
       onAnalyze(fullText, null);
     } else {
@@ -2346,32 +2414,6 @@ function VoiceView({
    * chạy thẳng vào ô nội dung và ra màn kết quả. Để nguyên tiếng Việt thì người
    * chọn English bấm "Police impersonation" rồi nhận về một màn chữ Việt.
    */
-  const sampleScenarios = [
-    {
-      title: t('👮 Giả danh công an'),
-      text: t('Số lạ tự xưng cán bộ điều tra công an, báo tài khoản của bác liên quan đường dây rửa tiền, yêu cầu chuyển gấp 50 triệu vào tài khoản tạm giữ trong 15 phút.')
-    },
-    {
-      title: t('🏦 Giả danh ngân hàng, xin OTP'),
-      text: t('Người gọi tự xưng tổng đài ngân hàng, báo vừa có giao dịch 20 triệu, yêu cầu bác đọc ngay mã OTP gửi về máy để huỷ giao dịch.')
-    },
-    {
-      title: t('🎁 Báo trúng thưởng'),
-      text: t('Báo bác trúng thưởng xe máy SH và 100 triệu đồng, yêu cầu nạp trước 3 triệu phí vận chuyển.')
-    },
-    {
-      title: t('🏥 Con cấp cứu, xin tiền gấp'),
-      text: t('Số lạ tự xưng bác sĩ cấp cứu, báo con của bác vừa bị tai nạn nguy kịch, yêu cầu chuyển ngay 30 triệu tiền mổ.')
-    },
-    {
-      title: t('📦 Bưu kiện cấm'),
-      text: t('Tổng đài bưu điện báo bác có bưu phẩm chứa tài liệu cấm, yêu cầu chuyển 15 triệu để xác minh, nếu không sẽ bị khởi tố.')
-    },
-    {
-      title: t('💰 Việc nhẹ lương cao'),
-      text: t('Mời bác làm cộng tác viên xem video kiếm tiền, chỉ cần nạp 2 triệu tiền cọc để nhận hoa hồng 500 nghìn mỗi ngày.')
-    }
-  ];
 
   const currentDisplayText = transcript + (interimText ? (transcript ? ' ' : '') + interimText : '');
 
@@ -2577,26 +2619,20 @@ function VoiceView({
         </div>
       </div>
 
-      {/* Quick Situation Scenarios */}
-      <div className="w-full mb-3">
-        <span className="text-[14px] font-bold text-[#4c1d95] block mb-1.5">{t("Hoặc chọn tình huống mẫu để thử nhanh:")}</span>
-        <div className="grid grid-cols-1 gap-1.5 max-h-36 overflow-y-auto pr-1">
-          {sampleScenarios.map((sc, idx) => (
-            <button
-              key={idx}
-              onClick={() => {
-                setTranscript(sc.text);
-                setInterimText('');
-                handleAnalyzeVoice(sc.text);
-              }}
-              className="text-left bg-white/90 hover:bg-purple-50 p-2.5 rounded-xl border border-purple-100 shadow-2xs text-[14px] text-[#1e1b4b] font-medium flex items-center justify-between active:scale-98 transition-all group"
-            >
-              <span className="font-bold mr-2 text-slate-800 group-hover:text-purple-900">{sc.title}</span>
-              <span className="text-[14px] text-purple-700 bg-purple-100 group-hover:bg-purple-200 px-2 py-0.5 rounded-md font-bold shrink-0">{t("Thử ngay")}</span>
-            </button>
-          ))}
-        </div>
-      </div>
+      {/*
+        ═════ ĐÃ BỎKHỐI "TÌNH HUỐNG MẪU ĐỂ THỬ NHANH" — 21/8/2026 ═════
+
+        Màn này là nơi bác KỂ chuyện của mình. Một danh sách kịch bản soạn sẵn
+        đặt ngay dưới ô ghi âm trộn hai thứ không được phép trộn: chuyện THẬT
+        của bác, và chuyện BỊA để xem cho biết.
+
+        ⚠️ BẤM NHẦM MỘT CÁI LÀ RA MỘT KẾT QUẢ "NGUY HIỂM CAO" VỀ MỘT VIỆC
+        CHƯA TỪNG XẢY RA. Với người đang hoảng thì đó không phải một phiền
+        phức nhỏ — đó là app tự dựng ra một vụ lừa đảo rồi bảo là của họ.
+
+        Muốn xem kịch bản mẫu thì sang mục Bài học — ở đó chúng được dạy như
+        bài học, không bị trình bày như kết quả kiểm tra của chính bác.
+      */}
 
       {/* Action Buttons */}
       <div className="w-full flex flex-col gap-2 mt-auto pb-2">
@@ -3256,6 +3292,8 @@ function CuaSoNoiNative({ t }: { t: any }) {
         nutMo: t("Mở Khoan Đã"),
         nutOn: t("Tôi ổn, tắt đi"),
       });
+      // Rời app ra thì mới thấy dải nằm NGOÀI app — xem `dayAppXuong`.
+      await dayAppXuong();
       // Tự tắt sau 5 giây để bản thử không nằm lại trên màn hình bác.
       setTimeout(() => { void anPopup(); setDangThu(false); }, 5000);
     } catch {
@@ -3315,6 +3353,18 @@ function CuaSoNoiNative({ t }: { t: any }) {
           <div className="p-3.5 bg-amber-400/15 border border-amber-300/40 rounded-2xl mb-3">
             <p className="text-[14px] text-amber-100 leading-relaxed">
               {t("Chưa bật. Bấm nút dưới đây, máy sẽ mở màn Cài đặt — bác tìm dòng Khoan Đã rồi gạt sang bật, xong quay lại đây.")}
+            </p>
+            {/*
+              ⚠️ NHIỀU ROM PHỔ THÔNG Ở VIỆT NAM CÓ HAI CÔNG TẮC, KHÔNG PHẢI MỘT.
+              `Settings.canDrawOverlays()` trả true sau khi bật công tắc thứ nhất,
+              nên app tưởng xong — nhưng Xiaomi, Oppo, Vivo, Realme còn một quyền
+              riêng tên "hiện cửa sổ khi chạy nền", và thiếu nó thì dải không bao
+              giờ hiện lúc bác đang ở app khác — tức đúng lúc cần.
+              Android không cho đọc trạng thái quyền riêng đó, nên thứ duy nhất
+              làm được là NÓI RA thay vì để bác tưởng app hỏng (§4.3).
+            */}
+            <p className="text-[14px] text-amber-100/90 leading-relaxed mt-2">
+              {t("Máy Xiaomi, Oppo, Vivo, Realme còn một công tắc nữa tên “hiện cửa sổ khi chạy nền”. Bác bật luôn cả dòng đó giúp cháu nhé.")}
             </p>
           </div>
           <button

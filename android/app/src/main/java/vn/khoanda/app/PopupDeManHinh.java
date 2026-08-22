@@ -71,20 +71,33 @@ public class PopupDeManHinh {
      * @param nutOn   nhãn nút "Tôi ổn" (§4.6 — BẮT BUỘC, không được null)
      */
     public static void hien(final Context ctx, String tieuDe, String nutMo, String nutOn) {
-        if (!daBatQuyen(ctx)) return;
+        /*
+         * ═════ DÙNG APPLICATION CONTEXT, KHÔNG DÙNG ACTIVITY — 21/8/2026 ═════
+         *
+         * `getContext()` của Capacitor trả về Activity. Một view thên vào
+         * WindowManager bằng token của Activity sống gắn với Activity đó: bác
+         * rời app thì token hết hạn, và cái dải — thứ sinh ra ĐỂ hiện khi bác
+         * ở app KHÁC — biến mất đúng lúc cần nó nhất. Có ROM còn ném
+         * `BadTokenException` ngay tại `addView`.
+         *
+         * Application context sống bằng tiến trình, không chết theo màn hình.
+         */
+        final Context ung = ctx.getApplicationContext();
+
+        if (!daBatQuyen(ung)) return;
         // ⚠️ §11 — thiếu chữ thì KHÔNG hiện. Hiện một dải trống hoặc một câu mặc
         // định do lớp native bịa ra là phá luật "mọi chuỗi đến từ catalog".
         if (tieuDe == null || nutMo == null || nutOn == null) return;
 
-        an(ctx);   // không chồng hai dải lên nhau
+        an(ung);   // không chồng hai dải lên nhau
 
-        LinearLayout khung = new LinearLayout(ctx);
+        LinearLayout khung = new LinearLayout(ung);
         khung.setOrientation(LinearLayout.VERTICAL);
         khung.setBackgroundColor(0xFF7F1D1D);
-        int p = (int) (16 * ctx.getResources().getDisplayMetrics().density);
+        int p = (int) (16 * ung.getResources().getDisplayMetrics().density);
         khung.setPadding(p, p, p, p);
 
-        TextView chu = new TextView(ctx);
+        TextView chu = new TextView(ung);
         chu.setText(tieuDe);
         chu.setTextColor(0xFFFFFFFF);
         // §4.4 — sàn cỡ chữ. 18sp là chữ chính, không phải chú thích.
@@ -93,34 +106,37 @@ public class PopupDeManHinh {
         chu.setLineSpacing(0f, 1.3f);
         khung.addView(chu);
 
-        LinearLayout hang = new LinearLayout(ctx);
+        LinearLayout hang = new LinearLayout(ung);
         hang.setOrientation(LinearLayout.HORIZONTAL);
         hang.setPadding(0, p / 2, 0, 0);
 
-        Button moApp = new Button(ctx);
+        Button moApp = new Button(ung);
         moApp.setText(nutMo);
         moApp.setTextSize(17);
         // §4.4 — vùng chạm tối thiểu 52dp.
-        moApp.setMinHeight((int) (52 * ctx.getResources().getDisplayMetrics().density));
+        moApp.setMinHeight((int) (52 * ung.getResources().getDisplayMetrics().density));
         moApp.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) {
-                Intent i = ctx.getPackageManager().getLaunchIntentForPackage(ctx.getPackageName());
+                Intent i = ung.getPackageManager().getLaunchIntentForPackage(ung.getPackageName());
                 if (i != null) {
                     i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                    ctx.startActivity(i);
+                    // Khởi từ application context thì BẮT BUỘC có NEW_TASK,
+                    // không thì Android ném AndroidRuntimeException.
+                    i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    ung.startActivity(i);
                 }
-                an(ctx);
+                an(ung);
             }
         });
         hang.addView(moApp);
 
         // ⚠️ §4.6 — LỐI RA. Không giấu, không nhỏ hơn nút chính.
-        Button toiOn = new Button(ctx);
+        Button toiOn = new Button(ung);
         toiOn.setText(nutOn);
         toiOn.setTextSize(17);
-        toiOn.setMinHeight((int) (52 * ctx.getResources().getDisplayMetrics().density));
+        toiOn.setMinHeight((int) (52 * ung.getResources().getDisplayMetrics().density));
         toiOn.setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View v) { an(ctx); }
+            @Override public void onClick(View v) { an(ung); }
         });
         hang.addView(toiOn);
 
@@ -142,7 +158,7 @@ public class PopupDeManHinh {
                 PixelFormat.TRANSLUCENT);
         lp.gravity = Gravity.TOP;
 
-        WindowManager wm = (WindowManager) ctx.getSystemService(Context.WINDOW_SERVICE);
+        WindowManager wm = (WindowManager) ung.getSystemService(Context.WINDOW_SERVICE);
         try {
             wm.addView(khung, lp);
             dangHien = khung;
@@ -155,7 +171,14 @@ public class PopupDeManHinh {
 
     public static void an(Context ctx) {
         if (dangHien == null) return;
-        WindowManager wm = (WindowManager) ctx.getSystemService(Context.WINDOW_SERVICE);
+        /*
+         * ⚠️ PHẢI CÙNG MỘT WindowManager VỚI LÚC THÊM VÀO.
+         * `hien()` thêm view bằng `ung.getSystemService(...)`. Gỡ bằng WindowManager
+         * lấy từ Activity là gỡ nhầm cửa sổ — `removeView` ném
+         * IllegalArgumentException, và cái dải ở lại trên màn hình vĩnh viễn.
+         */
+        WindowManager wm = (WindowManager)
+                ctx.getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
         try { wm.removeView(dangHien); } catch (Exception ignored) { }
         dangHien = null;
     }

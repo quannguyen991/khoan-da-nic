@@ -17,7 +17,7 @@ import {
   Play,
 } from 'lucide-react';
 import { ViewState } from '../App';
-import { laApk, quyenPopup, xinQuyenPopup, hienPopupCanhBao, anPopup } from '../native';
+import { laApk, quyenPopup, xinQuyenPopup, hienPopupCanhBao, anPopup, dayAppXuong } from '../native';
 
 interface FloatingQuickAccessProps {
   setView: (view: ViewState) => void;
@@ -395,6 +395,14 @@ export function FloatingQuickAccess({
       nutMo: t('Mở Khoan Đã'),
       nutOn: t('Tôi ổn, tắt đi'),
     });
+    /*
+     * ⚠️ RỜI APP RA THÌ MỚI THẤY LÀ NÓ Ở NGOÀI APP.
+     * Bấm nút này từ trong Khoan Đã thì dải vẽ đè lên chính Khoan Đã — có
+     * hiện thật, nhưng trông hệt một thành phần của app. Người dùng báo
+     * 21/8/2026 "pop up vẫn chưa hiện bên ngoài", và nhìn từ phía họ thì
+     * không có cách nào phân biệt được. Xem `dayAppXuong` bên Java.
+     */
+    await dayAppXuong();
     setTimeout(() => { void anPopup(); }, 6000);
   };
 

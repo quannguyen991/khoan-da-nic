@@ -215,6 +215,34 @@ public class KhoanDaPlugin extends Plugin {
         call.resolve();
     }
 
+    /**
+     * ĐẨY APP XUỐNG NỀN — ĐỂ CÁI DẢI THẬT SỰ Ở "NGOÀI APP".
+     *
+     * Người dùng báo 21/8/2026: "pop up vẫn chưa hiện bên ngoài". Đo lại thì
+     * `addView` KHÔNG hề lỗi — dải có hiện, nhưng bác bấm nút TỪ TRONG APP,
+     * nên nó vẽ đè lên chính Khoan Đã và trông hệt như một thành phần của app.
+     *
+     * Không thể phân biệt "đang vẽ đè toàn hệ thống" với "là một cái div"
+     * nếu thứ duy nhất dưới nó là chính app đó.
+     *
+     * ⚠️ ĐÂY KHÔNG PHẢI HIỆU ỨNG CHO ĐẸP. Đó là sự khác nhau giữa một
+     * bằng chứng và một lời tuyên bố. Bản trước của sản phẩm này từng vẽ hẳn
+     * một màn hình điện thoại giả để "cho xem popup", và người dùng đã bắt
+     * đúng — xem chú thích ở `FloatingQuickAccess`. Lần này dải là thật, nên
+     * cách chứng minh cũng phải thật: rời app ra rồi nhìn lại.
+     *
+     * `moveTaskToBack(true)` đưa app xuống nền giống như bấm nút Home — không
+     * đóng, không mất trạng thái, bác mở lại là về đúng chỗ cũ.
+     */
+    @PluginMethod
+    public void dayAppXuong(PluginCall call) {
+        chayTrenUi(null, "KHONG_DAY_XUONG_DUOC", () -> {
+            android.app.Activity a = getActivity();
+            if (a != null) a.moveTaskToBack(true);
+        });
+        call.resolve();
+    }
+
     @PluginMethod
     public void anPopup(PluginCall call) {
         chayTrenUi(null, "POPUP_KHONG_AN_DUOC", () -> PopupDeManHinh.an(getContext()));
