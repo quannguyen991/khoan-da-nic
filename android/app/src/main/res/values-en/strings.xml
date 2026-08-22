@@ -57,4 +57,7 @@
     <string name="tb_nut_kiem_tin">Check the latest message</string>
     <string name="tb_nut_kiem_giup">Yes, check it</string>
     <string name="tb_nut_bo_qua">No thanks</string>
+    <string name="bong_bong_kenh">Floating button</string>
+    <string name="bong_bong_tieu_de">The Khoan Đã button is floating on screen</string>
+    <string name="bong_bong_noi_dung">Tap the round button at the edge of the screen to open the app. Tap here to turn it off.</string>
 </resources>
