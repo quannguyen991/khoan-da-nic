@@ -177,14 +177,14 @@ bound rather than as a forecast.
 | Rule engine, Vietnamese | 80% | 0% | 100 scenarios (49 scam / 51 benign) |
 | Rule engine, English | 70% | 0% | 200 scenarios (100 / 100) |
 
-**Held-out set** — `eval/dataset/`, 497 labelled samples the patterns were never
+**Held-out set** — `eval/dataset/`, 597 labelled samples the patterns were never
 tuned against. This is the number that predicts behaviour on a message nobody has
 seen before. Reproduce with `node eval/khoanbench.js`, which prints this table:
 
 | Layer | Recall | False alarms |
 |---|---|---|
 | Rule engine, Vietnamese | 14.4% | 3.3% |
-| Rule engine, English | 6.1% | no benign English samples yet, so not measurable |
+| Rule engine, English | 6.1% | 4% |
 | Rule engine, mixed VI/EN | 11.4% | 0.0% |
 
 **The two tables count different things, so read the definitions before comparing
@@ -194,6 +194,19 @@ back at *High risk*. Under the looser definition the held-out set gives 34%
 Vietnamese and 33% English; under the strict one the development set gives 49%
 and 19%. Every one of those six numbers is reproducible from this repository, and
 none of them is the single headline figure.
+
+The English benign set was written after this table's first version, when the
+false-alarm cell read *not measurable*. It is deliberately held out: the four
+messages the engine gets wrong are listed here rather than quietly fixed, because
+tuning the rules against an evaluation set turns the number into a description of
+the tuning rather than of the engine.
+
+| Misfired on | Why it matters |
+|---|---|
+| "transfer the money for the flowers to me and don't tell Dad — it's for his birthday" | Returned **High risk**. A birthday surprise reads as coerced secrecy. The worst of the four. |
+| "Reminder from the bank: staff will never ask you to read out a one-time code" | An anti-scam warning flagged as a scam — the same weakness the Vietnamese warning-article slice shows at 20%. |
+| "Your library card number is 90114-2. Quote it at the desk" | A membership number read as a credential request. |
+| "20% off winter coats this weekend in store. No voucher code needed" | An ordinary discount read as a lure. |
 
 The distance between the two sets is what tuning on a set buys you. Publishing
 only the flattering half is how a project ends up believing its own demo, so both
@@ -212,6 +225,7 @@ Three slices of the held-out set are worth naming, including the two that fail:
 | 110 benign messages containing the exact keywords a detector hunts for — "Mum, install the bank app from the Play Store", "transfer the money, don't tell grandma" | **4% false alarms.** A benign set of "the cat has been fed" would make a low false-alarm rate meaningless. |
 | 35 published anti-scam warning articles | **20% wrongly flagged.** Teaching about fraud should not read as fraud. Open. |
 | 40 Vietnamese messages typed without diacritics | **42% caught, 19% false alarms** — the weakest slice, and a common way real messages arrive. Open. |
+| 100 benign English messages, written to the same difficulty | **4% false alarms.** The four failures are named below rather than tuned away. |
 
 Typical response times on the hosted demo: a clear impersonation scam returns in
 **under one second** from the rule layer alone, without calling AI. Ambiguous
@@ -262,7 +276,7 @@ height never drops below 1.25. Target: WCAG 2.2 AA.
 | Backend | Node · Express · pure rule engine with no network dependency |
 | Mobile | Capacitor + native Android (Java) for overlay, notifications, call state |
 | AI | Any OpenAI-compatible model — local via Ollama, or a hosted gateway |
-| Testing | 59 contract tests · 300 tuned scenarios · 497 held-out samples |
+| Testing | 59 contract tests · 300 tuned scenarios · 597 held-out samples |
 
 ---
 
@@ -308,7 +322,7 @@ npm run build && npx cap sync android
 | `test/hop-dong.test.mjs` | Guards for every invariant above |
 | `PERMISSIONS-AND-POLICY.md` | Permission ladder, data flow, what we refuse and why |
 | `test/du-lieu/` | Tuned scenario sets, 300 samples |
-| `eval/dataset/` | Held-out evaluation set, 497 labelled samples |
+| `eval/dataset/` | Held-out evaluation set, 597 labelled samples |
 | `eval/khoanbench.js` | Benchmark harness — prints the per-language table before any total |
 | `android/app/src/main/java/vn/khoanda/app/` | Native Android layer |
 
