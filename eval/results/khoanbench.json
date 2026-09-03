@@ -1,0 +1,159 @@
+{
+  "metadata": {
+    "commitSha": "ecbd49d",
+    "analysisVersion": "1.0.0",
+    "registryVersion": "1.0.0",
+    "ruleVersion": "1.2.0",
+    "promptVersion": "1.0.0",
+    "datasetVersion": "9625d2011ebe",
+    "datasetSize": 497,
+    "aiDaChay": true,
+    "model": "claude-sonnet-5",
+    "apiBase": "https://codex.hungnguyen.codes/v1",
+    "cheDo": "bo_luat_va_ai",
+    "tinHieuTuDem": 478,
+    "tinHieuGoiMoi": 19
+  },
+  "chiSo": {
+    "tongMau": 457,
+    "dat": 225,
+    "tyLeDat": 0.4923413566739606,
+    "dangerousRecall": 0.32710280373831774,
+    "soNguyHiem": 214,
+    "highRiskFP": 0.045454545454545456,
+    "soLanh": 154,
+    "fpTrenLatChat": 0.08849557522123894,
+    "soLanhChat": 113,
+    "vuotTranToiDa": 0.03282275711159737,
+    "tutDuoiMucDo": 0.474835886214442,
+    "confusion": {
+      "CHUA_THAY->CHUA_THAY": 136,
+      "CHUA_THAY->NGHI_NGO": 11,
+      "CHUA_THAY->CAO": 7,
+      "NGHI_NGO->CHUA_THAY": 73,
+      "NGHI_NGO->NGHI_NGO": 14,
+      "NGHI_NGO->CAO": 2,
+      "CAO->CHUA_THAY": 66,
+      "CAO->NGHI_NGO": 78,
+      "CAO->CAO": 70
+    }
+  },
+  "parity": {
+    "theoNgonNgu": {
+      "vi": {
+        "tongMau": 357,
+        "dat": 201,
+        "tyLeDat": 0.5630252100840336,
+        "dangerousRecall": 0.3287671232876712,
+        "soNguyHiem": 146,
+        "highRiskFP": 0.0457516339869281,
+        "soLanh": 153,
+        "fpTrenLatChat": 0.08928571428571429,
+        "soLanhChat": 112,
+        "vuotTranToiDa": 0.04201680672268908,
+        "tutDuoiMucDo": 0.3949579831932773,
+        "confusion": {
+          "CHUA_THAY->CHUA_THAY": 135,
+          "CHUA_THAY->NGHI_NGO": 11,
+          "CHUA_THAY->CAO": 7,
+          "NGHI_NGO->CHUA_THAY": 43,
+          "NGHI_NGO->NGHI_NGO": 13,
+          "NGHI_NGO->CAO": 2,
+          "CAO->CHUA_THAY": 43,
+          "CAO->NGHI_NGO": 55,
+          "CAO->CAO": 48
+        }
+      },
+      "en": {
+        "tongMau": 48,
+        "dat": 12,
+        "tyLeDat": 0.25,
+        "dangerousRecall": 0.36363636363636365,
+        "soNguyHiem": 33,
+        "highRiskFP": null,
+        "soLanh": 0,
+        "fpTrenLatChat": null,
+        "soLanhChat": 0,
+        "vuotTranToiDa": 0,
+        "tutDuoiMucDo": 0.75,
+        "confusion": {
+          "CHUA_THAY->CHUA_THAY": 0,
+          "CHUA_THAY->NGHI_NGO": 0,
+          "CHUA_THAY->CAO": 0,
+          "NGHI_NGO->CHUA_THAY": 15,
+          "NGHI_NGO->NGHI_NGO": 0,
+          "NGHI_NGO->CAO": 0,
+          "CAO->CHUA_THAY": 10,
+          "CAO->NGHI_NGO": 11,
+          "CAO->CAO": 12
+        }
+      },
+      "mixed": {
+        "tongMau": 52,
+        "dat": 12,
+        "tyLeDat": 0.23076923076923078,
+        "dangerousRecall": 0.2857142857142857,
+        "soNguyHiem": 35,
+        "highRiskFP": 0,
+        "soLanh": 1,
+        "fpTrenLatChat": 0,
+        "soLanhChat": 1,
+        "vuotTranToiDa": 0,
+        "tutDuoiMucDo": 0.7692307692307693,
+        "confusion": {
+          "CHUA_THAY->CHUA_THAY": 1,
+          "CHUA_THAY->NGHI_NGO": 0,
+          "CHUA_THAY->CAO": 0,
+          "NGHI_NGO->CHUA_THAY": 15,
+          "NGHI_NGO->NGHI_NGO": 1,
+          "NGHI_NGO->CAO": 0,
+          "CAO->CHUA_THAY": 13,
+          "CAO->NGHI_NGO": 12,
+          "CAO->CAO": 10
+        }
+      }
+    },
+    "lechRecall": 0.03486924034869243,
+    "lechFP": null
+  },
+  "mauThat": {
+    "coMauThat": false,
+    "tong": 0,
+    "dat": 0,
+    "nguyHiemBatDuoc": 0,
+    "nguyHiemTong": 0
+  },
+  "evidence": {
+    "tong": 1746,
+    "hopLe": 1745,
+    "tyLeHopLe": 0.9994272623138603,
+    "theoLat": {
+      "vi": {
+        "tong": 1249,
+        "hopLe": 1248,
+        "tyLe": 0.9991993594875901
+      },
+      "en": {
+        "tong": 263,
+        "hopLe": 263,
+        "tyLe": 1
+      },
+      "mixed": {
+        "tong": 234,
+        "hopLe": 234,
+        "tyLe": 1
+      }
+    }
+  },
+  "tranHong": {
+    "soHong": 0,
+    "tyLeHong": 0,
+    "tran": 0.1,
+    "vuotTran": false,
+    "vuotTranToanCuc": false,
+    "loVuotTran": [],
+    "lyDoHong": [],
+    "theoStatus": {},
+    "viDu": null
+  }
+}
