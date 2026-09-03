@@ -62,8 +62,32 @@ services:
         sync: false
       - key: LLM_API_KEY
         sync: false
+      # ══════════ ĐO LẠI 3/9/2026 TRÊN TRỌN 571 MẪU ══════════
+      #
+      # Bảng độ trễ ở đầu tệp này đo ngày 19/8 trên 10 tình huống. Đo lại hôm
+      # nay trên cả bộ eval, kết quả đảo ngược lựa chọn cũ:
+      #
+      #   model              recall  bỏ sót  báo đỏ oan  lượt hỏng
+      #   claude-sonnet-5     83,0%   20,5%       5,9%        0%
+      #   deepseek-v4-flash   60,4%   34,3%       3,6%        0%
+      #   gpt-5.4               —       —          —         8,8%  ✖
+      #
+      # ⚠️ `gpt-5.4` KHÔNG CÒN DÙNG ĐƯỢC — đây là giá trị mặc định cũ của tệp
+      # này. Nó quá hạn 35 giây ở 8,8% lượt gọi, và ba tệp mẫu vượt trần riêng
+      # (03-en-scam 13,3% · 06-negatives 13,6% · 07-vi-cau-ngan 25,0%). Bộ eval
+      # TỪ CHỐI công bố số của lượt đó theo §4.3. Deploy bằng nó thì giám khảo
+      # gặp lỗi ở khoảng một trên mười lượt bấm thử.
+      #
+      # ⚠️ `deepseek-v4-flash` NHANH GẤP 5 NHƯNG BỎ SÓT GẤP RƯỠI. Báo đỏ oan
+      # của nó thấp hơn (3,6% so với 5,9%) chỉ vì nó kêu ít hơn ở mọi chỗ —
+      # gồm cả chỗ đáng kêu. §4.2 nói mọi thứ thêm vào chỉ được LÀM TĂNG cảnh
+      # giác; đổi 23 điểm recall lấy 2 điểm báo oan là đi ngược đúng câu đó.
+      #
+      # Chậm hơn (trung vị ~20s) là cái giá đã biết và chấp nhận. Nếu sau này
+      # có model vừa nhanh vừa giữ được recall ≥80%, đổi — nhưng ĐO TRỌN BỘ
+      # trước, đừng tin bảng 10 tình huống.
       - key: RISK_LLM_MODEL
-        value: gpt-5.4
+        value: claude-sonnet-5
       # ── Dự phòng 1: qwen trên máy chủ tự vận hành ──
       #
       # ⚠️ ĐỨNG TRƯỚC GEMINI DÙ BẮT ÍT HƠN MỘT CA (4/5 so với 5/5).
