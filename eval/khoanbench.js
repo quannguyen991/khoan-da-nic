@@ -14,8 +14,8 @@
 require('dotenv').config({ quiet: true });
 
 const B = require('./lib/bo-danh-gia');
-const { buildContext } = require('../src/analysis/context-builder');
-const { trichCoThat } = require('../src/analysis/evidence-validator');
+const { buildContext } = require('../backend/src/analysis/context-builder');
+const { trichCoThat } = require('../backend/src/analysis/evidence-validator');
 
 const co = (c) => process.argv.includes(c);
 const soCo = (t, m) => { const i = process.argv.indexOf(t); return i > 0 ? Number(process.argv[i + 1]) : m; };

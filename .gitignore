@@ -1,27 +1,77 @@
-.env
 node_modules/
+build/
 dist/
-output/
+coverage/
+.DS_Store
 *.log
-public/assets/3d/*.png
-*CAU-LENH-TRIEN-KHAI*
-BACKEND.md
-FRONTEND.md
+.env*
+!.env.example
+
+# ⚠️ ẢNH GỐC KHÔNG ĐẨY LÊN GIT — 34 MB, và không cần để chạy app.
+# Bản đã tối ưu nằm ở `public/` (628 KB). Ảnh gốc giữ trên máy để dựng lại khi
+# cần; xem `assets/anh-goc/DOC-TRUOC.md` cho lệnh chuyển đổi.
+assets/anh-goc/*.png
+
+# Khoá API. `.env*` ở trên đã chặn, nhắc lại cho rõ ràng.
+.env
+.env.local
+
+# Bản git cũ đã hỏng, giữ trên máy phòng khi cần — không đẩy lên.
+.git-hong-*/
+
+# ⚠️ SẢN PHẨM DỰNG CỦA ANDROID — KHÔNG ĐẨY LÊN.
+#
+# `android/app/src/main/assets/public/` là BẢN SAO của `dist/`, do `npx cap sync`
+# chép vào mỗi lần dựng. Đẩy lên git thì mỗi lần dựng lại sinh ra vài trăm dòng
+# diff của tệp đã băm tên, và bản trong git sẽ lệch bản thật ngay lần dựng kế —
+# lệch mà không ai nhận ra, vì không ai đọc diff của bundle.
+#
+# Mã nguồn Android thật (Java, manifest, res, gradle) VẪN được theo dõi.
+android/app/src/main/assets/public/
+android/app/src/main/assets/capacitor.config.json
+android/app/src/main/assets/capacitor.plugins.json
+android/app/build/
+android/build/
+android/.gradle/
+android/local.properties
+android/capacitor-cordova-android-plugins/build/
+
+# ⚠️ KHO DỮ LIỆU CỦA MÁY CHỦ — TUYỆT ĐỐI KHÔNG ĐẨY LÊN.
+#
+# `backend/.du-lieu/` là SQLite chứa TÀI KHOẢN THẬT: số điện thoại, băm mật
+# khẩu, muối, nhật ký audit, vòng tròn gia đình. Nó bị lọt vào một commit ngày
+# 19/8/2026 (dữ liệu thử lúc kiểm bảo mật) và đã gỡ ra ngay.
+#
+# Băm scrypt không đọc ngược ra mật khẩu, nhưng một tệp như thế nằm trong lịch
+# sử git công khai là danh sách số điện thoại người cao tuổi đang dùng app
+# chống lừa đảo — đúng danh sách kẻ lừa đảo muốn có nhất.
+backend/.du-lieu/
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+
+# ══════════ ⚠️ HAI TÀI LIỆU CHỨA KHOÁ API SỐNG — KHÔNG ĐẨY LÊN ══════════
+#
+# `THAM-KHAO-DAY-DU.md` §7 và `BACKEND.md` đều nhúng khoá gateway thật. Chính
+# header của THAM-KHAO khẳng định "đã nằm trong .gitignore" — lời khẳng định đó
+# SAI cho tới 2/9/2026: `git check-ignore` không khớp dòng nào, nên `git add -A`
+# sẽ nuốt cả hai.
+#
+# Một khoá lọt vào lịch sử git công khai thì đổi khoá là chưa đủ — nó nằm lại
+# trong mọi bản clone và mọi cache của GitHub.
 THAM-KHAO-DAY-DU.md
+BACKEND.md
+
+# ⚠️ ANDROID SDK TẢI VỀ TRONG REPO — 11.580 TỆP.
+# Đây là công cụ, không phải mã nguồn. Máy khác cài lại bằng sdkmanager.
+android/sdk/
+
+# Bộ nhớ đệm lúc chạy: phản hồi AI của bộ eval, tin RSS đã lấy. Sinh lại được,
+# và `eval/cache/` còn chứa nguyên văn phản hồi của model cho từng mẫu.
+.cache/
 eval/cache/
 
-# Bản dựng giao diện — sinh ra bằng `npm run dung-giao-dien`, không commit.
-# ⚠️ Đây là ĐẦU RA của một repo khác (thư mục frontend). Commit vào đây là hai
-# nguồn sự thật cho cùng một tệp, và bản trong git sẽ cũ dần mà không ai biết.
-public/app/
-
-# APK dựng ra — 37,5 MB nhị phân, sinh lại được bằng scripts/dung-apk.ps1.
+# ⚠️ APK 12 MB — SẢN PHẨM DỰNG, KHÔNG PHẢI MÃ NGUỒN.
+# Dựng lại bằng `scripts/dung-apk.ps1`. Muốn phát cho giám khảo tải thì đính kèm
+# vào hồ sơ dự thi hoặc GitHub Release, đừng nhét vào lịch sử git.
 khoan-da.apk
-*.apk
-
-# ⚠️ DỮ LIỆU NGƯỜI DÙNG THẬT — KHÔNG BAO GIỜ ĐƯA VÀO GIT.
-# Chứa tài khoản, vòng tròn gia đình và nhật ký audit. §6.9.
-.du-lieu/
-
-# Đệm tin báo — lấy lại được, không cần theo dõi.
-.cache/
