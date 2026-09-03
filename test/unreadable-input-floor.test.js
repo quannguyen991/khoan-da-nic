@@ -5,7 +5,7 @@
 const test = require('node:test');
 const assert = require('node:assert');
 
-const { analyze, unreadableInputFloor } = require('../src/analysis/pipeline');
+const { analyze, unreadableInputFloor } = require('../backend/src/analysis/pipeline');
 
 test('§4.3 — ảnh không đọc được sinh mã chuaKiem, không im lặng', () => {
   const san = unreadableInputFloor({ anh: 'data:image/png;base64,xxx', ocrFailed: true });
@@ -218,7 +218,7 @@ test('ghi âm #10b — BỊ CẮT giữ nguyên mã, kể cả khi điểm tin c
  * chính ta biết là chưa nghe hết.
  */
 test('ghi âm #11 — bị cắt / nghe kém KHÔNG được ra nhãn thấp nhất', () => {
-  const { analyze, toHopDong } = require('../src/analysis/pipeline');
+  const { analyze, toHopDong } = require('../backend/src/analysis/pipeline');
   const cut = 'Bác chuyển 50 triệu sang';
 
   for (const nguon of [
@@ -239,7 +239,7 @@ test('ghi âm #11 — bị cắt / nghe kém KHÔNG được ra nhãn thấp nh�
  * tràn lan, và §4.6 nhắc thẳng rằng người dùng sẽ gỡ ứng dụng.
  */
 test('ghi âm #11b — thiếu SỐ ĐO thì nói ra, KHÔNG nâng mức', () => {
-  const { analyze, toHopDong } = require('../src/analysis/pipeline');
+  const { analyze, toHopDong } = require('../backend/src/analysis/pipeline');
   const r = toHopDong(analyze({
     vanBan: 'Chào bác, mai cháu qua chơi nhé.', ghiAm: true, ghiAmConfidence: -1,
   }));

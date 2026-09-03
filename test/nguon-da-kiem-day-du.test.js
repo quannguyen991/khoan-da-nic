@@ -13,7 +13,7 @@
 const test = require('node:test');
 const assert = require('node:assert');
 
-const { buildTrustReceipt, NGUON } = require('../src/analysis/trust-receipt-v2');
+const { buildTrustReceipt, NGUON } = require('../backend/src/analysis/trust-receipt-v2');
 const { MA_DA_KIEM } = require('../scripts/xuat-hop-dong');
 
 test('mọi mã daKiem của hợp đồng đều có trong bảng NGUON', () => {
@@ -41,7 +41,7 @@ test('ghi_am đi qua được Phiếu tin cậy, không bị nuốt', () => {
 });
 
 test('ba mã hỏng của ghi âm đều có giới hạn hiển thị ở Phiếu', () => {
-  const { GIOI_HAN } = require('../src/analysis/trust-receipt-v2');
+  const { GIOI_HAN } = require('../backend/src/analysis/trust-receipt-v2');
   for (const ma of ['chua_tai_xong_model_nghe', 'ghi_am_khong_co_tieng_noi',
     'chi_nghe_duoc_phan_dau', 'khong_nghe_duoc_ghi_am']) {
     assert.ok(GIOI_HAN[ma], `mã ${ma} không có giới hạn ⇒ Phiếu sẽ im lặng về nó`);
@@ -49,7 +49,7 @@ test('ba mã hỏng của ghi âm đều có giới hạn hiển thị ở Phi�
 });
 
 test('ba mã hỏng của ghi âm KHÔNG gộp chung một giới hạn', () => {
-  const { GIOI_HAN } = require('../src/analysis/trust-receipt-v2');
+  const { GIOI_HAN } = require('../backend/src/analysis/trust-receipt-v2');
   // "chưa tải bộ nghe" và "không giải mã được" là hai việc khác nhau, và một
   // trong hai thì bác tự sửa được. Gộp lại là nói sai (§4.3).
   assert.notStrictEqual(GIOI_HAN.chua_tai_xong_model_nghe,
@@ -74,7 +74,7 @@ test('ba mã hỏng của ghi âm KHÔNG gộp chung một giới hạn', () => 
 const CO_Y_KHONG_CO_GIOI_HAN = ['chua_thay_yeu_cau_da_xac_thuc'];
 
 test('mọi mã chuaKiem của hợp đồng đều có giới hạn ở Phiếu', () => {
-  const { GIOI_HAN } = require('../src/analysis/trust-receipt-v2');
+  const { GIOI_HAN } = require('../backend/src/analysis/trust-receipt-v2');
   const { MA_CHUA_KIEM } = require('../scripts/xuat-hop-dong');
   const thieu = MA_CHUA_KIEM
     .filter((ma) => !CO_Y_KHONG_CO_GIOI_HAN.includes(ma))
@@ -84,7 +84,7 @@ test('mọi mã chuaKiem của hợp đồng đều có giới hạn ở Phiếu
 });
 
 test('mã cố ý không có giới hạn thì phải THẬT SỰ không có', () => {
-  const { GIOI_HAN } = require('../src/analysis/trust-receipt-v2');
+  const { GIOI_HAN } = require('../backend/src/analysis/trust-receipt-v2');
   for (const ma of CO_Y_KHONG_CO_GIOI_HAN) {
     assert.ok(!GIOI_HAN[ma],
       `${ma} có giới hạn rồi ⇒ gỡ nó khỏi danh sách miễn trừ, đừng để hai nguồn sự thật`);

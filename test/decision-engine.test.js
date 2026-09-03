@@ -11,7 +11,7 @@ const {
   THRESHOLD_SUSPICIOUS,
   THRESHOLD_HIGH,
   SYNERGIES,
-} = require('../src/analysis/decision-engine');
+} = require('../backend/src/analysis/decision-engine');
 
 const tinHieu = (...ids) => ids.map((id) => ({
   id, state: 'present', source: 'direct', confidence: 1.0,
@@ -127,8 +127,8 @@ test('Dedup — cùng SIGNAL_ID gửi hai lần không cộng hai lần', () => 
 
 // ─────────────── B.2 — mười tổ hợp cộng hưởng ───────────────
 
-test('B.2 — đúng mười ba tổ hợp, không thừa không thiếu', () => {
-  assert.strictEqual(SYNERGIES.length, 13);
+test('B.2 — đúng mười tám tổ hợp, không thừa không thiếu', () => {
+  assert.strictEqual(SYNERGIES.length, 18);
   const mong = {
     'secrecy+fear+transfer': 15,
     'recoverysupport+recoveryfee': 15,
@@ -138,12 +138,20 @@ test('B.2 — đúng mười ba tổ hợp, không thừa không thiếu', () =>
     'identity+device': 10,
     'brandmismatch+credential': 10,
     'family+urgency+transfer': 10,
-    'coverstory+transfer': 10,
+    // 10 → 12 ngày 2/9/2026: "cớ + hối thúc + chuyển tiền" kẹt ở 43. Xem B.6.
+    'coverstory+transfer': 12,
     'stageescalation+action': 8,
     // Thêm 15/8/2026, người dùng duyệt sau khi xem số đo trên 445 mẫu.
     'offer+transfer': 14,
     'advancefee+transfer': 14,
     'orgclaim+transfer': 14,
+    // Thêm 2/9/2026, người dùng duyệt sau khi xem số đo. Xem khối B.5 bên dưới.
+    'credential+manipulation': 10,
+    // Thêm 2/9/2026 — nhắm bốn mẫu hình còn trượt ở tiếng Việt. Xem B.6.
+    'extortion+transfer': 10,
+    'keepcall+fear+transfer': 12,
+    'secrecy+isolation+transfer': 12,
+    'brandmismatch+pressure': 10,
   };
   for (const s of SYNERGIES) {
     assert.strictEqual(s.bonus, mong[s.id], `bonus ${s.id}`);
@@ -188,6 +196,135 @@ test('B.3 — hai tổ hợp đó kéo họ kịch bản thật LÊN TRÊN ngư�
   assert.strictEqual(decide(tech).baseScore, 38);
   assert.ok(decide(tech).score >= 45);
   assert.strictEqual(decide(tech).riskLabel, 'HIGH');
+});
+
+// ─────────── B.5 — vùng chết "đòi mã + gây áp lực" (thêm 2/9/2026) ───────────
+//
+// VÌ SAO: mọi tổ hợp cộng hưởng có `CRED_` đều đòi kèm `ID_` hoặc
+// `WEB_BRAND_DOMAIN_MISMATCH`. Nên tin nhắn THUẦN "đòi mã + gây sức ép" — kẻ
+// lừa đảo không tự xưng là ai cả — không có đường nào chạm ngưỡng 45.
+//
+// Số học của vùng chết: credential cap 25, manipulation lấy top2 nên trần thực
+// tế là 12+7 = 19. Tổng luôn ≤ 44, ĐÚNG MỘT ĐIỂM dưới ngưỡng.
+//
+// ĐO TRÊN 445 MẪU (chi-tiet.jsonl, lượt 15/8): tổ hợp khớp 26 mẫu — 25 mẫu
+// vàng CAO, 1 mẫu NGHI_NGO, KHÔNG mẫu lành nào. Báo đỏ oan không đổi.
+
+test('B.5 — vùng chết: CRED_ + MAN_ thuần luôn kẹt ≤44 nếu không có cộng hưởng', () => {
+  const kq = decide(tinHieu('CRED_OTP_SHARE', 'MAN_FEAR_THREAT', 'MAN_URGENCY'));
+  assert.strictEqual(kq.groupScores.credential, 25);
+  assert.strictEqual(kq.groupScores.manipulation, 19, 'top2 = 12 + 7');
+  assert.strictEqual(kq.baseScore, 44, 'đúng một điểm dưới ngưỡng 45');
+});
+
+test('B.5 — cộng hưởng credential+manipulation kéo vùng chết lên Nguy hiểm cao', () => {
+  // vi-otp-05: "ma xac nhan vua gui đó cô, đọc e 6 số ngay nha k quá hạn là tài khoản bị treo"
+  const otp = decide(tinHieu('CRED_OTP_SHARE', 'MAN_FEAR_THREAT', 'MAN_URGENCY'));
+  assert.ok(otp.appliedSynergies.some((s) => s.id === 'credential+manipulation'));
+  assert.strictEqual(otp.score, 54);
+  assert.strictEqual(otp.riskLabel, 'HIGH');
+
+  // vi-otp-08: "Cô đừng tắt máy… khi mã xác thực tới, cô đọc ngay cho tôi thì mới chặn kịp"
+  const giuMay = decide(tinHieu(
+    'CRED_OTP_SHARE', 'MAN_COVER_STORY', 'MAN_URGENCY', 'MAN_KEEP_CALL_ACTIVE',
+  ));
+  assert.strictEqual(giuMay.baseScore, 44);
+  assert.strictEqual(giuMay.riskLabel, 'HIGH');
+});
+
+test('B.5 — KHÔNG nổ khi thiếu một trong hai vế', () => {
+  const chiMa = decide(tinHieu('CRED_OTP_SHARE'));
+  const chiEp = decide(tinHieu('MAN_URGENCY', 'MAN_FEAR_THREAT'));
+  for (const kq of [chiMa, chiEp]) {
+    assert.ok(!kq.appliedSynergies.some((s) => s.id === 'credential+manipulation'));
+  }
+  assert.strictEqual(chiEp.riskLabel, 'NO_SIGNS_FOUND', 'sức ép đơn thuần KHÔNG được lên mức nào');
+});
+
+test('B.5 — tổ hợp mới KHÔNG đụng tới ngưỡng, cap, hay tin chỉ có tiền + sức ép', () => {
+  assert.strictEqual(THRESHOLD_HIGH, 45);
+  assert.strictEqual(SCORE_CAP, 69);
+  // "Con cần gấp 5 triệu đóng học phí" — tiền + hối thúc, KHÔNG có đòi mã.
+  // Tổ hợp mới phải không chạm vào lớp mẫu này (xem neg-tien-04).
+  const conXinTien = decide(tinHieu('FIN_TRANSFER_REQUEST', 'MAN_URGENCY'));
+  assert.ok(!conXinTien.appliedSynergies.some((s) => s.id === 'credential+manipulation'));
+});
+
+// ───────── B.6 — bốn mẫu hình tiếng Việt còn trượt (thêm 2/9/2026) ─────────
+//
+// Đo trên 497 mẫu, sau khi gỡ cổng lọc cue: recall tiếng Việt 75,3%. Bốn mẫu
+// hình dưới đây chiếm phần lớn số còn trượt, tất cả đều TRÍCH TÍN HIỆU ĐÚNG mà
+// vẫn dừng dưới 45. Thêm bốn tổ hợp + nâng `coverstory+transfer` 10→12:
+//   recall vi 75,3% → 83,6% · en 87,9% · trộn 94,3% · FP báo đỏ KHÔNG ĐỔI 6,5%
+//
+// Bốn trong năm thay đổi KHÔNG chạm mẫu lành nào. `coverstory+transfer` chạm
+// đúng một mẫu (neg-tien-09) vốn đã ở 69 điểm, nên kết luận không đổi.
+
+test('B.6 — tống tiền bằng ảnh riêng tư + đòi chuyển khoản phải là Nguy hiểm cao', () => {
+  // real-vi-045: "Tôi có hồ sơ và hình ảnh liên quan đến anh. Nếu không chuyển
+  // khoản theo yêu cầu, toàn bộ sẽ được gửi đi."
+  // Trần nhóm manipulation là 24, đúng bằng trọng số MAN_EXTORTION_MEDIA_THREAT,
+  // nên hai tín hiệu sức ép đi kèm KHÔNG cộng thêm gì: 24 + 14 = 38.
+  const kq = decide(tinHieu(
+    'MAN_EXTORTION_MEDIA_THREAT', 'FIN_TRANSFER_REQUEST', 'MAN_FEAR_THREAT', 'MAN_URGENCY',
+  ));
+  assert.strictEqual(kq.baseScore, 38, 'trần nhóm nuốt hết sức ép đi kèm');
+  assert.ok(kq.appliedSynergies.some((s) => s.id === 'extortion+transfer'));
+  assert.strictEqual(kq.riskLabel, 'HIGH');
+});
+
+test('B.6 — giữ máy + doạ + ra ATM rút tiền phải là Nguy hiểm cao', () => {
+  // vi-congan-06: "chú giữ máy đấy nhé, ko được tắt. chú ra cây ATM rút hết
+  // tiền ra rồi tôi hướng dẫn nộp, chậm là bị bắt"
+  const kq = decide(tinHieu(
+    'FIN_TRANSFER_REQUEST', 'MAN_FEAR_THREAT', 'MAN_URGENCY', 'MAN_KEEP_CALL_ACTIVE',
+  ));
+  assert.strictEqual(kq.baseScore, 33);
+  assert.ok(kq.appliedSynergies.some((s) => s.id === 'keepcall+fear+transfer'));
+  assert.ok(kq.score >= 45);
+  assert.strictEqual(kq.riskLabel, 'HIGH');
+});
+
+test('B.6 — cô lập + giữ bí mật + chuyển tiền phải là Nguy hiểm cao', () => {
+  // vi-nguoithan-06: "Mẹ chuyển giúp con 12 triệu, và mẹ đừng kể với bố nhé"
+  // Tách người bị hại khỏi người có thể can là dấu hiệu lõi của kịch bản này.
+  const kq = decide(tinHieu('FIN_TRANSFER_REQUEST', 'MAN_ISOLATION', 'MAN_SECRECY'));
+  assert.strictEqual(kq.baseScore, 34);
+  assert.ok(kq.appliedSynergies.some((s) => s.id === 'secrecy+isolation+transfer'));
+  assert.strictEqual(kq.riskLabel, 'HIGH');
+});
+
+test('B.6 — tên miền giả mạo thương hiệu + gây sức ép phải là Nguy hiểm cao', () => {
+  // real-vi-003: "Tài khoản đang bị ghi nhận phí dịch vụ 2,8 triệu. Hệ thống sẽ
+  // khoá nếu không xác minh." — kèm liên kết không khớp thương hiệu.
+  const kq = decide(tinHieu('WEB_BRAND_DOMAIN_MISMATCH', 'MAN_FEAR_THREAT', 'MAN_URGENCY'));
+  assert.ok(kq.appliedSynergies.some((s) => s.id === 'brandmismatch+pressure'));
+  assert.ok(kq.score >= 45);
+});
+
+test('B.6 — "cớ + hối thúc + chuyển tiền" thoát vùng chết 43 điểm', () => {
+  // 5 mẫu trượt cùng đúng tổ hợp này, gồm cớ chống chế deepfake:
+  // "mình đang kẹt. Video lúc nãy mạng yếu nên không nghe rõ"
+  const kq = decide(tinHieu('FIN_TRANSFER_REQUEST', 'MAN_COVER_STORY', 'MAN_URGENCY'));
+  assert.strictEqual(kq.baseScore, 33, '14 + top2(12,7)=19');
+  assert.strictEqual(kq.score, 45, 'bonus 12 đưa đúng lên ngưỡng, không hơn');
+  assert.strictEqual(kq.riskLabel, 'HIGH');
+});
+
+test('B.6 — không tổ hợp mới nào nổ khi thiếu vế YÊU CẦU HÀNH ĐỘNG', () => {
+  // Sức ép đơn thuần, không đòi tiền / không đòi mã: KHÔNG được lên mức nào.
+  for (const bo of [
+    ['MAN_EXTORTION_MEDIA_THREAT'],
+    ['MAN_KEEP_CALL_ACTIVE', 'MAN_FEAR_THREAT'],
+    ['MAN_ISOLATION', 'MAN_SECRECY'],
+  ]) {
+    const kq = decide(tinHieu(...bo));
+    const moi = ['extortion+transfer', 'keepcall+fear+transfer', 'secrecy+isolation+transfer'];
+    assert.ok(
+      !kq.appliedSynergies.some((s) => moi.includes(s.id)),
+      `${bo.join('+')} không có vế chuyển tiền mà vẫn nổ tổ hợp`,
+    );
+  }
 });
 
 test('B.2 — mỗi bonus chỉ áp dụng MỘT lần dù nhiều tín hiệu cùng khớp', () => {

@@ -15,7 +15,7 @@
 const test = require('node:test');
 const assert = require('node:assert');
 
-const { analyze } = require('../src/analysis/pipeline');
+const { analyze } = require('../backend/src/analysis/pipeline');
 const nhan = (v) => analyze({ vanBan: v }).nhan;
 
 test('bắt được giả danh người thân đòi tiền', () => {

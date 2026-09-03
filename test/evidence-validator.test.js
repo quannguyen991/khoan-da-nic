@@ -9,8 +9,8 @@
 const test = require('node:test');
 const assert = require('node:assert');
 
-const { buildContext } = require('../src/analysis/context-builder');
-const { validateEvidence, locTheoEvidence } = require('../src/analysis/evidence-validator');
+const { buildContext } = require('../backend/src/analysis/context-builder');
+const { validateEvidence, locTheoEvidence } = require('../backend/src/analysis/evidence-validator');
 
 const ctxVi = buildContext('Bác chuyển hết tiền sang tài khoản an toàn ngay.');
 const ctxEn = buildContext('Please move the money to a safe account today.');

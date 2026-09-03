@@ -9,8 +9,8 @@
 const test = require('node:test');
 const assert = require('node:assert');
 
-const J = require('../src/journey-engine');
-const { trichThucThe, thucTheTrung } = require('../src/analysis/entity-extractor');
+const J = require('../backend/src/journey-engine');
+const { trichThucThe, thucTheTrung } = require('../backend/src/analysis/entity-extractor');
 
 const NGAY = 24 * 60 * 60 * 1000;
 const T0 = 1_760_000_000_000;   // mốc thời gian cố định, không đọc đồng hồ
@@ -190,7 +190,7 @@ test('§6.11 — hiển thị rõ BA LỚP: biết chắc · nghi ngờ · cần
 });
 
 test('§4.2 — journey-engine KHÔNG import bộ luật, không tự tính điểm', () => {
-  const nguon = require('node:fs').readFileSync(require.resolve('../src/journey-engine'), 'utf8');
+  const nguon = require('node:fs').readFileSync(require.resolve('../backend/src/journey-engine'), 'utf8');
   assert.ok(!nguon.includes('decision-engine'));
   assert.ok(!/riskScore|riskLabel/.test(nguon));
 });

@@ -20,9 +20,9 @@
 const test = require('node:test');
 const assert = require('node:assert');
 
-const { buildContext, chuanHoa } = require('../src/analysis/context-builder');
-const { directPrecheck } = require('../src/analysis/direct-precheck');
-const { PACKS } = require('../src/analysis/locale-pack-registry');
+const { buildContext, chuanHoa } = require('../backend/src/analysis/context-builder');
+const { directPrecheck } = require('../backend/src/analysis/direct-precheck');
+const { PACKS } = require('../backend/src/analysis/locale-pack-registry');
 
 /** Ba cách viết cùng một số tiền. Người Việt dùng cả ba. */
 const CACH_VIET = [

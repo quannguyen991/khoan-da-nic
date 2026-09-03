@@ -11,27 +11,27 @@
  * đúng — nó phát ra mã, đúng như hợp đồng.
  *
  * Chạy:  node scripts/xuat-hop-dong.js            in ra màn hình
- *        node scripts/xuat-hop-dong.js --ghi      ghi public/config/ma-hop-dong.json
+ *        node scripts/xuat-hop-dong.js --ghi      ghi src/config/ma-hop-dong.json
  */
 
 const fs = require('node:fs');
 const path = require('node:path');
 
-const { RISK_LEVELS, NHAN_HOP_DONG } = require('../src/risk-labels');
-const { SIGNAL_IDS, GROUP_IDS } = require('../src/analysis/signal-registry');
-const { CRITICAL_OVERRIDES } = require('../src/analysis/critical-overrides');
-const { SYNERGIES } = require('../src/analysis/decision-engine');
-const { MUC_CAN_THIEP, MO_TA } = require('../src/intervention-ladder');
-const { GIOI_HAN } = require('../src/analysis/trust-receipt-v2');
-const { HO_KICH_BAN_MA } = require('../src/analysis/pipeline');
-const { GIAI_DOAN } = require('../src/journey-engine');
-const { TRANG_THAI_GIAO_NHAN, VAI_TRO } = require('../src/trusted-circle');
-const { BUOC_CHUNG, THEO_NUOC } = require('../src/analysis/recovery-adapters');
-const { CAU_HOI, NHANH_HANH_DONG } = require('../src/bo-hoi-nhanh');
-const { MA_BUOC_DA_DUNG } = require('../src/kich-ban-di-tiep');
-const { MA_KET_QUA, TU_VUNG_CUM_TU } = require('../src/khoan-proof-ky');
-const { MA_CHIEU_KIEM } = require('../src/verified-request');
-const V = require('../src/version');
+const { RISK_LEVELS, NHAN_HOP_DONG } = require('../backend/src/risk-labels');
+const { SIGNAL_IDS, GROUP_IDS } = require('../backend/src/analysis/signal-registry');
+const { CRITICAL_OVERRIDES } = require('../backend/src/analysis/critical-overrides');
+const { SYNERGIES } = require('../backend/src/analysis/decision-engine');
+const { MUC_CAN_THIEP, MO_TA } = require('../backend/src/intervention-ladder');
+const { GIOI_HAN } = require('../backend/src/analysis/trust-receipt-v2');
+const { HO_KICH_BAN_MA } = require('../backend/src/analysis/pipeline');
+const { GIAI_DOAN } = require('../backend/src/journey-engine');
+const { TRANG_THAI_GIAO_NHAN, VAI_TRO } = require('../backend/src/trusted-circle');
+const { BUOC_CHUNG, THEO_NUOC } = require('../backend/src/analysis/recovery-adapters');
+const { CAU_HOI, NHANH_HANH_DONG } = require('../backend/src/bo-hoi-nhanh');
+const { MA_BUOC_DA_DUNG } = require('../backend/src/kich-ban-di-tiep');
+const { MA_KET_QUA, TU_VUNG_CUM_TU } = require('../backend/src/khoan-proof-ky');
+const { MA_CHIEU_KIEM } = require('../backend/src/verified-request');
+const V = require('../backend/src/version');
 
 /** §HĐ — bảy trường, không hơn không kém. */
 const TRUONG_HOP_DONG = ['nhan', 'maLyDo', 'daKiem', 'chuaKiem', 'hoKichBan', 'aiDaChay', 'canThiep'];
@@ -46,6 +46,17 @@ const MA_DA_KIEM = [
 const MA_CHUA_KIEM = [
   'chua_nghe_duoc_cuoc_goi', 'khong_doc_duoc_anh', 'khong_mo_duoc_link',
   'ai_khong_phan_hoi', 'ai_khong_chay', 'khong_nghe_duoc_ghi_am', 'noi_dung_qua_dai',
+  /**
+   * §4.3 — ĐỐI XỨNG VỚI `noi_dung_qua_dai`. Thêm vào hợp đồng 2/9/2026.
+   *
+   * Mã này được `pipeline.js` phát ra từ 20/8/2026 nhưng CHƯA BAO GIỜ được khai
+   * ở đây, nên `hop-dong-ma.test.js` báo "chuaKiem lạ" ngay khi bộ test được
+   * trỏ về đúng cây mã. Backend phát ra một mã frontend không có trong hợp đồng
+   * là đúng thứ §HĐ sinh ra để chặn.
+   *
+   * Câu hiển thị đã có sẵn ở `src/catalog.ts` (`noi_dung_qua_ngan`).
+   */
+  'noi_dung_qua_ngan',
   /**
    * §4.3 — ba chỗ hỏng của nguồn ghi âm trên máy. BA MÃ RIÊNG, đừng gộp:
    *  · chua_tai_xong_model_nghe  — bác CHƯA CÓ bộ nghe. Bác tự sửa được.
@@ -194,12 +205,12 @@ if (require.main === module) {
   console.log(`  ${String(tong).padStart(4)}  TỔNG\n`);
 
   if (process.argv.includes('--ghi')) {
-    const p = path.join(__dirname, '..', 'public', 'config', 'ma-hop-dong.json');
+    const p = path.join(__dirname, '..', 'src', 'config', 'ma-hop-dong.json');
     fs.mkdirSync(path.dirname(p), { recursive: true });
     fs.writeFileSync(p, JSON.stringify(hd, null, 2), 'utf8');
     console.log(`  đã ghi ${p}\n`);
   } else {
-    console.log('  Thêm --ghi để xuất public/config/ma-hop-dong.json\n');
+    console.log('  Thêm --ghi để xuất src/config/ma-hop-dong.json\n');
   }
 }
 

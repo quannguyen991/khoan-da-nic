@@ -11,8 +11,8 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 
-const { dungSafetyCard, suThatKienTruc, MUC_TIEU } = require('../src/safety-card');
-const { dungTrang } = require('../src/safety-card-page');
+const { dungSafetyCard, suThatKienTruc, MUC_TIEU } = require('../backend/src/safety-card');
+const { dungTrang } = require('../backend/src/safety-card-page');
 
 const tam = (ten) => path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'kd-')), ten);
 const ghi = (o) => { const p = tam('latest.json'); fs.writeFileSync(p, JSON.stringify(o)); return p; };
@@ -101,8 +101,10 @@ test('Sự thật kiến trúc khớp code, không phải số chép tay', () =>
   const k = suThatKienTruc();
   assert.strictEqual(k.soTinHieu, 58);
   assert.strictEqual(k.soCriticalOverride, 10);
-  // 10 tổ hợp gốc Phụ lục B.2 + 3 tổ hợp thêm 15/8/2026 (rule 1.1.0).
-  assert.strictEqual(k.soToHopCongHuong, 13);
+  // 10 tổ hợp gốc Phụ lục B.2 + 3 tổ hợp thêm 15/8/2026 (rule 1.1.0)
+  // + credential+manipulation (rule 1.2.0, xem B.5)
+  // + 4 tổ hợp nhắm mẫu hình tiếng Việt còn trượt (rule 1.3.0, xem B.6).
+  assert.strictEqual(k.soToHopCongHuong, 18);
   assert.strictEqual(k.thangDiem, '0–69');
   assert.strictEqual(k.nguong, '20/45');
   assert.strictEqual(k.aiQuyetDinhMuc, false);

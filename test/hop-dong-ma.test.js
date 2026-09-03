@@ -19,11 +19,11 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const { dungHopDong, TRUONG_HOP_DONG } = require('../scripts/xuat-hop-dong');
-const { analyze, toHopDong } = require('../src/analysis/pipeline');
+const { analyze, toHopDong } = require('../backend/src/analysis/pipeline');
 
 const hd = dungHopDong();
 const GOC = path.join(__dirname, '..');
-const DUONG_XUAT = path.join(GOC, 'public', 'config', 'ma-hop-dong.json');
+const DUONG_XUAT = path.join(GOC, 'src', 'config', 'ma-hop-dong.json');
 
 /** Mã NGƯỜI DÙNG ĐỌC — nhóm duy nhất cần nhãn i18n và cần định dạng chặt. */
 const maCanNhan = () => hd._canNhanI18n.flatMap((k) => hd[k]);

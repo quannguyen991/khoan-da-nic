@@ -11,7 +11,7 @@ const {
   SPEECH_ACTS,
   NON_ACTIONABLE_ACTS,
   segmentsForScope,
-} = require('../src/analysis/context-builder');
+} = require('../backend/src/analysis/context-builder');
 
 const actsCua = (t) => buildContext(t).segments.map((s) => s.speechAct);
 const doanHanhDong = (t) => buildContext(t).segments.filter((s) => s.actionable);

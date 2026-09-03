@@ -106,25 +106,39 @@ test('§FE0.3 — sàn dùng min-block-size + display grid, KHÔNG dùng min-hei
  * dẫn sai thì nó không báo gì — không như `skip` có lý do, thứ vẫn hiện ra
  * trong kết quả chạy. Đừng viết nhánh điều kiện quanh phần khẳng định.
  */
-const DUONG_DUNG = 'public/app';
-const COA_BAN_DUNG = C.coTep(`${DUONG_DUNG}/index.html`);
-const BO_QUA_DUNG = COA_BAN_DUNG
-  ? false
-  : `chua co ${DUONG_DUNG}/index.html — chay "npm run dung-giao-dien" truoc`;
+/**
+ * ⚠️ SỬA 2/9/2026 — TRỎ VÀO NGUỒN THẬT, KHÔNG VÀO BẢN DỰNG CŨ.
+ *
+ * Hai test dưới đây đọc `public/app/index.html` và `public/app/sw.js` — bản
+ * dựng của KIẾN TRÚC CŨ, đóng băng từ 16/8/2026. Chúng vẫn XANH, nhưng xanh
+ * về một bản mã không ai chạy nữa: app hiện tại dựng bằng Vite từ `index.html`
+ * ở gốc, service worker sống là `public/sw.js`, bản dựng ra `dist/`.
+ *
+ * Đúng dạng lỗi mà chú thích phía trên tệp này đã kể — "test từng xanh mà
+ * không chạy gì" — chỉ khác là lần này nó CÓ chạy, nhưng chạy trên tệp sai.
+ * Cả hai đều cho một dấu ✔ không có nghĩa.
+ *
+ * Nay đọc thẳng NGUỒN. `index.html` ở gốc là thứ Vite dựng ra, nên thứ tự thẻ
+ * <link> trong đó CHÍNH LÀ thứ tự cascade của bản dựng — không cần build
+ * trước, và không bao giờ lệch pha với mã đang sửa.
+ */
+const HTML_NGUON = 'index.html';
+const SW_NGUON = 'public/sw.js';
+const BO_QUA_DUNG = false;
 
 test('§4.4 — vung-cham-san.css nằm trong APP_SHELL của service worker',
   { skip: BO_QUA_DUNG }, () => {
     // Sàn tiếp cận không được phụ thuộc vào việc có mạng.
-    assert.ok(C.coTep(`${DUONG_DUNG}/sw.js`), 'thiếu service worker trong bản dựng');
-    assert.match(C.doc(`${DUONG_DUNG}/sw.js`), /vung-cham-san\.css/,
+    assert.ok(C.coTep(SW_NGUON), `thiếu service worker ${SW_NGUON}`);
+    assert.match(C.doc(SW_NGUON), /vung-cham-san\.css/,
       'vung-cham-san.css phải nằm trong APP_SHELL của service worker');
   });
 
 test('§4.4 — vung-cham-san.css nạp SAU CÙNG, không CSS nào đè được',
   { skip: BO_QUA_DUNG }, () => {
-    const html = C.doc(`${DUONG_DUNG}/index.html`);
+    const html = C.doc(HTML_NGUON);
     const viTriSan = html.lastIndexOf('vung-cham-san.css');
-    assert.ok(viTriSan >= 0, 'bản dựng chưa nạp vung-cham-san.css');
+    assert.ok(viTriSan >= 0, 'index.html gốc chưa nạp vung-cham-san.css');
 
     const cssKhac = [...html.matchAll(/href="([^"]*\.css)"/g)]
       .filter((m) => !m[1].includes('vung-cham-san'));

@@ -23,7 +23,7 @@
 const test = require('node:test');
 const assert = require('node:assert');
 
-const P = require('../src/push');
+const P = require('../backend/src/push');
 
 const TOKEN = 'fVx9K2mQ:APA91bH-token-gia-lap-cho-kiem-thu_0123456789';
 const ENV_FCM = { FCM_SERVER_KEY: 'khoa-may-chu-gia-lap' };
@@ -148,7 +148,7 @@ test('Đường web KHÔNG nhận token native trá hình', () => {
 // cửa mà bản APK gõ vào. Nếu route tự kiểm khuôn Web Push thì token FCM bị
 // chặn ở đây, và `guiCanhBao` không bao giờ có cơ hội chạy.
 
-const { app } = require('../server');
+const { app } = require('../backend/server');
 
 let server;
 let goc;

@@ -19,7 +19,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 
-const DUONG_CHI_TIET = path.join(__dirname, '..', 'eval', 'results', 'chi-tiet.jsonl');
+const DUONG_CHI_TIET = path.join(__dirname, '..', '..', 'eval', 'results', 'chi-tiet.jsonl');
 
 /** Dưới ngưỡng này thì họ kịch bản được coi là điểm mù. */
 const NGUONG_RECALL = 0.6;

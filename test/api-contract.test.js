@@ -11,7 +11,7 @@ const assert = require('node:assert');
 
 // Test KHÔNG được gọi ra gateway thật — vừa tốn tiền, vừa làm kết quả phụ thuộc mạng.
 process.env.KHOAN_DA_KHONG_GOI_AI = '1';
-const { app } = require('../server');
+const { app } = require('../backend/server');
 
 const TRUONG_HOP_DONG = ['nhan', 'maLyDo', 'daKiem', 'chuaKiem', 'hoKichBan', 'aiDaChay', 'canThiep'];
 

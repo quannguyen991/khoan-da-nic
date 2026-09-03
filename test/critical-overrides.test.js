@@ -7,11 +7,11 @@
 const test = require('node:test');
 const assert = require('node:assert');
 
-const { analyze } = require('../src/analysis/pipeline');
+const { analyze } = require('../backend/src/analysis/pipeline');
 const {
   evaluateOverrides,
   CRITICAL_OVERRIDES,
-} = require('../src/analysis/critical-overrides');
+} = require('../backend/src/analysis/critical-overrides');
 
 const noTru = (vanBan, opts = {}) => analyze({ vanBan, ...opts }).overrides;
 const co = (vanBan, id, opts) => noTru(vanBan, opts).includes(id);

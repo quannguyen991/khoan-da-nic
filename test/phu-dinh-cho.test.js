@@ -23,7 +23,7 @@
 const test = require('node:test');
 const assert = require('node:assert');
 
-const { analyze } = require('../src/analysis/pipeline');
+const { analyze } = require('../backend/src/analysis/pipeline');
 
 const nhan = (v) => analyze({ vanBan: v }).nhan;
 
@@ -65,7 +65,7 @@ test('phủ định THẬT vẫn được nhận, không báo động oan', () =
  */
 test('`cho` không nằm trong danh sách phủ định bỏ dấu', () => {
   const src = require('node:fs')
-    .readFileSync(require.resolve('../src/analysis/direct-precheck.js'), 'utf8');
+    .readFileSync(require.resolve('../backend/src/analysis/direct-precheck.js'), 'utf8');
   const m = src.match(/const PHU_DINH = \/\(([^)]+)\)/);
   assert.ok(m, 'không tìm thấy PHU_DINH — đổi tên thì cập nhật test này');
   const tu = m[1].split('|');
@@ -75,7 +75,7 @@ test('`cho` không nằm trong danh sách phủ định bỏ dấu', () => {
 
 test('"chớ" vẫn bắt được trên bản còn dấu', () => {
   const src = require('node:fs')
-    .readFileSync(require.resolve('../src/analysis/direct-precheck.js'), 'utf8');
+    .readFileSync(require.resolve('../backend/src/analysis/direct-precheck.js'), 'utf8');
   assert.match(src, /PHU_DINH_CO_DAU[\s\S]{0,80}chớ/,
     'mất đường bắt "chớ" — gỡ `cho` mà không bù lại là mất hẳn một dạng phủ định');
 });

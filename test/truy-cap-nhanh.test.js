@@ -12,11 +12,11 @@ const assert = require('node:assert');
 const fs = require('node:fs');
 const path = require('node:path');
 
-const { analyze, toHopDong, unreadableInputFloor } = require('../src/analysis/pipeline');
-const Q = require('../src/bo-hoi-nhanh');
-const { MUC_CAN_THIEP } = require('../src/intervention-ladder');
-const { CRITICAL_OVERRIDES } = require('../src/analysis/critical-overrides');
-const { layDanhBa } = require('../src/analysis/verified-institution-registry');
+const { analyze, toHopDong, unreadableInputFloor } = require('../backend/src/analysis/pipeline');
+const Q = require('../backend/src/bo-hoi-nhanh');
+const { MUC_CAN_THIEP } = require('../backend/src/intervention-ladder');
+const { CRITICAL_OVERRIDES } = require('../backend/src/analysis/critical-overrides');
+const { layDanhBa } = require('../backend/src/analysis/verified-institution-registry');
 
 // ═══════════ §15.9.1 — trả lời hết bằng KHÔNG ═══════════
 
@@ -188,7 +188,7 @@ const MIEN_VI_LA_TEN_THU_DOAN = new Set([
 
 test('§15.9.3 — không MÃ nào chứa "bảo vệ cuộc gọi" / "đã chặn" / "đã xác minh" / "an toàn"', () => {
   const hd = JSON.parse(fs.readFileSync(
-    path.join(__dirname, '..', 'public', 'config', 'ma-hop-dong.json'), 'utf8'));
+    path.join(__dirname, '..', 'src', 'config', 'ma-hop-dong.json'), 'utf8'));
   const maNguoiDoc = hd._canNhanI18n.flatMap((k) => hd[k]);
   for (const ma of maNguoiDoc) {
     const t = ma.toLowerCase();
@@ -201,7 +201,7 @@ test('§15.9.3 — không MÃ nào chứa "bảo vệ cuộc gọi" / "đã ch�
 
 test('Danh sách miễn CHỈ gồm tên thủ đoạn, không có mã thông điệp nào', () => {
   // Chan viec ai do nem mot ma thong diep vao danh sach mien de lam xanh test.
-  const { MA_BUOC_DA_DUNG } = require('../src/kich-ban-di-tiep');
+  const { MA_BUOC_DA_DUNG } = require('../backend/src/kich-ban-di-tiep');
   for (const ma of MIEN_VI_LA_TEN_THU_DOAN) {
     const laTinHieu = /^(FIN_|OFF_|CRED_|DEV_|MAN_|ID_|WEB_|CASE_)/.test(ma);
     const laCauHoi = ma.startsWith('ho_');
@@ -214,7 +214,7 @@ test('Danh sách miễn CHỈ gồm tên thủ đoạn, không có mã thông đ
 });
 
 test('§15.6.1 — KHÔNG có ba mức xám/vàng/đỏ: chỉ đúng ba nhãn rủi ro', () => {
-  const { RISK_LEVELS } = require('../src/risk-labels');
+  const { RISK_LEVELS } = require('../backend/src/risk-labels');
   assert.strictEqual(RISK_LEVELS.length, 3);
   // "Có ba mức tức là có mức nhẹ nhất, và mức nhẹ nhất LUÔN bị đọc thành an toàn."
   assert.ok(!RISK_LEVELS.some((r) => /SAFE|OK|GREEN|NORMAL/i.test(r)));

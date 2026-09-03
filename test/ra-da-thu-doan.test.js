@@ -10,10 +10,10 @@
 const test = require('node:test');
 const assert = require('node:assert');
 
-const S = require('../src/intel-store');
-const R = require('../src/intel-radar');
-const B = require('../src/blind-spot');
-const { analyze } = require('../src/analysis/pipeline');
+const S = require('../backend/src/intel-store');
+const R = require('../backend/src/intel-radar');
+const B = require('../backend/src/blind-spot');
+const { analyze } = require('../backend/src/analysis/pipeline');
 
 const MUC_TOT = {
   maThuDoan: 'gia_danh_cong_an',
@@ -124,7 +124,7 @@ test('§4.2 — pipeline ra CÙNG MỘT MỨC dù có Ra-đa hay không', () => 
 
 test('§4.2 — decision-engine KHÔNG import gì từ tầng intel', () => {
   const nguon = require('node:fs').readFileSync(
-    require.resolve('../src/analysis/decision-engine'), 'utf8');
+    require.resolve('../backend/src/analysis/decision-engine'), 'utf8');
   assert.ok(!nguon.includes('intel'), 'bộ luật không được biết tới Ra-đa');
 });
 
@@ -155,6 +155,6 @@ test('Điểm mù CHỈ hiện ở /transparency, không hiện ở màn kết q
 });
 
 test('§4.3 — lượt AI hỏng KHÔNG được tính vào phép đo điểm mù', () => {
-  const nguon = require('node:fs').readFileSync(require.resolve('../src/blind-spot'), 'utf8');
+  const nguon = require('node:fs').readFileSync(require.resolve('../backend/src/blind-spot'), 'utf8');
   assert.match(nguon, /r\.hong/, 'phải loại lượt hỏng trước khi tính recall');
 });

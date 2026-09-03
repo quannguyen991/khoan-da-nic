@@ -15,8 +15,8 @@
 const test = require('node:test');
 const assert = require('node:assert');
 
-const { analyze } = require('../src/analysis/pipeline');
-const { coDinhCuocGoi } = require('../src/analysis/co-dinh-cuoc-goi');
+const { analyze } = require('../backend/src/analysis/pipeline');
+const { coDinhCuocGoi } = require('../backend/src/analysis/co-dinh-cuoc-goi');
 
 const co = (input) => coDinhCuocGoi(input);
 const chuaKiemCua = (input) => analyze(input).chuaKiem;

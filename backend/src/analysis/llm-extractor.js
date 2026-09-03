@@ -142,6 +142,29 @@ Chỉ trả JSON đúng dạng:
 {"signals":[{"id":"<SIGNAL_ID>","state":"present|unknown","confidence":0.0-1.0,
 "evidence":[{"quote":"...","start":0,"end":0,"sourceId":"van_ban"}]}]}
 
+TIẾNG VIỆT VIẾT KHÔNG DẤU vẫn phải đọc hiểu bình thường. "chuyen tien",
+"nhiem vu", "hoa hong", "nap tien" là tiếng Việt, không phải chữ vô nghĩa.
+Trích dẫn giữ NGUYÊN dạng không dấu như trong nội dung gốc.
+
+Hai ví dụ dưới đây chỉ để bạn thấy dạng đầu ra. Chúng KHÔNG phải nội dung cần
+phân tích, và KHÔNG phải khuôn để so khớp — nội dung thật sẽ khác.
+
+Ví dụ A, có tín hiệu:
+<noi_dung_can_phan_tich sourceId="van_ban">
+Em oi ben chi dang tuyen nguoi lam viec tai nha, moi ngay 300k. Em chuyen truoc 500k tien coc dong phuc roi chi gui viec nhe
+</noi_dung_can_phan_tich>
+{"signals":[{"id":"OFF_TASK_PREPAY","state":"present","confidence":0.9,"evidence":[{"quote":"tuyen nguoi lam viec tai nha, moi ngay 300k","start":0,"end":0,"sourceId":"van_ban"}]},{"id":"OFF_ADVANCE_FEE","state":"present","confidence":0.9,"evidence":[{"quote":"chuyen truoc 500k tien coc dong phuc","start":0,"end":0,"sourceId":"van_ban"}]}]}
+
+Ví dụ B, KHONG co tin hieu nao:
+<noi_dung_can_phan_tich sourceId="van_ban">
+Me oi chieu nay con qua don me di kham, me nho mang the bao hiem nhe
+</noi_dung_can_phan_tich>
+{"signals":[]}
+
+Ví dụ B quan trọng ngang ví dụ A: có nhắc tới việc phải làm, tới người thân,
+nhưng không ai yêu cầu chuyển tiền cho người lạ, không gấp gáp, không bí mật.
+Danh sách rỗng là một câu trả lời ĐÚNG và thường gặp.
+
 SIGNAL_ID hợp lệ, kèm nghĩa của từng mã. Chỉ dùng mã có trong danh sách này:
 ${SIGNAL_IDS.map((id) => `- ${id}: ${MO_TA[id] || ''}`).join('\n')}`;
 
@@ -149,14 +172,31 @@ ${SIGNAL_IDS.map((id) => `- ${id}: ${MO_TA[id] || ''}`).join('\n')}`;
  * §12 — nội dung người dùng nằm trong THẺ DỮ LIỆU, không trộn vào chỉ thị.
  * Đây là hàng rào chống tiêm nhiễm lời nhắc, không phải chuyện định dạng.
  */
-function dungLoiNhac(vanBan, sourceId = 'van_ban') {
+function dungLoiNhac(vanBan, sourceId = 'van_ban', anh = null) {
+  let userContent;
+  if (anh && typeof anh === 'string' && anh.trim()) {
+    const imgUrl = anh.startsWith('data:') ? anh : `data:image/jpeg;base64,${anh}`;
+    userContent = [
+      {
+        type: 'text',
+        text: `<noi_dung_can_phan_tich sourceId="${sourceId}">\n${vanBan || '(Người dùng gửi ảnh tình huống cần kiểm tra lừa đảo)'}\n</noi_dung_can_phan_tich>\n\nLiệt kê tín hiệu quan sát được từ ảnh và văn bản.`,
+      },
+      {
+        type: 'image_url',
+        image_url: { url: imgUrl },
+      },
+    ];
+  } else {
+    userContent = `<noi_dung_can_phan_tich sourceId="${sourceId}">\n${vanBan || ''}\n`
+      + '</noi_dung_can_phan_tich>\n\nLiệt kê tín hiệu quan sát được.';
+  }
+
   return {
     messages: [
       { role: 'system', content: CHI_THI },
       {
         role: 'user',
-        content: `<noi_dung_can_phan_tich sourceId="${sourceId}">\n${vanBan}\n`
-          + '</noi_dung_can_phan_tich>\n\nLiệt kê tín hiệu quan sát được.',
+        content: userContent,
       },
     ],
   };
@@ -168,12 +208,37 @@ function dungLoiNhac(vanBan, sourceId = 'van_ban') {
  */
 async function trichTinHieu(vanBan, opts = {}) {
   try {
-    const { messages } = dungLoiNhac(vanBan, opts.sourceId);
-    const tho = await goiChat(messages, opts);
+    const { messages } = dungLoiNhac(vanBan, opts.sourceId, opts.anh);
+    /*
+     * ⚠️ `goiChat` NAY TRẢ VỀ CẢ ĐƯỜNG ĐÃ DÙNG, không chỉ nội dung.
+     * Có chuỗi dự phòng (gateway → qwen cục bộ → Gemini), nên đường thật sự trả
+     * lời có thể không phải đường chính. §11: màn kết quả nói với bác "AI chạy ở
+     * đâu", và câu đó phải đúng với lượt này chứ không đúng với cấu hình.
+     */
+    const { noiDung: tho, cauHinh: duongDaDung } = await goiChat(messages, opts);
     const doc = parseJsonLoose(tho);
-    if (!doc) return { signals: [], rejected: [], aiDaChay: false, loi: 'AI_SCHEMA_INVALID' };
+    if (!doc) {
+      /**
+       * ⚠️ HAI CA KHÁC NHAU, ĐỪNG GỘP VÀO MỘT MÃ.
+       *   · trả về RỖNG        → model tiêu hết ngân sách token cho phần suy nghĩ,
+       *                          hoặc bị chặn bởi bộ lọc an toàn của nhà cung cấp.
+       *   · trả về CÓ CHỮ nhưng không phải JSON → lời nhắc hoặc model không theo
+       *                          được định dạng.
+       * Hai nguyên nhân, hai cách sửa. Gộp làm một là phải đoán.
+       */
+      const rong = typeof tho !== 'string' || !tho.trim();
+      return {
+        signals: [], rejected: [], aiDaChay: false,
+        loi: rong ? 'AI_TRA_LOI_RONG' : 'AI_SCHEMA_INVALID',
+      };
+    }
     const kq = validateExtraction(doc, opts.sourceId);
-    return { ...kq, aiDaChay: true, loi: null };
+    /*
+     * `noiChayThat` là đường ĐÃ TRẢ LỜI cho lượt này, không phải đường được
+     * cấu hình. Khi đường chính chết và app rơi xuống qwen cục bộ, hai thứ đó
+     * khác nhau — và bác cần biết cái thứ nhất (§11).
+     */
+    return { ...kq, aiDaChay: true, loi: null, noiChayThat: duongDaDung?.noiChay ?? null };
   } catch (e) {
     const ma = e instanceof LoiNhaCungCap ? e.ma : 'AI_NETWORK';
     return { signals: [], rejected: [], aiDaChay: false, loi: ma, chiTiet: e };

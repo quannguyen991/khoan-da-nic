@@ -16,6 +16,7 @@ const path = require('node:path');
 
 const express = require('express');
 const { analyze, toHopDong } = require('./src/analysis/pipeline');
+const { CAU_HOI } = require('./src/bo-hoi-nhanh');
 const { trichTinHieu } = require('./src/analysis/llm-extractor');
 const { layCauHinh } = require('./src/ai/fable-client');
 const { dungSafetyCard } = require('./src/safety-card');
@@ -44,6 +45,23 @@ const SO_LUOT_TOI_DA = 30;
 
 // Cho phép test chạy mà không gọi ra gateway thật.
 const KHONG_GOI_AI = process.env.KHOAN_DA_KHONG_GOI_AI === '1';
+
+/**
+ * LỖI AI GẦN NHẤT — để chẩn đoán được bản đang chạy thật mà không cần vào log.
+ *
+ * ⚠️ §6.9 — CHỈ MÃ LỖI VÀ MÃ TRẠNG THÁI HTTP. Tuyệt đối không giữ nội dung
+ * người dùng, không giữ khoá, không giữ thân yêu cầu. `providerMessage` của nhà
+ * cung cấp có thể chứa nguyên văn lời nhắc nên KHÔNG được đưa vào đây — nó chỉ
+ * đi vào log máy chủ.
+ *
+ * Vì sao cần: khi bản công khai trả "Lượt này AI không trả lời được", không có
+ * cách nào biết vì khoá sai, hết quota, hay tên model sai — mà ba nguyên nhân đó
+ * cần ba cách sửa khác nhau.
+ */
+let loiAiGanNhat = null;
+
+/** Lượt AI gần nhất CHẠY ĐƯỢC: nhận mấy tín hiệu, loại mấy, vì sao. */
+let chanDoanAiGanNhat = null;
 
 const app = express();
 app.disable('x-powered-by');   // §6.8 — không rò phiên bản
@@ -74,23 +92,79 @@ app.disable('x-powered-by');   // §6.8 — không rò phiên bản
  * ra ngoài mỗi lần bác mở app — đủ để bên đó biết bác đang dùng Khoan Đã.
  * Giao diện hiện còn vài ảnh mẫu từ unsplash.com; chúng sẽ bị chặn, và ĐÓ LÀ
  * HÀNH VI ĐÚNG — cần thay bằng ảnh cục bộ chứ không phải nới CSP.
+ *
+ * ⚠️⚠️ BA HEADER NÀY TỪNG BỊ GỠ MẤT, VÀ KHỐI CHÚ THÍCH Ở TRÊN VẪN NẰM LẠI.
+ * Đo 18/8/2026: cả tệp chỉ còn `x-content-type-options`, trong khi 20 dòng chú
+ * thích vẫn mô tả một CSP không tồn tại. Một chú thích mồ côi như vậy còn tệ hơn
+ * không có chú thích — người đọc mã tin rằng chỗ đó đã được bảo vệ.
+ *
+ * ⚠️ HAI CẤU HÌNH, VÌ VITE Ở CHẾ ĐỘ PHÁT TRIỂN CHÈN SCRIPT INLINE và mở
+ * WebSocket cho HMR. Bản chạy thật (`NODE_ENV=production`) dùng chính sách chặt;
+ * bản phát triển nới đúng hai thứ đó và KHÔNG nới `img-src` / `font-src` /
+ * `connect-src` ra ngoài `'self'` — hai cái sau mới là đường rò rỉ.
  */
+const LA_BAN_CHAY_THAT = process.env.NODE_ENV === 'production';
+
+const CSP = [
+  "default-src 'self'",
+  LA_BAN_CHAY_THAT ? "script-src 'self'" : "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+  "worker-src 'self'",              // ⚠️ thiếu dòng này là service worker chết
+  "style-src 'self' 'unsafe-inline'",
+  "font-src 'self' data:",
+  "img-src 'self' data: blob:",
+  LA_BAN_CHAY_THAT ? "connect-src 'self'" : "connect-src 'self' ws: wss:",
+  "object-src 'none'",
+  "base-uri 'none'",
+  /*
+   * ⚠️ `'self'` CHỨ KHÔNG PHẢI `'none'` — VÌ KHUNG ĐIỆN THOẠI LÀ MỘT <iframe>
+   * CÙNG NGUỒN.
+   *
+   * Trên màn hình rộng, `src/khung-dien-thoai.ts` bọc app trong một iframe 390px
+   * để media query của Tailwind thấy đúng bề rộng điện thoại. Với `'none'`,
+   * trình duyệt chặn thẳng iframe đó — và chặn **không báo gì cho người dùng**:
+   * khung vẫn vẽ ra đủ viền máy, bên trong trống trơn. Đo 20/8/2026, chỉ có
+   * console nói "violates frame-ancestors 'none'".
+   *
+   * `'self'` vẫn chặn đúng thứ cần chặn: trang của kẻ khác **không** nhúng được
+   * app này vào để lừa bác bấm nhầm (clickjacking). Chỉ chính tên miền này mới
+   * nhúng được chính nó.
+   *
+   * ⚠️ `x-frame-options` ở dưới PHẢI ĐỔI THEO. Nó là header cũ nhưng trình
+   * duyệt vẫn tôn trọng; để `DENY` thì nó chặn iframe bất kể CSP nói gì.
+   */
+  "frame-ancestors 'self'",
+].join('; ');
+
 app.use((req, res, next) => {
   res.setHeader('x-content-type-options', 'nosniff');
-  res.setHeader('x-frame-options', 'DENY');
+  res.setHeader('x-frame-options', 'SAMEORIGIN');   // đi cặp với frame-ancestors 'self' ở trên
   res.setHeader('referrer-policy', 'no-referrer');
-  res.setHeader('content-security-policy', [
-    "default-src 'self'",
-    "script-src 'self'",
-    "worker-src 'self'",              // ⚠️ thiếu dòng này là service worker chết
-    "style-src 'self' 'unsafe-inline'",
-    "font-src 'self' data:",
-    "img-src 'self' data:",
-    "connect-src 'self'",
-    "object-src 'none'",
-    "base-uri 'none'",
-    "frame-ancestors 'none'",
-  ].join('; '));
+  res.setHeader('content-security-policy', CSP);
+
+  /*
+   * ⚠️ HSTS — CHỈ KHI CHẠY THẬT, VÀ ĐÂY LÀ LÝ DO PHẢI CÓ ĐIỀU KIỆN.
+   *
+   * Header này bảo trình duyệt "từ nay chỉ nói chuyện với tên miền này qua
+   * HTTPS" và nhớ trong một năm. Gửi nó từ máy dev chạy `http://localhost` là
+   * tự khoá chính mình: trình duyệt sẽ từ chối mọi lần mở localhost sau đó,
+   * kể cả của dự án khác cùng cổng, và gỡ ra phải vào tận trang cấu hình nội
+   * bộ của trình duyệt.
+   *
+   * Với app này HSTS không phải trang trí: bản APK gọi sang máy chủ qua mạng
+   * di động ở nơi công cộng, và một lần bị hạ cấp xuống http là toàn bộ nội
+   * dung tin nhắn bác gửi đi kiểm nằm trần trên đường truyền.
+   */
+  if (process.env.NODE_ENV === 'production') {
+    res.setHeader('strict-transport-security', 'max-age=31536000; includeSubDomains');
+  }
+
+  /*
+   * Máy chủ này không cần camera, micro, vị trí hay cảm biến nào. Khai ra để
+   * nếu có ngày một tệp tĩnh bị chèn mã lạ, nó cũng không xin được những thứ đó.
+   */
+  res.setHeader('permissions-policy',
+    'camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()');
+
   next();
 });
 
@@ -208,8 +282,59 @@ const chanVuViec = gioiHanTanSuat('vu_viec');
  * Nó đọc bản ghi chữ ký từ kho của máy chủ rồi truyền qua THAM SỐ THỨ HAI của
  * `analyze()`. Hàng rào: test/co-xac-minh-khong-tu-khai.test.js.
  */
+const KHOA_BO_HOI_NHANH = new Set(CAU_HOI.map((c) => c.ma));
+
+function locTraLoiBoHoiNhanh(raw) {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return undefined;
+  const sach = {};
+  for (const [k, v] of Object.entries(raw)) {
+    if (KHOA_BO_HOI_NHANH.has(k) && typeof v === 'boolean') {
+      sach[k] = v;
+    }
+  }
+  return Object.keys(sach).length > 0 ? sach : undefined;
+}
+
+/**
+ * TRẠNG THÁI MÁY — nguồn đầu vào thứ năm, chỉ bản APK gửi.
+ *
+ * ⚠️ LỌC THÀNH BA TRƯỜNG, ĐÚNG KIỂU, KHÔNG GIỮ GÌ KHÁC.
+ *
+ * Bản APK cố tình KHÔNG gửi tên ứng dụng lên đây (xem `tomTatChoMayChu` bên
+ * `src/native.ts`) — danh sách app đã cài là dấu vân tay rất mạnh của một
+ * người. Bộ lọc này là hàng rào thứ hai cho đúng điều đó: kể cả khi ai đó sửa
+ * frontend để gửi tên app lên, máy chủ vẫn vứt đi trước khi chạm tới bộ luật,
+ * và không có đường nào để nó lọt vào nhật ký (§6.9).
+ *
+ * ⚠️ NGƯỜI GỌI TỰ KHAI, NÊN CHỈ ĐƯỢC LÀM TĂNG CẢNH GIÁC (§4.2).
+ * `soUngDungLa: 0` KHÔNG trừ điểm, KHÔNG hạ mức, KHÔNG sinh tín hiệu "an toàn"
+ * — nó chỉ khiến `daKiem` có thêm `trang_thai_may`, mà `daKiem` không nằm trong
+ * công thức điểm. Hàng rào: test §4.2 "máy sạch KHÔNG hạ mức".
+ *
+ * Nếu có ngày ai đó muốn cho máy sạch trừ điểm cho đỡ báo động giả: đó chính là
+ * câu thần chú §12 nói tới. Kẻ lừa đảo chỉ cần dặn nạn nhân gỡ app trước khi
+ * kiểm, và cả hệ thống tự hạ mức giúp chúng.
+ */
+function locTrangThaiMay(raw) {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return undefined;
+  if (typeof raw.docDuoc !== 'boolean') return undefined;
+  const so = Number(raw.soUngDungLa);
+  return {
+    docDuoc: raw.docDuoc,
+    soUngDungLa: Number.isFinite(so) && so > 0 ? Math.min(Math.floor(so), 50) : 0,
+    coCaiTrongTuan: raw.coCaiTrongTuan === true,
+  };
+}
+
 async function xuLyPhanTich(req, res) {
-  const { vanBan, anh, ghiAm, ghiAmConfidence, ghiAmFailed, ghiAmMaLoi } = req.body || {};
+  const {
+    vanBan, anh, ghiAm, ghiAmConfidence, ghiAmFailed, ghiAmMaLoi,
+    traLoiBoHoiNhanh: traLoiBoHoiNhanhRaw,
+    trangThaiMay: trangThaiMayRaw,
+  } = req.body || {};
+
+  const traLoiBoHoiNhanh = locTraLoiBoHoiNhanh(traLoiBoHoiNhanhRaw);
+  const trangThaiMay = locTrangThaiMay(trangThaiMayRaw);
 
   // §6.10 — giới hạn kích thước, báo lỗi rõ, KHÔNG âm thầm cắt.
   if (typeof anh === 'string' && anh.length > GIOI_HAN_TEP) {
@@ -227,7 +352,16 @@ async function xuLyPhanTich(req, res) {
    * CẦN NÓI RA thành một lỗi im lặng — bác bấm ghi, không nghe được, rồi màn
    * hình báo "thiếu đầu vào" như thể bác chưa làm gì. Đúng dạng lỗi §4.3.
    */
-  if (!coVanBan && !anh && !ghiAm) {
+  const coBoHoiNhanh = Boolean(traLoiBoHoiNhanh && Object.keys(traLoiBoHoiNhanh).length > 0);
+  /**
+   * §4.3 — GHI ÂM HỎNG CŨNG LÀ MỘT ĐẦU VÀO.
+   * §15.8 — BỘ HỎI NHANH CŨNG LÀ MỘT ĐẦU VÀO ĐẦY ĐỦ.
+   *
+   * Trả 400 "thiếu đầu vào" cho lượt chỉ có ghi âm hỏng hoặc chỉ có bộ hỏi nhanh
+   * là biến một trạng thái CẦN NÓI RA thành một lỗi im lặng — bác bấm trả lời,
+   * rồi màn hình báo "thiếu đầu vào" như thể bác chưa làm gì. Đúng dạng lỗi §4.3.
+   */
+  if (!coVanBan && !anh && !ghiAm && !coBoHoiNhanh) {
     return res.status(400).json({ maLoi: 'THIEU_DAU_VAO' });
   }
   const nguonGhiAm = { ghiAm, ghiAmConfidence, ghiAmFailed, ghiAmMaLoi };
@@ -241,7 +375,7 @@ async function xuLyPhanTich(req, res) {
    * lừa đảo thúc trên điện thoại ngồi chờ gateway là đánh đổi sai. 60 giây đã
    * mất thì không lấy lại được.
    */
-  const soBo = analyze({ vanBan: coVanBan ? vanBan : '', anh, ...nguonGhiAm });
+  const soBo = analyze({ vanBan: coVanBan ? vanBan : '', anh, traLoiBoHoiNhanh, trangThaiMay, ...nguonGhiAm });
   if (soBo.overrides.length > 0) {
     return res.json(toHopDong(soBo));
   }
@@ -251,10 +385,29 @@ async function xuLyPhanTich(req, res) {
   let aiError = null;
   const epLoi = KHONG_GOI_AI ? req.body?._epLoiAi : null;
 
+  /**
+   * ⚠️ MÔ HÌNH KHÔNG NHÌN ĐƯỢC ẢNH THÌ PHẢI KHAI RA, KHÔNG GỬI RỒI IM.
+   *
+   * Mô hình chỉ-đọc-chữ nhận khối `image_url` rồi lặng lẽ bỏ qua nó. Nếu cứ gửi
+   * thì `unreadableInputFloor()` thấy có trường `anh` và khai `daKiem:
+   * ['anh_ocr']` — màn hình nói "đã đọc chữ trong ảnh" về một tấm ảnh chưa ai
+   * nhìn. §4.3, và là loại chỉ lộ ra khi đổi mô hình chứ không lộ khi chạy test
+   * bằng văn bản.
+   *
+   * Nên: không có thị giác ⇒ KHÔNG gửi ảnh đi, và báo `ocrFailed` để tầng sàn
+   * khai `khong_doc_duoc_anh`. Bác thấy đúng một câu: "Khoan Đã chưa đọc được
+   * chữ trong ảnh".
+   */
+  const cauHinhAi = layCauHinh();
+  const moHinhDocDuocAnh = cauHinhAi.coThiGiac;
+  const anhBiBoQua = Boolean(anh) && !moHinhDocDuocAnh;
+
   if (epLoi) {
     aiError = epLoi;
-  } else if (!KHONG_GOI_AI && layCauHinh().daCauHinh && coVanBan) {
-    const kq = await trichTinHieu(vanBan);
+  } else if (!KHONG_GOI_AI && cauHinhAi.daCauHinh && (coVanBan || (anh && moHinhDocDuocAnh))) {
+    const kq = await trichTinHieu(coVanBan ? vanBan : '', {
+      anh: moHinhDocDuocAnh ? anh : undefined,
+    });
     llmSignals = kq.signals;
     aiError = kq.loi;
     if (kq.loi) {
@@ -262,13 +415,51 @@ async function xuLyPhanTich(req, res) {
       // Chỉ vào log, và KHÔNG kèm nội dung người dùng (§6.9).
       console.error('[ai]', kq.loi, kq.chiTiet?.providerStatus || '',
         kq.chiTiet?.providerMessage || '');
+      loiAiGanNhat = {
+        ma: kq.loi,
+        trangThaiNhaCungCap: kq.chiTiet?.providerStatus ?? null,
+        // ⚠️ 200 ký tự đầu của thông báo nhà cung cấp. Nó mô tả LỖI CẤU HÌNH
+        // (khoá sai, model không tồn tại, hết quota) chứ không phải nội dung
+        // người dùng — nhưng vẫn cắt ngắn để không vô tình mang gì theo.
+        moTa: typeof kq.chiTiet?.providerMessage === 'string'
+          ? kq.chiTiet.providerMessage.slice(0, 200) : null,
+      };
+    } else {
+      /**
+       * ⚠️ "AI CHẠY XONG" KHÔNG CÓ NGHĨA LÀ "AI TRÍCH ĐƯỢC GÌ".
+       *
+       * Đo 18/8/2026: sau khi vá timeout, `aiDaChay: true` nhưng `maLyDo: []`
+       * cho một tin nhắn giả danh công an rõ ràng. Nhìn từ ngoài giống hệt lúc
+       * AI hỏng, mà nguyên nhân hoàn toàn khác — và ba nguyên nhân khả dĩ cần
+       * ba cách sửa khác nhau:
+       *   · model trả rỗng            → lời nhắc hoặc mức suy luận
+       *   · model trả, bị loại evidence → trích dẫn không khớp bản gốc
+       *   · model trả, sai lược đồ    → mã không có trong registry
+       *
+       * `rejected` phân biệt được ba ca đó. §6.9 — CHỈ ĐẾM VÀ MÃ LÝ DO, không
+       * bao giờ đưa `quote` ra ngoài: trích dẫn LÀ nội dung người dùng.
+       */
+      const boLoc = {};
+      for (const r of kq.rejected || []) {
+        const ly = r?.lyDo || 'khong_ro';
+        boLoc[ly] = (boLoc[ly] || 0) + 1;
+      }
+      loiAiGanNhat = null;
+      chanDoanAiGanNhat = {
+        soTinHieuNhan: kq.signals?.length || 0,
+        soTinHieuBiLoai: (kq.rejected || []).length,
+        lyDoLoai: boLoc,
+      };
     }
   } else {
     aiError = 'AI_NOT_CONFIGURED';
   }
 
   const envelope = analyze({
-    vanBan: coVanBan ? vanBan : '', anh, llmSignals, aiError, ...nguonGhiAm,
+    vanBan: coVanBan ? vanBan : '', anh, llmSignals, aiError, traLoiBoHoiNhanh, trangThaiMay,
+    // Ảnh có mà không mô hình nào nhìn ⇒ "chưa đọc được", không phải "đã đọc".
+    ...(anhBiBoQua ? { ocrFailed: true } : {}),
+    ...nguonGhiAm,
   });
   return res.json(toHopDong(envelope));
 }
@@ -303,14 +494,34 @@ app.post('/api/phan-tich', chanPhanTich, xuLyPhanTich);   // §5.2 — alias, c�
  */
 app.post('/api/analyze/so-bo', chanPhanTich, (req, res) => {
   /**
-   * ⚠️ BỐN TRƯỜNG GHI ÂM PHẢI CÓ Ở CẢ HAI ĐƯỜNG.
+   * ⚠️ BỐN TRƯỜNG GHI ÂM VÀ BỘ HỎI NHANH PHẢI CÓ Ở CẢ HAI ĐƯỜNG.
    *
-   * Đường này mù với ghi âm còn `/api/analyze` thì không ⇒ sơ bộ ra "Chưa thấy
-   * dấu hiệu rủi ro" trong khi kết quả cuối có `chuaKiem`. Người dùng đọc màn
+   * Đường này mù với ghi âm / bộ hỏi nhanh còn `/api/analyze` thì không ⇒ sơ bộ ra "Chưa thấy
+   * dấu hiệu rủi ro" trong khi kết quả cuối có `chuaKiem` hoặc mức CAO. Người dùng đọc màn
    * hình đầu tiên rồi cất điện thoại. Hàng rào: ca so-bo trong
-   * test/ghi-am-than-yeu-cau.test.js.
+   * test/ghi-am-than-yeu-cau.test.js và test/so-bo-khong-cao-hon-ket-qua.test.js.
    */
-  const { vanBan, anh, ghiAm, ghiAmConfidence, ghiAmFailed, ghiAmMaLoi } = req.body || {};
+  const {
+    vanBan, anh, ghiAm, ghiAmConfidence, ghiAmFailed, ghiAmMaLoi,
+    traLoiBoHoiNhanh: traLoiBoHoiNhanhRaw,
+    trangThaiMay: trangThaiMayRaw,
+  } = req.body || {};
+
+  const traLoiBoHoiNhanh = locTraLoiBoHoiNhanh(traLoiBoHoiNhanhRaw);
+  /*
+   * ⚠️ RÚT Ở ĐÂY NỮA, KHÔNG DÙNG CHUNG BIẾN VỚI `xuLyPhanTich` — LỖI ĐO 19/8/2026.
+   *
+   * Route này là handler RIÊNG, không nằm trong `xuLyPhanTich`. Khi thêm nguồn
+   * đầu vào `trangThaiMay`, biến được khai bên kia nhưng dòng gọi `analyze()` ở
+   * đây cũng được sửa theo — nên nó tham chiếu một tên không tồn tại và ném
+   * `ReferenceError` ⇒ HTTP 500.
+   *
+   * Hỏng đúng chỗ tệ nhất: `/api/analyze/so-bo` LÀ đường dự phòng mà giao diện
+   * gọi khi `/api/analyze` lỗi. Cả hai cùng chết thì màn kết quả rơi về
+   * `khongGoiDuocMayChu` — bác thấy "chưa gửi đi kiểm được" và không có cách nào
+   * biết là do một biến chưa khai.
+   */
+  const trangThaiMay = locTrangThaiMay(trangThaiMayRaw);
 
   if (typeof anh === 'string' && anh.length > GIOI_HAN_TEP) {
     return res.status(413).json({ maLoi: 'FILE_TOO_LARGE' });
@@ -319,10 +530,11 @@ app.post('/api/analyze/so-bo', chanPhanTich, (req, res) => {
     return res.status(400).json({ maLoi: 'INPUT_TOO_LONG', toiDa: GIOI_HAN_VAN_BAN });
   }
   const coVanBan = typeof vanBan === 'string' && vanBan.trim().length > 0;
-  if (!coVanBan && !anh && !ghiAm) return res.status(400).json({ maLoi: 'THIEU_DAU_VAO' });
+  const coBoHoiNhanh = Boolean(traLoiBoHoiNhanh && Object.keys(traLoiBoHoiNhanh).length > 0);
+  if (!coVanBan && !anh && !ghiAm && !coBoHoiNhanh) return res.status(400).json({ maLoi: 'THIEU_DAU_VAO' });
 
   return res.json(toHopDong(analyze({
-    vanBan: coVanBan ? vanBan : '', anh, ghiAm, ghiAmConfidence, ghiAmFailed, ghiAmMaLoi,
+    vanBan: coVanBan ? vanBan : '', anh, ghiAm, ghiAmConfidence, ghiAmFailed, ghiAmMaLoi, traLoiBoHoiNhanh, trangThaiMay,
   })));
 });
 
@@ -385,7 +597,17 @@ const taiKhoan = (fn) => async (req, res) => {
     return res.json(await fn(req));
   } catch (e) {
     if (e instanceof TK.LoiTaiKhoan) {
-      // 401 cho ca sai thông tin đăng nhập, 400 cho ca đầu vào hỏng.
+      /*
+       * 429 cho ca phải chờ, 401 cho ca sai thông tin, 400 cho ca đầu vào hỏng.
+       *
+       * ⚠️ `THU_LAI_SAU` PHẢI LÀ 429, KHÔNG PHẢI 400. Bốn trăm nghĩa là "bác
+       * gửi sai", và giao diện sẽ hiện một câu kiểu "dữ liệu không hợp lệ" cho
+       * một người vừa gõ đúng mọi thứ, chỉ hơi vội. Kèm `giay` để màn hình nói
+       * được điều duy nhất có ích lúc đó: chờ bao lâu nữa.
+       */
+      if (e.ma === 'THU_LAI_SAU') {
+        return res.status(429).json({ maLoi: e.ma, giay: e.giay ?? 5 });
+      }
       const http = e.ma === 'SAI_SO_HOAC_MAT_KHAU' || e.ma === 'SAI_MAT_KHAU_CU' ? 401 : 400;
       return res.status(http).json({ maLoi: e.ma });
     }
@@ -547,7 +769,10 @@ app.get('/api/kich-ban/:hoKichBan', chanDoc, (req, res) => {
  * giờ 8 giây mỗi tờ báo; không lượt `/api/analyze` nào chờ ở đây.
  */
 app.get('/api/tin-lua-dao', chanDoc, async (req, res) => {
-  const d = await tinLuaDao();
+  // Ngôn ngữ lạ ⇒ tiếng Việt. Tham số này KHÔNG phải nội dung người dùng,
+  // chỉ là một trong hai giá trị enum — không có gì để lọc thêm.
+  const lang = req.query.lang === 'en' ? 'en' : 'vi';
+  const d = await tinLuaDao({ lang });
   return res.json({
     tin: d.tin,
     luc: d.luc,
@@ -668,13 +893,74 @@ app.get('/transparency', (req, res) => {
 });
 app.get('/api/safety-card', (req, res) => res.json(dungSafetyCard()));
 
+/**
+ * ⚠️ ĐƯỜNG NÀY KHÔNG PHẢI MỘT PHẦN CỦA §HĐ, VÀ CỐ Ý KHÔNG PHẢI.
+ *
+ * Nói cho người dùng biết AI chạy Ở ĐÂU là chuyện quan trọng, nhưng thêm một
+ * trường vào phản hồi của `/api/analyze` là ĐỔI HỢP ĐỒNG — mà §HĐ ghi rõ "đổi
+ * hợp đồng này = phải báo cho cả hai bên". Nên nó đi bằng một cửa riêng.
+ *
+ * §11 — không lộ khoá, không lộ địa chỉ máy chủ. Chỉ nói ba điều người dùng có
+ * quyền biết: AI có chạy không, chạy ở đâu, và nội dung của họ có rời máy không.
+ */
 app.get('/api/suc-khoe', (req, res) => {
   const c = layCauHinh();
+  const chay = c.daCauHinh && !KHONG_GOI_AI;
   res.json({
     ok: true,
     // §11 — nói thật AI có cấu hình hay không. KHÔNG lộ khoá, không lộ base URL.
-    aiCauHinh: c.daCauHinh && !KHONG_GOI_AI,
-    model: c.daCauHinh ? c.model : null,
+    aiCauHinh: chay,
+    /**
+     * ⚠️ CHỈ TÊN BIẾN, TUYỆT ĐỐI KHÔNG GIÁ TRỊ — §6.9.
+     *
+     * Thêm 20/8/2026 sau khi mất gần một tiếng đoán mò: deploy báo thành công,
+     * đúng commit, mà `aiCauHinh` vẫn false. Từ bên ngoài không có cách nào
+     * phân biệt ba ca: người vận hành chưa đặt biến, đặt sai TÊN, hay đặt đúng
+     * mà nền tảng chưa nạp.
+     *
+     * Ba ca đó cần ba cách sửa khác nhau, và §4.3 nói đúng chuyện này: không
+     * đo được thì phải nói ra là không đo được, đừng để người ta đoán.
+     *
+     * `true` ở đây chỉ có nghĩa "biến này có giá trị khác rỗng". Không lộ giá
+     * trị, không lộ độ dài, không lộ vài ký tự đầu — một khoá lộ bốn ký tự đầu
+     * vẫn là một khoá đã bắt đầu rò.
+     */
+    bienDaDat: Object.fromEntries(
+      ['LLM_API_BASE', 'LLM_API_KEY', 'RISK_LLM_MODEL',
+       'LLM_API_BASE2', 'LLM_API_KEY2', 'RISK_LLM_MODEL2',
+       'GEMINI_API_KEY', 'LLM_DU_PHONG_BASE', 'LLM_DU_PHONG_MODEL',
+       'LLM_TIMEOUT_MS', 'NODE_ENV']
+        .map((k) => [k, Boolean(process.env[k])]),
+    ),
+    /*
+     * ⚠️ TRẦN CHỜ LÀ SỐ CẤU HÌNH, KHÔNG PHẢI BÍ MẬT — khai hẳn giá trị.
+     *
+     * `bienDaDat` chỉ nói "có hay không", đúng cho khoá và địa chỉ. Nhưng trần
+     * chờ thì biết "có" là vô dụng: đặt 20000 hay 200000 đều ra "có", mà hai
+     * con số đó là hai sản phẩm khác hẳn nhau. Đo 20/8/2026: phải suy trần chờ
+     * từ phân bố thời gian đáp — chậm và không chắc chắn.
+     *
+     * Không có gì riêng tư ở đây: nó là số mili giây người vận hành tự đặt.
+     */
+    tranChoMs: Number(process.env.LLM_TIMEOUT_MS) || null,
+    model: chay ? c.model : null,
+    /**
+     * `tren_may_nguoi_dung`      — người dùng chạy cả app lẫn mô hình trên máy
+     *                              của mình; nội dung KHÔNG rời khỏi máy.
+     * `tren_may_chu_tu_van_hanh` — mô hình chạy cùng máy chủ này; nội dung rời
+     *                              khỏi máy người dùng nhưng KHÔNG sang bên thứ ba.
+     * `gateway` / `gemini`       — nội dung được gửi tới một công ty khác.
+     * `khong_chay`               — chỉ có tầng luật, và giao diện phải nói ra.
+     */
+    noiChay: chay ? c.noiChay : 'khong_chay',
+    /** Có sang BÊN THỨ BA không. Khác với "có rời khỏi máy người dùng không". */
+    noiDungSangBenThuBa: chay ? !c.laCucBo : false,
+    /** Mô hình có nhìn được ảnh không — quyết định ảnh vào daKiem hay chuaKiem. */
+    coThiGiac: chay ? c.coThiGiac : false,
+    /** Lỗi AI gần nhất, chỉ mã và trạng thái. `null` = lượt gần nhất chạy tốt. */
+    loiAiGanNhat,
+    /** Lượt chạy được gần nhất: nhận mấy tín hiệu, loại mấy, vì sao loại. */
+    chanDoanAiGanNhat,
   });
 });
 
@@ -725,45 +1011,28 @@ app.post('/api/push/dang-ky', chanDoc, async (req, res) => {
 });
 
 /**
- * ─────────────────── GIAO DIỆN ───────────────────
+ * ─────────────────── GIAO DIỆN: KHÔNG PHỤC VỤ Ở ĐÂY ───────────────────
  *
- * Phục vụ bản dựng frontend từ CHÍNH máy chủ này. Một tiến trình, một origin.
+ * Tệp này CHỈ là API. Giao diện do `server.ts` phục vụ — vite khi chạy dev,
+ * thư mục `dist/` khi chạy thật — và `server.ts` mount `backend/server.js`
+ * làm lớp API bên dưới nó. Một tiến trình, một origin, như cũ.
  *
- * ⚠️ VÌ SAO GỘP LẠI CHỨ KHÔNG CHẠY HAI CỔNG:
+ * ⚠️ ĐỪNG THÊM `express.static` VÀO ĐÂY. Chỗ này nằm SAU mọi route /api,
+ * nhưng `server.ts` đã có static + SPA catch-all rồi; thêm lần nữa là hai
+ * nơi cùng quyết định một đường, và khi lệch thì rất khó lần ra.
  *
- * ① WEBAUTHN. `rpID` phải khớp origin trình duyệt thấy. Chạy hai cổng thì phải
- *    nhớ khai cả `localhost:3000` lẫn `localhost:8089` vào danh sách origin, và
- *    quên một cái là MỌI chữ ký bị từ chối kèm thông báo trông y hệt "người
- *    dùng bấm sai". Cùng origin thì cả lớp lỗi đó biến mất.
+ * LỊCH SỬ (2/9/2026): khối phục vụ tĩnh cũ — `DUONG_GIAO_DIEN`,
+ * `TEP_DUNG_CHUNG`, `express.static`, SPA catch-all — đã bị bỏ lại khi `src/`
+ * được chép sang `backend/`, chỉ còn chú thích ở lại và một hằng trỏ vào
+ * `backend/public/app` (thư mục chưa từng tồn tại). Bảy test đỏ suốt hai
+ * tuần vì nhắm vào nó, trong khi sản phẩm chạy đúng.
  *
- * ② §6.10 — app phải chạy được khi RÚT MẠNG. Hai tiến trình là hai thứ có thể
- *    chết lệch nhau; người dùng thấy giao diện lên nhưng mọi lượt kiểm đều lỗi.
- *
- * ⚠️ ĐẶT SAU MỌI ROUTE `/api`. Đặt trước là `express.static` nuốt hết đường API
- * và trả `index.html` cho `/api/analyze` — frontend nhận HTML, `JSON.parse` ném
- * lỗi, và thông báo cuối cùng tới người dùng chẳng liên quan gì tới nguyên nhân.
- *
- * ⚠️ KHÔNG CÓ BẢN DỰNG THÌ NÓI RA, đừng trả trang trắng. §6.7.
+ * Sàn tiếp cận §4.4 vẫn được canh, nhưng canh ở NGUỒN:
+ * `test/vo-ung-dung.test.js` kiểm APP_SHELL của `public/sw.js` và kiểm
+ * `express.static` đứng TRƯỚC catch-all trong `server.ts` — chính là chỗ
+ * sinh ra lỗi "HTTP 200 kèm content-type text/html".
  */
-const DUONG_GIAO_DIEN = process.env.KHOAN_DA_GIAO_DIEN
-  || path.join(__dirname, 'public', 'app');
 
-/**
- * ⚠️ SÀN TIẾP CẬN §4.4 PHẢI PHỤC VỤ ĐƯỢC — VÀ NÓ TỪNG KHÔNG.
- *
- * `tokens.css` và `vung-cham-san.css` nằm ở `public/`, không nằm trong bản dựng
- * giao diện (`public/app/`). Trước khi có khối này, SPA catch-all nuốt chúng và
- * trả `index.html` — tức HTTP **200** kèm `content-type: text/html`.
- *
- * Đó tệ hơn 404: trình duyệt nhận HTML ở chỗ chờ CSS, âm thầm không áp gì, và
- * sàn 52px/56px/14px biến mất mà KHÔNG có lỗi ở bất kỳ đâu. §4.4 gọi tên
- * `vung-cham-san.css` đích danh và nói nó phải nằm trong APP_SHELL của service
- * worker — mà đệm một trang HTML dưới tên tệp CSS thì đệm luôn cả cái hỏng.
- *
- * Khai TƯỜNG MINH từng tệp, không mount cả `public/`: mount cả thư mục là phơi
- * thêm thứ chưa ai rà.
- * Hàng rào: test/vo-ung-dung.test.js kiểm cả mã trạng thái LẪN content-type.
- */
 /**
  * ─────────────────── TẢI APK ───────────────────
  *
@@ -778,37 +1047,12 @@ const DUONG_GIAO_DIEN = process.env.KHOAN_DA_GIAO_DIEN
  * ⚠️ `Content-Disposition: attachment` để Android tải xuống chứ không cố mở
  * trong trình duyệt. Thiếu nó thì một số máy hiện tệp nhị phân ra màn hình.
  */
-const DUONG_APK = path.join(__dirname, 'khoan-da.apk');
+const DUONG_APK = path.join(__dirname, '..', 'khoan-da.apk');
 if (fs.existsSync(DUONG_APK) && process.env.KHOAN_DA_KHONG_PHAT_APK !== '1') {
   app.get('/khoan-da.apk', chanDoc, (req, res) => {
     res.setHeader('content-type', 'application/vnd.android.package-archive');
     res.setHeader('content-disposition', 'attachment; filename="khoan-da.apk"');
     res.sendFile(DUONG_APK);
-  });
-}
-
-const TEP_DUNG_CHUNG = ['tokens.css', 'vung-cham-san.css'];
-for (const ten of TEP_DUNG_CHUNG) {
-  const d = path.join(__dirname, 'public', ten);
-  if (fs.existsSync(d)) app.get(`/${ten}`, (req, res) => res.sendFile(d));
-}
-
-if (fs.existsSync(path.join(DUONG_GIAO_DIEN, 'index.html'))) {
-  app.use(express.static(DUONG_GIAO_DIEN, { index: false }));
-
-  // SPA: mọi đường KHÔNG phải /api đều trả index.html để React tự định tuyến.
-  app.get(/^\/(?!api\/|transparency$).*/, (req, res, next) => {
-    if (req.method !== 'GET') return next();
-    return res.sendFile(path.join(DUONG_GIAO_DIEN, 'index.html'));
-  });
-} else {
-  app.get('/', (req, res) => {
-    res.status(503).type('text/plain; charset=utf-8').send(
-      'Chưa có bản dựng giao diện.\n\n'
-      + `Chờ tệp: ${path.join(DUONG_GIAO_DIEN, 'index.html')}\n\n`
-      + 'Dựng bằng:  npm run dung-giao-dien\n'
-      + 'Hoặc chạy riêng frontend ở cổng 3000 rồi mở http://localhost:3000\n',
-    );
   });
 }
 

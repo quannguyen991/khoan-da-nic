@@ -20,7 +20,7 @@ const { SIGNAL_IDS } = require('./analysis/signal-registry');
 const { CRITICAL_OVERRIDES } = require('./analysis/critical-overrides');
 const { SYNERGIES, SCORE_CAP, THRESHOLD_SUSPICIOUS, THRESHOLD_HIGH } = require('./analysis/decision-engine');
 
-const DUONG_KET_QUA = path.join(__dirname, '..', 'eval', 'results', 'latest.json');
+const DUONG_KET_QUA = path.join(__dirname, '..', '..', 'eval', 'results', 'latest.json');
 
 /** MỤC TIÊU — lấy từ §2B.6 và §6.14. Đây KHÔNG phải số đã đo. */
 const MUC_TIEU = Object.freeze([

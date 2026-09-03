@@ -21,6 +21,12 @@ const { chonMuc } = require('../intervention-ladder');
 const { tinHieuTuTraLoi } = require('../bo-hoi-nhanh');
 
 const GIOI_HAN_VAN_BAN = 5000;      // §6.10
+/**
+ * Dưới ngưỡng này mà không tìm ra tín hiệu nào thì KHÔNG kết luận "không thấy
+ * gì" — xem khối §4.3 ở cuối `analyze()`. Sáu chữ là chỗ "police told me bank
+ * 50$" (5 chữ) rơi vào, còn một câu tin nhắn thật thường dài hơn nhiều.
+ */
+const NGUONG_TU_QUA_NGAN = 6;
 const NGUONG_CHAP_NHAN_LLM = 0.72;  // §6.4 — 0.55–0.71 → unknown; < 0.55 → drop
 const NGUONG_OCR = 0.5;
 
@@ -187,6 +193,25 @@ function unreadableInputFloor(input = {}) {
     else if (input.thongBaoKhongCoNoiDung === true) chuaKiem.push('thong_bao_khong_co_noi_dung');
     else if (input.thongBaoDaBiXoa === true) chuaKiem.push('thong_bao_da_bi_xoa');
     else daKiem.push('thong_bao_tin_nhan');
+  }
+
+  /**
+   * NGUỒN ĐẦU VÀO THỨ NĂM: TRẠNG THÁI MÁY (chỉ bản APK).
+   *
+   * §4.3 gọi tên đích danh: "THÊM NGUỒN ĐẦU VÀO MỚI NÀO THÌ THÊM CA VÀO ĐÂY."
+   *
+   * ⚠️ BA CA, KHÔNG PHẢI HAI:
+   *   · không gửi trường này  ⇒ bản web, KHÔNG khai gì cả (không phải "đã xem")
+   *   · gửi kèm `docDuoc:false` ⇒ có APK nhưng không xem được ⇒ `chuaKiem`
+   *   · gửi kèm `docDuoc:true`  ⇒ đã xem thật ⇒ `daKiem`
+   *
+   * Gộp ca một và ca ba là lỗi §4.3 kinh điển: bản web không có cách nào nhìn
+   * vào trong máy, mà lại khai "đã kiểm trạng thái máy" thì Phiếu tin cậy nói
+   * sai về đúng thứ nó sinh ra để nói thật.
+   */
+  if (input.trangThaiMay && typeof input.trangThaiMay === 'object') {
+    if (input.trangThaiMay.docDuoc === true) daKiem.push('trang_thai_may');
+    else chuaKiem.push('chua_xem_duoc_trang_thai_may');
   }
 
   if (Array.isArray(input.urlUnresolved) && input.urlUnresolved.length > 0) {
@@ -388,6 +413,49 @@ function analyze(input = {}, nguCanhTinCay = {}) {
   // speech act phải cho phép. Bỏ hàng rào thứ hai là để AI đi vòng qua Phụ lục C.
   const sauEvidence = aiDaChay ? locTheoEvidence(nhanTinHieuLLM(input.llmSignals), ctx) : [];
   const scope = locTheoScopeChiTiet(sauEvidence, ctx);
+  /**
+   * HÀNG RÀO THỨ BA — bằng chứng phải mang dấu hiệu của CHÍNH tín hiệu đó.
+   *
+   * Hai hàng rào trên hỏi "câu trích có thật không" và "nó nằm ở đoạn hành động
+   * không". Không cái nào hỏi "câu trích này có liên quan gì tới nhãn được gán
+   * không" — và mô hình nhỏ chạy tại chỗ khai thác đúng khe đó: lấy một câu có
+   * thật rồi dán sai nhãn lên.
+   *
+   * Đo 18/8/2026, qwen2.5vl:7b, 5 tin nhắn LÀNH: 3 tin bị báo động vì những
+   * tín hiệu không hề có trong nội dung (phí lấy lại tiền, chuyển tiền mã hoá,
+   * người thân gặp nạn). Chi tiết ở `evidence-validator.js`.
+   */
+  /**
+   * ⚠️ LẤY PACK THEO NGÔN NGỮ CỦA CHÍNH VĂN BẢN, đúng như direct-precheck làm.
+   * Truyền nhầm `undefined` vào đây thì hàng rào im lặng không chặn gì — nó vẫn
+   * chạy, vẫn trả về, và mọi test vẫn xanh. Loại hỏng tệ nhất.
+   */
+  /*
+   * ══════ §4.2 · §12 — KHÔNG LỌC TÍN HIỆU AI QUA DANH SÁCH TỪ KHOÁ ══════
+   *
+   * Ở đây từng có `locTheoDauHieu(scope.giu, …)`: tín hiệu do model trích bị
+   * VỨT nếu câu trích dẫn không chứa một cue có sẵn trong locale pack.
+   *
+   * ĐO 2/9/2026 — cùng dataset 497 mẫu, cùng đệm AI, chỉ khác dòng này:
+   *          recall vi   recall en   recall trộn   FP báo đỏ vi
+   *   có lọc     32,9%       36,4%        28,6%          4,6%
+   *   bỏ lọc     75,3%       87,9%        94,3%          6,5%
+   *   66 tin CAO bị chấm "Chưa thấy dấu hiệu rủi ro" — so với 8.
+   *
+   * VÌ SAO PHẢI BỎ, KHÔNG PHẢI "NỚI RỘNG CUE":
+   * Cổng này ép cả tầng AI về đúng năng lực của một danh sách từ khoá cố định.
+   * Kẻ lừa đảo chỉ cần diễn đạt khác cue là tín hiệu biến mất — tức nó là một
+   * ĐƯỜNG HẠ MỨC VÔ ĐIỀU KIỆN, đúng thứ §12 gọi là "câu thần chú tặng cho kẻ
+   * lừa đảo", chỉ khác là áp cho toàn bộ tầng AI thay vì một cụm từ. Và §4.2
+   * nói mọi thứ thêm vào chỉ được LÀM TĂNG cảnh giác — cổng này chỉ giảm.
+   *
+   * CHỐNG TRÍCH DẪN BỊA VẪN CÒN: `locTheoEvidence` (trích dẫn phải khớp văn bản
+   * gốc) và `locTheoScopeChiTiet` (speech act / phạm vi) chạy NGAY TRÊN dòng
+   * này và không bị đụng tới. Bỏ cổng cue KHÔNG mở đường cho tín hiệu bịa.
+   *
+   * `locTheoDauHieu` vẫn được export cho công cụ chẩn đoán — chỉ không còn nằm
+   * trên đường quyết định. Hàng rào: test/khong-loc-tin-hieu-ai-qua-tu-khoa.test.js
+   */
   const llm = scope.giu;
 
   /**
@@ -423,7 +491,63 @@ function analyze(input = {}, nguCanhTinCay = {}) {
     }],
   }] : [];
 
-  const signals = ghepTinHieu([...direct, ...web, ...boHoiNhanh, ...kyTuChoi], llm);
+  /**
+   * TÍN HIỆU TỪ TRẠNG THÁI MÁY — bước ③ của kịch bản lừa đảo.
+   *
+   * ══════════ ⚠️ KHÔNG THÊM TÍN HIỆU MỚI, VÀ ĐÓ LÀ CHỦ Ý ══════════
+   *
+   * Hai tín hiệu dưới đây ĐÃ CÓ trong Phụ lục A. Máy quan sát được không tạo ra
+   * một loại nguy hiểm mới — nó là BẰNG CHỨNG CỨNG cho đúng thứ mà tới giờ bộ
+   * luật chỉ suy được từ chữ trong tin nhắn. Cùng cách `kyTuChoi` ngay trên
+   * dùng lại `ID_FAMILY_IMPERSONATION` thay vì đẻ ra tín hiệu riêng.
+   *
+   * Khác biệt về chất: `DEV_ACCESSIBILITY_PERMISSION` rút từ tin nhắn nghĩa là
+   * "có người ĐANG BẢO bác cấp quyền trợ năng". Rút từ thiết bị nghĩa là "bác
+   * ĐÃ CẤP RỒI, cho một ứng dụng đến từ ngoài chợ chính thức". Cái thứ hai là
+   * bước ③ đã xảy ra, không còn là lời dụ.
+   *
+   * ⚠️ `source: 'device_state'` — được miễn bộ lọc "bằng chứng phải mang dấu
+   * hiệu", vì bằng chứng ở đây là một sự kiện của máy chứ không phải đoạn chữ.
+   *
+   * ⚠️ CHỈ CÓ NHÁNH LÀM TĂNG (§4.2). Máy sạch KHÔNG trừ điểm, KHÔNG hạ mức,
+   * KHÔNG tạo tín hiệu "an toàn". Đọc được và không thấy gì chỉ có nghĩa là
+   * `daKiem` có thêm `trang_thai_may` — không hơn.
+   */
+  const trangThaiMay = [];
+  if (input.trangThaiMay && input.trangThaiMay.docDuoc === true) {
+    const soLa = Number(input.trangThaiMay.soUngDungLa) || 0;
+    if (soLa > 0) {
+      trangThaiMay.push({
+        id: 'DEV_ACCESSIBILITY_PERMISSION',
+        state: 'present',
+        source: 'device_state',
+        confidence: 1.0,
+        evidence: [{
+          quote: `UNG_DUNG_TRO_NANG_LA:${soLa}`, start: 0, end: 0,
+          sourceId: 'khoan_device',
+        }],
+      });
+      /*
+       * Vừa cài trong tuần ⇒ nhiều khả năng chính là app vừa được dụ cài, chứ
+       * không phải thứ bác dùng từ lâu. Đây là chỗ tín hiệu mạnh lên — và nó
+       * vẫn đi qua đúng bộ luật, đúng trần nhóm, như mọi tín hiệu khác.
+       */
+      if (input.trangThaiMay.coCaiTrongTuan === true) {
+        trangThaiMay.push({
+          id: 'DEV_INSTALL_APK_UNKNOWN',
+          state: 'present',
+          source: 'device_state',
+          confidence: 1.0,
+          evidence: [{
+            quote: 'UNG_DUNG_TRO_NANG_VUA_CAI_TRONG_TUAN', start: 0, end: 0,
+            sourceId: 'khoan_device',
+          }],
+        });
+      }
+    }
+  }
+
+  const signals = ghepTinHieu([...direct, ...web, ...boHoiNhanh, ...kyTuChoi, ...trangThaiMay], llm);
   const nhanDuoc = signals.filter((s) => s.state === 'present').map((s) => s.id);
 
   const kq = decide(signals);
@@ -534,6 +658,65 @@ function analyze(input = {}, nguCanhTinCay = {}) {
     speechActs: ctx.segments.map((d) => d.speechAct),
   };
   if (quaDai) envelope.loi = 'INPUT_TOO_LONG';
+
+  /*
+   * ══════ §4.3 — QUÁ NGẮN ĐỂ KẾT LUẬN, KHÔNG PHẢI "ĐÃ KIỂM, KHÔNG THẤY GÌ" ══════
+   *
+   * Đã có sàn cho nội dung QUÁ DÀI (`noi_dung_qua_dai`) nhưng không có sàn cho
+   * quá ngắn — một sự bất đối xứng lặng lẽ.
+   *
+   * Đo 20/8/2026, người dùng gõ đúng năm chữ: "police told me bank 50$".
+   * Bộ luật không đủ cấu trúc để chấm, tầng AI cũng không trích được câu nào để
+   * làm bằng chứng. Màn hình trả về "Chưa thấy dấu hiệu rủi ro" — đọc thành
+   * "cháu đã xem và thấy ổn", trong khi sự thật là KHÔNG ĐỦ ĐỂ XEM.
+   *
+   * Đây đúng dạng lỗi §4.3, chỉ khác nguồn: trước là ảnh không đọc được và tên
+   * miền không phân giải được, giờ là một mẩu chữ quá ngắn để có nghĩa.
+   *
+   * ⚠️ ĐIỀU KIỆN LÀ "CHƯA KẾT LUẬN ĐƯỢC", KHÔNG PHẢI "KHÔNG TÌM THẤY GÌ".
+   * Bản đầu chỉ khai khi `maLyDo` rỗng. Nhưng "police told me bank 50$" BẮT ĐƯỢC
+   * một tín hiệu giả danh (10 điểm, dưới ngưỡng 20) — tức có mã trong `maLyDo`
+   * mà nhãn vẫn là "chưa thấy dấu hiệu". Đúng lúc mâu thuẫn nhất thì sàn lại
+   * không áp. Năm chữ mà đã đủ để ra NGHI_NGO hoặc CAO thì không khai — lúc đó
+   * nói "quá ngắn" là tự phủ nhận chính kết luận vừa đưa ra.
+   *
+   * ⚠️ KHÔNG HẠ MỨC, KHÔNG NÂNG MỨC. Nó chỉ thêm một câu vào `chuaKiem`; §HĐ luật
+   * 3 buộc frontend hiện câu đó cùng cỡ chữ với nhãn. Mức vẫn do bộ luật quyết.
+   */
+  /*
+   * ⚠️ SỬA 2/9/2026 — "CHƯA KẾT LUẬN ĐƯỢC" ≠ "KHÔNG CÓ GÌ ĐỂ KẾT LUẬN".
+   *
+   * Điều kiện cũ là `soTu <= 6 && riskLabel === 'NO_SIGNS_FOUND'`. Nó khai
+   * "chưa kiểm được" cho MỌI tin ngắn, kể cả tin sạch hoàn toàn:
+   *     "Xin chào bác."          3 chữ, 0 tín hiệu
+   *     "Bác ơi cháu về rồi."    5 chữ, 0 tín hiệu
+   * Với hai câu đó ta ĐÃ kiểm và thật sự không có gì. Nói "chưa kiểm được" là
+   * khai sai về chính việc mình vừa làm — đúng lỗi §4.3 nhưng lộn ngược đầu,
+   * và §HĐ luật 3 buộc câu đó hiện to bằng nhãn, nên nó là nhiễu cỡ lớn.
+   *
+   * Hai test bắt được: `unchecked-not-safe` (đòi `chuaKiem` rỗng cho tin ngắn
+   * sạch) và `hop-dong-ma` (mã chưa có trong hợp đồng).
+   *
+   * Điều kiện đúng cần CẢ HAI vế:
+   *   · ngắn, và bộ luật ra "chưa thấy dấu hiệu"  — chưa kết luận được
+   *   · NHƯNG đã bắt được ít nhất một tín hiệu     — có cái để mà chưa kết luận
+   *
+   * Đây KHÔNG phải quay lại bản đầu (bản đầu đòi `maLyDo` RỖNG, tức ngược hẳn):
+   *     "police told me bank 50$"  → 1 tín hiệu giả danh, 10 điểm  ⇒ KHAI
+   *     "Xin chào bác."            → 0 tín hiệu                     ⇒ IM
+   * Ca của 20/8 vẫn được khai, ca sạch thì thôi.
+   *
+   * ⚠️ KHÔNG HẠ MỨC, KHÔNG NÂNG MỨC. Chỉ thêm một câu vào `chuaKiem`.
+   */
+  const soTu = String(vanBan).trim().split(/\s+/).filter(Boolean).length;
+  const coTinHieuNhungChuaDu = (envelope.maLyDo || []).length > 0;
+  if (soTu > 0 && soTu <= NGUONG_TU_QUA_NGAN
+      && riskLabel === 'NO_SIGNS_FOUND'
+      && coTinHieuNhungChuaDu
+      && !envelope.chuaKiem.includes('noi_dung_qua_ngan')) {
+    envelope.chuaKiem = [...envelope.chuaKiem, 'noi_dung_qua_ngan'];
+  }
+
   return envelope;
 }
 

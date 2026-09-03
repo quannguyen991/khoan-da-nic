@@ -18,7 +18,7 @@
 const test = require('node:test');
 const assert = require('node:assert');
 
-const { analyze } = require('../src/analysis/pipeline');
+const { analyze } = require('../backend/src/analysis/pipeline');
 const { napDataset } = require('../eval/lib/bo-danh-gia');
 
 const BAC = { CHUA_THAY: 0, NGHI_NGO: 1, CAO: 2 };

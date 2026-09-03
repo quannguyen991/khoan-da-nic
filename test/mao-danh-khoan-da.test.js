@@ -9,9 +9,9 @@
 const test = require('node:test');
 const assert = require('node:assert');
 
-const { analyze } = require('../src/analysis/pipeline');
-const { CRITICAL_OVERRIDES } = require('../src/analysis/critical-overrides');
-const { getSignal } = require('../src/analysis/signal-registry');
+const { analyze } = require('../backend/src/analysis/pipeline');
+const { CRITICAL_OVERRIDES } = require('../backend/src/analysis/critical-overrides');
+const { getSignal } = require('../backend/src/analysis/signal-registry');
 
 const ma = (t) => analyze({ vanBan: t }).maLyDo;
 

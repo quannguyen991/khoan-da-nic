@@ -11,8 +11,8 @@
 const test = require('node:test');
 const assert = require('node:assert');
 
-const { bocRss, LA_TIN_LUA_DAO, NGUON } = require('../src/tin-lua-dao');
-const { boDau } = require('../src/analysis/context-builder');
+const { bocRss, LA_TIN_LUA_DAO, NGUON } = require('../backend/src/tin-lua-dao');
+const { boDau } = require('../backend/src/analysis/context-builder');
 
 const rss = (items) => `<?xml version="1.0"?><rss><channel>${items}</channel></rss>`;
 const item = (o = {}) => `<item>

@@ -10,8 +10,8 @@
 const test = require('node:test');
 const assert = require('node:assert');
 
-const L = require('../src/link-shield');
-const M = require('../src/media-validation');
+const L = require('../backend/src/link-shield');
+const M = require('../backend/src/media-validation');
 
 // ═══════════════════ SSRF ═══════════════════
 
@@ -88,7 +88,7 @@ test('§6.8 — giới hạn số hop', () => {
 });
 
 test('§6.8 — link-shield KHÔNG tự mở link: không gọi mạng ở đâu cả', () => {
-  const nguon = require('node:fs').readFileSync(require.resolve('../src/link-shield'), 'utf8');
+  const nguon = require('node:fs').readFileSync(require.resolve('../backend/src/link-shield'), 'utf8');
   for (const cam of ['fetch(', 'http.get', 'https.get', 'dns.', 'net.connect', 'axios']) {
     assert.ok(!nguon.includes(cam), `link-shield không được dùng ${cam}`);
   }

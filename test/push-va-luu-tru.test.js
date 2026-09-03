@@ -10,9 +10,9 @@
 const test = require('node:test');
 const assert = require('node:assert');
 
-const P = require('../src/push');
-const V = require('../src/vault-store');
-const A = require('../src/auth');
+const P = require('../backend/src/push');
+const V = require('../backend/src/vault-store');
+const A = require('../backend/src/auth');
 
 // ═══════════ §9.4 — không nói quá ═══════════
 
@@ -122,7 +122,7 @@ test('§5.3 — route kiểm tra cơ bản KHÔNG BAO GIỜ đòi đăng nhập'
 test('§9.8 — mã ghép đôi dùng nguồn ngẫu nhiên MẬT MÃ, không phải Math.random', () => {
   // ⚠️ Phải BỎ CHÚ THÍCH trước khi quét: auth.js có dòng giải thích vì sao KHÔNG
   // dùng Math.random, và quét thô sẽ bắt đúng lời giải thích đó.
-  const nguon = require('node:fs').readFileSync(require.resolve('../src/auth'), 'utf8')
+  const nguon = require('node:fs').readFileSync(require.resolve('../backend/src/auth'), 'utf8')
     .replace(/\/\*[\s\S]*?\*\//g, '')
     .replace(/\/\/.*$/gm, '');
   assert.ok(!nguon.includes('Math.random'),
@@ -140,7 +140,7 @@ test('§9.8 — mã ghép đôi hết hạn, dùng một lần, so sánh chống
   assert.strictEqual(A.kiemMaGhep(ban, ban.ma, T + A.HAN_MA_GHEP_MS + 1).lyDo, 'ma_het_han');
   assert.strictEqual(A.kiemMaGhep(A.danhDauDaDung(ban), ban.ma, T).lyDo, 'ma_da_dung_roi');
 
-  const nguon = require('node:fs').readFileSync(require.resolve('../src/auth'), 'utf8');
+  const nguon = require('node:fs').readFileSync(require.resolve('../backend/src/auth'), 'utf8');
   assert.ok(nguon.includes('timingSafeEqual'), 'so mã bằng === là rò rỉ từng ký tự');
 });
 

@@ -42,6 +42,17 @@ const GIOI_HAN = Object.freeze({
   ai_khong_chay: 'chi_chay_bang_bo_luat',
   khong_nghe_duoc_ghi_am: 'ghi_am_khong_giai_ma_duoc',
   noi_dung_qua_dai: 'chi_doc_duoc_phan_dau',
+  /**
+   * §4.3 — ĐỐI XỨNG VỚI `noi_dung_qua_dai`, thêm 2/9/2026.
+   *
+   * Quá DÀI thì Phiếu nói "chỉ đọc được phần đầu". Quá NGẮN thì trước đây Phiếu
+   * IM — mà im ở đây nghĩa là để người dùng đọc nhãn "Chưa thấy dấu hiệu rủi ro"
+   * như một lời trấn an, trong khi sự thật là chưa đủ chữ để kết luận.
+   *
+   * Mã riêng, KHÔNG dùng lại `chi_doc_duoc_phan_dau`: hai câu chuyện ngược nhau
+   * ("đọc thiếu vì dài" so với "không đủ để đọc"), và gộp là nói sai một trong hai.
+   */
+  noi_dung_qua_ngan: 'noi_dung_chua_du_de_ket_luan',
 
   /**
    * §4.3 — BA KIỂU HỎNG KHÁC NHAU CỦA NGUỒN GHI ÂM, ba mã riêng.

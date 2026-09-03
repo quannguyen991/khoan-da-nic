@@ -31,6 +31,17 @@ module.exports = {
     ],
     CRED_BANK_LOGIN: [
       { pattern: 'đăng nhập\\b[^.]{0,30}(ngân hàng|internet banking|tài khoản|app ngân hàng)', scope: 'action' },
+      /**
+       * Ca `ld-ngan-hang-gia-01` và `-02` (bộ 100): "Dang nhap ngay tai
+       * tcb-verify.info va NHAP MAT KHAU cung ma OTP de mo khoa" — chỉ bật
+       * ID_BANK_IMPERSONATION + MAN_URGENCY = 17đ, dưới ngưỡng 20. Một trang
+       * ngân hàng giả đòi mật khẩu mà ra CHUA_THAY.
+       *
+       * Mẫu cũ đòi chữ "đăng nhập" ĐỨNG TRƯỚC "ngân hàng/tài khoản"; tin thật
+       * viết "đăng nhập tại <link> và nhập mật khẩu" — hai vế đảo nhau.
+       */
+      { pattern: '(nhập|điền|cung cấp)[^.]{0,24}(mật khẩu|password|mã pin|số thẻ)', scope: 'action' },
+      { pattern: '(đăng nhập|truy cập)[^.]{0,40}(xác minh|xác thực|mở khoá|mở khóa|cập nhật)[^.]{0,24}(tài khoản|mật khẩu)', scope: 'action' },
     ],
     FIN_TRANSFER_REQUEST: [
       { pattern: 'chuyển\\b[^.]{0,40}(tiền|triệu|đồng|khoản|vào tài khoản|sang tài khoản)', scope: 'action' },
@@ -71,6 +82,15 @@ module.exports = {
        * ⚠️ `(?![a-zà-ỹ])` thay cho `\b` — `đ` không phải ký tự chữ trong JavaScript.
        */
       { pattern: '(chuyển|nạp|đóng|nộp|gửi)\\s+\\d+\\s*(đ|k|tr|triệu|đồng|nghìn|tỷ|tỉ)(?![a-zà-ỹ])', scope: 'action' },
+      /**
+       * ⚠️ "STK" LÀ CÁCH VIẾT PHỔ BIẾN NHẤT, VÀ TRƯỚC ĐÂY KHÔNG CÓ MẪU NÀO.
+       *
+       * Đo trên bộ 100 (19/8/2026): "Bo chuyen vao stk nay giup con" chỉ bật
+       * MAN_URGENCY, không bật FIN_TRANSFER_REQUEST — nên một tin giả danh con
+       * xin tiền ra CHUA_THAY. Bốn mẫu trên đều đòi chữ "tiền/triệu/đồng" hoặc
+       * cụm "vào tài khoản" viết đủ; tin nhắn thật viết tắt "stk", "tk".
+       */
+      { pattern: '(chuyển|gửi|nạp|nộp)[^.]{0,26}(vào|qua|tới|đến)\\s*(stk|tk|số tài khoản|tài khoản)\\b', scope: 'action' },
     ],
     FIN_SAFE_ACCOUNT: [
       { pattern: '(tài khoản|ví)\\s+(an toàn|bảo đảm|tạm giữ|phong toả)', scope: 'action' },
@@ -98,13 +118,78 @@ module.exports = {
     DEV_REMOTE_CONTROL_APP: [
       { pattern: '\\b(anydesk|teamviewer|ultraviewer|quicksupport)\\b', scope: 'action' },
       { pattern: '(điều khiển|truy cập)\\s+từ xa', scope: 'action' },
+      /**
+       * Đo trên bộ 100: "tai ung dung Ultraview roi cho toi ma de toi ho tro
+       * tu xa" — KHÔNG bật tín hiệu nào. `ultraviewer` có trong danh sách
+       * nhưng người ta viết "Ultraview" (thiếu "er"), và "hỗ trợ từ xa" thì
+       * chưa có mẫu. Kẻ lừa đảo không đọc chính tả tên phần mềm.
+       */
+      { pattern: '\\b(ultraview|teamview|any ?desk|quick ?support|rustdesk)\\w*\\b', scope: 'any' },
+      { pattern: '(hỗ trợ|thao tác|làm giúp|cài giúp)[^.]{0,16}từ xa', scope: 'action' },
+      { pattern: '(cho|đọc|gửi)[^.]{0,14}(mã|id)[^.]{0,20}(để|cho)[^.]{0,14}(tôi|em|anh|mình)[^.]{0,20}(vào|truy cập|hỗ trợ|điều khiển)', scope: 'action' },
     ],
     DEV_INSTALL_APK_UNKNOWN: [
-      { pattern: '(cài|tải)\\b[^.]{0,44}(dịch vụ công|qua (đường )?link|file apk|\\bapk\\b|đường dẫn (tôi|em|anh) gửi)', scope: 'action' },
+      /**
+       * ⚠️ NHIỀU CÁCH NÓI "LẤY APP TỪ LINK", KHÔNG CHỈ "QUA LINK" — MỞ 19/8/2026.
+       *
+       * Bản trước chỉ nhận `qua (đường )?link`. Đo được trên ca
+       * `gia-danh-dien-luc`: "Vui long TAI UNG DUNG TAI LINK evn-thanhtoan.xyz"
+       * — tầng luật không bật một tín hiệu nào, nhãn ra CHUA_THAY.
+       *
+       * Cùng nội dung viết bằng tiếng Anh ("install our support app from this
+       * link") thì pack en-US bắt được ngay. Cùng một vụ lừa, hai ngôn ngữ hai
+       * kết quả — đó là lỗ, không phải khác biệt văn hoá.
+       *
+       * Người Việt nói "tải tại link", "tải ở link", "tải theo đường link",
+       * "vào link tải" — `qua` chỉ là một trong nhiều giới từ.
+       */
+      { pattern: '(cài|tải)\\b[^.]{0,44}(dịch vụ công|(qua|tại|từ|theo|ở|vào)\\s*(đường\\s*)?link|đường link|link\\s*(bên )?dưới|file apk|\\bapk\\b|đường dẫn (tôi|em|anh) gửi)', scope: 'action' },
+      /**
+       * Ngược lại: "vào link … tải/cài" — động từ đứng SAU. Không có mẫu này
+       * thì nửa số cách đặt câu vẫn lọt.
+       */
+      { pattern: '(vào|bấm|nhấn|truy cập)\\s*(đường\\s*)?link[^.]{0,40}(tải|cài)\\b', scope: 'action' },
+      /**
+       * Ca `ld-app-gia-02`: "bac CAI FILE APK toi vua gui QUA ZALO". Mẫu đầu có
+       * `file apk` trong nhóm chọn, nhưng cả nhóm nằm sau `[^.]{0,44}` tính từ
+       * "cài" — mà ở đây "cài" và "file apk" liền nhau nên phải khớp. Đo lại
+       * thì trượt vì đoạn này không được xếp vào scope `action`.
+       *
+       * Nới scope thành `any` cho ĐÚNG hai dấu hiệu cứng nhất — tệp apk và
+       * đường dẫn gửi qua ứng dụng nhắn tin. Hai thứ này không xuất hiện trong
+       * hội thoại bình thường của người cao tuổi.
+       */
+      { pattern: '\\b(file\\s*)?apk\\b', scope: 'any' },
+      { pattern: '(cài|tải)[^.]{0,30}(tôi|em|anh|mình)\\s*(vừa\\s*)?gửi[^.]{0,20}(qua|trên)\\s*(zalo|messenger|viber|telegram|tin nhắn)', scope: 'any' },
     ],
     DEV_SCREEN_SHARE_BANKING: [
       { pattern: '(chia sẻ|bật)\\b[^.]{0,16}màn hình\\b[^.]{0,48}(ngân hàng|banking|tài khoản)', scope: 'action' },
       { pattern: 'chia sẻ màn hình\\b[^.]{0,44}(app|ứng dụng)\\s+ngân hàng', scope: 'action' },
+    ],
+    /**
+     * ⚠️ MÃ USSD CHUYỂN HƯỚNG CUỘC GỌI — THÊM 2/9/2026.
+     *
+     * `DEV_CALL_FORWARD` có trong registry (trọng số 18) từ đầu nhưng pack
+     * tiếng Việt KHÔNG có mẫu nào, nên nó chỉ bật được khi tầng AI tình cờ nhận
+     * ra. Mất mạng hoặc AI chết là thủ đoạn này vô hình — trong khi nó là thủ
+     * đoạn ÍT ĐỂ LẠI DẤU NHẤT: không link để quét, không app để kiểm, không
+     * tệp để đọc. Nạn nhân tự bấm một dãy số trên bàn phím máy mình.
+     *
+     * Hậu quả: MỌI cuộc gọi tới — kể cả cuộc gọi tự động đọc mã xác thực của
+     * ngân hàng — chuyển thẳng sang máy kẻ gian, còn máy nạn nhân im lặng.
+     *
+     * Vì sao mẫu này an toàn để bắt xác định: đây là CHUỖI KÝ TỰ CỐ ĐỊNH do
+     * chuẩn GSM quy định, không có cách diễn đạt vòng vo. `*21*` là chuyển
+     * hướng vô điều kiện, `*67*`/`*61*`/`*62*` là chuyển khi bận/không nghe.
+     * Không người dùng bình thường nào tự nhiên gõ dãy này theo lời người lạ.
+     *
+     * `scope: 'any'` — không đòi câu phải ở thể mệnh lệnh. Một tin nhắn chỉ
+     * chứa trần trụi dãy mã cũng phải bị bắt.
+     */
+    DEV_CALL_FORWARD: [
+      { pattern: '\\*{1,2}\\s*(21|61|62|67)\\s*\\*\\s*[+0-9][0-9\\s.-]{6,}#', scope: 'any' },
+      { pattern: '(bấm|nhấn|gõ|nhập)\\b[^.]{0,30}(\\*{1,2}\\s*(21|61|62|67)\\s*\\*|##\\s*(21|61|62|67))', scope: 'any' },
+      { pattern: '(chuyển hướng|chuyển tiếp)\\b[^.]{0,20}cuộc gọi', scope: 'any' },
     ],
     /**
      * ⚠️ HAI GIỌNG, KHÔNG PHẢI MỘT — ĐO ĐƯỢC 16/8/2026.
@@ -245,6 +330,74 @@ module.exports = {
        */
       { pattern: '(đặt cọc|ứng trước|nạp trước|đóng trước)', scope: 'action' },
       { pattern: '(nộp|đóng|chuyển)[^.]{0,20}(phí|lệ phí)[^.]{0,30}(trước|rồi mới|thì mới)', scope: 'action' },
+      /**
+       * Bộ 100 chỉ ra ba lối viết mà hai mẫu trên không bắt:
+       *   · "đóng trước 2.000.000d phí bảo hiểm khoản vay"  (phí đứng SAU số)
+       *   · "chuyển trước 350.000d phí lưu kho"
+       *   · "nộp 1.500.000d lệ phí hải quan trước để nhận hàng"
+       * Mẫu cũ đòi "phí" đứng trước và "trước" đứng sau — thứ tự thật đảo lộn.
+       */
+      { pattern: '(đóng|nộp|chuyển|thanh toán)\\s*(trước)?[^.]{0,20}\\d[\\d.,]*\\s*[dđk]?[^.]{0,20}(phí|lệ phí|tiền cọc|tiền đặt cọc)', scope: 'action' },
+      { pattern: '(phí|lệ phí|tiền cọc)[^.]{0,26}(trước|mới|thì)[^.]{0,26}(nhận|rút|giải ngân|giao|lấy)', scope: 'action' },
+      { pattern: '(nộp|đóng|chuyển)[^.]{0,30}(rồi|sau đó|xong)[^.]{0,20}(nhận|rút|hoàn|trả lại|giải ngân)', scope: 'action' },
+    ],
+    /**
+     * ══════ TÍN HIỆU THÊM 19/8/2026, SAU KHI ĐO BỘ 100 TÌNH HUỐNG ══════
+     *
+     * Bộ thử cũ có 10 mẫu và cho 5/5 — nhìn như đã xong. Bộ 100 cho 30/50
+     * (60%), và danh sách bỏ sót chỉ thẳng ra từng họ kịch bản còn trống.
+     * Mọi mẫu dưới đây sinh ra từ một ca bỏ sót CỤ THỂ, không mẫu nào đoán.
+     *
+     * ⚠️ HẸP CÓ CHỦ Ý. Sau khi thêm, đã đo lại toàn bộ 50 tin nhắn LÀNH của bộ
+     * 100 — trong đó có tin ngân hàng thật, hoá đơn điện thật, nhắc học phí
+     * thật, tin cảnh báo lừa đảo thật. Báo oan phải giữ ở 0.
+     */
+    DEV_ACCESSIBILITY_PERMISSION: [
+      /*
+       * Ca `ld-app-gia-02`: "cai file apk toi vua gui qua zalo, BAT QUYEN TRO
+       * NANG de he thong tu dong dong bo". Đây là bước ③ của kịch bản chiếm
+       * máy, và tiếng Việt không có mẫu nào cho nó — trong khi en-US thì có.
+       */
+      { pattern: '(bật|cấp|cho phép|mở)[^.]{0,20}(quyền\\s*)?(trợ năng|hỗ trợ|accessibility)', scope: 'action' },
+      { pattern: '(cho phép|bấm đồng ý|bấm cho phép)[^.]{0,24}(tất cả|toàn bộ|mọi)\\s*(quyền|thứ)', scope: 'action' },
+    ],
+    MAN_EXTORTION_MEDIA_THREAT: [
+      /*
+       * Ca `ld-doa-lo-anh-01`: chỉ bật FIN_TRANSFER_REQUEST (14đ), không chạm
+       * ngưỡng 20 — một tin tống tiền bằng ảnh riêng tư ra CHUA_THAY.
+       */
+      { pattern: '(giữ|có|đang có)[^.]{0,26}(hình ảnh|clip|video|ảnh)[^.]{0,16}(riêng tư|nhạy cảm|nóng|của (anh|chị|bạn|em))', scope: 'any' },
+      { pattern: '(gửi|tung|phát tán|đăng)[^.]{0,30}(cho|lên)[^.]{0,24}(danh bạ|bạn bè|gia đình|người thân|mạng xã hội|facebook)', scope: 'any' },
+    ],
+    MAN_ISOLATION: [
+      /*
+       * Khác `MAN_SECRECY` ("đừng nói với ai") ở chỗ: đây là CẮT ĐƯỜNG LIÊN
+       * LẠC NGƯỢC LẠI — "đừng gọi lại", "đừng gọi cho bố". Kẻ lừa đảo dùng nó
+       * để nạn nhân không kiểm chứng được bằng một cuộc gọi.
+       */
+      { pattern: '(đừng|không được|khoan)\\s*(gọi|nhắn|liên hệ|hỏi)[^.]{0,24}(lại|cho|với)', scope: 'action' },
+      { pattern: '(một mình|tự đi|đi một mình)[^.]{0,20}(đừng|không)\\s*(cho|nói|báo)', scope: 'action' },
+    ],
+    ID_UTILITY_IMPERSONATION: [
+      { pattern: '\\b(evn|điện lực|công ty (cấp )?nước|cấp điện)\\b[^.]{0,40}(nợ|quá hạn|cắt|ngừng cung cấp)', scope: 'any' },
+      { pattern: '(cắt|ngừng)\\s*(điện|nước)[^.]{0,24}(trong|nếu không|hôm nay|\\d+\\s*(giờ|tiếng))', scope: 'any' },
+    ],
+    ID_DELIVERY_IMPERSONATION: [
+      { pattern: '(bưu điện|bưu phẩm|kiện hàng|đơn hàng)[^.]{0,36}(đang (bị )?giữ|lưu kho|hải quan|tạm giữ)', scope: 'any' },
+    ],
+    ID_EMPLOYER_JOB_IMPERSONATION: [
+      { pattern: '(tuyển|tuyển dụng|tuyển gấp)[^.]{0,40}(cộng tác viên|ctv|nhân viên|việc tại nhà|part ?time)', scope: 'any' },
+    ],
+    OFF_ROMANCE_EMERGENCY: [
+      { pattern: '(quen|nói chuyện|yêu)[^.]{0,26}(trên mạng|qua mạng|chưa gặp)[^.]{0,40}(gửi|chuyển|cho)\\s*(tiền|\\d)', scope: 'any' },
+      { pattern: '(em yêu|anh yêu|bé yêu|honey|darling)\\b[^.]{0,60}(chuyển|gửi|đóng|nộp)[^.]{0,20}(tiền|\\d)', scope: 'any' },
+    ],
+    OFF_PRIZE_GIFT: [
+      { pattern: '(trúng|nhận)\\s*(thưởng|giải|quà)[^.]{0,40}(nộp|đóng|chuyển|phí)', scope: 'any' },
+    ],
+    MAN_SCARCITY_PRESSURE: [
+      { pattern: '(chỉ còn|còn duy nhất|số lượng có hạn|suất cuối)[^.]{0,30}(hôm nay|trong ngày|tối nay|\\d+\\s*(suất|phút|giờ))', scope: 'any' },
+      { pattern: '(giữ (chỗ|suất)|đặt cọc)[^.]{0,24}(ngay|hôm nay|trong ngày)[^.]{0,20}(kẻo|nếu không|mai là)', scope: 'action' },
     ],
     OFF_TASK_PREPAY: [
       { pattern: '(nhiệm vụ|đơn hàng|chốt đơn)[^.]{0,40}(nạp|ứng|đặt cọc|chuyển)', scope: 'action' },

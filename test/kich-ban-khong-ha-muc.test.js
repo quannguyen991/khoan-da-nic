@@ -19,9 +19,9 @@
 const test = require('node:test');
 const assert = require('node:assert');
 
-const { analyze, toHopDong } = require('../src/analysis/pipeline');
-const { buocTiepTheo, KICH_BAN } = require('../src/kich-ban-di-tiep');
-const { suyGiaiDoan } = require('../src/journey-engine');
+const { analyze, toHopDong } = require('../backend/src/analysis/pipeline');
+const { buocTiepTheo, KICH_BAN } = require('../backend/src/kich-ban-di-tiep');
+const { suyGiaiDoan } = require('../backend/src/journey-engine');
 const { napDataset } = require('../eval/lib/bo-danh-gia');
 
 const BAC = { CHUA_THAY: 0, NGHI_NGO: 1, CAO: 2 };

@@ -10,7 +10,7 @@
 const test = require('node:test');
 const assert = require('node:assert');
 
-const T = require('../src/trusted-circle');
+const T = require('../backend/src/trusted-circle');
 
 const BAC = 'bac';        // chủ tài khoản — người cao tuổi
 const CON = 'con_gai';    // người thân tin cậy

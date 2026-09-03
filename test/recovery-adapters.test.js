@@ -10,7 +10,7 @@
 const test = require('node:test');
 const assert = require('node:assert');
 
-const R = require('../src/analysis/recovery-adapters');
+const R = require('../backend/src/analysis/recovery-adapters');
 
 test('§2B.5 — nước ĐÃ DUYỆT có bước riêng, cộng bước chung', () => {
   const kh = R.layKeHoachPhucHoi('VN');

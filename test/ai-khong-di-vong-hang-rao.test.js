@@ -14,8 +14,8 @@
 const test = require('node:test');
 const assert = require('node:assert');
 
-const { analyze } = require('../src/analysis/pipeline');
-const { scopeCuaTinHieu } = require('../src/analysis/signal-registry');
+const { analyze } = require('../backend/src/analysis/pipeline');
+const { scopeCuaTinHieu } = require('../backend/src/analysis/signal-registry');
 
 const ai = (id, quote, conf = 0.9) => [{
   id, state: 'present', confidence: conf,

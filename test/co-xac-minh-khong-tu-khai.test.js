@@ -21,7 +21,7 @@
 const test = require('node:test');
 const assert = require('node:assert');
 
-const { analyze, toHopDong } = require('../src/analysis/pipeline');
+const { analyze, toHopDong } = require('../backend/src/analysis/pipeline');
 
 /** Tin giả danh người thân — đúng thứ `ID_FAMILY_IMPERSONATION` sinh ra để bắt. */
 const TIN_GIA_NGUOI_THAN = 'Mẹ ơi con đây, con đổi số mới. Con nhờ mẹ chuyển tiền '

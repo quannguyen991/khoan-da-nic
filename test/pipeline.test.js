@@ -5,7 +5,7 @@
 const test = require('node:test');
 const assert = require('node:assert');
 
-const { analyze, toHopDong, chonCanThiep } = require('../src/analysis/pipeline');
+const { analyze, toHopDong, chonCanThiep } = require('../backend/src/analysis/pipeline');
 
 const TRUONG_HOP_DONG = [
   'nhan', 'maLyDo', 'daKiem', 'chuaKiem', 'hoKichBan', 'aiDaChay', 'canThiep',

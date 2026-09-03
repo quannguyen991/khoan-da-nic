@@ -14,11 +14,11 @@
 
 require('dotenv').config();
 
-const { goiChat, layCauHinh } = require('../src/ai/fable-client');
+const { goiChat, layCauHinh } = require('../backend/src/ai/fable-client');
 const {
   dungLoiNhac, parseJsonLoose, validateExtraction,
-} = require('../src/analysis/llm-extractor');
-const { analyze } = require('../src/analysis/pipeline');
+} = require('../backend/src/analysis/llm-extractor');
+const { analyze } = require('../backend/src/analysis/pipeline');
 
 // Mẫu tự soạn, KHÔNG phải nội dung thật của người dùng.
 const MAU = 'Tôi là cán bộ công an. Tài khoản của bác liên quan vụ án rửa tiền. '

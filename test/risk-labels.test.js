@@ -10,7 +10,7 @@ const {
   RISK_LABELS,
   NHAN_HOP_DONG,
   nhanHopDong,
-} = require('../src/risk-labels');
+} = require('../backend/src/risk-labels');
 
 test('§4.1 — đúng ba mức, không hơn không kém', () => {
   assert.deepStrictEqual(RISK_LEVELS, ['HIGH', 'SUSPICIOUS', 'NO_SIGNS_FOUND']);

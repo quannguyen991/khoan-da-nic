@@ -12,7 +12,7 @@ const {
   GROUP_IDS,
   getSignal,
   listByGroup,
-} = require('../src/analysis/signal-registry');
+} = require('../backend/src/analysis/signal-registry');
 
 test('§6.2 — đúng 58 tín hiệu', () => {
   assert.strictEqual(SIGNAL_IDS.length, 58);

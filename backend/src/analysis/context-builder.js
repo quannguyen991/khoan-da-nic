@@ -103,10 +103,58 @@ function goCheChu(t) {
  * An toàn theo §4.2: bỏ ký tự ngăn chỉ làm khoảng `[^.]{0,N}` với tới XA HƠN,
  * tức chỉ THÊM khớp. Không mẫu nào trong locale pack chứa dấu chấm giữa số.
  */
-const NGAN_HANG_NGHIN = /(?<=\d)[.,](?=\d{3}\b)/g;
+/*
+ * ⚠️ KHÔNG CÓ `` Ở CUỐI — ĐO ĐƯỢC 19/8/2026, VÀ ĐÂY LÀ MỘT LỖ CHỈ HỞ VỚI
+ * TIẾNG VIỆT KHÔNG DẤU.
+ *
+ * Bản trước kết thúc bằng `\d{3}`. Ranh giới từ phân biệt chữ cái ASCII với
+ * chữ khác, nên nó cư xử KHÁC NHAU giữa hai cách viết cùng một số tiền:
+ *
+ *   "1.200.000đ"  ->  1200000đ   (đ không phải chữ ASCII, có ranh giới)
+ *   "1.200.000d"  ->  1200.000d  (d là chữ ASCII, KHÔNG có ranh giới)
+ *
+ * Dấu chấm còn sót chặn ngang `[^.]{0,N}` của gần như mọi mẫu trong locale
+ * pack — tức toàn bộ cue bank mù với tin nhắn viết KHÔNG DẤU có kèm số tiền.
+ * Mà không dấu chính là cách tin nhắn lừa đảo hay được viết nhất.
+ *
+ * Đo trên ca `viec-nhe-luong-cao` ("Chi nap 1.200.000d lam nhiem vu cuoi la rut
+ * duoc ca von lan thuong"): cả hai mẫu OFF_TASK_PREPAY đều trượt, tầng luật câm
+ * hoàn toàn — trong khi mẫu viết ra chính là để bắt câu đó.
+ *
+ * `evidence-validator.js` đã dùng đúng dạng không có ranh giới từ từ trước. Hai
+ * tầng chuẩn hoá khác nhau tự nó là một lỗi: cùng một câu, tầng này thấy, tầng
+ * kia không.
+ */
+/*
+ * ⚠️ `(?!\d)` Ở CUỐI CHẶN NGÀY THÁNG. Không có nó thì "19.8.2026" thành
+ * "19.82026" — dấu chấm giữa ngày và năm bị nuốt vì "202" trông như nhóm ba
+ * chữ số. Tiền Việt luôn có nhóm ba chữ số ĐẦY ĐỦ rồi hết số, nên yêu cầu đó
+ * loại được ngày tháng mà không bỏ sót số tiền nào.
+ */
+const NGAN_HANG_NGHIN = /(\d)[.,](?=\d{3}(?!\d))/g;
+
+/**
+ * Đuôi tên miền hay gặp trong tin nhắn lừa đảo Việt Nam. Dấu chấm trước chúng
+ * được đổi thành dấu chấm giữa (·) để không chặn `[^.]` của cue bank.
+ */
+const DUOI_TEN_MIEN = /\.(com|net|org|info|online|top|xyz|site|vn|shop|store|club|icu|live|cc|app|link|space|website)\b/g;
 
 function chuanHoa(s) {
-  let t = s.toLowerCase().replace(NGAN_HANG_NGHIN, '');
+  let t = s.toLowerCase().replace(NGAN_HANG_NGHIN, '$1');
+  /*
+   * ⚠️ DẤU CHẤM TRONG TÊN MIỀN CHẶN `[^.]` Y HỆT DẤU CHẤM TRONG SỐ TIỀN.
+   *
+   * Đo trên bộ 100 (19/8/2026): "Vao link nuoc-sach.online tai ung dung" —
+   * mẫu `(vào|bấm|truy cập) link[^.]{0,40}(tải|cài)` trượt, vì dấu chấm của
+   * `.online` nằm đúng giữa hai vế. Cùng một lỗ với `1.200.000d`, chỉ khác
+   * loại dấu chấm; và nó bịt luôn cả họ kịch bản "vào link này tải app".
+   *
+   * ⚠️ CHỈ ĐỔI KHI THẤY ĐUÔI TÊN MIỀN THẬT. Đổi mọi dấu chấm giữa hai chữ cái
+   * là nối liền hai câu ("...xong. Tôi..."), và `[^.]{0,N}` sẽ lan qua câu
+   * khác — đúng thứ nó sinh ra để ngăn. Danh sách đuôi giữ hẹp, thêm được khi
+   * gặp đuôi mới trong tin nhắn thật.
+   */
+  t = t.replace(DUOI_TEN_MIEN, '\u00b7$1');
   for (const [re, thay] of CONTRACTIONS) t = t.replace(re, thay);
   return t.replace(/[ \t]+/g, ' ').trim();
 }
@@ -224,10 +272,37 @@ const DONG_TU_RUI_RO = new RegExp([
 
 /** Khung GIÁO DỤC / CẢNH BÁO. Vị trí của nó quyết định phạm vi chi phối. */
 const KHUNG_GIAO_DUC = new RegExp([
-  'never\\s+(share|give|send|tell|provide|reveal|install)',
+  'never\\s+(share|give|send|tell|provide|reveal|install|ask|request)',
   'scammers?\\b[^.]{0,40}\\b(may|might|will|often|can)',
   'fraudsters?\\b', 'warns?\\s+(that|you)', 'be (aware|careful)',
   'if\\s+(someone|anyone|a caller)',
+
+  /**
+   * ── KHUNG CẢNH BÁO TIẾNG ANH BỔ SUNG — 20/8/2026 ──
+   *
+   * Đo trên bộ 200 tiếng Anh: cả BA ca báo oan đều là lời khuyên an toàn.
+   *   "The bank will never ask you to transfer money to a safe account"
+   *   "no one from HMRC will ever ask you to pay with gift cards"
+   * Khung cũ có `never (share|give|send|tell…)` nhưng THIẾU `ask` — mà "sẽ không
+   * bao giờ HỎI" mới là câu khuyên hay gặp nhất. Thiếu đúng một động từ.
+   *
+   * Đây chính là bẫy Phụ lục C: câu cảnh báo chứa ĐỦ MỌI từ khoá của vụ lừa mà
+   * nó đang cảnh báo. Bên tiếng Việt đã có khung cho chuyện này từ lâu.
+   *
+   * ⚠️ MỖI KHUNG Ở ĐÂY LÀ MỘT LẦN HẠ CẢNH GIÁC — PHẢI ĐÒI CẤU TRÚC.
+   * Không lấy từ khoá trần. "scam" một mình thì kẻ lừa cũng viết được
+   * ("this is not a scam"); phải là dạng câu mà chỉ người ĐANG KHUYÊN mới viết.
+   *
+   * ⚠️ VÀ NÓ CHỈ TẮT ĐÚNG MỘT ĐOẠN, KHÔNG TẮT CẢ TIN. Kẻ lừa viết "We will never
+   * ask for your PIN. Now read me the code." thì câu sau vẫn nguyên vẹn — đó là
+   * lý do phân đoạn theo câu có giá trị.
+   */
+  'will\\s+(never|not)\\s+(ask|call|contact|request|phone)',
+  '(no one|nobody)\\b[^.]{0,30}\\b(will|would)\\s+(ever\\s+)?(ask|call|request)',
+  'is\\s+(always\\s+)?a\\s+scam\\b',
+  'how to (spot|avoid|recognise|recognize)\\b',
+  '(watch out for|beware of|look out for)\\b',
+  '(hang up|put the phone down)\\b[^.]{0,30}\\b(call|ring|check)\\b',
   /**
    * ── KHUNG TIẾNG VIỆT ──
    *
@@ -318,6 +393,45 @@ const KHUNG_TU_QUYET = new RegExp([
   'mừng tuổi', 'nhẫn cưới', 'sinh nhật', 'tặng (cháu|con)', 'quà tết',
 ].join('|'));
 
+/**
+ * §12 — CẤU TRÚC ĐÒI HỎI. Sự có mặt của nó BÁC BỎ khung "tự quyết định".
+ *
+ * VÌ SAO CẦN (đo 2/9/2026): `KHUNG_TU_QUYET` chứa những DANH TỪ CHỦ ĐỀ như
+ * `sinh nhật`, `quà tết`, `mừng tuổi`, `nhẫn cưới`, `tặng cháu`, `for my own`.
+ * Chúng được thêm để cứu ca lành có thật, và cứu đúng. Nhưng vì là danh từ chứ
+ * không phải cấu trúc câu, kẻ lừa đảo nối vào đâu cũng được:
+ *
+ *   "Con đây mẹ ơi, mẹ chuyển gấp 30 triệu vào tài khoản này giúp con"
+ *      → NGHI_NGO, 2 tín hiệu
+ *   cùng câu + " để mua quà sinh nhật."
+ *      → CHUA_THAY, 0 tín hiệu
+ *
+ *   Bản tiếng Anh còn nặng hơn: "for my own" kéo CAO (3 tín hiệu) → CHUA_THAY.
+ *
+ * §12 gọi đúng tên: "Bất kỳ cụm nào hạ mức vô điều kiện đều là một câu thần chú
+ * tặng cho kẻ lừa đảo" — cùng bài học với "please hold" và "ch play".
+ *
+ * ⚠️ QUY TẮC THEO VỊ TRÍ KHÔNG ĐỦ. Khung giáo dục dùng mẹo "động từ rủi ro đứng
+ * TRƯỚC khung thì khung không chi phối". Ở đây mẹo đó thua, vì kẻ gian chỉ việc
+ * đảo cụm lên đầu: "Để mua quà sinh nhật, mẹ chuyển gấp 30 triệu…". Nên phép
+ * kiểm này KHÔNG xét vị trí — có đòi hỏi ở bất kỳ đâu trong câu là khung tắt.
+ *
+ * ⚠️ HAI VẾ, VÀ CHỈ HAI: NƠI NHẬN TIỀN, hoặc SỨC ÉP THỜI GIAN. Đừng nới thêm.
+ * Hai ca lành mà các cụm kia sinh ra để cứu — "Mua vàng nhẫn cưới cho cháu." và
+ * "mai sinh nhật mẹ mình làm bất ngờ cho mẹ" — không có vế nào trong hai vế này,
+ * nên vẫn được cứu. Nới danh sách là bắt đầu ăn vào chúng.
+ *
+ * Hàng rào: test/than-chu-ha-muc.test.js (canh CẢ HAI chiều).
+ */
+const KHUNG_DOI_HOI = new RegExp([
+  // nơi nhận tiền
+  'tài khoản', 'số thẻ', '\\bstk\\b', '\\btk\\b',
+  '\\baccount\\b', '\\bwallet address\\b',
+  // sức ép thời gian
+  'gấp\\b', 'ngay\\b', 'khẩn', 'lập tức', 'trong vòng \\d',
+  '\\b(urgent|urgently|immediately|asap)\\b', 'right (now|away)', 'within \\d',
+].join('|'));
+
 const KHUNG_MENH_LENH = new RegExp([
   '^\\s*(please|kindly)\\b', '\\bplease\\b',
   '^\\s*(bác|anh|chị|ông|bà|cô|chú|em|con)\\s+\\S+',
@@ -387,7 +501,9 @@ function phanLoai(n) {
   // "…to the account I gave you" nằm giữa câu — là mệnh đề phụ, không tính.
   if (KHUNG_QUA_KHU.test(n)) return 'past_event';
 
-  if (KHUNG_TU_QUYET.test(n)) return 'self_directed';
+  // §12 — khung "tự quyết định" CÓ THỂ BỊ BÁC BỎ. Xem khối KHUNG_DOI_HOI.
+  // Không ai vừa "tự quyết định" vừa bị hối chuyển tiền vào một tài khoản.
+  if (KHUNG_TU_QUYET.test(n) && !KHUNG_DOI_HOI.test(n)) return 'self_directed';
   if (KHUNG_MENH_LENH.test(n)) return 'request_command';
 
   // C.3 bẫy 1 + 2: không nhận ra được thì là `unknown` — và `unknown` VẪN ĐƯỢC

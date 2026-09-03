@@ -27,9 +27,9 @@
 const test = require('node:test');
 const assert = require('node:assert');
 
-const { analyze, toHopDong } = require('../src/analysis/pipeline');
+const { analyze, toHopDong } = require('../backend/src/analysis/pipeline');
 const { napDataset } = require('../eval/lib/bo-danh-gia');
-const { SIGNAL_IDS } = require('../src/analysis/signal-registry');
+const { SIGNAL_IDS } = require('../backend/src/analysis/signal-registry');
 
 const BAC = { CHUA_THAY: 0, NGHI_NGO: 1, CAO: 2 };
 const { mau } = napDataset();

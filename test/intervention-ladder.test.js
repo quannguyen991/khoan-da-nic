@@ -6,7 +6,7 @@ const assert = require('node:assert');
 
 const {
   MUC_CAN_THIEP, chonMuc, SCORE_SCALE, moTaMuc,
-} = require('../src/intervention-ladder');
+} = require('../backend/src/intervention-ladder');
 
 test('§9 — đúng năm mức can thiệp, đúng enum của §HĐ', () => {
   assert.deepStrictEqual(MUC_CAN_THIEP,
@@ -54,7 +54,7 @@ test('§4.6 — mọi mức đều có lối ra, kể cả PROTECTED_CRITICAL', 
 
 test('§5.2 — KHÔNG dựng cầu nối sang bộ luật cũ', () => {
   const nguon = require('node:fs').readFileSync(
-    require.resolve('../src/intervention-ladder'), 'utf8');
+    require.resolve('../backend/src/intervention-ladder'), 'utf8');
   assert.ok(!nguon.includes('escalation-bridge'));
   assert.ok(!nguon.includes('rule-engine'));
 });

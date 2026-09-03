@@ -11,7 +11,7 @@ const test = require('node:test');
 const assert = require('node:assert');
 
 process.env.KHOAN_DA_KHONG_GOI_AI = '1';
-const { app } = require('../server');
+const { app } = require('../backend/server');
 
 let server; let goc;
 
@@ -121,7 +121,7 @@ const vongTron = () => {
   vt = TC.themThanhVien(vt, { id: 'con', vaiTro: 'nguoi_than_tin_cay', boiAi: 'bac' });
   return TC.datQuyTac(vt, { nguongTien: 5e6, nguoiNhanCanhBaoId: 'con' }, 'bac');
 };
-const TC = require('../src/trusted-circle');
+const TC = require('../backend/src/trusted-circle');
 
 test('§9.4 — KHÔNG auto-alert ở mức thấp', async () => {
   const { body } = await post('/api/canh-bao-nguoi-than',

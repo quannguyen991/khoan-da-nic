@@ -6,9 +6,9 @@
 const test = require('node:test');
 const assert = require('node:assert');
 
-const { analyze, toHopDong } = require('../src/analysis/pipeline');
-const { RISK_LABELS } = require('../src/risk-labels');
-const { buildTrustReceipt } = require('../src/analysis/trust-receipt-v2');
+const { analyze, toHopDong } = require('../backend/src/analysis/pipeline');
+const { RISK_LABELS } = require('../backend/src/risk-labels');
+const { buildTrustReceipt } = require('../backend/src/analysis/trust-receipt-v2');
 
 test('§4.3 — CHUA_THAY chỉ được trả khi CÓ nguồn đã kiểm được', () => {
   const sach = analyze({ vanBan: 'Chiều nay cháu ghé chơi bác nhé.' });

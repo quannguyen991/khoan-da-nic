@@ -12,7 +12,7 @@ const assert = require('node:assert');
 
 const {
   phanTichUrl, trichUrl, layRegistrableDomain,
-} = require('../src/analysis/url-analyzer');
+} = require('../backend/src/analysis/url-analyzer');
 
 const ids = (t) => phanTichUrl(t).map((s) => s.id);
 
@@ -57,7 +57,7 @@ test('A.7 — nguồn cài app không chính thức', () => {
 
 test('§6.8 / A.7 — TUYỆT ĐỐI không gọi mạng, không tự mở link', () => {
   const nguon = require('node:fs').readFileSync(
-    require.resolve('../src/analysis/url-analyzer'), 'utf8');
+    require.resolve('../backend/src/analysis/url-analyzer'), 'utf8');
   for (const cam of ['fetch(', 'http.get', 'https.get', 'dns.', 'axios', 'net.connect']) {
     assert.ok(!nguon.includes(cam), `url-analyzer không được dùng ${cam}`);
   }

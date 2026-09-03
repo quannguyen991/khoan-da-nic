@@ -7,9 +7,9 @@
  * Thoát mã 1 nếu bất kỳ kịch bản nào lệch — dùng được trong CI.
  */
 
-const { analyze, toHopDong } = require('../src/analysis/pipeline');
-const { buildTrustReceipt } = require('../src/analysis/trust-receipt-v2');
-const { RISK_LABELS } = require('../src/risk-labels');
+const { analyze, toHopDong } = require('../backend/src/analysis/pipeline');
+const { buildTrustReceipt } = require('../backend/src/analysis/trust-receipt-v2');
+const { RISK_LABELS } = require('../backend/src/risk-labels');
 
 const KICH_BAN = [
   {

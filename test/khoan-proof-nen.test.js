@@ -15,9 +15,9 @@ const test = require('node:test');
 const assert = require('node:assert');
 
 process.env.KHOAN_DA_KHONG_GOI_AI = '1';
-const { app } = require('../server');
-const { KHONG_CAN_DANG_NHAP, KHONG_CAN_DANG_NHAP_TIEN_TO, canDangNhap } = require('../src/auth');
-const P = require('../src/khoan-proof');
+const { app } = require('../backend/server');
+const { KHONG_CAN_DANG_NHAP, KHONG_CAN_DANG_NHAP_TIEN_TO, canDangNhap } = require('../backend/src/auth');
+const P = require('../backend/src/khoan-proof');
 const { taoMayXacThuc } = require('./helper/may-xac-thuc-gia');
 
 let server;
@@ -253,7 +253,7 @@ test('máy xác thực dựng cho test KHÔNG được rò vào sản phẩm', (
     }
   };
   quet(path.join(goc, 'src'));
-  assert.ok(!fs.readFileSync(path.join(goc, 'server.js'), 'utf8').includes('may-xac-thuc-gia'));
+  assert.ok(!fs.readFileSync(path.join(goc, 'backend', 'server.js'), 'utf8').includes('may-xac-thuc-gia'));
 });
 
 // ─────────────────── Ghép cặp ───────────────────
@@ -297,7 +297,7 @@ test('người con KHÔNG thu hồi được quyền của người khác', asyn
 // ─────────────────── §6.9 · TRUONG_CAM ───────────────────
 
 test('§6.9 — không ghi khoá riêng, mã ghép, hay trường cấm vào kho', async () => {
-  const { kiemTruongCam } = require('../src/vault-store');
+  const { kiemTruongCam } = require('../backend/src/vault-store');
   const { body: sinh } = await goi('/api/proof/ghep/bat-dau', {}, PHIEN_BAC);
   await goi('/api/proof/ghep/xac-nhan', { ma: sinh.ma }, PHIEN_CON);
 
@@ -351,7 +351,7 @@ test('§5.3 — /api/analyze VẪN chạy khi chưa đăng nhập, chưa ghép c
 });
 
 test('§4.2 — Khoan Proof KHÔNG được đụng vào đường phân tích', () => {
-  const nguon = require('node:fs').readFileSync(require.resolve('../src/khoan-proof'), 'utf8');
+  const nguon = require('node:fs').readFileSync(require.resolve('../backend/src/khoan-proof'), 'utf8');
   for (const cam of ['decision-engine', 'signal-registry', 'directPrecheck', 'quyetDinh']) {
     assert.ok(!nguon.includes(cam), `khoan-proof.js chạm vào ${cam}`);
   }

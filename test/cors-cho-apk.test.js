@@ -22,7 +22,7 @@ const test = require('node:test');
 const assert = require('node:assert');
 
 process.env.KHOAN_DA_KHONG_GOI_AI = '1';
-const { app } = require('../server');
+const { app } = require('../backend/server');
 
 let server;
 let goc;

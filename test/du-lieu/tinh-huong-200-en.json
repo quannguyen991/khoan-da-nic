@@ -1,0 +1,1205 @@
+{
+  "_doc": "200 tinh huong TIENG ANH — 100 lua dao, 100 lanh. Dung 20/8/2026.\n\nVI SAO CAN BO NAY: pack tieng Viet co bo 100 va len duoc 79% nho do lien tuc.\nPack tieng Anh chua tung duoc do lan nao — hai lo hong tim thay hom nay deu lo\nra do nguoi dung tinh co go mot cau, khong phai do co ai di tim.\n\nTRON HAI LOI VIET, VA DO LA DIEM CHINH:\n  · 'dan nguyen tin' — loi cua ke lua:  'This is Officer Daniels...'\n  · 'ke lai'         — loi cua bac:     'A man said he was from the police...'\nPack tieng Anh truoc nay chi duoc thu o loi thu nhat. Nguoi dung that go theo\nloi thu hai, va do 20/8/2026 cho thay loi do truot gan het.\n\nNUA LANH CO Y VIET KHO: 68% mang so tien, chu 'urgent/today', ten ngan hang,\nduong link, chu 'police', chu 'code'. Tin lanh hien lanh thi ti le bao oan 0%\nkhong chung minh duoc gi. Khac biet duy nhat: chung KHONG doi bac lam gi nguy hiem.\n\nCHAM DIEM: mot ca lua dao tinh la BAT DUOC khi muc >= NGHI_NGO. `mongDoi` chi la\nghi chu, khong phai dieu kien — hai loai sai khong cung gia (§4.6).",
+  "tinhHuong": [
+    {
+      "ma": "ld-cong-an-01",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "This is Officer Daniels from the Criminal Investigation Department. Your bank account is linked to a money laundering ring. Do not hang up and do not tell your family. Transfer 5,000 to our safe account for verification."
+    },
+    {
+      "ma": "ld-cong-an-02",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "A man called and said he was from the police. He told me my account is frozen and I must send money today or I will be arrested."
+    },
+    {
+      "ma": "ld-cong-an-03",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "Police told me my identity was used in a crime and I need to move my savings to a protected account while they investigate."
+    },
+    {
+      "ma": "ld-cong-an-04",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "Detective Morris here. There is a warrant in your name. Stay on the line, go to your bank, and withdraw 8,000 in cash for the court deposit."
+    },
+    {
+      "ma": "ld-cong-an-05",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "Someone rang saying he is an investigator. He said if I hang up I will be charged with obstruction, and he asked for my card number."
+    },
+    {
+      "ma": "ld-cong-an-06",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "FEDERAL NOTICE: your social security number has been suspended due to suspicious activity. Call this number immediately to avoid legal action."
+    },
+    {
+      "ma": "ld-cong-an-07",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "The officer said I must not tell anyone, not even my children, because the investigation is confidential. Then he asked me to buy gift cards."
+    },
+    {
+      "ma": "ld-cong-an-08",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "Court summons: you failed to appear as a juror. Pay the 450 fine today by bank transfer or a warrant will be issued."
+    },
+    {
+      "ma": "ld-thue-01",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "This is the IRS. You owe back taxes from 2023. Pay immediately with gift cards or an arrest warrant will be issued today."
+    },
+    {
+      "ma": "ld-thue-02",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "Someone from the tax office called saying I owe money and must pay within the hour or they will take my house."
+    },
+    {
+      "ma": "ld-thue-03",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "HMRC final notice: your tax refund is pending. Confirm your bank details at this link within 24 hours or the refund is cancelled."
+    },
+    {
+      "ma": "ld-thue-04",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "A caller said he was from the tax department and asked me to read the code sent to my phone so he could process my refund."
+    },
+    {
+      "ma": "ld-ngan-hang-01",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "Your card will be locked in 30 minutes. Read out the one-time passcode we just sent to confirm your identity."
+    },
+    {
+      "ma": "ld-ngan-hang-02",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "Someone called saying they are from my bank and asked me to read the code from the text message to cancel a payment I did not make."
+    },
+    {
+      "ma": "ld-ngan-hang-03",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "ALERT: a payment of 1,299 to an unknown merchant is pending on your account. If this was not you, reply STOP and call 0800 immediately."
+    },
+    {
+      "ma": "ld-ngan-hang-04",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "The bank called about a suspicious transaction and said the safest thing is to move my money into a new secure account they opened for me."
+    },
+    {
+      "ma": "ld-ngan-hang-05",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "To keep your funds safe during this fraud investigation, please transfer the balance to the holding account below."
+    },
+    {
+      "ma": "ld-ngan-hang-06",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "My bank texted me a code and then a man phoned and asked me to tell him the code so he could stop the fraud."
+    },
+    {
+      "ma": "ld-ngan-hang-07",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "Your online banking will be deactivated. Verify now: hsbc-secure-verify.top/login"
+    },
+    {
+      "ma": "ld-ngan-hang-08",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "A woman said she works in the bank fraud team and needs remote access to my computer to secure my account."
+    },
+    {
+      "ma": "ld-nguoi-than-01",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "Mum, I had an accident and I am in hospital. My phone is broken so I am using this number. Please send 2,000 to this account now."
+    },
+    {
+      "ma": "ld-nguoi-than-02",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "Hi Dad, this is my new number, my old phone fell in the water. I need to pay a bill today, can you transfer it and I will pay you back?"
+    },
+    {
+      "ma": "ld-nguoi-than-03",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "Someone messaged me on a new number saying they are my son and asking for money urgently for an operation."
+    },
+    {
+      "ma": "ld-nguoi-than-04",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "Grandma, please do not tell mum. I crashed the car and I need 1,500 for the repair before she finds out."
+    },
+    {
+      "ma": "ld-nguoi-than-05",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "A video call came from someone who looked and sounded exactly like my daughter, asking me to send money quickly."
+    },
+    {
+      "ma": "ld-nguoi-than-06",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "This is the doctor at the emergency department. Your son is in surgery and we need the deposit transferred before we can operate."
+    },
+    {
+      "ma": "ld-trung-thuong-01",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "Congratulations! You have won a new iPhone in our customer draw. Pay the 50 shipping fee to claim your prize."
+    },
+    {
+      "ma": "ld-trung-thuong-02",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "I got a message saying I won a car in a lucky draw and I just have to pay the tax first before they deliver it."
+    },
+    {
+      "ma": "ld-trung-thuong-03",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "FINAL REMINDER: your 100,000 prize expires tonight. Send your bank details and the processing fee to release the funds."
+    },
+    {
+      "ma": "ld-trung-thuong-04",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "You are the lucky winner of our anniversary giveaway. Reply with your full name, address and card number to receive the reward."
+    },
+    {
+      "ma": "ld-viec-nhe-01",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "Work from home watching videos. Deposit 200 to activate your account and earn 100 commission every day."
+    },
+    {
+      "ma": "ld-viec-nhe-02",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "Someone offered me an online job liking posts, they said I need to put in a deposit first to unlock the tasks."
+    },
+    {
+      "ma": "ld-viec-nhe-03",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "Part time job, no experience needed, 300 a day. Complete simple tasks and top up your wallet to withdraw your earnings."
+    },
+    {
+      "ma": "ld-viec-nhe-04",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "They said I earned 500 already but I have to pay a 700 tax before I can take the money out."
+    },
+    {
+      "ma": "ld-viec-nhe-05",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "HIRING NOW: rate hotel listings from home. Join our Telegram group and pay the small membership fee to begin."
+    },
+    {
+      "ma": "ld-dau-tu-01",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "Guaranteed 20% daily returns on our crypto platform. Just transfer USDT to this wallet address to start."
+    },
+    {
+      "ma": "ld-dau-tu-02",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "A man I met online showed me his trading profits and told me to put 5,000 into the platform he uses."
+    },
+    {
+      "ma": "ld-dau-tu-03",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "Our AI trading bot has never lost a trade. Deposit today and withdraw anytime. Limited spots for this round."
+    },
+    {
+      "ma": "ld-dau-tu-04",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "I tried to withdraw my investment and they said I must pay a 15% release fee first."
+    },
+    {
+      "ma": "ld-dau-tu-05",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "Exclusive pre-IPO shares available to selected clients only. Wire the funds before Friday to secure your allocation."
+    },
+    {
+      "ma": "ld-dau-tu-06",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "Someone added me to a stock tips group. The mentor says to move my pension into his platform for bigger returns."
+    },
+    {
+      "ma": "ld-tinh-cam-01",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "My love, I have never met you in person but I need you to wire 3,000 for my flight ticket to come and see you."
+    },
+    {
+      "ma": "ld-tinh-cam-02",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "I have been chatting to a man online for two months. We have never met and now he is asking me for money for a customs fee."
+    },
+    {
+      "ma": "ld-tinh-cam-03",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "Darling, my card is blocked abroad. Please send the money through this transfer service, I will repay you when I land."
+    },
+    {
+      "ma": "ld-tinh-cam-04",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "He says he is a surgeon working overseas and cannot access his account, so he asked me to receive and forward some money for him."
+    },
+    {
+      "ma": "ld-buu-kien-01",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "Your parcel is held at customs and contains banned items. Pay 500 now to avoid prosecution."
+    },
+    {
+      "ma": "ld-buu-kien-02",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "Customs is holding a parcel of yours with banned documents inside. Settle the fee today or the case goes to court."
+    },
+    {
+      "ma": "ld-buu-kien-03",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "I got a text saying my package could not be delivered and I need to pay a small redelivery charge on their website."
+    },
+    {
+      "ma": "ld-buu-kien-04",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "ROYAL MAIL: your item is awaiting a 2.99 shipping fee. Pay here: royalmail-redelivery.icu/pay"
+    },
+    {
+      "ma": "ld-buu-kien-05",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "The delivery company called and said my parcel was flagged and I must confirm my card details to release it."
+    },
+    {
+      "ma": "ld-ky-thuat-01",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "Microsoft tech support here. Your computer is infected. Install this app so we can fix it remotely."
+    },
+    {
+      "ma": "ld-ky-thuat-02",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "A pop-up said my computer has a virus and gave a number to call. The man asked to take control of my screen."
+    },
+    {
+      "ma": "ld-ky-thuat-03",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "We detected illegal activity from your IP address. Download the support tool and allow all permissions so we can secure it."
+    },
+    {
+      "ma": "ld-cai-app-01",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "Download this APK to update your identity verification, then allow all permissions when the phone asks."
+    },
+    {
+      "ma": "ld-cai-app-02",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "They sent me a link to install an app outside the store and told me to turn on accessibility for it."
+    },
+    {
+      "ma": "ld-cai-app-03",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "To complete the process, install the file we sent and grant it permission to appear over other apps."
+    },
+    {
+      "ma": "ld-cai-app-04",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "The caller asked me to install a screen sharing app and then open my bank so he could guide me through the steps."
+    },
+    {
+      "ma": "ld-chia-se-01",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "Please share your screen while you open your banking app so I can guide you through the refund."
+    },
+    {
+      "ma": "ld-chia-se-02",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "He asked me to mirror my screen to him while I logged into my account so he could check the transaction."
+    },
+    {
+      "ma": "ld-tong-tien-01",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "I have private photos of you. Send 1,000 in bitcoin or I will share them with all of your contacts."
+    },
+    {
+      "ma": "ld-tong-tien-02",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "Someone emailed saying they recorded me through my webcam and will send the video to my family unless I pay."
+    },
+    {
+      "ma": "ld-tong-tien-03",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "I know your password. Pay within 48 hours or everyone in your address book receives the file."
+    },
+    {
+      "ma": "ld-dien-nuoc-01",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "Your electricity will be cut off in 2 hours because the bill is unpaid. Pay now to avoid disconnection."
+    },
+    {
+      "ma": "ld-dien-nuoc-02",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "They will cut off the power this afternoon unless you settle the balance immediately over the phone."
+    },
+    {
+      "ma": "ld-dien-nuoc-03",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "The water company called and said my meter reading was wrong and I owe 320 which must be paid today by card."
+    },
+    {
+      "ma": "ld-dien-nuoc-04",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "URGENT: your energy account is in arrears. Click to pay: britishgas-billing.xyz/settle"
+    },
+    {
+      "ma": "ld-vay-tien-01",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "Your loan of 20,000 is approved. Pay the 600 insurance fee first and the money will be released today."
+    },
+    {
+      "ma": "ld-vay-tien-02",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "They approved a loan for me without any checks but said I have to send the first payment upfront before I receive it."
+    },
+    {
+      "ma": "ld-vay-tien-03",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "Bad credit? No problem. Guaranteed approval. Transfer the arrangement fee and funds arrive within the hour."
+    },
+    {
+      "ma": "ld-vay-tien-04",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "The lender asked for a processing fee by gift card because a bank transfer would take too long."
+    },
+    {
+      "ma": "ld-hoan-tien-01",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "We overcharged you by 400. To process the refund, log in here and confirm your card details: refund-centre.live"
+    },
+    {
+      "ma": "ld-hoan-tien-02",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "He said the company was closing and I was owed a refund, then he said he had sent too much and I must return the difference."
+    },
+    {
+      "ma": "ld-hoan-tien-03",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "Your subscription renewed for 599. If you did not authorise this, call us now to cancel and get your money back."
+    },
+    {
+      "ma": "ld-hoan-tien-04",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "Someone called about a refund for a service I never bought and asked me to open my banking app while we talked."
+    },
+    {
+      "ma": "ld-tu-thien-01",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "Donate now to help the earthquake victims. Send by bank transfer or gift card, every minute counts."
+    },
+    {
+      "ma": "ld-tu-thien-02",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "A woman came to the door collecting for a childrens charity and only accepted cash or a transfer, no receipt."
+    },
+    {
+      "ma": "ld-thue-nha-01",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "The flat is available but I am abroad. Send the deposit today and I will post the keys to you."
+    },
+    {
+      "ma": "ld-thue-nha-02",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "I found a car for sale much cheaper than the others and the seller wants a deposit before I can view it."
+    },
+    {
+      "ma": "ld-thue-nha-03",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "Pay via this shipping agent for buyer protection. Do not pay in person, our platform handles everything."
+    },
+    {
+      "ma": "ld-thue-nha-04",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "The buyer sent me a link to confirm my details so the marketplace can transfer the payment to my card."
+    },
+    {
+      "ma": "ld-di-tru-01",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "Immigration Enforcement: there is a problem with your visa status. Pay the fee today or you will be detained."
+    },
+    {
+      "ma": "ld-di-tru-02",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "Someone called saying my residence documents have expired and I must transfer money to fix it before the office closes."
+    },
+    {
+      "ma": "ld-y-te-01",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "Your health insurance has lapsed. Confirm your policy and card number now to keep your cover active."
+    },
+    {
+      "ma": "ld-y-te-02",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "A caller said my prescription needed a payment before it could be dispensed and asked for my card over the phone."
+    },
+    {
+      "ma": "ld-y-te-03",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "Miracle cure for joint pain, doctors do not want you to know. Order today, only a few boxes left, pay in advance."
+    },
+    {
+      "ma": "ld-the-qua-01",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "Please buy 500 in gift cards and read me the numbers on the back, it is the fastest way to settle this."
+    },
+    {
+      "ma": "ld-the-qua-02",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "He told me to go to the shop and buy vouchers, then photograph the codes and send them to him."
+    },
+    {
+      "ma": "ld-qr-link-01",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "Scan this QR code to confirm your account before it is suspended."
+    },
+    {
+      "ma": "ld-qr-link-02",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "Someone sent me a QR code to scan to receive a payment, and it opened a page asking for my banking login."
+    },
+    {
+      "ma": "ld-qr-link-03",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "Your account will be closed. Verify within 24 hours: secure-login-verify.cc/auth"
+    },
+    {
+      "ma": "ld-suc-ep-01",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "Do not discuss this with anyone, including your family, or you will be committing an offence."
+    },
+    {
+      "ma": "ld-suc-ep-02",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "He kept me on the phone for two hours and told me not to hang up or talk to my son about it."
+    },
+    {
+      "ma": "ld-suc-ep-03",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "You have 15 minutes to comply. After that the case is escalated and we cannot help you."
+    },
+    {
+      "ma": "ld-suc-ep-04",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "She said the call was being recorded for the investigation and that telling my daughter would make things worse."
+    },
+    {
+      "ma": "ld-hon-hop-01",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "The man on the phone knew my full name and address, so I believed him when he asked me to move my savings."
+    },
+    {
+      "ma": "ld-hon-hop-03",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "Send the money to your own new account in this name, it is still yours, we are just protecting it."
+    },
+    {
+      "ma": "ld-hon-hop-04",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "This is a courier coming to collect your cards for safekeeping as part of the investigation."
+    },
+    {
+      "ma": "ld-hon-hop-05",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "A taxi will arrive at your address in 20 minutes to take you to the bank. Withdraw the cash and hand it to the driver."
+    },
+    {
+      "ma": "ld-hon-hop-06",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "Someone asked me to receive a payment into my account and then forward it on, they said it is just admin work."
+    },
+    {
+      "ma": "ld-hon-hop-07",
+      "nhom": "lua_dao",
+      "mongDoi": "CAO",
+      "noiDung": "They told me the police are watching my account and I must not mention this to the bank staff when I withdraw."
+    },
+    {
+      "ma": "lanh-gia-dinh-01",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "Mum I am home late tonight, please eat first. See you tomorrow."
+    },
+    {
+      "ma": "lanh-gia-dinh-02",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "Do not forget the family dinner on Sunday. I already paid the 40 deposit for the table."
+    },
+    {
+      "ma": "lanh-gia-dinh-03",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "Dad, I paid the 200 back into your account this morning, thanks for lending it."
+    },
+    {
+      "ma": "lanh-gia-dinh-04",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "The grandchildren send their love. We will call at 7pm today as usual, nothing urgent."
+    },
+    {
+      "ma": "lanh-gia-dinh-05",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "I told my daughter about the new bank account we opened for the grandchildren."
+    },
+    {
+      "ma": "lanh-gia-dinh-06",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "Can you transfer me 50 for the shopping? I will give it back on payday. Love you."
+    },
+    {
+      "ma": "lanh-gia-dinh-07",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "Happy birthday! We put a little money in your account as a present, no need to send anything back."
+    },
+    {
+      "ma": "lanh-gia-dinh-08",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "I am at the hospital with mum for her check up, nothing to worry about, home by four."
+    },
+    {
+      "ma": "lanh-gia-dinh-09",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "Your son called earlier while you were out, he said he will ring again tonight."
+    },
+    {
+      "ma": "lanh-gia-dinh-10",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "We are collecting for Nans birthday present, 20 each if you can, no rush at all."
+    },
+    {
+      "ma": "lanh-ngan-hang-01",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "We will never ask for your PIN or the code we send you. Never share it with anyone."
+    },
+    {
+      "ma": "lanh-ngan-hang-02",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "Your statement for August is ready to view in the app. No action is needed."
+    },
+    {
+      "ma": "lanh-ngan-hang-03",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "A payment of 42.50 to Tesco was made on your card ending 4417."
+    },
+    {
+      "ma": "lanh-ngan-hang-04",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "Your direct debit of 89 for the water bill will be taken on the 15th."
+    },
+    {
+      "ma": "lanh-ngan-hang-05",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "Your new card is on its way and should arrive within five working days."
+    },
+    {
+      "ma": "lanh-ngan-hang-06",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "Interest rates on your savings account will change from 1 September. See details in the app."
+    },
+    {
+      "ma": "lanh-ngan-hang-07",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "Your balance is low. You can avoid charges by paying in before the end of the day."
+    },
+    {
+      "ma": "lanh-ngan-hang-08",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "We have updated our terms and conditions. There is nothing you need to do."
+    },
+    {
+      "ma": "lanh-ngan-hang-09",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "Your one-time passcode is 481923. We will never call you to ask for it."
+    },
+    {
+      "ma": "lanh-ngan-hang-10",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "Branch opening hours change next week. The Fulham branch will close at 3pm on Fridays."
+    },
+    {
+      "ma": "lanh-giao-hang-01",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "Your parcel will be delivered today between 2pm and 5pm. No action needed."
+    },
+    {
+      "ma": "lanh-giao-hang-02",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "Your order has been dispatched. Track it in the app or reply HELP for support."
+    },
+    {
+      "ma": "lanh-giao-hang-03",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "We tried to deliver but no one was home. Your parcel is at the local post office for seven days."
+    },
+    {
+      "ma": "lanh-giao-hang-04",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "Your refund of 24.99 has been issued and will appear in three to five working days."
+    },
+    {
+      "ma": "lanh-giao-hang-05",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "Delivery delayed by one day due to weather. Sorry for the inconvenience, no charge applies."
+    },
+    {
+      "ma": "lanh-y-te-01",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "Reminder: your appointment with Dr Hughes is on Tuesday at 9am at the clinic."
+    },
+    {
+      "ma": "lanh-y-te-02",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "Your prescription is ready to collect at the pharmacy. Bring your card if you pay for prescriptions."
+    },
+    {
+      "ma": "lanh-y-te-03",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "Your blood test results are normal. No further action is needed at this time."
+    },
+    {
+      "ma": "lanh-y-te-04",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "The hospital is calling to move your operation to 12 September. Please ring the ward to confirm."
+    },
+    {
+      "ma": "lanh-y-te-05",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "Flu vaccinations are now available at your surgery. Book online or call reception."
+    },
+    {
+      "ma": "lanh-y-te-06",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "Please arrive 15 minutes early and do not eat after midnight before the procedure."
+    },
+    {
+      "ma": "lanh-hoa-don-01",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "Your electricity bill for August is 42 pounds. It will be taken by direct debit on the 15th."
+    },
+    {
+      "ma": "lanh-hoa-don-02",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "Your council tax has been recalculated and your monthly payment goes down to 118."
+    },
+    {
+      "ma": "lanh-hoa-don-03",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "Your insurance policy renews next month. No payment is needed until then."
+    },
+    {
+      "ma": "lanh-hoa-don-04",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "Your broadband contract ends in October. You can compare options at any time, or do nothing."
+    },
+    {
+      "ma": "lanh-hoa-don-05",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "We received your payment of 320. Thank you, your account is now up to date."
+    },
+    {
+      "ma": "lanh-hoa-don-06",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "Your annual meter reading is due. Submit it at your convenience through the website or by phone."
+    },
+    {
+      "ma": "lanh-hoa-don-07",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "Your pension payment of 890 will reach your account on the first working day of the month."
+    },
+    {
+      "ma": "lanh-hoa-don-08",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "Your TV licence has been renewed. Keep this email for your records."
+    },
+    {
+      "ma": "lanh-tin-bao-01",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "Police arrest three people in a nationwide phone scam ring, court hears"
+    },
+    {
+      "ma": "lanh-tin-bao-02",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "The FTC warns that scammers may ask you to buy gift cards. Learn how to spot it."
+    },
+    {
+      "ma": "lanh-tin-bao-03",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "How to spot a fake bank text message asking for your one-time passcode"
+    },
+    {
+      "ma": "lanh-tin-bao-04",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "Trading standards say fraud losses rose by 40 percent last year across the region"
+    },
+    {
+      "ma": "lanh-tin-bao-05",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "Bank staff praised for stopping a customer transferring 8,000 to a fraudster"
+    },
+    {
+      "ma": "lanh-tin-bao-06",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "New guidance: your bank will never ask you to move money to a safe account"
+    },
+    {
+      "ma": "lanh-tin-bao-07",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "Investigation: how romance scammers build trust over months before asking for money"
+    },
+    {
+      "ma": "lanh-tin-bao-08",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "Watch out for parcel delivery texts asking for a small fee, says consumer group"
+    },
+    {
+      "ma": "lanh-tin-bao-09",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "Police urge people to talk to relatives before making any urgent bank transfer"
+    },
+    {
+      "ma": "lanh-tin-bao-10",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "Report: criminals now use AI to copy voices of family members in phone scams"
+    },
+    {
+      "ma": "lanh-cong-viec-01",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "You are invited to a free community talk about online safety this Saturday at the library."
+    },
+    {
+      "ma": "lanh-cong-viec-02",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "School closes early on Friday. Please arrange to collect the children at noon."
+    },
+    {
+      "ma": "lanh-cong-viec-03",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "Your shift next week has changed to Tuesday morning. Let me know if that is a problem."
+    },
+    {
+      "ma": "lanh-cong-viec-04",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "Payroll confirms your salary of 2,140 will be paid on the 28th as usual."
+    },
+    {
+      "ma": "lanh-cong-viec-05",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "The training session is now online. The link will be sent by your manager on Monday."
+    },
+    {
+      "ma": "lanh-cong-viec-06",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "Thank you for your application. We will contact you within two weeks about the next stage."
+    },
+    {
+      "ma": "lanh-mua-ban-01",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "Your order 4471 for 129.99 has been confirmed and will arrive by Thursday."
+    },
+    {
+      "ma": "lanh-mua-ban-02",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "The item you asked about is still for sale. You are welcome to come and see it any evening."
+    },
+    {
+      "ma": "lanh-mua-ban-03",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "We can hold the sofa for you until Saturday, no deposit required."
+    },
+    {
+      "ma": "lanh-mua-ban-04",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "Your subscription renews on 3 September for 7.99. You can cancel any time in settings."
+    },
+    {
+      "ma": "lanh-mua-ban-05",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "Sale ends tonight, up to 50 percent off in store and online. No code needed."
+    },
+    {
+      "ma": "lanh-goi-that-01",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "The bank called to check a card payment I made abroad and did not ask me for any details."
+    },
+    {
+      "ma": "lanh-goi-that-02",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "My daughter called to say she landed safely and will ring again tomorrow."
+    },
+    {
+      "ma": "lanh-goi-that-03",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "The doctor called me about my appointment tomorrow, nothing urgent."
+    },
+    {
+      "ma": "lanh-goi-that-04",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "The council rang to arrange a home visit about the handrail, they gave me a reference number."
+    },
+    {
+      "ma": "lanh-goi-that-05",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "Someone from the pharmacy called to say my repeat prescription is ready."
+    },
+    {
+      "ma": "lanh-co-link-01",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "You can read the full guidance on the official website at gov.uk when you have time."
+    },
+    {
+      "ma": "lanh-co-link-02",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "Here is the recipe I mentioned: bbc.co.uk/food/recipes/beefstew"
+    },
+    {
+      "ma": "lanh-co-link-03",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "The library events page is at westminster.gov.uk/libraries if you want to have a look."
+    },
+    {
+      "ma": "lanh-co-link-04",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "Your appointment details are in the NHS app, or at nhs.uk if you prefer the website."
+    },
+    {
+      "ma": "lanh-co-link-05",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "I have shared the holiday photos with you, the album link is in your email."
+    },
+    {
+      "ma": "lanh-gap-01",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "Urgent: the bin collection is tomorrow, not Thursday. Please put the bins out tonight."
+    },
+    {
+      "ma": "lanh-gap-02",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "Quick one before you go out, can you buy milk on the way home?"
+    },
+    {
+      "ma": "lanh-gap-03",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "Please reply today if you want a seat on the coach, we have to confirm numbers."
+    },
+    {
+      "ma": "lanh-gap-04",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "The match starts in ten minutes, hurry up and turn the television on!"
+    },
+    {
+      "ma": "lanh-gap-05",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "Last chance to enter the village show, entries close at five this afternoon."
+    },
+    {
+      "ma": "lanh-tien-01",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "The builder quoted 4,500 for the roof. I will get two more quotes before we decide anything."
+    },
+    {
+      "ma": "lanh-tien-02",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "The car needs 800 of work at the garage. I will book it in next month."
+    },
+    {
+      "ma": "lanh-tien-03",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "We saved 12,000 towards the extension so far, still a long way to go."
+    },
+    {
+      "ma": "lanh-tien-04",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "The solicitor said the fee will be around 1,200 including the searches."
+    },
+    {
+      "ma": "lanh-tien-05",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "The holiday deposit of 300 is due in October, I will pay it from the joint account."
+    },
+    {
+      "ma": "lanh-nhac-01",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "Remember, never give your card details to anyone who rings you out of the blue."
+    },
+    {
+      "ma": "lanh-nhac-02",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "If someone says they are from the police and asks for money, hang up and call your family."
+    },
+    {
+      "ma": "lanh-nhac-03",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "The bank will never ask you to transfer money to a safe account, that is always a scam."
+    },
+    {
+      "ma": "lanh-nhac-04",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "If you are ever unsure, put the phone down and ring the number on the back of your card."
+    },
+    {
+      "ma": "lanh-nhac-05",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "Do not feel rushed. A genuine caller will always let you take your time."
+    },
+    {
+      "ma": "lanh-nhac-06",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "We talked about this: no one from HMRC will ever ask you to pay with gift cards."
+    },
+    {
+      "ma": "lanh-cong-dong-01",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "Coffee morning is Wednesday, everyone welcome. Donations go to the hospital fund, no pressure."
+    },
+    {
+      "ma": "lanh-cong-dong-02",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "Your neighbour took in a parcel for you while you were out. Knock any time."
+    },
+    {
+      "ma": "lanh-cong-dong-03",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "The church roof fund has reached 6,000 thanks to everyone who helped."
+    },
+    {
+      "ma": "lanh-cong-dong-04",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "The bus timetable changes Monday. Your pass covers it, there is nothing to pay."
+    },
+    {
+      "ma": "lanh-cong-dong-05",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "The gardening club meets Saturday at ten. Subs are 25 for the year, pay when you can."
+    },
+    {
+      "ma": "lanh-cong-nghe-01",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "Your phone software update is ready to install. It may take a few minutes."
+    },
+    {
+      "ma": "lanh-cong-nghe-02",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "A new sign in to your account from your own tablet was approved by you just now."
+    },
+    {
+      "ma": "lanh-cong-nghe-03",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "Your password was changed successfully. If this was you, no action is needed."
+    },
+    {
+      "ma": "lanh-cong-nghe-04",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "Storage is nearly full. You can free up space by deleting old photos."
+    },
+    {
+      "ma": "lanh-cong-nghe-05",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "Your printer is offline. Check that it is switched on and connected to the wi-fi."
+    },
+    {
+      "ma": "lanh-linh-tinh-01",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "The weather forecast says heavy rain tomorrow, take your umbrella to the shops."
+    },
+    {
+      "ma": "lanh-linh-tinh-02",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "I left your reading glasses on the kitchen table. The optician rang, the new pair is 120."
+    },
+    {
+      "ma": "lanh-linh-tinh-03",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "The cat has been fed. I paid the 15 for your bingo book, pay me back whenever."
+    },
+    {
+      "ma": "lanh-linh-tinh-04",
+      "nhom": "lanh",
+      "mongDoi": "CHUA_THAY",
+      "noiDung": "Book club has moved to the front room this week, the decorator quoted 950 for the hallway."
+    }
+  ]
+}

@@ -90,7 +90,7 @@ const PACK = ['en-US', 'vi-VN'];
 
 for (const ten of PACK) {
   test(`Locale pack ${ten}: không mẫu nào đặt \\b cạnh chữ có dấu`, () => {
-    const pack = require(`../src/analysis/locale-packs/${ten}`);
+    const pack = require(`../backend/src/analysis/locale-packs/${ten}`);
     const hong = [];
     for (const [signalId, ds] of Object.entries(pack.directPatterns)) {
       for (const m of ds) {
@@ -106,7 +106,7 @@ for (const ten of PACK) {
 
 test('context-builder: không khung nào đặt \\b cạnh chữ có dấu', () => {
   // Đọc mã nguồn vì các khung là RegExp đã biên dịch, không phải dữ liệu.
-  const nguon = fs.readFileSync(require.resolve('../src/analysis/context-builder'), 'utf8');
+  const nguon = fs.readFileSync(require.resolve('../backend/src/analysis/context-builder'), 'utf8');
   const hong = [];
   // Chỉ soi các dòng chứa mẫu, bỏ dòng chú thích (chú thích CỐ Ý nhắc tới lỗi).
   for (const dong of nguon.split('\n')) {
@@ -120,15 +120,15 @@ test('context-builder: không khung nào đặt \\b cạnh chữ có dấu', () 
 });
 
 test('Không dùng \\w hay [^\\W] để bắt chữ — phải dùng \\p{L}', () => {
-  const nguon = fs.readFileSync(require.resolve('../src/analysis/context-builder'), 'utf8')
+  const nguon = fs.readFileSync(require.resolve('../backend/src/analysis/context-builder'), 'utf8')
     .replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '');
   assert.ok(!/\[\^\\s\\W/.test(nguon),
     '[^\\s\\W] là ASCII-only, dùng \\p{L} với cờ u');
 });
 
 test('Bốn ca đã từng câm nay đều khớp trở lại', () => {
-  const { buildContext } = require('../src/analysis/context-builder');
-  const { analyze } = require('../src/analysis/pipeline');
+  const { buildContext } = require('../backend/src/analysis/context-builder');
+  const { analyze } = require('../backend/src/analysis/pipeline');
 
   // 1 + 2. ID_AUTHORITY_IMPERSONATION và MAN_FEAR_THREAT
   const a = analyze({ vanBan: 'Tôi là điều tra viên, bác chuyển tiền ngay, chậm là bị phong toả tài khoản.' });

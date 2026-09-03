@@ -5,8 +5,8 @@
 const test = require('node:test');
 const assert = require('node:assert');
 
-const { analyze } = require('../src/analysis/pipeline');
-const { buildContext } = require('../src/analysis/context-builder');
+const { analyze } = require('../backend/src/analysis/pipeline');
+const { buildContext } = require('../backend/src/analysis/context-builder');
 
 /**
  * ⚠️ THAM SỐ THỨ HAI, KHÔNG PHẢI TRẢI VÀO `input`.
@@ -128,14 +128,14 @@ test('C.6.3 — nhiễu OCR cho kết quả NHƯ bản không nhiễu', () => {
 // ─────────────── C.1 / C.5 — danh sách tắt phải CỰC HẸP ───────────────
 
 test('C.5 — danh sách tắt vô điều kiện đúng số mục đã chốt', () => {
-  const en = require('../src/analysis/locale-packs/en-US');
-  const vi = require('../src/analysis/locale-packs/vi-VN');
+  const en = require('../backend/src/analysis/locale-packs/en-US');
+  const vi = require('../backend/src/analysis/locale-packs/vi-VN');
   assert.strictEqual(Object.keys(en.suppressors).length, 3, 'en-US: 3 tín hiệu có danh sách tắt');
   assert.strictEqual(Object.keys(vi.suppressors).length, 4, 'vi-VN: 4 tín hiệu có danh sách tắt');
 });
 
 test('C.5 — "ch play" TUYỆT ĐỐI không nằm trong danh sách tắt', () => {
-  const vi = require('../src/analysis/locale-packs/vi-VN');
+  const vi = require('../backend/src/analysis/locale-packs/vi-VN');
   const moi = JSON.stringify(vi.suppressors).toLowerCase();
   assert.ok(!moi.includes('ch play'),
     'đã đo: "…đừng tải trên CH Play vì bản đó cũ" tụt hẳn kịch bản giả danh công an xuống mức thấp');
@@ -144,7 +144,7 @@ test('C.5 — "ch play" TUYỆT ĐỐI không nằm trong danh sách tắt', () 
 
 test('§6.12 — locale pack CHỈ chứa dữ liệu, không weight/threshold/critical', () => {
   for (const ten of ['en-US', 'vi-VN']) {
-    const pack = require(`../src/analysis/locale-packs/${ten}`);
+    const pack = require(`../backend/src/analysis/locale-packs/${ten}`);
     const chu = JSON.stringify(pack);
     for (const cam of ['weight', 'threshold', 'riskScore', 'critical', 'SCORE_CAP']) {
       assert.ok(!chu.includes(cam), `${ten} không được chứa "${cam}"`);

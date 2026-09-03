@@ -21,10 +21,10 @@ const test = require('node:test');
 const assert = require('node:assert');
 
 process.env.KHOAN_DA_KHONG_GOI_AI = '1';
-const { app } = require('../server');
-const P = require('../src/khoan-proof');
-const K = require('../src/khoan-proof-ky');
-const { analyze, toHopDong, unreadableInputFloor } = require('../src/analysis/pipeline');
+const { app } = require('../backend/server');
+const P = require('../backend/src/khoan-proof');
+const K = require('../backend/src/khoan-proof-ky');
+const { analyze, toHopDong, unreadableInputFloor } = require('../backend/src/analysis/pipeline');
 const { taoMayXacThuc } = require('./helper/may-xac-thuc-gia');
 
 let server;
@@ -288,7 +288,7 @@ test('§11 — không chuỗi nào nói "an toàn" / "hợp lệ" / "đã xác m
   // những câu bị cấm, kèm lý do. Cấm cả trong chú thích thì mất luôn chỗ ghi
   // lại bài học — mà bài học mới là thứ ngăn người sau viết lại chúng.
   const nguon = require('node:fs')
-    .readFileSync(require.resolve('../src/khoan-proof-ky'), 'utf8')
+    .readFileSync(require.resolve('../backend/src/khoan-proof-ky'), 'utf8')
     .replace(/\/\*[\s\S]*?\*\//g, '')
     .replace(/\/\/.*$/gm, '');
   for (const cam of ['giao dịch an toàn', 'yêu cầu này hợp lệ', 'đã xác minh là người thân',
@@ -310,12 +310,12 @@ test('§4.6 — màn chờ chữ ký PHẢI có lối ra', () => {
 });
 
 test('§4.2 — không có override thứ 11, không tạo đường quyết định thứ hai', () => {
-  const { CRITICAL_OVERRIDES } = require('../src/analysis/critical-overrides');
+  const { CRITICAL_OVERRIDES } = require('../backend/src/analysis/critical-overrides');
   assert.strictEqual(CRITICAL_OVERRIDES.length, 10,
     `số override đổi thành ${CRITICAL_OVERRIDES.length}`);
 
   const nguon = require('node:fs')
-    .readFileSync(require.resolve('../src/khoan-proof-ky'), 'utf8')
+    .readFileSync(require.resolve('../backend/src/khoan-proof-ky'), 'utf8')
     .replace(/\/\*[\s\S]*?\*\//g, '')
     .replace(/\/\/.*$/gm, '');
   for (const cam of ['decision-engine', 'critical-overrides', 'THRESHOLD', 'SCORE_CAP']) {
@@ -325,7 +325,7 @@ test('§4.2 — không có override thứ 11, không tạo đường quyết đ�
 
 test('GIỚI HẠN txAuthSimple được GHI RÕ trong mã nguồn', () => {
   const nguon = require('node:fs')
-    .readFileSync(require.resolve('../src/khoan-proof-ky'), 'utf8');
+    .readFileSync(require.resolve('../backend/src/khoan-proof-ky'), 'utf8');
   assert.ok(nguon.includes('txAuthSimple'),
     'không ghi giới hạn: thiết bị KHÔNG hiển thị nội dung giao dịch');
 });

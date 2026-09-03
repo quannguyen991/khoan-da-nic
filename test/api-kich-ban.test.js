@@ -11,9 +11,9 @@ const test = require('node:test');
 const assert = require('node:assert');
 
 process.env.KHOAN_DA_KHONG_GOI_AI = '1';
-const { app } = require('../server');
-const { canDangNhap } = require('../src/auth');
-const { MA_BUOC_DA_DUNG, TOI_DA_BUOC } = require('../src/kich-ban-di-tiep');
+const { app } = require('../backend/server');
+const { canDangNhap } = require('../backend/src/auth');
+const { MA_BUOC_DA_DUNG, TOI_DA_BUOC } = require('../backend/src/kich-ban-di-tiep');
 
 let server;
 let goc;

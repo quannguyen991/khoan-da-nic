@@ -19,7 +19,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 
-const DUONG_MAC_DINH = path.join(__dirname, '..', '..', 'public', 'config', 'support-directory.json');
+const DUONG_MAC_DINH = path.join(__dirname, '..', '..', '..', 'public', 'config', 'support-directory.json');
 
 const TRUONG_BAT_BUOC = [
   'id', 'countryCode', 'type', 'canonicalName',

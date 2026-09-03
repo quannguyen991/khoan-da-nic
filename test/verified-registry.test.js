@@ -10,7 +10,7 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 
-const R = require('../src/analysis/verified-institution-registry');
+const R = require('../backend/src/analysis/verified-institution-registry');
 
 const ghi = (o) => {
   const p = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'kd-reg-')), 'd.json');

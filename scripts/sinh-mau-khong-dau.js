@@ -20,7 +20,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 
-const { boDau } = require('../src/analysis/context-builder');
+const { boDau } = require('../backend/src/analysis/context-builder');
 const { napDataset } = require('../eval/lib/bo-danh-gia');
 
 const SO_MAU = 40;

@@ -35,12 +35,25 @@ param(
   # Không đặt tham số này thì cài xong MỌI LƯỢT KIỂM ĐỀU LỖI.
   # Phải là https:// — androidScheme là https nên http bị chặn vì nội dung hỗn hợp.
   [string]$ApiGoc = "",
-  [string]$Frontend = "D:\trợ-lý-ảo-khoan-đã (1)",
+  # ⚠️ CHỌN BẢN BẰNG SỐ, ĐỪNG TRUYỀN `-Frontend` Ở DÒNG LỆNH.
+  #    Đây là hệ quả trực tiếp của bẫy ⓪ bên trên: chuỗi tiếng Việt gõ ở dòng lệnh
+  #    đi qua bảng mã ANSI của console và méo TRƯỚC KHI tới đây, bất kể tệp này
+  #    lưu đúng BOM. Chuỗi phải được GHÉP BÊN TRONG tệp mới đọc đúng.
+  #    Bản 3 đang dự thi — có mã native: dải cảnh báo đè màn hình, thông báo
+  #    thường trực, nhận nội dung từ nút Chia sẻ của Android.
+  [int]$Ban = 3,
+  [string]$Frontend = "",
   [string]$ThuMucDung = "D:\khoan-da-build",
   [string]$Sdk = "D:\android-sdk"
 )
 
 $ErrorActionPreference = "Stop"
+
+if (-not $Frontend) { $Frontend = "D:\trợ-lý-ảo-khoan-đã ($Ban)" }
+if (-not (Test-Path -LiteralPath $Frontend)) {
+  Write-Host "Khong thay thu muc frontend (ban $Ban): $Frontend" -ForegroundColor Red
+  exit 1
+}
 
 # ─── JDK ───
 $jdk = Get-ChildItem "C:\Program Files\Microsoft\jdk-*" -Directory -EA SilentlyContinue |

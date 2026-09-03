@@ -74,7 +74,65 @@ const LA_TIN_LUA_DAO = new RegExp(`\\b(${[
    */
 ].join('|')})\\b`, 'i');
 
-const TEP_DEM = path.join(__dirname, '..', '.cache', 'tin-lua-dao.json');
+/**
+ * ═════ NGUỒN TIẾNG ANH — đã dò sống ngày 20/8/2026 ═════
+ *
+ * Người chọn English vẫn nhận nguyên tin tiếng Việt: năm tờ báo trong `NGUON`
+ * đều là báo Việt, và bộ lọc `LA_TIN_LUA_DAO` cũng viết bằng tiếng Việt không
+ * dấu nên tiêu đề tiếng Anh không bao giờ khớp — người dùng English thấy một
+ * danh sách trống hoặc một danh sách tiếng Việt. Cả hai đều sai.
+ *
+ * ⚠️ ƯU TIÊN CƠ QUAN BẢO VỆ NGƯỜI TIÊU DÙNG, KHÔNG PHẢI BÁO CÔNG NGHỆ.
+ * FTC và FBI IC3 viết cho người bị nhắm tới, bằng câu thường; trang tin bảo mật
+ * viết cho quản trị hệ thống. Người dùng của app này thuộc nhóm thứ nhất.
+ *
+ * ⚠️ ĐÃ DÒ VÀ LOẠI: Action Fraud UK trả 403, Scamwatch AU và Which? trả 404.
+ * Để một mục chết trong danh sách rồi tưởng đang có sáu nguồn là tự lừa mình —
+ * cùng bài học với cand.com.vn ở `NGUON`.
+ */
+const NGUON_EN = [
+  { ten: 'FTC Consumer Alerts', rss: 'https://consumer.ftc.gov/blog/rss' },
+  { ten: 'FBI IC3', rss: 'https://www.ic3.gov/CSA/RSS' },
+  { ten: 'BleepingComputer', rss: 'https://www.bleepingcomputer.com/feed/' },
+  { ten: 'Krebs on Security', rss: 'https://krebsonsecurity.com/feed/' },
+];
+
+/**
+ * Lọc tin lừa đảo trong tiêu đề tiếng Anh.
+ *
+ * ⚠️ VIẾT ĐỦ BIẾN THỂ, ĐỪNG TRÔNG CHỜ VÀO GỐC TỪ. Biểu thức dùng `\b(...)\b`
+ * nên 'scammer' KHÔNG bắt được 'scammers', và 'impersonat' không bắt được gì
+ * cả. Thà liệt kê dài còn hơn im lặng trượt.
+ *
+ * ⚠️ CÙNG LUẬT VỚI BẢN TIẾNG VIỆT: cụm phải nói về THỦ ĐOẠN. Không thêm
+ * 'police', 'bank', 'crypto' đứng một mình — chúng kéo về mọi tin của ngành.
+ */
+const LA_TIN_LUA_DAO_EN = new RegExp(`\\b(${[
+  'scam', 'scams', 'scammer', 'scammers', 'scamming',
+  'fraud', 'frauds', 'fraudster', 'fraudsters', 'fraudulent',
+  'phishing', 'smishing', 'vishing', 'spoofing', 'spoofed',
+  'impersonation', 'impersonating', 'impersonator', 'impersonators',
+  'deepfake', 'deepfakes', 'sextortion', 'extortion',
+  'identity theft', 'gift card', 'gift cards', 'wire transfer',
+  'romance scam', 'tech support', 'robocall', 'robocalls',
+  'one-time passcode', 'otp', 'fake app', 'fake apps', 'malicious app',
+  'account takeover', 'money mule', 'con artist', 'swindle', 'swindled',
+].join('|')})\\b`, 'i');
+
+/** Chọn bộ nguồn và bộ lọc theo ngôn ngữ. Ngôn ngữ lạ ⇒ tiếng Việt. */
+function boNguon(lang) {
+  return lang === 'en'
+    ? { nguon: NGUON_EN, loc: LA_TIN_LUA_DAO_EN }
+    : { nguon: NGUON, loc: LA_TIN_LUA_DAO };
+}
+
+/*
+ * ⚠️ MỖI NGÔN NGỮ MỘT TỆP ĐỆM. Dùng chung một tệp thì lượt tiếng Anh ghi đè
+ * đệm tiếng Việt và ngược lại — người dùng sau nhận tin của ngôn ngữ khác,
+ * hoặc tệ hơn, nhận danh sách rỗng vì bộ lọc bên kia không khớp.
+ */
+const tepDem = (lang) => path.join(
+  __dirname, '..', '.cache', lang === 'en' ? 'tin-lua-dao-en.json' : 'tin-lua-dao.json');
 const HAN_DEM_MS = 30 * 60 * 1000;        // 30 phút
 const HAN_GOI_MS = 8000;                  // mỗi tờ báo tối đa 8 giây
 const SO_TIN = 12;
@@ -135,12 +193,16 @@ function goThucThe(s) {
   });
 }
 
-/** Lấy nội dung một thẻ, bóc CDATA nếu có. */
-function lay(khoi, the) {
+/** Lấy nội dung THÔ một thẻ: bóc CDATA, CHƯA giải thực thể. */
+function layTho(khoi, the) {
   const m = khoi.match(new RegExp(`<${the}[^>]*>([\\s\\S]*?)</${the}>`, 'i'));
   if (!m) return '';
-  const trong = m[1].replace(/^\s*<!\[CDATA\[([\s\S]*?)\]\]>\s*$/, '$1');
-  return goThucThe(trong).trim();
+  return m[1].replace(/^\s*<!\[CDATA\[([\s\S]*?)\]\]>\s*$/, '$1');
+}
+
+/** Lấy nội dung một thẻ, bóc CDATA, giải thực thể MỘT lượt. */
+function lay(khoi, the) {
+  return goThucThe(layTho(khoi, the)).trim();
 }
 
 /**
@@ -150,21 +212,93 @@ function lay(khoi, the) {
  * `<img>` trỏ ra ngoài). Đưa thẳng vào giao diện là mở đường chèn mã và phá
  * luôn CSP `img-src 'self'`. Ở đây gỡ sạch thẻ, chỉ giữ chữ.
  */
+/**
+ * Bỏ thẻ HTML và giải mã thực thể trong chữ lấy từ RSS.
+ *
+ * ⚠️ TIÊU ĐỀ CŨNG PHẢI LÀM SẠCH, KHÔNG CHỈ PHẦN TÓM TẮT.
+ * Đo 20/8/2026: feed của FTC gói tiêu đề trong một thẻ `<a href="…">`, nên màn
+ * hình hiện nguyên `<a href="https://consumer.ftc.gov/…` thay vì tên bài. Bản
+ * trước chỉ làm sạch `description` — mọi báo Việt để tiêu đề trần nên lỗi này
+ * nằm im cho tới khi thêm nguồn tiếng Anh.
+ */
+/**
+ * ⚠️ GIẢI THỰC THỂ ĐÚNG MỘT LƯỢT — SỬA 2/9/2026.
+ *
+ * Bản trước xâu chuỗi `.replace()`, và `&amp;` đứng TRƯỚC `&lt;`:
+ *
+ *   'a &amp;lt;b&amp;gt; c'
+ *      .replace(/&amp;/g,'&')  →  'a &lt;b&gt; c'
+ *      .replace(/&lt;/g,'<')   →  'a <b> c'        ← dấu < THẬT
+ *
+ * Một chuỗi replace tuần tự CHÍNH LÀ giải nhiều vòng: đầu ra của bước trước là
+ * đầu vào của bước sau. Người viết bài cố ý gõ ra chữ `<b>` (nên feed mã hoá
+ * thành `&amp;lt;b&amp;gt;`) thì cuối cùng lại thành thẻ thật — mở lại đúng cái
+ * cửa mà việc gỡ thẻ ở dòng trên sinh ra để đóng.
+ *
+ * Nay dùng MỘT regex, mỗi thực thể được thay đúng một lần và kết quả KHÔNG bị
+ * quét lại. `&amp;lt;` dừng ở `&lt;`, là chữ, và React in nó ra như chữ.
+ *
+ * ⚠️ THỨ TỰ CŨNG QUAN TRỌNG: gỡ thẻ TRƯỚC, giải thực thể SAU. Ngược lại thì
+ * `&lt;script&gt;` biến thành thẻ thật rồi mới bị gỡ — và bất kỳ chỗ nào quên
+ * gỡ là một lỗ chèn mã. Hàng rào: test/tin-lua-dao.test.js.
+ */
+function lamSachChu(x) {
+  return goThucThe(String(x || '').replace(/<[^>]*>/g, ' '))
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 function bocRss(xml, tenBao) {
   const ra = [];
   for (const m of xml.matchAll(/<item[^>]*>([\s\S]*?)<\/item>/gi)) {
     const khoi = m[1];
-    const tieuDe = lay(khoi, 'title');
-    const lienKet = lay(khoi, 'link');
+    /*
+     * ⚠️ THỨ TỰ: GỠ THẺ TRƯỚC, GIẢI THỰC THỂ SAU — SỬA 2/9/2026.
+     *
+     * Bản trước lấy tiêu đề qua `lay()` (đã giải thực thể) rồi mới `lamSachChu()`
+     * gỡ thẻ. Hai tầng giải chồng lên nhau, và hậu quả đi cả hai hướng:
+     *
+     *   'Tin &lt;script&gt;alert(1)&lt;/script&gt; lừa đảo'
+     *      lay()        → 'Tin <script>alert(1)</script> lừa đảo'   (thẻ THẬT)
+     *      lamSachChu() → 'Tin alert(1) lừa đảo'                    (nuốt mất chữ)
+     *
+     *   'a &amp;lt;b&amp;gt; c'
+     *      lay()        → 'a &lt;b&gt; c'
+     *      lamSachChu() → 'a <b> c'                                 (thành thẻ THẬT)
+     *
+     * Vế thứ hai là lỗ chèn mã: một dấu `<` do người viết cố ý gõ ra được feed
+     * mã hoá hai lớp, và ta giải đủ hai lớp thành thẻ thật.
+     *
+     * Nay `layTho()` trả chuỗi CHƯA giải, `lamSachChu()` gỡ thẻ trên đó rồi mới
+     * giải đúng một lượt. Thẻ thật bị gỡ, thẻ do người ta viết ra thì giữ làm
+     * CHỮ — và React in chữ ra như chữ.
+     */
+    const tieuDeTho = layTho(khoi, 'title');
+    const tieuDe = lamSachChu(tieuDeTho);
+
+    /*
+     * ⚠️ THẺ `<link>` CỦA MỘT SỐ FEED LÀ RÁC — PHẢI NHẬN RA VÀ VÒNG QUA.
+     *
+     * Đo 20/8/2026, feed của FTC trả về:
+     *   <link>https://consumer.ftc.gov/%3Ca%20href%3D%22https%3A//consumer.ftc.gov/
+     *         consumer-alerts/2026/08/...%22%20hreflang%3D%22en%22%3Eview%3C/a%3E</link>
+     * Tức cả một thẻ <a> bị mã hoá URL nhét vào chỗ đáng lẽ là địa chỉ. Nó
+     * VẪN qua được phép kiểm `^https?://` vì phần đầu trông như URL thật — nên
+     * mọi tin FTC hiện ra bình thường, bấm vào mới ra "page not found".
+     *
+     * Địa chỉ thật nằm trong `href` của thẻ <a> ở tiêu đề. Dấu hiệu nhận biết
+     * là `%3C` (dấu `<` đã mã hoá) hoặc `%22` (dấu nháy kép) nằm trong đường dẫn.
+     */
+    const hrefTrongTieuDe = (goThucThe(tieuDeTho).match(/href="(https?:\/\/[^"]+)"/i) || [])[1];
+    const lienKetTho = lay(khoi, 'link');
+    const lienKet = (/%3C|%3E|%22|<a[\s>]/i.test(lienKetTho) && hrefTrongTieuDe)
+      ? hrefTrongTieuDe
+      : lienKetTho;
 
     // §11 — thiếu tiêu đề hoặc thiếu link thì LOẠI, không hiện nửa vời.
     if (!tieuDe || !/^https?:\/\//.test(lienKet)) continue;
 
-    const tom = lay(khoi, 'description')
-      .replace(/<[^>]*>/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim()
-      .slice(0, 220);
+    const tom = lamSachChu(layTho(khoi, 'description')).slice(0, 220);
 
     const luc = Date.parse(lay(khoi, 'pubDate'));
 
@@ -198,18 +332,18 @@ async function lay1Nguon(n) {
   }
 }
 
-function docDem() {
+function docDem(lang) {
   try {
-    const d = JSON.parse(fs.readFileSync(TEP_DEM, 'utf8'));
+    const d = JSON.parse(fs.readFileSync(tepDem(lang), 'utf8'));
     if (Array.isArray(d?.tin) && Number.isFinite(d?.luc)) return d;
   } catch { /* chưa có đệm, hoặc đệm hỏng — cả hai đều xử như không có */ }
   return null;
 }
 
-function ghiDem(d) {
+function ghiDem(d, lang) {
   try {
-    fs.mkdirSync(path.dirname(TEP_DEM), { recursive: true });
-    fs.writeFileSync(TEP_DEM, JSON.stringify(d));
+    fs.mkdirSync(path.dirname(tepDem(lang)), { recursive: true });
+    fs.writeFileSync(tepDem(lang), JSON.stringify(d));
   } catch { /* đĩa chỉ đọc — vẫn chạy được, chỉ là lần sau phải lấy lại */ }
 }
 
@@ -218,11 +352,12 @@ function ghiDem(d) {
  *
  * @returns {Promise<{tin: object[], luc: number, chuaLayDuoc: string[], nguonHong: string[]}>}
  */
-async function layTinMoi() {
-  const ket = await Promise.all(NGUON.map(lay1Nguon));
+async function layTinMoi(lang = 'vi') {
+  const { nguon, loc } = boNguon(lang);
+  const ket = await Promise.all(nguon.map(lay1Nguon));
 
   const nguonHong = ket.filter((k) => k.loi).map((k) => k.ten);
-  const gop = ket.flatMap((k) => k.tin).filter((t) => LA_TIN_LUA_DAO.test(boDau(t.tieuDe.toLowerCase())));
+  const gop = ket.flatMap((k) => k.tin).filter((t) => loc.test(boDau(t.tieuDe.toLowerCase())));
 
   // Trùng bài giữa các báo — bỏ theo đường dẫn.
   const thay = new Set();
@@ -250,13 +385,13 @@ async function layTinMoi() {
  *
  * ⚠️ KHÔNG BAO GIỜ NÉM. Đây là tính năng phụ; §6.7 nói nó không được chặn gì.
  */
-async function tinLuaDao({ epLayMoi = false } = {}) {
-  const dem = docDem();
+async function tinLuaDao({ epLayMoi = false, lang = 'vi' } = {}) {
+  const dem = docDem(lang);
   const conHan = dem && Date.now() - dem.luc < HAN_DEM_MS;
   if (conHan && !epLayMoi) return { ...dem, tuDem: true };
 
   try {
-    const moi = await layTinMoi();
+    const moi = await layTinMoi(lang);
     /*
      * ⚠️ LẤY VỀ RỖNG THÌ GIỮ ĐỆM CŨ, ĐỪNG GHI ĐÈ BẰNG SỰ TRỐNG RỖNG.
      * Mọi tờ báo cùng lỗi một lúc (mất mạng) sẽ cho `tin: []`. Ghi cái đó vào
@@ -266,7 +401,7 @@ async function tinLuaDao({ epLayMoi = false } = {}) {
     if (moi.tin.length === 0 && dem?.tin?.length) {
       return { ...dem, chuaLayDuoc: ['khong_lay_duoc_tin_moi'], nguonHong: moi.nguonHong, tuDem: true };
     }
-    ghiDem(moi);
+    ghiDem(moi, lang);
     return { ...moi, tuDem: false };
   } catch {
     if (dem) return { ...dem, chuaLayDuoc: ['khong_lay_duoc_tin_moi'], tuDem: true };
@@ -275,4 +410,4 @@ async function tinLuaDao({ epLayMoi = false } = {}) {
   }
 }
 
-module.exports = { tinLuaDao, layTinMoi, bocRss, LA_TIN_LUA_DAO, NGUON };
+module.exports = { tinLuaDao, layTinMoi, bocRss, lamSachChu, goThucThe, LA_TIN_LUA_DAO, LA_TIN_LUA_DAO_EN, NGUON, NGUON_EN };

@@ -16,10 +16,10 @@ const assert = require('node:assert');
 
 const {
   buocTiepTheo, KICH_BAN, MA_BUOC, doiChieuHoDataset, HO_CHUA_CO_DU_LIEU,
-} = require('../src/kich-ban-di-tiep');
-const { GIAI_DOAN } = require('../src/journey-engine');
-const { SIGNALS } = require('../src/analysis/signal-registry');
-const { HO_KICH_BAN_MA } = require('../src/analysis/pipeline');
+} = require('../backend/src/kich-ban-di-tiep');
+const { GIAI_DOAN } = require('../backend/src/journey-engine');
+const { SIGNALS } = require('../backend/src/analysis/signal-registry');
+const { HO_KICH_BAN_MA } = require('../backend/src/analysis/pipeline');
 
 const HO_HOP_LE = new Set(HO_KICH_BAN_MA);
 
@@ -126,7 +126,7 @@ test('HÀM THUẦN — gọi hai lần ra y hệt, và không sửa được k�
 
 test('§6.8 — không mạng, không AI, không đọc đồng hồ', () => {
   const nguon = require('node:fs')
-    .readFileSync(require.resolve('../src/kich-ban-di-tiep'), 'utf8');
+    .readFileSync(require.resolve('../backend/src/kich-ban-di-tiep'), 'utf8');
   for (const cam of ['fetch(', 'require(\'node:https\')', 'require(\'node:http\')',
     'Date.now(', 'new Date(', 'Math.random(', 'goiChat', 'trichTinHieu']) {
     assert.ok(!nguon.includes(cam), `kich-ban-di-tiep.js chứa "${cam}"`);

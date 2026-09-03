@@ -15,15 +15,33 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 
-const { moKho } = require('../src/vault-store');
+const { moKho } = require('../backend/src/vault-store');
 const {
   dangKy, dangNhap, layHoSo, suaHoSo, doiMatKhau, chuanHoaSo, LoiTaiKhoan,
-} = require('../src/tai-khoan');
+} = require('../backend/src/tai-khoan');
 
 const tepTam = () => path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'kd-')), 'kho.sqlite');
 const moTam = () => moKho({ env: { SQLITE_PATH: tepTam() } });
 
 const AI = { ten: 'Nguyễn Văn An', soDienThoai: '0912345678', matKhau: 'baccuachau' };
+
+/**
+ * ⚠️ SỐ RIÊNG CHO TEST NÀO CÓ ĐĂNG NHẬP SAI — THÊM 2/9/2026.
+ *
+ * `CHO_SAI` trong tai-khoan.js khoá theo SỐ ĐIỆN THOẠI và sống ở cấp TIẾN
+ * TRÌNH. Đó là thiết kế đúng: đếm theo IP thì đổi IP là bộ đếm về 0.
+ *
+ * Nhưng nó có nghĩa là các test trong CÙNG một tệp dùng chung một số sẽ dội
+ * backoff sang nhau. Đo được: sau hai lần sai, `treBaoLau(2)` = 2 giây, nên
+ * test sau bị ném THU_LAI_SAU ngay ở 0,1ms thay vì làm đủ phép băm 35ms —
+ * và test đo thời gian phản hồi đỏ vì so hai trạng thái khác nhau.
+ *
+ * Đây KHÔNG phải lỗi sản phẩm, nên đừng thêm cửa reset vào tai-khoan.js:
+ * một hàm 'chỉ dùng cho test' trong mã sản phẩm là đúng thứ mà test
+ * 'máy xác thực dựng cho test KHÔNG được rò vào sản phẩm' sinh ra để chặn.
+ */
+let demSoRieng = 0;
+const soRieng = () => ({ ...AI, soDienThoai: `09123400${String(++demSoRieng).padStart(2, '0')}` });
 
 // ══════════ Mật khẩu ══════════
 
@@ -65,6 +83,7 @@ test('hồ sơ trả ra ngoài KHÔNG mang bam/muoi', async () => {
 // ══════════ §11 — không tiết lộ số nào đã đăng ký ══════════
 
 test('§11 — sai số và sai mật khẩu trả về CÙNG một mã lỗi', async () => {
+  const AI = soRieng();
   const kho = await moTam();
   await dangKy(kho, AI);
 
@@ -86,6 +105,7 @@ test('§11 — sai số và sai mật khẩu trả về CÙNG một mã lỗi', 
  * ký. Nên hàm đăng nhập LUÔN chạy hết một lượt băm.
  */
 test('§11 — thời gian phản hồi không tiết lộ số đã đăng ký', async () => {
+  const AI = soRieng();
   const kho = await moTam();
   await dangKy(kho, AI);
 
@@ -113,6 +133,7 @@ test('§11 — thời gian phản hồi không tiết lộ số đã đăng ký'
  * ghi, báo thành công, rồi mất sạch khi khởi động lại.
  */
 test('tài khoản sống qua lần khởi động lại máy chủ', async () => {
+  const AI = soRieng();
   const tep = tepTam();
 
   const kho1 = await moKho({ env: { SQLITE_PATH: tep } });
@@ -146,6 +167,7 @@ test('số điện thoại chuẩn hoá về một dạng duy nhất', () => {
 });
 
 test('không đăng ký trùng số', async () => {
+  const AI = soRieng();
   const kho = await moTam();
   await dangKy(kho, AI);
   await assert.rejects(() => dangKy(kho, AI), (e) => e.ma === 'SO_DA_DUOC_DANG_KY');
@@ -167,6 +189,7 @@ test('từ chối mật khẩu quá ngắn', async () => {
  * đặt lại mật khẩu của chính mình mà không cần biết mật khẩu cũ.
  */
 test('sửa hồ sơ không ghi đè được bam, muoi hay id', async () => {
+  const AI = soRieng();
   const kho = await moTam();
   const hs = await dangKy(kho, AI);
 
@@ -185,6 +208,7 @@ test('sửa hồ sơ không ghi đè được bam, muoi hay id', async () => {
 });
 
 test('đổi mật khẩu ĐÒI mật khẩu cũ', async () => {
+  const AI = soRieng();
   const kho = await moTam();
   const hs = await dangKy(kho, AI);
 
@@ -202,7 +226,7 @@ test('đổi mật khẩu ĐÒI mật khẩu cũ', async () => {
 // ══════════ §5.3 — tài khoản không gác đường kiểm tra ══════════
 
 test('§5.3 — /api/analyze không nằm sau đăng nhập', () => {
-  const { KHONG_CAN_DANG_NHAP } = require('../src/auth');
+  const { KHONG_CAN_DANG_NHAP } = require('../backend/src/auth');
   assert.ok(KHONG_CAN_DANG_NHAP.includes('/api/analyze'),
     'đường kiểm tin nhắn bị gác sau đăng nhập — người đang bị thúc sẽ đóng app');
 });

@@ -27,8 +27,8 @@
 const test = require('node:test');
 const assert = require('node:assert');
 
-const { buildContext, chuanHoa } = require('../src/analysis/context-builder');
-const { locTheoEvidence, doanChuaTrich } = require('../src/analysis/evidence-validator');
+const { buildContext, chuanHoa } = require('../backend/src/analysis/context-builder');
+const { locTheoEvidence, doanChuaTrich } = require('../backend/src/analysis/evidence-validator');
 
 const tinHieu = (id, quote) => ({
   id, state: 'present', source: 'llm', confidence: 0.9,
@@ -68,7 +68,7 @@ test('và tìm được ĐÚNG ĐOẠN chứa nó', () => {
  */
 test('evidence-validator KHÔNG tự chuẩn hoá lấy — phải gọi chuanHoa dùng chung', () => {
   const nguon = require('node:fs')
-    .readFileSync(require.resolve('../src/analysis/evidence-validator'), 'utf8')
+    .readFileSync(require.resolve('../backend/src/analysis/evidence-validator'), 'utf8')
     .replace(/\/\*[\s\S]*?\*\//g, '')
     .replace(/\/\/.*$/gm, '');
 

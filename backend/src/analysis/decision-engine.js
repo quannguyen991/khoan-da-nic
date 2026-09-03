@@ -68,7 +68,10 @@ const SYNERGIES = Object.freeze([
     khop: (s) => co(s, 'ID_FAMILY_IMPERSONATION') && co(s, 'MAN_URGENCY') && co(s, 'FIN_TRANSFER_REQUEST'),
   },
   {
-    id: 'coverstory+transfer', bonus: 10,
+    // B.6 — NÂNG 10 → 12 ngày 2/9/2026. +10 làm "cớ + hối thúc + chuyển tiền"
+    // dừng đúng ở 43, và năm mẫu trượt của tiếng Việt đều nằm ở con số đó.
+    // 12 đưa lên ĐÚNG 45, không hơn. Đo: recall vi +4,2 điểm, FP không đổi.
+    id: 'coverstory+transfer', bonus: 12,
     khop: (s) => co(s, 'MAN_COVER_STORY') && co(s, 'FIN_TRANSFER_REQUEST'),
   },
   {
@@ -123,6 +126,89 @@ const SYNERGIES = Object.freeze([
   {
     id: 'orgclaim+transfer', bonus: 14,
     khop: (s) => co(s, 'FIN_ORG_CLAIM_PERSONAL_ACCOUNT') && coMotTrong(s, FIN_CHUYEN_MANH),
+  },
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // THÊM 2/9/2026 — người dùng duyệt sau khi xem số đo.
+  //
+  // VÌ SAO: cùng hình dạng lỗi với khối 15/8, chỉ khác nhánh. Mọi tổ hợp có
+  // `CRED_` đều đòi kèm `ID_` (identity+credential) hoặc `WEB_BRAND_DOMAIN_MISMATCH`
+  // (brandmismatch+credential). Nên tin nhắn THUẦN "đòi mã + gây sức ép" — kẻ
+  // lừa đảo không tự xưng là ai cả — KHÔNG CÓ ĐƯỜNG NÀO chạm ngưỡng 45.
+  //
+  // Số học của vùng chết: credential cap 25, manipulation `top2` nên trần thực
+  // tế là 12 + 7 = 19. Tổng luôn ≤ 44 — ĐÚNG MỘT ĐIỂM dưới ngưỡng. Không phải
+  // trùng hợp, là hệ quả cấu trúc của bảng cap.
+  //
+  // Ví dụ thật đang bị chấm dưới ngưỡng, tất cả đều trích tín hiệu ĐÚNG:
+  //   "ma xac nhan vua gui đó cô, đọc e 6 số ngay nha k quá hạn là tài khoản
+  //    bị treo"                                                       44 điểm
+  //   "Cô đừng tắt máy… khi mã xác thực tới, cô đọc ngay cho tôi thì
+  //    mới chặn kịp"                                                  44 điểm
+  //   "Bác đọc lại mã OTP vừa gửi về máy để nhân viên xác nhận"        37 điểm
+  //
+  // ĐO TRÊN 445 MẪU (eval/results/chi-tiet.jsonl, lượt 15/8/2026):
+  //   khớp 26 mẫu — 25 mẫu vàng CAO, 1 mẫu NGHI_NGO, 0 mẫu lành.
+  //   +5 mẫu bắt đúng · dangerous recall 64,3% → 66,7% · báo đỏ oan KHÔNG ĐỔI.
+  //
+  // VÌ SAO AN TOÀN: không tổ chức hợp pháp nào vừa đòi mã OTP/PIN/mật khẩu vừa
+  // gây sức ép. Ngân hàng thật không bao giờ hỏi mã. Đây là lý do tổ hợp này
+  // không chạm mẫu lành nào — khác hẳn `FIN_ + MAN_` ("chuyển tiền + hối thúc"),
+  // thứ mà con cái nhắn bố mẹ vẫn dùng hằng ngày. ĐÃ CÂN NHẮC VÀ LOẠI `fin+man`:
+  // nó không thêm báo đỏ oan MỚI chỉ vì bốn mẫu lành đã bị báo đỏ sẵn, và nó
+  // đẩy các mẫu đó sâu thêm (53 → 63). Làm báo động giả tự tin hơn là đi ngược §4.6.
+  //
+  // ⚠️ NGƯỠNG 20/45, CAP 69 VÀ SỐ LƯỢNG 10 CRITICAL OVERRIDE KHÔNG BỊ ĐỤNG TỚI.
+  // ══════════════════════════════════════════════════════════════════════════
+  {
+    id: 'credential+manipulation', bonus: 10,
+    khop: (s) => coTienTo(s, 'CRED_') && coTienTo(s, 'MAN_'),
+  },
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // B.6 — BỐN MẪU HÌNH TIẾNG VIỆT CÒN TRƯỢT. Thêm 2/9/2026, đo trên 497 mẫu
+  // SAU KHI gỡ cổng lọc cue (xem khối §4.2 trong pipeline.js).
+  //
+  //   trước: recall vi 75,3% · en 87,9% · trộn 94,3% · FP báo đỏ vi 6,5%
+  //   sau  : recall vi 83,6% · en 87,9% · trộn 94,3% · FP báo đỏ vi 6,5%
+  //
+  // Cả bốn tổ hợp dưới đây KHÔNG CHẠM mẫu lành nào trong 148 mẫu lành.
+  //
+  // ⚠️ MỖI TỔ HỢP ĐỀU ĐÒI MỘT VẾ "YÊU CẦU HÀNH ĐỘNG" (FIN_* mạnh). Sức ép đơn
+  // thuần — doạ, giữ máy, xui giấu người nhà — KHÔNG tự nó nâng mức. Đó là chỗ
+  // phân biệt tin nhắn lừa đảo với một người thật đang lo lắng.
+  // ══════════════════════════════════════════════════════════════════════════
+  {
+    // "Tôi có hồ sơ và hình ảnh của anh. Không chuyển khoản thì gửi hết đi."
+    // Trần nhóm manipulation là 24, ĐÚNG BẰNG trọng số của tín hiệu tống tiền,
+    // nên doạ nạt và hối thúc đi kèm không cộng thêm gì: tổng kẹt ở 24 + 14 = 38.
+    // Không có lời tống tiền hợp pháp nào đi kèm yêu cầu chuyển khoản.
+    id: 'extortion+transfer', bonus: 10,
+    khop: (s) => co(s, 'MAN_EXTORTION_MEDIA_THREAT') && coMotTrong(s, FIN_CHUYEN_MANH),
+  },
+  {
+    // "chú giữ máy đấy nhé, ko được tắt. chú ra cây ATM rút hết tiền ra rồi tôi
+    // hướng dẫn nộp, chậm là bị bắt" — giữ nạn nhân trên đường dây để họ không
+    // kịp hỏi ai, cộng doạ nạt, cộng đòi tiền. 33 điểm, thiếu 12.
+    id: 'keepcall+fear+transfer', bonus: 12,
+    khop: (s) => co(s, 'MAN_KEEP_CALL_ACTIVE') && co(s, 'MAN_FEAR_THREAT')
+      && coMotTrong(s, FIN_CHUYEN_MANH),
+  },
+  {
+    // "Mẹ chuyển giúp con 12 triệu, và mẹ đừng kể với bố nhé."
+    // Tách người bị hại khỏi người có thể can là bước bắt buộc của kịch bản này.
+    // Giữ bí mật + cô lập + đòi tiền = 34 điểm, thiếu 11.
+    id: 'secrecy+isolation+transfer', bonus: 12,
+    khop: (s) => co(s, 'MAN_SECRECY') && co(s, 'MAN_ISOLATION')
+      && coMotTrong(s, FIN_CHUYEN_MANH),
+  },
+  {
+    // "Tài khoản bị ghi nhận phí 2,8 triệu, hệ thống sẽ khoá nếu không xác minh"
+    // kèm liên kết KHÔNG khớp thương hiệu. Bảng cũ đã có
+    // `brandmismatch+credential`, nhưng bỏ sót nhánh sức ép — mà phần lớn trang
+    // giả mạo tiếng Việt ép bằng doạ khoá tài khoản chứ không xin mã ngay.
+    id: 'brandmismatch+pressure', bonus: 10,
+    khop: (s) => co(s, 'WEB_BRAND_DOMAIN_MISMATCH') && coTienTo(s, 'MAN_'),
   },
 ]);
 

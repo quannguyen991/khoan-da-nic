@@ -26,10 +26,10 @@ const test = require('node:test');
 const assert = require('node:assert');
 
 process.env.KHOAN_DA_KHONG_GOI_AI = '1';
-const P = require('../src/khoan-proof');
-const KY = require('../src/khoan-proof-ky');
-const VR = require('../src/verified-request');
-const { analyze, toHopDong } = require('../src/analysis/pipeline');
+const P = require('../backend/src/khoan-proof');
+const KY = require('../backend/src/khoan-proof-ky');
+const VR = require('../backend/src/verified-request');
+const { analyze, toHopDong } = require('../backend/src/analysis/pipeline');
 const { taoMayXacThuc } = require('./helper/may-xac-thuc-gia');
 
 const BAC = { CHUA_THAY: 0, NGHI_NGO: 1, CAO: 2 };
@@ -146,7 +146,7 @@ test('§11 — mã trả về KHÔNG khẳng định người thân KHÔNG gửi
 
 test('§11 — không chuỗi nào trong mã nguồn nói người thân không gửi', () => {
   const nguon = require('node:fs')
-    .readFileSync(require.resolve('../src/verified-request'), 'utf8')
+    .readFileSync(require.resolve('../backend/src/verified-request'), 'utf8')
     .replace(/\/\*[\s\S]*?\*\//g, '')
     .replace(/\/\/.*$/gm, '');
   for (const cam of ['không hề gửi', 'không gửi yêu cầu này', 'did not send', 'never sent']) {
@@ -163,14 +163,14 @@ test('§HĐ — phản hồi vẫn ĐÚNG BẢY TRƯỜNG', async () => {
 
 test('GIỚI HẠN "không tìm thấy là bình thường" được GHI RÕ trong mã nguồn', () => {
   const nguon = require('node:fs')
-    .readFileSync(require.resolve('../src/verified-request'), 'utf8');
+    .readFileSync(require.resolve('../backend/src/verified-request'), 'utf8');
   assert.ok(/hầu như không ai dùng|trạng thái BÌNH THƯỜNG|bình thường/i.test(nguon),
     'không ghi giới hạn: "không tìm thấy" sẽ bật cả với yêu cầu THẬT');
 });
 
 test('§4.2 — verified-request KHÔNG chạm decision-engine', () => {
   const nguon = require('node:fs')
-    .readFileSync(require.resolve('../src/verified-request'), 'utf8')
+    .readFileSync(require.resolve('../backend/src/verified-request'), 'utf8')
     .replace(/\/\*[\s\S]*?\*\//g, '')
     .replace(/\/\/.*$/gm, '');
   for (const cam of ['decision-engine', 'critical-overrides', 'signal-registry']) {
