@@ -1,0 +1,295 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application
+        android:allowBackup="false"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+        <!--
+          ⚠️ android:allowBackup="false" — CỐ Ý, ĐỪNG BẬT LẠI.
+          Bật thì Android tự sao lưu dữ liệu app lên Google Drive của người dùng.
+          §12 cấm bật đồng bộ máy chủ mặc định, và §6.9 cấm để nội dung rời khỏi
+          máy. Sao lưu tự động là đồng bộ mặc định, chỉ khác tên gọi.
+        -->
+
+        <activity
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode"
+            android:name=".MainActivity"
+            android:label="@string/title_activity_main"
+            android:theme="@style/AppTheme.NoActionBarLaunch"
+            android:launchMode="singleTask"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+            <!--
+              ⚠️ NHẬN ẢNH CHỤP MÀN HÌNH VÀ CHỮ TỪ APP KHÁC — ĐÂY LÀ ĐƯỜNG DUY
+              NHẤT LÀM ĐƯỢC, VÀ CẦN HIỂU VÌ SAO.
+
+              Android KHÔNG cho app bên thứ ba tự chụp màn hình của app khác.
+              `MediaProjection` chụp được nhưng đòi một hộp thoại xác nhận mỗi
+              lần và hiện biểu tượng ghi màn hình — dùng nó để "âm thầm theo dõi
+              màn hình của người già" vừa bất khả thi về kỹ thuật vừa sai về đạo
+              đức, và Play Store sẽ từ chối.
+
+              Đường đúng: BÁC tự chụp màn hình (nút nguồn + giảm âm lượng), bấm
+              Chia sẻ, chọn Khoan Đã. Chủ động, có chủ đích, không có gì chạy
+              ngầm. Đây cũng là cách bác gửi được tin nhắn từ Zalo, Messenger,
+              ngân hàng — những app mà đọc thông báo không lấy được nội dung đầy đủ.
+
+              ⚠️ `android:exported="true"` là BẮT BUỘC cho intent-filter nhận từ
+              app khác, và nó KHÔNG mở thêm bề mặt tấn công nào: activity này chỉ
+              nhận nội dung để phân tích, không thực hiện lệnh nào từ bên gửi.
+              §12 cấm dùng nội dung người dùng làm prompt instruction — nội dung
+              nhận ở đây đi thẳng vào ô nhập, không đi vào chỗ nào ra lệnh được.
+            -->
+            <intent-filter android:label="@string/nhan_chia_se">
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+            <intent-filter android:label="@string/nhan_chia_se">
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="image/*" />
+            </intent-filter>
+
+            <!--
+              Deep link cho menu lối tắt (nhấn giữ biểu tượng app) và cho việc
+              chạm vào thông báo cảnh báo.
+            -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="khoanda" />
+            </intent-filter>
+
+            <!--
+              ⚠️ THẺ NÀY PHẢI NẰM TRONG <activity> CÓ intent-filter LAUNCHER.
+              ĐÃ ĐẶT SAI MỘT LẦN, VÀ ĐÓ LÀ LÝ DO MENU LỐI TẮT KHÔNG HIỆN.
+
+              Bản trước đặt nó làm con trực tiếp của <application> — ngay bên
+              dưới </activity>. Chú thích cũ ghi đúng luật ("phải nằm ngay sau
+              intent-filter LAUNCHER") nhưng mã lại làm ngược, và Android bỏ qua
+              HOÀN TOÀN IM LẶNG: aapt không báo lỗi, gradle dựng xong bình
+              thường, APK cài được — chỉ có điều nhấn giữ biểu tượng app thì
+              không ra gì. Người dùng báo "menu lối tắt của app chưa sử dụng
+              được" đúng ba lượt.
+
+              `ShortcutManager` đọc `android.app.shortcuts` TỪ ACTIVITY khởi
+              chạy, không phải từ application. Đặt sai chỗ = không có lối tắt nào
+              được khai báo cả.
+            -->
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
+        </activity>
+
+        <!--
+          §15.4 — ĐỌC THÔNG BÁO TIN NHẮN ĐẾN.
+
+          ⚠️ QUYỀN NHẠY CẢM NHẤT TRONG CẢ ỨNG DỤNG. Nó cho đọc MỌI thông báo trên
+          máy. Người dùng phải tự bật trong Cài đặt hệ thống — không app nào tự
+          bật được, và đó là điều đúng.
+
+          ⚠️ GOOGLE PLAY BẮT GIẢI TRÌNH quyền này. Chuẩn bị sẵn: mô tả tính năng,
+          video demo, và chính sách riêng tư nói rõ nội dung KHÔNG rời khỏi máy.
+          Không giải trình được thì bản phát hành sẽ bị từ chối — nên đừng dựng
+          luồng sản phẩm phụ thuộc hoàn toàn vào nó.
+        -->
+        <service
+            android:name=".DocThongBao"
+            android:label="@string/app_name"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService" />
+            </intent-filter>
+        </service>
+
+        <!--
+          DỰNG LẠI LỐI TẮT SAU KHI KHỞI ĐỘNG MÁY / SAU KHI CẬP NHẬT APP.
+
+          ⚠️ THÔNG BÁO KHÔNG SỐNG QUA MỘT LẦN TẮT MÁY. Android xoá sạch thông
+          báo khi khởi động lại, kể cả `ongoing`. Không có receiver này thì bác
+          bật lối tắt tối nay, sáng mai thanh thông báo trống — mà công tắc
+          trong app vẫn xanh. §4.3: app khai một thứ đang chạy trong khi không.
+
+          ⚠️ `exported="true"` LÀ BẮT BUỘC, KHÔNG PHẢI SƠ SUẤT. Broadcast
+          BOOT_COMPLETED do HỆ THỐNG gửi tới, tức là từ ngoài app — receiver
+          không exported thì không bao giờ nhận được, và nó hỏng trong im lặng
+          y như thứ nó sinh ra để chữa.
+
+          Bề mặt mở ra là có thật nhưng hẹp: app khác gửi broadcast giả tới thì
+          việc duy nhất xảy ra là dựng lại đúng thông báo mà bác ĐÃ chọn bật —
+          `KhoiDongLai` lọc action và kiểm `daChonBat()` trước khi làm gì.
+
+          `directBootAware` để nhận cả `LOCKED_BOOT_COMPLETED` trên máy có mã
+          hoá theo tệp — máy vừa bật mà bác chưa mở khoá lần nào.
+        -->
+        <!--
+          THEO DÕI THỜI LƯỢNG CUỘC GỌI — không nghe, không biết số nào.
+
+          ⚠️ `specialUse` LÀ LOẠI ĐÚNG, VÀ PHẢI GIẢI TRÌNH ĐƯỢC. Android 14 bắt
+          mọi foreground service khai loại. Việc này không rơi vào loại nào có
+          sẵn: không phải phát nhạc, không phải định vị, không phải cuộc gọi của
+          chính app. Nó chỉ đếm thời gian một cuộc gọi đang diễn ra.
+
+          ⚠️ CH Play SẼ HỎI. Chuẩn bị sẵn: app KHÔNG ghi âm, KHÔNG đọc nhật ký
+          cuộc gọi, KHÔNG biết số điện thoại — chỉ đọc trạng thái máy có đang
+          trong cuộc gọi hay không, để nhắc người cao tuổi ở phút thứ 25.
+        -->
+        <service
+            android:name=".TheoDoiCuocGoi"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Nhac nguoi cao tuoi khi mot cuoc goi keo dai bat thuong. Khong ghi am, khong doc nhat ky cuoc goi, khong doc so dien thoai." />
+        </service>
+
+        <receiver
+            android:name=".KhoiDongLai"
+            android:enabled="true"
+            android:exported="true"
+            android:directBootAware="true">
+            <intent-filter android:priority="1000">
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />
+            </intent-filter>
+        </receiver>
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/file_paths" />
+        </provider>
+    </application>
+
+    <!-- ─────────── QUYỀN ─────────── -->
+
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <!--
+      Thông báo cục bộ. Từ Android 13 (API 33) phải XIN LÚC CHẠY, không phải
+      cấp sẵn lúc cài. Không xin thì thông báo im lặng không hiện, và không có
+      lỗi nào báo cho biết.
+    -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!--
+      ⚠️ NGHE MÁY KHỞI ĐỘNG — CHỈ ĐỂ DỰNG LẠI LỐI TẮT BÁC ĐÃ BẬT.
+
+      Quyền này KHÔNG cho app chạy nền, không cho theo dõi gì, không tốn pin:
+      `KhoiDongLai` gửi đúng một thông báo rồi kết thúc trong vài mili giây.
+
+      Nó ở đây vì thông báo trên thanh không sống qua một lần tắt máy — xem chú
+      thích của `<receiver>` bên trên. Bỏ quyền này đi thì lối tắt khẩn cấp âm
+      thầm biến mất sau mỗi lần khởi động, và bác chỉ phát hiện ra vào đúng lúc
+      cần tới nó.
+    -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+    <!--
+      ⚠️ TRẠNG THÁI CUỘC GỌI — CHỈ "CÓ ĐANG GỌI HAY KHÔNG".
+
+      Quyền này KHÔNG cho đọc nội dung, KHÔNG cho ghi âm, và KHÔNG cho đọc nhật
+      ký cuộc gọi. Nó cho biết đúng một điều: máy đang trong cuộc gọi hay không.
+
+      ⚠️ CỐ Ý KHÔNG XIN `READ_CALL_LOG`. Muốn biết SỐ của người gọi thì phải có
+      quyền đó — và nó mở ra toàn bộ lịch sử ai gọi cho bác, lúc nào, bao lâu.
+      Đổi lấy khả năng phân biệt "số lạ" với "con gái", cái giá là một kho dữ
+      liệu về đời sống của bác nằm trong app này. Không đáng.
+
+      Hệ quả phải sống chung: app không biết ai đang gọi, nên nó chỉ được nói về
+      THỜI LƯỢNG, và không câu nào được hàm ý người bên kia là kẻ xấu (§11).
+    -->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+
+    <!--
+      ⚠️ POPUP ĐÈ LÊN MÀN HÌNH.
+
+      Đây đúng là quyền mà phần mềm độc hại dùng để phủ lên app ngân hàng và ăn
+      cắp thao tác. Nên `PopupDeManHinh` tự áp ba giới hạn: không nhận thao tác
+      ngoài hai nút của chính nó, không bao giờ phủ toàn màn hình, và luôn có
+      nút "Tôi ổn" (§4.6). Đọc chú thích đầu tệp đó trước khi sửa.
+
+      Người dùng phải tự bật trong Cài đặt. Google Play cũng soi quyền này.
+    -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+
+    <!--
+      ⚠️ MICRO — XIN LÚC CHẠY, và CHỈ dùng cho bộ nghe CHẠY TRÊN MÁY.
+
+      Trước đây quyền này nằm trong danh sách "cố ý không xin" ngay dưới, vì dò
+      ba router không cái nào có model nghe được (đo 16/8/2026: 0/1 router có
+      đường phiên âm). Giờ đường nghe không đi qua mạng nữa mà dùng
+      `SpeechRecognizer.createOnDeviceSpeechRecognizer` của Android, nên quyền
+      này mới có việc thật để làm.
+
+      ⚠️ Máy không có bộ nghe trên máy thì `NgheGiongNoi` TỪ CHỐI, không rơi về
+      bản đám mây. Giọng người dùng không rời khỏi máy (§6.9, §12). Đừng thêm
+      `createSpeechRecognizer` vào bất cứ đâu.
+
+      ⚠️ KHÔNG xin `CAPTURE_AUDIO_OUTPUT`: Android chặn app bên thứ ba ghi luồng
+      cuộc gọi từ bản 10, và §15.9.1 giữ nguyên `chua_nghe_duoc_cuoc_goi` trong
+      `chuaKiem` không ngoại lệ. Khoan Đã nghe cái micro đặt cạnh cuộc gọi, chứ
+      không nghe cuộc gọi — hai việc khác nhau và Phiếu tin cậy nói đúng cái thứ hai.
+    -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
+    <!--
+      ⚠️ CAMERA — CHỈ ĐỂ QUÉT MÃ QR, VÀ ĐÃ THIẾU MẤT MỘT LƯỢT DỰNG.
+      Màn `QuetQR.tsx` được dựng xong nhưng quyền này không được khai, nên
+      `getUserMedia` trong WebView bị từ chối ngay — quét QR không chạy được
+      trong APK dù chạy tốt trên trình duyệt máy tính. Kiểu lỗi chỉ lộ ra trên
+      máy thật.
+
+      ⚠️ HÌNH KHÔNG RỜI KHỎI MÁY. Mã QR được giải ngay trong trình duyệt
+      (BarcodeDetector của Android, hoặc jsQR); chỉ CHUỖI bên trong mã mới đi
+      tới máy chủ. Không có đường nào gửi khung hình đi.
+
+      ⚠️ KHÔNG khai `android.hardware.camera` là `required` — máy không có
+      camera vẫn cài được app, và màn quét tự nói ra rồi mở ô gõ tay (§4.3).
+    -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+
+    <!--
+      Android 11+ lọc danh sách app thấy được. Không khai thì
+      `isOnDeviceRecognitionAvailable` trả false trên máy CÓ bộ nghe — tức app
+      báo "máy bác chưa có bộ nghe" trong khi máy có. Một dạng §4.3 nữa: không
+      nhìn thấy khác không tồn tại.
+    -->
+    <queries>
+        <intent>
+            <action android:name="android.speech.RecognitionService" />
+        </intent>
+    </queries>
+
+    <!--
+      ⚠️ CỐ Ý KHÔNG XIN, và đừng thêm vào:
+        READ_SMS / RECEIVE_SMS  — đọc thẳng tin nhắn là bề mặt riêng tư rộng hơn
+                                  hẳn so với đọc thông báo, và Play Store gần như
+                                  chỉ duyệt cho app SMS mặc định.
+        CAPTURE_AUDIO_OUTPUT    — ghi luồng cuộc gọi. Android chặn từ bản 10, và
+                                  §15.9.1 giữ `chua_nghe_duoc_cuoc_goi` không
+                                  ngoại lệ. Đừng hứa thứ hệ điều hành không cho.
+        READ_CONTACTS           — vòng tròn gia đình do người dùng tự nhập, không
+                                  quét danh bạ (§9.8).
+
+      (RECORD_AUDIO ĐÃ CHUYỂN LÊN TRÊN — nó có việc thật rồi. Xem chú thích ở đó.)
+    -->
+</manifest>
