@@ -93,20 +93,29 @@ services:
       # `home.ai-box.vn` tới model DeepSeek. Đó là bên thứ ba, và Điều 5.5 của
       # thể lệ buộc kê khai đầy đủ công cụ AI / mô hình / API đã dùng.
       #
-      # ⚠️ TÌNH TRẠNG 3/9/2026 — CẢ HAI GATEWAY ĐỀU KHÔNG CHẠY TRỌN BỘ ĐƯỢC:
-      #   home.ai-box.vn        hết tiền giữa chừng. Lượt chạy sạch dừng ở
-      #                         115/571, rồi 456 lượt còn lại trả HTTP 403
-      #                         "insufficient user quota, remaining: -2.8 đ".
-      #   codex.hungnguyen.codes  35–50% AI_SCHEMA_INVALID (xem trên).
+      # ══════ SỐ CÔNG BỐ — LƯỢT SẠCH 3/9/2026, GHI VÀO latest.json ══════
       #
-      # Con số 60,4% của deepseek đến từ lượt chạy TRƯỚC đó, cũng toàn gọi mới
-      # (`tinHieuGoiMoi: 570`, 0% hỏng) — nó hợp lệ, nhưng CHƯA được ghi vào
-      # `eval/results/latest.json` vì lượt đó chạy không kèm `--ghi`.
+      #   tinHieuTuDem: 0 · tinHieuGoiMoi: 571 · lượt hỏng 0% · 360 giây
       #
-      # ⚠️ VIỆC CÒN LẠI: nạp tiền ai-box, chạy `node eval/run.js --ai --bo-cache
-      # --ghi --chi-tiet`, rồi mới lấy số đó làm số công bố. Cho tới lúc đó,
-      # `latest.json` vẫn là số phát lại từ đệm của claude-sonnet-5 và KHÔNG
-      # được dùng làm năng lực đã đo của bản dựng.
+      #   recall nguy hiểm   61,1%   (vi 60,7% · en 61,8% · trộn 62,9%)
+      #   báo đỏ oan          3,6%
+      #   bỏ sót             34,3%
+      #   lệch parity VI↔EN   1,1%   ✔ đạt (trần 3%)
+      #   vượt trần toi_da    2,6%   ✔ đạt (trần 3%)
+      #
+      # Đây là con số ĐƯỢC PHÉP đưa vào hồ sơ: 571/571 lượt gọi mới, không một
+      # mẫu nào lấy từ đệm. Ba lượt đo trước đó đều KHÔNG dùng được — một lượt
+      # phát lại từ đệm (claude-sonnet-5, `tinHieuGoiMoi: 0`), một lượt hết
+      # tiền giữa chừng, một lượt timeout quá trần.
+      #
+      # ⚠️ CHI PHÍ: bảng giá công khai của ai-box (`/api/pricing`) cho
+      # deepseek-v4-flash là 0,04 $/1M vào và 0,08 $/1M ra. Mỗi lượt kiểm tốn
+      # ~2.070 token vào + 424 ra, tức khoảng 3 đồng. Trọn bộ 571 mẫu ~1.700đ.
+      # Cùng model đó trên codex.hungnguyen.codes đắt hơn khoảng 85 lần.
+      #
+      # ⚠️ KHÔNG CHẠY `--bo-cache` KHI KHÔNG CẦN. Đổi bộ luật thì KHÔNG cần —
+      # bộ luật chạy trên tín hiệu đã nằm sẵn trong đệm, không tốn đồng nào.
+      # Chỉ bỏ đệm khi đổi model hoặc đổi lời nhắc.
       - key: RISK_LLM_MODEL
         value: deepseek-v4-flash
       # ── Dự phòng 1: qwen trên máy chủ tự vận hành ──

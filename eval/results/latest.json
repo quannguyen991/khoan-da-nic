@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "commitSha": "ecbd49d",
+    "commitSha": "7f53aa5",
     "analysisVersion": "1.0.0",
     "registryVersion": "1.0.0",
     "ruleVersion": "1.3.0",
@@ -8,112 +8,112 @@
     "datasetVersion": "d12ba1bd284f",
     "datasetSize": 571,
     "aiDaChay": true,
-    "model": "claude-sonnet-5",
-    "apiBase": "https://codex.hungnguyen.codes/v1",
+    "model": "deepseek-v4-flash",
+    "apiBase": "https://home.ai-box.vn/v1",
     "cheDo": "bo_luat_va_ai",
-    "tinHieuTuDem": 571,
-    "tinHieuGoiMoi": 0
+    "tinHieuTuDem": 0,
+    "tinHieuGoiMoi": 571
   },
   "chiSo": {
     "tongMau": 531,
-    "dat": 394,
-    "tyLeDat": 0.7419962335216572,
-    "dangerousRecall": 0.8301886792452831,
+    "dat": 335,
+    "tyLeDat": 0.6308851224105462,
+    "dangerousRecall": 0.6113207547169811,
     "soNguyHiem": 265,
-    "highRiskFP": 0.05917159763313609,
+    "highRiskFP": 0.03550295857988166,
     "soLanh": 169,
-    "fpTrenLatChat": 0.128,
+    "fpTrenLatChat": 0.08,
     "soLanhChat": 125,
-    "vuotTranToiDa": 0.05273069679849341,
-    "tutDuoiMucDo": 0.20527306967984935,
+    "vuotTranToiDa": 0.026365348399246705,
+    "tutDuoiMucDo": 0.3427495291902072,
     "confusion": {
-      "CHUA_THAY->CHUA_THAY": 140,
-      "CHUA_THAY->NGHI_NGO": 19,
-      "CHUA_THAY->CAO": 10,
-      "NGHI_NGO->CHUA_THAY": 64,
-      "NGHI_NGO->NGHI_NGO": 22,
-      "NGHI_NGO->CAO": 11,
-      "CAO->CHUA_THAY": 13,
-      "CAO->NGHI_NGO": 32,
-      "CAO->CAO": 220
+      "CHUA_THAY->CHUA_THAY": 156,
+      "CHUA_THAY->NGHI_NGO": 7,
+      "CHUA_THAY->CAO": 6,
+      "NGHI_NGO->CHUA_THAY": 79,
+      "NGHI_NGO->NGHI_NGO": 14,
+      "NGHI_NGO->CAO": 4,
+      "CAO->CHUA_THAY": 34,
+      "CAO->NGHI_NGO": 69,
+      "CAO->CAO": 162
     }
   },
   "parity": {
     "theoNgonNgu": {
       "vi": {
         "tongMau": 430,
-        "dat": 324,
-        "tyLeDat": 0.7534883720930232,
-        "dangerousRecall": 0.8010204081632653,
+        "dat": 288,
+        "tyLeDat": 0.6697674418604651,
+        "dangerousRecall": 0.6071428571428571,
         "soNguyHiem": 196,
-        "highRiskFP": 0.05952380952380952,
+        "highRiskFP": 0.03571428571428571,
         "soLanh": 168,
-        "fpTrenLatChat": 0.12903225806451613,
+        "fpTrenLatChat": 0.08064516129032258,
         "soLanhChat": 124,
-        "vuotTranToiDa": 0.06046511627906977,
-        "tutDuoiMucDo": 0.18604651162790697,
+        "vuotTranToiDa": 0.03255813953488372,
+        "tutDuoiMucDo": 0.29767441860465116,
         "confusion": {
-          "CHUA_THAY->CHUA_THAY": 139,
-          "CHUA_THAY->NGHI_NGO": 19,
-          "CHUA_THAY->CAO": 10,
-          "NGHI_NGO->CHUA_THAY": 41,
-          "NGHI_NGO->NGHI_NGO": 16,
-          "NGHI_NGO->CAO": 9,
-          "CAO->CHUA_THAY": 11,
-          "CAO->NGHI_NGO": 28,
-          "CAO->CAO": 157
+          "CHUA_THAY->CHUA_THAY": 155,
+          "CHUA_THAY->NGHI_NGO": 7,
+          "CHUA_THAY->CAO": 6,
+          "NGHI_NGO->CHUA_THAY": 51,
+          "NGHI_NGO->NGHI_NGO": 11,
+          "NGHI_NGO->CAO": 4,
+          "CAO->CHUA_THAY": 29,
+          "CAO->NGHI_NGO": 48,
+          "CAO->CAO": 119
         }
       },
       "en": {
         "tongMau": 49,
-        "dat": 34,
-        "tyLeDat": 0.6938775510204082,
-        "dangerousRecall": 0.8823529411764706,
+        "dat": 23,
+        "tyLeDat": 0.46938775510204084,
+        "dangerousRecall": 0.6176470588235294,
         "soNguyHiem": 34,
         "highRiskFP": null,
         "soLanh": 0,
         "fpTrenLatChat": null,
         "soLanhChat": 0,
-        "vuotTranToiDa": 0.02040816326530612,
-        "tutDuoiMucDo": 0.2857142857142857,
+        "vuotTranToiDa": 0,
+        "tutDuoiMucDo": 0.5306122448979592,
         "confusion": {
           "CHUA_THAY->CHUA_THAY": 0,
           "CHUA_THAY->NGHI_NGO": 0,
           "CHUA_THAY->CAO": 0,
-          "NGHI_NGO->CHUA_THAY": 10,
-          "NGHI_NGO->NGHI_NGO": 4,
-          "NGHI_NGO->CAO": 1,
-          "CAO->CHUA_THAY": 2,
-          "CAO->NGHI_NGO": 2,
-          "CAO->CAO": 30
+          "NGHI_NGO->CHUA_THAY": 13,
+          "NGHI_NGO->NGHI_NGO": 2,
+          "NGHI_NGO->CAO": 0,
+          "CAO->CHUA_THAY": 3,
+          "CAO->NGHI_NGO": 10,
+          "CAO->CAO": 21
         }
       },
       "mixed": {
         "tongMau": 52,
-        "dat": 36,
-        "tyLeDat": 0.6923076923076923,
-        "dangerousRecall": 0.9428571428571428,
+        "dat": 24,
+        "tyLeDat": 0.46153846153846156,
+        "dangerousRecall": 0.6285714285714286,
         "soNguyHiem": 35,
         "highRiskFP": 0,
         "soLanh": 1,
         "fpTrenLatChat": 0,
         "soLanhChat": 1,
-        "vuotTranToiDa": 0.019230769230769232,
-        "tutDuoiMucDo": 0.28846153846153844,
+        "vuotTranToiDa": 0,
+        "tutDuoiMucDo": 0.5384615384615384,
         "confusion": {
           "CHUA_THAY->CHUA_THAY": 1,
           "CHUA_THAY->NGHI_NGO": 0,
           "CHUA_THAY->CAO": 0,
-          "NGHI_NGO->CHUA_THAY": 13,
-          "NGHI_NGO->NGHI_NGO": 2,
-          "NGHI_NGO->CAO": 1,
-          "CAO->CHUA_THAY": 0,
-          "CAO->NGHI_NGO": 2,
-          "CAO->CAO": 33
+          "NGHI_NGO->CHUA_THAY": 15,
+          "NGHI_NGO->NGHI_NGO": 1,
+          "NGHI_NGO->CAO": 0,
+          "CAO->CHUA_THAY": 2,
+          "CAO->NGHI_NGO": 11,
+          "CAO->CAO": 22
         }
       }
     },
-    "lechRecall": 0.08133253301320531,
+    "lechRecall": 0.010504201680672343,
     "lechFP": null
   },
   "mauThat": {
@@ -127,8 +127,8 @@
     "bo_dau": {
       "soMau": 40,
       "soMauGoc": 40,
-      "tyLeDat": 0.7,
-      "dangerousRecall": 0.7619047619047619
+      "tyLeDat": 0.675,
+      "dangerousRecall": 0.5714285714285714
     }
   },
   "tranHong": {
@@ -142,5 +142,5 @@
     "theoStatus": {},
     "viDu": null
   },
-  "thoiGianGiay": 0.6
+  "thoiGianGiay": 360.4
 }
