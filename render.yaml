@@ -1,0 +1,88 @@
+# Triển khai công khai — Render (gói free đủ dùng cho vòng chấm).
+#
+# ⚠️ CÓ MỘT ĐIỀU PHẢI BIẾT TRƯỚC KHI ĐẨY LÊN:
+# Không đặt khoá AI thì bản công khai chạy CHỈ BẰNG TẦNG LUẬT. Nó vẫn trung thực
+# — màn kết quả hiện "Lượt này không có AI đọc nội dung" — nhưng người vào thử
+# một tin nhắn lừa đảo sẽ thấy "Chưa thấy dấu hiệu rủi ro", vì tầng luật một
+# mình chỉ bắt được các dấu hiệu trực tiếp.
+#
+# Đo được: bỏ AI đi, độ nhạy phát hiện rơi từ 67,6% xuống 3,8%.
+#
+# ══════ ĐƯỜNG AI: ĐO ĐƯỢC 19/8/2026, TRÊN CÙNG 10 TÌNH HUỐNG THỬ ══════
+#
+#   model                    trung vị   chậm nhất   bắt lừa đảo   báo oan
+#   gpt-5.4 (gateway)           5,3s        7,4s        5/5         0/5
+#   gpt-5.4-mini                5,2s       27,2s        5/5         0/5
+#   claude-fable-5              7,3s       20,8s        5/5*        0/5
+#   claude-sonnet-5            20,8s       32,2s         —           —
+#   gemini-3.6-flash           28,8s       48,2s        5/5         0/5
+#   qwen2.5:7b (cục bộ)         2,4s       10,4s        3/5**       0/5
+#
+#   * fable-5 trả JSON sai lược đồ 3/10 lượt, bị Zod chặn — phần đó do tầng
+#     luật gánh chứ không phải AI.
+#
+# ⚠️⚠️ MẤY CON SỐ "BẮT LỪA ĐẢO" TRÊN ĐÂY LÀ MỘT LƯỢT ĐO, VÀ CHÚNG KHÔNG ỔN ĐỊNH.
+#
+# Đo lại nhiều lượt trên cùng một tình huống (19/8/2026):
+#   · `viec-nhe-luong-cao` — gpt-5.4 bắt 1/4 lượt, qwen2.5:7b bắt 0/5 lượt.
+#   · `gia-danh-dien-luc`  — gpt-5.4 bắt 4/4, qwen bắt 0/5.
+#
+# Nghĩa là "5/5" của gpt-5.4 có một ca chỉ đúng nhờ may. ** qwen ban đầu đo
+# được 4/5, đo lại ra 3/5 — lần 4/5 mới là ngoại lệ.
+#
+# Bộ thử có 10 mẫu. Chênh lệch một ca nằm gọn trong nhiễu, nên ĐỪNG dùng bảng
+# này để nói model nào "chính xác hơn" — nó chỉ đủ để nói về TỐC ĐỘ (chênh 5-12
+# lần, vượt xa nhiễu) và để loại thứ hỏng hẳn.
+#
+# ⚠️ CHẤT LƯỢNG BẰNG NHAU, TỐC ĐỘ CHÊNH 5,5 LẦN. Chọn `gpt-5.4` vì ĐUÔI ngắn
+# nhất (7,4s so với 48,2s của Gemini). Với app này, "lượt chậm nhất" quan trọng
+# hơn "trung bình": người dùng đang bị thúc chuyển tiền, không phải đang lướt.
+#
+# Vì sao Gemini chậm: nó TỪ CHỐI `reasoning_effort: none` (trả 400), nên buộc
+# phải chịu phần "suy nghĩ" cho một việc không cần suy nghĩ — xem chú thích dài
+# trong `backend/src/ai/fable-client.js`.
+#
+# ⚠️ GIỮ `GEMINI_API_KEY` LÀM ĐƯỜNG DỰ PHÒNG. Gateway là máy chủ cá nhân, không
+# có cam kết uptime. Mã tự chọn đường theo thứ tự: LLM_API_BASE trước, không có
+# thì tới GEMINI_API_KEY, không có nữa thì chạy thuần luật và NÓI RA điều đó.
+services:
+  - type: web
+    name: khoan-da
+    runtime: node
+    plan: free
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # ⚠️ ĐẶT TAY TRONG BẢNG ENVIRONMENT, ĐỪNG VIẾT KHOÁ VÀO TỆP NÀY.
+      # Tệp này đi vào git; khoá viết ở đây là khoá đã lộ.
+      # ── Đường AI chính: gateway (nhanh hơn Gemini 5,5 lần, xem bảng trên) ──
+      - key: LLM_API_BASE
+        sync: false
+      - key: LLM_API_KEY
+        sync: false
+      - key: RISK_LLM_MODEL
+        value: gpt-5.4
+      # ── Dự phòng 1: qwen trên máy chủ tự vận hành ──
+      #
+      # ⚠️ ĐỨNG TRƯỚC GEMINI DÙ BẮT ÍT HƠN MỘT CA (4/5 so với 5/5).
+      # Nó nhanh hơn Gemini 12 lần (2,4s so với 28,8s) và không báo oan lần nào.
+      # Khi đường chính đã chết, thứ người dùng cần là câu trả lời trong vài
+      # giây — lúc đó bác đang bị thúc chuyển tiền, không phải đang lướt.
+      #
+      # ⚠️ ĐỂ TRỐNG THÌ BỎ QUA HẲN, không tự đoán 127.0.0.1:11434 — đoán sai thì
+      # mỗi lượt hỏng lại tốn thêm một timeout cho máy chủ không tồn tại.
+      #
+      # Máy chủ này phải mở cổng ra mạng riêng (Tailscale). Timeout để 12s: nó
+      # ở trong LAN, đo được 2,4s; quá 12s nghĩa là máy đã tắt, chờ thêm vô ích.
+      - key: LLM_DU_PHONG_BASE
+        sync: false
+      - key: LLM_DU_PHONG_MODEL
+        value: qwen2.5:7b
+      # ── Dự phòng 2: Gemini. Để trống thì bỏ qua. ──
+      - key: GEMINI_API_KEY
+        sync: false
+      # Cho phép bản APK / tên miền khác gọi vào. Để trống nếu chỉ chạy web.
+      - key: KHOAN_DA_ORIGIN_THEM
+        sync: false

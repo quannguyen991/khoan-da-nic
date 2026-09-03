@@ -34,12 +34,31 @@ summary,
 [role="checkbox"],
 [role="radio"],
 [tabindex]:not([tabindex="-1"]) {
-  display: grid;
-  align-content: center;
   min-block-size: max(var(--touch-target), 3.25rem);
   /* §FE0 lỗi 2 — gỡ nowrap dù quy tắc nào ở trên đã đặt. */
   white-space: normal;
   overflow-wrap: break-word;
+}
+
+/* ⚠️ `display: grid` TÁCH RIÊNG — SỬA 18/8/2026 CHO BẢN REACT + TAILWIND NÀY.
+
+   Lý do gốc của `display: grid` (§FE0 lỗi 3) là `min-height` KHÔNG có tác dụng
+   trên hộp `display: inline` — thẻ `<a>` rơi về inline nên sàn 70px khai xong
+   mà phần tử vẫn cao 49px. Lý do đó VẪN ĐÚNG và không được bỏ.
+
+   Nhưng nó chỉ đúng với hộp inline. `<button>` mặc định là `inline-block`, và
+   ở bản này 299 nút đã tự khai `flex` — cả hai đều nhận `min-block-size` bình
+   thường. Tệp này KHÔNG dùng `@layer`, nên nó thắng MỌI utility của Tailwind
+   bất kể vị trí nạp: ép `grid` lên cả nhóm sẽ dựng đứng icon + chữ trong từng
+   nút của cả app, mà không hề làm sàn chắc thêm một pixel nào.
+
+   Nên: ép hộp khối CHỈ cho phần tử thật sự có nguy cơ rơi về inline, và chỉ khi
+   nó chưa tự khai display nào. Sàn chiều cao ở trên vẫn áp cho TẤT CẢ. */
+a[href]:not([class*="flex"]):not([class*="grid"]):not([class*="block"]),
+[role="link"]:not([class*="flex"]):not([class*="grid"]):not([class*="block"]),
+summary:not([class*="flex"]):not([class*="grid"]):not([class*="block"]) {
+  display: grid;
+  align-content: center;
 }
 
 /* Ô nhập là phần tử thay thế — `display: grid` trên chúng cho hành vi lạ giữa

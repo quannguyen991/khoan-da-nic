@@ -1,0 +1,93 @@
+@import "tailwindcss";
+
+/* ⚠️ FONT CỤC BỘ, KHÔNG GỌI RA fonts.googleapis.com.
+   Be Vietnam Pro dựng riêng cho chữ Việt: dấu xếp cả trên lẫn dưới (ế, ộ, ữ,
+   ị, ặ) nên khoảng dấu rộng hơn font Latin thường. Nạp cục bộ giữ được cả
+   quyền riêng tư lẫn khả năng chạy khi mất mạng. */
+@import "@fontsource/be-vietnam-pro/400.css";
+@import "@fontsource/be-vietnam-pro/600.css";
+@import "@fontsource/be-vietnam-pro/700.css";
+@import "@fontsource/be-vietnam-pro/800.css";
+
+@theme {
+  --font-sans: "Be Vietnam Pro", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}
+
+/* Prevent unwanted drag, bounce, and selection */
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/*
+ * ═════ KHUNG ĐIỆN THOẠI: KHÔNG NẰM Ở ĐÂY NỮA ═════
+ *
+ * Trước 20/8/2026 chỗ này có
+ * `@media (min-width: 900px) { #root { width: 390px } }`.
+ * Nó **không dùng được** và đã gỡ.
+ *
+ * Thu `#root` xuống 390px không làm app tin rằng nó đang ở trên điện thoại.
+ * App có 285 lớp `sm:`/`md:`/`lg:` của Tailwind, mà mỗi lớp là một media query
+ * đo **cửa sổ trình duyệt** chứ không đo khối chứa. Ở màn hình 1280px, toàn bộ
+ * bố cục máy tính vẫn bật rồi bị nhồi vào cột 390px — chữ rơi dọc từng ký tự,
+ * ảnh linh vật mất, thanh điều hướng dưới cùng nhảy lên đầu màn hình.
+ *
+ * Không chữa được từ CSS hay JavaScript của trang này: media query chỉ nghe
+ * theo viewport. Thứ duy nhất có viewport riêng là <iframe>.
+ *
+ * Khung giờ nằm ở `src/khung-dien-thoai.ts`, chạy trước khi React gắn vào.
+ * Đọc phần đầu tệp đó trước khi định đưa khung quay lại đây.
+ */
+
+img {
+  -webkit-user-drag: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+input, textarea {
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   §4.4 — BA BẬC CỠ CHỮ, ĐẶT BẰNG THUỘC TÍNH TRÊN <html>, KHÔNG BẰNG INLINE.
+
+   ⚠️ Bản cũ ghi thẳng `document.documentElement.style.fontSize = '14px'`.
+   Hai chuyện hỏng cùng lúc:
+     · inline style thắng mọi thứ, kể cả sàn — cả hệ bậc chữ mất hiệu lực;
+     · bậc "nhỏ" đặt gốc 14px, thấp hơn gốc 15px mà `--touch-target-primary`
+       tính theo `rem` dựa vào, nên nút chính tụt xuống dưới 56px.
+
+   Ba giá trị dưới đây neo ở 15/17/20px — trùng thang của tokens.css.
+   ══════════════════════════════════════════════════════════════════════════ */
+html[data-bac-chu="nho"]  { font-size: 15px; }
+html[data-bac-chu="vua"]  { font-size: 17px; }
+html[data-bac-chu="lon"]  { font-size: 20px; }
+
+/*
+ * ⚠️ §4.4 — MASCOT KHÔNG ĐƯỢC PHÓNG TO THEO CỠ CHỮ.
+ *
+ * Đặt kích thước ảnh minh họa bằng `vh` thì ảnh đứng độc lập với `font-size`
+ * của <html> — nhưng Tailwind `h-[36vh]` sinh ra `height: 36vh` qua một class
+ * đã ghi đè mọi nơi khác. Để ba bậc chữ có ba cỡ ảnh khác nhau nhưng vẫn có
+ * SÀN ở đây, ta đặt qua thuộc tính `[data-bac-chu]` trên <html>.
+ */
+.mascot-img[data-bac-chu-host] { /* marker */ }
+html[data-bac-chu="nho"] .mascot-img {
+  height: 28vh !important;
+  max-height: 260px !important;
+}
+html[data-bac-chu="vua"] .mascot-img {
+  height: 36vh !important;
+  max-height: 340px !important;
+}
+html[data-bac-chu="lon"] .mascot-img {
+  height: 40vh !important;
+  max-height: 380px !important;
+}

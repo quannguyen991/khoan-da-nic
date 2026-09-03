@@ -1,0 +1,19 @@
+{
+  "appId": "vn.khoanda.app",
+  "appName": "Khoan Đã",
+  "webDir": "dist",
+  "android": {
+    "allowMixedContent": false
+  },
+  "server": {
+    "androidScheme": "https",
+    "_doc_url": "Bỏ trống `url` ⇒ APK chạy bản dựng ĐÓNG GÓI TRONG MÁY, không tải từ mạng. Đó là điều kiện để app mở được khi rút mạng. Chỉ đặt `url` khi đang gỡ lỗi trên máy thật, và PHẢI gỡ trước khi phát hành.",
+    "cleartext": false
+  },
+  "plugins": {
+    "LocalNotifications": {
+      "smallIcon": "ic_stat_khoanda",
+      "iconColor": "#8b5cf6"
+    }
+  }
+}

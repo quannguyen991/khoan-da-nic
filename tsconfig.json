@@ -1,0 +1,47 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "experimentalDecorators": true,
+    "useDefineForClassFields": false,
+    "module": "ESNext",
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "skipLibCheck": true,
+    "moduleResolution": "bundler",
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "allowJs": true,
+    "resolveJsonModule": true,
+
+    /*
+     * ⚠️ BA CỜ NÀY BẬT NGÀY 18/8/2026, VÀ CẢ BA ĐỀU XANH NGAY.
+     *
+     * Trước đó dự án KHÔNG có `@types/react`, nên mọi prop, hook và sự kiện của
+     * React đều là `any` ngầm — `tsc --noEmit` chạy xanh mà gần như không kiểm
+     * gì ở nửa giao diện. Một bộ đo báo "không có lỗi" trong khi nó không đo
+     * chính là thứ dự án này đã bị cắn nhiều lần (bộ eval hỏng 89,5% lượt gọi
+     * vẫn báo "không thấy rủi ro").
+     *
+     * `noUncheckedIndexedAccess` bắt được bốn chỗ đọc mảng có thể rỗng, trong đó
+     * có `questionQueue[currentIndex]` của bộ hỏi nhanh: hết câu hỏi mà vẫn ghi
+     * `{undefined: true}` thì máy chủ lọc bỏ IM LẶNG, và câu trả lời của bác
+     * biến mất khỏi phép tính mà không ai báo.
+     *
+     * Đừng tắt lại để "cho nhanh".
+     */
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUncheckedIndexedAccess": true,
+    "jsx": "react-jsx",
+    "paths": {
+      "@/*": [
+        "./*"
+      ]
+    },
+    "allowImportingTsExtensions": true,
+    "noEmit": true
+  }
+}

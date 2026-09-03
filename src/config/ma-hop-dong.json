@@ -32,7 +32,7 @@
   "phienBan": {
     "analysis": "1.0.0",
     "registry": "1.0.0",
-    "rule": "1.1.0",
+    "rule": "1.3.0",
     "prompt": "1.0.0"
   },
   "truongHopDong": [
@@ -152,6 +152,7 @@
     "ai_khong_chay",
     "khong_nghe_duoc_ghi_am",
     "noi_dung_qua_dai",
+    "noi_dung_qua_ngan",
     "chua_tai_xong_model_nghe",
     "ghi_am_khong_co_tieng_noi",
     "chi_nghe_duoc_phan_dau",
@@ -169,6 +170,7 @@
     "chi_chay_bang_bo_luat",
     "ghi_am_khong_giai_ma_duoc",
     "chi_doc_duoc_phan_dau",
+    "noi_dung_chua_du_de_ket_luan",
     "chua_co_bo_nghe_tren_may",
     "ghi_am_khong_co_tieng_noi",
     "ghi_am_chua_do_duoc_do_tin_cay",
@@ -219,7 +221,12 @@
     "stageescalation+action",
     "offer+transfer",
     "advancefee+transfer",
-    "orgclaim+transfer"
+    "orgclaim+transfer",
+    "credential+manipulation",
+    "extortion+transfer",
+    "keepcall+fear+transfer",
+    "secrecy+isolation+transfer",
+    "brandmismatch+pressure"
   ],
   "giaiDoanVuViec": [
     "tiep_can",
