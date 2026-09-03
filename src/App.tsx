@@ -40,7 +40,9 @@ import {
   Smartphone,
   Sliders,
   Maximize2,
-  EyeOff, Users
+  EyeOff, Users,
+  PhoneOff,
+  Wallet
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { translations, Lang, t as translate } from './i18n';
@@ -49,7 +51,7 @@ import { translations, Lang, t as translate } from './i18n';
  * Backend trả ENUM và MÃ; chữ tiếng Việt / tiếng Anh nằm ở `catalog.ts`, và
  * CHỈ ở đó. Hệ quả cố ý: đổi ngôn ngữ KHÔNG THỂ làm đổi kết luận.
  */
-import { NHAN, MA_LY_DO, CHUA_KIEM, CHUA_LAY_TIN, NOI_CHAY_AI, tra, traNhieu, CHU_NATIVE , TRANG_THAI_MAY, NHAC_CUOC_GOI, MA_TAI_KHOAN} from './catalog';
+import { NHAN, MA_LY_DO, CHUA_KIEM, CHUA_LAY_TIN, NOI_CHAY_AI, tra, traNhieu, CHU_NATIVE , TRANG_THAI_MAY, NHAC_CUOC_GOI, MA_TAI_KHOAN, KHUNG_KICH_BAN, KET_KICH_BAN, MA_BUOC, KHUNG_PHUC_HOI, BUOC_PHUC_HOI, CANH_BAO_PHUC_HOI } from './catalog';
 import { api } from './api-goc';
 import {
   dangKy as dangKyTaiKhoan, dangNhap as dangNhapTaiKhoan,
@@ -5321,6 +5323,51 @@ function WarningView({
     };
   }, []);
 
+  /**
+   * §16.1 — DỰ BÁO KỊCH BẢN, CHỈ Ở MÀN VERIFY_PATH.
+   * Gọi `/api/kich-ban/:hoKichBan` KHÔNG kèm `giaiDoan` — Frontend chưa nối
+   * Bộ nhớ vụ việc (§6.11) nên không biết bác đang ở giai đoạn nào; máy chủ tự
+   * lấy giai đoạn sớm nhất, đúng như route đã ghi: "thà dự báo thừa một bước đã
+   * qua còn hơn giấu bước sắp tới". Hàm nguồn là hàm thuần, không gì để hỏng
+   * ngoài mạng — lỗi mạng thì khối này lặng lẽ không hiện, không phải lỗi cần
+   * báo (đây là phần thêm, không phải kết quả phân tích).
+   */
+  const canVerify = canThiep === 'VERIFY_PATH';
+  const hoKichBanHienTai: string | null = result?.hoKichBan ?? null;
+  const [duBao, setDuBao] = useState<Array<{ maBuoc: string }>>([]);
+  useEffect(() => {
+    if (!canVerify || !hoKichBanHienTai) { setDuBao([]); return; }
+    let huy = false;
+    fetch(api(`/api/kich-ban/${encodeURIComponent(hoKichBanHienTai)}`))
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => { if (!huy && Array.isArray(d?.buoc)) setDuBao(d.buoc); })
+      .catch(() => { /* mất mạng ⇒ khối dự báo không hiện, không phải lỗi */ });
+    return () => { huy = true; };
+  }, [canVerify, hoKichBanHienTai]);
+  const cauDuBao = traNhieu(MA_BUOC, duBao.map((b) => b.maBuoc), lang);
+
+  /**
+   * §2B.5 — BẢO VỆ 72 GIỜ.
+   * Hiện khi bộ luật đã gán `canThiep: 'RECOVERY'`, HOẶC bác tự bấm nút "Tôi đã
+   * lỡ..." bên dưới — giống hệt lý do `tuBamDung` tồn tại cho PAUSE_60S (§HĐ
+   * luật 4: đây là màn, không phải một kết quả phân tích mới).
+   */
+  const [daBamPhucHoi, setDaBamPhucHoi] = useState(false);
+  const canRecovery = canThiep === 'RECOVERY' || daBamPhucHoi;
+  const [keHoachPhucHoi, setKeHoachPhucHoi] = useState<any>(null);
+  useEffect(() => {
+    if (!canRecovery) return;
+    let huy = false;
+    // VN — sản phẩm nói tiếng Việt, xưng "bác"/"cháu"; §2B.5 hiện chỉ duyệt VN + GLOBAL.
+    fetch(api('/api/ke-hoach-phuc-hoi?nuoc=VN'))
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => { if (!huy && d) setKeHoachPhucHoi(d); })
+      .catch(() => { /* §4.3 — mất mạng thì khối dưới tự ẩn vì vẫn null, không giả kết quả */ });
+    return () => { huy = true; };
+  }, [canRecovery]);
+  const buocPhucHoi = keHoachPhucHoi ? traNhieu(BUOC_PHUC_HOI, keHoachPhucHoi.buoc ?? [], lang) : [];
+  const canhBaoPhucHoi = keHoachPhucHoi ? traNhieu(CANH_BAO_PHUC_HOI, keHoachPhucHoi.canhBao ?? [], lang) : [];
+
   // Nhãn NGUYÊN VĂN §4.1, tra từ catalog. Không có nhãn thứ tư.
   const nhanChu = nhan ? tra(NHAN, nhan, lang) : null;
   const lyDo = traNhieu(MA_LY_DO, result?.maLyDo ?? [], lang);
@@ -5419,6 +5466,15 @@ function WarningView({
   };
 
   /**
+   * HAI SỐ THẬT CHO HÀNG "LIÊN HỆ KHẨN CẤP" — lấy từ `so-khan-cap.ts`, ĐÃ QUA
+   * DUYỆT (xem chú thích đầu tệp đó), không bịa số nào ở đây. Đổi theo `lang`
+   * vì bộ số tiếng Anh là số của US/UK/AU..., không phải bản dịch của 113/156.
+   */
+  const soKhanCap = EMERGENCY_NUMBERS[lang === 'en' ? 'en' : 'vi'];
+  const soCongAn = soKhanCap.find((s) => s.id === 'vn-police' || s.id === 'us-911');
+  const soBaoLuaDao = soKhanCap.find((s) => s.id === 'vn-spam-scam' || s.id === 'us-ftc');
+
+  /**
    * ⚠️ §11 — KHÔNG NÓI "đã gửi cho người thân". Hàm này MỞ ứng dụng tin nhắn;
    * người bấm Gửi là bác. Nút cũng ghi đúng như vậy.
    *
@@ -5467,28 +5523,6 @@ function WarningView({
 
       {/* Center Main Card & Explanations */}
       <div className="flex flex-col items-center z-10 w-full my-auto max-w-md">
-        <div className="relative w-24 h-28 flex items-center justify-center mb-2">
-          <svg className="w-full h-full drop-shadow-[0_15px_25px_rgba(0,0,0,0.4)] relative z-10" viewBox="0 0 200 240" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path d="M100 10L20 40V100C20 150 50 190 100 230C150 190 180 150 180 100V40L100 10Z" fill={laCao ? '#b91c1c' : laNghiNgo ? '#b45309' : laChuaThay ? '#047857' : '#5b21b6'} stroke="#ffffff" strokeWidth="3" />
-            {(laCao || laNghiNgo || (!nhan && !laChuaThay)) ? (
-              <>
-                <path d="M100 55V140" stroke="white" strokeWidth="20" strokeLinecap="round" />
-                <circle cx="100" cy="180" r="12" fill="white" />
-              </>
-            ) : (
-              /*
-                ⚠️ KHÔNG DÙNG DẤU TÍCH ✓ CHO MỨC THẤP. Dấu tích đọc là "xong rồi,
-                ổn rồi" — đúng thứ §4.1 cấm hứa. Dùng dấu chấm hỏi: đã xem, chưa
-                kết luận được gì.
-              */
-              <>
-                <path d="M75 85c0-14 11-25 25-25s25 11 25 25c0 18-25 15-25 35" stroke="white" strokeWidth="17" strokeLinecap="round" fill="none" />
-                <circle cx="100" cy="175" r="12" fill="white" />
-              </>
-            )}
-          </svg>
-        </div>
-
         {/* NHÃN — nguyên văn §4.1 */}
         <h1 className="text-[25px] font-black text-white text-center leading-tight mb-1 drop-shadow-sm tracking-tight">
           {khongGoiDuoc
@@ -5497,7 +5531,7 @@ function WarningView({
               ? t('Bác dừng lại 60 giây đã')
               : (nhanChu ?? t('Chưa có kết quả'))}
         </h1>
-        <p className="text-[16px] font-semibold text-white/95 mb-3 text-center leading-snug">
+        <p className="text-[16px] font-semibold text-white/95 mb-4 text-center leading-snug">
           {khongGoiDuoc
             ? t('Mạng không đi được nên chưa có gì được kiểm cả.')
             : laCao
@@ -5509,6 +5543,98 @@ function WarningView({
                   : t('Bác thở một hơi. Không có gì gấp tới mức không chờ được một phút.')}
         </p>
 
+        {/*
+          THẺ TRUNG TÂM — biểu tượng + vòng đếm ngược trong một khối kính mờ, nổi
+          trên nền gradient + hai quầng mờ đã có sẵn phía trên (không đổi bgColor).
+          Vòng chỉ là cách trình bày khác của `timeLeft` đã chạy sẵn — không phải
+          đồng hồ thứ hai; bar tuyến tính cũ ở cuối màn được bỏ, dồn hết vào đây.
+        */}
+        <div
+          className="w-full rounded-[28px] p-5 mb-3 relative overflow-hidden border border-white/25"
+          style={{ background: 'linear-gradient(155deg, rgba(255,255,255,0.18), rgba(255,255,255,0.05))' }}
+        >
+          <div className="flex items-center justify-center gap-6">
+            <div className="relative w-20 h-24 flex items-center justify-center shrink-0">
+              <svg className="w-full h-full drop-shadow-[0_10px_18px_rgba(0,0,0,0.35)] relative z-10" viewBox="0 0 200 240" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M100 10L20 40V100C20 150 50 190 100 230C150 190 180 150 180 100V40L100 10Z" fill={laCao ? '#b91c1c' : laNghiNgo ? '#b45309' : laChuaThay ? '#047857' : '#5b21b6'} stroke="#ffffff" strokeWidth="3" />
+                {(laCao || laNghiNgo || (!nhan && !laChuaThay)) ? (
+                  <>
+                    <path d="M100 55V140" stroke="white" strokeWidth="20" strokeLinecap="round" />
+                    <circle cx="100" cy="180" r="12" fill="white" />
+                  </>
+                ) : (
+                  /*
+                    ⚠️ KHÔNG DÙNG DẤU TÍCH ✓ CHO MỨC THẤP. Dấu tích đọc là "xong rồi,
+                    ổn rồi" — đúng thứ §4.1 cấm hứa. Dùng dấu chấm hỏi: đã xem, chưa
+                    kết luận được gì.
+                  */
+                  <>
+                    <path d="M75 85c0-14 11-25 25-25s25 11 25 25c0 18-25 15-25 35" stroke="white" strokeWidth="17" strokeLinecap="round" fill="none" />
+                    <circle cx="100" cy="175" r="12" fill="white" />
+                  </>
+                )}
+              </svg>
+            </div>
+
+            {timeLeft > 0 && (
+              <div className="relative w-[112px] h-[112px] flex items-center justify-center shrink-0">
+                <svg className="absolute inset-0 -rotate-90" width="112" height="112" viewBox="0 0 112 112" aria-hidden="true">
+                  <circle cx="56" cy="56" r="48" fill="none" stroke="rgba(255,255,255,0.25)" strokeWidth="9" />
+                  <circle
+                    cx="56" cy="56" r="48" fill="none" stroke="#fcd34d" strokeWidth="9" strokeLinecap="round"
+                    strokeDasharray={2 * Math.PI * 48}
+                    strokeDashoffset={2 * Math.PI * 48 * (1 - timeLeft / Math.max(initialTime, 1))}
+                    style={{ transition: 'stroke-dashoffset 1s linear' }}
+                  />
+                </svg>
+                <div className="relative z-10 flex flex-col items-center">
+                  <span className="text-[32px] font-black text-white leading-none tabular-nums">{timeLeft}</span>
+                  <span className="text-[12px] font-bold text-white/80 -mt-0.5">{t('giây')}</span>
+                </div>
+              </div>
+            )}
+          </div>
+          <p className="text-white/95 font-semibold text-[15px] text-center mt-4 leading-snug">
+            {t('Chưa làm gì vội. Đếm ngược rồi tính tiếp.')}
+          </p>
+        </div>
+
+        {/*
+          PAUSE_60S — một câu công nhận cảm xúc, không phải thêm áp lực.
+          ⚠️ CHỈ HIỆN Ở ĐÚNG MÀN NÀY (canThiep), không theo nhãn (§HĐ luật 4).
+        */}
+        {canThiep === 'PAUSE_60S' && (
+          <div className="w-full bg-black/30 border border-white/20 rounded-[22px] px-4 py-3 mb-2 backdrop-blur-md">
+            <p className="text-white font-semibold text-[15px] leading-relaxed text-center">
+              {t('Cảm giác phải làm ngay là điều họ cố tình tạo ra. Bác dừng lại bây giờ không có nghĩa là bác chậm hay ngốc.')}
+            </p>
+          </div>
+        )}
+
+        {/*
+          BỐN VIỆC NÊN LÀM NGAY — cụ thể hoá lời khuyên ở trên thành từng bước rời
+          rạc, dễ theo khi đang hoảng. Chỉ là hướng dẫn: app không tự dừng cuộc
+          gọi hay chặn giao dịch nào thay bác (§12) — bốn dòng này nói bác nên làm
+          gì, không phải app đã làm gì. Làm việc nào trước cũng được, không bắt
+          buộc theo đúng thứ tự 1-2-3-4.
+        */}
+        {canThiep === 'PAUSE_60S' && (
+          <div className="w-full bg-white/12 border border-white/20 rounded-[22px] backdrop-blur-md mb-2 overflow-hidden">
+            {[
+              { icon: PhoneOff, text: t('Dừng cuộc gọi') },
+              { icon: Wallet, text: t('Không chuyển tiền') },
+              { icon: Lock, text: t('Không đọc mã OTP') },
+              { icon: Users, text: t('Gọi cho con cháu') },
+            ].map((muc, i) => (
+              <div key={muc.text} className={`flex items-center gap-3 px-4 py-3 ${i > 0 ? 'border-t border-white/15' : ''}`}>
+                <span className="w-7 h-7 rounded-full bg-white/20 text-white text-[13px] font-black flex items-center justify-center shrink-0">{i + 1}</span>
+                <muc.icon size={20} className="text-white/90 shrink-0" />
+                <span className="text-white font-bold text-[15px] leading-snug">{muc.text}</span>
+              </div>
+            ))}
+          </div>
+        )}
+
         {/* Lý do — tra từ MÃ, §HĐ luật 2 */}
         {lyDo.length > 0 && (
           <ul className="w-full flex flex-col gap-1.5 mb-2">
@@ -5519,6 +5645,58 @@ function WarningView({
               </li>
             ))}
           </ul>
+        )}
+
+        {/*
+          §16.1 — DỰ BÁO KỊCH BẢN. Chỉ ở VERIFY_PATH: đây là màn "đang nghi
+          ngờ, cần xác minh", đúng lúc bác cần biết bước TIẾP THEO có thể là gì
+          để tự nhận ra nếu nó xảy ra thật.
+          ⚠️ Khung câu "Họ thường…", không phải "Họ sẽ…" (§11) — đã cố định ở
+          catalog, không sửa ở đây.
+        */}
+        {canVerify && cauDuBao.length > 0 && (
+          <div className="w-full bg-sky-950/55 border-2 border-sky-300/60 rounded-2xl p-4 backdrop-blur-md mb-2">
+            <div className="flex items-start gap-2 mb-2">
+              <AlertTriangle size={20} className="text-sky-200 shrink-0 mt-0.5" />
+              <h3 className="text-white font-black text-[17px] leading-snug">{KHUNG_KICH_BAN[lang]}</h3>
+            </div>
+            <ul className="flex flex-col gap-1.5 mb-2">
+              {cauDuBao.map((cau) => (
+                <li key={cau} className="px-3 py-2 bg-black/30 rounded-xl border border-white/15 text-white font-semibold text-[15px] leading-snug">
+                  {cau}
+                </li>
+              ))}
+            </ul>
+            <p className="text-sky-50 text-[14px] leading-relaxed">{KET_KICH_BAN[lang]}</p>
+          </div>
+        )}
+
+        {/*
+          VERIFY_PATH — hành động xác minh CÓ THỂ BẤM NGAY, không chỉ lời
+          khuyên chung. Đầu số 156: đường dây quốc gia miễn phí nhận báo cáo
+          cuộc gọi/tin nhắn nghi lừa đảo. "Soạn tin", KHÔNG "đã gửi" (§11) —
+          bác đọc lại rồi tự bấm gửi.
+          ⚠️ KHÔNG dựng danh bạ số hotline ngân hàng ở đây — số nào cũng phải
+          qua sổ tổ chức đã xác minh (`verified-institution-registry.js`),
+          không phải mã cứng trong giao diện.
+        */}
+        {canVerify && (
+          <div className="w-full bg-black/30 border border-white/20 rounded-2xl p-4 backdrop-blur-md mb-2">
+            <p className="text-white font-semibold text-[15px] leading-relaxed mb-3">
+              {t('Đừng gọi lại đúng số vừa gọi cho bác. Bác tự bấm số đã lưu sẵn trong máy, hoặc số in ở mặt sau thẻ ngân hàng.')}
+            </p>
+            <button
+              onClick={() => {
+                const noiDung = lang === 'en'
+                  ? 'I received a call or message I suspect is a scam. Please advise.'
+                  : 'Tôi vừa nhận được một cuộc gọi hoặc tin nhắn nghi là lừa đảo, xin được hướng dẫn.';
+                window.open(`sms:156?body=${encodeURIComponent(noiDung)}`, '_self');
+              }}
+              className="w-full min-h-[52px] px-4 bg-white/90 hover:bg-white active:scale-95 text-slate-900 font-extrabold rounded-xl text-[16px] transition-all"
+            >
+              {t('Soạn tin báo cáo tới đầu số 156')}
+            </button>
+          </div>
         )}
 
         {/*
@@ -5658,6 +5836,44 @@ function WarningView({
         )}
 
         {/*
+          §2B.5 — BẢO VỆ 72 GIỜ. Hiện khi `canThiep` là RECOVERY (do bộ luật
+          gán, hiếm) HOẶC bác tự bấm "Tôi đã lỡ..." bên dưới.
+          ⚠️ §11 — KHÔNG hứa lấy lại được tiền. `KHUNG_PHUC_HOI`/`BUOC_PHUC_HOI`
+          đã viết theo đúng khung "làm TĂNG khả năng xử lý" ở catalog — không
+          thêm chữ ở đây.
+        */}
+        {canRecovery && keHoachPhucHoi && (
+          <div className="w-full bg-rose-950/55 border-2 border-rose-300/60 rounded-2xl p-4 backdrop-blur-md mb-2">
+            <div className="flex items-start gap-2 mb-1.5">
+              <AlertTriangle size={20} className="text-rose-200 shrink-0 mt-0.5" />
+              <h3 className="text-white font-black text-[17px] leading-snug">{KHUNG_PHUC_HOI[lang]}</h3>
+            </div>
+            {typeof keHoachPhucHoi.gioVang === 'number' && (
+              <p className="text-rose-50 text-[14px] font-semibold mb-2">
+                {t('Giờ vàng còn tính:')} {keHoachPhucHoi.gioVang} {t('giờ đầu là lúc quan trọng nhất')}
+              </p>
+            )}
+            {buocPhucHoi.length > 0 && (
+              <ul className="flex flex-col gap-1.5 mb-2">
+                {buocPhucHoi.map((cau, i) => (
+                  <li key={cau} className="px-3 py-2 bg-black/30 rounded-xl border border-white/15 text-white font-semibold text-[15px] leading-snug flex gap-2">
+                    <span className="text-rose-200 font-black shrink-0">{i + 1}.</span>
+                    <span>{cau}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+            {canhBaoPhucHoi.length > 0 && (
+              <ul className="flex flex-col gap-1 mt-1">
+                {canhBaoPhucHoi.map((cau) => (
+                  <li key={cau} className="text-rose-100/90 text-[14px] leading-snug">· {cau}</li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
+
+        {/*
           §11 — NÓI THẬT AI CHẠY Ở ĐÂU.
 
           Đây là thứ người dùng có quyền biết trước khi gõ một tin nhắn có tên,
@@ -5681,25 +5897,44 @@ function WarningView({
 
       {/* Action Buttons Optimized for Elderly */}
       <div className="w-full max-w-md z-10 flex flex-col items-center gap-2.5 mt-auto pt-2">
-        {timeLeft > 0 && (
-          <div className="w-full bg-black/35 border border-white/20 rounded-2xl p-2.5 backdrop-blur-md">
-            <div className="flex items-center justify-between text-white text-[14px] font-bold mb-1.5 px-1">
-              <span>{t('Dừng lại bình tĩnh:')}</span>
-              <span className="text-amber-200 font-mono text-[16px] font-black">{timeLeft}s</span>
-            </div>
-            <div className="w-full bg-white/20 h-2.5 rounded-full overflow-hidden">
-              <div
-                className="bg-amber-300 h-full rounded-full transition-all duration-1000 ease-linear"
-                style={{ width: `${((initialTime - timeLeft) / initialTime) * 100}%` }}
-              />
-            </div>
-          </div>
-        )}
+        {/*
+          LIÊN HỆ KHẨN CẤP — ba lối gọi nhanh. "Con cháu" dùng đúng logic
+          `handleCallRelative` (chưa có ai thì đưa sang màn Gia đình, không quay
+          số bừa — xem chú thích ở `AppMenuModal`). Hai số còn lại là số thật đã
+          duyệt trong `so-khan-cap.ts`, không phải số bịa cho đẹp bố cục.
+        */}
+        <div className="w-full grid grid-cols-3 gap-2">
+          <button
+            onClick={handleCallRelative}
+            className="rounded-2xl bg-white/15 hover:bg-white/25 border border-white/25 backdrop-blur-md px-2 py-3 flex flex-col items-center gap-1.5 active:scale-95 transition-all min-h-[64px]"
+          >
+            <Users size={20} className="text-white shrink-0" />
+            <span className="text-[13px] font-bold text-white leading-tight text-center">{t('Con cháu')}</span>
+          </button>
+          {soCongAn && (
+            <a
+              href={`tel:${soCongAn.cleanPhone}`}
+              className="rounded-2xl bg-white/15 hover:bg-white/25 border border-white/25 backdrop-blur-md px-2 py-3 flex flex-col items-center gap-1.5 active:scale-95 transition-all min-h-[64px]"
+            >
+              <ShieldCheck size={20} className="text-white shrink-0" />
+              <span className="text-[13px] font-bold text-white leading-tight text-center">{soCongAn.name}</span>
+            </a>
+          )}
+          {soBaoLuaDao && (
+            <a
+              href={`tel:${soBaoLuaDao.cleanPhone}`}
+              className="rounded-2xl bg-white/15 hover:bg-white/25 border border-white/25 backdrop-blur-md px-2 py-3 flex flex-col items-center gap-1.5 active:scale-95 transition-all min-h-[64px]"
+            >
+              <PhoneOff size={20} className="text-white shrink-0" />
+              <span className="text-[13px] font-bold text-white leading-tight text-center">{soBaoLuaDao.name}</span>
+            </a>
+          )}
+        </div>
 
         <button
           onClick={handleCallRelative}
           data-vai-tro="nut-chinh"
-          className="w-full py-4 px-4 rounded-2xl font-black text-[17px] bg-amber-300 text-amber-950 shadow-[0_6px_20px_rgba(245,158,11,0.4)] border-2 border-amber-200 flex flex-col items-center justify-center gap-0.5 active:scale-98 transition-all hover:brightness-105"
+          className="w-full py-4 px-4 rounded-[22px] font-black text-[17px] bg-amber-300 text-amber-950 shadow-[0_10px_28px_rgba(245,158,11,0.35)] border-2 border-amber-200 flex flex-col items-center justify-center gap-0.5 active:scale-98 transition-all hover:brightness-105"
         >
           <span className="flex items-center gap-2">
             <PhoneCall size={22} />
@@ -5715,11 +5950,25 @@ function WarningView({
         {/* ⚠️ "Soạn tin", KHÔNG phải "đã gửi" — §11. */}
         <button
           onClick={handleSendSos}
-          className="w-full py-3 px-3 rounded-2xl font-black text-[16px] bg-white text-slate-900 shadow-md border border-white/40 flex items-center justify-center gap-2 active:scale-98 transition-all hover:bg-slate-50"
+          className="w-full py-3 px-3 rounded-[22px] font-black text-[16px] bg-white text-slate-900 shadow-md border border-white/40 flex items-center justify-center gap-2 active:scale-98 transition-all hover:bg-slate-50"
         >
           <MessageSquare size={18} className="text-slate-700" />
           <span>{t('Soạn tin nhắn cho con cháu')}</span>
         </button>
+
+        {/*
+          §2B.5 — LỐI VÀO BẢO VỆ 72 GIỜ. Chỉ hiện ở mức CAO, và chỉ trước khi
+          đã ở màn phục hồi rồi (đỡ bấm lặp). Đây không phải một kết quả phân
+          tích mới — xem chú thích ở `daBamPhucHoi` phía trên.
+        */}
+        {laCao && !canRecovery && (
+          <button
+            onClick={() => setDaBamPhucHoi(true)}
+            className="w-full py-3 px-3 rounded-2xl font-bold text-[15px] bg-black/30 hover:bg-black/40 text-white border border-white/25 flex items-center justify-center gap-2 active:scale-98 transition-all"
+          >
+            <span>{t('Tôi đã lỡ chuyển tiền hoặc đọc mã rồi')}</span>
+          </button>
+        )}
 
         {/*
           §4.6 — NGUYÊN TẮC LUÔN CÓ LỐI RA.
@@ -5732,7 +5981,7 @@ function WarningView({
         */}
         <button
           onClick={() => setView('home')}
-          className="w-full py-3 rounded-2xl font-bold text-[16px] bg-white/20 hover:bg-white/30 text-white border border-white/30 shadow-sm backdrop-blur-md active:scale-98 transition-all flex items-center justify-center gap-1.5"
+          className="w-full py-3 rounded-[22px] font-bold text-[16px] bg-white/20 hover:bg-white/30 text-white border border-white/30 shadow-sm backdrop-blur-md active:scale-98 transition-all flex items-center justify-center gap-1.5"
         >
           <span>{laKhanCap ? t('Tôi ổn, không có gì nguy hiểm') : t('Về trang chủ')}</span>
         </button>

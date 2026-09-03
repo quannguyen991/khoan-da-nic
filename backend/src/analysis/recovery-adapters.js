@@ -43,6 +43,18 @@ const THEO_NUOC = Object.freeze({
     buocRieng: Object.freeze([
       'gui_don_trinh_bao_cong_an_phuong_noi_cu_tru',
       'yeu_cau_ngan_hang_phong_toa_tai_khoan_nhan',
+      /**
+       * §2B.5 — thêm 3/9/2026, sau khi nghiên cứu đối chiếu thông lệ Việt Nam.
+       * "gui_don_trinh_bao..." ở trên nói CÓ báo công an, nhưng không nói QUA
+       * KÊNH NÀO — mà đây đúng là chỗ người vừa mất tiền, đang hoảng, dễ bỏ
+       * cuộc nhất. VNeID có quy trình cụ thể, theo dõi được tiến độ xử lý:
+       * mở mục phản ánh → tạo yêu cầu mới → điền thông tin người tố giác/đối
+       * tượng/vụ việc → đính kèm ảnh bằng chứng → gửi tới công an phường/xã.
+       * Mã này KHÔNG hứa xử lý nhanh hay lấy lại được tiền (§11) — chỉ nói
+       * ĐÚNG kênh chính thức có phản hồi hai chiều, thay vì "báo công an"
+       * chung chung không ai biết bắt đầu từ đâu.
+       */
+      'to_giac_qua_vneid_5_buoc',
     ]),
     // Cửa sổ vàng: càng sớm càng dễ chặn lệnh. KHÔNG hứa chặn được.
     gioVang: 24,

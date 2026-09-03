@@ -69,6 +69,16 @@ test('Có bước cảnh giác với chính kẻ lừa đảo thứ hai', () => 
   assert.ok(R.BUOC_CHUNG.includes('canh_giac_voi_ben_hua_lay_lai_tien'));
 });
 
+test('§2B.5 — VN có bước trình báo qua VNeID, KHÔNG chỉ "báo công an" chung chung', () => {
+  // Nghiên cứu 3/9/2026: VNeID có quy trình 5 bước cụ thể (mở mục phản ánh →
+  // tạo yêu cầu → điền thông tin → đính kèm ảnh → gửi), theo dõi được tiến độ.
+  // "Báo công an" mà không nói bằng kênh nào là lời khuyên suông.
+  const kh = R.layKeHoachPhucHoi('VN');
+  assert.ok(R.THEO_NUOC.VN.buocRieng.includes('to_giac_qua_vneid_5_buoc'),
+    'thiếu bước trình báo qua VNeID trong bước riêng của VN');
+  assert.ok(kh.buoc.includes('to_giac_qua_vneid_5_buoc'));
+});
+
 test('Mọi bước là MÃ để frontend tra catalog, không phải câu tiếng Việt', () => {
   for (const b of R.layKeHoachPhucHoi('VN').buoc) {
     assert.match(b, /^[a-z][a-z0-9_]+$/, `không phải mã: ${b}`);
