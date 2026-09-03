@@ -62,32 +62,53 @@ services:
         sync: false
       - key: LLM_API_KEY
         sync: false
-      # ══════════ ĐO LẠI 3/9/2026 TRÊN TRỌN 571 MẪU ══════════
+      # ══════ ĐO LẠI 3/9/2026 — VÀ MỘT BÀI HỌC VỀ BỘ NHỚ ĐỆM ══════
       #
-      # Bảng độ trễ ở đầu tệp này đo ngày 19/8 trên 10 tình huống. Đo lại hôm
-      # nay trên cả bộ eval, kết quả đảo ngược lựa chọn cũ:
+      # Bảng độ trễ ở đầu tệp đo 19/8 trên 10 tình huống. Đo lại trên trọn 571
+      # mẫu thì lựa chọn cũ (`gpt-5.4`) sai, và lựa chọn thay thế đầu tiên
+      # (`claude-sonnet-5`) cũng sai — vì một lý do không nhìn thấy trong bảng:
       #
-      #   model              recall  bỏ sót  báo đỏ oan  lượt hỏng
-      #   claude-sonnet-5     83,0%   20,5%       5,9%        0%
-      #   deepseek-v4-flash   60,4%   34,3%       3,6%        0%
-      #   gpt-5.4               —       —          —         8,8%  ✖
+      #   model              recall   nguồn số        gọi mới hôm nay
+      #   deepseek-v4-flash   60,4%   570/571 GỌI MỚI      0% hỏng
+      #   claude-sonnet-5     83,0%   571/571 TỪ ĐỆM     35–50% hỏng  ✖
+      #   gpt-5.4               —          —              8,8% timeout ✖
       #
-      # ⚠️ `gpt-5.4` KHÔNG CÒN DÙNG ĐƯỢC — đây là giá trị mặc định cũ của tệp
-      # này. Nó quá hạn 35 giây ở 8,8% lượt gọi, và ba tệp mẫu vượt trần riêng
-      # (03-en-scam 13,3% · 06-negatives 13,6% · 07-vi-cau-ngan 25,0%). Bộ eval
-      # TỪ CHỐI công bố số của lượt đó theo §4.3. Deploy bằng nó thì giám khảo
-      # gặp lỗi ở khoảng một trên mười lượt bấm thử.
+      # ⚠️ 83,0% CỦA `claude-sonnet-5` LÀ SỐ PHÁT LẠI TỪ ĐỆM, KHÔNG TÁI LẬP ĐƯỢC.
+      # `latest.json` của lượt đó ghi `tinHieuGoiMoi: 0` — không một lượt gọi
+      # mới nào. Chạy lại với `--bo-cache` cùng ngày: hỏng 35%, bộ eval TỪ CHỐI
+      # công bố. Đo qua HTTP: 7/15 lượt `AI_SCHEMA_INVALID`, mỗi lần ~20 giây
+      # thử lại rồi rơi về tầng luật. Mà tầng luật một mình chỉ đạt 3,8% độ
+      # nhạy, nên recall THỰC TẾ của nó hôm nay thấp hơn 60,4%, không cao hơn.
       #
-      # ⚠️ `deepseek-v4-flash` NHANH GẤP 5 NHƯNG BỎ SÓT GẤP RƯỠI. Báo đỏ oan
-      # của nó thấp hơn (3,6% so với 5,9%) chỉ vì nó kêu ít hơn ở mọi chỗ —
-      # gồm cả chỗ đáng kêu. §4.2 nói mọi thứ thêm vào chỉ được LÀM TĂNG cảnh
-      # giác; đổi 23 điểm recall lấy 2 điểm báo oan là đi ngược đúng câu đó.
+      # Đã thử chữa bằng `LLM_TAT_SUY_NGHI=1`: hỏng chỉ xuống 41,7%, thêm lỗi
+      # `AI_PROVIDER_ERROR`, và lượt thành công chậm hơn nữa. Không phải tham
+      # số của ta sai — gateway `codex.hungnguyen.codes` đang xuống cấp, và
+      # `gpt-5.4` trên cùng gateway cũng timeout, khớp với chẩn đoán đó.
       #
-      # Chậm hơn (trung vị ~20s) là cái giá đã biết và chấp nhận. Nếu sau này
-      # có model vừa nhanh vừa giữ được recall ≥80%, đổi — nhưng ĐO TRỌN BỘ
-      # trước, đừng tin bảng 10 tình huống.
+      # ⚠️ BÀI HỌC ĐỂ LẠI: `tinHieuGoiMoi: 0` trong `latest.json` nghĩa là con
+      # số ĐÓ KHÔNG MÔ TẢ HÔM NAY. Trước khi đưa bất kỳ số nào lên slide hay
+      # hồ sơ, kiểm trường đó, và chạy lại bằng `--bo-cache`.
+      #
+      # ⚠️ ĐỔI GATEWAY THÌ PHẢI KHAI. Nội dung tin nhắn của người dùng đi qua
+      # `home.ai-box.vn` tới model DeepSeek. Đó là bên thứ ba, và Điều 5.5 của
+      # thể lệ buộc kê khai đầy đủ công cụ AI / mô hình / API đã dùng.
+      #
+      # ⚠️ TÌNH TRẠNG 3/9/2026 — CẢ HAI GATEWAY ĐỀU KHÔNG CHẠY TRỌN BỘ ĐƯỢC:
+      #   home.ai-box.vn        hết tiền giữa chừng. Lượt chạy sạch dừng ở
+      #                         115/571, rồi 456 lượt còn lại trả HTTP 403
+      #                         "insufficient user quota, remaining: -2.8 đ".
+      #   codex.hungnguyen.codes  35–50% AI_SCHEMA_INVALID (xem trên).
+      #
+      # Con số 60,4% của deepseek đến từ lượt chạy TRƯỚC đó, cũng toàn gọi mới
+      # (`tinHieuGoiMoi: 570`, 0% hỏng) — nó hợp lệ, nhưng CHƯA được ghi vào
+      # `eval/results/latest.json` vì lượt đó chạy không kèm `--ghi`.
+      #
+      # ⚠️ VIỆC CÒN LẠI: nạp tiền ai-box, chạy `node eval/run.js --ai --bo-cache
+      # --ghi --chi-tiet`, rồi mới lấy số đó làm số công bố. Cho tới lúc đó,
+      # `latest.json` vẫn là số phát lại từ đệm của claude-sonnet-5 và KHÔNG
+      # được dùng làm năng lực đã đo của bản dựng.
       - key: RISK_LLM_MODEL
-        value: claude-sonnet-5
+        value: deepseek-v4-flash
       # ── Dự phòng 1: qwen trên máy chủ tự vận hành ──
       #
       # ⚠️ ĐỨNG TRƯỚC GEMINI DÙ BẮT ÍT HƠN MỘT CA (4/5 so với 5/5).
