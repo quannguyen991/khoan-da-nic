@@ -1041,7 +1041,7 @@ export default function App() {
               />
             )}
             {view === 'voice' && <VoiceView setView={setView} t={t} onAnalyze={handleAnalyze} isAnalyzing={isAnalyzing} />}
-            {view === 'search' && <SearchView setView={setView} t={t} lang={lang} onAnalyze={handleAnalyze} isAnalyzing={isAnalyzing} />}
+            {view === 'search' && <SearchView setView={setView} t={t} lang={lang} onAnalyze={handleAnalyze} isAnalyzing={isAnalyzing} superBasic={superBasic} />}
             {view === 'history' && <HistoryView setView={setView} t={t} lang={lang} isLoggedIn={isLoggedIn} historyItems={historyItems} setHistoryItems={setHistoryItems} setAnalyzeResult={setAnalyzeResult} />}
             {view === 'profile' && <ProfileView setView={setView} t={t} isLoggedIn={isLoggedIn} hoSo={hoSo} onDangXuat={dangXuat} />}
             {view === 'family' && <FamilyView setView={setView} t={t} lang={lang} isLoggedIn={isLoggedIn} familyMembers={familyMembers} setFamilyMembers={setFamilyMembers} />}
@@ -4803,13 +4803,29 @@ function SearchView({
   t,
   lang = 'vi',
   onAnalyze,
-  isAnalyzing
+  isAnalyzing,
+  /**
+   * ⚠️ PHẢI NHẬN `superBasic` — CUỐI HÀM CÓ DÙNG TỚI NÓ.
+   *
+   * Thiếu dòng này thì `{!superBasic && <TinLuaDaoGanDay …/>}` ở cuối hàm ném
+   * `ReferenceError: superBasic is not defined`, và app TRẮNG MÀN ngay khi bác
+   * bấm nút "Tìm kiếm" — không phải hỏng một khối, mà hỏng cả ứng dụng.
+   *
+   * `tsc` đã chỉ thẳng lỗi này từ lâu; nó lọt được là vì `npm test` không hề
+   * gọi trình biên dịch. Nay `test/bien-dich-khong-loi.test.js` chặn lại.
+   *
+   * Mặc định `false`: chưa ai truyền thì coi như KHÔNG ở chế độ tối giản, tức
+   * vẫn hiện đủ nội dung — thiếu sót nghiêng về phía hiện thừa, không phải phía
+   * giấu mất tin của bác.
+   */
+  superBasic = false
 }: {
   setView: (v: ViewState) => void,
   t: any,
   lang?: Lang,
   onAnalyze?: (text: string, image?: string | null) => void,
-  isAnalyzing?: boolean
+  isAnalyzing?: boolean,
+  superBasic?: boolean
 }) {
   const [searchInput, setSearchInput] = useState('');
   const [searchImage, setSearchImage] = useState<string | null>(null);
