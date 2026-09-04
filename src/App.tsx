@@ -1283,11 +1283,11 @@ export default function App() {
                         */
                         aria-label={item.label}
                         onClick={() => setView(item.id as ViewState)} 
-                        className={`relative z-10 transition-all duration-300 flex items-center justify-center rounded-full active:scale-95
+                        className={`relative z-10 transition-all duration-300 flex items-center justify-center rounded-full active:scale-95 shrink-0
                           lg:rounded-full lg:px-5 lg:h-[3.4rem] lg:gap-2.5 lg:w-auto ${
                           isActive
-                            ? 'bg-white/25 shadow-[0_0_20px_rgba(255,255,255,0.4)] text-white px-3.5 sm:px-4 h-[3.25rem] sm:h-[3.6rem] lg:bg-white lg:text-[#6d28d9] lg:shadow-md'
-                            : 'text-white/70 hover:text-white w-[3.25rem] h-[3.25rem] sm:w-[3.6rem] sm:h-[3.6rem] lg:text-white/85 lg:hover:bg-white/20 lg:w-auto'
+                            ? 'bg-white/25 shadow-[0_0_20px_rgba(255,255,255,0.4)] text-white px-2.5 min-[375px]:px-3.5 h-[52px] sm:h-[3.6rem] lg:bg-white lg:text-[#6d28d9] lg:shadow-md'
+                            : 'text-white/70 hover:text-white w-[52px] h-[52px] sm:w-[3.6rem] sm:h-[3.6rem] lg:text-white/85 lg:hover:bg-white/20 lg:w-auto'
                         }`}
                       >
                         {/*
@@ -1327,7 +1327,7 @@ export default function App() {
                               initial={{ opacity: 0, marginLeft: 0 }}
                               animate={{ opacity: 1, marginLeft: 6 }}
                               exit={{ opacity: 0, marginLeft: 0 }}
-                              className="lg:hidden font-bold text-[14px] shrink-0"
+                              className="hidden min-[375px]:inline lg:hidden font-bold text-[14px] shrink-0"
                             >
                               {item.label}
                             </motion.span>
