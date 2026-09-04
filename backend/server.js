@@ -883,6 +883,192 @@ app.post('/api/canh-bao-nguoi-than', (req, res) => {
   });
 });
 
+
+/* ══════════════════════════════════════════════════════════════════════════
+ * PHÁT HIỆN THỤ ĐỘNG — tin nhắn / thông báo đến, và ứng dụng lạ vừa cài.
+ *
+ * ⚠️ Đường này KHÔNG thuộc §HĐ. `/api/analyze` giữ nguyên bảy trường của hợp
+ * đồng; `/api/detect` là luồng KHÁC (thông báo đến, không phải người dùng dán
+ * nội dung) nên nó có hình dạng riêng — và vì thế nó KHÔNG được phép làm đổi
+ * hình dạng của `/api/analyze`. Hai luồng, một bộ luật.
+ * ══════════════════════════════════════════════════════════════════════════ */
+
+const DETECT = require('./src/detect');
+const { boLuat } = require('./src/detect/bo-luat-store');
+const { taoKhoXacMinh, tinhChinhTang2 } = require('./src/detect/tang-2');
+const UDL = require('./src/detect/ung-dung-la');
+const CB = require('./src/canh-bao-hai-phia');
+const DT = require('./src/dien-tap');
+const BCT = require('./src/bao-cao-tuan');
+
+const khoXacMinh = taoKhoXacMinh();
+const khoCanhBao = CB.taoKhoCanhBao();
+const khoDienTap = DT.taoKhoDienTap();
+
+/** Số lượt đã quét — để báo cáo tuần nói được "đã quét bao nhiêu". */
+let soLuotQuet = 0;
+
+/** POST /api/detect — tầng 0 + tầng 1, ĐỒNG BỘ, chạy được khi mất AI. */
+app.post('/api/detect', chanPhanTich, (req, res) => {
+  const { nguon, nguoiGui, noiDung, thoiDiem, danhBa, ngonNgu, doTinCayDauVao } = req.body || {};
+  if (typeof noiDung !== 'string') return res.status(400).json({ maLoi: 'THIEU_NOI_DUNG' });
+  if (noiDung.length > GIOI_HAN_VAN_BAN) return res.status(413).json({ maLoi: 'NOI_DUNG_QUA_DAI' });
+
+  soLuotQuet += 1;
+  return res.json(DETECT.analyze(
+    { nguon, nguoiGui, noiDung, thoiDiem },
+    { danhBa, ngonNgu, doTinCayDauVao },
+  ));
+});
+
+/**
+ * POST /api/detect/verify — TẦNG 2.
+ * ⚠️ Nhận TÊN MIỀN và BĂM số tài khoản, KHÔNG nhận nội dung tin nhắn.
+ * "Không trùng" KHÔNG phải là "sạch" (§4.3) — client giữ nguyên nhãn tầng 0.
+ */
+app.post('/api/detect/verify', chanDoc, (req, res) => {
+  const { tenMien, bamSoTaiKhoan, nhanTang0 } = req.body || {};
+  const doiChieu = khoXacMinh.doiChieu({
+    tenMien: Array.isArray(tenMien) ? tenMien.slice(0, 20) : [],
+    bamSoTaiKhoan: Array.isArray(bamSoTaiKhoan) ? bamSoTaiKhoan.slice(0, 20) : [],
+  });
+  const tinhChinh = tinhChinhTang2({ nhan: nhanTang0 || 'CHUA_THAY' }, doiChieu);
+  res.json({ ...doiChieu, nhanSauTang2: tinhChinh.nhan, tang2: tinhChinh.tang2 });
+});
+
+/**
+ * GET /api/detect/bo-luat — bộ luật đang hiệu lực, để client tải về và cache.
+ * Chiêu lừa đổi hằng tuần; không được bắt người dùng cập nhật app mới sửa được luật.
+ */
+app.get('/api/detect/bo-luat', chanDoc, (req, res) => {
+  const l = boLuat();
+  res.json({
+    phienBan: l.phienBan,
+    nguon: l.nguon,
+    maoDanh: { cum: l.maoDanh },
+    allowlist: { hauToChinhThuc: l.allowlistHauTo, tenMien: l.allowlistTenMien },
+    thuongHieu: { muc: l.thuongHieu },
+    duoiMienRuiRo: { duoi: l.duoiMienRuiRo },
+    rutGon: { tenMien: l.rutGon },
+    khoAppChinhThuc: { tenMien: l.khoAppChinhThuc },
+    cum: {
+      caiApp: l.caiApp,
+      apLucThoiGian: l.apLucThoiGian,
+      biMat: l.biMat,
+      doiMaXacThuc: { veYeuCau: l.maXacThucYeuCau, veDoiTuong: l.maXacThucDoiTuong },
+      xungDanhToChuc: { cum: l.xungDanhToChuc },
+      soTaiKhoan: { nguCanh: l.nguCanhSoTaiKhoan },
+    },
+    dongHinh: { bang: l.dongHinh },
+  });
+});
+
+/**
+ * POST /api/detect/ung-dung — ứng dụng lạ vừa được cài.
+ * §12 — chỉ báo. KHÔNG có đường gỡ app, không có đường khoá máy.
+ */
+app.post('/api/detect/ung-dung', chanPhanTich, (req, res) => {
+  const { goi, tenHienThi, installer, thoiDiem, laCapNhat } = req.body || {};
+  soLuotQuet += 1;
+  res.json(UDL.phanTichCaiDat({ goi, tenHienThi, installer, thoiDiem, laCapNhat }));
+});
+
+/**
+ * POST /api/detect/canh-bao — phát cảnh báo hai phía.
+ *
+ * ⚠️ KHÔNG CÓ GIỚI HẠN TẦN SUẤT, cùng lý do đã ghi ở `/api/canh-bao-nguoi-than`:
+ * §6.10 — "RATE_LIMITED KHÔNG được chặn nút gọi người thân."
+ */
+app.post('/api/detect/canh-bao', async (req, res, next) => {
+  try {
+    const {
+      ketQua, vongTron, tenNguoiCaoTuoi, tenNguoiThan, chiaSeNoiDung, noiDung, huyLanNay,
+    } = req.body || {};
+    if (!ketQua || typeof ketQua !== 'object') return res.status(400).json({ maLoi: 'THIEU_KET_QUA' });
+    if (!vongTron || typeof vongTron !== 'object') return res.status(400).json({ maLoi: 'THIEU_VONG_TRON' });
+
+    const ra = await CB.phatCanhBao({
+      kq: ketQua,
+      vongTron,
+      kho: khoCanhBao,
+      /*
+       * Chưa cắm nhà cung cấp push ⇒ NÓI THẬT là không xác nhận được (§6.7),
+       * không giả lập thành công. Màn của bác sẽ hiện "chưa gửi được cho …",
+       * và đó là câu đúng.
+       */
+      guiPush: async () => ({ endpointOk: false, ma: 'CHUA_CAU_HINH_PUSH' }),
+      tenNguoiCaoTuoi,
+      tenNguoiThan,
+      chiaSeNoiDung,
+      noiDung,
+      huyLanNay,
+    });
+    return res.json(ra);
+  } catch (e) { return next(e); }
+});
+
+/** Ghi hành vi trên một cảnh báo. Đây là dữ liệu hiệu chỉnh ngưỡng (§4.6). */
+app.post('/api/detect/canh-bao/:id/:hanhDong', (req, res) => {
+  const { id, hanhDong } = req.params;
+  if (!khoCanhBao.lay(id)) return res.status(404).json({ maLoi: 'KHONG_CO_CANH_BAO' });
+  const luc = Date.now();
+  switch (hanhDong) {
+    case 'mo': return res.json(CB.ghiNhanMo(khoCanhBao, id, luc));
+    case 'goi': return res.json(CB.ghiNhanBamGoi(khoCanhBao, id, luc));
+    case 'toi-on': return res.json(CB.ghiNhanToiOn(khoCanhBao, id, luc));
+    case 'ket-qua':
+      try {
+        return res.json(CB.danhDauKetQua(khoCanhBao, id, req.body?.ketQua, req.body?.boi ?? null));
+      } catch { return res.status(400).json({ maLoi: 'KET_QUA_KHONG_HOP_LE' }); }
+    default: return res.status(404).json({ maLoi: 'HANH_DONG_LA' });
+  }
+});
+
+/** POST /api/dien-tap/phat — phiếu đồng ý là CỔNG CỨNG. */
+app.post('/api/dien-tap/phat', chanProof, (req, res) => {
+  const { nguoiId, phieuDongY, chuKyNgay, kichBanMa } = req.body || {};
+  if (!nguoiId) return res.status(400).json({ maLoi: 'THIEU_NGUOI' });
+  try {
+    return res.json(DT.phatBai({
+      nguoiId, phieuDongY, kho: khoDienTap, chuKyNgay, kichBanMa,
+    }));
+  } catch { return res.status(400).json({ maLoi: 'KICH_BAN_KHONG_HOP_LE' }); }
+});
+
+app.post('/api/dien-tap/:id/hanh-vi', chanDoc, (req, res) => {
+  if (!khoDienTap.lay(req.params.id)) return res.status(404).json({ maLoi: 'KHONG_CO_LUOT' });
+  try {
+    return res.json(DT.ghiHanhVi(khoDienTap, req.params.id, req.body?.hanhVi));
+  } catch { return res.status(400).json({ maLoi: 'HANH_VI_LA' }); }
+});
+
+/** Trang giải thích sau bài tập. KHÔNG có ô nhập liệu nào (ràng buộc đạo đức 4). */
+app.get('/api/dien-tap/kich-ban/:ma/giai-thich', chanDoc, (req, res) => {
+  try { return res.json(DT.manGiaiThich(req.params.ma)); } catch {
+    return res.status(404).json({ maLoi: 'KICH_BAN_KHONG_TON_TAI' });
+  }
+});
+
+/** GET /api/bao-cao-tuan — gửi KỂ CẢ tuần không có sự kiện gì. */
+app.get('/api/bao-cao-tuan', chanDoc, (req, res) => {
+  const den = Date.now();
+  const ky = BCT.kyBaoCao(req.query.tanSuat || 'tuan', den);
+  if (!ky) return res.json({ gui: false, lyDo: 'nguoi_than_da_tat' });
+
+  return res.json(BCT.dungBaoCaoTuan({
+    ...ky,
+    canhBao: khoCanhBao.trongKhoang(ky.tu, ky.den),
+    soLuotQuet,
+    luotDienTap: khoDienTap.tatCa().filter((l) => l.guiLuc >= ky.tu && l.guiLuc < ky.den),
+    /*
+     * §4.3 — trạng thái hệ thống ĐỂ TRỐNG khi máy chủ không đo được. Chỉ lớp
+     * Android biết quyền đọc thông báo còn hiệu lực hay không; máy chủ đoán hộ
+     * là biến "chưa đo được" thành "vẫn tốt", đúng lỗi §4.3.
+     */
+    trangThaiHeThong: { phienBanLuat: boLuat().phienBan },
+  }));
+});
+
 /**
  * §5.3 — /transparency dựng HTML ở máy chủ, KHÔNG CẦN JavaScript phía trình duyệt.
  * §11 — chưa đo thì hiện "mục tiêu — chưa đo", không điền số mục tiêu vào cho đẹp.
