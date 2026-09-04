@@ -174,6 +174,54 @@ export interface NguoiThan {
   avatar?: string;
 }
 
+/**
+ * PHẢN HỒI PHÂN TÍCH — HÌNH DẠNG CỦA §HĐ, VIẾT THÀNH KIỂU.
+ *
+ * ⚠️ ĐÂY LÀ HỢP ĐỒNG, KHÔNG PHẢI MỘT KIỂU TIỆN TAY. Backend và frontend được
+ * dựng song song bởi hai công cụ khác nhau; §HĐ nói thẳng: đổi hình dạng này là
+ * phải báo cho cả hai bên. Trước 4/9/2026 nó khai `any`, nên trình biên dịch
+ * không canh được gì — kể cả một cái tên trường gõ sai.
+ *
+ * Ba thứ kiểu này canh hộ, mà đọc mã bằng mắt thì không:
+ *
+ *  1. `nhan` chỉ nhận ĐÚNG ba giá trị. §4.1 và §12 cấm nhãn thứ tư và cấm mọi
+ *     biến thể "An toàn" — nay gõ `nhan: 'AN_TOAN'` là lỗi biên dịch, không
+ *     phải chuyện phải nhớ.
+ *  2. `canThiep` chỉ nhận đúng năm màn. §HĐ luật 4: `canThiep` quyết định MÀN,
+ *     `nhan` quyết định NHÃN — hai trường riêng, không suy cái này từ cái kia.
+ *  3. `maLyDo`/`daKiem`/`chuaKiem` là MẢNG MÃ (§HĐ luật 2), không phải câu chữ.
+ *     Có kiểu thì `.map()` trên chúng không còn là canh bạc.
+ *
+ * ⚠️ VÌ SAO NHIỀU TRƯỜNG LÀ TUỲ CHỌN. Máy chủ luôn trả đủ bảy trường, nhưng
+ * frontend cũng tự dựng đối tượng này ở hai chỗ hợp lệ:
+ *   · mất mạng ⇒ `khongGoiDuocMayChu`, KHÔNG có `nhan` — frontend không có
+ *     quyền ra mức (§4.2)
+ *   · bác tự bấm "Dừng 60 giây" ⇒ `canThiep: 'PAUSE_60S'`, cũng không có `nhan`
+ * Khai chúng là bắt buộc thì sẽ có người bịa một `nhan` cho đủ kiểu — đúng thứ
+ * §4.2 cấm. Tuỳ chọn ở đây là nói thật, không phải nới lỏng.
+ */
+export interface KetQuaPhanTich {
+  /** ENUM §4.1. Vắng khi frontend tự dựng màn — xem chú thích trên. */
+  nhan?: 'CAO' | 'NGHI_NGO' | 'CHUA_THAY';
+  /** MÃ, không phải câu (§HĐ luật 2). Frontend tra catalog mới ra chữ. */
+  maLyDo: string[];
+  daKiem: string[];
+  /** §HĐ luật 3 — không rỗng thì BẮT BUỘC hiện cùng cỡ chữ với `nhan`. */
+  chuaKiem: string[];
+  hoKichBan?: string | null;
+  /** false ⇒ màn hình PHẢI nói "lượt này không có AI đọc". */
+  aiDaChay?: boolean;
+  canThiep?: 'TRUST_RECEIPT' | 'VERIFY_PATH' | 'PAUSE_60S' | 'PROTECTED_CRITICAL' | 'RECOVERY';
+
+  // ───── Ngoài hợp đồng: frontend tự đặt, backend không bao giờ gửi ─────
+  /** Mất mạng. §4.3 — "không kiểm được" KHÁC "đã kiểm, không thấy gì". */
+  khongGoiDuocMayChu?: boolean;
+  /** Bác tự bấm nút dừng, không phải một kết quả phân tích. */
+  tuBamDung?: boolean;
+  queryText?: string;
+  queryImage?: string | null;
+}
+
 export interface HistoryRecord {
   id: number;
   title: string;
@@ -181,7 +229,7 @@ export interface HistoryRecord {
   risk: 'CAO' | 'NGHI_NGO' | 'CHUA_THAY';
   date: string;
   saved?: boolean;
-  data: any;
+  data: KetQuaPhanTich;
 }
 
 /**
@@ -248,7 +296,7 @@ export default function App() {
     } catch { /* trình duyệt chặn localStorage ⇒ cứ hiện intro */ }
     return 'intro';
   });
-  const [analyzeResult, setAnalyzeResult] = useState<any>(null);
+  const [analyzeResult, setAnalyzeResult] = useState<KetQuaPhanTich | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [buocDangLam, setBuocDangLam] = useState<null | 'doc_chu' | 'doc_anh'>(null);
   const [pinnedNotification, setPinnedNotification] = useState(() => localStorage.getItem('pinnedNotification') === 'true');
@@ -2779,7 +2827,7 @@ function HistoryView({
   isLoggedIn: boolean,
   historyItems: HistoryRecord[],
   setHistoryItems: React.Dispatch<React.SetStateAction<HistoryRecord[]>>,
-  setAnalyzeResult: (data: any) => void
+  setAnalyzeResult: (data: KetQuaPhanTich) => void
 }) {
   const [activeTab, setActiveTab] = useState<'all' | 'high' | 'saved'>('all');
   const [searchFilter, setSearchFilter] = useState('');
@@ -2789,7 +2837,20 @@ function HistoryView({
     if (activeTab === 'saved' && !item.saved) return false;
     if (searchFilter.trim()) {
       const q = searchFilter.toLowerCase();
-      return item.title.toLowerCase().includes(q) || (item.data?.lyDo && item.data.lyDo.toLowerCase().includes(q));
+      /*
+       * ⚠️ TÌM TRÊN CÂU ĐÃ TRA, KHÔNG TÌM TRÊN MÃ (§HĐ luật 2).
+       *
+       * Bản trước viết `item.data?.lyDo` — KHÔNG CÓ TRƯỜNG NÀO TÊN VẬY. Hợp
+       * đồng chỉ có `maLyDo`, và nó là MẢNG MÃ chứ không phải chuỗi, nên
+       * `.toLowerCase()` cũng sai nốt. Hệ quả: `undefined && ...` luôn rơi về
+       * false, tức nửa "tìm theo lý do" của ô này CHƯA BAO GIỜ CHẠY — không
+       * báo lỗi, chỉ lặng lẽ không tìm ra. `data: any` giấu cả hai cái sai.
+       *
+       * Tra qua catalog rồi mới tìm, vì bác gõ chữ mình ĐANG THẤY trên màn
+       * ("giả danh công an"), không gõ `CO_GIA_DANH_CO_QUAN`.
+       */
+      const cauLyDo = traNhieu(MA_LY_DO, item.data?.maLyDo ?? [], lang).join(' · ').toLowerCase();
+      return item.title.toLowerCase().includes(q) || cauLyDo.includes(q);
     }
     return true;
   });
@@ -5961,7 +6022,7 @@ function WarningView({
   setView: (v: ViewState) => void,
   t: any,
   lang?: Lang,
-  result?: any,
+  result?: KetQuaPhanTich | null,
   familyMembers?: NguoiThan[],
   /**
    * Ứng dụng đang xem và bấm được thay bác — đọc thẳng từ Android.
