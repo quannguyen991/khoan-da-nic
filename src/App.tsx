@@ -2635,7 +2635,7 @@ function FamilyView({
     >
       {/* Mobile Header */}
       <div className="md:hidden flex flex-col items-center mb-4">
-         <div className="w-10 h-10 bg-gradient-to-tr from-[#8b5cf6] to-[#c084fc] rounded-2xl flex items-center justify-center shadow-sm mb-1.5 border border-white">
+         <div className="w-11 h-11 bg-gradient-to-tr from-[#8b5cf6] to-[#c084fc] rounded-2xl flex items-center justify-center mb-2 border-[2.5px] border-[#2e1065] shadow-[3px_3px_0_#2e1065]">
             <BookOpen size={20} className="text-white" fill="currentColor" />
          </div>
          <h2 className="text-[22px] font-black text-[#1e1b4b] text-center leading-tight">{t("Gia đình & Người thân")}</h2>
@@ -2658,50 +2658,79 @@ function FamilyView({
             giữ đủ chiều cao vùng chạm.
           */}
           <div className="flex flex-col gap-2.5">
-            {familyMembers.map((member) => (
-              <div key={member.id} className="bg-white rounded-2xl p-3.5 flex flex-col sm:flex-row sm:items-center gap-3 shadow-2xs border border-purple-100">
-                <div className="w-12 h-12 rounded-xl bg-purple-100 overflow-hidden border border-purple-200 shrink-0">
-                   {/* `avatar` giờ là MÃ MÀU, không phải đường dẫn ảnh — xem AddFamilyView. */}
-                   <div
-                     className="w-full h-full flex items-center justify-center font-black text-[18px] text-white"
-                     style={{ backgroundColor: member.avatar && member.avatar.startsWith('#') ? member.avatar : '#7e22ce' }}
-                   >
-                     {(member.name || '?').trim().charAt(0).toUpperCase()}
-                   </div>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-bold text-[#1e1b4b] text-[16px] leading-snug">{member.name}</h3>
-                  <p className="text-purple-700 font-semibold text-[14px] mt-0.5">{t(member.relation) || member.relation} • {member.phone || '0988 *** 888'}</p>
-                </div>
-                <div className="flex items-center gap-2 shrink-0">
-                   <button 
-                     onClick={() => handleCall(member.phone)}
-                     className="flex-1 sm:flex-none px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-[15px] flex items-center justify-center gap-1.5 shadow-2xs active:scale-95 transition-transform"
-                     title={t("Gọi ngay")}
-                   >
-                      <Phone size={16} />
-                      <span>{t("Gọi")}</span>
-                   </button>
-                   <button 
-                     onClick={() => handleSms(member)}
-                     className="flex-1 sm:flex-none min-h-[52px] px-4 py-2.5 bg-gradient-to-r from-[#9e76ea] via-[#ad8af0] to-[#9e76ea] text-white rounded-full font-bold text-[15px] flex items-center justify-center gap-1.5 shadow-2xs active:scale-95 transition-transform"
-                     title={t("Gửi tin nhắn nhờ hỗ trợ")}
-                   >
-                      <MessageSquare size={16} />
-                      <span>{t("Báo tin")}</span>
-                   </button>
-                   <button aria-label={t("Xoá")} 
-                     onClick={() => handleDeleteMember(member.id)}
-                     className="p-1.5 text-gray-300 hover:text-red-500 rounded-lg transition-colors"
-                     title={t("Xóa")}
-                   >
-                     <Trash2 size={15} />
-                   </button>
-                </div>
-              </div>
-            ))}
+            {/*
+              ⚠️ KHÔNG CÒN Ô CHỮ CÁI ĐẦU TÊN (avatar "A", "C").
+              Bỏ 4/9/2026 theo yêu cầu người dùng. Nó chiếm 48px chiều ngang ở
+              đúng khổ hẹp nhất mà không nói thêm điều gì: tên người thân đã nằm
+              ngay cạnh, và một chữ "A" tô màu không giúp bác nhận ra con mình
+              nhanh hơn dòng "Anh Nam (Con trai)". Bỏ đi thì tên và số điện thoại
+              được cả chiều ngang, đỡ phải xuống dòng.
 
-            <button onClick={() => setView('add_family')} className="w-full mt-1 min-h-[56px] py-3 bg-gradient-to-r from-[#9e76ea] via-[#ad8af0] to-[#9e76ea] text-white rounded-full font-bold text-[14px] shadow-sm flex items-center justify-center gap-1.5 active:scale-95 transition-transform">
+              ⚠️ `member.avatar` VẪN CÒN trong dữ liệu và trong màn "Thêm người
+              thân" — đừng xoá nó ở đó, chỉ là màn này không vẽ ra nữa.
+
+              Kiểu thẻ: viền dày + bóng đổ cứng, theo ảnh mẫu người dùng gửi.
+              Dùng tím đậm `#2e1065` (đã có trong bảng màu app) thay vì đen
+              tuyền — giữ được dấu ấn Khoan Đã. Viền dày cũng là thứ người mắt
+              kém cần: ranh giới thẻ không còn phụ thuộc vào bóng mờ.
+            */}
+            {familyMembers.map((member) => {
+              /*
+                ⚠️ VÙNG CHẠM 52px NHƯNG HÌNH VẼ NHỎ — CỐ Ý.
+                §4.4 đòi 52px cho mọi nút; bản trước `p-1.5` quanh icon 15px chỉ
+                ra ~27px. Nhưng nút này XOÁ người thân, nên nó không được tranh
+                chú ý với "Gọi"/"Báo tin": không viền, không bóng, chỉ một icon
+                xám. `text-gray-300` cũ đạt 1,5:1 — dưới cả sàn 3:1 của WCAG
+                1.4.11 cho hình phi văn bản; `slate-500` đạt 4,7:1.
+
+                ⚠️ Ở KHỔ HẸP NÓ NẰM Ở GÓC TÊN, KHÔNG NẰM CÙNG HÀNG VỚI HAI NÚT
+                CHÍNH. Đo ở 375px: để chung hàng thì 52px của nó cộng với hai nút
+                `flex-1` làm chữ "Báo tin" vỡ thành hai dòng — đúng cái bẫy §4.5
+                cảnh báo (tiếng Việt dài hơn ~30%, đừng dựng nút vừa khít chữ).
+                Tách ra cũng bớt nguy cơ bấm nhầm nút xoá khi đang vội gọi.
+              */
+              const nutXoa = (themLop: string) => (
+                <button aria-label={t("Xoá")}
+                  onClick={() => handleDeleteMember(member.id)}
+                  className={`w-[52px] h-[52px] shrink-0 items-center justify-center text-slate-500 hover:text-red-600 rounded-full transition-colors ${themLop}`}
+                  title={t("Xóa")}
+                >
+                  <Trash2 size={18} />
+                </button>
+              );
+              return (
+                <div key={member.id} className="bg-white rounded-[20px] p-3.5 flex flex-col sm:flex-row sm:items-center gap-3 border-[2.5px] border-[#2e1065] shadow-[4px_4px_0_#2e1065]">
+                  <div className="flex items-start gap-2 flex-1 min-w-0">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-bold text-[#1e1b4b] text-[17px] leading-snug">{member.name}</h3>
+                      <p className="text-purple-700 font-semibold text-[14px] mt-0.5">{t(member.relation) || member.relation} • {member.phone || '0988 *** 888'}</p>
+                    </div>
+                    {nutXoa('flex sm:hidden -mt-1 -mr-1')}
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                     <button
+                       onClick={() => handleCall(member.phone)}
+                       className="flex-1 sm:flex-none min-h-[52px] px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full font-bold text-[15px] flex items-center justify-center gap-1.5 border-[2.5px] border-[#064e3b] shadow-[3px_3px_0_#064e3b] active:scale-95 transition-transform"
+                       title={t("Gọi ngay")}
+                     >
+                        <Phone size={16} className="shrink-0" />
+                        <span>{t("Gọi")}</span>
+                     </button>
+                     <button
+                       onClick={() => handleSms(member)}
+                       className="flex-1 sm:flex-none min-h-[52px] px-4 py-2.5 bg-gradient-to-r from-[#9e76ea] via-[#ad8af0] to-[#9e76ea] text-white rounded-full font-bold text-[15px] flex items-center justify-center gap-1.5 border-[2.5px] border-[#2e1065] shadow-[3px_3px_0_#2e1065] active:scale-95 transition-transform"
+                       title={t("Gửi tin nhắn nhờ hỗ trợ")}
+                     >
+                        <MessageSquare size={16} className="shrink-0" />
+                        <span>{t("Báo tin")}</span>
+                     </button>
+                     {nutXoa('hidden sm:flex')}
+                  </div>
+                </div>
+              );
+            })}
+
+            <button onClick={() => setView('add_family')} className="w-full mt-1 min-h-[56px] py-3 bg-gradient-to-r from-[#9e76ea] via-[#ad8af0] to-[#9e76ea] text-white rounded-full font-bold text-[15px] border-[2.5px] border-[#2e1065] shadow-[4px_4px_0_#2e1065] flex items-center justify-center gap-1.5 active:scale-95 transition-transform">
                <Plus size={18} strokeWidth={2.5} /> {t("Thêm người thân")}
             </button>
           </div>
@@ -2709,13 +2738,13 @@ function FamilyView({
 
         {/* Right Column - Quick Support Cards */}
         <div className="flex flex-col gap-3 md:w-[380px]">
-           <div className="bg-white rounded-2xl p-4 shadow-2xs border border-purple-100">
-              <div className="flex items-center justify-between mb-2.5">
-                <h3 className="text-[14px] font-black text-[#2e1065] flex items-center gap-1.5">
-                  <Zap className="w-4 h-4 text-red-600" />
+           <div className="bg-white rounded-[20px] p-4 border-[2.5px] border-[#2e1065] shadow-[4px_4px_0_#2e1065]">
+              <div className="flex items-center justify-between mb-2.5 gap-2">
+                <h3 className="text-[15px] font-black text-[#2e1065] flex items-center gap-1.5">
+                  <Zap className="w-4 h-4 text-red-600 shrink-0" />
                   {t("Số khẩn cấp")}
                 </h3>
-                <span className="text-[14px] font-bold text-purple-700 bg-purple-100 px-2 py-0.5 rounded-full">
+                <span className="text-[14px] font-bold text-purple-800 bg-purple-100 px-2.5 py-0.5 rounded-full border-2 border-[#2e1065] shrink-0">
                   {lang === 'en' ? 'Global' : 'Việt Nam'}
                 </span>
               </div>
@@ -2740,21 +2769,21 @@ function FamilyView({
                    <button
                      key={item.id}
                      onClick={() => handleCall(item.phone.replace(/[^0-9+]/g, ''))}
-                     className="flex items-center gap-3 p-3 rounded-xl bg-purple-50/70 hover:bg-purple-100 text-left transition-all border border-purple-100 active:scale-95 group"
+                     className="flex items-center gap-3 p-3 min-h-[52px] rounded-2xl bg-purple-50 hover:bg-purple-100 text-left transition-all border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] active:scale-95 group"
                    >
-                      <div className="w-11 h-11 bg-purple-600 text-white rounded-xl flex items-center justify-center font-black text-[14px] shrink-0 group-hover:bg-red-600 transition-colors">
+                      <div className="w-11 h-11 bg-purple-600 text-white rounded-xl flex items-center justify-center font-black text-[14px] shrink-0 border-2 border-[#2e1065] group-hover:bg-red-600 transition-colors">
                          {item.phone.length > 5 ? 'SOS' : item.phone}
                       </div>
-                      <h4 className="flex-1 font-bold text-[#1e1b4b] text-[14px] leading-snug">{item.name}</h4>
-                      <PhoneCall size={18} className="text-purple-600 shrink-0" />
+                      <h4 className="flex-1 font-bold text-[#1e1b4b] text-[15px] leading-snug">{item.name}</h4>
+                      <PhoneCall size={18} className="text-purple-700 shrink-0" />
                    </button>
                  ))}
               </div>
 
               {/* Link to Full Learn & Hotline View */}
-              <button 
+              <button
                 onClick={() => setView('learn')}
-                className="w-full mt-3 py-2.5 px-3 bg-gradient-to-r from-amber-500/15 via-purple-100 to-indigo-100 border border-amber-300 text-[#2e1065] rounded-xl font-bold text-[14px] flex items-center justify-between active:scale-98 transition-all"
+                className="w-full mt-3 py-2.5 px-3.5 min-h-[52px] bg-amber-100 border-[2.5px] border-[#2e1065] shadow-[3px_3px_0_#2e1065] text-[#2e1065] rounded-full font-bold text-[15px] flex items-center justify-between active:scale-95 transition-all"
               >
                 <div className="flex items-center gap-2">
                   <BookOpen size={16} className="text-amber-600 shrink-0" />
@@ -2764,9 +2793,9 @@ function FamilyView({
               </button>
            </div>
 
-           <div className="bg-purple-50/70 rounded-2xl p-3 border border-purple-100 flex items-center gap-2.5">
+           <div className="bg-purple-50 rounded-[20px] p-3.5 border-[2.5px] border-[#2e1065] shadow-[4px_4px_0_#2e1065] flex items-center gap-2.5">
               <ShieldCheck className="w-6 h-6 text-[#7e22ce] shrink-0" />
-              <p className="text-[14px] text-purple-900 font-medium leading-tight">
+              <p className="text-[14px] text-purple-900 font-semibold leading-snug">
                 {t("Danh bạ lưu an toàn trên máy của bác, bảo mật tuyệt đối.")}
               </p>
            </div>
