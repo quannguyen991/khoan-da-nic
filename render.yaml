@@ -116,6 +116,86 @@ services:
       # ⚠️ KHÔNG CHẠY `--bo-cache` KHI KHÔNG CẦN. Đổi bộ luật thì KHÔNG cần —
       # bộ luật chạy trên tín hiệu đã nằm sẵn trong đệm, không tốn đồng nào.
       # Chỉ bỏ đệm khi đổi model hoặc đổi lời nhắc.
+      #
+      # ══════ QUÉT 4/9/2026 — MỘT PROXY GOM MODEL, VÀ MỘT TRƯỜNG THIẾU ══════
+      #
+      # Quét `localhost:20128` (proxy gom 155 model từ 8 nhà cung cấp).
+      #
+      # ⚠️ ĐỌC PHẦN NÀY TRƯỚC KHI ĐỌC BẢNG: LƯỢT QUÉT ĐẦU TIÊN SAI HẾT.
+      # Nó báo "9/126 model sống". Nguyên nhân không phải model — proxy trả
+      # `text/event-stream` khi thân yêu cầu không khai `stream`, và cả bộ đo
+      # lẫn `fable-client.js` đều dùng `res.json()`. Sửa một trường xong:
+      # **98/126 sống**. Cùng bài học với `curl` trong Git Bash (18/8) và với
+      # `tinHieuGoiMoi: 0` ở trên: TRƯỚC KHI TIN MỘT CON SỐ, KIỂM BỘ ĐO BẰNG
+      # MỘT CA ĐÃ BIẾT KẾT QUẢ. Bản vá + hàng rào nằm ở commit `stream: false`.
+      #
+      # ⚠️ BẢNG DƯỚI ĐÂY KHÔNG PHẢI SỐ EVAL. 5 ca, không phải 571 — và cố ý
+      # chọn 3 mẫu mà TẦNG LUẬT MỘT MÌNH BỎ SÓT (đo được: 127/217 mẫu CAO
+      # tiếng Việt trong `eval/dataset`), vì mẫu tầng luật tự bắt được thì
+      # KHÔNG phân biệt nổi "AI chạy" với "AI chết". Dùng bảng này để LOẠI thứ
+      # hỏng và để nói về TỐC ĐỘ. Đừng dùng nó để xếp hạng độ chính xác, và
+      # đừng đưa vào hồ sơ — `eval/results/latest.json` vẫn là nguồn duy nhất.
+      #
+      #   model                              AI chạy  CAO  báo oan  t.vị   đuôi
+      #   aiboxkimi/qwen3.8-flash              5/5     4/4    0/1    4,2s   5,7s
+      #   kr/claude-haiku-4.5                  5/5     4/4    0/1    5,8s   9,7s
+      #   ag/gemini-3.8-flash                  5/5     4/4    0/1    7,8s  10,6s
+      #   cx/gpt-5.4-mini                      5/5     4/4    0/1    5,9s  13,1s
+      #   kr/claude-sonnet-4.5                 5/5     4/4    0/1   12,6s  14,6s
+      #   aiboxkimi/deepseek-v4-flash ← đang dùng
+      #                                        5/5     2/4    0/1    2,5s   4,1s
+      #   aiboxkimi/ZHIPU/GLM-5.3              0/5      —      —      —   AI_PROVIDER_ERROR
+      #
+      # 19/20 ứng viên chạy trọn vẹn, 0 lượt bị Zod loại, 0 báo oan trên tin lành.
+      #
+      # ── Cloudflare Workers AI: tiền tố `cf/`, id dạng `cf/@cf/meta/…` ──
+      #
+      # ⚠️ CHỮ "cloudflare" KHÔNG XUẤT HIỆN Ở ĐÂU TRONG `/v1/models`. Nhóm này
+      # nấp dưới `owned_by: "cf"` — tìm bằng tên nhà cung cấp sẽ không ra.
+      # 9/13 model sống, nhưng chỉ 5/9 dùng được:
+      #
+      #   cf/@cf/…                             AI chạy  CAO   t.vị   đuôi
+      #   mistralai/mistral-small-3.1-24b        5/5     3/4   6,0s  11,9s  ← tốt nhất nhóm
+      #   meta/llama-3.3-70b-fp8-fast            5/5     2/4   2,4s   8,1s
+      #   meta/llama-3.1-70b-fp8-fast            5/5     2/4   5,0s   7,6s
+      #   deepseek-ai/deepseek-r1-distill-32b    5/5     1/4  27,5s  38,9s  ✖ vượt trần 35s
+      #   qwen/qwq-32b                           4/5     2/4  14,6s  45,4s  ✖ vượt trần 35s
+      #   meta/llama-3.2-3b-instruct             5/5     1/4   0,6s   0,9s  bịa mã ngoài registry
+      #   meta/llama-3.1-8b-fp8-fast             3/5     1/4   1,6s  12,1s
+      #   qwen/qwen2.5-coder-32b                 0/5      —      —      —   ✖ hỏng lược đồ 100%
+      #   meta/llama-3.2-1b-instruct             0/5      —      —      —   ✖ hỏng lược đồ 100%
+      #
+      # ⚠️ BÀI HỌC `claude-haiku-4-5` TRONG `.env` LẶP LẠI NGUYÊN SI. Hai model
+      # cuối trả lời trôi chảy, nhanh, HTTP 200 — và hỏng lược đồ 100% lượt, nên
+      # Zod loại sạch và MỌI THỨ RƠI VỀ `CHUA_THAY`. Nhìn từ ngoài chúng "chạy
+      # tốt". Đây là lý do §4.2 tồn tại, và là lý do không được đổi model đường
+      # rủi ro mà không chạy ít nhất một kịch bản CAO.
+      #
+      # ⚠️ HAI MODEL VƯỢT TRẦN. Đo với `LLM_TIMEOUT_MS=60000`; bản dựng để 35s.
+      # Ở 35s thì `qwq-32b` và `deepseek-r1-distill` ra `AI_TIMEOUT`, không phải
+      # kết quả. Đừng đọc cột "CAO" của chúng như thể dùng được.
+      #
+      # ⚠️ PROXY NÀY NHÉT LỜI NHẮC HỆ THỐNG ẨN VÀO MỌI ĐƯỜNG. Một tin nhắn ~45
+      # token báo về `prompt_tokens`: `aiboxkimi/*` ~2.070 · `ag/*` ~2.110 ·
+      # `cf/*` ~2.030 · `kr/*` **6.247**. Hỏi thẳng thì model xác nhận có nhưng
+      # từ chối đọc ra; `kr/claude-sonnet-4-agentic` từng rò ra chữ "chunked
+      # write protocol" — lời nhắc của một agent lập trình.
+      #
+      # ĐIỀU NÀY CHẠM §12: đường risk analysis có chỉ thị của bên thứ ba đứng
+      # TRƯỚC lời nhắc trích tín hiệu của mình, và mỗi lượt kiểm trả tiền cho
+      # 2.000–6.200 token vào không phải của mình. Muốn dùng Workers AI thì nối
+      # THẲNG `https://api.cloudflare.com/client/v4/accounts/<ID>/ai/v1` —
+      # tránh được cả khoản token đó lẫn việc phụ thuộc một proxy chạy trên máy
+      # cá nhân. Và §5.5 thể lệ vẫn buộc kê khai: đổi đường là phải khai lại.
+      #
+      # ⚠️ CÓ MODEL CHẾT MÀ TRẢ HTTP 200. `ag/gemini-3.5-flash-*`,
+      # `ag/gemini-3-flash-agent`, `High` trả câu "Gemini 3.5 Flash is no longer
+      # available…" nằm ĐÚNG CHỖ nội dung trả lời. Đã chạy thử: Khoan Đã vẫn
+      # khai đúng (`aiDaChay: false`), nhưng đừng tin cột "OK" của bộ quét —
+      # phải nhìn nội dung.
+      #
+      # KHÔNG ĐỔI `RISK_LLM_MODEL` theo bảng này. 5 ca không đủ cơ sở. Muốn đổi
+      # thì chạy `npm run eval:quocte -- --bo-cache` trên model định chọn.
       - key: RISK_LLM_MODEL
         value: deepseek-v4-flash
       # ── Dự phòng 1: qwen trên máy chủ tự vận hành ──
