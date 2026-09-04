@@ -2,6 +2,19 @@ export type Lang = 'vi' | 'en';
 
 export const translations: Record<Lang, Record<string, string>> = {
   vi: {
+
+    // ═══ ba màn can thiệp: PAUSE_60S · VERIFY_PATH · RECOVERY (§HĐ luật 4) ═══
+    "Cảm giác phải làm ngay là điều họ cố tình tạo ra. Bác dừng lại bây giờ không có nghĩa là bác chậm hay ngốc.": "Cảm giác phải làm ngay là điều họ cố tình tạo ra. Bác dừng lại bây giờ không có nghĩa là bác chậm hay ngốc.",
+    "Dừng cuộc gọi": "Dừng cuộc gọi",
+    "Không đọc mã OTP": "Không đọc mã OTP",
+    "Không chuyển tiền": "Không chuyển tiền",
+    "Gọi cho con cháu": "Gọi cho con cháu",
+    "Đừng gọi lại đúng số vừa gọi cho bác. Bác tự bấm số đã lưu sẵn trong máy, hoặc số in ở mặt sau thẻ ngân hàng.": "Đừng gọi lại đúng số vừa gọi cho bác. Bác tự bấm số đã lưu sẵn trong máy, hoặc số in ở mặt sau thẻ ngân hàng.",
+    "Soạn tin báo cáo tới đầu số 156": "Soạn tin báo cáo tới đầu số 156",
+    "Giờ vàng còn tính:": "Giờ vàng còn tính:",
+    "giờ đầu là lúc quan trọng nhất": "giờ đầu là lúc quan trọng nhất",
+    "bước nữa": "bước nữa",
+    "Tôi đã lỡ chuyển tiền hoặc đọc mã rồi": "Tôi đã lỡ chuyển tiền hoặc đọc mã rồi",
     "Màn hình mô phỏng": "Màn hình mô phỏng",
     "Đây là màn hình mô phỏng do Khoan Đã vẽ ra để bác xem thử.": "Đây là màn hình mô phỏng do Khoan Đã vẽ ra để bác xem thử.",
     "Muốn xem dải cảnh báo thật hiện ra ngoài app: vào Cài đặt › Dải cảnh báo › Xem thử một lần.": "Muốn xem dải cảnh báo thật hiện ra ngoài app: vào Cài đặt › Dải cảnh báo › Xem thử một lần.",
@@ -780,6 +793,19 @@ export const translations: Record<Lang, Record<string, string>> = {
     "Chưa có ai — bấm để thêm": "Chưa có ai — bấm để thêm",
   },
   en: {
+
+    // ═══ ba màn can thiệp: PAUSE_60S · VERIFY_PATH · RECOVERY (§HĐ luật 4) ═══
+    "Cảm giác phải làm ngay là điều họ cố tình tạo ra. Bác dừng lại bây giờ không có nghĩa là bác chậm hay ngốc.": "That feeling of having to act right now is something they created on purpose. Pausing does not mean you are slow or foolish.",
+    "Dừng cuộc gọi": "Hang up the call",
+    "Không đọc mã OTP": "Do not share the OTP code",
+    "Không chuyển tiền": "Do not transfer money",
+    "Gọi cho con cháu": "Call your family",
+    "Đừng gọi lại đúng số vừa gọi cho bác. Bác tự bấm số đã lưu sẵn trong máy, hoặc số in ở mặt sau thẻ ngân hàng.": "Do not call back the number that just called you. Use a number already saved in your phone, or the one printed on the back of your bank card.",
+    "Soạn tin báo cáo tới đầu số 156": "Compose a report to hotline 156",
+    "Giờ vàng còn tính:": "Golden window remaining:",
+    "giờ đầu là lúc quan trọng nhất": "hours are the most important",
+    "bước nữa": "more steps",
+    "Tôi đã lỡ chuyển tiền hoặc đọc mã rồi": "I already sent money or read out a code",
     "Chỉ chạy trên Chrome hoặc Edge của máy tính.": "Only works in Chrome or Edge on a computer.",
     "Nút tròn nổi trên màn hình": "Floating button on your screen",
     "Một nút tròn mờ nằm ở mép màn hình, giống nút tròn của iPhone. Bác đang dùng app nào cũng thấy nó, chạm vào là mở Khoan Đã ngay. Kéo được sang chỗ khác nếu nó vướng.": "A soft round button sits at the edge of your screen, like the round button on an iPhone. You can see it in any app, and one tap opens Khoan Đã. Drag it somewhere else if it gets in the way.",

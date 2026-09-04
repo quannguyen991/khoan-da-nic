@@ -521,6 +521,91 @@ export const MA_BUOC: Record<string, Cap> = {
   XIN_DUNG_KE_CHO_NGUOI_KHAC: c('Họ thường xin bác đừng kể cho ai', 'They usually ask you not to tell anyone'),
 };
 
+// ═══════════════ §2B.5 — bảo vệ 72 giờ (RECOVERY) ═══════════════
+//
+// Màn người dùng đọc LÚC VỪA MẤT TIỀN. §11: không hứa lấy lại được tiền — dùng
+// khung "các bước làm TĂNG KHẢ NĂNG xử lý". Mã lấy từ
+// `backend/src/analysis/recovery-adapters.js` — BUOC_CHUNG (9) + buocRieng
+// của từng nước (VN: 3). `maBuocHopLe()` đã chặn cụm hứa hẹn ở tầng backend;
+// đây chỉ là câu hiển thị, không phải hàng rào thứ hai.
+
+export const KHUNG_PHUC_HOI: Cap = c(
+  'Những bước sau làm TĂNG khả năng xử lý — không ai hứa lấy lại được tiền',
+  'These steps increase the chance of a resolution — no one can promise your money back',
+);
+
+export const BUOC_PHUC_HOI: Record<string, Cap> = {
+  // ── Bước chung, mọi nước ──
+  ngung_moi_lien_lac_voi_ben_kia: c(
+    'Ngừng mọi liên lạc với bên kia — đừng nghe máy, đừng nhắn lại',
+    'Stop all contact with them — do not answer calls or reply to messages',
+  ),
+  khong_chuyen_them_bat_ky_khoan_nao: c(
+    'Không chuyển thêm bất kỳ khoản nào nữa, dù họ nói lý do gì',
+    'Do not send any more money, no matter what reason they give',
+  ),
+  goi_ngan_hang_bang_so_in_tren_the: c(
+    'Gọi ngay ngân hàng bằng số in trên thẻ hoặc mặt sau thẻ — không dùng số họ gửi',
+    'Call your bank now using the number printed on your card — not a number they sent you',
+  ),
+  yeu_cau_ngan_hang_ghi_nhan_tra_soat: c(
+    'Yêu cầu ngân hàng ghi nhận tra soát giao dịch',
+    'Ask the bank to formally log a transaction dispute',
+  ),
+  chup_lai_toan_bo_tin_nhan_va_bien_lai: c(
+    'Chụp lại toàn bộ tin nhắn, cuộc gọi và biên lai chuyển khoản',
+    'Screenshot every message, call log, and transfer receipt',
+  ),
+  bao_cho_mot_nguoi_than: c(
+    'Báo cho một người thân biết — đừng tự mình xử lý một mình',
+    'Tell a family member — do not handle this alone',
+  ),
+  trinh_bao_co_quan_chuc_nang_dia_phuong: c(
+    'Trình báo với cơ quan chức năng ở nơi bác cư trú',
+    'Report to the local authorities where you live',
+  ),
+  doi_mat_khau_tren_thiet_bi_khac: c(
+    'Đổi mật khẩu ngân hàng và email — làm trên MỘT THIẾT BỊ KHÁC, không phải máy vừa dùng',
+    'Change your banking and email passwords — do this on a DIFFERENT device, not the one you just used',
+  ),
+  canh_giac_voi_ben_hua_lay_lai_tien: c(
+    'Cảnh giác với bất kỳ ai tự xưng có thể giúp lấy lại tiền và đòi phí trước',
+    'Be wary of anyone who claims they can recover your money for an upfront fee',
+  ),
+  // ── Bước riêng của Việt Nam ──
+  gui_don_trinh_bao_cong_an_phuong_noi_cu_tru: c(
+    'Gửi đơn trình báo tại công an phường/xã nơi bác cư trú',
+    'File a report at the local police station where you live',
+  ),
+  yeu_cau_ngan_hang_phong_toa_tai_khoan_nhan: c(
+    'Yêu cầu ngân hàng phong toả tài khoản đã NHẬN tiền của bác — gọi hotline của NGÂN HÀNG ĐÓ, không phải ngân hàng của bác',
+    'Ask for the RECEIVING account to be frozen — call that bank\'s hotline, not your own bank',
+  ),
+  to_giac_qua_vneid_5_buoc: c(
+    'Tố giác qua VNeID: mục Kiến nghị, phản ánh về an ninh trật tự — có thể theo dõi tiến độ xử lý',
+    'Report via the VNeID app\'s security feedback section — you can track how it is being handled',
+  ),
+};
+
+export const CANH_BAO_PHUC_HOI: Record<string, Cap> = {
+  chua_biet_nguoi_dung_o_nuoc_nao: c(
+    'Chưa biết bác đang ở nước nào, nên chỉ hiện được các bước chung',
+    'We do not yet know which country you are in, so only the general steps are shown',
+  ),
+  nuoc_chua_duoc_duyet_chi_co_buoc_chung: c(
+    'Nước này chưa có bước riêng đã kiểm chứng, chỉ hiện các bước chung',
+    'This country has no verified local steps yet — only the general steps are shown',
+  ),
+  chua_xac_minh_duoc_so_tong_dai_dung_so_in_sau_the: c(
+    'Khoan Đã chưa xác minh được số tổng đài nào — bác tự lấy số ở mặt sau thẻ ngân hàng',
+    'Khoan Đã has not verified any hotline number — please use the number on the back of your bank card',
+  ),
+  danh_ba_chua_co_muc_nao_duoc_duyet: c(
+    'Sổ danh bạ tổ chức đã xác minh hiện chưa có mục nào',
+    'The verified organization directory currently has no entries',
+  ),
+};
+
 // ═══════════════ Khoan Proof ═══════════════
 //
 // ⚠️ §11 — CHỈ NÓI AI ĐÃ KÝ. Tuyệt đối không nói yêu cầu tốt hay xấu.
