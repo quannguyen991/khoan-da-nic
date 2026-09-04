@@ -783,6 +783,16 @@ export const translations: Record<Lang, Record<string, string>> = {
     "Giờ vàng còn tính:": "Giờ vàng còn tính:",
     "giờ đầu là lúc quan trọng nhất": "giờ đầu là lúc quan trọng nhất",
     "bước nữa": "bước nữa",
+    "Ghi âm cuộc gọi": "Ghi âm cuộc gọi",
+    "Tiếng nói của bác được gửi ra ngoài để đổi thành chữ.": "Tiếng nói của bác được gửi ra ngoài để đổi thành chữ.",
+    "Phần khác của app không gửi gì. Bác có thể gõ chữ hoặc gửi ảnh thay.": "Phần khác của app không gửi gì. Bác có thể gõ chữ hoặc gửi ảnh thay.",
+    "Phần nghe chạy ngay trên máy. Tiếng nói không gửi đi đâu.": "Phần nghe chạy ngay trên máy. Tiếng nói không gửi đi đâu.",
+    "Lời bác nói:": "Lời bác nói:",
+    "Đang nghe... Bác cứ nói.": "Đang nghe... Bác cứ nói.",
+    "Bấm micro để nói tiếp.": "Bấm micro để nói tiếp.",
+    "Đang nghe qua micro": "Đang nghe qua micro",
+    "Đã ghi xong": "Đã ghi xong",
+    "Hoặc thử một tình huống mẫu:": "Hoặc thử một tình huống mẫu:",
   },
   en: {
     "👮 Giả danh công an": "👮 Police impersonation",
@@ -1557,6 +1567,16 @@ export const translations: Record<Lang, Record<string, string>> = {
     "Giờ vàng còn tính:": "Golden window remaining:",
     "giờ đầu là lúc quan trọng nhất": "hours are the most important",
     "bước nữa": "more steps",
+    "Ghi âm cuộc gọi": "Record the call",
+    "Tiếng nói của bác được gửi ra ngoài để đổi thành chữ.": "Your voice is sent out to be turned into text.",
+    "Phần khác của app không gửi gì. Bác có thể gõ chữ hoặc gửi ảnh thay.": "The rest of the app sends nothing. You can type or send a photo instead.",
+    "Phần nghe chạy ngay trên máy. Tiếng nói không gửi đi đâu.": "Listening runs on your device. Your voice is not sent anywhere.",
+    "Lời bác nói:": "What you said:",
+    "Đang nghe... Bác cứ nói.": "Listening… go ahead.",
+    "Bấm micro để nói tiếp.": "Tap the mic to keep talking.",
+    "Đang nghe qua micro": "Listening through the mic",
+    "Đã ghi xong": "Recording finished",
+    "Hoặc thử một tình huống mẫu:": "Or try a sample situation:",
   }
 };
 

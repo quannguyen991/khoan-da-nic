@@ -1602,8 +1602,17 @@ function HomeView({
           </div>
         )}
 
-        {/* Text and Image Input Area */}
-        <div className="w-full px-4 sm:px-6 mb-2 sm:mb-3 pointer-events-auto">
+        {/*
+          Text and Image Input Area
+
+          ⚠️ `mb-7` CHỨ KHÔNG PHẢI `mb-2` — Ô NHẬP TỪNG DÍNH SÁT THANH ĐIỀU HƯỚNG.
+          Thanh dưới là `absolute bottom-0` nên nó KHÔNG chiếm chỗ trong luồng bố
+          cục; ô nhập bên trên không hề biết có nó và nằm đè lên tới sát mép. Với
+          ngón tay người cao tuổi, hai vùng chạm dính nhau là bấm nhầm. Khoảng
+          cách này cũng đẩy cả hàng "Khẩn cấp · Chạm để nói · Gọi con cái" lên
+          theo, cho cả cụm thở ra.
+        */}
+        <div className="w-full px-4 sm:px-6 mb-7 sm:mb-8 pointer-events-auto">
           <div className="relative flex items-center bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-1.5 sm:p-2 pl-3 pr-2 shadow-lg border border-white/60 focus-within:ring-3 ring-[#c084fc]/50 transition-all">
              <button 
                type="button"
@@ -2124,9 +2133,14 @@ function VoiceView({
         <button aria-label={t("Quay lại")} onClick={() => { stopRecording(); setView('home'); }} className="w-10 h-10 rounded-full bg-white/80 backdrop-blur-md flex items-center justify-center text-[#4c1d95] shadow-sm active:scale-95 transition-transform">
           <ArrowLeft size={22} />
         </button>
+        {/*
+          ⚠️ ĐÃ BỎ DÒNG PHỤ "Tự động nhận diện giọng nói mượt mà" (4/9/2026).
+          Nó không nói cho bác biết điều gì làm được hay không làm được — chỉ là
+          lời quảng cáo, mà lại nằm ngay trên khối khai báo quyền riêng tư quan
+          trọng phía dưới, làm loãng chỗ cần đọc nhất.
+        */}
         <div className="text-center">
-          <span className="font-extrabold text-[#321379] text-[16px] block">{t("Ghi âm tình huống cuộc gọi")}</span>
-          <span className="text-[14px] text-purple-600 font-semibold">{t("Tự động nhận diện giọng nói mượt mà")}</span>
+          <span className="font-extrabold text-[#321379] text-[17px] block">{t("Ghi âm cuộc gọi")}</span>
         </div>
         <div className="w-10"></div>
       </div>
@@ -2210,10 +2224,10 @@ function VoiceView({
         {nguonNghe === 'trinh_duyet' && (
           <div className="w-full max-w-md bg-slate-100 border-2 border-slate-400 rounded-2xl px-4 py-3 my-2">
             <p className="text-[16px] font-bold text-slate-900 leading-snug">
-              {t("Phần nghe này dùng dịch vụ của trình duyệt: tiếng nói của bác được gửi ra ngoài để đổi thành chữ.")}
+              {t("Tiếng nói của bác được gửi ra ngoài để đổi thành chữ.")}
             </p>
             <p className="text-[14px] font-medium text-slate-700 leading-snug mt-1">
-              {t("Những phần khác của Khoan Đã không gửi gì ra ngoài. Bác không muốn thì gõ chữ hoặc gửi ảnh cũng được.")}
+              {t("Phần khác của app không gửi gì. Bác có thể gõ chữ hoặc gửi ảnh thay.")}
             </p>
           </div>
         )}
@@ -2228,7 +2242,7 @@ function VoiceView({
         {nguonNghe === 'tren_may' && (
           <div className="w-full max-w-md bg-emerald-50 border-2 border-emerald-500 rounded-2xl px-4 py-3 my-2">
             <p className="text-[16px] font-bold text-emerald-900 leading-snug">
-              {t("Phần nghe này chạy ngay trên máy của bác. Tiếng nói không gửi đi đâu cả.")}
+              {t("Phần nghe chạy ngay trên máy. Tiếng nói không gửi đi đâu.")}
             </p>
           </div>
         )}
@@ -2278,7 +2292,7 @@ function VoiceView({
       <div className="w-full bg-white rounded-2xl p-3.5 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] mb-3">
         <div className="flex items-center justify-between mb-1.5">
           <span className="text-[14px] font-bold text-[#6d28d9] flex items-center gap-1.5">
-            <Sparkles size={14} className="text-amber-500 animate-spin" /> {t("Lời nói đang nhận diện:")}
+            <Sparkles size={14} className="text-amber-500 animate-spin" /> {t("Lời bác nói:")}
           </span>
           {currentDisplayText && (
             <button 
@@ -2299,7 +2313,7 @@ function VoiceView({
             setTranscript(e.target.value);
             setInterimText('');
           }}
-          placeholder={isRecording ? t("Đang lắng nghe... Bác hãy nói nội dung cuộc gọi hoặc tin nhắn...") : t("Bấm Micro để tiếp tục nói...")}
+          placeholder={isRecording ? t("Đang nghe... Bác cứ nói.") : t("Bấm micro để nói tiếp.")}
           rows={3}
           className="w-full bg-[#f8f4ff] rounded-2xl p-2.5 text-[14px] text-[#311068] font-medium outline-none border border-transparent focus:border-[#c084fc] resize-none leading-relaxed"
         />
@@ -2307,7 +2321,7 @@ function VoiceView({
         <div className="mt-1.5 flex items-center justify-between text-[14px] text-emerald-700 font-bold">
           <span className="flex items-center gap-1">
             <CheckCircle2 size={13} className="text-emerald-500" />
-            {isRecording ? t("Đang nhận diện trực tiếp qua Micro") : t("Đã thu nhận lời nói")}
+            {isRecording ? t("Đang nghe qua micro") : t("Đã ghi xong")}
           </span>
           <span className="text-purple-600 font-semibold">{currentDisplayText.length} {t("ký tự")}</span>
         </div>
@@ -2315,7 +2329,7 @@ function VoiceView({
 
       {/* Quick Situation Scenarios */}
       <div className="w-full mb-3">
-        <span className="text-[14px] font-bold text-[#4c1d95] block mb-1.5">{t("Hoặc chọn tình huống mẫu để thử nhanh:")}</span>
+        <span className="text-[14px] font-bold text-[#4c1d95] block mb-1.5">{t("Hoặc thử một tình huống mẫu:")}</span>
         <div className="grid grid-cols-1 gap-1.5 max-h-36 overflow-y-auto pr-1">
           {sampleScenarios.map((sc, idx) => (
             <button
@@ -5629,23 +5643,36 @@ function WarningView({
           style={{ background: 'linear-gradient(155deg, rgba(255,255,255,0.18), rgba(255,255,255,0.05))' }}
         >
           <div className="flex items-center justify-center gap-6">
-            <div className="relative w-20 h-24 flex items-center justify-center shrink-0">
-              <svg className="w-full h-full drop-shadow-[0_10px_18px_rgba(0,0,0,0.35)] relative z-10" viewBox="0 0 200 240" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                <path d="M100 10L20 40V100C20 150 50 190 100 230C150 190 180 150 180 100V40L100 10Z" fill={laCao ? '#b91c1c' : laNghiNgo ? '#b45309' : laChuaThay ? '#047857' : '#5b21b6'} stroke="#ffffff" strokeWidth="3" />
+            {/*
+              ⚠️ HÌNH NÀY KHÔNG ĐƯỢC MANG MÀU RIÊNG.
+              Bản trước là cái khiên tô đặc, và khi màn không có nhãn rủi ro
+              (lượt bác tự bấm "Dừng 60 giây") nó rơi vào màu tím `#5b21b6` —
+              một mảng tím chọi giữa nền đỏ, không ăn nhập với gì cả. Nay hình
+              vẽ chỉ dùng TRẮNG, để nền phía sau nói lên mức; §4.4 vốn đã yêu
+              cầu màu chỉ là phụ, chữ và biểu tượng mới là chính.
+
+              Tam giác + chấm than là hình cảnh báo ai cũng đọc được, kể cả khi
+              không phân biệt được màu. Riêng mức "Chưa thấy dấu hiệu" thì
+              KHÔNG dùng tam giác (nó nói "có cảnh báo") và cũng KHÔNG dùng dấu
+              tích ✓ — dấu tích đọc là "xong rồi, ổn rồi", đúng thứ §4.1 cấm
+              hứa. Dùng vòng tròn với dấu chấm hỏi: đã xem, chưa kết luận được.
+            */}
+            <div className="relative w-24 h-24 flex items-center justify-center shrink-0">
+              <svg className="w-full h-full drop-shadow-[0_10px_18px_rgba(0,0,0,0.35)] relative z-10" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                 {(laCao || laNghiNgo || (!nhan && !laChuaThay)) ? (
                   <>
-                    <path d="M100 55V140" stroke="white" strokeWidth="20" strokeLinecap="round" />
-                    <circle cx="100" cy="180" r="12" fill="white" />
+                    <path
+                      d="M100 22 L186 172 a14 14 0 0 1 -12 21 H26 a14 14 0 0 1 -12 -21 Z"
+                      fill="none" stroke="white" strokeWidth="14" strokeLinejoin="round"
+                    />
+                    <path d="M100 84V132" stroke="white" strokeWidth="17" strokeLinecap="round" />
+                    <circle cx="100" cy="163" r="10" fill="white" />
                   </>
                 ) : (
-                  /*
-                    ⚠️ KHÔNG DÙNG DẤU TÍCH ✓ CHO MỨC THẤP. Dấu tích đọc là "xong rồi,
-                    ổn rồi" — đúng thứ §4.1 cấm hứa. Dùng dấu chấm hỏi: đã xem, chưa
-                    kết luận được gì.
-                  */
                   <>
-                    <path d="M75 85c0-14 11-25 25-25s25 11 25 25c0 18-25 15-25 35" stroke="white" strokeWidth="17" strokeLinecap="round" fill="none" />
-                    <circle cx="100" cy="175" r="12" fill="white" />
+                    <circle cx="100" cy="100" r="82" fill="none" stroke="white" strokeWidth="14" />
+                    <path d="M76 82c0-13 11-24 24-24s24 11 24 24c0 17-24 14-24 33" stroke="white" strokeWidth="15" strokeLinecap="round" fill="none" />
+                    <circle cx="100" cy="147" r="10" fill="white" />
                   </>
                 )}
               </svg>
@@ -5669,9 +5696,18 @@ function WarningView({
               </div>
             )}
           </div>
-          <p className="text-white/95 font-semibold text-[15px] text-center mt-4 leading-snug">
-            {t('Chưa làm gì vội. Đếm ngược rồi tính tiếp.')}
-          </p>
+          {/*
+            ⚠️ CÂU NÀY NÓI VỀ ĐỒNG HỒ, NÊN CHỈ ĐƯỢC HIỆN KHI CÓ ĐỒNG HỒ.
+            Ở mức "Chưa thấy dấu hiệu" thì `initialTime` bằng 0, không có đếm
+            ngược nào — mà câu "Đếm ngược rồi tính tiếp" vẫn hiện, trỏ vào một
+            thứ không tồn tại trên màn. Cùng họ với §4.3: đừng khai một việc mà
+            máy không thực sự làm.
+          */}
+          {timeLeft > 0 && (
+            <p className="text-white/95 font-semibold text-[15px] text-center mt-4 leading-snug">
+              {t('Chưa làm gì vội. Đếm ngược rồi tính tiếp.')}
+            </p>
+          )}
         </div>
 
         {/*
