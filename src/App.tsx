@@ -2089,7 +2089,7 @@ function HomeView({
 
               <div className="flex flex-col gap-2.5 max-h-[50vh] overflow-y-auto py-1">
                 {familyMembers && familyMembers.length > 0 ? (
-                  familyMembers.map((member: any) => (
+                  familyMembers.map((member: NguoiThan) => (
                     <a
                       key={member.id}
                       href={`tel:${member.phone}`}
@@ -3049,7 +3049,7 @@ function FamilyView({
   lang?: Lang,
   isLoggedIn: boolean, 
   familyMembers: NguoiThan[],
-  setFamilyMembers: React.Dispatch<React.SetStateAction<any[]>>
+  setFamilyMembers: React.Dispatch<React.SetStateAction<NguoiThan[]>>
 }) {
   const emergencyList = EMERGENCY_NUMBERS[lang] || EMERGENCY_NUMBERS['vi'];
   const topEmergencies = emergencyList.slice(0, 4);
@@ -3064,7 +3064,7 @@ function FamilyView({
     window.open(`tel:${phone.trim()}`, '_self');
   };
 
-  const handleSms = (member: any) => {
+  const handleSms = (member: NguoiThan) => {
     const text = lang === 'en'
       ? `[WAIT A MOMENT - SOS] I just encountered a suspicious scam situation. Please call me back right away!`
       : `[KHOAN ĐÃ - CẦU CỨU] Bố/Mẹ vừa gặp tình huống nghi vấn lừa đảo. Con gọi lại kiểm tra giúp bố/mẹ nhé!`;
@@ -5869,7 +5869,7 @@ function AddFamilyView({ setView, t, setFamilyMembers }: { setView: (v: ViewStat
 
   const handleSave = () => {
     if (name.trim() && phone.trim()) {
-      setFamilyMembers((prev: any) => [
+      setFamilyMembers((prev: NguoiThan[]) => [
         ...prev,
         {
           id: Date.now(),
