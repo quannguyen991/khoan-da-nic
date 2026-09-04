@@ -801,7 +801,7 @@ export const TRANG_THAI_MAY: Record<string, Cap> = {
   che_do_toi_gian_aria: c('Bật/Tắt chế độ tối giản', 'Toggle minimalist mode'),
 
   /*
-   * �️ §4.1 — NHÃN ĐIỀU KHIỂN CÀI ĐẶT. Tiếng Việt dài hơn tiếng Anh ~30%
+   * ⚠️ §4.1 — NHÃN ĐIỀU KHIỂN CÀI ĐẶT. Tiếng Việt dài hơn tiếng Anh ~30%
    * nên phải giữ chữ ngắn, và dùng cùng một từ cho cùng một khái niệm ở mọi
    * chỗ. Đổi "Ngôn ngữ" thành "Language" mà quên đổi ở chỗ khác là vỡ phép
    * liên tục giữa các màn.

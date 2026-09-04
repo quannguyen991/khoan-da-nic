@@ -783,7 +783,7 @@ export default function App() {
    *
    * Ẩn: cỡ chữ nâng cao, tiếng nói, nút tròn quét, popup preview, đếm lượt,
    * tin tức cảnh báo, học tập. Không ẩn màn phân tích (vì đó là chỗ bác ĐANG
-   * cần) — chỉ �n các màn phụ quanh.
+   * cần) — chỉ ẩn các màn phụ quanh.
    *
    * Lưu localStorage để bật qua lần mở app sau.
    */
@@ -4321,7 +4321,7 @@ function SettingsView({
         <ChevronRight size={20} className="text-emerald-600 shrink-0" />
       </button>
 
-      {/* Floating Assistive Ball & Outside Mode Card — �n khi tối giản. */}
+      {/* Floating Assistive Ball & Outside Mode Card — ẩn khi tối giản. */}
       {!superBasic && (
       <div className="w-full max-w-[360px] bg-gradient-to-br from-purple-900 to-indigo-950 rounded-3xl p-5 shadow-md border border-purple-400/30 text-white mb-6">
         <div className="flex items-center gap-3 mb-3">
@@ -4387,7 +4387,7 @@ function SettingsView({
       )}
 
       {/*
-        * ⚠️ CH� ĐỘ TỐI GIẢN — chuyển sang xem cực gọn.
+        * ⚠️ CHẾ ĐỘ TỐI GIẢN — chuyển sang xem cực gọn.
         *
         * Bật lên thì ẩn nút tròn quét, tin tức, mục học — chỉ giữ ba việc thật
         * cần làm và các tuỳ chỉnh gốc (cỡ chữ, ngôn ngữ). Mục này nằm trong
@@ -4680,7 +4680,7 @@ function IntroView({
                 alt="Mascot illustration"
                 draggable={false}
                 /*
-                 * ⚠️ ĐẶT CỨNG KÍCH TH�ỚC THEO fontSize — không scale theo rem.
+                 * ⚠️ ĐẶT CỨNG KÍCH THƯỚC THEO fontSize — không scale theo rem.
                  *
                  * Trước 20/8/2026: `h-[45vh] max-h-[450px]` cộng với `scale-135`.
                  * Bậc "Lớn" đặt gốc chữ 20px thay vì 17px, làm layout bốc hơi,
@@ -4689,7 +4689,7 @@ function IntroView({
                  * chữ KHÔNG ĐƯỢC phóng to ảnh minh họa.
                  *
                  * Nay: cap cứng theo fontSize qua ba bậc từ `src/index.css`.
-                 * Bậc "Nh�" — h-[28vh] max-h-[260px]; "Vừa" — h-[36vh] max-h-[340px];
+                 * Bậc "Nhỏ" — h-[28vh] max-h-[260px]; "Vừa" — h-[36vh] max-h-[340px];
                  * "Lớn" — h-[40vh] max-h-[380px]. Đủ thấy, không che.
                  */
                 className="mascot-img h-[36vh] max-h-[340px] w-auto max-w-[95%] sm:max-w-[420px] object-contain drop-shadow-[0_25px_50px_rgba(109,40,217,0.25)] pointer-events-none select-none my-auto"
