@@ -13,7 +13,7 @@ import {
   Camera,
   BookOpen
 } from 'lucide-react';
-import { ViewState } from '../App';
+import { ViewState, NguoiThan } from '../App';
 
 interface AppMenuModalProps {
   isOpen: boolean;
@@ -22,7 +22,7 @@ interface AppMenuModalProps {
   t: (key: any) => string;
   pinnedNotification?: boolean;
   togglePinnedNotification?: () => void;
-  familyMembers?: any[];
+  familyMembers?: NguoiThan[];
   onTriggerEmergency?: () => void;
   onSelectImage?: () => void;
   onOpenOutsideMode?: () => void;
