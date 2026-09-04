@@ -70,6 +70,50 @@ const CAU = Object.freeze({
     en: 'The message contains a link and this sender is not in your saved contacts.',
   },
 
+  /* ═══ Mười họ kịch bản, thêm 5/9/2026 ═══
+   * Cùng luật viết câu như trên: một câu, không thuật ngữ, không quy kết ai là
+   * tội phạm, không kể ra thứ VẮNG MẶT, không trách móc bác. */
+  R11: {
+    vi: 'Trong tin có câu ra lệnh cho máy kiểm tra phải bỏ qua cảnh báo.',
+    en: 'This message contains an instruction telling the checker to skip its warning.',
+  },
+  R12: {
+    vi: 'Tin này đòi trả tiền bằng thẻ cào. Không cơ quan hay công ty nào thu tiền kiểu đó.',
+    en: 'It asks for payment by gift card. No real company or agency collects money that way.',
+  },
+  R13: {
+    vi: 'Tin này hứa một mức lãi chắc chắn rồi bảo bác nạp tiền. Không ai được phép hứa lãi chắc chắn.',
+    en: 'It promises a guaranteed return and asks you to pay in. No one is allowed to guarantee a return.',
+  },
+  R14: {
+    vi: 'Tin này mời một công việc nhẹ nhưng lại bắt nạp tiền trước. Việc làm thật không đòi người làm nạp tiền.',
+    en: 'It offers easy work but asks you to pay first. Real jobs do not ask workers for money.',
+  },
+  R15: {
+    vi: 'Người nhắn quen bác qua mạng, chưa gặp mặt ngoài đời, và đang hỏi tiền.',
+    en: 'The sender knows you only online, has never met you in person, and is asking for money.',
+  },
+  R16: {
+    vi: 'Tin này bảo bác cài phần mềm cho người khác điều khiển máy. Người đó sẽ nhìn thấy mọi thứ trên máy bác.',
+    en: 'It asks you to install software that lets someone else control your phone. They would see everything on it.',
+  },
+  R17: {
+    vi: 'Người nhắn tự xưng là người nhà đang dùng số mới, rồi hỏi tiền. Bác gọi vào số cũ để hỏi lại nhé.',
+    en: 'The sender claims to be family on a new number and asks for money. Please call their old number to check.',
+  },
+  R18: {
+    vi: 'Tin này vừa doạ bác vừa đòi tiền.',
+    en: 'This message threatens you and asks for money at the same time.',
+  },
+  R19: {
+    vi: 'Tin này hứa lấy lại số tiền đã mất nhưng đòi trả phí trước.',
+    en: 'It promises to recover money you lost but asks for a fee up front.',
+  },
+  R20: {
+    vi: 'Tin này bảo bác quét một mã QR. Mã QR giấu nơi nó dẫn tới, bác không xem trước được.',
+    en: 'It asks you to scan a QR code. A QR code hides where it leads, so you cannot check it first.',
+  },
+
   /** Tầng 2 nâng nhãn sau khi đối chiếu máy chủ. */
   T2_DA_BAO_CAO: {
     vi: 'Đường link trong tin này đã từng bị báo cáo trong các vụ lừa đảo trước đó.',

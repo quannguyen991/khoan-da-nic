@@ -107,9 +107,9 @@ function analyze(tin = {}, tuyChon = {}) {
    * repo: hàm thuần, không mạng, không AI, chạy trên locale pack vi-VN/en-US.
    * Chúng bắt được cả 58 tín hiệu Phụ lục A — `FIN_SAFE_ACCOUNT`,
    * `MAN_FEAR_THREAT`, `CRED_OTP_SHARE`, `DEV_REMOTE_CONTROL_APP`… — thứ mà
-   * mười luật R1–R10 không bao giờ chép lại hết được.
+   * hai mươi luật R1–R20 không bao giờ chép lại hết được.
    *
-   * Đây chính là điều §4.2 đòi: một bộ luật, một bộ tín hiệu. R1–R10 KHÔNG thay
+   * Đây chính là điều §4.2 đòi: một bộ luật, một bộ tín hiệu. R1–R20 KHÔNG thay
    * thế chúng, chỉ THÊM những mẫu mà luồng "thông báo đến" cần và luồng "người
    * dùng dán nội dung" không có (link ngoài allowlist, tên miền nhái, người gửi
    * là số di động xưng danh tổ chức).
@@ -139,7 +139,7 @@ function analyze(tin = {}, tuyChon = {}) {
    * Ba nguồn, lấy MAX:
    *   · bộ luật duy nhất  (`decide` → điểm → nhãn)
    *   · critical override (nổ ⇒ CAO, và ⇒ PROTECTED_CRITICAL)
-   *   · sàn của tầng 0    (luật R1–R10 khai mức tối thiểu của mình)
+   *   · sàn của tầng 0    (luật R1–R20 khai mức tối thiểu của mình)
    * Cộng thêm sàn §4.3: không đọc được thì không được nói "chưa thấy dấu hiệu".
    */
   let nhan = NHAN_TU_RISK(kq.riskLabel);

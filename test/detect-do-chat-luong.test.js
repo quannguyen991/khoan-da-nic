@@ -88,7 +88,17 @@ function inBang(b) {
 test('BẢNG ĐO — mỗi luật khớp bao nhiêu ca, precision, recall', () => {
   const b = dungBang(chay());
   inBang(b);
-  assert.ok(b.theoLuat.length === 10, 'phải có đúng mười luật R1–R10');
+  /*
+   * Đếm theo  chứ không ghim con số: thêm luật mới mà quên thêm ca vào
+   * fixture thì test 'mỗi luật phải bắt được ít nhất một ca' bên dưới mới là
+   * thứ đỏ, và đó là thông báo đúng hơn.
+   */
+  assert.strictEqual(b.theoLuat.length, LUAT.length);
+  assert.deepStrictEqual(
+    b.theoLuat.map((l) => l.ma),
+    Array.from({ length: LUAT.length }, (_, i) => 'R' + (i + 1)),
+    'mã luật phải liên tục R1..Rn — thiếu một số là dấu hiệu có luật bị xoá nhầm',
+  );
 });
 
 test('CỔNG CỨNG — precision của nhãn CAO ≥ 0,98 trên tập bình thường', () => {

@@ -85,9 +85,46 @@ function chuanHoaGoi(g = {}) {
     xungDanhToChuc: Object.freeze(hop(cum.xungDanhToChuc?.cum)),
     nguCanhSoTaiKhoan: Object.freeze(hop(cum.soTaiKhoan?.nguCanh)),
 
+    // ── Mười họ kịch bản cho luật R11–R20 ───────────────────────────────
+    ...hoKichBan(g.hoKichBan || {}),
+
     dongHinh: Object.freeze({ ...(g.dongHinh?.bang || {}) }),
   });
 }
+
+/**
+ * Làm phẳng khối `hoKichBan` thành các khoá `ho*` mà `tang-0.js` tiêu thụ.
+ *
+ * ⚠️ LÀM PHẲNG Ở ĐÂY MỘT LẦN, KHÔNG ĐỂ MỖI LUẬT TỰ ĐÀO VÀO JSON.
+ * Mười luật cùng đào vào cùng một cây là mười chỗ có thể gõ sai tên khoá, và
+ * gõ sai tên khoá thì luật im lặng không khớp gì — không có lỗi nào báo ra.
+ * Đó đúng là kiểu hỏng đã cắn một lần ở `nguCanhSoTaiKhoan`.
+ */
+function hoKichBan(h) {
+  return {
+    hoTiemNhiem: Object.freeze(hop(h.tiemNhiem?.cum)),
+    hoTheQuaTang: Object.freeze(hop(h.theQuaTang?.cum)),
+    hoTheQuaTangHanhDong: Object.freeze(hop(h.theQuaTang?.veHanhDong)),
+    hoDauTu: Object.freeze(hop(h.dauTu?.cum)),
+    hoDauTuNapTien: Object.freeze(hop(h.dauTu?.veNapTien)),
+    hoVieciNhe: Object.freeze(hop(h.vieciNheLuongCao?.cum)),
+    hoTinhCam: Object.freeze(hop(h.tinhCamQuaMang?.cum)),
+    hoDieuKhienApp: Object.freeze(hop(h.dieuKhienTuXa?.app)),
+    hoDieuKhienCum: Object.freeze(hop(h.dieuKhienTuXa?.cum)),
+    hoDoiSo: Object.freeze(hop(h.nguoiThanDoiSo?.cum)),
+    hoDoaNat: Object.freeze(hop(h.doaNat?.cum)),
+    hoPhiLayLai: Object.freeze(hop(h.phiLayLaiTien?.cum)),
+    hoPhiLayLaiPhi: Object.freeze(hop(h.phiLayLaiTien?.vePhi)),
+    hoMaQr: Object.freeze(hop(h.maQr?.cum)),
+  };
+}
+
+/** Tên các danh sách của họ kịch bản — dùng chung cho chuẩn hoá và hợp nhất. */
+const KHOA_HO = Object.freeze([
+  'hoTiemNhiem', 'hoTheQuaTang', 'hoTheQuaTangHanhDong', 'hoDauTu', 'hoDauTuNapTien',
+  'hoVieciNhe', 'hoTinhCam', 'hoDieuKhienApp', 'hoDieuKhienCum', 'hoDoiSo',
+  'hoDoaNat', 'hoPhiLayLai', 'hoPhiLayLaiPhi', 'hoMaQr',
+]);
 
 /**
  * §4.2 — HỢP NHẤT CHỈ THÊM, KHÔNG BỚT.
@@ -131,6 +168,13 @@ function hopNhat(cu, moi) {
     maXacThucDoiTuong: gop('maXacThucDoiTuong', cu.maXacThucDoiTuong, moi.maXacThucDoiTuong),
     xungDanhToChuc: gop('xungDanhToChuc', cu.xungDanhToChuc, moi.xungDanhToChuc),
     nguCanhSoTaiKhoan: gop('nguCanhSoTaiKhoan', cu.nguCanhSoTaiKhoan, moi.nguCanhSoTaiKhoan),
+
+    /*
+     * Mười họ kịch bản hợp nhất theo đúng luật số 3 ở đầu tệp: PHÉP HỢP, chỉ
+     * thêm. Duyệt theo `KHOA_HO` thay vì liệt kê tay — thêm họ mới mà quên sửa
+     * chỗ này thì họ đó âm thầm biến mất sau lần cập nhật đầu tiên.
+     */
+    ...Object.fromEntries(KHOA_HO.map((k) => [k, gop(k, cu[k] || [], moi[k] || [])])),
 
     dongHinh: Object.freeze({ ...cu.dongHinh, ...moi.dongHinh }),
     __themVao: Object.freeze(themVao),
@@ -198,5 +242,5 @@ const nhatKyHopNhat = () => [...nhatKy];
 
 module.exports = {
   boLuat, capNhatTuXa, datLai, nhatKyHopNhat,
-  chuanHoaGoi, hopNhat, soSanhPhienBan, MAC_DINH,
+  chuanHoaGoi, hopNhat, soSanhPhienBan, MAC_DINH, KHOA_HO,
 };

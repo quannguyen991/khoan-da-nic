@@ -63,7 +63,7 @@ test('mọi mã giải thích của backend đều có trong bảng của fronte
   );
 });
 
-test('mỗi luật R1–R10 có một mã giải thích riêng', () => {
+test('mỗi luật R1–R20 có một mã giải thích riêng', () => {
   for (const l of LUAT) {
     assert.ok(CAU[l.ma], `luật ${l.ma} (${l.ten}) không có câu giải thích`);
   }

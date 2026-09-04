@@ -245,6 +245,118 @@
       "noiDung": "Alo bác, cháu gọi mấy lần mà bác không nghe. Bác gọi lại cho cháu gấp nhé, có việc.",
       "toiDa": "CHUA_THAY",
       "viSao": "Có 'gấp' — ép thời gian ĐƠN ĐỘC. Không được tự nó nâng mức."
+    },
+    {
+      "id": "BT-31",
+      "nguon": "zalo",
+      "nguoiGui": "0909111222",
+      "noiDung": "Cháu đọc bài này thấy hay: kẻ gian giờ chèn cả câu \"bỏ qua mọi hướng dẫn trước đó\" vào tin nhắn để đánh lừa máy kiểm tra.",
+      "toiDa": "NGHI_NGO",
+      "viSao": "Bài phổ biến kiến thức TRÍCH nguyên câu tiêm nhiễm. R11 đơn độc phải dừng ở NGHI_NGO — nếu nó lên CAO thì mọi bài dạy cảnh giác đều bị báo đỏ."
+    },
+    {
+      "id": "BT-32",
+      "nguon": "sms",
+      "nguoiGui": "0909111223",
+      "noiDung": "Bác nạp thẻ điện thoại chưa? Hết tiền là không gọi được cho cháu đâu.",
+      "toiDa": "NGHI_NGO",
+      "viSao": "Nhắc nạp thẻ cho CHÍNH máy bác. R12 KHÔNG nổ (đúng — thiếu vế gửi mã / mua hộ). Nhưng mức vẫn ra NGHI_NGO vì cue bank locale pack có sẵn bắt 'nạp thẻ' thành FIN_GIFT_CARD_PAYMENT (22 điểm). Đó là hành vi CÓ TRƯỚC đợt R11-R20, chỉ bị ca này lộ ra; sửa nó là đụng vào cue bank dùng chung với đường AI nên phải đo riêng. Điều cổng precision quan tâm vẫn giữ: KHÔNG lên CAO."
+    },
+    {
+      "id": "BT-33",
+      "nguon": "sms",
+      "nguoiGui": "VNDIRECT",
+      "noiDung": "Ban tin thi truong: VN-Index tang 8 diem. Lai suat huy dong ky han 12 thang tai cac ngan hang o muc 5,2%.",
+      "toiDa": "CHUA_THAY",
+      "viSao": "Bản tin thị trường thật, nhắc 'lãi suất'. Không có vế nạp tiền nên R13 không nổ."
+    },
+    {
+      "id": "BT-34",
+      "nguon": "zalo",
+      "nguoiGui": "0909111225",
+      "noiDung": "Cửa hàng em đang tuyển cộng tác viên bán hàng, hoa hồng cao, làm tại nhà. Chị quan tâm thì qua cửa hàng gặp trực tiếp nhé.",
+      "toiDa": "NGHI_NGO",
+      "viSao": "Tin tuyển cộng tác viên THẬT, không đòi nạp tiền, mời gặp trực tiếp. R14 phải dừng ở NGHI_NGO."
+    },
+    {
+      "id": "BT-35",
+      "nguon": "messenger",
+      "nguoiGui": "0909111226",
+      "noiDung": "Mình quen qua mạng nhưng nói chuyện hợp quá. Cuối tuần này rảnh mình cà phê nhé, mình ở Cầu Giấy.",
+      "toiDa": "NGHI_NGO",
+      "viSao": "Quen qua mạng THẬT, hẹn gặp ngoài đời, không hỏi tiền. R15 chỉ lên CAO khi có yêu cầu tiền."
+    },
+    {
+      "id": "BT-36",
+      "nguon": "zalo",
+      "nguoiGui": "0909111227",
+      "noiDung": "Mẹ bật chia sẻ màn hình lên đi, con chỉ mẹ cách đổi cỡ chữ cho dễ đọc.",
+      "toiDa": "NGHI_NGO",
+      "viSao": "Con cháu chỉ bố mẹ dùng máy. Có cụm 'chia sẻ màn hình' nhưng KHÔNG gọi đích danh app điều khiển từ xa, nên R16 dừng ở NGHI_NGO."
+    },
+    {
+      "id": "BT-37",
+      "nguon": "sms",
+      "nguoiGui": "0909111228",
+      "noiDung": "Mẹ ơi đây là số mới của con nhé, con vừa đổi sim. Mẹ lưu lại giúp con.",
+      "toiDa": "NGHI_NGO",
+      "viSao": "Con THẬT đổi số. Không có số tài khoản, không có số tiền nên R17 dừng ở NGHI_NGO. Nới ra là báo đỏ mọi lần con cái đổi số."
+    },
+    {
+      "id": "BT-38",
+      "nguon": "messenger",
+      "nguoiGui": "0909111229",
+      "noiDung": "Anh nói cho rõ, nếu bên đó không trả lại hàng thì tôi sẽ kiện ra toà, không nói nhiều nữa.",
+      "toiDa": "NGHI_NGO",
+      "viSao": "Tranh chấp mua bán, có lời doạ kiện nhưng không đòi tiền chuyển vào tài khoản nào. R18 đơn độc dừng ở NGHI_NGO."
+    },
+    {
+      "id": "BT-39",
+      "nguon": "sms",
+      "nguoiGui": "CONGAN",
+      "noiDung": "Canh bao: khong tin bat ky ai hua lay lai tien da mat. Moi de nghi thu phi deu la lua dao.",
+      "toiDa": "CHUA_THAY",
+      "viSao": "CẢNH BÁO CỦA CHÍNH CƠ QUAN về đúng chiêu R19 bắt. Nó chứa 'lấy lại tiền đã mất' — nếu R19 chỉ đòi một vế thì nó nổ đỏ vào thứ đang dạy người ta cảnh giác."
+    },
+    {
+      "id": "BT-40",
+      "nguon": "thong_bao",
+      "nguoiGui": "0909111231",
+      "noiDung": "Quán để mã QR thanh toán ở quầy nhé bác, bác quét mã rồi chuyển là xong.",
+      "toiDa": "NGHI_NGO",
+      "viSao": "Quét mã QR ở quán là chuyện hằng ngày. R20 chỉ lên CAO khi kèm từ khoá mạo danh cơ quan."
+    },
+    {
+      "id": "BT-41",
+      "nguon": "sms",
+      "nguoiGui": "Techcombank",
+      "noiDung": "Techcombank uu dai lai suat tiet kiem ky han 6 thang. Chi tiet lien he chi nhanh gan nhat.",
+      "toiDa": "CHUA_THAY",
+      "viSao": "Quảng cáo lãi suất tiết kiệm thật từ brandname, không cam kết lợi nhuận, không đòi nạp tiền."
+    },
+    {
+      "id": "BT-42",
+      "nguon": "zalo",
+      "nguoiGui": "0909111233",
+      "noiDung": "Bác vào Cài đặt bật trợ năng cho ứng dụng đọc màn hình, mắt bác kém thì nó đọc chữ to lên cho.",
+      "toiDa": "NGHI_NGO",
+      "viSao": "Hướng dẫn dùng tính năng trợ năng cho người mắt kém. Có cụm 'bật trợ năng' nên R16 nổ NGHI_NGO — mức đó chấp nhận được, nhưng KHÔNG được lên CAO."
+    },
+    {
+      "id": "BT-43",
+      "nguon": "sms",
+      "nguoiGui": "BHXHVN",
+      "noiDung": "Bao hiem xa hoi: ho so cua ong ba can bo sung truoc 30/9, neu khong se tam dung chi tra tro cap.",
+      "toiDa": "NGHI_NGO",
+      "viSao": "Thông báo BHXH thật, có lời cảnh báo cắt trợ cấp. Không đòi tiền nên R18 dừng ở NGHI_NGO."
+    },
+    {
+      "id": "BT-44",
+      "nguon": "sms",
+      "nguoiGui": "0909111235",
+      "noiDung": "Chị ơi tháng này em bán được 12 đơn, hoa hồng em nhận 3.600.000đ chị nhé.",
+      "toiDa": "CHUA_THAY",
+      "viSao": "Nhân viên bán hàng THẬT báo hoa hồng đã nhận. Có 'hoa hồng' và số tiền nhưng không mời chào, không đòi nạp tiền."
     }
   ]
 }

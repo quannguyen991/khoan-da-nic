@@ -828,6 +828,20 @@ export const translations: Record<Lang, Record<string, string>> = {
     "Cháu không đọc được tên ứng dụng vừa cài.": "Cháu không đọc được tên ứng dụng vừa cài.",
     "Lượt này không có AI đọc.": "Lượt này không có AI đọc.",
     "Chưa có ai — bấm để thêm": "Chưa có ai — bấm để thêm",
+
+    /* ═══ Mười họ kịch bản R11–R20 — thêm 5/9/2026 ═══
+     * Câu giải thích cho các luật quét thêm tình huống. Gốc ở
+     * `backend/src/detect/giai-thich.js`; hai nơi phải khớp, có test canh. */
+    "Trong tin có câu ra lệnh cho máy kiểm tra phải bỏ qua cảnh báo.": "Trong tin có câu ra lệnh cho máy kiểm tra phải bỏ qua cảnh báo.",
+    "Tin này đòi trả tiền bằng thẻ cào. Không cơ quan hay công ty nào thu tiền kiểu đó.": "Tin này đòi trả tiền bằng thẻ cào. Không cơ quan hay công ty nào thu tiền kiểu đó.",
+    "Tin này hứa một mức lãi chắc chắn rồi bảo bác nạp tiền. Không ai được phép hứa lãi chắc chắn.": "Tin này hứa một mức lãi chắc chắn rồi bảo bác nạp tiền. Không ai được phép hứa lãi chắc chắn.",
+    "Tin này mời một công việc nhẹ nhưng lại bắt nạp tiền trước. Việc làm thật không đòi người làm nạp tiền.": "Tin này mời một công việc nhẹ nhưng lại bắt nạp tiền trước. Việc làm thật không đòi người làm nạp tiền.",
+    "Người nhắn quen bác qua mạng, chưa gặp mặt ngoài đời, và đang hỏi tiền.": "Người nhắn quen bác qua mạng, chưa gặp mặt ngoài đời, và đang hỏi tiền.",
+    "Tin này bảo bác cài phần mềm cho người khác điều khiển máy. Người đó sẽ nhìn thấy mọi thứ trên máy bác.": "Tin này bảo bác cài phần mềm cho người khác điều khiển máy. Người đó sẽ nhìn thấy mọi thứ trên máy bác.",
+    "Người nhắn tự xưng là người nhà đang dùng số mới, rồi hỏi tiền. Bác gọi vào số cũ để hỏi lại nhé.": "Người nhắn tự xưng là người nhà đang dùng số mới, rồi hỏi tiền. Bác gọi vào số cũ để hỏi lại nhé.",
+    "Tin này vừa doạ bác vừa đòi tiền.": "Tin này vừa doạ bác vừa đòi tiền.",
+    "Tin này hứa lấy lại số tiền đã mất nhưng đòi trả phí trước.": "Tin này hứa lấy lại số tiền đã mất nhưng đòi trả phí trước.",
+    "Tin này bảo bác quét một mã QR. Mã QR giấu nơi nó dẫn tới, bác không xem trước được.": "Tin này bảo bác quét một mã QR. Mã QR giấu nơi nó dẫn tới, bác không xem trước được.",
   },
   en: {
     "👮 Giả danh công an": "👮 Police impersonation",
@@ -1647,6 +1661,20 @@ export const translations: Record<Lang, Record<string, string>> = {
     "Cháu không đọc được tên ứng dụng vừa cài.": "The name of the newly installed app could not be read.",
     "Lượt này không có AI đọc.": "No AI read this one.",
     "Chưa có ai — bấm để thêm": "No one yet — tap to add",
+
+    /* ═══ Mười họ kịch bản R11–R20 — thêm 5/9/2026 ═══
+     * Câu giải thích cho các luật quét thêm tình huống. Gốc ở
+     * `backend/src/detect/giai-thich.js`; hai nơi phải khớp, có test canh. */
+    "Trong tin có câu ra lệnh cho máy kiểm tra phải bỏ qua cảnh báo.": "This message contains an instruction telling the checker to skip its warning.",
+    "Tin này đòi trả tiền bằng thẻ cào. Không cơ quan hay công ty nào thu tiền kiểu đó.": "It asks for payment by gift card. No real company or agency collects money that way.",
+    "Tin này hứa một mức lãi chắc chắn rồi bảo bác nạp tiền. Không ai được phép hứa lãi chắc chắn.": "It promises a guaranteed return and asks you to pay in. No one is allowed to guarantee a return.",
+    "Tin này mời một công việc nhẹ nhưng lại bắt nạp tiền trước. Việc làm thật không đòi người làm nạp tiền.": "It offers easy work but asks you to pay first. Real jobs do not ask workers for money.",
+    "Người nhắn quen bác qua mạng, chưa gặp mặt ngoài đời, và đang hỏi tiền.": "The sender knows you only online, has never met you in person, and is asking for money.",
+    "Tin này bảo bác cài phần mềm cho người khác điều khiển máy. Người đó sẽ nhìn thấy mọi thứ trên máy bác.": "It asks you to install software that lets someone else control your phone. They would see everything on it.",
+    "Người nhắn tự xưng là người nhà đang dùng số mới, rồi hỏi tiền. Bác gọi vào số cũ để hỏi lại nhé.": "The sender claims to be family on a new number and asks for money. Please call their old number to check.",
+    "Tin này vừa doạ bác vừa đòi tiền.": "This message threatens you and asks for money at the same time.",
+    "Tin này hứa lấy lại số tiền đã mất nhưng đòi trả phí trước.": "It promises to recover money you lost but asks for a fee up front.",
+    "Tin này bảo bác quét một mã QR. Mã QR giấu nơi nó dẫn tới, bác không xem trước được.": "It asks you to scan a QR code. A QR code hides where it leads, so you cannot check it first.",
   }
 };
 
