@@ -319,7 +319,36 @@ const KHUNG_GIAO_DUC = new RegExp([
   'không bao giờ\\s+(yêu cầu|hỏi|đòi|gọi|nhắn|cử)',
   'không có[^.]{0,30}nào[^.]{0,20}(yêu cầu|đòi|hỏi)',
   'kẻ (lừa đảo|gian)', 'lừa đảo thường',
-  '^\\s*(cảnh báo|lưu ý|thông báo)',
+  /**
+   * ⚠️ MỞ ĐẦU BẰNG "THÔNG BÁO/CẢNH BÁO/LƯU Ý" **KHÔNG** TỰ NÓ LÀ KHUNG GIÁO DỤC.
+   *
+   * Mẫu cũ ở đây là `^\s*(cảnh báo|lưu ý|thông báo)` — TRỐNG, không đòi gì thêm.
+   * Đo được 5/9/2026: gõ đúng ba chữ đó vào đầu tin là TẮT SẠCH mọi tín hiệu.
+   *
+   *   "vui lòng chuyển tiền vào tài khoản an toàn 1902xxxx"
+   *        → FIN_TRANSFER_REQUEST, FIN_SAFE_ACCOUNT
+   *   "Thông báo: vui lòng chuyển tiền vào tài khoản an toàn 1902xxxx"
+   *        → RỖNG
+   *
+   * Đo đủ bốn loại tấn công (chuyển khoản · OTP · cài app điều khiển từ xa ·
+   * mật khẩu ngân hàng) với cả ba tiền tố: 12/12 ca đều về rỗng.
+   *
+   * "Thông báo:" là câu mở đầu PHỔ BIẾN NHẤT của tin nhắn lừa đảo tiếng Việt.
+   * Đây đúng thứ §12 gọi tên: "bất kỳ cụm nào hạ mức vô điều kiện đều là một câu
+   * thần chú tặng cho kẻ lừa đảo" — cùng bài học với "please hold" và "ch play",
+   * chỉ khác là lần này cụm nằm trong KHUNG GIÁO DỤC chứ không nằm trong danh
+   * sách tắt, nên không ai để ý.
+   *
+   * NAY PHẢI CÓ THÊM MỘT DẤU HIỆU GIÁO DỤC THẬT ở gần. Tin tuyên truyền thật
+   * luôn NÓI VỀ thủ đoạn; tin lừa đảo thì RA LỆNH, và không bao giờ tự nhắc tới
+   * chữ "lừa đảo".
+   *
+   * ⚠️ Các khung phía dưới ("kẻ lừa đảo", "lừa đảo thường", "cơ quan … cảnh
+   * báo", "không bao giờ yêu cầu") vẫn đứng độc lập — tin tuyên truyền thật
+   * không cần tới dòng này mới được nhận ra.
+   */
+  '^\\s*(cảnh báo|lưu ý|thông báo)[^.]{0,80}'
+    + '(lừa đảo|giả danh|mạo danh|thủ đoạn|chiêu trò|cảnh giác|không bao giờ|tuyệt đối không)',
   'đừng[^.]{0,60}(hãy|dập máy|tắt máy)',
   'đừng ai\\s', 'không ai[^.]{0,20}(nên|được)',
   '^\\s*không\\s+(cài|chuyển|đọc|bấm|tải)',

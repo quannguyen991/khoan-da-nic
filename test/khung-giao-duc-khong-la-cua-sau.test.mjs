@@ -1,0 +1,102 @@
+/**
+ * KHUNG GIÁO DỤC KHÔNG ĐƯỢC LÀ CỬA SAU.
+ *
+ * ══════════ LỖI ĐÃ ĐO ĐƯỢC 5/9/2026 ══════════
+ *
+ * `KHUNG_GIAO_DUC` trong `context-builder.js` tắt tín hiệu cho văn bản TUYÊN
+ * TRUYỀN — để câu "kẻ lừa đảo thường đòi mã OTP" không bị chấm là lừa đảo. Đúng
+ * và cần thiết.
+ *
+ * Nhưng một dòng trong khung đó là `^\s*(cảnh báo|lưu ý|thông báo)` — TRỐNG,
+ * không đòi thêm gì. Nghĩa là chỉ cần gõ ba chữ ấy vào ĐẦU tin nhắn:
+ *
+ *   "vui lòng chuyển tiền vào tài khoản an toàn 1902xxxx"
+ *        → FIN_TRANSFER_REQUEST, FIN_SAFE_ACCOUNT
+ *   "Thông báo: vui lòng chuyển tiền vào tài khoản an toàn 1902xxxx"
+ *        → RỖNG
+ *
+ * Đo đủ bốn loại tấn công × ba tiền tố: 12/12 ca về rỗng. Mà "Thông báo:" là
+ * câu mở đầu PHỔ BIẾN NHẤT của tin nhắn lừa đảo tiếng Việt.
+ *
+ * §12 đã viết sẵn bài học này: "Bất kỳ cụm nào hạ mức vô điều kiện đều là một
+ * câu thần chú tặng cho kẻ lừa đảo" — cùng họ với "please hold" và "ch play".
+ * Lần này cụm nằm trong khung giáo dục chứ không nằm trong danh sách tắt, nên
+ * không ai nghĩ tới việc soi nó.
+ *
+ * ⚠️ TEST NÀY CHẠY BỘ DÒ THẬT, KHÔNG ĐỌC MÃ NGUỒN. Đọc mã thì chỉ thấy có một
+ * chuỗi regex; chỉ khi CHẠY mới thấy tín hiệu biến mất.
+ *
+ * ⚠️ ĐỪNG NỚI THÀNH "CẢNH BÁO THÔI". Một tin lừa đảo không bị chấm điểm là một
+ * tin hiện ra "Chưa thấy dấu hiệu rủi ro" — tức app nói dối theo hướng nguy
+ * hiểm nhất (§4.3).
+ */
+
+import test from 'node:test';
+import assert from 'node:assert';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { createRequire } from 'node:module';
+
+const require = createRequire(import.meta.url);
+const GOC = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
+const DUONG = path.join(GOC, 'backend', 'src', 'analysis');
+const BO_QUA = fs.existsSync(path.join(DUONG, 'context-builder.js'))
+  ? false : 'chưa có backend/src/analysis/context-builder.js';
+
+function tinHieuCua(vanBan) {
+  const { buildContext } = require(path.join(DUONG, 'context-builder'));
+  const { directPrecheck } = require(path.join(DUONG, 'direct-precheck'));
+  const ctx = buildContext(vanBan, { sourceId: 'van_ban' });
+  return directPrecheck(ctx, {}).filter((s) => s.state === 'present').map((s) => s.id).sort();
+}
+
+/** Bốn câu RA LỆNH — mỗi câu một loại tấn công khác nhau. */
+const CAU_RA_LENH = [
+  'vui lòng chuyển tiền vào tài khoản an toàn 1902xxxx để bảo vệ',
+  'đọc mã OTP vừa gửi cho nhân viên để hoàn tất hồ sơ',
+  'cài ứng dụng anydesk để nhân viên hỗ trợ từ xa',
+  'cung cấp mật khẩu internet banking để đối chiếu',
+];
+
+/** Ba câu mở đầu mà kẻ lừa đảo hay dùng nhất. */
+const TIEN_TO = ['Thông báo: ', 'Cảnh báo: ', 'Lưu ý: ', 'THÔNG BÁO '];
+
+test('thêm "Thông báo/Cảnh báo/Lưu ý" vào đầu KHÔNG được xoá tín hiệu nào',
+  { skip: BO_QUA }, () => {
+    const mat = [];
+    for (const cau of CAU_RA_LENH) {
+      const goc = tinHieuCua(cau);
+      assert.ok(goc.length > 0, `câu mẫu "${cau.slice(0, 40)}" đáng lẽ phải có tín hiệu — sửa câu mẫu, đừng sửa test`);
+      for (const dau of TIEN_TO) {
+        const sau = tinHieuCua(dau + cau);
+        const thieu = goc.filter((id) => !sau.includes(id));
+        if (thieu.length) mat.push(`"${dau}" + "${cau.slice(0, 34)}…" mất ${thieu.join(',')}`);
+      }
+    }
+    assert.deepStrictEqual(mat, [],
+      'một câu mở đầu vô hại không được làm mất tín hiệu — đó là câu thần chú tặng cho kẻ lừa đảo (§12)');
+  });
+
+/**
+ * ⚠️ NỬA KIA CỦA HÀNG RÀO — ĐỪNG XOÁ.
+ *
+ * Cách "sửa" sai là bỏ luôn khung giáo dục. Làm thế thì mọi tin tuyên truyền
+ * của ngân hàng và công an đều bị chấm là lừa đảo, và bác học được đúng một
+ * điều: bỏ qua cảnh báo của app. Test này giữ cho bản vá không đi quá tay.
+ */
+test('nhưng tin TUYÊN TRUYỀN THẬT vẫn phải được miễn', { skip: BO_QUA }, () => {
+  const NOI_VE_THU_DOAN = [
+    'Ngân hàng không bao giờ yêu cầu quý khách cung cấp mã OTP qua điện thoại',
+    'Cảnh báo: kẻ lừa đảo thường yêu cầu chuyển tiền vào tài khoản an toàn',
+    'Công an TP Hà Nội khuyến cáo người dân tuyệt đối không cung cấp mã OTP cho ai',
+    'Lưu ý: thủ đoạn giả danh nhân viên ngân hàng đòi mã xác thực đang tăng',
+  ];
+  const bao = NOI_VE_THU_DOAN
+    .map((t) => [t, tinHieuCua(t)])
+    .filter(([, s]) => s.length > 0)
+    .map(([t, s]) => `"${t.slice(0, 46)}…" → ${s.join(',')}`);
+
+  assert.deepStrictEqual(bao, [],
+    'tin dạy người ta cảnh giác mà bị chấm là lừa đảo thì bác sẽ học cách bỏ qua app');
+});
