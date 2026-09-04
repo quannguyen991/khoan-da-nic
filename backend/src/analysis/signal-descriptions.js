@@ -22,7 +22,7 @@ module.exports = Object.freeze({
   FIN_RECOVERY_FEE: 'đòi nộp phí trước thì mới lấy lại được tiền đã mất, hoặc mới nhận được hoàn tiền',
   FIN_ORG_CLAIM_PERSONAL_ACCOUNT: 'người tự xưng đại diện tổ chức nhưng số tài khoản nhận lại là tài khoản CÁ NHÂN',
   FIN_RECIPIENT_NAME_MISMATCH: 'tên chủ tài khoản nhận không khớp với tổ chức hay người mà họ tự xưng',
-  FIN_TRANSFER_REQUEST: 'yêu cầu chuyển tiền / chuyển khoản ngay lúc này',
+  FIN_TRANSFER_REQUEST: 'yêu cầu chuyển tiền / chuyển khoản, dù có hối thúc hay không',
   FIN_CRYPTO_TRANSFER: 'yêu cầu chuyển tiền mã hoá, bitcoin, USDT',
   FIN_REPEATED_TRANSFER_PRESSURE: 'thúc chuyển thêm lần nữa sau khi đã chuyển một lần',
   FIN_TRANSFER_MEMO_MISMATCH: 'nội dung chuyển khoản được dặn ghi khác với lý do thật',
@@ -44,7 +44,9 @@ module.exports = Object.freeze({
   // ── MANIPULATION ──
   MAN_EXTORTION_MEDIA_THREAT: 'doạ phát tán ảnh, video riêng tư để ép làm theo',
   MAN_FEAR_THREAT: 'doạ bắt giữ, khởi tố, phong toả tài khoản, cắt trợ cấp, quy kết liên quan vụ án',
-  MAN_COVER_STORY: 'dựng một câu chuyện để giải thích vì sao yêu cầu này bất thường nhưng vẫn hợp lý',
+  MAN_COVER_STORY: 'kèm một lý do làm cho yêu cầu bất thường nghe ra hợp lý — đang họp, đang ở '
+    + 'nước ngoài, tài khoản bị khoá, hệ thống đang lỗi, người nhà nằm viện, xe hỏng, chiều '
+    + 'sẽ hoàn lại. Lý do đó giải thích vì sao phải nhờ, và vì sao không gọi trực tiếp được',
   MAN_SECRECY: 'dặn giữ bí mật, không nói với gia đình / người thân / ngân hàng',
   MAN_ISOLATION: 'tách người dùng khỏi người xung quanh, bảo đừng hỏi ai, đừng ra ngoài',
   MAN_URGENCY: 'ép làm ngay, đặt hạn giờ, nói chậm là mất cơ hội hoặc gặp hậu quả',
@@ -67,7 +69,9 @@ module.exports = Object.freeze({
   ID_DELIVERY_IMPERSONATION: 'tự xưng đơn vị giao hàng, bưu điện, hải quan giữ hàng',
 
   // ── OFFER ──
-  OFF_ADVANCE_FEE: 'đòi nộp một khoản trước thì mới nhận được khoản lớn hơn',
+  OFF_ADVANCE_FEE: 'đòi nộp một khoản trước thì mới nhận được thứ đã hứa — có thể là tiền lớn hơn, '
+    + 'nhưng cũng có thể là hàng, phòng, suất hay dịch vụ. Gồm phí giao hàng, phí lưu kho, '
+    + 'phí hải quan, tiền cọc giữ chỗ, phí kích hoạt, phí dịch vụ phải trả trước',
   OFF_CONTRACT_EXIT_UPSELL: 'ép mua thêm hợp đồng / gói mới để thoát khỏi hợp đồng cũ',
   OFF_INVESTMENT_GUARANTEE: 'mời đầu tư kèm cam kết lợi nhuận cao, chắc chắn, không rủi ro',
   OFF_TASK_PREPAY: 'mời làm nhiệm vụ, chốt đơn, nạp trước để nhận hoa hồng',

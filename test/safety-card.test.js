@@ -99,7 +99,10 @@ test('§4.3 — vượt trần lượt hỏng phải sinh cảnh báo', () => {
 
 test('Sự thật kiến trúc khớp code, không phải số chép tay', () => {
   const k = suThatKienTruc();
-  assert.strictEqual(k.soTinHieu, 58);
+  // 59 từ 5/9/2026: thêm `MAN_ANALYZER_INJECTION`. Phụ lục A vẫn ghi 58 —
+  // mâu thuẫn đã ghi lại trong `test/signal-registry.test.js`, đừng xoá tín
+  // hiệu để khớp lại con số.
+  assert.strictEqual(k.soTinHieu, 59);
   assert.strictEqual(k.soCriticalOverride, 10);
   // 10 tổ hợp gốc Phụ lục B.2 + 3 tổ hợp thêm 15/8/2026 (rule 1.1.0)
   // + credential+manipulation (rule 1.2.0, xem B.5)

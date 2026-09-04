@@ -33,7 +33,7 @@
     "analysis": "1.0.0",
     "registry": "1.0.0",
     "rule": "1.3.0",
-    "prompt": "1.0.0"
+    "prompt": "1.1.0"
   },
   "truongHopDong": [
     "nhan",
@@ -88,6 +88,7 @@
     "DEV_INSTALL_APK_UNKNOWN",
     "DEV_CALL_FORWARD",
     "MAN_EXTORTION_MEDIA_THREAT",
+    "MAN_ANALYZER_INJECTION",
     "MAN_FEAR_THREAT",
     "MAN_COVER_STORY",
     "MAN_SECRECY",
@@ -260,7 +261,8 @@
     "doi_mat_khau_tren_thiet_bi_khac",
     "canh_giac_voi_ben_hua_lay_lai_tien",
     "gui_don_trinh_bao_cong_an_phuong_noi_cu_tru",
-    "yeu_cau_ngan_hang_phong_toa_tai_khoan_nhan"
+    "yeu_cau_ngan_hang_phong_toa_tai_khoan_nhan",
+    "to_giac_qua_vneid_5_buoc"
   ],
   "canhBaoPhucHoi": [
     "chua_biet_nguoi_dung_o_nuoc_nao",
