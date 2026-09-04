@@ -583,6 +583,30 @@ async function goiMotDuong(messages, cauHinh, opts = {}) {
         messages,
         temperature: 0,
         /**
+         * ⚠️ KHAI BÁO KHÔNG-STREAM CHO RÕ. KHÔNG GỬI ≠ GỬI `false`.
+         *
+         * Đo 4/9/2026 trên một gateway openai-compatible chạy ở
+         * `localhost:20128`, gom 155 model từ 8 nhà cung cấp: không gửi trường
+         * này thì nó trả `content-type: text/event-stream` cho MỌI model.
+         * `res.json()` ở dưới ném lỗi → `AI_SCHEMA_INVALID` → `aiDaChay:
+         * false` → rơi hết về tầng luật. Cùng lượt gọi đó, thêm `stream: false`
+         * thì trả `application/json`.
+         *
+         * Đo được, cùng một model, cùng một lời nhắc, chỉ khác trường này:
+         *   không gửi   `kr/claude-sonnet-4.5`  AI_SCHEMA_INVALID  0 tín hiệu
+         *   stream:false `kr/claude-sonnet-4.5`  aiDaChay: true     7 tín hiệu
+         *
+         * ⚠️ ĐÂY LÀ DẠNG HỎNG NGUY HIỂM NHẤT (§4.3): ca giả danh công an VẪN ra
+         * `CAO` vì tầng luật tự bắt được, nên nhìn từ ngoài giống hệt lúc chạy
+         * đúng. Chỉ `aiDaChay: false` tố cáo. Còn mẫu nào tầng luật bỏ sót —
+         * đo được 127/217 mẫu CAO tiếng Việt trong `eval/dataset` — thì im
+         * lặng ra "Chưa thấy dấu hiệu rủi ro".
+         *
+         * `false` là mặc định của chuẩn OpenAI, nên gửi tường minh không đổi
+         * hành vi của gateway nào đang chạy đúng.
+         */
+        stream: false,
+        /**
          * ⚠️ TOKEN SUY NGHĨ ĂN CHUNG NGÂN SÁCH VỚI CÂU TRẢ LỜI.
          *
          * Đo 18/8/2026 trên bản công khai: `gemini-3.6-flash` với
