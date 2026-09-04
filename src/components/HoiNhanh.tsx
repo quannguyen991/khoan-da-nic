@@ -416,7 +416,7 @@ export function HoiNhanhView({ setView, t, lang = 'vi', onTriggerEmergency }: Ho
             />
           </div>
 
-          <div className="bg-white text-slate-900 rounded-3xl p-6 shadow-xl border border-purple-200 mb-6">
+          <div className="bg-white text-slate-900 rounded-3xl p-6 shadow-xl border-2 border-[#2e1065] mb-6">
             <span className="text-[14px] font-extrabold uppercase text-purple-700 tracking-wider mb-2 block">
               {chu('tro_ly_hoi')}
             </span>
@@ -484,11 +484,11 @@ export function HoiNhanhView({ setView, t, lang = 'vi', onTriggerEmergency }: Ho
               key={ma}
               onClick={() => handleSelectBranch(ma)}
               data-vai-tro="nut-chinh"
-              className="w-full p-4 bg-white/95 text-slate-900 rounded-2xl flex items-center justify-between border border-purple-200/50 shadow-md hover:bg-white active:scale-98 transition-all text-left"
+              className="w-full p-4 bg-white/95 text-slate-900 rounded-2xl flex items-center justify-between border-2 border-[#2e1065]/50 shadow-md hover:bg-white active:scale-98 transition-all text-left"
             >
               <span className="flex items-center gap-3.5">
                 <span
-                  className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 border ${MAU_VIEN_NHANH[ma] ?? ''}`}
+                  className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border ${MAU_VIEN_NHANH[ma] ?? ''}`}
                 >
                   <IconComponent size={24} />
                 </span>

@@ -516,7 +516,7 @@ export function FloatingQuickAccess({
                     <div className="flex items-center gap-1.5">
                       <button aria-label={t("Cài đặt")}
                         onClick={() => setShowPermissionModal(true)}
-                        className="p-1.5 text-purple-600 hover:bg-purple-100 rounded-xl text-[14px] flex items-center gap-1 font-bold"
+                        className="p-1.5 text-purple-600 hover:bg-purple-100 rounded-2xl text-[14px] flex items-center gap-1 font-bold"
                         title={t('Xem quyền và hướng dẫn')}
                       >
                         <Settings size={15} />
@@ -567,7 +567,7 @@ export function FloatingQuickAccess({
                     onClick={handleEmergencyClick}
                     className="flex items-center gap-3.5 p-3 bg-red-50 hover:bg-red-100 text-red-700 rounded-2xl active:scale-98 transition-colors border-2 border-red-200"
                   >
-                    <div className="w-10 h-10 rounded-xl bg-red-500 text-white flex items-center justify-center shrink-0 shadow-xs">
+                    <div className="w-10 h-10 rounded-2xl bg-red-500 text-white flex items-center justify-center shrink-0 shadow-xs">
                       <ShieldAlert size={20} />
                     </div>
                     <div className="flex-1 text-left">
@@ -581,7 +581,7 @@ export function FloatingQuickAccess({
                     onClick={handleVoiceClick}
                     className="flex items-center gap-3.5 p-3 bg-purple-50 hover:bg-purple-100 text-[#5b21b6] rounded-2xl active:scale-98 transition-colors border-2 border-purple-100"
                   >
-                    <div className="w-10 h-10 rounded-xl bg-[#7e22ce] text-white flex items-center justify-center shrink-0 shadow-xs">
+                    <div className="w-10 h-10 rounded-2xl bg-[#7e22ce] text-white flex items-center justify-center shrink-0 shadow-xs">
                       <Mic size={20} />
                     </div>
                     <div className="flex-1 text-left">
@@ -595,7 +595,7 @@ export function FloatingQuickAccess({
                     onClick={handleCallClick}
                     className="flex items-center gap-3.5 p-3 bg-green-50 hover:bg-green-100 text-green-800 rounded-2xl active:scale-98 transition-colors border-2 border-green-200"
                   >
-                    <div className="w-10 h-10 rounded-xl bg-green-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                    <div className="w-10 h-10 rounded-2xl bg-green-600 text-white flex items-center justify-center shrink-0 shadow-xs">
                       <PhoneCall size={20} />
                     </div>
                     <div className="flex-1 text-left">
@@ -617,7 +617,7 @@ export function FloatingQuickAccess({
                     }`}
                   >
                     <span className="flex items-center gap-2.5 text-[14px] text-left">
-                      <div className="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                      <div className="w-8 h-8 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shrink-0 shadow-xs">
                         <Maximize2 size={16} className={isPipActive ? 'text-emerald-200' : 'text-white'} />
                       </div>
                       <div>
@@ -635,7 +635,7 @@ export function FloatingQuickAccess({
                   {/* 6. Dải cảnh báo THẬT đè lên màn hình — xem `moPopupThat` */}
                   <button
                     onClick={() => { void moPopupThat(); }}
-                    className="flex items-center justify-between p-2.5 bg-gray-50 hover:bg-gray-100 rounded-xl text-gray-700 text-[14px] font-bold border border-gray-200 transition-colors"
+                    className="flex items-center justify-between p-2.5 bg-gray-50 hover:bg-gray-100 rounded-2xl text-gray-700 text-[14px] font-bold border border-gray-200 transition-colors"
                   >
                     <span className="flex items-center gap-2 text-[14px] text-gray-800">
                       <Smartphone size={16} className="text-purple-600" />
@@ -645,7 +645,7 @@ export function FloatingQuickAccess({
                   </button>
 
                   {loiPopup === 'web' && (
-                    <div className="p-2.5 bg-amber-50 border border-amber-300 rounded-xl">
+                    <div className="p-2.5 bg-amber-50 border border-amber-300 rounded-2xl">
                       <p className="text-[14px] text-amber-900 leading-snug font-medium">
                         {t('Trình duyệt không cho vẽ đè lên app khác. Phần này chỉ chạy được trên bản đã cài vào máy.')}
                       </p>
@@ -658,7 +658,7 @@ export function FloatingQuickAccess({
                     Đưa bác đi bật lại cái đã bật là đẩy bác vào vòng lặp.
                   */}
                   {loiPopup === 'rom_chan' && (
-                    <div className="p-2.5 bg-amber-50 border border-amber-300 rounded-xl">
+                    <div className="p-2.5 bg-amber-50 border border-amber-300 rounded-2xl">
                       <p className="text-[14px] text-amber-900 leading-snug font-medium">
                         {t('Máy đã cho phép vẽ đè, nhưng hệ điều hành vẫn chặn. Máy Xiaomi, Oppo, Vivo, Realme còn một công tắc nữa tên “hiện cửa sổ khi chạy nền” — bác bật luôn dòng đó giúp cháu.')}
                       </p>
@@ -667,7 +667,7 @@ export function FloatingQuickAccess({
                   {(loiPopup === 'chua_bat' || loiPopup === 'chua_co_quyen') && (
                     <button
                       onClick={() => { void xinQuyenPopup(); }}
-                      className="p-2.5 bg-amber-50 border border-amber-300 rounded-xl text-left"
+                      className="p-2.5 bg-amber-50 border border-amber-300 rounded-2xl text-left"
                     >
                       <p className="text-[14px] text-amber-900 leading-snug font-medium">
                         {t('Máy chưa cho phép vẽ đè. Chạm vào đây để mở Cài đặt, tìm dòng Khoan Đã rồi gạt sang bật.')}
@@ -766,7 +766,7 @@ export function FloatingQuickAccess({
               {/* Header */}
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-2xl bg-purple-100 border border-purple-200 flex items-center justify-center text-purple-700 shrink-0">
+                  <div className="w-12 h-12 rounded-2xl bg-purple-100 border-2 border-[#2e1065] flex items-center justify-center text-purple-700 shrink-0">
                     <Layers size={26} />
                   </div>
                   <div>
@@ -789,7 +789,7 @@ export function FloatingQuickAccess({
                 Facebook hay ở màn hình chính" — bốn ví dụ cho một ý mà câu trước đã
                 nói xong. Ví dụ chỉ giúp khi ý còn mơ hồ; ở đây nó chỉ dài thêm.
               */}
-              <div className="bg-purple-50/80 border border-purple-200 rounded-2xl p-3.5 mb-4 flex items-start gap-2">
+              <div className="bg-purple-50/80 border-2 border-[#2e1065] rounded-2xl p-3.5 mb-4 flex items-start gap-2">
                 <CheckCircle2 size={16} className="text-emerald-600 shrink-0 mt-0.5" />
                 <p className="text-[14px] text-purple-900 leading-relaxed font-medium">
                   {t('Gặp số lạ hay link lạ, chạm quả bóng là kiểm được ngay.')}
@@ -818,7 +818,7 @@ export function FloatingQuickAccess({
                   />
                 </button>
                 {xemHuongDan && (<>
-                <div className="grid grid-cols-4 gap-1 p-1 bg-gray-100 rounded-xl mb-3 text-center text-[14px] font-bold text-gray-600">
+                <div className="grid grid-cols-4 gap-1 p-1 bg-gray-100 rounded-2xl mb-3 text-center text-[14px] font-bold text-gray-600">
                   <button
                     onClick={() => setActiveTabGuide('android')}
                     className={`py-1.5 rounded-lg transition-all ${activeTabGuide === 'android' ? 'bg-white text-purple-700 shadow-xs' : ''}`}
@@ -905,7 +905,7 @@ export function FloatingQuickAccess({
                         setShowPermissionModal(false);
                         tryToLaunchPip();
                       }}
-                      className="w-full py-2 bg-purple-600 text-white rounded-xl font-bold flex items-center justify-center gap-1.5 mt-2"
+                      className="w-full py-2 bg-purple-600 text-white rounded-2xl font-bold flex items-center justify-center gap-1.5 mt-2"
                     >
                       <Play size={13} /> {t('Thử mở cửa sổ PiP')}
                     </button>
@@ -919,7 +919,7 @@ export function FloatingQuickAccess({
                 <span className="text-[14px] text-gray-400">{hasPermission ? t('Đã được phép') : t('Chưa bật')}</span>
                 <button
                   onClick={() => setShowPermissionModal(false)}
-                  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-[14px] font-bold"
+                  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-2xl text-[14px] font-bold"
                 >
                   {t('Đóng')}
                 </button>

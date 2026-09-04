@@ -104,7 +104,7 @@ function KhongTaiDuocBaiHoc({ t, setView }: { t: any; setView: (v: ViewState) =>
       </button>
       <button
         onClick={() => setView('home')}
-        className="w-full max-w-xs py-3.5 px-4 bg-white text-[#6d28d9] border border-purple-200 font-bold text-[16px] rounded-2xl active:scale-95"
+        className="w-full max-w-xs py-3.5 px-4 bg-white text-[#6d28d9] border-2 border-[#2e1065] font-bold text-[16px] rounded-2xl active:scale-95"
       >
         {t('Về trang chủ')}
       </button>
@@ -1029,7 +1029,7 @@ export default function App() {
             {(pinnedActionType === 'both' || pinnedActionType === 'app') && (
               <button
                 onClick={() => setView('home')}
-                className="bg-white/20 hover:bg-white/30 text-white px-2.5 sm:px-3 py-1 rounded-xl font-bold text-[14px] sm:text-[14px] shadow-xs border border-white/20 flex items-center gap-1 active:scale-95 transition-transform"
+                className="bg-white/20 hover:bg-white/30 text-white px-2.5 sm:px-3 py-1 rounded-2xl font-bold text-[14px] sm:text-[14px] shadow-xs border border-white/20 flex items-center gap-1 active:scale-95 transition-transform"
                 title={t("Vào màn hình chính")}
               >
                 <Sparkles size={12} className="text-yellow-300" /> {t("Vào App")}
@@ -1039,7 +1039,7 @@ export default function App() {
             {(pinnedActionType === 'both' || pinnedActionType === 'danger') && (
               <button
                 onClick={() => triggerEmergencyAlert()}
-                className="bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white px-2.5 sm:px-3 py-1 rounded-xl font-bold text-[14px] sm:text-[14px] shadow-sm border border-red-400 flex items-center gap-1 active:scale-95 transition-transform"
+                className="bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white px-2.5 sm:px-3 py-1 rounded-2xl font-bold text-[14px] sm:text-[14px] shadow-sm border border-red-400 flex items-center gap-1 active:scale-95 transition-transform"
                 title={t("Kích hoạt cảnh giác khẩn cấp")}
               >
                 <ShieldAlert size={12} className="text-white animate-pulse" /> {t("Nguy hiểm (SOS)")}
@@ -1257,7 +1257,7 @@ export default function App() {
                 className="absolute bottom-0 left-0 w-full px-4 pb-6 pt-10 bg-gradient-to-t from-[#cfb8f8] via-[#e2d2f9]/80 to-transparent z-50 pointer-events-none
                   lg:static lg:order-first lg:w-full lg:h-auto lg:shrink-0 lg:px-8 lg:pt-5 lg:pb-3 lg:bg-none"
               >
-                <div className="bg-gradient-to-r from-[#9e76ea] via-[#ad8af0] to-[#9e76ea] rounded-full p-[6px] px-3 sm:px-4 flex justify-between items-center shadow-[0_15px_30px_rgba(90,30,160,0.3)] border border-white/20 h-16 sm:h-18 max-w-lg sm:max-w-xl mx-auto relative overflow-hidden pointer-events-auto
+                <div className="bg-gradient-to-r from-[#9e76ea] via-[#ad8af0] to-[#9e76ea] rounded-full p-[6px] px-3 sm:px-4 flex justify-between items-center shadow-[4px_4px_0_#2e1065] border-[2.5px] border-[#2e1065] h-16 sm:h-18 max-w-lg sm:max-w-xl mx-auto relative overflow-hidden pointer-events-auto
                   lg:justify-center lg:gap-2 lg:h-[4.25rem] lg:max-w-3xl lg:rounded-full lg:px-3 lg:shadow-[0_10px_28px_rgba(90,30,160,0.22)]">
                   <div className="absolute inset-0 bg-gradient-to-t from-white/10 to-transparent pointer-events-none"></div>
                   
@@ -1348,7 +1348,7 @@ export default function App() {
            {/* Desktop Topbar for Guardian */}
            <header className="flex items-center justify-between px-6 lg:px-12 py-3.5 relative z-20 bg-white border-b border-slate-200/80 shadow-2xs sticky top-0">
               <div className="flex items-center gap-3">
-                 <div className="w-9 h-9 bg-gradient-to-br from-sky-500 to-blue-600 rounded-xl flex items-center justify-center shadow-sm text-white">
+                 <div className="w-9 h-9 bg-gradient-to-br from-sky-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-sm text-white">
                     <ShieldCheck className="w-5 h-5" />
                  </div>
                  <div>
@@ -1371,14 +1371,14 @@ export default function App() {
                      setUserRole('elder');
                      setView('home');
                    }} 
-                   className="flex items-center gap-1.5 text-purple-700 bg-purple-50 hover:bg-purple-100 border border-purple-200 px-3.5 py-1.5 rounded-xl font-bold text-[14px] transition-colors shadow-2xs"
+                   className="flex items-center gap-1.5 text-purple-700 bg-purple-50 hover:bg-purple-100 border-2 border-[#2e1065] px-3.5 py-1.5 rounded-2xl font-bold text-[14px] transition-colors shadow-2xs"
                  >
                    <Smartphone className="w-3.5 h-3.5" /> {t("Vai của bác")}
                  </button>
-                 <button onClick={() => setIsMenuOpen(true)} className="flex items-center gap-1.5 text-slate-700 bg-slate-100 hover:bg-slate-200 px-3.5 py-1.5 rounded-xl font-bold text-[14px] transition-colors">
+                 <button onClick={() => setIsMenuOpen(true)} className="flex items-center gap-1.5 text-slate-700 bg-slate-100 hover:bg-slate-200 px-3.5 py-1.5 rounded-2xl font-bold text-[14px] transition-colors">
                    <LayoutGrid className="w-3.5 h-3.5" /> {t("Menu")}
                  </button>
-                 <button onClick={() => { if (isLoggedIn) { void dangXuat(); } else { setView('login'); } }} className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white px-4 py-1.5 rounded-xl font-bold text-[14px] shadow-xs transition-opacity">
+                 <button onClick={() => { if (isLoggedIn) { void dangXuat(); } else { setView('login'); } }} className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white px-4 py-1.5 rounded-2xl font-bold text-[14px] shadow-xs transition-opacity">
                    {isLoggedIn ? <><LogOut className="w-3.5 h-3.5" /> {t("Đăng xuất")}</> : <><UserCircle className="w-3.5 h-3.5" /> {t("Đăng nhập")}</>}
                  </button>
               </div>
@@ -1682,7 +1682,7 @@ function HomeView({
       <div className="pt-2 sm:pt-4 px-4 sm:px-6 lg:px-8 z-50 flex items-center justify-between pointer-events-auto shrink-0 select-none max-w-2xl lg:max-w-none mx-auto w-full">
         <button 
           onClick={onOpenMenu}
-          className="p-2 sm:p-2.5 px-3.5 sm:px-5 bg-white/90 hover:bg-white rounded-2xl shadow-sm backdrop-blur-md active:scale-95 transition-all text-[#6d28d9] flex items-center gap-2 border border-purple-200"
+          className="p-2 sm:p-2.5 px-3.5 sm:px-5 bg-white/90 hover:bg-white rounded-2xl shadow-sm backdrop-blur-md active:scale-95 transition-all text-[#6d28d9] flex items-center gap-2 border-2 border-[#2e1065]"
           title={t("Menu tính năng & Truy cập nhanh")}
         >
           <LayoutGrid size={18} strokeWidth={2.5} className="text-[#6d28d9]" />
@@ -1699,19 +1699,19 @@ function HomeView({
             */
             aria-label={t("Bật/Tắt ghim thông báo cảnh giác")}
             title={t("Bật/Tắt ghim thông báo cảnh giác")}
-            className={`p-2 sm:p-2.5 px-3 rounded-2xl shadow-sm backdrop-blur-md active:scale-95 transition-all flex items-center gap-1.5 ${pinnedNotification ? 'bg-red-500 text-white animate-pulse' : 'bg-white/80 text-[#6d28d9] border border-purple-100'}`}
+            className={`p-2 sm:p-2.5 px-3 rounded-2xl shadow-sm backdrop-blur-md active:scale-95 transition-all flex items-center gap-1.5 ${pinnedNotification ? 'bg-red-500 text-white animate-pulse' : 'bg-white/80 text-[#6d28d9] border-2 border-[#2e1065]'}`}
           >
             <Bell size={18} strokeWidth={2.5} />
             <span className="hidden sm:inline text-[14px] font-bold">{pinnedNotification ? t("Đang ghim") : t("Ghim tin")}</span>
           </button>
-          <button aria-label={t("Cài đặt")} onClick={() => setView('settings')} className="p-2 sm:p-2.5 bg-white/80 hover:bg-white rounded-2xl shadow-sm backdrop-blur-md active:scale-95 transition-all text-[#6d28d9] border border-purple-100">
+          <button aria-label={t("Cài đặt")} onClick={() => setView('settings')} className="p-2 sm:p-2.5 bg-white/80 hover:bg-white rounded-2xl shadow-sm backdrop-blur-md active:scale-95 transition-all text-[#6d28d9] border-2 border-[#2e1065]">
             <Settings size={18} strokeWidth={2.5} />
           </button>
         </div>
       </div>
 
       <div className="flex items-center justify-center gap-2 mt-2 sm:mt-3 mb-0.5 shrink-0 select-none">
-        <img src="/logo.webp" alt="Khoan Đã Logo" draggable={false} className="h-7 w-7 sm:h-9 sm:w-9 object-contain drop-shadow-sm rounded-xl pointer-events-none select-none" />
+        <img src="/logo.webp" alt="Khoan Đã Logo" draggable={false} className="h-7 w-7 sm:h-9 sm:w-9 object-contain drop-shadow-sm rounded-2xl pointer-events-none select-none" />
         <h1 className="text-xl sm:text-2xl font-extrabold text-[#321379] tracking-tight">{t("Khoan Đã")}</h1>
       </div>
 
@@ -1922,7 +1922,7 @@ function HomeView({
         {selectedImage && (
           <div className="w-full px-4 sm:px-6 mb-2 pointer-events-auto">
             <div className="flex items-center gap-3 p-2 bg-purple-100/90 backdrop-blur-md rounded-2xl border border-purple-300">
-              <img src={selectedImage} alt="Preview" draggable={false} className="w-11 h-11 sm:w-12 sm:h-12 object-cover rounded-xl border border-purple-400 shrink-0 select-none" />
+              <img src={selectedImage} alt="Preview" draggable={false} className="w-11 h-11 sm:w-12 sm:h-12 object-cover rounded-2xl border border-purple-400 shrink-0 select-none" />
               <div className="flex-1 overflow-hidden">
                 <p className="text-[14px] sm:text-sm font-bold text-purple-900 truncate">{t("Ảnh đã sẵn sàng kiểm tra")}</p>
                 <p className="text-[14px] sm:text-[14px] text-purple-700 truncate">{t("Bấm nút gửi tím để AI phân tích")}</p>
@@ -1939,11 +1939,11 @@ function HomeView({
 
         {/* Text and Image Input Area */}
         <div className="w-full px-4 sm:px-6 mb-2 sm:mb-3 pointer-events-auto">
-          <div className="relative flex items-center bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-1.5 sm:p-2 pl-3 pr-2 shadow-sm border border-purple-200 focus-within:ring-3 ring-[#c084fc]/50 transition-all">
+          <div className="relative flex items-center bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-1.5 sm:p-2 pl-3 pr-2 shadow-sm border-2 border-[#2e1065] focus-within:ring-3 ring-[#c084fc]/50 transition-all">
              <button 
                type="button"
                onClick={() => fileInputRefMobile.current?.click()}
-               className={`w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center rounded-xl sm:rounded-2xl transition-colors shrink-0 ${selectedImage ? 'bg-[#7e22ce] text-white shadow-xs' : 'text-[#6d28d9] hover:bg-[#f3e8ff]'}`}
+               className={`w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center rounded-2xl sm:rounded-2xl transition-colors shrink-0 ${selectedImage ? 'bg-[#7e22ce] text-white shadow-xs' : 'text-[#6d28d9] hover:bg-[#f3e8ff]'}`}
                title={t("Chọn ảnh tình huống")}
              >
                <ImageIcon size={20} className="sm:w-6 sm:h-6" />
@@ -1959,7 +1959,7 @@ function HomeView({
              <button 
                onClick={submitAnalysis} 
                disabled={isAnalyzing}
-               className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-gradient-to-tr from-[#8b5cf6] to-[#d8b4fe] flex items-center justify-center text-white shadow-sm active:scale-95 transition-transform shrink-0 disabled:opacity-50"
+               className="w-9 h-9 sm:w-11 sm:h-11 rounded-2xl sm:rounded-2xl bg-gradient-to-tr from-[#8b5cf6] to-[#d8b4fe] flex items-center justify-center text-white shadow-sm active:scale-95 transition-transform shrink-0 disabled:opacity-50"
              >
                 {isAnalyzing ? (
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -1982,7 +1982,7 @@ function HomeView({
               initial={{ scale: 0.9, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              className="w-full max-w-sm bg-white rounded-3xl p-5 shadow-2xl border border-purple-100 flex flex-col"
+              className="w-full max-w-sm bg-white rounded-3xl p-5 shadow-2xl border-2 border-[#2e1065] flex flex-col"
             >
               <div className="flex items-center justify-between pb-3 border-b border-gray-100 mb-3">
                 <div className="flex items-center gap-2">
@@ -2008,7 +2008,7 @@ function HomeView({
                     <a
                       key={member.id}
                       href={`tel:${member.phone}`}
-                      className="flex items-center justify-between p-3.5 bg-gradient-to-r from-purple-50 to-green-50/50 hover:from-purple-100 hover:to-green-100/70 border border-purple-100 rounded-2xl active:scale-[0.98] transition-all group"
+                      className="flex items-center justify-between p-3.5 bg-gradient-to-r from-purple-50 to-green-50/50 hover:from-purple-100 hover:to-green-100/70 border-2 border-[#2e1065] rounded-2xl active:scale-[0.98] transition-all group"
                     >
                       <div className="flex items-center gap-3">
                         {/*
@@ -2050,13 +2050,13 @@ function HomeView({
                     setShowQuickCallModal(false);
                     setView('family');
                   }}
-                  className="flex-1 py-2.5 px-3 bg-purple-100 hover:bg-purple-200 text-[#5b21b6] font-bold text-[14px] rounded-xl transition-colors text-center"
+                  className="flex-1 py-2.5 px-3 bg-purple-100 hover:bg-purple-200 text-[#5b21b6] font-bold text-[14px] rounded-2xl transition-colors text-center"
                 >
                   {t("Quản lý danh bạ")}
                 </button>
                 <button
                   onClick={() => setShowQuickCallModal(false)}
-                  className="py-2.5 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-[14px] rounded-xl transition-colors"
+                  className="py-2.5 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-[14px] rounded-2xl transition-colors"
                 >
                   {t("Đóng")}
                 </button>
@@ -2588,7 +2588,7 @@ function VoiceView({
 
         {/* Live Audio Waveform based on real microphone volume with smooth curves */}
         {isRecording && (
-          <div className="flex items-center justify-center gap-1.5 h-10 px-5 py-1.5 bg-purple-50/90 backdrop-blur-sm rounded-full border border-purple-200/80 shadow-inner my-1">
+          <div className="flex items-center justify-center gap-1.5 h-10 px-5 py-1.5 bg-purple-50/90 backdrop-blur-sm rounded-full border-2 border-[#2e1065]/80 shadow-inner my-1">
             {micVolume.map((height, i) => (
               <motion.div
                 key={i}
@@ -2619,7 +2619,7 @@ function VoiceView({
           {nguonNghe === 'tren_may' && (
             <button
               onClick={() => { void moCaiDatGiongNoi(); }}
-              className="mt-2.5 w-full min-h-[52px] px-4 bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-extrabold rounded-xl text-[15px] transition-all"
+              className="mt-2.5 w-full min-h-[52px] px-4 bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-extrabold rounded-2xl text-[15px] transition-all"
             >
               {t("Mở Cài đặt để tải bộ nghe")}
             </button>
@@ -2628,7 +2628,7 @@ function VoiceView({
       )}
 
       {/* Transcript Text Box */}
-      <div className="w-full bg-white rounded-2xl p-3.5 shadow-sm border border-[#e9d5ff] mb-3">
+      <div className="w-full bg-white rounded-2xl p-3.5 shadow-sm border-2 border-[#2e1065] mb-3">
         <div className="flex items-center justify-between mb-1.5">
           <span className="text-[14px] font-bold text-[#6d28d9] flex items-center gap-1.5">
             <Sparkles size={14} className="text-amber-500 animate-spin" /> {t("Lời nói đang nhận diện:")}
@@ -2654,7 +2654,7 @@ function VoiceView({
           }}
           placeholder={isRecording ? t("Đang lắng nghe... Bác hãy nói nội dung cuộc gọi hoặc tin nhắn...") : t("Bấm Micro để tiếp tục nói...")}
           rows={3}
-          className="w-full bg-[#f8f4ff] rounded-xl p-2.5 text-[14px] text-[#311068] font-medium outline-none border border-transparent focus:border-[#c084fc] resize-none leading-relaxed"
+          className="w-full bg-[#f8f4ff] rounded-2xl p-2.5 text-[14px] text-[#311068] font-medium outline-none border border-transparent focus:border-[#c084fc] resize-none leading-relaxed"
         />
 
         <div className="mt-1.5 flex items-center justify-between text-[14px] text-emerald-700 font-bold">
@@ -2695,7 +2695,7 @@ function VoiceView({
         <div className="flex gap-2">
           <button 
             onClick={handleToggle} 
-            className={`flex-1 py-2.5 rounded-xl font-bold text-[14px] shadow-xs active:scale-95 transition-all flex items-center justify-center gap-1.5 border ${
+            className={`flex-1 py-2.5 rounded-2xl font-bold text-[14px] shadow-xs active:scale-95 transition-all flex items-center justify-center gap-1.5 border ${
               isRecording 
                 ? 'bg-amber-50 border-amber-200 text-amber-800' 
                 : 'bg-white border-[#e9d5ff] text-[#4c1d95]'
@@ -2710,7 +2710,7 @@ function VoiceView({
               setInterimText('');
               startRecording(); 
             }} 
-            className="flex-1 bg-white border border-[#e9d5ff] text-[#6d28d9] py-2.5 rounded-xl font-bold text-[14px] shadow-xs active:scale-95 transition-all flex items-center justify-center gap-1"
+            className="flex-1 bg-white border-2 border-[#2e1065] text-[#6d28d9] py-2.5 rounded-2xl font-bold text-[14px] shadow-xs active:scale-95 transition-all flex items-center justify-center gap-1"
           >
             <RotateCcw size={13} />
             <span>{t("Nói lại từ đầu")}</span>
@@ -2777,7 +2777,7 @@ function HistoryView({
       className="flex-1 flex flex-col w-full relative z-10 pt-6 md:pt-16 pb-24 lg:pb-10 px-4 md:px-12 lg:px-16 overflow-y-auto"
     >
       <div className="md:hidden flex flex-col items-center mb-4">
-         <div className="w-10 h-10 bg-white rounded-2xl flex items-center justify-center shadow-xs mb-1.5 border border-purple-100">
+         <div className="w-10 h-10 bg-white rounded-2xl flex items-center justify-center shadow-xs mb-1.5 border-2 border-[#2e1065]">
             <ShieldAlert size={22} className="text-[#6d28d9]" />
          </div>
          <h2 className="text-[22px] font-black text-[#1e1b4b] text-center leading-tight">{t("Lịch sử cảnh báo")}</h2>
@@ -2801,20 +2801,20 @@ function HistoryView({
       <div className="flex bg-gradient-to-r from-[#9e76ea] via-[#ad8af0] to-[#9e76ea] md:w-[420px] md:mx-auto rounded-full p-[6px] mb-3 shadow-[0_10px_24px_rgba(90,30,160,0.22)] border border-white/20">
         <button 
           onClick={() => setActiveTab('all')} 
-          className={`flex-1 py-2.5 rounded-full font-bold text-[14px] transition-all ${activeTab === 'all' ? 'bg-white text-[#6d28d9] shadow-sm' : 'text-white/85 hover:bg-white/20'}`}
+          className={`flex-auto min-h-[44px] px-2 rounded-full font-bold text-[14px] leading-snug transition-all ${activeTab === 'all' ? 'bg-white text-[#6d28d9] shadow-sm' : 'text-white/85 hover:bg-white/20'}`}
         >
           {t("Tất cả")}{historyItems.length > 0 ? ` (${historyItems.length})` : ''}
         </button>
         <button 
           onClick={() => setActiveTab('high')} 
-          className={`flex-1 py-2.5 rounded-full font-bold text-[14px] transition-all ${activeTab === 'high' ? 'bg-red-600 text-white shadow-sm' : 'text-white/85 hover:bg-white/20'}`}
+          className={`flex-auto min-h-[44px] px-2 rounded-full font-bold text-[14px] leading-snug transition-all ${activeTab === 'high' ? 'bg-red-600 text-white shadow-sm' : 'text-white/85 hover:bg-white/20'}`}
         >
           {/* Tab lọc cũng dùng đúng nhãn của catalog — cùng một mức, cùng một chữ. */}
           {tra(NHAN, 'CAO', lang)}{historyItems.filter(i => i.risk === 'CAO').length > 0 ? ` (${historyItems.filter(i => i.risk === 'CAO').length})` : ''}
         </button>
         <button 
           onClick={() => setActiveTab('saved')} 
-          className={`flex-1 py-2.5 rounded-full font-bold text-[14px] transition-all ${activeTab === 'saved' ? 'bg-white text-[#6d28d9] shadow-sm' : 'text-white/85 hover:bg-white/20'}`}
+          className={`flex-auto min-h-[44px] px-2 rounded-full font-bold text-[14px] leading-snug transition-all ${activeTab === 'saved' ? 'bg-white text-[#6d28d9] shadow-sm' : 'text-white/85 hover:bg-white/20'}`}
         >
           {t("Đã lưu")}{historyItems.filter(i => i.saved).length > 0 ? ` (${historyItems.filter(i => i.saved).length})` : ''}
         </button>
@@ -2822,7 +2822,7 @@ function HistoryView({
 
       {/* Search inside history */}
       <div className="w-full max-w-4xl mx-auto mb-3">
-        <div className="bg-white rounded-xl px-3 py-2 flex items-center gap-2 border border-purple-100 shadow-2xs">
+        <div className="bg-white rounded-2xl px-3 py-2 flex items-center gap-2 border-2 border-[#2e1065] shadow-2xs">
           <Search size={15} className="text-gray-400" />
           <input 
             type="text" 
@@ -2842,7 +2842,7 @@ function HistoryView({
       {/* History Items List */}
       <div className="flex flex-col gap-2.5 max-w-4xl mx-auto w-full md:grid md:grid-cols-2">
         {filteredItems.length === 0 ? (
-          <div className="col-span-2 flex flex-col items-center justify-center py-10 bg-white/70 rounded-3xl border border-purple-100 shadow-2xs text-center p-6">
+          <div className="col-span-2 flex flex-col items-center justify-center py-10 bg-white/70 rounded-3xl border-2 border-[#2e1065] shadow-2xs text-center p-6">
             <ShieldCheck size={38} className="text-[#c084fc] mb-2 opacity-60" />
             <h4 className="font-bold text-[#1e1b4b] text-[15px] mb-1">{t("Chưa có bản ghi nào")}</h4>
             <p className="text-[14px] text-gray-500 max-w-xs mb-3">{t("Bác bấm micro hoặc quét ảnh ở trang chủ để kiểm tra an toàn.")}</p>
@@ -2861,9 +2861,9 @@ function HistoryView({
               <div 
                 key={item.id}
                 onClick={() => handleOpenItem(item)}
-                className="bg-white rounded-2xl p-3 flex gap-3 items-center shadow-2xs border border-purple-100/70 hover:shadow-xs hover:border-purple-200 transition-all cursor-pointer group"
+                className="bg-white rounded-2xl p-3 flex gap-3 items-center shadow-2xs border-2 border-[#2e1065]/70 hover:shadow-xs hover:border-purple-200 transition-all cursor-pointer group"
               >
-                <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${isHigh ? 'bg-red-50 text-red-600 border border-red-200' : isSuspicious ? 'bg-amber-50 text-amber-600 border border-amber-200' : 'bg-emerald-50 text-emerald-600 border border-emerald-200'}`}>
+                <div className={`w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 ${isHigh ? 'bg-red-50 text-red-600 border border-red-200' : isSuspicious ? 'bg-amber-50 text-amber-600 border border-amber-200' : 'bg-emerald-50 text-emerald-600 border border-emerald-200'}`}>
                   {item.type === 'call' ? (
                     <Phone size={18} />
                   ) : item.type === 'image' ? (
@@ -3118,7 +3118,7 @@ function FamilyView({
                      onClick={() => handleCall(item.phone.replace(/[^0-9+]/g, ''))}
                      className="flex items-center gap-3 p-3 min-h-[52px] rounded-2xl bg-purple-50 hover:bg-purple-100 text-left transition-all border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] active:scale-95 group"
                    >
-                      <div className="w-11 h-11 bg-purple-600 text-white rounded-xl flex items-center justify-center font-black text-[14px] shrink-0 border-2 border-[#2e1065] group-hover:bg-red-600 transition-colors">
+                      <div className="w-11 h-11 bg-purple-600 text-white rounded-2xl flex items-center justify-center font-black text-[14px] shrink-0 border-2 border-[#2e1065] group-hover:bg-red-600 transition-colors">
                          {item.phone.length > 5 ? 'SOS' : item.phone}
                       </div>
                       <h4 className="flex-1 font-bold text-[#1e1b4b] text-[15px] leading-snug">{item.name}</h4>
@@ -3233,12 +3233,12 @@ function AccountView({ setView, t, hoSo, onDangXuat, onLuuTen }: {
                       value={ten}
                       onChange={(e) => { setTen(e.target.value); setXong(false); }}
                       maxLength={60}
-                      className="flex-1 min-h-[52px] px-3 rounded-xl border-2 border-purple-200 bg-white text-[15px] font-bold text-[#1e1b4b] focus:outline-none focus:border-[#7c3aed]"
+                      className="flex-1 min-h-[52px] px-3 rounded-2xl border-2 border-purple-200 bg-white text-[15px] font-bold text-[#1e1b4b] focus:outline-none focus:border-[#7c3aed]"
                     />
                     <button
                       onClick={() => void luuTen()}
                       disabled={dangLuu || !ten.trim() || ten.trim() === hoSo.ten}
-                      className="min-h-[52px] px-4 bg-[#7c3aed] text-white rounded-xl font-bold text-[15px] disabled:opacity-40 active:scale-95 transition-transform"
+                      className="min-h-[52px] px-4 bg-[#7c3aed] text-white rounded-2xl font-bold text-[15px] disabled:opacity-40 active:scale-95 transition-transform"
                     >
                       {dangLuu ? '…' : t("Lưu")}
                     </button>
@@ -3384,7 +3384,7 @@ function BongBongNoiNative({ t }: { t: any }) {
   };
 
   return (
-    <div className="w-full max-w-[420px] bg-white rounded-[26px] p-5 shadow-md border border-[#e9d5ff] mb-5">
+    <div className="w-full max-w-[420px] bg-white rounded-[26px] p-5 shadow-md border-2 border-[#2e1065] mb-5">
       <h3 className="font-black text-[16px] text-[#311068] mb-1 flex items-center gap-2">
         <Sparkles size={18} className="text-[#6d28d9]" />
         {t('Nút tròn nổi trên màn hình')}
@@ -3480,7 +3480,7 @@ function CuaSoNoiNative({ t }: { t: any }) {
   return (
     <div className="w-full max-w-[420px] bg-gradient-to-r from-purple-900 via-indigo-900 to-purple-800 text-white rounded-[26px] p-5 shadow-lg border border-purple-400/50 mb-5 relative overflow-hidden">
       <div className="flex items-start gap-2.5 mb-2">
-        <div className="w-9 h-9 rounded-xl bg-purple-500/30 border border-purple-300/40 flex items-center justify-center text-purple-200 shrink-0">
+        <div className="w-9 h-9 rounded-2xl bg-purple-500/30 border border-purple-300/40 flex items-center justify-center text-purple-200 shrink-0">
           <Maximize2 size={20} />
         </div>
         <div>
@@ -3522,7 +3522,7 @@ function CuaSoNoiNative({ t }: { t: any }) {
           <button
             onClick={thu}
             disabled={dangThu}
-            className="w-full py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 active:scale-95 disabled:opacity-60 text-white font-extrabold rounded-xl text-[14px] flex items-center justify-center gap-2 shadow-md transition-all"
+            className="w-full py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 active:scale-95 disabled:opacity-60 text-white font-extrabold rounded-2xl text-[14px] flex items-center justify-center gap-2 shadow-md transition-all"
           >
             <Sparkles size={15} />
             <span>{dangThu ? t("Đang hiện thử…") : t("Xem thử một lần")}</span>
@@ -3565,7 +3565,7 @@ function CuaSoNoiNative({ t }: { t: any }) {
           </div>
           <button
             onClick={() => { void xinQuyenPopup(); }}
-            className="w-full py-2.5 bg-gradient-to-r from-amber-400 to-orange-400 hover:from-amber-500 hover:to-orange-500 active:scale-95 text-[#3b1f00] font-extrabold rounded-xl text-[14px] flex items-center justify-center gap-2 shadow-md transition-all"
+            className="w-full py-2.5 bg-gradient-to-r from-amber-400 to-orange-400 hover:from-amber-500 hover:to-orange-500 active:scale-95 text-[#3b1f00] font-extrabold rounded-2xl text-[14px] flex items-center justify-center gap-2 shadow-md transition-all"
           >
             <Sparkles size={15} />
             <span>{t("Mở Cài đặt để bật")}</span>
@@ -3719,7 +3719,7 @@ function DocTinNhanNative({ t, onAnalyze }: { t: any; onAnalyze?: (text: string)
   };
 
   return (
-    <div className="w-full max-w-[420px] bg-white rounded-[26px] p-5 shadow-md border border-[#e9d5ff] mb-5">
+    <div className="w-full max-w-[420px] bg-white rounded-[26px] p-5 shadow-md border-2 border-[#2e1065] mb-5">
       <h3 className="font-black text-[16px] text-[#311068] mb-1 flex items-center gap-2">
         <Bell size={18} className="text-[#6d28d9]" />
         {t("Tự bắt tin nhắn đến")}
@@ -3750,7 +3750,7 @@ function DocTinNhanNative({ t, onAnalyze }: { t: any; onAnalyze?: (text: string)
           <button
             onClick={kiemTinMoi}
             disabled={dangLay}
-            className="w-full min-h-[52px] px-4 mb-2.5 bg-gradient-to-r from-[#7c3aed] to-[#6d28d9] hover:opacity-95 active:scale-95 disabled:opacity-60 text-white font-extrabold rounded-xl text-[15px] transition-all"
+            className="w-full min-h-[52px] px-4 mb-2.5 bg-gradient-to-r from-[#7c3aed] to-[#6d28d9] hover:opacity-95 active:scale-95 disabled:opacity-60 text-white font-extrabold rounded-2xl text-[15px] transition-all"
           >
             {dangLay ? t("Đang lấy…") : t("Kiểm tin nhắn mới nhất")}
           </button>
@@ -3761,7 +3761,7 @@ function DocTinNhanNative({ t, onAnalyze }: { t: any; onAnalyze?: (text: string)
           */}
           <button
             onClick={() => { void xoaTinDaBat(); setKhongCoTin(false); }}
-            className="w-full min-h-[52px] px-4 bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 font-bold rounded-xl text-[14px] transition-all"
+            className="w-full min-h-[52px] px-4 bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 font-bold rounded-2xl text-[14px] transition-all"
           >
             {t("Xoá các tin đã bắt")}
           </button>
@@ -3781,7 +3781,7 @@ function DocTinNhanNative({ t, onAnalyze }: { t: any; onAnalyze?: (text: string)
           </div>
           <button
             onClick={() => { void xinQuyenDocThongBao(); }}
-            className="w-full min-h-[52px] px-4 bg-gradient-to-r from-amber-400 to-orange-400 hover:opacity-95 active:scale-95 text-[#3b1f00] font-extrabold rounded-xl text-[15px] transition-all"
+            className="w-full min-h-[52px] px-4 bg-gradient-to-r from-amber-400 to-orange-400 hover:opacity-95 active:scale-95 text-[#3b1f00] font-extrabold rounded-2xl text-[15px] transition-all"
           >
             {t("Mở Cài đặt để bật")}
           </button>
@@ -3850,7 +3850,7 @@ function NhacCuocGoiDai({ t, lang }: { t: any; lang: Lang }) {
   };
 
   return (
-    <div className="w-full max-w-[420px] bg-white rounded-[26px] p-5 shadow-md border border-[#e9d5ff] mb-5">
+    <div className="w-full max-w-[420px] bg-white rounded-[26px] p-5 shadow-md border-2 border-[#2e1065] mb-5">
       <h3 className="font-black text-[16px] text-[#311068] mb-1 flex items-center gap-2">
         <PhoneCall size={18} className="text-[#6d28d9]" />
         {t('Nhắc khi cuộc gọi kéo dài')}
@@ -3881,7 +3881,7 @@ function NhacCuocGoiDai({ t, lang }: { t: any; lang: Lang }) {
         </div>
       )}
 
-      <div className="flex items-center justify-between p-3.5 bg-purple-50 rounded-2xl border border-purple-200">
+      <div className="flex items-center justify-between p-3.5 bg-purple-50 rounded-2xl border-2 border-[#2e1065]">
         <span className="text-[15px] font-extrabold text-[#311068]">
           {dangBat ? t('Đang trông chừng') : t('Đang tắt')}
         </span>
@@ -4117,7 +4117,7 @@ function NotificationsView({
         có thứ tự thì bác bật cái nào trước cũng được, và cái nào hỏng thì không
         biết vì sao. Ba dòng dưới đây nói đúng thứ tự nên bật, và bật để làm gì.
       */}
-      <div className="w-full max-w-[420px] bg-white rounded-3xl p-4 shadow-sm border border-[#e9d5ff] mb-4">
+      <div className="w-full max-w-[420px] bg-white rounded-3xl p-4 shadow-sm border-2 border-[#2e1065] mb-4">
         <h3 className="text-[16px] font-black text-[#311068] mb-2">{t('Bật theo thứ tự này')}</h3>
         <ol className="flex flex-col gap-2">
           {[
@@ -4147,7 +4147,7 @@ function NotificationsView({
           <ChevronLeft size={20} />
           <span>{t("Quay lại")}</span>
         </button>
-        <span className="text-[14px] font-extrabold text-purple-700 bg-purple-100 px-3 py-1 rounded-full border border-purple-200">
+        <span className="text-[14px] font-extrabold text-purple-700 bg-purple-100 px-3 py-1 rounded-full border-2 border-[#2e1065]">
           {t("Cài đặt thông báo")}
         </span>
       </div>
@@ -4370,7 +4370,7 @@ function NotificationsView({
       <div className="w-full max-w-[420px] bg-gradient-to-r from-purple-900 via-indigo-900 to-purple-800 text-white rounded-[26px] p-5 shadow-lg border border-purple-400/50 mb-5 relative overflow-hidden">
         <div className="flex items-start justify-between gap-3 mb-2">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-purple-500/30 border border-purple-300/40 flex items-center justify-center text-purple-200 shrink-0">
+            <div className="w-9 h-9 rounded-2xl bg-purple-500/30 border border-purple-300/40 flex items-center justify-center text-purple-200 shrink-0">
               <Maximize2 size={20} />
             </div>
             <div>
@@ -4410,7 +4410,7 @@ function NotificationsView({
 
         <button
           onClick={handleLaunchPipFromSettings}
-          className="w-full py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 active:scale-95 text-white font-extrabold rounded-xl text-[14px] flex items-center justify-center gap-2 shadow-md transition-all"
+          className="w-full py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 active:scale-95 text-white font-extrabold rounded-2xl text-[14px] flex items-center justify-center gap-2 shadow-md transition-all"
         >
           <Sparkles size={15} />
           <span>{t("Mở cửa sổ nổi")}</span>
@@ -4432,7 +4432,7 @@ function NotificationsView({
       {dangChayApk && <NhacCuocGoiDai t={t} lang={lang} />}
 
       {/* 4. Action Mode Selector */}
-      <div className="w-full max-w-[420px] bg-white rounded-[26px] p-5 shadow-md border border-[#e9d5ff] mb-5">
+      <div className="w-full max-w-[420px] bg-white rounded-[26px] p-5 shadow-md border-2 border-[#2e1065] mb-5">
         <h3 className="font-black text-[16px] text-[#311068] mb-1 flex items-center gap-2">
           <Sliders size={18} className="text-[#6d28d9]" />
           {t("Chọn hành động khi bấm vào thông báo:")}
@@ -4515,7 +4515,7 @@ function NotificationsView({
 
       {/* 4. In-App Banner Setting Toggle */}
       {setShowInAppBanner && (
-        <div className="w-full max-w-[420px] bg-white rounded-[24px] p-4 shadow-sm border border-[#e9d5ff] mb-5 flex items-center justify-between">
+        <div className="w-full max-w-[420px] bg-white rounded-[24px] p-4 shadow-sm border-2 border-[#2e1065] mb-5 flex items-center justify-between">
           <div className="flex flex-col pr-2">
             <span className="font-bold text-[#1e1b4b] text-[14px]">{t('Hiện dải ghim ở đầu trang web')}</span>
             <span className="text-[#64748b] text-[14px]">{t('Bật thì thấy dải tím ở đầu trang. Tắt thì chỉ nhận thông báo ngoài máy.')}</span>
@@ -4671,7 +4671,7 @@ function ProfileView({ setView, t, isLoggedIn, hoSo, onDangXuat }: {
            <User size={48} className="text-[#c084fc] mb-4 opacity-50" />
            <p className="text-[#3b1d7d] font-bold text-lg mb-2">{t("Chưa có dữ liệu")}</p>
            <p className="text-center text-[#6d28d9]/70 text-sm font-medium px-8 mb-6">{t("Vui lòng đăng nhập để xem thông tin")}</p>
-           <button onClick={() => setView('login')} className="px-8 py-3 bg-gradient-to-r from-[#9333ea] to-[#7e22ce] text-white font-bold rounded-2xl shadow-lg active:scale-95 transition-all">
+           <button onClick={() => setView('login')} className="min-h-[56px] px-8 py-3 bg-gradient-to-r from-[#9e76ea] via-[#ad8af0] to-[#9e76ea] text-white font-bold text-[16px] rounded-full border-[2.5px] border-[#2e1065] shadow-[4px_4px_0_#2e1065] active:scale-95 transition-all">
              {t("Đăng nhập")}
            </button>
         </div>
@@ -4716,7 +4716,7 @@ function ProfileView({ setView, t, isLoggedIn, hoSo, onDangXuat }: {
           <div className="flex flex-col gap-3">
              <div onClick={() => setView('account')} className="bg-white rounded-[20px] p-4 flex items-center justify-between shadow-sm border border-[#f3e8ff] active:bg-[#f8f4ff] cursor-pointer transition-colors">
                <div className="flex items-center gap-4">
-                 <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#8b5cf6] to-[#c084fc] flex items-center justify-center text-white shadow-sm">
+                 <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#8b5cf6] to-[#c084fc] flex items-center justify-center text-white shadow-sm">
                    <User size={24} fill="currentColor" />
                  </div>
                  <span className="font-bold text-[#1e1b4b] text-[17px]">{t("Tài khoản")}</span>
@@ -4726,7 +4726,7 @@ function ProfileView({ setView, t, isLoggedIn, hoSo, onDangXuat }: {
              
              <div onClick={() => setView('privacy')} className="bg-white rounded-[20px] p-4 flex items-center justify-between shadow-sm border border-[#f3e8ff] active:bg-[#f8f4ff] cursor-pointer transition-colors">
                <div className="flex items-center gap-4">
-                 <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#8b5cf6] to-[#c084fc] flex items-center justify-center text-white shadow-sm">
+                 <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#8b5cf6] to-[#c084fc] flex items-center justify-center text-white shadow-sm">
                    <ShieldCheck size={24} fill="currentColor" />
                  </div>
                  <span className="font-bold text-[#1e1b4b] text-[17px]">{t("Quyền riêng tư")}</span>
@@ -4736,7 +4736,7 @@ function ProfileView({ setView, t, isLoggedIn, hoSo, onDangXuat }: {
              
              <div onClick={() => setView('notifications')} className="bg-white rounded-[20px] p-4 flex items-center justify-between shadow-sm border border-[#f3e8ff] active:bg-[#f8f4ff] cursor-pointer transition-colors">
                <div className="flex items-center gap-4">
-                 <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#8b5cf6] to-[#c084fc] flex items-center justify-center text-white shadow-sm">
+                 <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#8b5cf6] to-[#c084fc] flex items-center justify-center text-white shadow-sm">
                    <Bell size={24} fill="currentColor" />
                  </div>
                  <span className="font-bold text-[#1e1b4b] text-[17px]">{t("Thông báo")}</span>
@@ -4746,7 +4746,7 @@ function ProfileView({ setView, t, isLoggedIn, hoSo, onDangXuat }: {
              
              <div onClick={() => setView('device_data')} className="bg-white rounded-[20px] p-4 flex items-center justify-between shadow-sm border border-[#f3e8ff] active:bg-[#f8f4ff] cursor-pointer transition-colors">
                <div className="flex items-center gap-4">
-                 <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#8b5cf6] to-[#c084fc] flex items-center justify-center text-white shadow-sm">
+                 <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#8b5cf6] to-[#c084fc] flex items-center justify-center text-white shadow-sm">
                    <Database size={24} fill="currentColor" />
                  </div>
                  <span className="font-bold text-[#1e1b4b] text-[17px]">{t("Dữ liệu trên thiết bị")}</span>
@@ -4842,7 +4842,7 @@ function SettingsView({
       {/* Floating Assistive Ball & Outside Mode Card */}
       <div className="w-full max-w-[360px] bg-gradient-to-br from-purple-900 to-indigo-950 rounded-3xl p-5 shadow-md border border-purple-400/30 text-white mb-6">
         <div className="flex items-center gap-3 mb-3">
-          <div className="w-10 h-10 rounded-xl bg-purple-500/30 border border-purple-400/40 flex items-center justify-center text-purple-200">
+          <div className="w-10 h-10 rounded-2xl bg-purple-500/30 border border-purple-400/40 flex items-center justify-center text-purple-200">
             <Layers size={22} />
           </div>
           <div>
@@ -4888,7 +4888,7 @@ function SettingsView({
         {onOpenOutsideMode && (
           <button
             onClick={onOpenOutsideMode}
-            className="w-full py-2.5 bg-white/15 hover:bg-white/25 active:scale-95 text-white rounded-xl text-[14px] font-bold transition-all flex items-center justify-center gap-2 border border-white/20"
+            className="w-full py-2.5 bg-white/15 hover:bg-white/25 active:scale-95 text-white rounded-2xl text-[14px] font-bold transition-all flex items-center justify-center gap-2 border border-white/20"
           >
             {/*
               ⚠️ NHÃN NGẮN LẠI. Bản trước là "Thử màn hình khóa / Màn hình ngoài"
@@ -4908,7 +4908,7 @@ function SettingsView({
         — nên người đang tìm cái này thường đang tìm cả cái kia.
       */}
       {setSieuDonGian && (
-        <div className="w-full max-w-[360px] bg-white rounded-3xl p-5 shadow-sm border border-[#e9d5ff] mb-6">
+        <div className="w-full max-w-[360px] bg-white rounded-3xl p-5 shadow-sm border-2 border-[#2e1065] mb-6">
           <div className="flex items-start justify-between gap-3">
             <div className="flex-1">
               <h3 className="text-[17px] font-black text-[#4c1d95] leading-snug">
@@ -4930,42 +4930,42 @@ function SettingsView({
         </div>
       )}
 
-      <div className="w-full max-w-[360px] bg-white rounded-3xl p-6 shadow-sm border border-[#e9d5ff] mb-6">
+      <div className="w-full max-w-[360px] bg-white rounded-3xl p-6 shadow-sm border-2 border-[#2e1065] mb-6">
         <h3 className="text-xl font-bold text-[#4c1d95] mb-4">{t("Cỡ chữ")}</h3>
         <div className="flex justify-between items-center bg-[#f3e8ff] p-2 rounded-2xl">
           <button 
             onClick={() => setFontSize('small')}
-            className={`flex-1 py-3 rounded-xl font-bold text-[15px] transition-all ${fontSize === 'small' ? 'bg-[#6d28d9] text-white shadow-md' : 'text-[#6d28d9] hover:bg-[#e9d5ff]'}`}
+            className={`flex-1 py-3 rounded-2xl font-bold text-[15px] transition-all ${fontSize === 'small' ? 'bg-[#6d28d9] text-white shadow-md' : 'text-[#6d28d9] hover:bg-[#e9d5ff]'}`}
           >
             {t("Nhỏ")}
           </button>
           <button 
             onClick={() => setFontSize('normal')}
-            className={`flex-1 py-3 rounded-xl font-bold text-[15px] mx-2 transition-all ${fontSize === 'normal' ? 'bg-[#6d28d9] text-white shadow-md' : 'text-[#6d28d9] hover:bg-[#e9d5ff]'}`}
+            className={`flex-1 py-3 rounded-2xl font-bold text-[15px] mx-2 transition-all ${fontSize === 'normal' ? 'bg-[#6d28d9] text-white shadow-md' : 'text-[#6d28d9] hover:bg-[#e9d5ff]'}`}
           >
             {t("Vừa")}
           </button>
           <button 
             onClick={() => setFontSize('large')}
-            className={`flex-1 py-3 rounded-xl font-bold text-[15px] transition-all ${fontSize === 'large' ? 'bg-[#6d28d9] text-white shadow-md' : 'text-[#6d28d9] hover:bg-[#e9d5ff]'}`}
+            className={`flex-1 py-3 rounded-2xl font-bold text-[15px] transition-all ${fontSize === 'large' ? 'bg-[#6d28d9] text-white shadow-md' : 'text-[#6d28d9] hover:bg-[#e9d5ff]'}`}
           >
             {t("Lớn")}
           </button>
         </div>
       </div>
 
-      <div className="w-full max-w-[360px] bg-white rounded-3xl p-6 shadow-sm border border-[#e9d5ff] mb-6">
+      <div className="w-full max-w-[360px] bg-white rounded-3xl p-6 shadow-sm border-2 border-[#2e1065] mb-6">
         <h3 className="text-xl font-bold text-[#4c1d95] mb-4">{t("Ngôn ngữ")}</h3>
         <div className="flex justify-between items-center bg-[#f3e8ff] p-2 rounded-2xl">
           <button 
             onClick={() => setLang('vi')}
-            className={`flex-1 py-3 rounded-xl font-bold text-[15px] transition-all ${lang === 'vi' ? 'bg-[#6d28d9] text-white shadow-md' : 'text-[#6d28d9] hover:bg-[#e9d5ff]'}`}
+            className={`flex-1 py-3 rounded-2xl font-bold text-[15px] transition-all ${lang === 'vi' ? 'bg-[#6d28d9] text-white shadow-md' : 'text-[#6d28d9] hover:bg-[#e9d5ff]'}`}
           >
             {t("Tiếng Việt")}
           </button>
           <button 
             onClick={() => setLang('en')}
-            className={`flex-1 py-3 rounded-xl font-bold text-[15px] ml-2 transition-all ${lang === 'en' ? 'bg-[#6d28d9] text-white shadow-md' : 'text-[#6d28d9] hover:bg-[#e9d5ff]'}`}
+            className={`flex-1 py-3 rounded-2xl font-bold text-[15px] ml-2 transition-all ${lang === 'en' ? 'bg-[#6d28d9] text-white shadow-md' : 'text-[#6d28d9] hover:bg-[#e9d5ff]'}`}
           >
             {t("English")}
           </button>
@@ -4973,7 +4973,7 @@ function SettingsView({
       </div>
 
       <div className="w-full max-w-[360px] mb-6">
-        <div className="bg-white/60 backdrop-blur-sm rounded-3xl border border-[#e9d5ff] shadow-sm flex flex-col overflow-hidden">
+        <div className="bg-white/60 backdrop-blur-sm rounded-3xl border-2 border-[#2e1065] shadow-sm flex flex-col overflow-hidden">
            <div 
              onClick={() => setView('notifications')}
              className="p-5 flex items-center justify-between border-b border-[#e9d5ff] cursor-pointer hover:bg-white/80 active:bg-purple-50 transition-colors"
@@ -5105,7 +5105,7 @@ function IntroView({
               initial={{ scale: 0.92, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.92, opacity: 0 }}
-              className="w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl border border-purple-100 flex flex-col items-center text-center"
+              className="w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl border-2 border-[#2e1065] flex flex-col items-center text-center"
             >
               <div className="w-16 h-16 mb-2">
                 <img src="/logo.webp" alt="Logo" className="w-full h-full object-contain drop-shadow-md" />
@@ -5168,7 +5168,7 @@ function IntroView({
               if (setUserRole) setUserRole('elder');
               setView('home');
             }} 
-            className="text-[#6d28d9] font-bold text-[14px] active:scale-95 transition-transform bg-white/70 backdrop-blur-sm px-3.5 py-1.5 rounded-full shadow-2xs border border-purple-100"
+            className="text-[#6d28d9] font-bold text-[14px] active:scale-95 transition-transform bg-white/70 backdrop-blur-sm px-3.5 py-1.5 rounded-full shadow-2xs border-2 border-[#2e1065]"
           >
             {t("Bỏ qua")}
           </button>
@@ -5286,7 +5286,7 @@ function TinLuaDaoGanDay({ t, lang = 'vi' }: { t: any, lang?: Lang }) {
       </div>
 
       {dangTai ? (
-        <div className="bg-white rounded-2xl p-4 border border-purple-100 text-[14px] text-gray-600">
+        <div className="bg-white rounded-2xl p-4 border-2 border-[#2e1065] text-[14px] text-gray-600">
           {t("Đang lấy tin từ các báo…")}
         </div>
       ) : (
@@ -5297,9 +5297,9 @@ function TinLuaDaoGanDay({ t, lang = 'vi' }: { t: any, lang?: Lang }) {
               href={x.lienKet}
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-white rounded-2xl p-3 flex gap-2.5 shadow-2xs border border-purple-100 items-start"
+              className="bg-white rounded-2xl p-3 flex gap-2.5 shadow-2xs border-2 border-[#2e1065] items-start"
             >
-              <span className="w-10 h-10 rounded-xl bg-purple-50 border border-purple-100 flex items-center justify-center text-purple-700 shrink-0">
+              <span className="w-10 h-10 rounded-2xl bg-purple-50 border-2 border-[#2e1065] flex items-center justify-center text-purple-700 shrink-0">
                 <FileText size={18} />
               </span>
               <span className="flex-1 min-w-0">
@@ -5315,7 +5315,7 @@ function TinLuaDaoGanDay({ t, lang = 'vi' }: { t: any, lang?: Lang }) {
             và câu chữ ở đây phải phân biệt được hai chuyện đó.
           */}
           {(tin ?? []).length === 0 && cauChuaLayDuoc.length === 0 && (
-            <div className="bg-white rounded-2xl p-4 border border-purple-100 text-[14px] text-gray-700">
+            <div className="bg-white rounded-2xl p-4 border-2 border-[#2e1065] text-[14px] text-gray-700">
               {t("Chưa có tin nào lấy về được lúc này.")}
             </div>
           )}
@@ -5391,7 +5391,7 @@ function SearchView({
       />
 
       <div className="md:hidden flex flex-col items-center mb-4">
-         <div className="w-10 h-10 bg-white rounded-2xl flex items-center justify-center shadow-xs mb-1.5 border border-purple-100">
+         <div className="w-10 h-10 bg-white rounded-2xl flex items-center justify-center shadow-xs mb-1.5 border-2 border-[#2e1065]">
             <Search size={22} className="text-[#6d28d9]" />
          </div>
          <h2 className="text-[22px] font-black text-[#1e1b4b] text-center leading-tight">{t("Kiểm tra an toàn")}</h2>
@@ -5406,7 +5406,7 @@ function SearchView({
       <div className="w-full max-w-2xl mx-auto mb-4">
           {searchImage && (
             <div className="flex items-center gap-2 p-2 bg-purple-100/90 backdrop-blur-md rounded-2xl border border-purple-300 mb-2.5">
-              <img src={searchImage} alt="Preview" className="w-10 h-10 object-cover rounded-xl border border-purple-400 shrink-0" />
+              <img src={searchImage} alt="Preview" className="w-10 h-10 object-cover rounded-2xl border border-purple-400 shrink-0" />
               <div className="flex-1 overflow-hidden">
                 <p className="text-[14px] font-bold text-purple-900 truncate">{t("Ảnh đính kèm đã sẵn sàng")}</p>
                 <p className="text-[14px] text-purple-700 truncate">{t("Bấm nút kính lúp để quét")}</p>
@@ -5420,11 +5420,11 @@ function SearchView({
             </div>
           )}
 
-          <div className="relative flex items-center bg-white rounded-2xl p-1.5 pl-2 pr-1.5 shadow-2xs border border-purple-100 focus-within:ring-2 ring-[#c084fc]/50 transition-all">
+          <div className="relative flex items-center bg-white rounded-2xl p-1.5 pl-2 pr-1.5 shadow-2xs border-2 border-[#2e1065] focus-within:ring-2 ring-[#c084fc]/50 transition-all">
              <button 
                type="button"
                onClick={() => fileInputRef.current?.click()}
-               className={`w-9 h-9 flex items-center justify-center rounded-xl transition-colors shrink-0 ${searchImage ? 'bg-[#7e22ce] text-white shadow-xs' : 'text-[#6d28d9] hover:bg-[#f3e8ff]'}`}
+               className={`w-9 h-9 flex items-center justify-center rounded-2xl transition-colors shrink-0 ${searchImage ? 'bg-[#7e22ce] text-white shadow-xs' : 'text-[#6d28d9] hover:bg-[#f3e8ff]'}`}
                /* `title` chỉ hiện khi rê chuột — điện thoại không có chuột. */
                aria-label={t("Chọn ảnh")}
                title={t("Chọn ảnh")}
@@ -5443,7 +5443,7 @@ function SearchView({
                onClick={() => handleRunSearch()}
                aria-label={t("Kiểm tra ngay")}
                disabled={isAnalyzing}
-               className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#8b5cf6] to-[#7c3aed] flex items-center justify-center text-white shadow-xs active:scale-95 transition-transform shrink-0 disabled:opacity-50"
+               className="w-9 h-9 rounded-2xl bg-gradient-to-tr from-[#8b5cf6] to-[#7c3aed] flex items-center justify-center text-white shadow-xs active:scale-95 transition-transform shrink-0 disabled:opacity-50"
              >
                 {isAnalyzing ? (
                   <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -5459,9 +5459,9 @@ function SearchView({
                  setSearchInput("Tôi nhận được mã QR yêu cầu quét để nhận quà tri ân");
                  handleRunSearch("Tôi nhận được mã QR yêu cầu quét để nhận quà tri ân");
                }}
-               className="flex flex-col items-center justify-center bg-white rounded-2xl p-2.5 shadow-2xs border border-purple-100 active:scale-95 transition-transform"
+               className="flex flex-col items-center justify-center bg-white rounded-2xl p-2.5 shadow-2xs border-2 border-[#2e1065] active:scale-95 transition-transform"
              >
-               <div className="w-9 h-9 bg-blue-100 rounded-xl flex items-center justify-center mb-1 text-blue-600">
+               <div className="w-9 h-9 bg-blue-100 rounded-2xl flex items-center justify-center mb-1 text-blue-600">
                  <QrCode size={18} />
                </div>
                <span className="text-[#3b1d7d] font-bold text-[14px] text-center">{t("Mã QR")}</span>
@@ -5472,9 +5472,9 @@ function SearchView({
                  setSearchInput("Có người gửi link khuyến mãi trúng thưởng yêu cầu đăng nhập");
                  handleRunSearch("Có người gửi link khuyến mãi trúng thưởng yêu cầu đăng nhập");
                }}
-               className="flex flex-col items-center justify-center bg-white rounded-2xl p-2.5 shadow-2xs border border-purple-100 active:scale-95 transition-transform"
+               className="flex flex-col items-center justify-center bg-white rounded-2xl p-2.5 shadow-2xs border-2 border-[#2e1065] active:scale-95 transition-transform"
              >
-               <div className="w-9 h-9 bg-purple-100 rounded-xl flex items-center justify-center mb-1 text-purple-600">
+               <div className="w-9 h-9 bg-purple-100 rounded-2xl flex items-center justify-center mb-1 text-purple-600">
                  <Globe size={18} />
                </div>
                <span className="text-[#3b1d7d] font-bold text-[14px] text-center">{t("Link web")}</span>
@@ -5485,9 +5485,9 @@ function SearchView({
                  setSearchInput("Số điện thoại lạ gọi tự xưng công an yêu cầu chuyển tiền vào tài khoản an toàn");
                  handleRunSearch("Số điện thoại lạ gọi tự xưng công an yêu cầu chuyển tiền vào tài khoản an toàn");
                }}
-               className="flex flex-col items-center justify-center bg-white rounded-2xl p-2.5 shadow-2xs border border-purple-100 active:scale-95 transition-transform"
+               className="flex flex-col items-center justify-center bg-white rounded-2xl p-2.5 shadow-2xs border-2 border-[#2e1065] active:scale-95 transition-transform"
              >
-               <div className="w-9 h-9 bg-emerald-100 rounded-xl flex items-center justify-center mb-1 text-emerald-600">
+               <div className="w-9 h-9 bg-emerald-100 rounded-2xl flex items-center justify-center mb-1 text-emerald-600">
                  <Phone size={18} />
                </div>
                <span className="text-[#3b1d7d] font-bold text-[14px] text-center">{t("Cuộc gọi")}</span>
@@ -5508,7 +5508,7 @@ function SearchView({
         khoảng 30%, nên đừng thiết kế hộp vừa khít chữ (§4.5).
       */}
       <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-5 w-full mb-8">
-         <div onClick={() => handleRunSearch("Cuộc gọi tự xưng cơ quan chức năng hoặc công an điều tra")} className="bg-white rounded-[1.5rem] p-5 shadow-sm border border-purple-100 flex flex-col gap-3 hover:shadow-md hover:border-purple-300 transition-all cursor-pointer group text-left min-w-0">
+         <div onClick={() => handleRunSearch("Cuộc gọi tự xưng cơ quan chức năng hoặc công an điều tra")} className="bg-white rounded-[1.5rem] p-5 shadow-sm border-2 border-[#2e1065] flex flex-col gap-3 hover:shadow-md hover:border-purple-300 transition-all cursor-pointer group text-left min-w-0">
             <div className="w-14 h-14 bg-[#f3e8ff] rounded-2xl flex items-center justify-center shadow-inner relative overflow-hidden shrink-0">
                <Phone className="w-7 h-7 text-[#7e22ce] relative z-10" />
                <div className="absolute inset-0 bg-gradient-to-tr from-[#c084fc]/20 to-transparent"></div>
@@ -5519,7 +5519,7 @@ function SearchView({
             </div>
          </div>
 
-         <div onClick={() => handleRunSearch("Tin nhắn thông báo tài khoản ngân hàng bị khóa hoặc yêu cầu ấn vào link")} className="bg-white rounded-[1.5rem] p-5 shadow-sm border border-purple-100 flex flex-col gap-3 hover:shadow-md hover:border-purple-300 transition-all cursor-pointer group text-left min-w-0">
+         <div onClick={() => handleRunSearch("Tin nhắn thông báo tài khoản ngân hàng bị khóa hoặc yêu cầu ấn vào link")} className="bg-white rounded-[1.5rem] p-5 shadow-sm border-2 border-[#2e1065] flex flex-col gap-3 hover:shadow-md hover:border-purple-300 transition-all cursor-pointer group text-left min-w-0">
             <div className="w-14 h-14 bg-[#f3e8ff] rounded-2xl flex items-center justify-center shadow-inner relative overflow-hidden shrink-0">
                <MessageSquare className="w-7 h-7 text-[#7e22ce] relative z-10" />
                <div className="absolute inset-0 bg-gradient-to-tr from-[#c084fc]/20 to-transparent"></div>
@@ -5530,7 +5530,7 @@ function SearchView({
             </div>
          </div>
 
-         <div onClick={() => handleRunSearch("Đường link nhận quà hoặc yêu cầu quét mã QR nạp tiền")} className="bg-white rounded-[1.5rem] p-5 shadow-sm border border-purple-100 flex flex-col gap-3 hover:shadow-md hover:border-purple-300 transition-all cursor-pointer group text-left min-w-0">
+         <div onClick={() => handleRunSearch("Đường link nhận quà hoặc yêu cầu quét mã QR nạp tiền")} className="bg-white rounded-[1.5rem] p-5 shadow-sm border-2 border-[#2e1065] flex flex-col gap-3 hover:shadow-md hover:border-purple-300 transition-all cursor-pointer group text-left min-w-0">
             <div className="w-14 h-14 bg-[#f3e8ff] rounded-2xl flex items-center justify-center shadow-inner relative overflow-hidden shrink-0">
                <Globe className="w-7 h-7 text-[#7e22ce] relative z-10" />
                <div className="absolute inset-0 bg-gradient-to-tr from-[#c084fc]/20 to-transparent"></div>
@@ -5668,11 +5668,11 @@ function LoginView({
         {t("Tài khoản để nối bác với người nhà. Bác kiểm được cả khi chưa đăng nhập.")}
       </p>
 
-      <div className="w-full max-w-sm mb-5 bg-white/80 p-1.5 rounded-2xl border border-purple-200/80 shadow-xs flex items-center gap-1.5">
+      <div className="w-full max-w-sm mb-5 bg-white/80 p-1.5 rounded-2xl border-2 border-[#2e1065]/80 shadow-xs flex items-center gap-1.5">
         <button
           type="button"
           onClick={() => setSelectedRole('elder')}
-          className={`flex-1 min-h-[52px] px-3 rounded-xl font-bold text-[15px] flex items-center justify-center gap-1.5 transition-all ${
+          className={`flex-1 min-h-[52px] px-3 rounded-2xl font-bold text-[15px] flex items-center justify-center gap-1.5 transition-all ${
             selectedRole === 'elder' ? 'bg-purple-600 text-white shadow-sm' : 'text-slate-600'
           }`}
         >
@@ -5681,7 +5681,7 @@ function LoginView({
         <button
           type="button"
           onClick={() => setSelectedRole('guardian')}
-          className={`flex-1 min-h-[52px] px-3 rounded-xl font-bold text-[15px] flex items-center justify-center gap-1.5 transition-all ${
+          className={`flex-1 min-h-[52px] px-3 rounded-2xl font-bold text-[15px] flex items-center justify-center gap-1.5 transition-all ${
             selectedRole === 'guardian' ? 'bg-sky-600 text-white shadow-sm' : 'text-slate-600'
           }`}
         >
@@ -5787,19 +5787,24 @@ function AddFamilyView({ setView, t, setFamilyMembers }: { setView: (v: ViewStat
       exit={{ opacity: 0, x: -20 }}
       className="absolute inset-0 z-50 bg-[#f8f4ff] flex flex-col pt-8 px-5 overflow-y-auto"
     >
+      {/*
+        KIỂU CHUNG CỦA APP — LẤY MÀN "GIA ĐÌNH & NGƯỜI THÂN" LÀM CHUẨN (4/9/2026).
+        Thẻ và nút mang viền 2,5px + bóng đổ cứng màu tím đậm `#2e1065`, bo góc
+        lớn. Ô nhập và nút bấm đều đạt sàn vùng chạm §4.4.
+      */}
       <div className="flex items-center mb-6 relative">
-        <button aria-label={t("Quay lại")} 
+        <button aria-label={t("Quay lại")}
           onClick={() => setView('family')}
-          className="p-2 bg-white/70 rounded-full shadow-sm text-[#6d28d9] active:scale-95 transition-all absolute left-0"
+          className="w-[52px] h-[52px] flex items-center justify-center bg-white rounded-full border-[2.5px] border-[#2e1065] shadow-[3px_3px_0_#2e1065] text-[#6d28d9] active:scale-95 transition-all absolute left-0"
         >
           <ChevronLeft size={24} />
         </button>
-        <h2 className="text-[20px] font-black text-[#1e1b4b] text-center w-full">{t("Thêm người thân mới")}</h2>
+        <h2 className="text-[20px] font-black text-[#1e1b4b] text-center w-full px-14 leading-snug">{t("Thêm người thân mới")}</h2>
       </div>
 
-      <div className="bg-white rounded-3xl p-5 shadow-sm border border-[#e9d5ff] flex flex-col gap-4 max-w-md mx-auto w-full">
+      <div className="bg-white rounded-[24px] p-5 border-[2.5px] border-[#2e1065] shadow-[4px_4px_0_#2e1065] flex flex-col gap-4 max-w-md mx-auto w-full">
         <div>
-          <label className="text-[14px] font-bold text-[#6d28d9] mb-1.5 block">{t("Chọn ảnh đại diện")}</label>
+          <label className="text-[15px] font-bold text-[#6d28d9] mb-1.5 block">{t("Chọn ảnh đại diện")}</label>
           <div className="flex gap-2.5 overflow-x-auto pb-1">
             {mauAvatar.map((mau, idx) => (
               <button
@@ -5808,43 +5813,48 @@ function AddFamilyView({ setView, t, setFamilyMembers }: { setView: (v: ViewStat
                 aria-label={`${t("Chọn ảnh đại diện")} ${idx + 1}`}
                 onClick={() => setMauDaChon(mau)}
                 style={{ backgroundColor: mau }}
-                className={`w-12 h-12 rounded-full shrink-0 border-2 transition-all ${mauDaChon === mau ? 'border-[#1e1b4b] ring-2 ring-[#c084fc] scale-105' : 'border-gray-200 opacity-60'}`}
+                className={`w-[52px] h-[52px] rounded-full shrink-0 transition-all ${mauDaChon === mau ? 'border-[3px] border-[#2e1065] shadow-[3px_3px_0_#2e1065] scale-105' : 'border-[2.5px] border-[#2e1065]/35 opacity-70'}`}
               />
             ))}
           </div>
         </div>
 
         <div>
-          <label className="text-[14px] font-bold text-[#6d28d9] mb-1 block">{t("Họ và tên")}</label>
-          <input 
-            type="text" 
+          <label className="text-[15px] font-bold text-[#6d28d9] mb-1 block">{t("Họ và tên")}</label>
+          <input
+            type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full bg-[#f3e8ff] rounded-2xl px-4 py-3 text-[#311068] font-bold outline-none border border-transparent focus:border-[#c084fc] transition-colors text-[15px]"
+            className="w-full min-h-[52px] bg-[#f8f4ff] rounded-2xl px-4 py-3 text-[#311068] font-bold outline-none border-[2.5px] border-[#2e1065] focus:border-[#7e22ce] focus:bg-white transition-colors text-[16px]"
             placeholder={t("Ví dụ: Nguyễn Văn An")}
           />
         </div>
 
         <div>
-          <label className="text-[14px] font-bold text-[#6d28d9] mb-1 block">{t("Số điện thoại")}</label>
-          <input 
-            type="tel" 
+          <label className="text-[15px] font-bold text-[#6d28d9] mb-1 block">{t("Số điện thoại")}</label>
+          <input
+            type="tel"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
-            className="w-full bg-[#f3e8ff] rounded-2xl px-4 py-3 text-[#311068] font-bold outline-none border border-transparent focus:border-[#c084fc] transition-colors text-[15px]"
+            className="w-full min-h-[52px] bg-[#f8f4ff] rounded-2xl px-4 py-3 text-[#311068] font-bold outline-none border-[2.5px] border-[#2e1065] focus:border-[#7e22ce] focus:bg-white transition-colors text-[16px]"
             placeholder={t("Ví dụ: 0988 123 456")}
           />
         </div>
 
         <div>
-          <label className="text-[14px] font-bold text-[#6d28d9] mb-1 block">{t("Mối quan hệ")}</label>
-          <div className="grid grid-cols-3 gap-2">
+          <label className="text-[15px] font-bold text-[#6d28d9] mb-1 block">{t("Mối quan hệ")}</label>
+          {/*
+            ⚠️ `min-h` CHỨ KHÔNG PHẢI `h` — "Vợ / Chồng" và "Hàng xóm" xuống hai
+            dòng ở khổ hẹp (§4.5: tiếng Việt dài hơn ~30%). Đặt chiều cao cứng là
+            chữ tràn ra ngoài nút.
+          */}
+          <div className="grid grid-cols-3 gap-2.5">
             {['Con trai', 'Con gái', 'Cháu', 'Vợ / Chồng', 'Anh em', 'Hàng xóm'].map((rel) => (
               <button
                 key={rel}
                 type="button"
                 onClick={() => setRelation(rel)}
-                className={`py-2 rounded-xl text-[14px] font-bold border transition-all ${relation === rel ? 'bg-[#7e22ce] text-white border-[#7e22ce]' : 'bg-[#f8f4ff] text-[#4c1d95] border-purple-100 hover:bg-purple-100'}`}
+                className={`min-h-[52px] px-2 py-2 rounded-2xl text-[15px] font-bold border-[2.5px] border-[#2e1065] transition-all active:scale-95 ${relation === rel ? 'bg-[#7e22ce] text-white shadow-[3px_3px_0_#2e1065]' : 'bg-white text-[#4c1d95] hover:bg-purple-50'}`}
               >
                 {t(rel)}
               </button>
@@ -5854,16 +5864,16 @@ function AddFamilyView({ setView, t, setFamilyMembers }: { setView: (v: ViewStat
       </div>
 
       <div className="my-6 flex gap-3 max-w-md mx-auto w-full">
-        <button 
+        <button
           onClick={() => setView('family')}
-          className="flex-1 bg-white text-[#6d28d9] border border-[#e9d5ff] py-3.5 rounded-2xl font-bold text-[15px] shadow-sm active:scale-95 transition-transform"
+          className="flex-1 min-h-[56px] bg-white text-[#6d28d9] border-[2.5px] border-[#2e1065] py-3.5 rounded-full font-bold text-[16px] shadow-[4px_4px_0_#2e1065] active:scale-95 transition-transform"
         >
           {t("Hủy")}
         </button>
-        <button 
+        <button
           onClick={handleSave}
           disabled={!name.trim() || !phone.trim()}
-          className="flex-1 bg-[#8b5cf6] disabled:opacity-50 text-white py-3.5 rounded-2xl font-bold text-[15px] shadow-md active:scale-95 transition-transform"
+          className="flex-1 min-h-[56px] bg-gradient-to-r from-[#9e76ea] via-[#ad8af0] to-[#9e76ea] disabled:opacity-50 text-white py-3.5 rounded-full font-bold text-[16px] border-[2.5px] border-[#2e1065] shadow-[4px_4px_0_#2e1065] active:scale-95 transition-transform"
         >
           {t("Lưu người thân")}
         </button>
@@ -6214,7 +6224,7 @@ function WarningView({
         {lyDo.length > 0 && (
           <ul className="w-full flex flex-col gap-1.5 mb-2">
             {lyDo.slice(0, 8).map((cau) => (
-              <li key={cau} className="px-3.5 py-2 bg-black/30 rounded-xl text-white font-semibold text-[16px] border border-white/15 flex items-start gap-2 backdrop-blur-xs leading-snug">
+              <li key={cau} className="px-3.5 py-2 bg-black/30 rounded-2xl text-white font-semibold text-[16px] border border-white/15 flex items-start gap-2 backdrop-blur-xs leading-snug">
                 <AlertTriangle size={18} className="text-amber-300 shrink-0 mt-0.5" />
                 <span>{cau}</span>
               </li>
@@ -6293,7 +6303,7 @@ function WarningView({
                 </p>
                 <button
                   onClick={() => setView('mat_khau_gia_dinh')}
-                  className="w-full min-h-[52px] px-4 bg-emerald-400 hover:bg-emerald-300 active:scale-95 text-[#04301f] font-extrabold rounded-xl text-[16px] transition-all"
+                  className="w-full min-h-[52px] px-4 bg-emerald-400 hover:bg-emerald-300 active:scale-95 text-[#04301f] font-extrabold rounded-2xl text-[16px] transition-all"
                 >
                   {t('Lập mật khẩu gia đình')}
                 </button>
@@ -6328,7 +6338,7 @@ function WarningView({
 
             <ul className="flex flex-col gap-1.5 mb-2.5">
               {dangNgo.slice(0, 4).map((u) => (
-                <li key={u.goi} className="px-3 py-2 bg-black/35 rounded-xl border border-white/15">
+                <li key={u.goi} className="px-3 py-2 bg-black/35 rounded-2xl border border-white/15">
                   <span className="block text-white font-bold text-[16px] leading-snug">{u.ten}</span>
                   <span className="block text-amber-100/90 text-[14px] leading-snug mt-0.5">
                     {tra(TRANG_THAI_MAY, u.nguonCai === 'khong_ro' ? 'khong_ro' : 'tu_tep', lang)}
@@ -6345,7 +6355,7 @@ function WarningView({
             <div className="flex flex-col gap-2">
               <button
                 onClick={() => { void moCaiDatTroNang(); }}
-                className="w-full min-h-[52px] px-4 bg-amber-400 hover:bg-amber-300 active:scale-95 text-[#3b1f00] font-extrabold rounded-xl text-[16px] transition-all"
+                className="w-full min-h-[52px] px-4 bg-amber-400 hover:bg-amber-300 active:scale-95 text-[#3b1f00] font-extrabold rounded-2xl text-[16px] transition-all"
               >
                 {tra(TRANG_THAI_MAY, 'nut_cai_dat', lang)}
               </button>
@@ -6357,7 +6367,7 @@ function WarningView({
               */}
               <button
                 onClick={boQuaNhungCaiNay}
-                className="w-full min-h-[52px] px-4 bg-white/15 hover:bg-white/25 active:scale-95 text-white font-bold rounded-xl text-[15px] border border-white/25 transition-all"
+                className="w-full min-h-[52px] px-4 bg-white/15 hover:bg-white/25 active:scale-95 text-white font-bold rounded-2xl text-[15px] border border-white/25 transition-all"
               >
                 {tra(TRANG_THAI_MAY, 'nut_tu_cai', lang)}
               </button>
@@ -6400,7 +6410,7 @@ function WarningView({
           `noiChayAi` là `null` và khối này không hiện — thà thiếu còn hơn sai.
         */}
         {noiChayAi && tra(NOI_CHAY_AI, noiChayAi, lang) && (
-          <div className={`w-full mt-2 rounded-xl px-3.5 py-2.5 border-2 ${
+          <div className={`w-full mt-2 rounded-2xl px-3.5 py-2.5 border-2 ${
             noiChayAi.startsWith('tren_may') ? 'bg-black/35 border-emerald-300/70' : 'bg-black/35 border-white/30'
           }`}>
             <p className="text-[14px] font-bold text-white leading-snug">
