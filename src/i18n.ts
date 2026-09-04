@@ -782,6 +782,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     "Tôi đã lỡ chuyển tiền hoặc đọc mã rồi": "Tôi đã lỡ chuyển tiền hoặc đọc mã rồi",
     "Giờ vàng còn tính:": "Giờ vàng còn tính:",
     "giờ đầu là lúc quan trọng nhất": "giờ đầu là lúc quan trọng nhất",
+    "bước nữa": "bước nữa",
   },
   en: {
     "👮 Giả danh công an": "👮 Police impersonation",
@@ -1555,6 +1556,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     "Tôi đã lỡ chuyển tiền hoặc đọc mã rồi": "I already sent money or read out a code",
     "Giờ vàng còn tính:": "Golden window remaining:",
     "giờ đầu là lúc quan trọng nhất": "hours are the most important",
+    "bước nữa": "more steps",
   }
 };
 

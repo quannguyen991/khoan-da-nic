@@ -1,16 +1,27 @@
 @import "tailwindcss";
 
 /* ⚠️ FONT CỤC BỘ, KHÔNG GỌI RA fonts.googleapis.com.
-   Be Vietnam Pro dựng riêng cho chữ Việt: dấu xếp cả trên lẫn dưới (ế, ộ, ữ,
-   ị, ặ) nên khoảng dấu rộng hơn font Latin thường. Nạp cục bộ giữ được cả
-   quyền riêng tư lẫn khả năng chạy khi mất mạng. */
-@import "@fontsource/be-vietnam-pro/400.css";
-@import "@fontsource/be-vietnam-pro/600.css";
-@import "@fontsource/be-vietnam-pro/700.css";
-@import "@fontsource/be-vietnam-pro/800.css";
+   Đổi từ Be Vietnam Pro sang Quicksand ngày 4/9/2026, theo yêu cầu người dùng
+   (font của theieltsdictionary.com) — đã KIỂM TRỰC TIẾP trước khi đổi, không
+   suy đoán: `@fontsource/quicksand` có subset `vietnamese` chính thức (metadata
+   Google Fonts, v37), và đã dựng cạnh nhau "ế ộ ữ ị ặ" ở cỡ 34px trên dev
+   server thật — dấu xếp cả trên lẫn dưới không bị cắt, không chồng lên thân
+   chữ. Nạp cục bộ (không phải fonts.googleapis.com) giữ được quyền riêng tư
+   lẫn khả năng chạy khi mất mạng — lý do gốc không đổi.
+
+   ⚠️ QUICKSAND KHÔNG CÓ BẬC 800/900. `font-weight-extrabold`/`-black` được ép
+   xuống 700 (bậc đậm nhất họ này có) ngay dưới — KHÔNG xoá, nếu không trình
+   duyệt tự "làm đậm giả" (synthetic bold) ở khắp nơi dùng `font-black`/
+   `font-extrabold` (89 chỗ trong App.tsx), nhìn mờ nhoè trên chữ có dấu. */
+@import "@fontsource/quicksand/400.css";
+@import "@fontsource/quicksand/500.css";
+@import "@fontsource/quicksand/600.css";
+@import "@fontsource/quicksand/700.css";
 
 @theme {
-  --font-sans: "Be Vietnam Pro", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-sans: "Quicksand", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-weight-extrabold: 700;
+  --font-weight-black: 700;
 }
 
 /* Prevent unwanted drag, bounce, and selection */

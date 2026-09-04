@@ -1110,32 +1110,44 @@ export default function App() {
                         */
                         aria-label={item.label}
                         onClick={() => setView(item.id as ViewState)} 
-                        className={`relative z-10 transition-all duration-300 flex items-center justify-center rounded-full active:scale-95
+                        className={`relative z-10 transition-all duration-300 flex items-center justify-center rounded-full active:scale-95 shrink-0
                           lg:rounded-full lg:px-5 lg:h-[3.4rem] lg:gap-2.5 lg:w-auto ${
                           isActive
-                            ? 'bg-white/25 shadow-[0_0_20px_rgba(255,255,255,0.4)] text-white px-3.5 sm:px-4 h-[3.25rem] sm:h-[3.6rem] lg:bg-white lg:text-[#6d28d9] lg:shadow-md'
-                            : 'text-white/70 hover:text-white w-[3.25rem] h-[3.25rem] sm:w-[3.6rem] sm:h-[3.6rem] lg:text-white/85 lg:hover:bg-white/20 lg:w-auto'
+                            ? 'bg-white/25 shadow-[0_0_20px_rgba(255,255,255,0.4)] text-white px-4 h-[55px] lg:bg-white lg:text-[#6d28d9] lg:shadow-md'
+                            : 'text-white/70 hover:text-white w-[55px] h-[55px] lg:text-white/85 lg:hover:bg-white/20 lg:w-auto'
                         }`}
+                        /*
+                          ⚠️ §4.4 — SÀN 52px BẰNG PX CỐ ĐỊNH, KHÔNG BẰNG rem.
+                          Từng thử `w-[max(52px,3.25rem)]` — Tailwind KHÔNG sinh ra
+                          CSS nào cho lớp đó (kiểm bằng `document.styleSheets`, rỗng),
+                          lặng lẽ như không có gì hỏng. rem cũng vốn không cần thiết ở
+                          đây nữa: nút mobile giờ CHỈ có icon, không còn chữ nở ra, nên
+                          không có lý do bắt khung nút phình theo bậc chữ A/A+/A++.
+                          `shrink-0` để hàng 5 nút không co dưới sàn khi hẹp — trước đây
+                          nhãn nút đang chọn nở ra chiếm chỗ, ép bốn nút còn lại co
+                          xuống dưới 52px mà không hiển thị nào cảnh báo.
+                        */
                       >
                         <Icon size={24} fill={isActive && item.id !== 'search' ? "currentColor" : "none"} strokeWidth={isActive ? 2 : 2} />
                         {/*
                           Trên máy tính nhãn hiện thường trực — có chỗ, và người
-                          cao tuổi đọc chữ nhanh hơn đoán biểu tượng. Trên điện
-                          thoại mới cần giấu để vừa bề ngang.
+                          cao tuổi đọc chữ nhanh hơn đoán biểu tượng.
+
+                          ⚠️ TRÊN ĐIỆN THOẠI KHÔNG CÒN NHÃN CHỮ NỞ RA NỮA — đã BỎ
+                          9/2026. Bản cũ nở nhãn nút đang chọn bằng `width: 'auto'`
+                          trong một hàng 5 nút `justify-between` không dư khoảng nào:
+                          đo ở khổ 320px (mốc §4.4), "Trang chủ" bị flex-shrink cắt
+                          còn "Trang ch", và các nút CÒN LẠI cũng bị ép xuống dưới
+                          52px — tức đúng sàn `--touch-target` mà token khai lại
+                          không có gì đảm bảo ở màn thật. Đổi phông chữ (Quicksand)
+                          chỉ làm lộ ra vấn đề vốn đã treo lơ lửng.
+
+                          Nền phát sáng + icon tô đặc đã đủ báo nút nào đang chọn,
+                          không cần thêm chữ nở ra tranh chỗ. `aria-label` vẫn còn
+                          nguyên nên TalkBack đọc tên đúng bất kể có chữ hiện hay
+                          không (§4.4).
                         */}
                         <span className="hidden lg:inline font-bold text-[15px]">{item.label}</span>
-                        <AnimatePresence>
-                          {isActive && (
-                            <motion.span
-                              initial={{ width: 0, opacity: 0, marginLeft: 0 }}
-                              animate={{ width: 'auto', opacity: 1, marginLeft: 6 }}
-                              exit={{ width: 0, opacity: 0, marginLeft: 0 }}
-                              className="lg:hidden font-bold text-[14px] whitespace-nowrap overflow-hidden"
-                            >
-                              {item.label}
-                            </motion.span>
-                          )}
-                        </AnimatePresence>
                       </button>
                     );
                   })}
@@ -5367,6 +5379,17 @@ function WarningView({
   }, [canRecovery]);
   const buocPhucHoi = keHoachPhucHoi ? traNhieu(BUOC_PHUC_HOI, keHoachPhucHoi.buoc ?? [], lang) : [];
   const canhBaoPhucHoi = keHoachPhucHoi ? traNhieu(CANH_BAO_PHUC_HOI, keHoachPhucHoi.canhBao ?? [], lang) : [];
+  /**
+   * §4.5 / distill — 12 BƯỚC LÀ QUÁ NHIỀU ĐỂ ĐỌC HẾT LÚC ĐANG HOẢNG.
+   * Không bớt NỘI DUNG (mọi bước vẫn còn, xem được khi bấm) — chỉ giấu bớt
+   * LÚC ĐẦU. Bốn bước đầu của `BUOC_CHUNG` đã xếp theo độ khẩn cấp giảm dần
+   * (ngừng liên lạc → đừng chuyển thêm → gọi ngân hàng đúng số → tra soát),
+   * nên cắt ở đây không làm mất bước quan trọng nhất.
+   */
+  const [hienHetBuocPhucHoi, setHienHetBuocPhucHoi] = useState(false);
+  const SO_BUOC_PHUC_HOI_DAU = 4;
+  const buocPhucHoiHien = hienHetBuocPhucHoi ? buocPhucHoi : buocPhucHoi.slice(0, SO_BUOC_PHUC_HOI_DAU);
+  const soBuocPhucHoiConLai = Math.max(0, buocPhucHoi.length - SO_BUOC_PHUC_HOI_DAU);
 
   // Nhãn NGUYÊN VĂN §4.1, tra từ catalog. Không có nhãn thứ tư.
   const nhanChu = nhan ? tra(NHAN, nhan, lang) : null;
@@ -5589,7 +5612,7 @@ function WarningView({
                 </svg>
                 <div className="relative z-10 flex flex-col items-center">
                   <span className="text-[32px] font-black text-white leading-none tabular-nums">{timeLeft}</span>
-                  <span className="text-[12px] font-bold text-white/80 -mt-0.5">{t('giây')}</span>
+                  <span className="text-[14px] font-bold text-white/80 -mt-0.5">{t('giây')}</span>
                 </div>
               </div>
             )}
@@ -5627,7 +5650,7 @@ function WarningView({
               { icon: Users, text: t('Gọi cho con cháu') },
             ].map((muc, i) => (
               <div key={muc.text} className={`flex items-center gap-3 px-4 py-3 ${i > 0 ? 'border-t border-white/15' : ''}`}>
-                <span className="w-7 h-7 rounded-full bg-white/20 text-white text-[13px] font-black flex items-center justify-center shrink-0">{i + 1}</span>
+                <span className="w-7 h-7 rounded-full bg-white/20 text-white text-[14px] font-black flex items-center justify-center shrink-0">{i + 1}</span>
                 <muc.icon size={20} className="text-white/90 shrink-0" />
                 <span className="text-white font-bold text-[15px] leading-snug">{muc.text}</span>
               </div>
@@ -5655,19 +5678,20 @@ function WarningView({
           catalog, không sửa ở đây.
         */}
         {canVerify && cauDuBao.length > 0 && (
-          <div className="w-full bg-sky-950/55 border-2 border-sky-300/60 rounded-2xl p-4 backdrop-blur-md mb-2">
-            <div className="flex items-start gap-2 mb-2">
+          <div className="w-full bg-sky-950/55 border-2 border-sky-300/60 rounded-[22px] backdrop-blur-md mb-2 overflow-hidden">
+            <div className="flex items-start gap-2 px-4 pt-4">
               <AlertTriangle size={20} className="text-sky-200 shrink-0 mt-0.5" />
               <h3 className="text-white font-black text-[17px] leading-snug">{KHUNG_KICH_BAN[lang]}</h3>
             </div>
-            <ul className="flex flex-col gap-1.5 mb-2">
-              {cauDuBao.map((cau) => (
-                <li key={cau} className="px-3 py-2 bg-black/30 rounded-xl border border-white/15 text-white font-semibold text-[15px] leading-snug">
-                  {cau}
-                </li>
+            <div className="mt-2">
+              {cauDuBao.map((cau, i) => (
+                <div key={cau} className={`flex items-center gap-3 px-4 py-2.5 ${i > 0 ? 'border-t border-white/15' : ''}`}>
+                  <span className="w-7 h-7 rounded-full bg-white/20 text-white text-[14px] font-black flex items-center justify-center shrink-0">{i + 1}</span>
+                  <span className="text-white font-semibold text-[15px] leading-snug">{cau}</span>
+                </div>
               ))}
-            </ul>
-            <p className="text-sky-50 text-[14px] leading-relaxed">{KET_KICH_BAN[lang]}</p>
+            </div>
+            <p className="text-sky-50 text-[14px] leading-relaxed px-4 pb-4 pt-1">{KET_KICH_BAN[lang]}</p>
           </div>
         )}
 
@@ -5843,28 +5867,40 @@ function WarningView({
           thêm chữ ở đây.
         */}
         {canRecovery && keHoachPhucHoi && (
-          <div className="w-full bg-rose-950/55 border-2 border-rose-300/60 rounded-2xl p-4 backdrop-blur-md mb-2">
-            <div className="flex items-start gap-2 mb-1.5">
+          <div className="w-full bg-rose-950/55 border-2 border-rose-300/60 rounded-[22px] backdrop-blur-md mb-2 overflow-hidden">
+            <div className="flex items-start gap-2 px-4 pt-4">
               <AlertTriangle size={20} className="text-rose-200 shrink-0 mt-0.5" />
               <h3 className="text-white font-black text-[17px] leading-snug">{KHUNG_PHUC_HOI[lang]}</h3>
             </div>
             {typeof keHoachPhucHoi.gioVang === 'number' && (
-              <p className="text-rose-50 text-[14px] font-semibold mb-2">
+              <p className="text-rose-50 text-[14px] font-semibold px-4 pt-2">
                 {t('Giờ vàng còn tính:')} {keHoachPhucHoi.gioVang} {t('giờ đầu là lúc quan trọng nhất')}
               </p>
             )}
-            {buocPhucHoi.length > 0 && (
-              <ul className="flex flex-col gap-1.5 mb-2">
-                {buocPhucHoi.map((cau, i) => (
-                  <li key={cau} className="px-3 py-2 bg-black/30 rounded-xl border border-white/15 text-white font-semibold text-[15px] leading-snug flex gap-2">
-                    <span className="text-rose-200 font-black shrink-0">{i + 1}.</span>
-                    <span>{cau}</span>
-                  </li>
+            {buocPhucHoiHien.length > 0 && (
+              <div className={`mt-2 ${(hienHetBuocPhucHoi || soBuocPhucHoiConLai === 0) && canhBaoPhucHoi.length === 0 ? 'pb-2' : ''}`}>
+                {buocPhucHoiHien.map((cau, i) => (
+                  <div key={cau} className={`flex items-center gap-3 px-4 py-2.5 ${i > 0 ? 'border-t border-white/15' : ''}`}>
+                    <span className="w-7 h-7 rounded-full bg-white/20 text-white text-[14px] font-black flex items-center justify-center shrink-0">{i + 1}</span>
+                    <span className="text-white font-semibold text-[15px] leading-snug">{cau}</span>
+                  </div>
                 ))}
-              </ul>
+              </div>
+            )}
+            {/*
+              §4.5 / distill — GIẤU BỚT, KHÔNG XOÁ. Bấm là thấy hết ngay, không
+              phải xin phép hay tải thêm gì — chỉ là ẩn bớt để lúc đầu bớt rối.
+            */}
+            {!hienHetBuocPhucHoi && soBuocPhucHoiConLai > 0 && (
+              <button
+                onClick={() => setHienHetBuocPhucHoi(true)}
+                className="w-full min-h-[52px] px-4 py-2.5 border-t border-white/15 text-rose-100 font-bold text-[15px] hover:bg-white/10 active:scale-[0.99] transition-all text-center"
+              >
+                {t('Xem thêm')} {soBuocPhucHoiConLai} {t('bước nữa')}
+              </button>
             )}
             {canhBaoPhucHoi.length > 0 && (
-              <ul className="flex flex-col gap-1 mt-1">
+              <ul className="flex flex-col gap-1 px-4 pb-4 pt-2">
                 {canhBaoPhucHoi.map((cau) => (
                   <li key={cau} className="text-rose-100/90 text-[14px] leading-snug">· {cau}</li>
                 ))}
@@ -5909,7 +5945,7 @@ function WarningView({
             className="rounded-2xl bg-white/15 hover:bg-white/25 border border-white/25 backdrop-blur-md px-2 py-3 flex flex-col items-center gap-1.5 active:scale-95 transition-all min-h-[64px]"
           >
             <Users size={20} className="text-white shrink-0" />
-            <span className="text-[13px] font-bold text-white leading-tight text-center">{t('Con cháu')}</span>
+            <span className="text-[14px] font-bold text-white leading-tight text-center">{t('Con cháu')}</span>
           </button>
           {soCongAn && (
             <a
@@ -5917,7 +5953,7 @@ function WarningView({
               className="rounded-2xl bg-white/15 hover:bg-white/25 border border-white/25 backdrop-blur-md px-2 py-3 flex flex-col items-center gap-1.5 active:scale-95 transition-all min-h-[64px]"
             >
               <ShieldCheck size={20} className="text-white shrink-0" />
-              <span className="text-[13px] font-bold text-white leading-tight text-center">{soCongAn.name}</span>
+              <span className="text-[14px] font-bold text-white leading-tight text-center">{soCongAn.name}</span>
             </a>
           )}
           {soBaoLuaDao && (
@@ -5926,7 +5962,7 @@ function WarningView({
               className="rounded-2xl bg-white/15 hover:bg-white/25 border border-white/25 backdrop-blur-md px-2 py-3 flex flex-col items-center gap-1.5 active:scale-95 transition-all min-h-[64px]"
             >
               <PhoneOff size={20} className="text-white shrink-0" />
-              <span className="text-[13px] font-bold text-white leading-tight text-center">{soBaoLuaDao.name}</span>
+              <span className="text-[14px] font-bold text-white leading-tight text-center">{soBaoLuaDao.name}</span>
             </a>
           )}
         </div>
