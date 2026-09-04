@@ -155,14 +155,14 @@ export function ThuTinhHuong({ t, lang = 'vi' }: { t: (k: string) => string; lan
                     onClick={() => chayMot(th)}
                     disabled={dangChay === th.ma || chayTatCa}
                     aria-label={t('Chạy lại')}
-                    className="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 disabled:opacity-50 text-slate-800 font-bold text-[14px]"
+                    className="px-3 py-2 rounded-2xl bg-slate-100 hover:bg-slate-200 disabled:opacity-50 text-slate-800 font-bold text-[14px]"
                   >
                     {dangChay === th.ma ? <Loader2 size={16} className="animate-spin" /> : <Play size={16} />}
                   </button>
                   <button
                     onClick={() => setMoRong(mo ? null : th.ma)}
                     aria-label={t('Xem chi tiết')}
-                    className="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800"
+                    className="px-3 py-2 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-800"
                   >
                     {mo ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                   </button>
@@ -173,7 +173,7 @@ export function ThuTinhHuong({ t, lang = 'vi' }: { t: (k: string) => string; lan
                 <div className="border-t border-slate-200 bg-slate-50 p-4 flex flex-col gap-3">
                   <div>
                     <p className="text-[14px] font-black text-slate-600 mb-1">{t('Nội dung đem thử')}</p>
-                    <p className="text-[15px] text-slate-900 leading-snug bg-white rounded-xl p-3 border border-slate-200">{th.noiDung}</p>
+                    <p className="text-[15px] text-slate-900 leading-snug bg-white rounded-2xl p-3 border border-slate-200">{th.noiDung}</p>
                   </div>
 
                   <div>
@@ -194,7 +194,7 @@ export function ThuTinhHuong({ t, lang = 'vi' }: { t: (k: string) => string; lan
 
                   {/* §HĐ luật 3 — chuaKiem hiện ở mọi nơi có kết quả, không riêng màn của bác. */}
                   {chuaKiem.length > 0 && (
-                    <div className="bg-white border-2 border-slate-300 rounded-xl p-3">
+                    <div className="bg-white border-2 border-slate-300 rounded-2xl p-3">
                       <p className="text-[14px] font-black text-slate-800 mb-1 flex items-center gap-1.5">
                         <EyeOff size={16} /> {t('Những thứ chưa kiểm được')}
                       </p>
@@ -227,7 +227,7 @@ export function ThuTinhHuong({ t, lang = 'vi' }: { t: (k: string) => string; lan
         thật của ai. Dòng này phải ở lại: một danh sách trông như hồ sơ vụ việc
         mà không nói rõ nguồn gốc là đúng thứ §11 cấm.
       */}
-      <div className="mt-4 flex items-start gap-2 text-[14px] text-slate-600 bg-slate-50 border border-slate-200 rounded-xl p-3">
+      <div className="mt-4 flex items-start gap-2 text-[14px] text-slate-600 bg-slate-50 border border-slate-200 rounded-2xl p-3">
         <Info size={16} className="shrink-0 mt-0.5" />
         <p className="leading-snug">
           {t('Mười tình huống trên do nhóm soạn theo các thủ đoạn đã được báo chí và cơ quan chức năng mô tả công khai. Không lấy từ tin nhắn của ai, không chứa số tài khoản hay số điện thoại thật.')}
@@ -235,7 +235,7 @@ export function ThuTinhHuong({ t, lang = 'vi' }: { t: (k: string) => string; lan
       </div>
 
       {xong > 0 && baoOan > 0 && (
-        <div className="mt-3 flex items-start gap-2 bg-amber-50 border-2 border-amber-300 rounded-xl p-3.5">
+        <div className="mt-3 flex items-start gap-2 bg-amber-50 border-2 border-amber-300 rounded-2xl p-3.5">
           <ShieldAlert size={18} className="text-amber-800 shrink-0 mt-0.5" />
           <p className="text-[15px] text-amber-900 leading-snug font-medium">
             {t('Có tin bình thường bị báo động. Với người cao tuổi, báo oan đắt hơn bỏ sót — một app kêu nhầm vài lần sẽ bị gỡ trước khi kịp cứu ai.')}

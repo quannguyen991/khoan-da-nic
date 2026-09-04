@@ -97,7 +97,7 @@ export function GuardianIntroView({
             if (setUserRole) setUserRole('elder');
             setView('home');
           }}
-          className="w-full bg-white hover:bg-slate-50 text-purple-700 border border-purple-200 py-3.5 px-6 rounded-2xl font-bold text-sm shadow-xs flex items-center justify-center gap-2 active:scale-95 transition-all"
+          className="w-full bg-white hover:bg-slate-50 text-purple-700 border-2 border-[#2e1065] py-3.5 px-6 rounded-2xl font-bold text-sm shadow-xs flex items-center justify-center gap-2 active:scale-95 transition-all"
         >
           <Smartphone size={18} />
           {tr("Chuyển sang vai Bác (Người già)")}
@@ -174,7 +174,7 @@ export function GuardianAuthView({
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               placeholder={tr("Ví dụ: 0988 123 456")}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-900 outline-none focus:border-sky-500 focus:bg-white transition-all"
+              className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm font-medium text-slate-900 outline-none focus:border-sky-500 focus:bg-white transition-all"
             />
           </div>
 
@@ -192,7 +192,7 @@ export function GuardianAuthView({
               value={matKhau}
               onChange={(e) => setMatKhau(e.target.value)}
               autoComplete="current-password"
-              className="w-full min-h-[52px] bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-[16px] font-medium text-slate-900 outline-none focus:border-sky-500 focus:bg-white transition-all"
+              className="w-full min-h-[52px] bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-[16px] font-medium text-slate-900 outline-none focus:border-sky-500 focus:bg-white transition-all"
             />
           </div>
 
@@ -207,7 +207,7 @@ export function GuardianAuthView({
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-sky-600 hover:bg-sky-700 active:scale-95 text-white py-3 rounded-xl font-bold text-sm shadow-md transition-all flex items-center justify-center"
+            className="w-full bg-sky-600 hover:bg-sky-700 active:scale-95 text-white py-3 rounded-2xl font-bold text-sm shadow-md transition-all flex items-center justify-center"
           >
             {loading ? (
               <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -475,7 +475,7 @@ export function GuardianView({
             <a
               href={parentData?.phone ? `tel:${parentData.phone.replace(/\s/g, '')}` : undefined}
               aria-disabled={!parentData?.phone}
-              className="py-2.5 px-3 bg-slate-900 hover:bg-slate-800 active:scale-95 text-white rounded-xl font-bold text-[14px] flex items-center justify-center gap-1.5 transition-transform"
+              className="py-2.5 px-3 bg-slate-900 hover:bg-slate-800 active:scale-95 text-white rounded-2xl font-bold text-[14px] flex items-center justify-center gap-1.5 transition-transform"
             >
               <Phone size={14} className="text-sky-400" />
               {tr("Gọi điện")}
@@ -483,7 +483,7 @@ export function GuardianView({
 
             <button
               onClick={sendSafetyReminderToParent}
-              className="py-2.5 px-3 bg-sky-50 hover:bg-sky-100 active:scale-95 text-sky-800 border border-sky-200 rounded-xl font-bold text-[14px] flex items-center justify-center gap-1.5 transition-transform"
+              className="py-2.5 px-3 bg-sky-50 hover:bg-sky-100 active:scale-95 text-sky-800 border border-sky-200 rounded-2xl font-bold text-[14px] flex items-center justify-center gap-1.5 transition-transform"
             >
               <MessageSquare size={14} />
               {tr("Gửi nhắc an toàn")}
@@ -494,7 +494,7 @@ export function GuardianView({
                 if (onTriggerEmergency) onTriggerEmergency();
                 else setView('warning');
               }}
-              className="py-2.5 px-3 bg-red-50 hover:bg-red-100 active:scale-95 text-red-700 border border-red-200 rounded-xl font-bold text-[14px] flex items-center justify-center gap-1.5 transition-transform"
+              className="py-2.5 px-3 bg-red-50 hover:bg-red-100 active:scale-95 text-red-700 border border-red-200 rounded-2xl font-bold text-[14px] flex items-center justify-center gap-1.5 transition-transform"
             >
               <ShieldAlert size={14} className="text-red-600" />
               {tr("Báo động SOS")}
@@ -573,7 +573,7 @@ export function GuardianView({
             Chúng bật/tắt được nên trông y hệt công tắc thật; im lặng để vậy là
             để con cháu tin rằng bố mẹ đang được bảo vệ bởi thứ chưa tồn tại.
           */}
-          <p className="text-[14px] text-slate-600 font-medium text-center mt-3 bg-slate-100 border border-slate-300 rounded-xl px-3 py-2">
+          <p className="text-[14px] text-slate-600 font-medium text-center mt-3 bg-slate-100 border border-slate-300 rounded-2xl px-3 py-2">
             {tr("Ba công tắc trên chưa nối được với máy của bố mẹ — chúng cho thấy dự định, không phải trạng thái đang chạy.")}
           </p>
         </div>
@@ -637,7 +637,7 @@ export function GuardianView({
                 <button
                   type="submit"
                   disabled={!queryInput.trim() || isChecking}
-                  className="absolute right-1.5 top-1.5 bottom-1.5 px-3 bg-purple-600 hover:bg-purple-700 disabled:opacity-40 text-white rounded-xl text-[14px] font-bold transition-all flex items-center gap-1"
+                  className="absolute right-1.5 top-1.5 bottom-1.5 px-3 bg-purple-600 hover:bg-purple-700 disabled:opacity-40 text-white rounded-2xl text-[14px] font-bold transition-all flex items-center gap-1"
                 >
                   {isChecking ? (
                     <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>

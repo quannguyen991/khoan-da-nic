@@ -114,7 +114,7 @@ export function AppMenuModal({
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: '100%', opacity: 0 }}
           transition={{ type: 'spring', damping: 26, stiffness: 280 }}
-          className="relative w-full max-w-lg md:max-w-2xl lg:max-w-3xl bg-[#fbf9fe] rounded-t-[2.5rem] sm:rounded-[2.5rem] shadow-2xl overflow-hidden max-h-[92vh] flex flex-col z-10 border-2 border-purple-200/80"
+          className="relative w-full max-w-lg md:max-w-2xl lg:max-w-3xl bg-[#fbf9fe] rounded-t-[2.5rem] sm:rounded-[2.5rem] shadow-2xl overflow-hidden max-h-[92vh] flex flex-col z-10 border-[2.5px] border-[#2e1065]"
         >
           {/* Header - Large & Bold */}
           <div className="px-6 py-4 sm:py-5 bg-gradient-to-r from-[#6d28d9] via-[#7c3aed] to-[#8b5cf6] text-white flex items-center justify-between shrink-0 shadow-sm">
@@ -169,9 +169,9 @@ export function AppMenuModal({
                 <button
                   data-vai-tro="nut-chinh"
                   onClick={handleEmergency}
-                  className="bg-[#b91c1c] hover:bg-[#991b1b] text-white rounded-2xl p-4 flex items-center gap-3.5 text-left shadow-md active:scale-95 transition-transform"
+                  className="bg-[#b91c1c] hover:bg-[#991b1b] text-white rounded-2xl p-4 flex items-center gap-3.5 text-left border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] active:scale-95 transition-transform"
                 >
-                  <span className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
+                  <span className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center shrink-0">
                     <ShieldAlert size={26} />
                   </span>
                   <span className="min-w-0">
@@ -185,9 +185,9 @@ export function AppMenuModal({
                 <button
                   data-vai-tro="nut-chinh"
                   onClick={handleCall}
-                  className="bg-emerald-700 hover:bg-emerald-800 text-white rounded-2xl p-4 flex items-center gap-3.5 text-left shadow-md active:scale-95 transition-transform"
+                  className="bg-emerald-700 hover:bg-emerald-800 text-white rounded-2xl p-4 flex items-center gap-3.5 text-left border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] active:scale-95 transition-transform"
                 >
-                  <span className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
+                  <span className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center shrink-0">
                     <PhoneCall size={26} />
                   </span>
                   <span className="min-w-0">
@@ -205,9 +205,9 @@ export function AppMenuModal({
                 */}
                 <button
                   onClick={handleSosSms}
-                  className="sm:col-span-2 bg-white hover:bg-purple-50 border-2 border-purple-200 rounded-2xl p-4 flex items-center gap-3.5 text-left active:scale-95 transition-transform"
+                  className="sm:col-span-2 bg-white hover:bg-purple-50 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] rounded-2xl p-4 flex items-center gap-3.5 text-left active:scale-95 transition-transform"
                 >
-                  <span className="w-12 h-12 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center shrink-0">
+                  <span className="w-12 h-12 rounded-2xl bg-purple-100 text-purple-700 flex items-center justify-center shrink-0">
                     <MessageSquare size={24} />
                   </span>
                   <span className="min-w-0">
@@ -229,9 +229,9 @@ export function AppMenuModal({
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <button
                   onClick={() => handleGo('voice')}
-                  className="bg-white hover:bg-purple-50 border border-purple-200 rounded-2xl p-4 flex flex-col gap-2 text-left active:scale-95 transition-transform"
+                  className="bg-white hover:bg-purple-50 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] rounded-2xl p-4 flex flex-col gap-2 text-left active:scale-95 transition-transform"
                 >
-                  <span className="w-12 h-12 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center">
+                  <span className="w-12 h-12 rounded-2xl bg-purple-100 text-purple-700 flex items-center justify-center">
                     <Mic size={24} />
                   </span>
                   <span>
@@ -242,9 +242,9 @@ export function AppMenuModal({
 
                 <button
                   onClick={handlePickImage}
-                  className="bg-white hover:bg-purple-50 border border-purple-200 rounded-2xl p-4 flex flex-col gap-2 text-left active:scale-95 transition-transform"
+                  className="bg-white hover:bg-purple-50 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] rounded-2xl p-4 flex flex-col gap-2 text-left active:scale-95 transition-transform"
                 >
-                  <span className="w-12 h-12 rounded-xl bg-pink-100 text-pink-700 flex items-center justify-center">
+                  <span className="w-12 h-12 rounded-2xl bg-pink-100 text-pink-700 flex items-center justify-center">
                     <Camera size={24} />
                   </span>
                   <span>
@@ -255,9 +255,9 @@ export function AppMenuModal({
 
                 <button
                   onClick={() => handleGo('learn')}
-                  className="bg-white hover:bg-amber-50 border border-amber-300 rounded-2xl p-4 flex flex-col gap-2 text-left active:scale-95 transition-transform"
+                  className="bg-white hover:bg-amber-50 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] rounded-2xl p-4 flex flex-col gap-2 text-left active:scale-95 transition-transform"
                 >
-                  <span className="w-12 h-12 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center">
+                  <span className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-800 flex items-center justify-center">
                     <BookOpen size={24} />
                   </span>
                   <span>
@@ -271,10 +271,10 @@ export function AppMenuModal({
             {/* ── Cài đặt ─────────────────────────────────────────────── */}
             <button
               onClick={() => handleGo('settings')}
-              className="bg-white hover:bg-gray-50 border border-gray-200 rounded-2xl p-4 flex items-center justify-between gap-3 active:scale-95 transition-transform"
+              className="bg-white hover:bg-gray-50 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] rounded-2xl p-4 flex items-center justify-between gap-3 active:scale-95 transition-transform"
             >
               <span className="flex items-center gap-3.5 min-w-0">
-                <span className="w-12 h-12 rounded-xl bg-gray-100 text-gray-700 flex items-center justify-center shrink-0">
+                <span className="w-12 h-12 rounded-2xl bg-gray-100 text-gray-700 flex items-center justify-center shrink-0">
                   <Settings size={24} />
                 </span>
                 <span className="text-left min-w-0">
