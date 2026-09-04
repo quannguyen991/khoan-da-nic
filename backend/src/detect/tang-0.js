@@ -269,10 +269,51 @@ const LUAT = Object.freeze([
       if (doiTuong.length === 0) return null;
 
       // Khoảng cách: vế yêu cầu phải nằm trong 40 ký tự quanh vế đối tượng.
-      const viTri = (cum) => {
-        const i = ban.khongDau.indexOf(boDau(cum));
-        return i >= 0 ? i : ban.thap.indexOf(cum);
+      /**
+       * ⚠️ KHỚP TRỌN TỪ, KHÔNG PHẢI CHUỖI CON.
+       *
+       * ĐO ĐƯỢC 5/9/2026: `indexOf` trần khiến cụm yêu cầu "điền" khớp trúng
+       * BÊN TRONG "điện thoại" — bỏ dấu thì cả hai đều bắt đầu bằng "dien".
+       * Câu "…cung cấp mã OTP qua điện thoại" có "dien" cách "ma otp" 10 ký tự,
+       * dưới ngưỡng 40, nên luật nổ mà không có ai yêu cầu điền gì cả.
+       *
+       * "điện thoại" nằm trong vô số tin nhắn lành, nên đây là báo oan diện
+       * rộng. Cùng họ với bài học `phí\b` ở `locale-packs/vi-VN.js`: ranh giới
+       * từ trong tiếng Việt bỏ dấu không tự có, phải viết ra.
+       *
+       * Bản bỏ dấu chỉ còn ASCII (đ→d), nên ranh giới là "ký tự trước và sau
+       * không phải chữ/số". Không dùng `\b` của JavaScript — nó không hiểu chữ
+       * có dấu, và `test/ranh-gioi-tu-unicode.test.js` chặn đúng chuyện đó.
+       */
+      const LA_CHU_SO = /[a-z0-9]/;
+      const timTron = (chuoi, cum) => {
+        let i = chuoi.indexOf(cum);
+        while (i >= 0) {
+          const truoc = i > 0 ? chuoi[i - 1] : '';
+          const sau = chuoi[i + cum.length] || '';
+          if (!LA_CHU_SO.test(truoc) && !LA_CHU_SO.test(sau)) return i;
+          i = chuoi.indexOf(cum, i + 1);
+        }
+        return -1;
       };
+      /**
+       * ⚠️ TIN CÓ DẤU THÌ SO TRÊN BẢN CÓ DẤU. ĐỪNG BỎ DẤU RỒI MỚI SO.
+       *
+       * Ranh giới từ ở trên là cần, nhưng KHÔNG đủ, và bản vá đầu của khối này
+       * đã sai vì tưởng là đủ. Bỏ dấu thì "điền" và "điện" đều thành `dien`, mà
+       * trong "điện thoại" → `dien thoai` thì `dien` là MỘT TỪ TRỌN VẸN. Ranh
+       * giới từ khớp hoàn hảo vào đúng chỗ sai.
+       *
+       * Đây đúng cái bẫy `context-builder.js` đã ghi cho `đừng` / `dụng`, và
+       * cách chữa ở đó cũng là cách chữa ở đây: tin CÓ DẤU thì so trên bản có
+       * dấu, chỉ tin viết không dấu mới hạ xuống so bản bỏ dấu.
+       *
+       * Bỏ dấu vẫn phải giữ, vì tin nhắn thật thường viết không dấu — nhưng nó
+       * là ĐƯỜNG LÙI, không phải đường chính.
+       */
+      const viTri = (cum) => (CO_DAU.test(ban.thap)
+        ? timTron(ban.thap, String(cum).toLowerCase())
+        : timTron(ban.khongDau, boDau(cum)));
       for (const dt of doiTuong) {
         const iDt = viTri(dt);
         if (iDt < 0) continue;
@@ -673,10 +714,57 @@ function che(s = '') {
  * @param {object} boiCanh { ban, tang1, luat, tin, quen }
  * @returns {{ khop: Array, san: string, tinHieu: string[] }}
  */
+/**
+ * ══════ TẦNG 0 KHÔNG ĐƯỢC CÃI BỘ PHÂN LOẠI CÂU, THEO HƯỚNG BÁO OAN ══════
+ *
+ * ĐO ĐƯỢC 5/9/2026 — trên chính tin tuyên truyền của ngân hàng:
+ *   "Ngân hàng không bao giờ yêu cầu quý khách cung cấp mã OTP qua điện thoại"
+ *      · directPrecheck  → RỖNG   (đúng: `speechAct = warning_education`)
+ *      · tầng 0 + R1–R20 → CAO, CRED_OTP_SHARE
+ *
+ * Nghĩa là app hét "Nguy hiểm cao" vào đúng câu dạy bác làm đúng. Ngân hàng nào
+ * cũng gửi tin dạng này hằng tháng, nên đây không phải ca hiếm — và mỗi lần báo
+ * oan là một lần bác học cách bỏ qua cảnh báo của app (§4.6).
+ *
+ * R8 CÓ hàng rào phủ định riêng, nhưng nó chỉ nhìn 16 ký tự trước vị trí khớp.
+ * "không bao giờ yêu cầu quý khách cung cấp" dài 30 ký tự, nên "không" nằm
+ * ngoài tầm nhìn. NỚI CỬA SỔ ĐÓ LÀ NỚI MỘT BỘ CHẶN — ngược hướng §4.2, và sẽ
+ * tha luôn "không phải lừa đảo đâu, chuyển tiền đi".
+ *
+ * Cách đúng là dùng lại bộ phân loại canonical: `buildContext` đã gán
+ * `speechAct` cho từng mệnh đề và `directPrecheck` đã theo nó. Không mệnh đề nào
+ * RA LỆNH thì tầng 0 cũng không được tự ý thêm tín hiệu ĐÒI HỎI.
+ *
+ * ⚠️ CHỈ BỎ LUẬT CHỈ SINH TÍN HIỆU NỘI DUNG (`CRED_`/`FIN_`). Luật về NGƯỜI GỬI
+ * và ĐƯỜNG LINK (R1, R9…) vẫn phải chạy: bỏ hết thì kẻ lừa đảo chỉ cần mở đầu
+ * bằng giọng tuyên truyền rồi đính link giả — đúng lỗ hổng vừa vá ở
+ * `context-builder.js`, mở lại ở một tầng khác.
+ *
+ * ⚠️ BỎ CẢ SÀN NHÃN CỦA LUẬT, KHÔNG CHỈ TÍN HIỆU. Bản vá đầu chỉ lọc tín hiệu ở
+ * `index.js`; đo lại thì `maLyDo` rỗng mà nhãn VẪN CAO, vì `l.sanMacDinh` đi
+ * đường riêng qua `t0.san`. Một luật bị loại phải im hoàn toàn.
+ *
+ * ⚠️ ĐÂY KHÔNG PHẢI CỬA SAU CỦA §12. Không cụm từ nào trong bộ luật cập nhật
+ * được từ xa chạm tới đây — nó đọc CẤU TRÚC CÂU, nên kẻ lừa đảo không chép được
+ * một câu thần chú vào tin để tắt nó.
+ *
+ * Thiếu cờ (người gọi cũ) thì mặc định `true`: giữ nguyên hành vi, không tự ý
+ * làm im một luật vì một tham số vắng mặt.
+ */
+const CHI_LA_DOI_HOI = (ds) => ds.length > 0 && ds.every((id) => /^(CRED_|FIN_)/.test(id));
+
+/**
+ * Tin có dấu hay không. Cùng dạng với hằng cùng tên trong `context-builder.js`;
+ * để riêng vì tệp đó không xuất nó ra, và một `RegExp` một dòng thì chép lại rẻ
+ * hơn là mở rộng bề mặt xuất của một module khác.
+ */
+const CO_DAU = /[À-ỹ]/;
+
 function chayTang0(boiCanh) {
   const khop = [];
   const tinHieu = new Set();
   let san = 'CHUA_THAY';
+  const coMenhDeRaLenh = boiCanh.coMenhDeRaLenh !== false;
 
   for (const l of LUAT) {
     let kq = null;
@@ -693,6 +781,10 @@ function chayTang0(boiCanh) {
       kq = null;
     }
     if (!kq) continue;
+
+    // Xem khối ghi chú của `CHI_LA_DOI_HOI` ngay trên `chayTang0`.
+    const tinHieuLuat = (kq.tinHieu || []).filter(laTinHieu);
+    if (!coMenhDeRaLenh && CHI_LA_DOI_HOI(tinHieuLuat)) continue;
 
     const sanLuat = kq.san || l.sanMacDinh;
     san = nangNhan(san, sanLuat);

@@ -124,7 +124,14 @@ function analyze(tin = {}, tuyChon = {}) {
   ];
   const idGoc = [...new Set(tinHieuGoc.filter((s) => s.state === 'present').map((s) => s.id))];
 
-  const t0 = chayTang0({ ban, tang1, luat, tin, quen, tinHieuGoc: idGoc });
+  /*
+   * `coMenhDeRaLenh` — có mệnh đề nào RA LỆNH không, theo bộ phân loại canonical
+   * của `buildContext`. Tầng 0 cần nó để không cãi bộ phân loại theo hướng báo
+   * oan; xem khối ghi chú dài trong `tang-0.js`.
+   */
+  const coMenhDeRaLenh = !Array.isArray(ctx.segments) || ctx.segments.some((s) => s.actionable);
+
+  const t0 = chayTang0({ ban, tang1, luat, tin, quen, tinHieuGoc: idGoc, coMenhDeRaLenh });
 
   /**
    * ⚠️ BỘ LUẬT DUY NHẤT CHẤM ĐIỂM. Tầng 0 chỉ đưa tín hiệu vào.
