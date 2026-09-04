@@ -73,6 +73,8 @@ import { AppMenuModal } from './components/AppMenuModal';
 import { MatKhauGiaDinh, docMatKhauGiaDinh } from './components/MatKhauGiaDinh';
 import { FloatingQuickAccess } from './components/FloatingQuickAccess';
 import { HoiNhanhView } from './components/HoiNhanh';
+import { CanhBaoToanManHinh } from './components/CanhBaoToanManHinh';
+import { useCanhBaoThuDong } from './canh-bao-thu-dong';
 /**
  * MÀN BÀI HỌC TẢI RIÊNG — nó là phần chữ nặng nhất của app (bài học + bộ câu
  * hỏi + dữ liệu tình huống), mà bác chỉ mở khi rảnh, không phải lúc đang bị gọi.
@@ -829,6 +831,42 @@ export default function App() {
   });
 
   /**
+   * ═══════════ PHÁT HIỆN THỤ ĐỘNG — bác không phải thao tác gì ═══════════
+   *
+   * Trước đợt này, tin bắt được từ thông báo nằm im trong bộ đệm native chờ bác
+   * CHỦ ĐỘNG bấm kiểm. Người đang bị kẻ gian dồn ép là người ít có khả năng bấm
+   * nút nhất — nên một bộ đệm chờ bấm gần như không cứu được ai.
+   *
+   * ⚠️ CHỈ CHẠY Ở VAI NGƯỜI CAO TUỔI. Máy của con cháu không cần quét thông báo
+   * của chính họ; làm thế là mở rộng bề mặt riêng tư mà không đổi lấy gì.
+   *
+   * ⚠️ VÒNG TRÒN GIA ĐÌNH DỰNG TỪ `familyMembers`. Chưa ai trong danh sách thì
+   * `quyTac` là `undefined` ⇒ `nenTuDongCanhBao()` trả `chua_co_quy_tac`, và màn
+   * cảnh báo đổi nút chính thành "Báo cho …" do BÁC bấm. §12 — không tự bật
+   * auto-alert thay chủ tài khoản.
+   */
+  const vongTronThuDong = React.useMemo(() => ({
+    chuTaiKhoanId: 'bac',
+    thanhVien: [
+      { id: 'bac', vaiTro: 'chu_tai_khoan', daThuHoi: false },
+      ...familyMembers.map((m: any, i: number) => ({
+        id: `nt-${i}`, vaiTro: 'nguoi_than_tin_cay', daThuHoi: false,
+      })),
+    ],
+  }), [familyMembers]);
+
+  const canhBaoThuDong = useCanhBaoThuDong({
+    bat: userRole === 'elder' && view !== 'intro' && view !== 'login',
+    vongTron: vongTronThuDong,
+    tenNguoiThan: familyMembers[0]?.name ?? null,
+    /*
+     * §12 — KHÔNG tự quay số. Đưa bác sang màn Vòng tròn gia đình, nơi có nút
+     * gọi và nơi bác thấy mình đang gọi cho ai.
+     */
+    onGoiNguoiThan: () => setView('family'),
+  });
+
+  /**
    * Nút "Dừng 60 giây" bác tự bấm.
    *
    * ⚠️ ĐÂY KHÔNG PHẢI MỘT KẾT QUẢ PHÂN TÍCH — bản trước đặt `nhan: 'CAO'` cho
@@ -1256,6 +1294,24 @@ export default function App() {
         có sẵn mục quét trong danh sách. Một nút không làm được việc gì mà vẫn
         nằm chắn đường là thứ khiến bác chạm nhầm rồi lạc.
       */}
+      {/*
+        ═══════════ MÀN CẢNH BÁO THỤ ĐỘNG — TRÊN CÙNG MỌI THỨ ═══════════
+
+        Đặt Ở ĐÂY, sau mọi view và sau cả bóng nổi, vì nó phải phủ kín màn hình.
+        Người đang nghe kẻ gian nói KHÔNG nhìn thấy một thông báo nhỏ trong khay.
+
+        §4.6 — nó luôn có lối ra. Xem `CanhBaoToanManHinh.tsx`.
+      */}
+      {canhBaoThuDong.man && (
+        <CanhBaoToanManHinh
+          man={canhBaoThuDong.man}
+          t={t}
+          onGoi={canhBaoThuDong.goi}
+          onDong={canhBaoThuDong.dong}
+          onToiOn={canhBaoThuDong.toiOn}
+        />
+      )}
+
       {view !== 'intro' && view !== 'login' && !isMenuOpen && !superBasic && (
       <FloatingQuickAccess
           lang={lang}

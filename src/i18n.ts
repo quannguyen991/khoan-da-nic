@@ -793,6 +793,40 @@ export const translations: Record<Lang, Record<string, string>> = {
     "Đang nghe qua micro": "Đang nghe qua micro",
     "Đã ghi xong": "Đã ghi xong",
     "Hoặc thử một tình huống mẫu:": "Hoặc thử một tình huống mẫu:",
+
+    /* ═══ Màn cảnh báo toàn màn hình phía người cao tuổi — thêm 4/9/2026 ═══
+     * §HĐ luật 2: máy chủ trả MÃ, frontend tra bảng ra câu. Những chuỗi dưới
+     * đây là ĐÍCH của phép tra đó — xem `src/components/CanhBaoToanManHinh.tsx`.
+     * Sửa câu ở đây KHÔNG làm đổi kết luận của bộ luật, và đó là chủ đích. */
+    "Khoan đã!": "Khoan đã!",
+    "Cảnh báo khẩn": "Cảnh báo khẩn",
+    "Báo cho": "Báo cho",
+    "người nhà": "người nhà",
+    "Cháu đã gửi cảnh báo cho {ten}.": "Cháu đã gửi cảnh báo cho {ten}.",
+    "{ten} đã mở cảnh báo.": "{ten} đã mở cảnh báo.",
+    "Cháu chưa gửi được cho {ten}. Bác gọi cho {ten} nhé.": "Cháu chưa gửi được cho {ten}. Bác gọi cho {ten} nhé.",
+    "Nhà mình chưa đặt người nhận cảnh báo.": "Nhà mình chưa đặt người nhận cảnh báo.",
+    "Tin này nói chuyện của cơ quan nhà nước nhưng đường link lại không phải trang chính thức.": "Tin này nói chuyện của cơ quan nhà nước nhưng đường link lại không phải trang chính thức.",
+    "Tin này bảo bác cài một ứng dụng từ đường link — đây là cách kẻ gian chiếm quyền điều khiển điện thoại.": "Tin này bảo bác cài một ứng dụng từ đường link — đây là cách kẻ gian chiếm quyền điều khiển điện thoại.",
+    "Tin này xưng danh cơ quan nhưng dùng link rút gọn, mà cơ quan nhà nước thì không dùng link rút gọn.": "Tin này xưng danh cơ quan nhưng dùng link rút gọn, mà cơ quan nhà nước thì không dùng link rút gọn.",
+    "Đường link trong tin có tên gần giống trang thật nhưng không phải trang thật.": "Đường link trong tin có tên gần giống trang thật nhưng không phải trang thật.",
+    "Đường link trong tin dùng loại tên miền mà các vụ lừa đảo hay dùng.": "Đường link trong tin dùng loại tên miền mà các vụ lừa đảo hay dùng.",
+    "Tin này vừa đưa số tài khoản, vừa nêu số tiền, vừa giục bác làm ngay — ba thứ đi cùng nhau là dấu hiệu thường gặp trong các vụ lừa đảo.": "Tin này vừa đưa số tài khoản, vừa nêu số tiền, vừa giục bác làm ngay — ba thứ đi cùng nhau là dấu hiệu thường gặp trong các vụ lừa đảo.",
+    "Tin này bảo bác đừng nói với ai. Việc thật thì không ai cấm bác hỏi người nhà.": "Tin này bảo bác đừng nói với ai. Việc thật thì không ai cấm bác hỏi người nhà.",
+    "Tin này hỏi mã hoặc mật khẩu của bác. Ngân hàng và cơ quan nhà nước không bao giờ hỏi những thứ đó.": "Tin này hỏi mã hoặc mật khẩu của bác. Ngân hàng và cơ quan nhà nước không bao giờ hỏi những thứ đó.",
+    "Tin gửi từ một số điện thoại thường nhưng lại xưng là cơ quan hoặc ngân hàng.": "Tin gửi từ một số điện thoại thường nhưng lại xưng là cơ quan hoặc ngân hàng.",
+    "Tin có đường link và bác chưa từng lưu số người gửi này.": "Tin có đường link và bác chưa từng lưu số người gửi này.",
+    "Đường link trong tin này đã từng bị báo cáo trong các vụ lừa đảo trước đó.": "Đường link trong tin này đã từng bị báo cáo trong các vụ lừa đảo trước đó.",
+    "Vừa có một ứng dụng lạ được cài vào máy. Nếu ai đó đang hướng dẫn bác cài, bác dừng lại và gọi cho người nhà nhé.": "Vừa có một ứng dụng lạ được cài vào máy. Nếu ai đó đang hướng dẫn bác cài, bác dừng lại và gọi cho người nhà nhé.",
+    "Cháu chưa đọc được hết phần bác gửi, nên chưa kết luận được gì.": "Cháu chưa đọc được hết phần bác gửi, nên chưa kết luận được gì.",
+    "Cháu chưa thấy dấu hiệu rủi ro trong phần bác gửi. Nếu vẫn thấy chưa yên tâm, bác gọi cho người nhà nhé.": "Cháu chưa thấy dấu hiệu rủi ro trong phần bác gửi. Nếu vẫn thấy chưa yên tâm, bác gọi cho người nhà nhé.",
+    "Thông báo này không có nội dung để đọc.": "Thông báo này không có nội dung để đọc.",
+    "Cháu chỉ đọc được một phần tin này.": "Cháu chỉ đọc được một phần tin này.",
+    "Cháu không mở được đường link trong tin.": "Cháu không mở được đường link trong tin.",
+    "Cháu không đọc được ảnh bác gửi.": "Cháu không đọc được ảnh bác gửi.",
+    "Cháu không nghe được cuộc gọi.": "Cháu không nghe được cuộc gọi.",
+    "Cháu không đọc được tên ứng dụng vừa cài.": "Cháu không đọc được tên ứng dụng vừa cài.",
+    "Lượt này không có AI đọc.": "Lượt này không có AI đọc.",
   },
   en: {
     "👮 Giả danh công an": "👮 Police impersonation",
@@ -1577,6 +1611,40 @@ export const translations: Record<Lang, Record<string, string>> = {
     "Đang nghe qua micro": "Listening through the mic",
     "Đã ghi xong": "Recording finished",
     "Hoặc thử một tình huống mẫu:": "Or try a sample situation:",
+
+    /* ═══ Màn cảnh báo toàn màn hình phía người cao tuổi — thêm 4/9/2026 ═══
+     * §HĐ luật 2: máy chủ trả MÃ, frontend tra bảng ra câu. Những chuỗi dưới
+     * đây là ĐÍCH của phép tra đó — xem `src/components/CanhBaoToanManHinh.tsx`.
+     * Sửa câu ở đây KHÔNG làm đổi kết luận của bộ luật, và đó là chủ đích. */
+    "Khoan đã!": "Wait a moment!",
+    "Cảnh báo khẩn": "Urgent alert",
+    "Báo cho": "Alert",
+    "người nhà": "your family",
+    "Cháu đã gửi cảnh báo cho {ten}.": "The alert was sent to {ten}.",
+    "{ten} đã mở cảnh báo.": "{ten} opened the alert.",
+    "Cháu chưa gửi được cho {ten}. Bác gọi cho {ten} nhé.": "The alert could not be sent to {ten}. Please call {ten}.",
+    "Nhà mình chưa đặt người nhận cảnh báo.": "No family member is set to receive alerts yet.",
+    "Tin này nói chuyện của cơ quan nhà nước nhưng đường link lại không phải trang chính thức.": "This message talks about a government matter, but the link is not an official government site.",
+    "Tin này bảo bác cài một ứng dụng từ đường link — đây là cách kẻ gian chiếm quyền điều khiển điện thoại.": "This message asks you to install an app from a link — that is how phones get taken over.",
+    "Tin này xưng danh cơ quan nhưng dùng link rút gọn, mà cơ quan nhà nước thì không dùng link rút gọn.": "It claims to be from a government body but uses a shortened link, which official bodies do not use.",
+    "Đường link trong tin có tên gần giống trang thật nhưng không phải trang thật.": "The link looks almost like the real site, but it is not the real site.",
+    "Đường link trong tin dùng loại tên miền mà các vụ lừa đảo hay dùng.": "The link uses a type of domain commonly seen in scams.",
+    "Tin này vừa đưa số tài khoản, vừa nêu số tiền, vừa giục bác làm ngay — ba thứ đi cùng nhau là dấu hiệu thường gặp trong các vụ lừa đảo.": "It gives an account number, an amount, and pushes you to act now — those three together are a common scam pattern.",
+    "Tin này bảo bác đừng nói với ai. Việc thật thì không ai cấm bác hỏi người nhà.": "It tells you to keep this from everyone. Nothing legitimate requires you to hide it from your family.",
+    "Tin này hỏi mã hoặc mật khẩu của bác. Ngân hàng và cơ quan nhà nước không bao giờ hỏi những thứ đó.": "It asks for your code or password. Banks and government bodies never ask for those.",
+    "Tin gửi từ một số điện thoại thường nhưng lại xưng là cơ quan hoặc ngân hàng.": "The message comes from an ordinary mobile number but claims to be a bank or a government body.",
+    "Tin có đường link và bác chưa từng lưu số người gửi này.": "The message contains a link and this sender is not in your saved contacts.",
+    "Đường link trong tin này đã từng bị báo cáo trong các vụ lừa đảo trước đó.": "The link in this message has been reported in earlier scam cases.",
+    "Vừa có một ứng dụng lạ được cài vào máy. Nếu ai đó đang hướng dẫn bác cài, bác dừng lại và gọi cho người nhà nhé.": "An app from outside the official store was just installed. If someone is guiding you through it, please stop and call a family member.",
+    "Cháu chưa đọc được hết phần bác gửi, nên chưa kết luận được gì.": "Some of what you sent could not be read, so nothing is concluded yet.",
+    "Cháu chưa thấy dấu hiệu rủi ro trong phần bác gửi. Nếu vẫn thấy chưa yên tâm, bác gọi cho người nhà nhé.": "No clear risk signals found in what you sent. If you are still unsure, please call a family member.",
+    "Thông báo này không có nội dung để đọc.": "This notification had no text to read.",
+    "Cháu chỉ đọc được một phần tin này.": "Only part of this message could be read.",
+    "Cháu không mở được đường link trong tin.": "The link in this message could not be checked.",
+    "Cháu không đọc được ảnh bác gửi.": "The image you sent could not be read.",
+    "Cháu không nghe được cuộc gọi.": "Phone calls are not listened to.",
+    "Cháu không đọc được tên ứng dụng vừa cài.": "The name of the newly installed app could not be read.",
+    "Lượt này không có AI đọc.": "No AI read this one.",
   }
 };
 
