@@ -360,7 +360,18 @@ const KHUNG_GIAO_DUC = new RegExp([
   // Khung TƯỜNG THUẬT về nạn nhân, hoặc về kẻ giả danh.
   '(nạn nhân|người bị hại)[^.]{0,30}(được|bị)\\s+(yêu cầu|dụ|lừa)',
   'có người[^.]{0,20}(giả danh|mạo danh|xưng là)',
-  'theo (cơ quan|công an|báo|nguồn tin)',
+  /**
+   * ⚠️ "THEO CƠ QUAN X" PHẢI ĐI KÈM MỘT ĐỘNG TỪ TƯỜNG THUẬT.
+   *
+   * Mẫu cũ là `theo (cơ quan|công an|báo|nguồn tin)` — trống. Đo được 5/9/2026:
+   *   "Theo công an, bác cần chuyển tiền vào tài khoản an toàn" → RỖNG
+   * Một câu RA LỆNH chỉ cần khoác hai chữ "theo công an" là được miễn. Cùng họ
+   * với lỗ "Thông báo:" vừa vá ở trên.
+   *
+   * Tường thuật thật thì có động từ tường thuật. Câu ra lệnh thì không.
+   */
+  'theo (cơ quan|công an|báo|nguồn tin)[^.]{0,40}'
+    + '(cho biết|khuyến cáo|cảnh báo|thông tin|xác nhận|thống kê|ghi nhận|phản ánh)',
 
   /**
    * ⚠️ CHUYỆN ĐÃ QUA — MỐC THỜI GIAN QUÁ KHỨ + LỜI KỂ.
@@ -499,6 +510,27 @@ function viTriKhungGiaoDuc(n) {
   return m ? m.index : -1;
 }
 
+/**
+ * Vị trí TỪ NỐI ĐỐI LẬP đầu tiên. Sau nó, khung giáo dục hết hiệu lực — xem
+ * khối ghi chú trong `phanLoai`.
+ *
+ * ⚠️ Viết CẢ hai dạng có dấu và không dấu, vì `n` có thể là bản nào cũng được.
+ * Không dùng `\b` cạnh chữ có dấu — `test/ranh-gioi-tu-unicode.test.js` chặn.
+ */
+const TU_DOI_LAP = new RegExp([
+  '(^|[\\s,.;:])(nhưng|nhung)([\\s,]|$)',
+  '(^|[\\s,.;:])(tuy nhiên|tuy nhien)([\\s,]|$)',
+  '(^|[\\s,.;:])(thế nhưng|the nhung)([\\s,]|$)',
+  '(^|[\\s,.;:])(song)([\\s,]|$)',
+  '(^|[\\s,.;:])(riêng lần này|rieng lan nay|lần này thì|lan nay thi)',
+  '(^|[\\s,.;:])(however|but)([\\s,]|$)',
+].join('|'), 'i');
+
+function viTriTuDoiLap(n) {
+  const m = TU_DOI_LAP.exec(n);
+  return m ? m.index : -1;
+}
+
 function viTriDongTuRuiRo(n) {
   DONG_TU_RUI_RO.lastIndex = 0;
   const ra = [];
@@ -519,7 +551,33 @@ function phanLoai(n) {
     // C.3 bẫy 3: khung giáo dục chỉ chi phối động từ đứng SAU nó. Một động từ
     // rủi ro đứng TRƯỚC khung là mệnh lệnh thật ở mệnh đề chính —
     // "Please transfer the money now and do not tell Mum." KHÔNG phải bài giáo dục.
-    const coRuiRoNgoaiKhung = viTriRuiRo.some((v) => v < viTriEdu);
+    /**
+     * ⚠️ KHUNG GIÁO DỤC DỪNG LẠI Ở TỪ NHƯNG.
+     *
+     * ĐO ĐƯỢC 5/9/2026, ngay sau khi vá lỗ "Thông báo:" — quét cả khung bằng
+     * từ vựng tuyên truyền dùng làm VỎ BỌC, và tìm thêm hai ca về rỗng:
+     *
+     *   "Ngân hàng không bao giờ yêu cầu mật khẩu, NHƯNG LẦN NÀY bác vui lòng
+     *    chuyển tiền vào tài khoản an toàn 1902xxxx"      → RỖNG
+     *   "Theo công an, bác cần chuyển tiền vào tài khoản an toàn"  → RỖNG
+     *
+     * Ca thứ nhất là chiêu kinh điển: trích đúng lời khuyên của ngân hàng để
+     * lấy lòng tin, rồi tạo một ngoại lệ. Chính vế "nhưng" mới là tin nhắn.
+     *
+     * Khối `coRuiRoNgoaiKhung` ngay dưới đã mang sẵn ý đúng — "động từ rủi ro
+     * đứng TRƯỚC khung là mệnh lệnh thật" — chỉ thiếu vế đối: một TỪ NỐI ĐỐI LẬP
+     * cũng KẾT THÚC phạm vi của khung. Sau chữ "nhưng", câu không còn nói về
+     * thủ đoạn nữa; nó bắt đầu ra lệnh.
+     *
+     * ⚠️ ĐÒI CÓ ĐỘNG TỪ RỦI RO SAU TỪ NỐI. Chỉ riêng chữ "nhưng" thì quá rộng —
+     * một bài tuyên truyền thật cũng viết "…nhưng nhiều người vẫn mắc bẫy".
+     */
+    const viTriDoiLap = viTriTuDoiLap(n);
+    const coRuiRoSauTuDoiLap = viTriDoiLap >= 0
+      && viTriDoiLap > viTriEdu
+      && viTriRuiRo.some((v) => v > viTriDoiLap);
+
+    const coRuiRoNgoaiKhung = viTriRuiRo.some((v) => v < viTriEdu) || coRuiRoSauTuDoiLap;
     if (!coRuiRoNgoaiKhung) {
       return /kẻ (lừa đảo|gian)|scammers?\b.*\b(told|said) me/.test(n)
         && /\btôi\b|\bme\b/.test(n) ? 'quoted_report' : 'warning_education';

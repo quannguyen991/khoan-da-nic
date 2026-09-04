@@ -77,6 +77,46 @@ test('thêm "Thông báo/Cảnh báo/Lưu ý" vào đầu KHÔNG được xoá t
   });
 
 /**
+ * ⚠️ VỎ BỌC BẰNG CHÍNH TỪ VỰNG TUYÊN TRUYỀN.
+ *
+ * Vá xong lỗ "Thông báo:", quét lại cả khung bằng cách bọc câu ra lệnh trong
+ * giọng tuyên truyền — và tìm thêm HAI ca nữa cùng về rỗng:
+ *
+ *   "Ngân hàng không bao giờ yêu cầu mật khẩu, NHƯNG LẦN NÀY bác vui lòng
+ *    chuyển tiền vào tài khoản an toàn 1902xxxx"
+ *   "THEO CÔNG AN, bác cần chuyển tiền vào tài khoản an toàn"
+ *
+ * Ca đầu là chiêu kinh điển: trích đúng lời khuyên của ngân hàng để lấy lòng
+ * tin, rồi tạo một ngoại lệ. Ca sau khoác hai chữ "theo công an" lên một câu
+ * ra lệnh.
+ *
+ * Bài học chung của cả tệp này: MỘT LỖ HỔNG LOẠI NÀY KHÔNG ĐỨNG MỘT MÌNH. Tìm
+ * ra một cái thì phải quét cả danh sách, và quét bằng cách CHẠY chứ không đọc.
+ */
+test('từ vựng tuyên truyền không dùng làm vỏ bọc được', { skip: BO_QUA }, () => {
+  const RA_LENH = 'vui lòng chuyển tiền vào tài khoản an toàn 1902xxxx để bảo vệ';
+  const VO_BOC = [
+    'Kẻ lừa đảo đang nhắm vào bác. Để bảo vệ,',
+    'Lừa đảo thường xảy ra lúc này. Bác',
+    'Ngân hàng không bao giờ yêu cầu mật khẩu, nhưng lần này bác',
+    'Công an cảnh báo có đường dây lừa đảo. Bác',
+    'Có người giả danh nhân viên ngân hàng. Bác',
+    'Theo công an, bác cần',
+    'Hồi tháng ba bác từng bị lừa. Nay bác',
+  ];
+  const goc = tinHieuCua(RA_LENH);
+  assert.ok(goc.length > 0, 'câu mẫu phải có tín hiệu — sửa câu mẫu, đừng sửa test');
+
+  const lot = VO_BOC
+    .map((vo) => [vo, tinHieuCua(`${vo} ${RA_LENH}`)])
+    .filter(([, s]) => goc.some((id) => !s.includes(id)))
+    .map(([vo, s]) => `"${vo}…" → ${s.join(',') || 'RỖNG'}`);
+
+  assert.deepStrictEqual(lot, [],
+    'bọc câu ra lệnh trong giọng tuyên truyền không được làm mất tín hiệu nào');
+});
+
+/**
  * ⚠️ NỬA KIA CỦA HÀNG RÀO — ĐỪNG XOÁ.
  *
  * Cách "sửa" sai là bỏ luôn khung giáo dục. Làm thế thì mọi tin tuyên truyền
