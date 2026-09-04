@@ -97,7 +97,7 @@ export function GuardianIntroView({
             if (setUserRole) setUserRole('elder');
             setView('home');
           }}
-          className="w-full bg-white hover:bg-slate-50 text-purple-700 border-2 border-[#2e1065] py-3.5 px-6 rounded-2xl font-bold text-sm shadow-xs flex items-center justify-center gap-2 active:scale-95 transition-all"
+ className="w-full bg-white hover:bg-slate-50 text-purple-700 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] py-3.5 px-6 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 active:scale-95 transition-all"
         >
           <Smartphone size={18} />
           {tr("Chuyển sang vai Bác (Người già)")}

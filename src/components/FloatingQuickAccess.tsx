@@ -766,7 +766,7 @@ export function FloatingQuickAccess({
               {/* Header */}
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-2xl bg-purple-100 border-2 border-[#2e1065] flex items-center justify-center text-purple-700 shrink-0">
+                  <div className="w-12 h-12 rounded-2xl bg-purple-100 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] flex items-center justify-center text-purple-700 shrink-0">
                     <Layers size={26} />
                   </div>
                   <div>
@@ -789,7 +789,7 @@ export function FloatingQuickAccess({
                 Facebook hay ở màn hình chính" — bốn ví dụ cho một ý mà câu trước đã
                 nói xong. Ví dụ chỉ giúp khi ý còn mơ hồ; ở đây nó chỉ dài thêm.
               */}
-              <div className="bg-purple-50/80 border-2 border-[#2e1065] rounded-2xl p-3.5 mb-4 flex items-start gap-2">
+              <div className="bg-purple-50/80 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] rounded-2xl p-3.5 mb-4 flex items-start gap-2">
                 <CheckCircle2 size={16} className="text-emerald-600 shrink-0 mt-0.5" />
                 <p className="text-[14px] text-purple-900 leading-relaxed font-medium">
                   {t('Gặp số lạ hay link lạ, chạm quả bóng là kiểm được ngay.')}

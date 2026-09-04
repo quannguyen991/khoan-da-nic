@@ -104,7 +104,7 @@ function KhongTaiDuocBaiHoc({ t, setView }: { t: any; setView: (v: ViewState) =>
       </button>
       <button
         onClick={() => setView('home')}
-        className="w-full max-w-xs py-3.5 px-4 bg-white text-[#6d28d9] border-2 border-[#2e1065] font-bold text-[16px] rounded-2xl active:scale-95"
+ className="w-full max-w-xs py-3.5 px-4 bg-white text-[#6d28d9] border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] font-bold text-[16px] rounded-2xl active:scale-95"
       >
         {t('Về trang chủ')}
       </button>
@@ -1257,7 +1257,7 @@ export default function App() {
                 className="absolute bottom-0 left-0 w-full px-4 pb-6 pt-10 bg-gradient-to-t from-[#cfb8f8] via-[#e2d2f9]/80 to-transparent z-50 pointer-events-none
                   lg:static lg:order-first lg:w-full lg:h-auto lg:shrink-0 lg:px-8 lg:pt-5 lg:pb-3 lg:bg-none"
               >
-                <div className="bg-gradient-to-r from-[#9e76ea] via-[#ad8af0] to-[#9e76ea] rounded-full p-[6px] px-3 sm:px-4 flex justify-between items-center shadow-[4px_4px_0_#2e1065] border-[2.5px] border-[#2e1065] h-16 sm:h-18 max-w-lg sm:max-w-xl mx-auto relative overflow-hidden pointer-events-auto
+                <div className="bg-gradient-to-r from-[#9e76ea] via-[#ad8af0] to-[#9e76ea] rounded-full p-[6px] px-3 sm:px-4 flex justify-between items-center shadow-[0_15px_30px_rgba(90,30,160,0.3)] border border-white/20 h-16 sm:h-18 max-w-lg sm:max-w-xl mx-auto relative overflow-hidden pointer-events-auto
                   lg:justify-center lg:gap-2 lg:h-[4.25rem] lg:max-w-3xl lg:rounded-full lg:px-3 lg:shadow-[0_10px_28px_rgba(90,30,160,0.22)]">
                   <div className="absolute inset-0 bg-gradient-to-t from-white/10 to-transparent pointer-events-none"></div>
                   
@@ -1371,7 +1371,7 @@ export default function App() {
                      setUserRole('elder');
                      setView('home');
                    }} 
-                   className="flex items-center gap-1.5 text-purple-700 bg-purple-50 hover:bg-purple-100 border-2 border-[#2e1065] px-3.5 py-1.5 rounded-2xl font-bold text-[14px] transition-colors shadow-2xs"
+ className="flex items-center gap-1.5 text-purple-700 bg-purple-50 hover:bg-purple-100 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] px-3.5 py-1.5 rounded-2xl font-bold text-[14px] transition-colors "
                  >
                    <Smartphone className="w-3.5 h-3.5" /> {t("Vai của bác")}
                  </button>
@@ -1682,7 +1682,7 @@ function HomeView({
       <div className="pt-2 sm:pt-4 px-4 sm:px-6 lg:px-8 z-50 flex items-center justify-between pointer-events-auto shrink-0 select-none max-w-2xl lg:max-w-none mx-auto w-full">
         <button 
           onClick={onOpenMenu}
-          className="p-2 sm:p-2.5 px-3.5 sm:px-5 bg-white/90 hover:bg-white rounded-2xl shadow-sm backdrop-blur-md active:scale-95 transition-all text-[#6d28d9] flex items-center gap-2 border-2 border-[#2e1065]"
+ className="p-2 sm:p-2.5 px-3.5 sm:px-5 bg-white/90 hover:bg-white rounded-2xl shadow-sm backdrop-blur-md active:scale-95 transition-all text-[#6d28d9] flex items-center gap-2"
           title={t("Menu tính năng & Truy cập nhanh")}
         >
           <LayoutGrid size={18} strokeWidth={2.5} className="text-[#6d28d9]" />
@@ -1699,12 +1699,12 @@ function HomeView({
             */
             aria-label={t("Bật/Tắt ghim thông báo cảnh giác")}
             title={t("Bật/Tắt ghim thông báo cảnh giác")}
-            className={`p-2 sm:p-2.5 px-3 rounded-2xl shadow-sm backdrop-blur-md active:scale-95 transition-all flex items-center gap-1.5 ${pinnedNotification ? 'bg-red-500 text-white animate-pulse' : 'bg-white/80 text-[#6d28d9] border-2 border-[#2e1065]'}`}
+ className={`p-2 sm:p-2.5 px-3 rounded-2xl backdrop-blur-md active:scale-95 transition-all flex items-center gap-1.5 ${pinnedNotification ? 'bg-red-500 text-white animate-pulse' : 'bg-white/80 text-[#6d28d9] shadow-sm'}`}
           >
             <Bell size={18} strokeWidth={2.5} />
             <span className="hidden sm:inline text-[14px] font-bold">{pinnedNotification ? t("Đang ghim") : t("Ghim tin")}</span>
           </button>
-          <button aria-label={t("Cài đặt")} onClick={() => setView('settings')} className="p-2 sm:p-2.5 bg-white/80 hover:bg-white rounded-2xl shadow-sm backdrop-blur-md active:scale-95 transition-all text-[#6d28d9] border-2 border-[#2e1065]">
+          <button aria-label={t("Cài đặt")} onClick={() => setView('settings')} className="p-2 sm:p-2.5 bg-white/80 hover:bg-white rounded-2xl shadow-sm backdrop-blur-md active:scale-95 transition-all text-[#6d28d9]">
             <Settings size={18} strokeWidth={2.5} />
           </button>
         </div>
@@ -1939,7 +1939,7 @@ function HomeView({
 
         {/* Text and Image Input Area */}
         <div className="w-full px-4 sm:px-6 mb-2 sm:mb-3 pointer-events-auto">
-          <div className="relative flex items-center bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-1.5 sm:p-2 pl-3 pr-2 shadow-sm border-2 border-[#2e1065] focus-within:ring-3 ring-[#c084fc]/50 transition-all">
+          <div className="relative flex items-center bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-1.5 sm:p-2 pl-3 pr-2 shadow-lg border border-white/60 focus-within:ring-3 ring-[#c084fc]/50 transition-all">
              <button 
                type="button"
                onClick={() => fileInputRefMobile.current?.click()}
@@ -1982,7 +1982,7 @@ function HomeView({
               initial={{ scale: 0.9, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              className="w-full max-w-sm bg-white rounded-3xl p-5 shadow-2xl border-2 border-[#2e1065] flex flex-col"
+ className="w-full max-w-sm bg-white rounded-3xl p-5 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] flex flex-col"
             >
               <div className="flex items-center justify-between pb-3 border-b border-gray-100 mb-3">
                 <div className="flex items-center gap-2">
@@ -2008,7 +2008,7 @@ function HomeView({
                     <a
                       key={member.id}
                       href={`tel:${member.phone}`}
-                      className="flex items-center justify-between p-3.5 bg-gradient-to-r from-purple-50 to-green-50/50 hover:from-purple-100 hover:to-green-100/70 border-2 border-[#2e1065] rounded-2xl active:scale-[0.98] transition-all group"
+ className="flex items-center justify-between p-3.5 bg-gradient-to-r from-purple-50 to-green-50/50 hover:from-purple-100 hover:to-green-100/70 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] rounded-2xl active:scale-[0.98] transition-all group"
                     >
                       <div className="flex items-center gap-3">
                         {/*
@@ -2588,7 +2588,7 @@ function VoiceView({
 
         {/* Live Audio Waveform based on real microphone volume with smooth curves */}
         {isRecording && (
-          <div className="flex items-center justify-center gap-1.5 h-10 px-5 py-1.5 bg-purple-50/90 backdrop-blur-sm rounded-full border-2 border-[#2e1065]/80 shadow-inner my-1">
+          <div className="flex items-center justify-center gap-1.5 h-10 px-5 py-1.5 bg-purple-50/90 backdrop-blur-sm rounded-full border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065]/80 shadow-inner my-1">
             {micVolume.map((height, i) => (
               <motion.div
                 key={i}
@@ -2628,7 +2628,7 @@ function VoiceView({
       )}
 
       {/* Transcript Text Box */}
-      <div className="w-full bg-white rounded-2xl p-3.5 shadow-sm border-2 border-[#2e1065] mb-3">
+      <div className="w-full bg-white rounded-2xl p-3.5 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] mb-3">
         <div className="flex items-center justify-between mb-1.5">
           <span className="text-[14px] font-bold text-[#6d28d9] flex items-center gap-1.5">
             <Sparkles size={14} className="text-amber-500 animate-spin" /> {t("Lời nói đang nhận diện:")}
@@ -2710,7 +2710,7 @@ function VoiceView({
               setInterimText('');
               startRecording(); 
             }} 
-            className="flex-1 bg-white border-2 border-[#2e1065] text-[#6d28d9] py-2.5 rounded-2xl font-bold text-[14px] shadow-xs active:scale-95 transition-all flex items-center justify-center gap-1"
+ className="flex-1 bg-white border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] text-[#6d28d9] py-2.5 rounded-2xl font-bold text-[14px] active:scale-95 transition-all flex items-center justify-center gap-1"
           >
             <RotateCcw size={13} />
             <span>{t("Nói lại từ đầu")}</span>
@@ -2777,7 +2777,7 @@ function HistoryView({
       className="flex-1 flex flex-col w-full relative z-10 pt-6 md:pt-16 pb-24 lg:pb-10 px-4 md:px-12 lg:px-16 overflow-y-auto"
     >
       <div className="md:hidden flex flex-col items-center mb-4">
-         <div className="w-10 h-10 bg-white rounded-2xl flex items-center justify-center shadow-xs mb-1.5 border-2 border-[#2e1065]">
+         <div className="w-10 h-10 bg-white rounded-2xl flex items-center justify-center mb-1.5 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065]">
             <ShieldAlert size={22} className="text-[#6d28d9]" />
          </div>
          <h2 className="text-[22px] font-black text-[#1e1b4b] text-center leading-tight">{t("Lịch sử cảnh báo")}</h2>
@@ -2822,7 +2822,7 @@ function HistoryView({
 
       {/* Search inside history */}
       <div className="w-full max-w-4xl mx-auto mb-3">
-        <div className="bg-white rounded-2xl px-3 py-2 flex items-center gap-2 border-2 border-[#2e1065] shadow-2xs">
+        <div className="bg-white rounded-2xl px-3 py-2 flex items-center gap-2 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] ">
           <Search size={15} className="text-gray-400" />
           <input 
             type="text" 
@@ -2842,7 +2842,7 @@ function HistoryView({
       {/* History Items List */}
       <div className="flex flex-col gap-2.5 max-w-4xl mx-auto w-full md:grid md:grid-cols-2">
         {filteredItems.length === 0 ? (
-          <div className="col-span-2 flex flex-col items-center justify-center py-10 bg-white/70 rounded-3xl border-2 border-[#2e1065] shadow-2xs text-center p-6">
+          <div className="col-span-2 flex flex-col items-center justify-center py-10 bg-white/70 rounded-3xl border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] text-center p-6">
             <ShieldCheck size={38} className="text-[#c084fc] mb-2 opacity-60" />
             <h4 className="font-bold text-[#1e1b4b] text-[15px] mb-1">{t("Chưa có bản ghi nào")}</h4>
             <p className="text-[14px] text-gray-500 max-w-xs mb-3">{t("Bác bấm micro hoặc quét ảnh ở trang chủ để kiểm tra an toàn.")}</p>
@@ -2861,7 +2861,7 @@ function HistoryView({
               <div 
                 key={item.id}
                 onClick={() => handleOpenItem(item)}
-                className="bg-white rounded-2xl p-3 flex gap-3 items-center shadow-2xs border-2 border-[#2e1065]/70 hover:shadow-xs hover:border-purple-200 transition-all cursor-pointer group"
+ className="bg-white rounded-2xl p-3 flex gap-3 items-center border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065]/70 hover: hover:border-purple-200 transition-all cursor-pointer group"
               >
                 <div className={`w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 ${isHigh ? 'bg-red-50 text-red-600 border border-red-200' : isSuspicious ? 'bg-amber-50 text-amber-600 border border-amber-200' : 'bg-emerald-50 text-emerald-600 border border-emerald-200'}`}>
                   {item.type === 'call' ? (
@@ -3091,7 +3091,7 @@ function FamilyView({
                   <Zap className="w-4 h-4 text-red-600 shrink-0" />
                   {t("Số khẩn cấp")}
                 </h3>
-                <span className="text-[14px] font-bold text-purple-800 bg-purple-100 px-2.5 py-0.5 rounded-full border-2 border-[#2e1065] shrink-0">
+                <span className="text-[14px] font-bold text-purple-800 bg-purple-100 px-2.5 py-0.5 rounded-full border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] shrink-0">
                   {lang === 'en' ? 'Global' : 'Việt Nam'}
                 </span>
               </div>
@@ -3118,7 +3118,7 @@ function FamilyView({
                      onClick={() => handleCall(item.phone.replace(/[^0-9+]/g, ''))}
                      className="flex items-center gap-3 p-3 min-h-[52px] rounded-2xl bg-purple-50 hover:bg-purple-100 text-left transition-all border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] active:scale-95 group"
                    >
-                      <div className="w-11 h-11 bg-purple-600 text-white rounded-2xl flex items-center justify-center font-black text-[14px] shrink-0 border-2 border-[#2e1065] group-hover:bg-red-600 transition-colors">
+                      <div className="w-11 h-11 bg-purple-600 text-white rounded-2xl flex items-center justify-center font-black text-[14px] shrink-0 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] group-hover:bg-red-600 transition-colors">
                          {item.phone.length > 5 ? 'SOS' : item.phone}
                       </div>
                       <h4 className="flex-1 font-bold text-[#1e1b4b] text-[15px] leading-snug">{item.name}</h4>
@@ -3384,7 +3384,7 @@ function BongBongNoiNative({ t }: { t: any }) {
   };
 
   return (
-    <div className="w-full max-w-[420px] bg-white rounded-[26px] p-5 shadow-md border-2 border-[#2e1065] mb-5">
+    <div className="w-full max-w-[420px] bg-white rounded-[26px] p-5 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] mb-5">
       <h3 className="font-black text-[16px] text-[#311068] mb-1 flex items-center gap-2">
         <Sparkles size={18} className="text-[#6d28d9]" />
         {t('Nút tròn nổi trên màn hình')}
@@ -3719,7 +3719,7 @@ function DocTinNhanNative({ t, onAnalyze }: { t: any; onAnalyze?: (text: string)
   };
 
   return (
-    <div className="w-full max-w-[420px] bg-white rounded-[26px] p-5 shadow-md border-2 border-[#2e1065] mb-5">
+    <div className="w-full max-w-[420px] bg-white rounded-[26px] p-5 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] mb-5">
       <h3 className="font-black text-[16px] text-[#311068] mb-1 flex items-center gap-2">
         <Bell size={18} className="text-[#6d28d9]" />
         {t("Tự bắt tin nhắn đến")}
@@ -3850,7 +3850,7 @@ function NhacCuocGoiDai({ t, lang }: { t: any; lang: Lang }) {
   };
 
   return (
-    <div className="w-full max-w-[420px] bg-white rounded-[26px] p-5 shadow-md border-2 border-[#2e1065] mb-5">
+    <div className="w-full max-w-[420px] bg-white rounded-[26px] p-5 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] mb-5">
       <h3 className="font-black text-[16px] text-[#311068] mb-1 flex items-center gap-2">
         <PhoneCall size={18} className="text-[#6d28d9]" />
         {t('Nhắc khi cuộc gọi kéo dài')}
@@ -3881,7 +3881,7 @@ function NhacCuocGoiDai({ t, lang }: { t: any; lang: Lang }) {
         </div>
       )}
 
-      <div className="flex items-center justify-between p-3.5 bg-purple-50 rounded-2xl border-2 border-[#2e1065]">
+      <div className="flex items-center justify-between p-3.5 bg-purple-50 rounded-2xl border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065]">
         <span className="text-[15px] font-extrabold text-[#311068]">
           {dangBat ? t('Đang trông chừng') : t('Đang tắt')}
         </span>
@@ -4117,7 +4117,7 @@ function NotificationsView({
         có thứ tự thì bác bật cái nào trước cũng được, và cái nào hỏng thì không
         biết vì sao. Ba dòng dưới đây nói đúng thứ tự nên bật, và bật để làm gì.
       */}
-      <div className="w-full max-w-[420px] bg-white rounded-3xl p-4 shadow-sm border-2 border-[#2e1065] mb-4">
+      <div className="w-full max-w-[420px] bg-white rounded-3xl p-4 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] mb-4">
         <h3 className="text-[16px] font-black text-[#311068] mb-2">{t('Bật theo thứ tự này')}</h3>
         <ol className="flex flex-col gap-2">
           {[
@@ -4147,7 +4147,7 @@ function NotificationsView({
           <ChevronLeft size={20} />
           <span>{t("Quay lại")}</span>
         </button>
-        <span className="text-[14px] font-extrabold text-purple-700 bg-purple-100 px-3 py-1 rounded-full border-2 border-[#2e1065]">
+        <span className="text-[14px] font-extrabold text-purple-700 bg-purple-100 px-3 py-1 rounded-full border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065]">
           {t("Cài đặt thông báo")}
         </span>
       </div>
@@ -4432,7 +4432,7 @@ function NotificationsView({
       {dangChayApk && <NhacCuocGoiDai t={t} lang={lang} />}
 
       {/* 4. Action Mode Selector */}
-      <div className="w-full max-w-[420px] bg-white rounded-[26px] p-5 shadow-md border-2 border-[#2e1065] mb-5">
+      <div className="w-full max-w-[420px] bg-white rounded-[26px] p-5 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] mb-5">
         <h3 className="font-black text-[16px] text-[#311068] mb-1 flex items-center gap-2">
           <Sliders size={18} className="text-[#6d28d9]" />
           {t("Chọn hành động khi bấm vào thông báo:")}
@@ -4515,7 +4515,7 @@ function NotificationsView({
 
       {/* 4. In-App Banner Setting Toggle */}
       {setShowInAppBanner && (
-        <div className="w-full max-w-[420px] bg-white rounded-[24px] p-4 shadow-sm border-2 border-[#2e1065] mb-5 flex items-center justify-between">
+        <div className="w-full max-w-[420px] bg-white rounded-[24px] p-4 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] mb-5 flex items-center justify-between">
           <div className="flex flex-col pr-2">
             <span className="font-bold text-[#1e1b4b] text-[14px]">{t('Hiện dải ghim ở đầu trang web')}</span>
             <span className="text-[#64748b] text-[14px]">{t('Bật thì thấy dải tím ở đầu trang. Tắt thì chỉ nhận thông báo ngoài máy.')}</span>
@@ -4908,7 +4908,7 @@ function SettingsView({
         — nên người đang tìm cái này thường đang tìm cả cái kia.
       */}
       {setSieuDonGian && (
-        <div className="w-full max-w-[360px] bg-white rounded-3xl p-5 shadow-sm border-2 border-[#2e1065] mb-6">
+        <div className="w-full max-w-[360px] bg-white rounded-3xl p-5 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] mb-6">
           <div className="flex items-start justify-between gap-3">
             <div className="flex-1">
               <h3 className="text-[17px] font-black text-[#4c1d95] leading-snug">
@@ -4930,7 +4930,7 @@ function SettingsView({
         </div>
       )}
 
-      <div className="w-full max-w-[360px] bg-white rounded-3xl p-6 shadow-sm border-2 border-[#2e1065] mb-6">
+      <div className="w-full max-w-[360px] bg-white rounded-3xl p-6 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] mb-6">
         <h3 className="text-xl font-bold text-[#4c1d95] mb-4">{t("Cỡ chữ")}</h3>
         <div className="flex justify-between items-center bg-[#f3e8ff] p-2 rounded-2xl">
           <button 
@@ -4954,7 +4954,7 @@ function SettingsView({
         </div>
       </div>
 
-      <div className="w-full max-w-[360px] bg-white rounded-3xl p-6 shadow-sm border-2 border-[#2e1065] mb-6">
+      <div className="w-full max-w-[360px] bg-white rounded-3xl p-6 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] mb-6">
         <h3 className="text-xl font-bold text-[#4c1d95] mb-4">{t("Ngôn ngữ")}</h3>
         <div className="flex justify-between items-center bg-[#f3e8ff] p-2 rounded-2xl">
           <button 
@@ -4973,7 +4973,7 @@ function SettingsView({
       </div>
 
       <div className="w-full max-w-[360px] mb-6">
-        <div className="bg-white/60 backdrop-blur-sm rounded-3xl border-2 border-[#2e1065] shadow-sm flex flex-col overflow-hidden">
+        <div className="bg-white/60 backdrop-blur-sm rounded-3xl border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] flex flex-col overflow-hidden">
            <div 
              onClick={() => setView('notifications')}
              className="p-5 flex items-center justify-between border-b border-[#e9d5ff] cursor-pointer hover:bg-white/80 active:bg-purple-50 transition-colors"
@@ -5105,7 +5105,7 @@ function IntroView({
               initial={{ scale: 0.92, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.92, opacity: 0 }}
-              className="w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl border-2 border-[#2e1065] flex flex-col items-center text-center"
+ className="w-full max-w-md bg-white rounded-3xl p-6 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] flex flex-col items-center text-center"
             >
               <div className="w-16 h-16 mb-2">
                 <img src="/logo.webp" alt="Logo" className="w-full h-full object-contain drop-shadow-md" />
@@ -5168,7 +5168,7 @@ function IntroView({
               if (setUserRole) setUserRole('elder');
               setView('home');
             }} 
-            className="text-[#6d28d9] font-bold text-[14px] active:scale-95 transition-transform bg-white/70 backdrop-blur-sm px-3.5 py-1.5 rounded-full shadow-2xs border-2 border-[#2e1065]"
+ className="text-[#6d28d9] font-bold text-[14px] active:scale-95 transition-transform bg-white/70 backdrop-blur-sm px-3.5 py-1.5 rounded-full border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065]"
           >
             {t("Bỏ qua")}
           </button>
@@ -5286,7 +5286,7 @@ function TinLuaDaoGanDay({ t, lang = 'vi' }: { t: any, lang?: Lang }) {
       </div>
 
       {dangTai ? (
-        <div className="bg-white rounded-2xl p-4 border-2 border-[#2e1065] text-[14px] text-gray-600">
+        <div className="bg-white rounded-2xl p-4 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] text-[14px] text-gray-600">
           {t("Đang lấy tin từ các báo…")}
         </div>
       ) : (
@@ -5297,9 +5297,9 @@ function TinLuaDaoGanDay({ t, lang = 'vi' }: { t: any, lang?: Lang }) {
               href={x.lienKet}
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-white rounded-2xl p-3 flex gap-2.5 shadow-2xs border-2 border-[#2e1065] items-start"
+ className="bg-white rounded-2xl p-3 flex gap-2.5 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] items-start"
             >
-              <span className="w-10 h-10 rounded-2xl bg-purple-50 border-2 border-[#2e1065] flex items-center justify-center text-purple-700 shrink-0">
+              <span className="w-10 h-10 rounded-2xl bg-purple-50 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] flex items-center justify-center text-purple-700 shrink-0">
                 <FileText size={18} />
               </span>
               <span className="flex-1 min-w-0">
@@ -5315,7 +5315,7 @@ function TinLuaDaoGanDay({ t, lang = 'vi' }: { t: any, lang?: Lang }) {
             và câu chữ ở đây phải phân biệt được hai chuyện đó.
           */}
           {(tin ?? []).length === 0 && cauChuaLayDuoc.length === 0 && (
-            <div className="bg-white rounded-2xl p-4 border-2 border-[#2e1065] text-[14px] text-gray-700">
+            <div className="bg-white rounded-2xl p-4 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] text-[14px] text-gray-700">
               {t("Chưa có tin nào lấy về được lúc này.")}
             </div>
           )}
@@ -5391,7 +5391,7 @@ function SearchView({
       />
 
       <div className="md:hidden flex flex-col items-center mb-4">
-         <div className="w-10 h-10 bg-white rounded-2xl flex items-center justify-center shadow-xs mb-1.5 border-2 border-[#2e1065]">
+         <div className="w-10 h-10 bg-white rounded-2xl flex items-center justify-center mb-1.5 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065]">
             <Search size={22} className="text-[#6d28d9]" />
          </div>
          <h2 className="text-[22px] font-black text-[#1e1b4b] text-center leading-tight">{t("Kiểm tra an toàn")}</h2>
@@ -5420,7 +5420,7 @@ function SearchView({
             </div>
           )}
 
-          <div className="relative flex items-center bg-white rounded-2xl p-1.5 pl-2 pr-1.5 shadow-2xs border-2 border-[#2e1065] focus-within:ring-2 ring-[#c084fc]/50 transition-all">
+          <div className="relative flex items-center bg-white rounded-2xl p-1.5 pl-2 pr-1.5 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] focus-within:ring-2 ring-[#c084fc]/50 transition-all">
              <button 
                type="button"
                onClick={() => fileInputRef.current?.click()}
@@ -5459,7 +5459,7 @@ function SearchView({
                  setSearchInput("Tôi nhận được mã QR yêu cầu quét để nhận quà tri ân");
                  handleRunSearch("Tôi nhận được mã QR yêu cầu quét để nhận quà tri ân");
                }}
-               className="flex flex-col items-center justify-center bg-white rounded-2xl p-2.5 shadow-2xs border-2 border-[#2e1065] active:scale-95 transition-transform"
+ className="flex flex-col items-center justify-center bg-white rounded-2xl p-2.5 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] active:scale-95 transition-transform"
              >
                <div className="w-9 h-9 bg-blue-100 rounded-2xl flex items-center justify-center mb-1 text-blue-600">
                  <QrCode size={18} />
@@ -5472,7 +5472,7 @@ function SearchView({
                  setSearchInput("Có người gửi link khuyến mãi trúng thưởng yêu cầu đăng nhập");
                  handleRunSearch("Có người gửi link khuyến mãi trúng thưởng yêu cầu đăng nhập");
                }}
-               className="flex flex-col items-center justify-center bg-white rounded-2xl p-2.5 shadow-2xs border-2 border-[#2e1065] active:scale-95 transition-transform"
+ className="flex flex-col items-center justify-center bg-white rounded-2xl p-2.5 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] active:scale-95 transition-transform"
              >
                <div className="w-9 h-9 bg-purple-100 rounded-2xl flex items-center justify-center mb-1 text-purple-600">
                  <Globe size={18} />
@@ -5485,7 +5485,7 @@ function SearchView({
                  setSearchInput("Số điện thoại lạ gọi tự xưng công an yêu cầu chuyển tiền vào tài khoản an toàn");
                  handleRunSearch("Số điện thoại lạ gọi tự xưng công an yêu cầu chuyển tiền vào tài khoản an toàn");
                }}
-               className="flex flex-col items-center justify-center bg-white rounded-2xl p-2.5 shadow-2xs border-2 border-[#2e1065] active:scale-95 transition-transform"
+ className="flex flex-col items-center justify-center bg-white rounded-2xl p-2.5 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] active:scale-95 transition-transform"
              >
                <div className="w-9 h-9 bg-emerald-100 rounded-2xl flex items-center justify-center mb-1 text-emerald-600">
                  <Phone size={18} />
@@ -5508,7 +5508,7 @@ function SearchView({
         khoảng 30%, nên đừng thiết kế hộp vừa khít chữ (§4.5).
       */}
       <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-5 w-full mb-8">
-         <div onClick={() => handleRunSearch("Cuộc gọi tự xưng cơ quan chức năng hoặc công an điều tra")} className="bg-white rounded-[1.5rem] p-5 shadow-sm border-2 border-[#2e1065] flex flex-col gap-3 hover:shadow-md hover:border-purple-300 transition-all cursor-pointer group text-left min-w-0">
+         <div onClick={() => handleRunSearch("Cuộc gọi tự xưng cơ quan chức năng hoặc công an điều tra")} className="bg-white rounded-[1.5rem] p-5 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] flex flex-col gap-3 hover: hover:border-purple-300 transition-all cursor-pointer group text-left min-w-0">
             <div className="w-14 h-14 bg-[#f3e8ff] rounded-2xl flex items-center justify-center shadow-inner relative overflow-hidden shrink-0">
                <Phone className="w-7 h-7 text-[#7e22ce] relative z-10" />
                <div className="absolute inset-0 bg-gradient-to-tr from-[#c084fc]/20 to-transparent"></div>
@@ -5519,7 +5519,7 @@ function SearchView({
             </div>
          </div>
 
-         <div onClick={() => handleRunSearch("Tin nhắn thông báo tài khoản ngân hàng bị khóa hoặc yêu cầu ấn vào link")} className="bg-white rounded-[1.5rem] p-5 shadow-sm border-2 border-[#2e1065] flex flex-col gap-3 hover:shadow-md hover:border-purple-300 transition-all cursor-pointer group text-left min-w-0">
+         <div onClick={() => handleRunSearch("Tin nhắn thông báo tài khoản ngân hàng bị khóa hoặc yêu cầu ấn vào link")} className="bg-white rounded-[1.5rem] p-5 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] flex flex-col gap-3 hover: hover:border-purple-300 transition-all cursor-pointer group text-left min-w-0">
             <div className="w-14 h-14 bg-[#f3e8ff] rounded-2xl flex items-center justify-center shadow-inner relative overflow-hidden shrink-0">
                <MessageSquare className="w-7 h-7 text-[#7e22ce] relative z-10" />
                <div className="absolute inset-0 bg-gradient-to-tr from-[#c084fc]/20 to-transparent"></div>
@@ -5530,7 +5530,7 @@ function SearchView({
             </div>
          </div>
 
-         <div onClick={() => handleRunSearch("Đường link nhận quà hoặc yêu cầu quét mã QR nạp tiền")} className="bg-white rounded-[1.5rem] p-5 shadow-sm border-2 border-[#2e1065] flex flex-col gap-3 hover:shadow-md hover:border-purple-300 transition-all cursor-pointer group text-left min-w-0">
+         <div onClick={() => handleRunSearch("Đường link nhận quà hoặc yêu cầu quét mã QR nạp tiền")} className="bg-white rounded-[1.5rem] p-5 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] flex flex-col gap-3 hover: hover:border-purple-300 transition-all cursor-pointer group text-left min-w-0">
             <div className="w-14 h-14 bg-[#f3e8ff] rounded-2xl flex items-center justify-center shadow-inner relative overflow-hidden shrink-0">
                <Globe className="w-7 h-7 text-[#7e22ce] relative z-10" />
                <div className="absolute inset-0 bg-gradient-to-tr from-[#c084fc]/20 to-transparent"></div>
@@ -5668,7 +5668,7 @@ function LoginView({
         {t("Tài khoản để nối bác với người nhà. Bác kiểm được cả khi chưa đăng nhập.")}
       </p>
 
-      <div className="w-full max-w-sm mb-5 bg-white/80 p-1.5 rounded-2xl border-2 border-[#2e1065]/80 shadow-xs flex items-center gap-1.5">
+      <div className="w-full max-w-sm mb-5 bg-white/80 p-1.5 rounded-2xl border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065]/80 flex items-center gap-1.5">
         <button
           type="button"
           onClick={() => setSelectedRole('elder')}
@@ -5825,7 +5825,7 @@ function AddFamilyView({ setView, t, setFamilyMembers }: { setView: (v: ViewStat
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full min-h-[52px] bg-[#f8f4ff] rounded-2xl px-4 py-3 text-[#311068] font-bold outline-none border-[2.5px] border-[#2e1065] focus:border-[#7e22ce] focus:bg-white transition-colors text-[16px]"
+ className="w-full min-h-[52px] bg-[#f8f4ff] rounded-2xl px-4 py-3 text-[#311068] font-bold outline-none border-[2.5px] border-[#2e1065] shadow-[3px_3px_0_#2e1065] focus:border-[#7e22ce] focus:bg-white transition-colors text-[16px]"
             placeholder={t("Ví dụ: Nguyễn Văn An")}
           />
         </div>
@@ -5836,7 +5836,7 @@ function AddFamilyView({ setView, t, setFamilyMembers }: { setView: (v: ViewStat
             type="tel"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
-            className="w-full min-h-[52px] bg-[#f8f4ff] rounded-2xl px-4 py-3 text-[#311068] font-bold outline-none border-[2.5px] border-[#2e1065] focus:border-[#7e22ce] focus:bg-white transition-colors text-[16px]"
+ className="w-full min-h-[52px] bg-[#f8f4ff] rounded-2xl px-4 py-3 text-[#311068] font-bold outline-none border-[2.5px] border-[#2e1065] shadow-[3px_3px_0_#2e1065] focus:border-[#7e22ce] focus:bg-white transition-colors text-[16px]"
             placeholder={t("Ví dụ: 0988 123 456")}
           />
         </div>

@@ -119,7 +119,7 @@ export function MatKhauGiaDinh({
             nói rõ đây là việc làm cùng nhau, không phải một ô để bác điền một
             mình rồi xong.
           */}
-          <div className="w-full max-w-[420px] bg-white rounded-[26px] p-5 shadow-md border-2 border-[#2e1065] mb-5">
+          <div className="w-full max-w-[420px] bg-white rounded-[26px] p-5 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] mb-5">
             <h3 className="font-black text-[17px] text-[#311068] mb-3">{t('Cách làm')}</h3>
             <ol className="flex flex-col gap-3">
               {[
@@ -137,7 +137,7 @@ export function MatKhauGiaDinh({
             </ol>
           </div>
 
-          <div className="w-full max-w-[420px] bg-white rounded-[26px] p-5 shadow-md border-2 border-[#2e1065] mb-5">
+          <div className="w-full max-w-[420px] bg-white rounded-[26px] p-5 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] mb-5">
             <h3 className="font-black text-[17px] text-[#311068] mb-1">{t('Câu nhắc cho bác')}</h3>
             {/*
               ⚠️ Ô NÀY KHÔNG PHẢI CHỖ GÕ MẬT KHẨU. Nói thẳng ra, vì bác sẽ định
@@ -181,7 +181,7 @@ export function MatKhauGiaDinh({
             )}
           </div>
 
-          <div className="w-full max-w-[420px] bg-white rounded-[26px] p-5 shadow-md border-2 border-[#2e1065] mb-5">
+          <div className="w-full max-w-[420px] bg-white rounded-[26px] p-5 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] mb-5">
             <h3 className="font-black text-[17px] text-[#311068] mb-2">{t('Khi nào dùng')}</h3>
             <ul className="flex flex-col gap-2 text-[15px] text-slate-700 leading-relaxed">
               <li>{t('· Có người gọi điện, xưng là con cháu, giục chuyển tiền.')}</li>
