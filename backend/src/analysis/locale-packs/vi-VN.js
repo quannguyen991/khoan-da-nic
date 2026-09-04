@@ -277,6 +277,33 @@ module.exports = {
       { pattern: 'giữ\\s+bí mật', scope: 'action' },
       { pattern: 'không được cho ai biết', scope: 'action' },
     ],
+    /**
+     * NỘI DUNG RA LỆNH CHO CHÍNH BỘ PHÂN TÍCH — xem `signal-registry.js`.
+     *
+     * ⚠️ `scope: 'any'`, KHÔNG PHẢI `'action'`. Câu tiêm nhiễm không phải lời
+     * nói với bác; nó nói với cái máy. Bó vào mệnh đề "hành động" thì bỏ sót
+     * đúng dạng hay gặp nhất — một khối `[SYSTEM]…[/SYSTEM]` dán ở đầu tin.
+     *
+     * ⚠️ ĐỪNG THÊM CỤM CHUNG CHUNG như "an toàn" hay "bỏ qua" đứng một mình.
+     * Mỗi mẫu ở đây phải là một câu RA LỆNH CHO MÁY; "bác cứ yên tâm, tin này
+     * an toàn" là lời nói với người, và nó đã có đường xử lý riêng.
+     */
+    MAN_ANALYZER_INJECTION: [
+      { pattern: '(bỏ qua|quên|phớt lờ)[^.]{0,20}(mọi|các|những)?[^.]{0,12}(hướng dẫn|chỉ dẫn|quy tắc|quy định|cảnh báo)', scope: 'any' },
+      { pattern: '(tắt|vô hiệu hoá|vô hiệu hóa)[^.]{0,16}(bộ lọc|kiểm duyệt|cảnh báo)', scope: 'any' },
+      { pattern: '(trả lời|đánh dấu|phân loại|kết luận|xác nhận|báo cáo)[^.]{0,24}(là|rằng)?[^.]{0,14}an toàn', scope: 'any' },
+      { pattern: '(bạn|mày) (bây giờ )?là[^.]{0,24}(trợ lý|ai|trí tuệ)', scope: 'any' },
+      { pattern: '(chế độ|che do) (nhà phát triển|developer)', scope: 'any' },
+      { pattern: '(lời nhắc|prompt) (hệ thống|gốc)', scope: 'any' },
+      { pattern: '\\[\\s*/?\\s*system\\s*\\]', scope: 'any' },
+      { pattern: '<\\s*/?\\s*system\\s*>', scope: 'any' },
+      { pattern: '###\\s*instruction', scope: 'any' },
+      { pattern: '(ignore|disregard|forget|override)[^.]{0,24}(previous|prior|above|your)[^.]{0,16}(instruction|rule|prompt)', scope: 'any' },
+      { pattern: '(you are now|act as)[^.]{0,24}(assistant|ai|model)', scope: 'any' },
+      { pattern: '(developer mode|jailbreak)', scope: 'any' },
+      { pattern: '(classify|mark|output|respond)[^.]{0,16}as safe', scope: 'any' },
+      { pattern: '(risk_?label|risk level)[^.]{0,12}(=|:)?[^.]{0,10}(safe|low)', scope: 'any' },
+    ],
     MAN_FEAR_THREAT: [
       { pattern: '(bắt giữ|bị bắt|khởi tố|truy tố|phong toả|tạm giam)', scope: 'any' },
       { pattern: '\\b(rửa tiền|cắt trợ cấp|liên quan.{0,12}vụ án)\\b', scope: 'any' },

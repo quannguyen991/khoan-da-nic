@@ -260,6 +260,25 @@ module.exports = {
       { pattern: '\\bkeep (this|it|the matter)\\b[^.]{0,16}\\b(confidential|secret|between us|to yourself)\\b', scope: 'action' },
       { pattern: '\\btell (no one|nobody)\\b', scope: 'action' },
     ],
+    /**
+     * Content that gives orders to the checker itself — see `signal-registry.js`.
+     * `scope: 'any'`: an injection is not addressed to the reader, so binding it
+     * to the "action" clause misses the commonest shape — a `[SYSTEM]…[/SYSTEM]`
+     * block pasted at the top of the message.
+     */
+    MAN_ANALYZER_INJECTION: [
+      { pattern: '(ignore|disregard|forget|override)[^.]{0,24}(previous|prior|above|earlier|your)[^.]{0,20}(instruction|rule|prompt|guideline)', scope: 'any' },
+      { pattern: '(disable|turn off|bypass)[^.]{0,16}(filter|moderation|safety|warning)', scope: 'any' },
+      { pattern: '(classify|mark|label|output|respond|reply|answer)[^.]{0,20}(as|with|that)?[^.]{0,12}safe', scope: 'any' },
+      { pattern: '(you are now|act as|pretend to be)[^.]{0,24}(assistant|ai|model|system)', scope: 'any' },
+      { pattern: '(developer mode|jailbreak|dan mode)', scope: 'any' },
+      { pattern: '(system|original) prompt', scope: 'any' },
+      { pattern: '\\[\\s*/?\\s*system\\s*\\]', scope: 'any' },
+      { pattern: '<\\s*/?\\s*system\\s*>', scope: 'any' },
+      { pattern: '###\\s*instruction', scope: 'any' },
+      { pattern: '(risk_?label|risk level)[^.]{0,12}(=|:)?[^.]{0,10}(safe|low|none)', scope: 'any' },
+      { pattern: 'set risk to (low|none|safe)', scope: 'any' },
+    ],
     MAN_FEAR_THREAT: [
       /*
        * "You have 15 minutes to comply" và "the call is being recorded for the

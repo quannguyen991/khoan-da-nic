@@ -194,6 +194,17 @@ export const MA_LY_DO: Record<string, Cap> = {
 
   // sức ép
   MAN_EXTORTION_MEDIA_THREAT: c('Doạ phát tán hình ảnh, video', 'Threatens to release photos or video'),
+  /**
+   * ⚠️ CÂU NÀY NÓI VỚI BÁC, KHÔNG NÓI VỚI KỸ SƯ. Không có chữ "tiêm nhiễm",
+   * "prompt injection" hay "bộ phân tích" — §4.5 cấm thuật ngữ.
+   *
+   * Nó cũng KHÔNG quy kết người gửi là tội phạm (§11): chỉ mô tả thứ có trong
+   * tin, đúng như mọi mã lý do khác.
+   */
+  MAN_ANALYZER_INJECTION: c(
+    'Trong tin có câu ra lệnh cho máy kiểm tra phải bỏ qua cảnh báo',
+    'The message contains an instruction telling the checker to skip its warning',
+  ),
   MAN_FEAR_THREAT: c('Doạ bắt giữ, khởi tố, phong toả', 'Threatens arrest, prosecution or freezing'),
   MAN_COVER_STORY: c('Dựng một câu chuyện để giải thích', 'Builds a story to explain the request'),
   MAN_SECRECY: c('Dặn đừng nói với ai', 'Tells you to keep it secret'),
