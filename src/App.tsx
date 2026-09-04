@@ -148,6 +148,31 @@ import { EMERGENCY_NUMBERS } from './data/so-khan-cap';
 
 export type ViewState = 'intro' | 'home' | 'voice' | 'phone' | 'link' | 'qr' | 'learn' | 'profile' | 'settings' | 'history' | 'family' | 'search' | 'login' | 'add_family' | 'warning' | 'guardian' | 'account' | 'privacy' | 'notifications' | 'device_data' | 'hoi_nhanh' | 'mat_khau_gia_dinh';
 
+/**
+ * MỘT NGƯỜI THÂN TRONG VÒNG TRÒN GIA ĐÌNH.
+ *
+ * ⚠️ KIỂU NÀY TỒN TẠI ĐỂ TRÌNH BIÊN DỊCH BẮT LỖI HỘ, KHÔNG PHẢI ĐỂ CHO ĐẸP.
+ *
+ * Trước 4/9/2026 danh sách này khai là `any[]` ở sáu chỗ. Hệ quả đo được:
+ * `AppMenuModal` đọc `firstContact.name` trong khi `firstContact` có thể là
+ * `null` (bác chưa thêm ai — trạng thái MẶC ĐỊNH), ném TypeError và làm chết cả
+ * Menu tác vụ trên bản web thật. `strict: true` đã bật sẵn trong tsconfig,
+ * nhưng `any` vô hiệu hoá nó: `any.name` thì tsc không có gì để kiểm.
+ *
+ * Khai kiểu thật thì `NguoiThan | null` buộc mọi nơi phải xử lý trường hợp
+ * chưa có ai — và `test/bien-dich-khong-loi.test.js` biến việc đó thành test đỏ
+ * ngay khi có người quên.
+ */
+export interface NguoiThan {
+  id: number;
+  name: string;
+  /** 'Con trai' · 'Con gái' · 'Cháu' … — tra qua `t()` khi hiển thị. */
+  relation: string;
+  phone: string;
+  /** MÃ MÀU (`#7e22ce`), không phải đường dẫn ảnh — xem `AddFamilyView`. */
+  avatar?: string;
+}
+
 export interface HistoryRecord {
   id: number;
   title: string;
@@ -1350,7 +1375,7 @@ function HomeView({
   pinnedNotification?: boolean,
   togglePinnedNotification?: () => void,
   onOpenMenu?: () => void,
-  familyMembers?: any[],
+  familyMembers?: NguoiThan[],
   onTriggerEmergency?: () => void,
   /** §11 — Chế độ tối giản: ẩn tin tức, nút tròn, mọi thứ trang trí. */
   superBasic?: boolean
@@ -2675,7 +2700,7 @@ function FamilyView({
   t: any, 
   lang?: Lang,
   isLoggedIn: boolean, 
-  familyMembers: any[],
+  familyMembers: NguoiThan[],
   setFamilyMembers: React.Dispatch<React.SetStateAction<any[]>>
 }) {
   const emergencyList = EMERGENCY_NUMBERS[lang] || EMERGENCY_NUMBERS['vi'];
@@ -5393,7 +5418,7 @@ function WarningView({
   t: any,
   lang?: Lang,
   result?: any,
-  familyMembers?: any[],
+  familyMembers?: NguoiThan[],
   /**
    * Ứng dụng đang xem và bấm được thay bác — đọc thẳng từ Android.
    * ⚠️ Dữ liệu này KHÔNG đến từ máy chủ và KHÔNG đi lên máy chủ (§6.9).
@@ -5617,9 +5642,23 @@ function WarningView({
         ? 'from-[#047857] to-[#064e3b]'
         : 'from-[#4c1d95] to-[#2e1065]';
 
-  const firstContact = (familyMembers && familyMembers.length > 0)
-    ? familyMembers[0]
-    : { name: t('Người thân'), phone: '' };
+  /**
+   * ⚠️ ĐỌC PHẦN TỬ ĐẦU QUA `?.[0]`, RỒI MỚI DỰ PHÒNG.
+   *
+   * `noUncheckedIndexedAccess` đang bật, nên `familyMembers[0]` mang kiểu
+   * `NguoiThan | undefined` kể cả khi vừa kiểm `length > 0` — và tsc nói đúng:
+   * mảng thưa thì `length` không hứa phần tử nào tồn tại. Viết như dưới thì cả
+   * hai nhánh đều chắc chắn có `name` và `phone`, nên phần còn lại của màn
+   * không phải đoán.
+   *
+   * Đây là cùng loại lỗi đã làm chết Menu tác vụ ngày 4/9/2026 — chỗ đó đọc
+   * thẳng thuộc tính của một giá trị có thể `null`. Khai kiểu thật cho
+   * `familyMembers` (thay cho `any[]`) là thứ khiến trình biên dịch chỉ ra
+   * được cả hai.
+   */
+  const nguoiDauTien = familyMembers?.[0];
+  const firstContact: { name: string; phone: string } =
+    nguoiDauTien ?? { name: t('Người thân'), phone: '' };
 
   const handleCallRelative = () => {
     if (!firstContact.phone) { setView('family'); return; }

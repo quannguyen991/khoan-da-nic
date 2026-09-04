@@ -20,7 +20,7 @@ import {
   MessageSquare,
   Globe,
 } from 'lucide-react';
-import { ViewState } from '../App';
+import { ViewState, NguoiThan } from '../App';
 
 interface FloatingQuickAccessProps {
   setView: (view: ViewState) => void;
@@ -29,7 +29,7 @@ interface FloatingQuickAccessProps {
   lang?: string;
   onAnalyze: (text: string, image?: string | null) => void;
   onTriggerEmergency?: () => void;
-  familyMembers?: any[];
+  familyMembers?: NguoiThan[];
   isOutsideMode: boolean;
   setIsOutsideMode: (val: boolean) => void;
   showFloatingBall: boolean;
@@ -385,7 +385,7 @@ export function FloatingQuickAccess({
      * Chỗ này từng rơi về '0988888888' — số thật của một người lạ.
      */
     if (!primaryContact?.phone) { setView('family'); return; }
-    window.location.href = `tel:${primaryContact.phone}`;
+    window.location.href = `tel:${primaryContact?.phone}`;
   };
 
   // If user clicks floating ball but has not granted overlay permission yet
@@ -560,7 +560,22 @@ export function FloatingQuickAccess({
                     </div>
                     <div className="flex-1 text-left">
                       <p className="font-black text-sm leading-tight text-green-900">Gọi ngay cho con cháu</p>
-                      <p className="text-[14px] text-green-700 truncate mt-0.5">{primaryContact.name} ({primaryContact.phone})</p>
+                      {/*
+                        ⚠️ `?.` Ở ĐÂY KHÔNG PHẢI CHO ĐẸP. `primaryContact` là `null` khi bác
+                        chưa thêm ai — tức là trạng thái MẶC ĐỊNH của app. Đọc thẳng thuộc tính
+                        ở đây chính là thứ đã làm sập Menu tác vụ ngày 4/9/2026 — và chỗ này là
+                        lối tắt KHẨN CẤP, sập thì còn nặng hơn nhiều.
+
+                        `?.` bên trong nhánh `primaryContact ? ...` trông thừa — ĐỪNG DỌN.
+                        Luật ở test/menu-khong-sap-khi-chua-co-nguoi-than.test.js là "biến
+                        này luôn đi kèm `?.`", không ngoại lệ. Luật có ngoại lệ thì sớm muộn
+                        cũng có người xếp đúng con lỗi thật vào diện ngoại lệ.
+                      */}
+                      <p className="text-[14px] text-green-700 truncate mt-0.5">
+                        {primaryContact
+                          ? `${primaryContact?.name} (${primaryContact?.phone})`
+                          : t("Chưa có ai — bấm để thêm")}
+                      </p>
                     </div>
                   </button>
 

@@ -16,7 +16,7 @@ import {
   EyeOff,
   Info
 } from 'lucide-react';
-import { ViewState } from '../App';
+import { ViewState, NguoiThan } from '../App';
 import { api } from '../api-goc';
 import { dangNhap as dangNhapTaiKhoan, type HoSo as HoSoTaiKhoan } from '../tai-khoan';
 import { MA_TAI_KHOAN } from '../catalog';
@@ -251,7 +251,7 @@ export function GuardianView({
   isDesktop?: boolean;
   isLoggedIn?: boolean;
   onAnalyze?: (text: string, image?: string | null) => void;
-  familyMembers?: any[];
+  familyMembers?: NguoiThan[];
   onTriggerEmergency?: () => void;
   setUserRole?: (r: 'elder' | 'guardian') => void;
 }) {
