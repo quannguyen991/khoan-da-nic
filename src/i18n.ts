@@ -827,6 +827,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     "Cháu không nghe được cuộc gọi.": "Cháu không nghe được cuộc gọi.",
     "Cháu không đọc được tên ứng dụng vừa cài.": "Cháu không đọc được tên ứng dụng vừa cài.",
     "Lượt này không có AI đọc.": "Lượt này không có AI đọc.",
+    "Chưa có ai — bấm để thêm": "Chưa có ai — bấm để thêm",
   },
   en: {
     "👮 Giả danh công an": "👮 Police impersonation",
@@ -1645,6 +1646,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     "Cháu không nghe được cuộc gọi.": "Phone calls are not listened to.",
     "Cháu không đọc được tên ứng dụng vừa cài.": "The name of the newly installed app could not be read.",
     "Lượt này không có AI đọc.": "No AI read this one.",
+    "Chưa có ai — bấm để thêm": "No one yet — tap to add",
   }
 };
 

@@ -44,7 +44,6 @@ export function AppMenuModal({
   showFloatingBall = true,
   setShowFloatingBall
 }: AppMenuModalProps) {
-  if (!isOpen) return null;
 
   /**
    * ⚠️ `null` KHI CHƯA CÓ AI — KHÔNG CÓ SỐ DỰ PHÒNG.
@@ -63,14 +62,14 @@ export function AppMenuModal({
   const handleCall = () => {
     onClose();
     if (!firstContact?.phone) { setView('family'); return; }
-    window.open(`tel:${firstContact.phone}`, '_self');
+    window.open(`tel:${firstContact?.phone}`, '_self');
   };
 
   const handleSosSms = () => {
     onClose();
     const text = `[KHOAN ĐÃ - CẦU CỨU] Bố/Mẹ đang gặp tình huống nghi ngờ lừa đảo. Con hãy gọi lại ngay cho bố mẹ nhé!`;
     if (!firstContact?.phone) { setView('family'); return; }
-    window.open(`sms:${firstContact.phone}?body=${encodeURIComponent(text)}`, '_self');
+    window.open(`sms:${firstContact?.phone}?body=${encodeURIComponent(text)}`, '_self');
   };
 
   const handleGo = (view: ViewState) => {
@@ -98,7 +97,8 @@ export function AppMenuModal({
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[140] flex items-end sm:items-center justify-center p-0 sm:p-4 md:p-6">
+      {isOpen && (
+      <div key="menu-tac-vu" className="fixed inset-0 z-[140] flex items-end sm:items-center justify-center p-0 sm:p-4 md:p-6">
         {/* Backdrop */}
         <motion.div 
           initial={{ opacity: 0 }}
@@ -192,8 +192,18 @@ export function AppMenuModal({
                   </span>
                   <span className="min-w-0">
                     <span className="font-black text-[17px] leading-tight block">{t("Gọi Cho Con Cháu")}</span>
+                    {/*
+                      ⚠️ `firstContact?.name` — CÓ DẤU `?`, ĐỪNG BỎ.
+                      `firstContact` là `null` khi bác chưa thêm người thân nào,
+                      và đó là trạng thái MẶC ĐỊNH của app (dữ liệu mẫu bịa đã
+                      bỏ từ lâu). Bản trước đọc thẳng thuộc tính `name` mà thiếu
+                      dấu hỏi, nên ném TypeError; hàng rào lỗi chặn cả menu, và
+                      bác bấm "Menu tác vụ" thì không vào được — báo 4/9/2026.
+                      Chưa có ai thì nói thẳng là chưa có, đúng như `handleCall`
+                      vốn đã đưa bác sang màn Gia đình trong trường hợp đó.
+                    */}
                     <span className="text-[14px] text-emerald-100 font-medium block mt-0.5 truncate">
-                      {firstContact.name}
+                      {firstContact?.name ?? t("Chưa có ai — bấm để thêm")}
                     </span>
                   </span>
                 </button>
@@ -316,6 +326,7 @@ export function AppMenuModal({
           </div>
         </motion.div>
       </div>
+      )}
     </AnimatePresence>
   );
 }
