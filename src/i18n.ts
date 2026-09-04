@@ -768,6 +768,15 @@ export const translations: Record<Lang, Record<string, string>> = {
     "Chrome hoặc Edge trên máy tính. Điện thoại chưa có cửa sổ nổi.": "Chrome hoặc Edge trên máy tính. Điện thoại chưa có cửa sổ nổi.",
     "Trên máy tính, cửa sổ nhỏ này nổi trên các cửa sổ khác để bác bấm nhanh. Trên điện thoại, web chưa làm được việc đó — cần bản cài đặt.": "Trên máy tính, cửa sổ nhỏ này nổi trên các cửa sổ khác để bác bấm nhanh. Trên điện thoại, web chưa làm được việc đó — cần bản cài đặt.",
     "Mở cửa sổ nổi": "Mở cửa sổ nổi",
+    "Ghi âm cuộc gọi": "Ghi âm cuộc gọi",
+    "Tiếng nói của bác được gửi ra ngoài để đổi thành chữ.": "Tiếng nói của bác được gửi ra ngoài để đổi thành chữ.",
+    "Phần khác của app không gửi gì. Bác có thể gõ chữ hoặc gửi ảnh thay.": "Phần khác của app không gửi gì. Bác có thể gõ chữ hoặc gửi ảnh thay.",
+    "Phần nghe chạy ngay trên máy. Tiếng nói không gửi đi đâu.": "Phần nghe chạy ngay trên máy. Tiếng nói không gửi đi đâu.",
+    "Lời bác nói:": "Lời bác nói:",
+    "Đang nghe... Bác cứ nói.": "Đang nghe... Bác cứ nói.",
+    "Bấm micro để nói tiếp.": "Bấm micro để nói tiếp.",
+    "Đang nghe qua micro": "Đang nghe qua micro",
+    "Đã ghi xong": "Đã ghi xong",
   },
   en: {
     "Chỉ chạy trên Chrome hoặc Edge của máy tính.": "Only works in Chrome or Edge on a computer.",
@@ -1585,6 +1594,15 @@ export const translations: Record<Lang, Record<string, string>> = {
     "Chrome hoặc Edge trên máy tính. Điện thoại chưa có cửa sổ nổi.": "Chrome or Edge on a computer. Phones cannot do floating windows yet.",
     "Trên máy tính, cửa sổ nhỏ này nổi trên các cửa sổ khác để bác bấm nhanh. Trên điện thoại, web chưa làm được việc đó — cần bản cài đặt.": "On a computer this small window floats above other windows for quick access. On a phone the web cannot do this — it needs the installed app.",
     "Mở cửa sổ nổi": "Open floating window",
+    "Ghi âm cuộc gọi": "Record the call",
+    "Tiếng nói của bác được gửi ra ngoài để đổi thành chữ.": "Your voice is sent out to be turned into text.",
+    "Phần khác của app không gửi gì. Bác có thể gõ chữ hoặc gửi ảnh thay.": "The rest of the app sends nothing. You can type or send a photo instead.",
+    "Phần nghe chạy ngay trên máy. Tiếng nói không gửi đi đâu.": "Listening runs on your device. Your voice is not sent anywhere.",
+    "Lời bác nói:": "What you said:",
+    "Đang nghe... Bác cứ nói.": "Listening… go ahead.",
+    "Bấm micro để nói tiếp.": "Tap the mic to keep talking.",
+    "Đang nghe qua micro": "Listening through the mic",
+    "Đã ghi xong": "Recording finished",
   }
 };
 
