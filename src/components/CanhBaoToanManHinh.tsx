@@ -95,6 +95,7 @@ const CAU_GIAI_THICH: Record<string, string> = {
   R18: 'Tin này vừa doạ bác vừa đòi tiền.',
   R19: 'Tin này hứa lấy lại số tiền đã mất nhưng đòi trả phí trước.',
   R20: 'Tin này bảo bác quét một mã QR. Mã QR giấu nơi nó dẫn tới, bác không xem trước được.',
+  R21: 'Tin này từ một số bác chưa lưu, mà lại hỏi tiền hoặc hỏi mã. Bác gọi lại bằng số đã lưu sẵn để kiểm.',
   T2_DA_BAO_CAO: 'Đường link trong tin này đã từng bị báo cáo trong các vụ lừa đảo trước đó.',
   APP_LA: 'Vừa có một ứng dụng lạ được cài vào máy. Nếu ai đó đang hướng dẫn bác cài, bác dừng lại và gọi cho người nhà nhé.',
   KHONG_DOC_DUOC: 'Cháu chưa đọc được hết phần bác gửi, nên chưa kết luận được gì.',

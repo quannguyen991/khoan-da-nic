@@ -842,6 +842,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     "Tin này vừa doạ bác vừa đòi tiền.": "Tin này vừa doạ bác vừa đòi tiền.",
     "Tin này hứa lấy lại số tiền đã mất nhưng đòi trả phí trước.": "Tin này hứa lấy lại số tiền đã mất nhưng đòi trả phí trước.",
     "Tin này bảo bác quét một mã QR. Mã QR giấu nơi nó dẫn tới, bác không xem trước được.": "Tin này bảo bác quét một mã QR. Mã QR giấu nơi nó dẫn tới, bác không xem trước được.",
+    "Tin này từ một số bác chưa lưu, mà lại hỏi tiền hoặc hỏi mã. Bác gọi lại bằng số đã lưu sẵn để kiểm.": "Tin này từ một số bác chưa lưu, mà lại hỏi tiền hoặc hỏi mã. Bác gọi lại bằng số đã lưu sẵn để kiểm.",
   },
   en: {
     "👮 Giả danh công an": "👮 Police impersonation",
@@ -1675,6 +1676,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     "Tin này vừa doạ bác vừa đòi tiền.": "This message threatens you and asks for money at the same time.",
     "Tin này hứa lấy lại số tiền đã mất nhưng đòi trả phí trước.": "It promises to recover money you lost but asks for a fee up front.",
     "Tin này bảo bác quét một mã QR. Mã QR giấu nơi nó dẫn tới, bác không xem trước được.": "It asks you to scan a QR code. A QR code hides where it leads, so you cannot check it first.",
+    "Tin này từ một số bác chưa lưu, mà lại hỏi tiền hoặc hỏi mã. Bác gọi lại bằng số đã lưu sẵn để kiểm.": "This came from a number you have not saved, and it asks for money or a code. Call back using a number you already have.",
   }
 };
 

@@ -114,6 +114,11 @@ const CAU = Object.freeze({
     en: 'It asks you to scan a QR code. A QR code hides where it leads, so you cannot check it first.',
   },
 
+  R21: {
+    vi: 'Tin này từ một số bác chưa lưu, mà lại hỏi tiền hoặc hỏi mã. Bác gọi lại bằng số đã lưu sẵn để kiểm.',
+    en: 'This came from a number you have not saved, and it asks for money or a code. Call back using a number you already have.',
+  },
+
   /** Tầng 2 nâng nhãn sau khi đối chiếu máy chủ. */
   T2_DA_BAO_CAO: {
     vi: 'Đường link trong tin này đã từng bị báo cáo trong các vụ lừa đảo trước đó.',

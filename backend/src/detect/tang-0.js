@@ -696,6 +696,102 @@ const LUAT = Object.freeze([
       };
     },
   },
+
+  {
+    ma: 'R21',
+    ten: 'Người gửi lạ đòi chuyển tiền hoặc đòi mã',
+    sanMacDinh: 'NGHI_NGO',
+    /**
+     * ══════ LƯỚI AN TOÀN CHO ĐÚNG CÂU HỎI CỦA NGƯỜI DÙNG ══════
+     *
+     * "Tin nhắn lạ bảo chuyển khoản hay OTP gì thì phải cảnh báo."
+     *
+     * ĐO ĐƯỢC 5/9/2026 — ba tin dưới đây đều ra CHUA_THAY, tức app nói
+     * "chưa thấy dấu hiệu rủi ro" về một người lạ đang xin tiền:
+     *
+     *   "Chị ơi em đang kẹt ở viện, chị chuyển tạm 20tr vào tk này giúp em"
+     *   "Hợp đồng đã duyệt, bạn chuyển trước 30% giá trị vào stk công ty"
+     *
+     * Vì sao trượt: `FIN_TRANSFER_REQUEST` nặng 14 điểm, dưới ngưỡng 20 của
+     * NGHI_NGO. Một mình nó không đủ, và ĐÚNG là không nên đủ — "chuyển tiền
+     * học phí cho con nhé" cũng khớp cụm ấy. Thứ còn thiếu không nằm trong nội
+     * dung, mà nằm ở NGƯỜI GỬI.
+     *
+     * ⚠️ KHÔNG ĐỘNG TỚI ĐIỂM SỐ. Ngưỡng 20/45 và trọng số 14 giữ nguyên (§12).
+     * Luật này nâng SÀN NHÃN, đúng cách R9/R10 đang làm — một đường song song,
+     * không phải một phép cộng điểm thứ hai.
+     *
+     * ⚠️ VẾ "ĐÒI HỎI" ĐỌC TỪ BỘ DÒ CANONICAL, KHÔNG TỰ DỰNG DANH SÁCH CỤM.
+     * `tinHieuGoc` là kết quả của `directPrecheck`, đã qua hàng rào phủ định và
+     * bộ phân loại câu. Nhờ vậy tin tuyên truyền ("ngân hàng không bao giờ yêu
+     * cầu…") không kích hoạt luật này, và không có cụm từ nào để kẻ lừa đảo
+     * chép vào tin nhằm tắt nó — nó không đọc cụm nào cả.
+     *
+     * ⚠️ NGHI_NGO, KHÔNG PHẢI CAO. Một số lạ xin tiền là ĐÁNG NGỜ, chưa phải
+     * bằng chứng lừa đảo: chủ nhà mới, người bán hàng, đồng nghiệp đổi số đều
+     * có thật. §4.1 — nhãn phải xứng với thứ đã đo được.
+     *
+     * ⚠️ "LẠ" = KHÔNG CÓ TRONG DANH BẠ TIN CẬY TẦNG GỌI TRUYỀN VÀO. Không có
+     * danh bạ ⇒ coi là lạ (§4.3: không biết ≠ đã kiểm và thấy ổn). Giống R10.
+     */
+    /*
+     * ⚠️ HAI ĐIỀU KIỆN DƯỚI ĐÂY LÀ HỌC PHÍ, KHÔNG PHẢI CHO CHẶT CHẼ HÌNH THỨC.
+     *
+     * Bản đầu chỉ có `if (quen) return null` — và nó báo oan vào ca BT-02 của
+     * `binh-thuong.json`: một tin BIẾN ĐỘNG SỐ DƯ THẬT. Lý do: brandname ngân
+     * hàng KHÔNG BAO GIỜ nằm trong danh bạ cá nhân, nên "lạ" theo nghĩa của R10
+     * đúng với mọi SMS ngân hàng hợp lệ trên đời.
+     *
+     *   · `laSoDiDong` — "tin nhắn lạ" mà người dùng nói tới là SỐ ĐIỆN THOẠI
+     *     lạ, không phải brandname. Tin từ `Vietcombank` đi đường R9 (brandname
+     *     giả) và R4 (tên miền nhái), không đi đường này.
+     *   · `coMenhDeRaLenh` — "biến động số dư" là tin BÁO, không phải tin ĐÒI.
+     *     Cả hai đều có số tài khoản và số tiền; thứ phân biệt là câu có ra lệnh
+     *     hay không, và bộ phân loại canonical đã trả lời sẵn.
+     */
+    khop({ ban, tin, quen, tinHieuGoc, coMenhDeRaLenh }) {
+      if (quen) return null;
+      if (!laSoDiDong(tin.nguoiGui)) return null;
+      if (coMenhDeRaLenh === false) return null;
+      const ds = Array.isArray(tinHieuGoc) ? tinHieuGoc : [];
+      const doiHoi = ds.filter((id) => /^(FIN_|CRED_)/.test(id));
+      if (doiHoi.length === 0) return null;
+
+      /**
+       * ⚠️ TIỀN CHẢY VỀ PHÍA BÁC THÌ KHÔNG PHẢI LỜI ĐÒI.
+       *
+       * Ca BT-29 của `binh-thuong.json`:
+       *   "Bác ơi cháu chuyển khoản vào tài khoản 0011002200 CỦA BÁC rồi nhé"
+       * Bộ phân loại câu KHÔNG tách được ca này với BT-13 — đo được: cả hai đều
+       * `speechAct = request_command`, `direction = sender_to_user`,
+       * `actionable = true`, và cùng đúng một tín hiệu `FIN_TRANSFER_REQUEST`.
+       *
+       * Thứ tách được nằm ở XƯNG HÔ: tin mở đầu bằng "Bác ơi" và nói tài khoản
+       * đó là "của bác" — tức tài khoản của CHÍNH NGƯỜI ĐANG ĐƯỢC GỌI. Người
+       * báo tin đã chuyển tiền CHO bác thì không phải đang xin tiền của bác.
+       *
+       * ⚠️ ĐÒI TRÙNG KHỚP XƯNG HÔ, KHÔNG NHẬN "của" + ĐẠI TỪ BẤT KỲ. Nhận bừa
+       * thì "chuyển vào tài khoản của em" — em ở đây là KẺ GỬI — cũng được tha,
+       * và đó là một câu thần chú tặng cho kẻ lừa đảo (§12). Phải là đại từ mà
+       * chính tin nhắn dùng để GỌI người nhận.
+       *
+       * ⚠️ ĐÂY KHÔNG PHẢI BỘ HẠ MỨC. Nó chỉ thu hẹp phạm vi của R21 — một luật
+       * MỚI — nên mức không bao giờ thấp hơn mức trước khi có R21. Trò "tài
+       * khoản an toàn" vẫn nổ độc lập qua `FIN_SAFE_ACCOUNT` (30 điểm).
+       */
+      const chu = String(ban.thap || '');
+      const XUNG_HO = ['bác', 'ông', 'bà', 'cô', 'chú', 'dì', 'cậu', 'mẹ', 'bố', 'ba', 'má'];
+      const goiLa = XUNG_HO.filter((x) => new RegExp(`(^|[\\s,.!?])${x}( ơi|,| à)`).test(chu));
+      const tienVeNguoiNhan = goiLa.some((x) => new RegExp(
+        `(tài khoản|tk|stk|số)[^.]{0,26}của ${x}`).test(chu));
+      if (tienVeNguoiNhan) return null;
+      return {
+        bangChung: { nguoiGui: che(tin.nguoiGui), doiHoi },
+        // Không thêm tín hiệu mới: chúng đã nằm trong `tinHieuGoc` rồi.
+        tinHieu: [],
+      };
+    },
+  },
 ]);
 
 /**
