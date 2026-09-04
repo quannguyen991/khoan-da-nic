@@ -777,6 +777,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     "Bấm micro để nói tiếp.": "Bấm micro để nói tiếp.",
     "Đang nghe qua micro": "Đang nghe qua micro",
     "Đã ghi xong": "Đã ghi xong",
+    "Chưa có ai — bấm để thêm": "Chưa có ai — bấm để thêm",
   },
   en: {
     "Chỉ chạy trên Chrome hoặc Edge của máy tính.": "Only works in Chrome or Edge on a computer.",
@@ -1603,6 +1604,7 @@ export const translations: Record<Lang, Record<string, string>> = {
     "Bấm micro để nói tiếp.": "Tap the mic to keep talking.",
     "Đang nghe qua micro": "Listening through the mic",
     "Đã ghi xong": "Recording finished",
+    "Chưa có ai — bấm để thêm": "No one yet — tap to add",
   }
 };
 
