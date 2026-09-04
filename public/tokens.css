@@ -198,9 +198,13 @@
   /* ══ HỌ CHỮ — 2 token ═════════════════════════════════════════════════════
      Phục vụ CỤC BỘ từ node_modules/@fontsource*. KHÔNG link fonts.googleapis.com
      — mâu thuẫn với "dữ liệu của bác nằm trên máy của bác", và hỏng ngoại tuyến.
-     Inter Variable CÓ subset `vietnamese` nên không bị trộn phông ở dấu tiếng Việt. */
-  --font-display: "Inter Variable", "Be Vietnam Pro", system-ui, sans-serif;
-  --font-body:    "Inter Variable", "Be Vietnam Pro", system-ui, sans-serif;
+     Quicksand (đổi 4/9/2026, khớp `--font-sans` ở src/index.css) CÓ subset
+     `vietnamese` chính thức — đã kiểm trực tiếp trên dev server, không suy đoán.
+     ⚠️ Hai token này CHƯA có nơi tiêu thụ trong App.tsx (App.tsx dùng lớp
+     Tailwind `font-sans`, đọc `--font-sans` ở src/index.css) — giữ khớp giá
+     trị ở đây để không trở thành mã sự thật sai, không phải để dùng ngay. */
+  --font-display: "Quicksand", ui-sans-serif, system-ui, sans-serif;
+  --font-body:    "Quicksand", ui-sans-serif, system-ui, sans-serif;
 
   /* ══ BỀ RỘNG ĐỌC — 3 token ════════════════════════════════════════════════ */
   --reading-width: 34rem;   /* khối chữ dài */
