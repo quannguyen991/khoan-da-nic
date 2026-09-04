@@ -1,0 +1,481 @@
+{
+  "phienBan": "2026.09.04+2",
+  "capNhatLuc": "2026-09-04T00:00:00.000Z",
+  "nguon": "dong-goi-san",
+  "ghiChu": "Bản MẶC ĐỊNH đóng gói trong app. Bộ luật tải từ xa GHI ĐÈ tệp này khi phienBan lớn hơn. Xem bo-luat-store.js. Chiêu lừa đổi hằng tuần — không được bắt người dùng cập nhật app mới sửa được luật.",
+  "maoDanh": {
+    "ghiChu": "Từ khoá mạo danh cơ quan. Viết CÓ DẤU; bộ khớp tự bỏ dấu cả mẫu lẫn văn bản nên không cần chép bản không dấu.",
+    "cum": [
+      "phạt nguội",
+      "vi phạm giao thông",
+      "csgt",
+      "cảnh sát giao thông",
+      "nộp phạt",
+      "tra cứu vi phạm",
+      "cục thuế",
+      "chi cục thuế",
+      "cơ quan thuế",
+      "hoàn thuế",
+      "quyết toán thuế",
+      "bảo hiểm xã hội",
+      "vneid",
+      "định danh điện tử",
+      "căn cước công dân",
+      "căn cước",
+      "khoá tài khoản",
+      "khóa tài khoản",
+      "xác minh danh tính",
+      "cập nhật thông tin",
+      "tài khoản bị đình chỉ",
+      "tài khoản bị tạm khoá",
+      "toà án",
+      "tòa án",
+      "viện kiểm sát",
+      "lệnh bắt",
+      "lệnh tạm giam",
+      "chuyên án",
+      "bộ công an",
+      "cơ quan điều tra",
+      "dịch vụ công",
+      "điện lực",
+      "bảo hiểm y tế"
+    ]
+  },
+  "allowlist": {
+    "ghiChu": "Tên miền ĐĂNG KÝ ĐƯỢC (eTLD+1) của cơ quan nhà nước và ngân hàng. So bằng registrable domain, KHÔNG dùng endsWith ngây thơ. AI không được tự thêm mục nào — mỗi mục phải do người kiểm chứng.",
+    "hauToChinhThuc": [
+      "gov.vn"
+    ],
+    "tenMien": [
+      "csgt.vn",
+      "dichvucong.gov.vn",
+      "vneid.gov.vn",
+      "gdt.gov.vn",
+      "baohiemxahoi.gov.vn",
+      "mps.gov.vn",
+      "evn.com.vn",
+      "vietcombank.com.vn",
+      "bidv.com.vn",
+      "vietinbank.vn",
+      "techcombank.com.vn",
+      "agribank.com.vn",
+      "mbbank.com.vn",
+      "acb.com.vn",
+      "vpbank.com.vn",
+      "tpb.vn",
+      "sacombank.com.vn",
+      "vib.com.vn",
+      "hdbank.com.vn",
+      "shb.com.vn",
+      "msb.com.vn",
+      "ocb.com.vn",
+      "seabank.com.vn",
+      "eximbank.com.vn",
+      "scb.com.vn",
+      "namabank.com.vn",
+      "abbank.vn",
+      "baovietbank.vn",
+      "pvcombank.com.vn",
+      "lpbank.com.vn",
+      "vietcapitalbank.com.vn",
+      "kienlongbank.com",
+      "vietabank.com.vn",
+      "bacabank.com.vn",
+      "vietbank.com.vn",
+      "saigonbank.com.vn",
+      "ncb-bank.vn",
+      "pgbank.com.vn",
+      "cake.vn",
+      "timo.vn"
+    ]
+  },
+  "thuongHieu": {
+    "ghiChu": "Tên thương hiệu dùng cho LUẬT R4 (tên miền nhái). Mỗi mục: chuỗi có mặt trong hostname ⇒ eTLD+1 BẮT BUỘC phải nằm trong danh sách domains.",
+    "muc": [
+      {
+        "ten": "vietcombank",
+        "domains": [
+          "vietcombank.com.vn"
+        ]
+      },
+      {
+        "ten": "vcb",
+        "domains": [
+          "vietcombank.com.vn"
+        ]
+      },
+      {
+        "ten": "bidv",
+        "domains": [
+          "bidv.com.vn"
+        ]
+      },
+      {
+        "ten": "vietinbank",
+        "domains": [
+          "vietinbank.vn"
+        ]
+      },
+      {
+        "ten": "techcombank",
+        "domains": [
+          "techcombank.com.vn"
+        ]
+      },
+      {
+        "ten": "agribank",
+        "domains": [
+          "agribank.com.vn"
+        ]
+      },
+      {
+        "ten": "mbbank",
+        "domains": [
+          "mbbank.com.vn"
+        ]
+      },
+      {
+        "ten": "sacombank",
+        "domains": [
+          "sacombank.com.vn"
+        ]
+      },
+      {
+        "ten": "vpbank",
+        "domains": [
+          "vpbank.com.vn"
+        ]
+      },
+      {
+        "ten": "dichvucong",
+        "domains": [
+          "dichvucong.gov.vn"
+        ]
+      },
+      {
+        "ten": "vneid",
+        "domains": [
+          "vneid.gov.vn"
+        ]
+      },
+      {
+        "ten": "csgt",
+        "domains": [
+          "csgt.vn"
+        ]
+      },
+      {
+        "ten": "chinhphu",
+        "domains": [
+          "chinhphu.vn"
+        ]
+      },
+      {
+        "ten": "baohiemxahoi",
+        "domains": [
+          "baohiemxahoi.gov.vn"
+        ]
+      }
+    ]
+  },
+  "duoiMienRuiRo": {
+    "ghiChu": "LUẬT R5. Đuôi miền giá rẻ, đăng ký hàng loạt, gần như không có tổ chức Việt Nam hợp pháp nào dùng.",
+    "duoi": [
+      "top",
+      "xyz",
+      "icu",
+      "cc",
+      "buzz",
+      "rest",
+      "cyou",
+      "click",
+      "link",
+      "shop",
+      "online",
+      "site",
+      "website",
+      "space",
+      "fun",
+      "live",
+      "work",
+      "monster",
+      "quest",
+      "sbs",
+      "cfd",
+      "bond",
+      "makeup",
+      "beauty",
+      "hair",
+      "skin",
+      "mom",
+      "lol",
+      "tk",
+      "ml",
+      "ga",
+      "cf",
+      "gq",
+      "su",
+      "ru.com"
+    ]
+  },
+  "rutGon": {
+    "ghiChu": "LUẬT R3. Cơ quan nhà nước không dùng link rút gọn.",
+    "tenMien": [
+      "bit.ly",
+      "tinyurl.com",
+      "t.co",
+      "goo.gl",
+      "ow.ly",
+      "is.gd",
+      "buff.ly",
+      "rb.gy",
+      "cutt.ly",
+      "shorturl.at",
+      "rebrand.ly",
+      "s.id",
+      "tiny.cc",
+      "shorte.st",
+      "bl.ink",
+      "lnkd.in",
+      "trib.al",
+      "urlz.fr",
+      "v.gd",
+      "1link.vn",
+      "l.ead.me",
+      "gg.gg",
+      "shrtco.de",
+      "short.gy"
+    ]
+  },
+  "khoAppChinhThuc": {
+    "ghiChu": "LUẬT R2. Ngoài danh sách này thì mọi lời mời cài ứng dụng từ link đều là CAO.",
+    "tenMien": [
+      "play.google.com",
+      "apps.apple.com",
+      "itunes.apple.com",
+      "appgallery.huawei.com",
+      "galaxystore.samsung.com",
+      "microsoft.com"
+    ]
+  },
+  "cum": {
+    "ghiChu": "Cụm từ theo luật. Viết CÓ DẤU. Bộ khớp bỏ dấu cả hai vế trước khi so.",
+    "caiApp": [
+      "cài ứng dụng",
+      "cài app",
+      "tải ứng dụng",
+      "tải app",
+      "cài phần mềm",
+      "tải phần mềm",
+      "cài đặt ứng dụng",
+      "tải về và cài",
+      "cài file",
+      "cài tệp",
+      "tải apk",
+      "cài apk",
+      "cài đặt theo link",
+      "tải theo đường link",
+      "install the app",
+      "download the app",
+      "install this apk"
+    ],
+    "apLucThoiGian": [
+      "ngay lập tức",
+      "ngay bây giờ",
+      "gấp",
+      "khẩn",
+      "trong vòng",
+      "trước 24h",
+      "trong 24 giờ",
+      "trong hôm nay",
+      "hết hạn hôm nay",
+      "hết hạn trong",
+      "nếu không sẽ",
+      "nếu không thì",
+      "chậm nhất",
+      "trước khi quá muộn",
+      "chỉ còn",
+      "sắp hết hạn",
+      "quá hạn",
+      "trong 2 tiếng",
+      "trong vài phút",
+      "immediately",
+      "within 24 hours",
+      "expires today",
+      "or else",
+      "trong vòng 2 tiếng",
+      "ngay hôm nay",
+      "lập tức"
+    ],
+    "biMat": [
+      "không được nói với ai",
+      "không nói với ai",
+      "giữ bí mật",
+      "giữ kín",
+      "không báo người nhà",
+      "đừng nói với gia đình",
+      "đừng kể với ai",
+      "không được kể",
+      "tự mình xử lý",
+      "một mình xử lý",
+      "bí mật điều tra",
+      "bảo mật điều tra",
+      "không tiết lộ cho bất kỳ ai",
+      "keep this confidential",
+      "do not tell anyone",
+      "tell no one",
+      "đừng nói với ai",
+      "đừng nói cho ai",
+      "không kể với ai",
+      "đừng kể với bố",
+      "đừng kể với mẹ",
+      "đừng cho ai biết",
+      "không cho ai biết",
+      "chỉ mình bác biết",
+      "đừng báo công an",
+      "không được báo"
+    ],
+    "doiMaXacThuc": {
+      "ghiChu": "LUẬT R8. PHẢI có cả VẾ YÊU CẦU lẫn VẾ ĐỐI TƯỢNG — tin nhắn OTP thật của ngân hàng chỉ có vế đối tượng. Đây là chỗ dễ báo oan nhất trong cả bộ luật.",
+      "veYeuCau": [
+        "đọc",
+        "gửi",
+        "cung cấp",
+        "nhập",
+        "cho tôi",
+        "cho em",
+        "cho anh",
+        "cho chị",
+        "nhắn lại",
+        "đọc lại",
+        "xác nhận giúp",
+        "điền",
+        "khai báo",
+        "send me",
+        "give me",
+        "provide",
+        "enter",
+        "confirm the",
+        "xin",
+        "cho cháu xin",
+        "gửi cho",
+        "nhắn cho",
+        "đọc cho",
+        "báo cho",
+        "nhập vào",
+        "điền vào",
+        "chuyển cho tôi",
+        "share"
+      ],
+      "veDoiTuong": [
+        "mã otp",
+        "mã xác thực",
+        "mã xác minh",
+        "mã bảo mật",
+        "mã pin",
+        "mật khẩu",
+        "số thẻ",
+        "mã cvv",
+        "cvv",
+        "mã thẻ",
+        "mã 6 số",
+        "6 chữ số",
+        "mã vừa gửi",
+        "otp",
+        "one-time",
+        "verification code",
+        "security code",
+        "card number",
+        "password",
+        "mã xác nhận",
+        "6 số",
+        "mã ngân hàng",
+        "mã giao dịch",
+        "mã bí mật",
+        "mật khẩu tài khoản",
+        "mã số bí mật",
+        "smart otp",
+        "mã smart otp"
+      ]
+    },
+    "xungDanhToChuc": {
+      "ghiChu": "LUẬT R9. Nội dung tự xưng là tổ chức, trong khi người gửi là một số di động thường.",
+      "cum": [
+        "ngân hàng",
+        "chi nhánh",
+        "tổng đài",
+        "trung tâm chăm sóc khách hàng",
+        "bộ phận",
+        "phòng giao dịch",
+        "nhân viên ngân hàng",
+        "cán bộ",
+        "điều tra viên",
+        "cơ quan",
+        "cục",
+        "chi cục",
+        "tổng cục",
+        "uỷ ban",
+        "ủy ban",
+        "công ty điện lực",
+        "bưu điện",
+        "viettel post",
+        "vnpost"
+      ]
+    },
+    "soTaiKhoan": {
+      "ghiChu": "LUẬT R6. Dãy số chỉ được coi là số tài khoản khi có NGỮ CẢNH tài khoản đứng gần. Một dãy 10 chữ số trần trụi trong tin nhắn thường là mã đơn hàng.",
+      "nguCanh": [
+        "số tài khoản",
+        "stk",
+        "tài khoản số",
+        "tk",
+        "số tk",
+        "chủ tài khoản",
+        "chuyển vào",
+        "chuyển khoản vào",
+        "chuyển tới",
+        "nhận tiền",
+        "account number",
+        "acc no",
+        "bank account",
+        "vào tk",
+        "vào stk",
+        "tài khoản",
+        "vao tai khoan"
+      ]
+    }
+  },
+  "dongHinh": {
+    "ghiChu": "Ký tự đồng hình (homoglyph) hay dùng để nhái tên miền. Ánh xạ về ASCII rồi mới so với allowlist.",
+    "bang": {
+      "а": "a",
+      "е": "e",
+      "о": "o",
+      "р": "p",
+      "с": "c",
+      "х": "x",
+      "у": "y",
+      "і": "i",
+      "ѕ": "s",
+      "ԁ": "d",
+      "ɡ": "g",
+      "ɩ": "l",
+      "ᴠ": "v",
+      "ᴡ": "w",
+      "α": "a",
+      "ο": "o",
+      "ρ": "p",
+      "ε": "e",
+      "ι": "i",
+      "κ": "k",
+      "ν": "v",
+      "０": "0",
+      "１": "1",
+      "ａ": "a",
+      "ｂ": "b",
+      "ｃ": "c",
+      "ｅ": "e",
+      "ｏ": "o"
+    }
+  }
+}
