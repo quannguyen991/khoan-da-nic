@@ -165,6 +165,33 @@ public class KhoanDaPlugin extends Plugin {
         call.resolve(r);
     }
 
+    /**
+     * ỨNG DỤNG LẠ VỪA ĐƯỢC CÀI — lấy và XOÁ bộ đệm của {@link NhanAppMoi}.
+     *
+     * ⚠️ LỚP NÀY KHÔNG QUYẾT ĐỊNH MỨC RỦI RO. Nó trả dữ kiện thô; bộ luật là
+     * `backend/src/detect/ung-dung-la.js`, và chỉ có MỘT bản (§4.2).
+     *
+     * ⚠️ `installer` là `null` khi không có trình cài nào đứng tên — nghĩa là
+     * app được cài bằng tệp .apk tải tay. Đó là TÍN HIỆU MẠNH NHẤT, không phải
+     * một giá trị thiếu. Đừng đổi `null` thành chuỗi rỗng hay "unknown".
+     */
+    @PluginMethod
+    public void layAppMoi(PluginCall call) {
+        JSArray ds = new JSArray();
+        for (NhanAppMoi.AppMoi m : NhanAppMoi.layVaXoa()) {
+            JSObject o = new JSObject();
+            o.put("goi", m.goi);
+            o.put("tenHienThi", m.tenHienThi);
+            o.put("installer", m.installer);   // null = cai bang tep .apk tai tay
+            o.put("laCapNhat", m.laCapNhat);
+            o.put("thoiDiem", m.luc);
+            ds.put(o);
+        }
+        JSObject r = new JSObject();
+        r.put("danhSach", ds);
+        call.resolve(r);
+    }
+
     /** Người dùng tắt tính năng ⇒ xoá sạch bộ đệm, không giữ lại gì (§6.9). */
     @PluginMethod
     public void xoaTinDaBat(PluginCall call) {

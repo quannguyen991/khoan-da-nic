@@ -34,6 +34,17 @@ interface CauNoi {
     co: boolean; tuApp?: string; noiDung?: string; trangThai?: string; luc?: number;
   }>;
   xoaTinDaBat(): Promise<void>;
+  /**
+   * Ứng dụng lạ vừa được cài. `installer === null` nghĩa là KHÔNG có trình cài
+   * nào đứng tên — app được cài bằng tệp .apk tải tay, và đó là tín hiệu MẠNH
+   * NHẤT chứ không phải một giá trị thiếu.
+   */
+  layAppMoi(): Promise<{
+    danhSach: Array<{
+      goi: string; tenHienThi: string | null; installer: string | null;
+      laCapNhat: boolean; thoiDiem: number;
+    }>;
+  }>;
   trangThaiQuyenPopup(): Promise<{ daBat: boolean }>;
   moCaiDatPopup(): Promise<void>;
   hienPopup(o: { tieuDe: string; nutMo: string; nutOn: string }): Promise<void>;
@@ -247,6 +258,40 @@ export async function tinMoiNhat(): Promise<{
 
 export async function xoaTinDaBat(): Promise<void> {
   (await cauHoacNull())?.cau.xoaTinDaBat();
+}
+
+export interface AppVuaCai {
+  goi: string;
+  tenHienThi: string | null;
+  installer: string | null;
+  laCapNhat: boolean;
+  thoiDiem: number;
+}
+
+/**
+ * Ứng dụng lạ vừa được cài — lấy và XOÁ bộ đệm bên native.
+ *
+ * ⚠️ TRẢ `null` KHI KHÔNG PHẢI BẢN APK, KHÔNG TRẢ MẢNG RỖNG.
+ * Mảng rỗng có nghĩa "đã hỏi, không có app nào mới"; `null` có nghĩa "không hỏi
+ * được, vì đây là trình duyệt". Hai thứ khác nhau, và §4.3 nói đúng chỗ này —
+ * gộp chúng lại là để một "chưa kiểm được" đi ra ngoài dưới dạng "không có gì".
+ *
+ * ⚠️ KHÔNG QUYẾT ĐỊNH MỨC RỦI RO Ở ĐÂY. Đưa từng mục cho
+ * `backend/src/detect/ung-dung-la.js` — bộ luật chỉ có một bản (§4.2).
+ */
+export async function appVuaCai(): Promise<AppVuaCai[] | null> {
+  const c = (await cauHoacNull())?.cau;
+  if (!c) return null;
+  try {
+    const r = await c.layAppMoi();
+    return Array.isArray(r?.danhSach) ? r.danhSach : [];
+  } catch {
+    /*
+     * Bản APK cũ chưa có phương thức này ⇒ Capacitor ném "not implemented".
+     * Trả `null` (không hỏi được) chứ KHÔNG trả `[]` (đã hỏi, không có gì).
+     */
+    return null;
+  }
 }
 
 // ═══════════ Popup đè màn hình ═══════════

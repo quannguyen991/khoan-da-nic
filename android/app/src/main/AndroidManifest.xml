@@ -167,6 +167,29 @@
             </intent-filter>
         </receiver>
 
+        <!--
+          NGHE SU KIEN CAI UNG DUNG MOI - xem NhanAppMoi.java.
+
+          KHONG khai QUERY_ALL_PACKAGES. Chung ta chi nghe broadcast ve DUNG goi
+          vua duoc cai, khong liet ke danh sach app tren may. Do la du lieu toi
+          thieu can cho viec nay, va no tranh luon mot nhom quyen bi cua hang han
+          che (docs/kien-truc-hai-phia.md muc 4).
+
+          exported="true" la BAT BUOC: broadcast nay do he thong gui toi, khong
+          phai app tu gui cho minh. PACKAGE_ADDED can data scheme "package";
+          thieu no thi filter khong bao gio khop va receiver im lang khong chay,
+          khong co loi nao bao cho biet.
+        -->
+        <receiver
+            android:name=".NhanAppMoi"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter android:priority="800">
+                <action android:name="android.intent.action.PACKAGE_ADDED" />
+                <data android:scheme="package" />
+            </intent-filter>
+        </receiver>
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
