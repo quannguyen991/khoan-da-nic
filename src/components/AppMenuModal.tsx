@@ -1,17 +1,13 @@
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   X, 
-  ShieldAlert, 
-  Mic, 
+  ShieldAlert,  
   PhoneCall, 
-  MessageSquare, 
-  ShieldCheck, 
+  MessageSquare,  
   Settings, 
   ChevronRight, 
   Sparkles,
   Zap,
-  Camera,
-  BookOpen
 } from 'lucide-react';
 import { ViewState, NguoiThan } from '../App';
 
@@ -86,14 +82,6 @@ export function AppMenuModal({
     }
   };
 
-  const handlePickImage = () => {
-    onClose();
-    if (onSelectImage) {
-      onSelectImage();
-    } else {
-      setView('home');
-    }
-  };
 
   return (
     <AnimatePresence>
@@ -230,65 +218,16 @@ export function AppMenuModal({
               </div>
             </div>
 
-            {/* ── Kiểm tra ngay ───────────────────────────────────────── */}
-            <div>
-              <h4 className="flex items-center gap-2 text-[15px] font-black uppercase tracking-wide text-[#6d28d9] mb-3">
-                <ShieldCheck size={18} /> {t("Kiểm tra ngay")}
-              </h4>
+            {/*
+              ⚠️ KHỐI "KIỂM TRA NGAY" ĐÃ BỎ — 5/9/2026, người dùng yêu cầu.
+              Ba thẻ cũ (Chạm Để Nói · Quét Ảnh Chụp · Cẩm Nang & Hotline) KHÔNG
+              mất đường vào: `voice` và chọn ảnh mỗi thứ còn bốn lối khác, `learn`
+              còn năm lối ngay ở trang chủ. Đã kiểm trước khi bỏ.
 
-              {/*
-                ⚠️ ICON NẰM CÙNG HÀNG VỚI CHỮ, KHÔNG XẾP DỌC.
-                Bản trước dùng `flex-col` nên mỗi thẻ cao gấp đôi mà vẫn thừa
-                chỗ trống hai bên; ba thẻ xếp dọc đẩy phần dưới của menu ra
-                ngoài tầm nhìn. Cùng hàng thì gọn hơn và khớp với thẻ "Cài Đặt"
-                ngay bên dưới — một menu không nên có hai kiểu thẻ.
-
-                ⚠️ KHỐI CHỮ DÙNG `<span className="block">`, KHÔNG PHẢI `<span>`
-                TRẦN. Span mặc định là inline; bọc hai span `block` bên trong một
-                span inline thì chiều cao không bao hết nội dung và dòng mô tả
-                tràn ra ngoài viền thẻ — đúng lỗi thấy ở thẻ "Cài Đặt".
-              */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <button
-                  onClick={() => handleGo('voice')}
-                  className="bg-white hover:bg-purple-50 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] rounded-2xl p-4 flex items-center gap-3.5 text-left active:scale-95 transition-transform"
-                >
-                  <span className="w-12 h-12 rounded-2xl bg-purple-100 text-purple-700 flex items-center justify-center shrink-0">
-                    <Mic size={24} />
-                  </span>
-                  <span className="block min-w-0">
-                    <span className="font-black text-[16px] text-[#1e1b4b] block leading-tight">{t("Chạm Để Nói")}</span>
-                    <span className="text-[14px] text-gray-600 font-medium block leading-snug">{t("Kể lại cho AI kiểm tra")}</span>
-                  </span>
-                </button>
-
-                <button
-                  onClick={handlePickImage}
-                  className="bg-white hover:bg-purple-50 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] rounded-2xl p-4 flex items-center gap-3.5 text-left active:scale-95 transition-transform"
-                >
-                  <span className="w-12 h-12 rounded-2xl bg-pink-100 text-pink-700 flex items-center justify-center shrink-0">
-                    <Camera size={24} />
-                  </span>
-                  <span className="block min-w-0">
-                    <span className="font-black text-[16px] text-[#1e1b4b] block leading-tight">{t("Quét Ảnh Chụp")}</span>
-                    <span className="text-[14px] text-gray-600 font-medium block leading-snug">{t("Tin nhắn / Mã QR / Số tài khoản")}</span>
-                  </span>
-                </button>
-
-                <button
-                  onClick={() => handleGo('learn')}
-                  className="bg-white hover:bg-amber-50 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] rounded-2xl p-4 flex items-center gap-3.5 text-left active:scale-95 transition-transform"
-                >
-                  <span className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-800 flex items-center justify-center shrink-0">
-                    <BookOpen size={24} />
-                  </span>
-                  <span className="block min-w-0">
-                    <span className="font-black text-[16px] text-[#1e1b4b] block leading-tight">{t("Cẩm Nang & Hotline")}</span>
-                    <span className="text-[14px] text-gray-600 font-medium block leading-snug">{t("Nhận diện bẫy lừa & số khẩn cấp")}</span>
-                  </span>
-                </button>
-              </div>
-            </div>
+              Menu này là thứ bác mở khi đang lo. Càng ít ô phải đọc càng tốt —
+              giữ lại đúng phần "khi bác đang lo" và Cài đặt.
+              ⚠️ Thêm lại thì phải đếm lại số ô: mỗi ô thêm là một giây chần chừ.
+            */}
 
             {/* ── Cài đặt ─────────────────────────────────────────────── */}
             {/*
