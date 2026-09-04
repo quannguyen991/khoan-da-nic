@@ -133,7 +133,7 @@ export function LearnView({ setView, t, lang = 'vi', onTriggerEmergency }: Learn
             stopSpeaking();
             setView('home');
           }}
-          className="w-10 h-10 rounded-2xl bg-white/80 backdrop-blur-md flex items-center justify-center text-[#4c1d95] shadow-xs border-2 border-[#2e1065] active:scale-95 transition-transform"
+ className="w-10 h-10 rounded-2xl bg-white/80 backdrop-blur-md flex items-center justify-center text-[#4c1d95] border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] active:scale-95 transition-transform"
         >
           <ArrowLeft size={22} />
         </button>
@@ -151,7 +151,7 @@ export function LearnView({ setView, t, lang = 'vi', onTriggerEmergency }: Learn
       </div>
 
       {/* Main Mode Toggle: Lessons vs Emergency Numbers */}
-      <div className="w-full bg-white/90 p-1.5 rounded-2xl border-2 border-[#2e1065] shadow-xs flex items-center gap-1.5 mb-5">
+      <div className="w-full bg-white/90 p-1.5 rounded-2xl border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] flex items-center gap-1.5 mb-5">
         <button
           onClick={() => {
             stopSpeaking();
@@ -199,7 +199,7 @@ export function LearnView({ setView, t, lang = 'vi', onTriggerEmergency }: Learn
       {activeTab === 'lessons' && (
         <div className="w-full space-y-4">
           {/* Search bar */}
-          <div className="relative flex items-center bg-white rounded-2xl p-1.5 pl-3 pr-2 shadow-xs border-2 border-[#2e1065] focus-within:ring-2 ring-purple-400">
+          <div className="relative flex items-center bg-white rounded-2xl p-1.5 pl-3 pr-2 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] focus-within:ring-2 ring-purple-400">
             <Search size={18} className="text-purple-500 mr-2 shrink-0" />
             <input 
               type="text"
@@ -229,7 +229,7 @@ export function LearnView({ setView, t, lang = 'vi', onTriggerEmergency }: Learn
                   className={`px-3.5 py-2 rounded-2xl text-[14px] font-bold whitespace-nowrap flex items-center gap-1.5 transition-all shrink-0 ${
                     isSelected
                       ? 'bg-purple-900 text-white shadow-xs'
-                      : 'bg-white text-slate-700 hover:bg-purple-50 border-2 border-[#2e1065]'
+                      : 'bg-white text-slate-700 hover:bg-purple-50 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065]'
                   }`}
                 >
                   <span>{cat.icon}</span>
@@ -269,7 +269,7 @@ export function LearnView({ setView, t, lang = 'vi', onTriggerEmergency }: Learn
                     setSelectedLesson(lesson);
                     stopSpeaking();
                   }}
-                  className="bg-white rounded-3xl p-4 sm:p-5 shadow-xs border-2 border-[#2e1065] hover:border-purple-300 hover:shadow-md transition-all cursor-pointer flex flex-col justify-between group active:scale-[0.99]"
+ className="bg-white rounded-3xl p-4 sm:p-5 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] hover:border-purple-300 hover: transition-all cursor-pointer flex flex-col justify-between group active:scale-[0.99]"
                 >
                   <div>
                     {/* Top Row: Icon, Danger Level & Read Time */}
@@ -335,7 +335,7 @@ export function LearnView({ setView, t, lang = 'vi', onTriggerEmergency }: Learn
           </div>
 
           {filteredLessons.length === 0 && (
-            <div className="w-full bg-white rounded-3xl p-8 text-center border-2 border-[#2e1065] shadow-xs">
+            <div className="w-full bg-white rounded-3xl p-8 text-center border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] ">
               <div className="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center mx-auto mb-2">
                 <Search size={24} />
               </div>
@@ -378,7 +378,7 @@ export function LearnView({ setView, t, lang = 'vi', onTriggerEmergency }: Learn
             {emergencyContacts.map((contact) => (
               <div
                 key={contact.id}
-                className="bg-white rounded-3xl p-4 sm:p-5 shadow-xs border-2 border-[#2e1065] flex flex-col justify-between"
+ className="bg-white rounded-3xl p-4 sm:p-5 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] flex flex-col justify-between"
               >
                 <div>
                   <div className="flex items-start justify-between mb-2">
@@ -461,7 +461,7 @@ export function LearnView({ setView, t, lang = 'vi', onTriggerEmergency }: Learn
               initial={{ scale: 0.95, opacity: 0, y: 20 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.95, opacity: 0, y: 20 }}
-              className="w-full max-w-2xl bg-[#fbf9ff] rounded-3xl shadow-2xl border-2 border-[#2e1065] overflow-hidden max-h-[90vh] flex flex-col"
+ className="w-full max-w-2xl bg-[#fbf9ff] rounded-3xl border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] overflow-hidden max-h-[90vh] flex flex-col"
             >
               {/* Modal Header */}
               <div className="p-4 sm:p-5 bg-white border-b border-purple-100 flex items-center justify-between sticky top-0 z-10">
@@ -509,7 +509,7 @@ export function LearnView({ setView, t, lang = 'vi', onTriggerEmergency }: Learn
               {/* Modal Body (Scrollable) */}
               <div className="p-4 sm:p-6 overflow-y-auto space-y-5 text-slate-800">
                 {/* Story / Scenario */}
-                <div className="bg-white rounded-2xl p-4 sm:p-5 border-2 border-[#2e1065] shadow-xs">
+                <div className="bg-white rounded-2xl p-4 sm:p-5 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] ">
                   <h4 className="font-bold text-[14px] uppercase tracking-wider text-purple-700 mb-2 flex items-center gap-1.5">
                     <Users size={15} />
                     {lang === 'en' ? 'Simulated Scenario' : 'Tình Huống Thực Tế'}
@@ -562,7 +562,7 @@ export function LearnView({ setView, t, lang = 'vi', onTriggerEmergency }: Learn
                 </div>
 
                 {/* Interactive Practice Quiz */}
-                <div className="bg-white rounded-2xl p-4 sm:p-5 border-2 border-[#2e1065] shadow-xs">
+                <div className="bg-white rounded-2xl p-4 sm:p-5 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] ">
                   <div className="flex items-center gap-2 mb-2">
                     <HelpCircle className="w-5 h-5 text-purple-600" />
                     <h4 className="font-extrabold text-sm text-[#2e1065]">
