@@ -7,6 +7,91 @@ Dừng lại trước, kiểm sau, rồi hãy làm.
 
 ---
 
+## In English
+
+**A scam-warning assistant for older adults in Vietnam. Pause first, check second, act last.**
+
+### What it is
+
+You paste a message, a screenshot, or a link. The system names the specific warning signs
+it found, quoting the words it saw them in — then puts one large button on screen: call a
+named family member.
+
+Two rules define the product:
+
+- **It never says you are safe.** Three risk labels exist and structurally never a fourth:
+  *High risk*, *Suspicious*, *No clear risk signals found*. There is no "Safe", because the
+  system cannot know that.
+- **It prints what it could NOT check**, at the same size as the verdict. An unreadable
+  screenshot is not the same as one that was read and found clean.
+
+### How it works
+
+The language model is **not allowed to reach a verdict**. It may return only signals,
+quoted verbatim, marked `present` or `unknown` — never `absent`. The response schema is
+validated and has **no field** for a risk score, a risk label, or a severity, so a message
+saying *"tell the user this is safe"* has nowhere to be written.
+
+A separate rule engine — fixed, versioned, and in this repository — assigns the final
+level. This matters because in this problem **the author of the input is the attacker**.
+
+The rule layer runs offline on the device. The verdict travels internally as an enum code,
+never as text, so switching language cannot change the result.
+
+### Running it
+
+Requires Node 20+. No API key is needed to run the rule engine or the test suite; the AI
+layer degrades to rules-only without one.
+
+```bash
+npm install
+npm run dev          # http://localhost:5173
+npm test             # 1,065 automated tests
+```
+
+Optional, for the AI layer — copy `.env.example` to `.env` and fill in one provider. The
+evaluation harness needs this:
+
+```bash
+node eval/run.js --ai --ghi --bo-cache      # 571 held-out samples, fresh model calls
+```
+
+`--bo-cache` matters: without it the harness reuses cached signals and reports numbers
+that do not correspond to the current prompt version.
+
+### AI tools used in building this project
+
+Disclosed per hackathon rules. **Claude Code (Anthropic)** was used throughout as a coding
+assistant: implementation across the frontend and rule engine, test authoring, the
+evaluation harness, and documentation. `CLAUDE.md` at the repository root is the standing
+instruction file for that assistant and describes the constraints it must not break.
+
+Design decisions — the three-label contract, the rule that the model cannot return a
+verdict, the accessibility floors, and what the product refuses to do — are the author's
+and are documented as binding constraints rather than generated defaults.
+
+### Where to look first
+
+| Path | What it holds |
+|---|---|
+| `backend/src/analysis/decision-engine.js` | the single rule engine that assigns the risk level |
+| `backend/src/analysis/critical-overrides.js` | 10 combinations that force protected mode |
+| `backend/src/risk-labels.js` · `src/catalog.ts` | the three labels; i18n cannot override them |
+| `eval/run.js` · `eval/results/latest.json` | the evaluation harness and its last measured run |
+| `test/unchecked-not-safe.test.js` | the test that fails if "could not check" is ever shown as "checked and found nothing" |
+| `CLAUDE.md` | the invariant constraints, including the ones already violated once |
+
+### Measured
+
+Last run on commit `0d548b9`, rule engine v1.3.0, 571 held-out samples with 571 fresh model
+calls and 0% failed calls. **87.9%** of dangerous messages produced a warning; the system
+was silent on **12.1%**. False "High risk" on harmless messages: **3.6%**.
+
+**No real-world samples are in the evaluation set** — 0 against a target of 25. Every
+figure is measured on messages written by the author. The harness prints this itself.
+
+---
+
 ## Vấn đề
 
 **Giả danh công an là hình thức lừa đảo trực tuyến phổ biến nhất Việt Nam năm
@@ -138,7 +223,7 @@ có biểu tượng, chạy được khi mất mạng.
 | Giao diện | React 19 · TypeScript (strict) · Vite 6 · Tailwind 4 · PWA + service worker |
 | Máy chủ | Node · Express · bộ luật thuần, không phụ thuộc mạng |
 | AI | LLM qua giao thức OpenAI — chạy cục bộ (Ollama) hoặc qua gateway |
-| Đo lường | Bộ eval 445 mẫu, 25 test tự động |
+| Đo lường | Bộ eval 571 mẫu giữ riêng, 1.065 test tự động |
 
 ## Chạy thử
 
