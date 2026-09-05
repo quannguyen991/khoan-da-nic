@@ -5805,6 +5805,25 @@ function WarningView({
         </p>
 
         {/*
+          §4.1 — DÒNG GIẢI THÍCH BẮT BUỘC.
+
+          Đây là chỗ DUY NHẤT người dùng nhìn thấy kiến trúc của sản phẩm: model
+          chỉ bật cờ, bộ luật mới ra mức. Thiếu nó thì toàn bộ lập luận "AI không
+          được quyết định" chỉ tồn tại trong tài liệu, không tồn tại trên màn
+          hình — và một người mở app ra sẽ thấy đúng thứ ngược lại.
+
+          CÓ ĐIỀU KIỆN, và điều kiện là phần quan trọng: `aiDaChay === false`
+          nghĩa là lượt này KHÔNG có model nào chạy. Nói "AI đã trích ra các dấu
+          hiệu" lúc đó là một câu sai, và §11 cấm gán việc cho model chưa hề được
+          gọi. Trường hợp ấy `chuaKiem` đã mang sẵn `ai_khong_chay` để nói thay.
+        */}
+        {!khongGoiDuoc && result?.aiDaChay === true ? (
+          <p className="text-[14px] text-white/85 mb-4 text-center leading-snug max-w-sm">
+            {t('AI đã trích ra các dấu hiệu. Mức rủi ro là do bộ luật cố định quyết định.')}
+          </p>
+        ) : null}
+
+        {/*
           THẺ TRUNG TÂM — biểu tượng + vòng đếm ngược trong một khối kính mờ, nổi
           trên nền gradient + hai quầng mờ đã có sẵn phía trên (không đổi bgColor).
           Vòng chỉ là cách trình bày khác của `timeLeft` đã chạy sẵn — không phải
