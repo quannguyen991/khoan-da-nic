@@ -1,0 +1,362 @@
+{
+  "moTa": "Tin nhắn BÌNH THƯỜNG. Tập này QUAN TRỌNG NGANG tập lừa đảo — báo động giả ở mức CAO là thứ giết niềm tin nhanh nhất với người cao tuổi (§4.6: bị kẹt trong màn khẩn cấp thì họ gỡ ứng dụng). Số điện thoại và số tài khoản đều là số giả.",
+  "quyUoc": {
+    "toiDa": "Nhãn CAO NHẤT được phép cho mục này. 'CHUA_THAY' nghĩa là không luật nào được nổ; 'NGHI_NGO' nghĩa là có luật nổ đúng nhưng KHÔNG được lên CAO.",
+    "viSao": "Ghi vì sao mục này dễ bị bắt oan. Đọc trước khi 'tối ưu' bất kỳ luật nào.",
+    "congCung": "KHÔNG mục nào trong tệp này được ra CAO. Đó là cổng precision ≥ 0,98 của bản đặc tả, và nó là cổng CỨNG."
+  },
+  "tin": [
+    {
+      "id": "BT-01",
+      "nguon": "sms",
+      "nguoiGui": "Vietcombank",
+      "noiDung": "Ma OTP cua quy khach la 482913. Khong chia se ma nay cho bat ky ai. VCB khong bao gio hoi ma OTP.",
+      "toiDa": "CHUA_THAY",
+      "viSao": "Tin OTP THẬT. Chứa cả 'mã OTP' lẫn 'không chia sẻ' — bắt theo từ khoá là mọi giao dịch ngân hàng đều nổ đỏ."
+    },
+    {
+      "id": "BT-02",
+      "nguon": "sms",
+      "nguoiGui": "BIDV",
+      "noiDung": "TK 0011223344 GD: -2,500,000VND luc 14:32 03/09. So du: 12,450,000VND. Noi dung: CHUYEN TIEN HOC PHI.",
+      "toiDa": "CHUA_THAY",
+      "viSao": "Biến động số dư thật: có số tài khoản, có số tiền. Thiếu vế ép thời gian nên R6 không được nổ."
+    },
+    {
+      "id": "BT-03",
+      "nguon": "sms",
+      "nguoiGui": "Techcombank",
+      "noiDung": "Quy khach vua dang nhap Techcombank Mobile luc 09:15. Neu khong phai ban, goi 1800 588 822.",
+      "toiDa": "CHUA_THAY",
+      "viSao": "Cảnh báo đăng nhập thật từ brandname."
+    },
+    {
+      "id": "BT-04",
+      "nguon": "sms",
+      "nguoiGui": "Shopee",
+      "noiDung": "Don hang cua ban da duoc giao cho don vi van chuyen. Ma van don 887766554433. Theo doi tai https://shopee.vn/order",
+      "toiDa": "NGHI_NGO",
+      "viSao": "Dãy 12 chữ số là MÃ VẬN ĐƠN, không phải số tài khoản. Nhận bừa là báo oan mọi thông báo giao hàng."
+    },
+    {
+      "id": "BT-05",
+      "nguon": "sms",
+      "nguoiGui": "GrabVN",
+      "noiDung": "Uu dai 50% cho 3 chuyen xe hom nay. Nhap ma GRAB50 truoc 23:59 hom nay. Chi tiet: https://grab.com/vn/uu-dai",
+      "toiDa": "NGHI_NGO",
+      "viSao": "Khuyến mãi thật: có ép thời gian ('trước 23:59 hôm nay') và có link. Không có số tài khoản nên R6 không nổ."
+    },
+    {
+      "id": "BT-06",
+      "nguon": "zalo",
+      "nguoiGui": "0912345678",
+      "noiDung": "Mẹ ơi con về muộn, mẹ ăn cơm trước nhé. Con yêu mẹ.",
+      "toiDa": "CHUA_THAY",
+      "viSao": "Tin nhắn gia đình. Không có gì để bắt."
+    },
+    {
+      "id": "BT-07",
+      "nguon": "zalo",
+      "nguoiGui": "0912345678",
+      "noiDung": "Mẹ giữ bí mật hộ con nhé, con định làm bất ngờ sinh nhật cho bố.",
+      "toiDa": "NGHI_NGO",
+      "viSao": "BÍ MẬT THẬT, KHÔNG PHẢI LỪA ĐẢO. Đây là ca R7 phải ở NGHI_NGO chứ không CAO — xem khối ghi chú R7 trong tang-0.js."
+    },
+    {
+      "id": "BT-08",
+      "nguon": "sms",
+      "nguoiGui": "0987654321",
+      "noiDung": "Anh ơi chuyển giúp em 500k nhé, em gửi lại chiều nay.",
+      "toiDa": "CHUA_THAY",
+      "viSao": "Vay tiền giữa người quen. Không có số tài khoản có ngữ cảnh, không ép thời gian bằng cụm chuẩn."
+    },
+    {
+      "id": "BT-09",
+      "nguon": "sms",
+      "nguoiGui": "VNPT",
+      "noiDung": "Quy khach da su dung 80% dung luong goi cuoc. Nap them tai https://vnpt.com.vn de tiep tuc su dung.",
+      "toiDa": "NGHI_NGO",
+      "viSao": "Thông báo nhà mạng thật, có link."
+    },
+    {
+      "id": "BT-10",
+      "nguon": "thong_bao",
+      "nguoiGui": "Zalo",
+      "noiDung": "Hội người cao tuổi phường: 8h sáng thứ Bảy họp tại nhà văn hoá. Đề nghị các bác đến đúng giờ.",
+      "toiDa": "CHUA_THAY",
+      "viSao": "Thông báo cộng đồng. Có chữ 'đúng giờ' nhưng không có cụm ép thời gian trong bộ luật."
+    },
+    {
+      "id": "BT-11",
+      "nguon": "sms",
+      "nguoiGui": "0909090909",
+      "noiDung": "Bác ơi cháu là Hương hàng xóm, cháu gửi bác link bài thuốc nam hôm trước bác hỏi: https://suckhoedoisong.vn/bai-thuoc",
+      "toiDa": "NGHI_NGO",
+      "viSao": "Người quen gửi link. R10 sẽ nổ NGHI_NGO nếu số chưa có trong danh bạ — đó là chủ đích, và NGHI_NGO là mức đúng."
+    },
+    {
+      "id": "BT-12",
+      "nguon": "sms",
+      "nguoiGui": "MobiFone",
+      "noiDung": "Ma xac thuc cua quy khach: 771203. Ma co hieu luc trong 5 phut.",
+      "toiDa": "CHUA_THAY",
+      "viSao": "OTP thật, có cả 'mã xác thực' lẫn ép thời gian '5 phút'. Không có vế YÊU CẦU nên R8 không được nổ."
+    },
+    {
+      "id": "BT-13",
+      "nguon": "sms",
+      "nguoiGui": "0911223344",
+      "noiDung": "Chuyển cho anh 3 triệu vào số tài khoản 19001234567 nhé em, anh gửi lại cuối tháng.",
+      "toiDa": "NGHI_NGO",
+      "viSao": "CA KHÓ NHẤT CỦA TẬP NÀY: có số tài khoản CÓ ngữ cảnh và có số tiền. Thiếu đúng một vế ép thời gian nên R6 không nổ — ĐỪNG nới R6 thành hai vế. Trần nâng lên NGHI_NGO ngày 5/9/2026 cùng luật R21: người gửi là một SỐ CHƯA LƯU đang đòi chuyển 3 triệu, và đó đúng là hình dạng của trò giả danh người quen mượn tiền. NGHI_NGO đưa bác tới màn \"gọi lại bằng số đã lưu để kiểm\" — lời khuyên đúng cho cả tin thật lẫn tin giả. CỔNG CỨNG KHÔNG ĐỔI: mục này vẫn KHÔNG được ra CAO."
+    },
+    {
+      "id": "BT-14",
+      "nguon": "messenger",
+      "nguoiGui": "0933445566",
+      "noiDung": "Bố ơi con gửi ảnh cháu nội đây, bố xem đi. Cuối tuần con đưa cháu về chơi.",
+      "toiDa": "CHUA_THAY",
+      "viSao": "Tin nhắn gia đình có ảnh."
+    },
+    {
+      "id": "BT-15",
+      "nguon": "sms",
+      "nguoiGui": "BHXHVN",
+      "noiDung": "Bao hiem xa hoi Viet Nam: ho so huu tri cua ong/ba da duoc duyet. Tra cuu tai https://baohiemxahoi.gov.vn",
+      "toiDa": "NGHI_NGO",
+      "viSao": "BHXH THẬT. Có từ khoá mạo danh ('bảo hiểm xã hội') nhưng tên miền NẰM TRONG allowlist nên R1 không nổ. Đây là ca chứng minh allowlist làm đúng việc."
+    },
+    {
+      "id": "BT-16",
+      "nguon": "sms",
+      "nguoiGui": "CSGT",
+      "noiDung": "Tra cuu phat nguoi tai trang chinh thuc https://csgt.vn. Cuc CSGT khong yeu cau chuyen tien qua dien thoai.",
+      "toiDa": "NGHI_NGO",
+      "viSao": "CSGT THẬT. Cùng lý do BT-15 — csgt.vn nằm trong allowlist."
+    },
+    {
+      "id": "BT-17",
+      "nguon": "sms",
+      "nguoiGui": "DichVuCong",
+      "noiDung": "Ho so dich vu cong cua ban da duoc tiep nhan. Theo doi tai https://dichvucong.gov.vn/tra-cuu",
+      "toiDa": "NGHI_NGO",
+      "viSao": "Dịch vụ công THẬT, tên miền gov.vn."
+    },
+    {
+      "id": "BT-18",
+      "nguon": "zalo",
+      "nguoiGui": "0966778899",
+      "noiDung": "Bác cài giúp cháu ứng dụng Zalo trên CH Play nhé, cháu gọi video cho bác.",
+      "toiDa": "CHUA_THAY",
+      "viSao": "Mời cài app THẬT nhưng KHÔNG có link — R2 đòi phải có link ngoài cửa hàng. Cũng là ca §12 nhắc: 'ch play' KHÔNG được làm cụm hạ mức."
+    },
+    {
+      "id": "BT-19",
+      "nguon": "sms",
+      "nguoiGui": "TIKI",
+      "noiDung": "Don hang #TK98765432 da giao thanh cong luc 16:40. Cam on quy khach.",
+      "toiDa": "CHUA_THAY",
+      "viSao": "Thông báo giao hàng, có dãy số dài trong mã đơn."
+    },
+    {
+      "id": "BT-20",
+      "nguon": "sms",
+      "nguoiGui": "0977001122",
+      "noiDung": "Bác ơi mai 7h sáng cháu qua đón bác đi khám nhé, bác nhớ nhịn ăn sáng.",
+      "toiDa": "CHUA_THAY",
+      "viSao": "Nhắc lịch khám."
+    },
+    {
+      "id": "BT-21",
+      "nguon": "sms",
+      "nguoiGui": "Agribank",
+      "noiDung": "Agribank canh bao: khong cung cap ma OTP, mat khau cho bat ky ai. Moi thac mac goi 1900 558 818.",
+      "toiDa": "CHUA_THAY",
+      "viSao": "CẢNH BÁO CHỐNG LỪA ĐẢO của chính ngân hàng. Chứa 'mã OTP' và 'mật khẩu' và 'cung cấp' — nếu R8 chỉ đòi hai vế gần nhau thì nó nổ oan vào đúng tin dạy người ta cảnh giác."
+    },
+    {
+      "id": "BT-22",
+      "nguon": "thong_bao",
+      "nguoiGui": "Khoan Đã",
+      "noiDung": "Tuần này không có gì đáng ngại. Đã quét 42 tin nhắn.",
+      "toiDa": "CHUA_THAY",
+      "viSao": "Thông báo của chính Khoan Đã. Không được tự phân tích thông báo của mình — lọc ở tầng Android."
+    },
+    {
+      "id": "BT-23",
+      "nguon": "sms",
+      "nguoiGui": "0912121212",
+      "noiDung": "Chào bác, cháu bên tổng đài chăm sóc khách hàng của công ty bảo hiểm. Cháu gọi lại cho bác lúc nào tiện ạ?",
+      "toiDa": "NGHI_NGO",
+      "viSao": "Nhân viên THẬT gọi từ máy riêng. R9 nổ NGHI_NGO là ĐÚNG và đủ — nâng lên CAO là báo oan."
+    },
+    {
+      "id": "BT-24",
+      "nguon": "sms",
+      "nguoiGui": "0988112233",
+      "noiDung": "Em gui anh bao gia nhe: 12.500.000d cho ca goi, anh xem roi phan hoi giup em.",
+      "toiDa": "CHUA_THAY",
+      "viSao": "Báo giá công việc: có số tiền, không có tài khoản, không ép thời gian."
+    },
+    {
+      "id": "BT-25",
+      "nguon": "zalo",
+      "nguoiGui": "0900998877",
+      "noiDung": "Bác xem ảnh chụp đơn thuốc này giúp cháu với ạ, cháu chụp hơi mờ.",
+      "toiDa": "CHUA_THAY",
+      "viSao": "Nhờ xem ảnh."
+    },
+    {
+      "id": "BT-26",
+      "nguon": "sms",
+      "nguoiGui": "VETC",
+      "noiDung": "Tai khoan VETC cua quy khach con 45.000d, sap het. Nap them tai https://vetc.com.vn de tranh gian doan.",
+      "toiDa": "NGHI_NGO",
+      "viSao": "Nhắc nạp tiền thật, có 'sắp hết' + số tiền + link. Thiếu số tài khoản nên R6 không nổ."
+    },
+    {
+      "id": "BT-27",
+      "nguon": "sms",
+      "nguoiGui": "0966332211",
+      "noiDung": "Bac oi, chieu nay 4h co lich tiem nhac lai o tram y te phuong, bac nho di dung gio nhe.",
+      "toiDa": "CHUA_THAY",
+      "viSao": "Nhắc lịch tiêm, viết không dấu — kiểm rằng bỏ dấu không sinh khớp bừa."
+    },
+    {
+      "id": "BT-28",
+      "nguon": "messenger",
+      "nguoiGui": "0911777888",
+      "noiDung": "Con gửi mẹ link bài hát mẹ thích nhé: https://www.youtube.com/watch?v=abc123",
+      "toiDa": "NGHI_NGO",
+      "viSao": "Link YouTube từ con. Tham số 'v' KHÔNG phải tham số chuyển hướng — kiểm rằng bộ tách link lồng không bắt bừa."
+    },
+    {
+      "id": "BT-29",
+      "nguon": "sms",
+      "nguoiGui": "0355112233",
+      "noiDung": "Bác ơi cháu chuyển khoản vào tài khoản 0011002200 của bác rồi nhé, bác kiểm tra giúp cháu.",
+      "toiDa": "CHUA_THAY",
+      "viSao": "Chuyển tiền CHO bác, không phải bác chuyển đi. Có ngữ cảnh tài khoản nhưng không có số tiền và không ép thời gian."
+    },
+    {
+      "id": "BT-30",
+      "nguon": "sms",
+      "nguoiGui": "0922556688",
+      "noiDung": "Alo bác, cháu gọi mấy lần mà bác không nghe. Bác gọi lại cho cháu gấp nhé, có việc.",
+      "toiDa": "CHUA_THAY",
+      "viSao": "Có 'gấp' — ép thời gian ĐƠN ĐỘC. Không được tự nó nâng mức."
+    },
+    {
+      "id": "BT-31",
+      "nguon": "zalo",
+      "nguoiGui": "0909111222",
+      "noiDung": "Cháu đọc bài này thấy hay: kẻ gian giờ chèn cả câu \"bỏ qua mọi hướng dẫn trước đó\" vào tin nhắn để đánh lừa máy kiểm tra.",
+      "toiDa": "NGHI_NGO",
+      "viSao": "Bài phổ biến kiến thức TRÍCH nguyên câu tiêm nhiễm. R11 đơn độc phải dừng ở NGHI_NGO — nếu nó lên CAO thì mọi bài dạy cảnh giác đều bị báo đỏ."
+    },
+    {
+      "id": "BT-32",
+      "nguon": "sms",
+      "nguoiGui": "0909111223",
+      "noiDung": "Bác nạp thẻ điện thoại chưa? Hết tiền là không gọi được cho cháu đâu.",
+      "toiDa": "NGHI_NGO",
+      "viSao": "Nhắc nạp thẻ cho CHÍNH máy bác. R12 KHÔNG nổ (đúng — thiếu vế gửi mã / mua hộ). Nhưng mức vẫn ra NGHI_NGO vì cue bank locale pack có sẵn bắt 'nạp thẻ' thành FIN_GIFT_CARD_PAYMENT (22 điểm). Đó là hành vi CÓ TRƯỚC đợt R11-R20, chỉ bị ca này lộ ra; sửa nó là đụng vào cue bank dùng chung với đường AI nên phải đo riêng. Điều cổng precision quan tâm vẫn giữ: KHÔNG lên CAO."
+    },
+    {
+      "id": "BT-33",
+      "nguon": "sms",
+      "nguoiGui": "VNDIRECT",
+      "noiDung": "Ban tin thi truong: VN-Index tang 8 diem. Lai suat huy dong ky han 12 thang tai cac ngan hang o muc 5,2%.",
+      "toiDa": "CHUA_THAY",
+      "viSao": "Bản tin thị trường thật, nhắc 'lãi suất'. Không có vế nạp tiền nên R13 không nổ."
+    },
+    {
+      "id": "BT-34",
+      "nguon": "zalo",
+      "nguoiGui": "0909111225",
+      "noiDung": "Cửa hàng em đang tuyển cộng tác viên bán hàng, hoa hồng cao, làm tại nhà. Chị quan tâm thì qua cửa hàng gặp trực tiếp nhé.",
+      "toiDa": "NGHI_NGO",
+      "viSao": "Tin tuyển cộng tác viên THẬT, không đòi nạp tiền, mời gặp trực tiếp. R14 phải dừng ở NGHI_NGO."
+    },
+    {
+      "id": "BT-35",
+      "nguon": "messenger",
+      "nguoiGui": "0909111226",
+      "noiDung": "Mình quen qua mạng nhưng nói chuyện hợp quá. Cuối tuần này rảnh mình cà phê nhé, mình ở Cầu Giấy.",
+      "toiDa": "NGHI_NGO",
+      "viSao": "Quen qua mạng THẬT, hẹn gặp ngoài đời, không hỏi tiền. R15 chỉ lên CAO khi có yêu cầu tiền."
+    },
+    {
+      "id": "BT-36",
+      "nguon": "zalo",
+      "nguoiGui": "0909111227",
+      "noiDung": "Mẹ bật chia sẻ màn hình lên đi, con chỉ mẹ cách đổi cỡ chữ cho dễ đọc.",
+      "toiDa": "NGHI_NGO",
+      "viSao": "Con cháu chỉ bố mẹ dùng máy. Có cụm 'chia sẻ màn hình' nhưng KHÔNG gọi đích danh app điều khiển từ xa, nên R16 dừng ở NGHI_NGO."
+    },
+    {
+      "id": "BT-37",
+      "nguon": "sms",
+      "nguoiGui": "0909111228",
+      "noiDung": "Mẹ ơi đây là số mới của con nhé, con vừa đổi sim. Mẹ lưu lại giúp con.",
+      "toiDa": "NGHI_NGO",
+      "viSao": "Con THẬT đổi số. Không có số tài khoản, không có số tiền nên R17 dừng ở NGHI_NGO. Nới ra là báo đỏ mọi lần con cái đổi số."
+    },
+    {
+      "id": "BT-38",
+      "nguon": "messenger",
+      "nguoiGui": "0909111229",
+      "noiDung": "Anh nói cho rõ, nếu bên đó không trả lại hàng thì tôi sẽ kiện ra toà, không nói nhiều nữa.",
+      "toiDa": "NGHI_NGO",
+      "viSao": "Tranh chấp mua bán, có lời doạ kiện nhưng không đòi tiền chuyển vào tài khoản nào. R18 đơn độc dừng ở NGHI_NGO."
+    },
+    {
+      "id": "BT-39",
+      "nguon": "sms",
+      "nguoiGui": "CONGAN",
+      "noiDung": "Canh bao: khong tin bat ky ai hua lay lai tien da mat. Moi de nghi thu phi deu la lua dao.",
+      "toiDa": "CHUA_THAY",
+      "viSao": "CẢNH BÁO CỦA CHÍNH CƠ QUAN về đúng chiêu R19 bắt. Nó chứa 'lấy lại tiền đã mất' — nếu R19 chỉ đòi một vế thì nó nổ đỏ vào thứ đang dạy người ta cảnh giác."
+    },
+    {
+      "id": "BT-40",
+      "nguon": "thong_bao",
+      "nguoiGui": "0909111231",
+      "noiDung": "Quán để mã QR thanh toán ở quầy nhé bác, bác quét mã rồi chuyển là xong.",
+      "toiDa": "NGHI_NGO",
+      "viSao": "Quét mã QR ở quán là chuyện hằng ngày. R20 chỉ lên CAO khi kèm từ khoá mạo danh cơ quan."
+    },
+    {
+      "id": "BT-41",
+      "nguon": "sms",
+      "nguoiGui": "Techcombank",
+      "noiDung": "Techcombank uu dai lai suat tiet kiem ky han 6 thang. Chi tiet lien he chi nhanh gan nhat.",
+      "toiDa": "CHUA_THAY",
+      "viSao": "Quảng cáo lãi suất tiết kiệm thật từ brandname, không cam kết lợi nhuận, không đòi nạp tiền."
+    },
+    {
+      "id": "BT-42",
+      "nguon": "zalo",
+      "nguoiGui": "0909111233",
+      "noiDung": "Bác vào Cài đặt bật trợ năng cho ứng dụng đọc màn hình, mắt bác kém thì nó đọc chữ to lên cho.",
+      "toiDa": "NGHI_NGO",
+      "viSao": "Hướng dẫn dùng tính năng trợ năng cho người mắt kém. Có cụm 'bật trợ năng' nên R16 nổ NGHI_NGO — mức đó chấp nhận được, nhưng KHÔNG được lên CAO."
+    },
+    {
+      "id": "BT-43",
+      "nguon": "sms",
+      "nguoiGui": "BHXHVN",
+      "noiDung": "Bao hiem xa hoi: ho so cua ong ba can bo sung truoc 30/9, neu khong se tam dung chi tra tro cap.",
+      "toiDa": "NGHI_NGO",
+      "viSao": "Thông báo BHXH thật, có lời cảnh báo cắt trợ cấp. Không đòi tiền nên R18 dừng ở NGHI_NGO."
+    },
+    {
+      "id": "BT-44",
+      "nguon": "sms",
+      "nguoiGui": "0909111235",
+      "noiDung": "Chị ơi tháng này em bán được 12 đơn, hoa hồng em nhận 3.600.000đ chị nhé.",
+      "toiDa": "CHUA_THAY",
+      "viSao": "Nhân viên bán hàng THẬT báo hoa hồng đã nhận. Có 'hoa hồng' và số tiền nhưng không mời chào, không đòi nạp tiền."
+    }
+  ]
+}

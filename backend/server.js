@@ -946,8 +946,14 @@ app.post('/api/canh-bao-nguoi-than', (req, res) => {
  * §11 — chưa đo thì hiện "mục tiêu — chưa đo", không điền số mục tiêu vào cho đẹp.
  */
 app.get('/transparency', (req, res) => {
+  /*
+   * `?lang=en` — trang này là artifact chứng minh sự nghiêm túc của dự án, mà
+   * người đọc nó (ban giám khảo, người rà soát) hầu hết đọc tiếng Anh. Mặc định
+   * vẫn tiếng Việt vì người dùng thật của app là người Việt.
+   */
+  const ngonNgu = String(req.query.lang || '').toLowerCase() === 'en' ? 'en' : 'vi';
   res.setHeader('content-type', 'text/html; charset=utf-8');
-  res.send(dungTrang());
+  res.send(dungTrang(undefined, ngonNgu));
 });
 app.get('/api/safety-card', (req, res) => res.json(dungSafetyCard()));
 

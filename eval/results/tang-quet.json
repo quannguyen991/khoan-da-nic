@@ -1,0 +1,40 @@
+{
+  "metadata": {
+    "commitSha": "6dddd52",
+    "boMau": "test/fixtures/tin-nhan",
+    "chayLuc": "2026-09-06T08:01:43.205Z",
+    "khongGoiAi": true,
+    "khongGoiMang": true
+  },
+  "chiSo": {
+    "batDuoc": 1,
+    "precisionCao": 1,
+    "baoDoNhamTrenTinLanh": 0,
+    "vuotTranTinLanh": 0,
+    "soMau": {
+      "luaDao": 42,
+      "lanh": 44,
+      "tong": 86
+    },
+    "sot": [],
+    "baoOan": []
+  },
+  "boLon": {
+    "batDuoc": 0.25076452599388377,
+    "precisionCao": 0.8409090909090909,
+    "baoDoNhamTrenTinLanh": 0.05185185185185185,
+    "vuotTranTinLanh": 0.11851851851851852,
+    "soMau": {
+      "nguyHiem": 327,
+      "lanh": 270,
+      "tong": 597
+    }
+  },
+  "canhBao": [
+    "khong_co_mau_that",
+    "bo_mau_nho",
+    "luat_chinh_tren_chinh_bo_mau_nay",
+    "khong_so_sanh_voi_khoanbench",
+    "bo_lon_khong_co_nguoi_gui"
+  ]
+}
