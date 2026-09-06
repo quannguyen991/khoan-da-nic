@@ -20,7 +20,36 @@ const { SIGNAL_IDS } = require('./analysis/signal-registry');
 const { CRITICAL_OVERRIDES } = require('./analysis/critical-overrides');
 const { SYNERGIES, SCORE_CAP, THRESHOLD_SUSPICIOUS, THRESHOLD_HIGH } = require('./analysis/decision-engine');
 
-const DUONG_KET_QUA = path.join(__dirname, '..', '..', 'eval', 'results', 'latest.json');
+/**
+ * ⚠️ TÌM `eval/results/` THEO NHIỀU ỨNG VIÊN, ĐỪNG ĐOÁN MỘT ĐƯỜNG.
+ *
+ * Một đường dẫn tương đối ở đây phải đúng trong HAI ngữ cảnh khác nhau, và
+ * không đường nào đúng được cả hai:
+ *   · chạy thẳng từ nguồn → `__dirname` là `backend/src`
+ *   · chạy bản đóng gói   → `__dirname` là `dist` (npm start dùng dist/server.cjs)
+ *
+ * ĐO ĐƯỢC 6/9/2026 trên cây web: nó khai `'..', 'eval'`, tức
+ * `backend/eval/results/` — một thư mục KHÔNG TỒN TẠI. Chạy backend trực tiếp
+ * thì `dungSafetyCard()` trả `daDo: false` và trang minh bạch hiện "chưa đo"
+ * cho toàn bộ, dù eval đã chạy xong. Nó vẫn ra số trên máy chủ, nhưng là do MAY:
+ * từ `dist` thì `'..', 'eval'` tình cờ trúng `<gốc>/eval`.
+ *
+ * Một đường dẫn chỉ đúng sau khi đóng gói là một đường dẫn đang chờ hỏng.
+ *
+ * Không ứng viên nào có thật thì trang tự chuyển hết về "mục tiêu — chưa đo".
+ * Đó vẫn là hành vi đúng của §11, không phải lỗi.
+ */
+function timEval(ten) {
+  const ungVien = [
+    path.join(__dirname, '..', '..', 'eval', 'results', ten),   // backend/src → gốc
+    path.join(__dirname, '..', 'eval', 'results', ten),         // dist → gốc
+    path.join(process.cwd(), 'eval', 'results', ten),           // chạy từ gốc
+  ];
+  return ungVien.find((d) => { try { return fs.existsSync(d); } catch { return false; } })
+    || ungVien[0];
+}
+
+const DUONG_KET_QUA = timEval('latest.json');
 
 /**
  * Kết quả của TẦNG QUÉT TIN NHẮN ĐẾN — `eval/do-tang-quet.js` ghi ra.
@@ -30,7 +59,7 @@ const DUONG_KET_QUA = path.join(__dirname, '..', '..', 'eval', 'results', 'lates
  * luồng "tự quét tin đến" không có con số nào được công bố. Im lặng về một nửa
  * sản phẩm cũng là một dạng nói không đủ sự thật.
  */
-const DUONG_TANG_QUET = path.join(__dirname, '..', '..', 'eval', 'results', 'tang-quet.json');
+const DUONG_TANG_QUET = timEval('tang-quet.json');
 
 function docTangQuet(duong = DUONG_TANG_QUET) {
   try {

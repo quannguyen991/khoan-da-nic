@@ -55,7 +55,7 @@ const CHU = {
       + 'khác nhau, và khoảng cách giữa chúng mới là điều đáng đọc.',
     thBoMau: 'Bộ mẫu',
     tangQuetNho: 'Bộ mẫu dùng để chỉnh luật',
-    tangQuetLon: 'Bộ 571 mẫu, không có người gửi',
+    tangQuetLon: 'Bộ mẫu lớn hơn, không có trường người gửi',
     mBatDuoc: 'Bắt được ca nguy hiểm',
     mPrecision: 'Trong số bị chấm “Nguy hiểm cao”, bao nhiêu phần đúng là nguy hiểm',
     mBaoDo: 'Tin lành bị chấm “Nguy hiểm cao”',
@@ -64,10 +64,10 @@ const CHU = {
     tqC1: '<strong>100% ở bảng bên trái là đo lại chính bài đã học thuộc.</strong> '
       + 'Các luật được chỉnh trên đúng 86 mẫu ấy. Đừng trích con số đó ra ngoài.',
     tqC2: '<strong>Bảng bên phải là một cái SÀN, không phải hiệu năng thật.</strong> '
-      + 'Bộ 571 mẫu không có trường người gửi, nên ba luật mạnh nhất — số di động xưng danh '
+      + 'Bộ mẫu lớn không có trường người gửi, nên ba luật mạnh nhất — số di động xưng danh '
       + 'tổ chức, link từ người lạ, người lạ đòi tiền — không bao giờ nổ được ở đó. '
       + 'Tin nhắn ngoài đời luôn có người gửi.',
-    tqC3: '<strong>Bộ 571 mẫu cũng không phải bộ giữ riêng sạch.</strong> Mười luật gần '
+    tqC3: '<strong>Bộ mẫu lớn cũng không phải bộ giữ riêng sạch.</strong> Mười luật gần '
       + 'đây được dựng sau khi xem họ nào trượt trên chính nó. Không mẫu nào bị khớp riêng, '
       + 'nhưng hướng thiết kế thì có nhìn vào đây.',
 
@@ -121,7 +121,7 @@ const CHU = {
       + 'is the part worth reading.',
     thBoMau: 'Sample set',
     tangQuetNho: 'The set the rules were tuned on',
-    tangQuetLon: '571 samples, no sender field',
+    tangQuetLon: 'The larger set, no sender field',
     mBatDuoc: 'Dangerous messages caught',
     mPrecision: 'Of those labelled “High risk”, how many really were',
     mBaoDo: 'Safe messages labelled “High risk”',
@@ -130,10 +130,10 @@ const CHU = {
     tqC1: '<strong>The 100% on the left is the model re-sitting the exam it studied.</strong> '
       + 'The rules were tuned on those exact 86 samples. Do not quote that number on its own.',
     tqC2: '<strong>The right-hand table is a FLOOR, not real-world performance.</strong> '
-      + 'The 571-sample set has no sender field, so the three strongest rules — a mobile number '
+      + 'The larger set has no sender field, so the three strongest rules — a mobile number '
       + 'claiming to be an institution, a link from an unknown sender, a stranger asking for money '
       + '— can never fire there. Real messages always have a sender.',
-    tqC3: '<strong>The 571-sample set is not a clean hold-out either.</strong> Ten of the recent '
+    tqC3: '<strong>The larger set is not a clean hold-out either.</strong> Ten of the recent '
       + 'rules were written after looking at which scam families failed on it. No individual sample '
       + 'was fitted, but the design direction did look at this data.',
 
