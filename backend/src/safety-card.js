@@ -22,6 +22,25 @@ const { SYNERGIES, SCORE_CAP, THRESHOLD_SUSPICIOUS, THRESHOLD_HIGH } = require('
 
 const DUONG_KET_QUA = path.join(__dirname, '..', '..', 'eval', 'results', 'latest.json');
 
+/**
+ * Kết quả của TẦNG QUÉT TIN NHẮN ĐẾN — `eval/do-tang-quet.js` ghi ra.
+ *
+ * Đây là nửa thứ hai của sản phẩm, và trước 6/9/2026 trang này không nhắc tới
+ * nó một chữ nào: `khoanbench` chỉ đo đường "bác dán nội dung", còn 21 luật của
+ * luồng "tự quét tin đến" không có con số nào được công bố. Im lặng về một nửa
+ * sản phẩm cũng là một dạng nói không đủ sự thật.
+ */
+const DUONG_TANG_QUET = path.join(__dirname, '..', '..', 'eval', 'results', 'tang-quet.json');
+
+function docTangQuet(duong = DUONG_TANG_QUET) {
+  try {
+    if (!fs.existsSync(duong)) return null;
+    const b = JSON.parse(fs.readFileSync(duong, 'utf8'));
+    if (!b?.metadata?.commitSha || !b?.chiSo) return null;
+    return b;
+  } catch { return null; }
+}
+
 /** MỤC TIÊU — lấy từ §2B.6 và §6.14. Đây KHÔNG phải số đã đo. */
 const MUC_TIEU = Object.freeze([
   { ma: 'dangerous_recall_vi', nguong: 0.95, huong: 'min', nguon: '§2B.6' },
@@ -75,8 +94,9 @@ const lay = (bao, ma) => {
 /**
  * @returns {{daDo:boolean, chiSo:Array, nguonDo:object|null, kienTruc:object, canhBao:string[]}}
  */
-function dungSafetyCard(duong = DUONG_KET_QUA) {
+function dungSafetyCard(duong = DUONG_KET_QUA, duongTangQuet = DUONG_TANG_QUET) {
   const bao = docKetQua(duong);
+  const tangQuet = docTangQuet(duongTangQuet);
   const kienTruc = suThatKienTruc();
   const canhBao = [];
 
@@ -114,6 +134,7 @@ function dungSafetyCard(duong = DUONG_KET_QUA) {
     chiSo,
     kienTruc,
     canhBao,
+    tangQuet,
     nguonDo: bao
       ? {
         commitSha: bao.metadata.commitSha,
