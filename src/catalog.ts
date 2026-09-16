@@ -902,6 +902,185 @@ export const MA_LOI: Record<string, Cap> = {
   CHUA_DANG_KY_PASSKEY: c('Tài khoản chưa đăng ký passkey', 'This account has no passkey yet'),
 };
 
+// ═══════════════ Quy tắc gia đình — `FAMILY_RULE` (§4.1) ═══════════════
+//
+// Bốn câu mẫu. Người dùng chọn một rồi SỬA LỜI cho giống nhà mình — câu đã sửa
+// mới là thứ được lưu. Mẫu tồn tại vì một màn hình trắng là màn hình không ai
+// điền, không phải vì bốn câu này đúng cho mọi nhà.
+//
+// ⚠️ ĐÂY LÀ CHỮ, KHÔNG PHẢI LUẬT. `src/lib/vong-tron-gia-dinh.ts` giữ mã và
+// logic chọn; tệp này chỉ giữ câu hiển thị. Quy tắc gia đình KHÔNG BAO GIỜ đổi
+// mức rủi ro (§4.2).
+//
+// ⚠️ Câu viết ở giọng CỦA GIA ĐÌNH ("nhà mình…"), không phải giọng ra lệnh của
+// hệ thống ("bác phải…"). Cả tính năng này sống hay chết ở chỗ đó: lúc bị thúc
+// ép, câu có sức nặng là câu người nhà đã cùng nhau đặt ra, không phải câu máy
+// đọc lên.
+
+export const QUY_TAC_MAU: Record<string, Cap> = {
+  KHONG_CHUYEN_KHI_DANG_NGHE_MAY: c(
+    'Nhà mình không chuyển tiền khi đang nghe điện thoại.',
+    'Our family never transfers money while still on a phone call.',
+  ),
+  KHONG_DOC_MA_OTP: c(
+    'Nhà mình không đọc mã trong tin nhắn cho bất kỳ ai.',
+    'Our family never reads out a code from a text message to anyone.',
+  ),
+  GOI_LAI_TRUOC_KHI_CHUYEN: c(
+    'Trước khi chuyển tiền, nhà mình gọi lại cho nhau đã.',
+    'Before sending money, we call each other back first.',
+  ),
+  KHONG_CAI_UNG_DUNG_LA: c(
+    'Nhà mình không cài ứng dụng do người lạ chỉ.',
+    'Our family never installs an app a stranger tells us to install.',
+  ),
+  TUY_CHINH: c(
+    'Tự viết một câu cho nhà mình',
+    'Write a rule in your own words',
+  ),
+};
+
+/** Khung chữ quanh khối quy tắc trên màn cảnh báo. */
+export const QUY_TAC_KHUNG: Record<string, Cap> = {
+  TIEU_DE: c('Quy tắc nhà mình', 'Your family rule'),
+  DAT_NGAY: c('Bác đặt ngày {ngay}', 'You set this on {ngay}'),
+  DAT_NGAY_CUNG: c('Bác đặt ngày {ngay} cùng {ten}', 'You set this on {ngay} with {ten}'),
+  CHUA_DAT: c('Nhà mình chưa đặt quy tắc nào', 'Your family has not set a rule yet'),
+  DAT_NGAY_BAY_GIO: c('Đặt một quy tắc', 'Set a family rule'),
+  DA_LUU: c(
+    'Lần tới gặp chuyện, Khoan Đã sẽ nhắc lại đúng câu này.',
+    'Next time something happens, Khoan Đã will show you this exact sentence.',
+  ),
+  QUA_NHIEU: c(
+    'Nhà mình đã có ba quy tắc. Xoá bớt một câu rồi thêm câu mới.',
+    'Your family already has three rules. Remove one before adding another.',
+  ),
+  CAU_RONG: c('Chưa có câu nào để lưu', 'There is no sentence to save yet'),
+  AI_CUNG_DAT: c('Ai cùng đặt quy tắc này?', 'Who set this rule with you?'),
+  BO_QUA: c('Bỏ qua', 'Skip'),
+};
+
+// ═══════════════ Hồ sơ vụ việc — tệp cầm tới ngân hàng và công an ═══════════════
+//
+// ⚠️ MỌI CÂU Ở ĐÂY SẼ ĐƯỢC NGƯỜI LẠ ĐỌC: nhân viên quầy, cán bộ tiếp dân, có
+// khi cả phóng viên. Nên không câu nào được hứa hẹn, không câu nào được nói
+// thay lời khai của bác, và không câu nào chứa chữ "an toàn" (§4.1).
+//
+// ⚠️ "chưa khai" LÀ MỘT GIÁ TRỊ, KHÔNG PHẢI Ô TRỐNG. Để trống thì người đọc tự
+// điền bằng suy đoán của họ. Ghi rõ "chưa khai" thì họ biết phải hỏi lại bác.
+
+export const HO_SO_KHUNG: Record<string, Cap> = {
+  TIEU_DE: c('HỒ SƠ VỤ VIỆC', 'INCIDENT FILE'),
+  TAO_LUC: c('Lập lúc {luc}', 'Created {luc}'),
+  KHONG_NOI_DUNG: c(
+    'Hồ sơ này KHÔNG chứa nội dung tin nhắn — chỉ có thời điểm, mức cảnh báo và loại dấu hiệu.',
+    'This file contains NO message content — only timestamps, warning levels, and signal types.',
+  ),
+
+  PHAN_MOC: c('1. CÁC LƯỢT KIỂM ĐÃ GHI', '1. RECORDED CHECKS'),
+  GHI_CHU_MOC: c(
+    'Mốc thời gian dưới đây là lúc bấm kiểm trong ứng dụng, không phải lúc vụ việc xảy ra.',
+    'The timestamps below are when the check was run in the app, not when the incident happened.',
+  ),
+  KHONG_CO_MOC: c('Chưa có lượt kiểm nào được ghi.', 'No checks have been recorded yet.'),
+
+  PHAN_KHAI: c('2. THÔNG TIN NGƯỜI DÙNG TỰ KHAI', '2. REPORTED BY THE USER'),
+  GHI_CHU_KHAI: c(
+    'Ứng dụng không biết những thông tin này và không tự điền. Chỗ nào chưa khai thì ghi rõ là chưa khai.',
+    'The app does not know these details and never fills them in. Anything not reported is marked as such.',
+  ),
+  SO_TIEN: c('Số tiền', 'Amount'),
+  NGAN_HANG: c('Ngân hàng', 'Bank'),
+  LUC_CHUYEN: c('Lúc chuyển', 'Time of transfer'),
+  MA_GIAO_DICH: c('Mã giao dịch', 'Transaction reference'),
+  CHUA_KHAI: c('chưa khai', 'not reported'),
+
+  PHAN_CHUA_KIEM: c('3. NHỮNG THỨ CHƯA KIỂM ĐƯỢC', '3. WHAT COULD NOT BE CHECKED'),
+  KHONG_CO_CHUA_KIEM: c(
+    'Không có mục nào được đánh dấu là chưa kiểm được.',
+    'Nothing was marked as unable to be checked.',
+  ),
+
+  GHI_CHU_CUOI: c(
+    'Khoan Đã là công cụ hỗ trợ quyết định, không thay thế công an và ngân hàng. Hồ sơ do chính người dùng xuất ra từ máy của mình.',
+    'Khoan Đã is a decision-support tool. It does not replace the police or your bank. This file was exported by the user from their own device.',
+  ),
+};
+
+// ═══════════════ Ba màn mới: hồ sơ · ra-đa · đồng hồ phản ứng ═══════════════
+
+/** Màn lập hồ sơ vụ việc. Chữ trên màn, khác với chữ trong tệp xuất ra. */
+export const MAN_HO_SO: Record<string, Cap> = {
+  TIEU_DE: c('Hồ sơ vụ việc', 'Incident file'),
+  MO_TA: c(
+    'Gom các lượt bác đã kiểm thành một tờ để cầm đi ngân hàng hoặc công an. Bác điền thêm những gì mình nhớ.',
+    'Collects your checks into one sheet to take to your bank or the police. Add anything you remember.',
+  ),
+  O_SO_TIEN: c('Số tiền đã chuyển (nếu có)', 'Amount transferred (if any)'),
+  O_NGAN_HANG: c('Ngân hàng', 'Bank'),
+  O_MA_GD: c('Mã giao dịch', 'Transaction reference'),
+  GHI_CHU_KHAI: c(
+    'Bỏ trống cũng được. Hồ sơ sẽ ghi rõ là bác chưa khai, chứ không tự điền.',
+    'You can leave these blank. The file will say they were not reported, rather than filling them in.',
+  ),
+  NUT_XEM: c('Xem hồ sơ', 'Preview the file'),
+  NUT_CHEP: c('Chép toàn bộ', 'Copy everything'),
+  DA_CHEP: c('Đã chép. Bác dán vào tin nhắn hoặc email.', 'Copied. Paste it into a message or email.'),
+  NUT_TAI: c('Tải về máy', 'Download'),
+};
+
+/** Màn ra-đa thủ đoạn. */
+export const MAN_RA_DA: Record<string, Cap> = {
+  TIEU_DE: c('Ra-đa nhà mình', 'Your household radar'),
+  MO_TA: c(
+    'Ba mươi ngày qua nhà mình gặp những thủ đoạn nào, đếm theo kiểu lừa — không phải theo người.',
+    'Which tactics your household has met in the last thirty days, counted by scam type — not by person.',
+  ),
+  KHONG_CO: c(
+    'Chưa có lượt kiểm nào trong ba mươi ngày qua.',
+    'No checks recorded in the last thirty days.',
+  ),
+  SO_LAN: c('lần', 'times'),
+  NUT_CHIA_SE: c('Chép bản chia sẻ', 'Copy a shareable summary'),
+  DA_CHEP: c('Đã chép bản chia sẻ.', 'Shareable summary copied.'),
+  GIAI_THICH_CHIA_SE: c(
+    'Bản chia sẻ chỉ có tên kiểu lừa và số lần, tính theo tuần. Không có nội dung tin nhắn, không có số điện thoại, không có tên ai.',
+    'The summary contains only scam-type names and counts, by week. No message content, no phone numbers, no names.',
+  ),
+  CHUA_CO_MAY_CHU: c(
+    'Chưa có máy chủ gom ra-đa giữa các nhà — phần đó chưa làm. Hiện bác tự chọn gửi bản này cho ai.',
+    'There is no server collecting radars across households yet — that part is not built. For now you choose who to send this to.',
+  ),
+  BI_CHAN: c(
+    'Bản chia sẻ có thứ không hợp lệ nên đã bị chặn, không chép gì cả.',
+    'The summary contained something invalid and was blocked — nothing was copied.',
+  ),
+  KHONG_CHEP_DUOC: c(
+    'Máy không cho chép tự động. Bác chọn chữ bên dưới rồi chép tay.',
+    'This device blocked automatic copying. Select the text below and copy it manually.',
+  ),
+};
+
+/**
+ * Đồng hồ phản ứng.
+ *
+ * ⚠️ CÂU CHỮ PHẢI NÓI ĐÚNG THỨ ĐO ĐƯỢC: tới lúc BẤM gọi. App không biết có ai
+ * nhấc máy hay không, và không được nói như thể nó biết (§11).
+ */
+export const MAN_DONG_HO: Record<string, Cap> = {
+  TIEU_DE: c('Nhà mình phản ứng nhanh thế nào', 'How fast your household reacts'),
+  TRUNG_VI: c('Thường là {giay} giây', 'Usually {giay} seconds'),
+  SO_LUOT: c('đo trên {so} lần', 'measured over {so} times'),
+  GIOI_HAN: c(
+    'Đo từ lúc cảnh báo hiện ra tới lúc bác bấm nút gọi. Máy không biết người thân có nghe máy hay không.',
+    'Measured from the warning appearing to the moment the call button is pressed. The app cannot know whether anyone answered.',
+  ),
+  CHUA_DO: c(
+    'Chưa đo lần nào. Con số sẽ xuất hiện sau lần đầu bác bấm gọi từ màn cảnh báo.',
+    'Not measured yet. A number appears after the first time a call is started from a warning screen.',
+  ),
+};
+
 // ═══════════════ Tra cứu ═══════════════
 
 /**

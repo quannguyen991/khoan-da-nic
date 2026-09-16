@@ -40,6 +40,10 @@ export const translations: Record<Lang, Record<string, string>> = {
     "Khoan Đã KHÔNG giữ mật khẩu. Đây chỉ là câu nhắc cho bác.": "Khoan Đã KHÔNG giữ mật khẩu. Đây chỉ là câu nhắc cho bác.",
     "Một câu chỉ nhà mình biết. Ai xưng là con cháu mà không nói được — đừng làm theo.": "Một câu chỉ nhà mình biết. Ai xưng là con cháu mà không nói được — đừng làm theo.",
     "Ghim": "Ghim",
+    "Câu nhà mình tự đặt, hiện lại đúng lúc có người thúc bác chuyển tiền": "Câu nhà mình tự đặt, hiện lại đúng lúc có người thúc bác chuyển tiền",
+    "Một tờ để cầm đi ngân hàng hoặc công an": "Một tờ để cầm đi ngân hàng hoặc công an",
+    "Ba mươi ngày qua nhà mình gặp thủ đoạn nào": "Ba mươi ngày qua nhà mình gặp thủ đoạn nào",
+    "Xong": "Xong",
     /* ═══ Màn giả lập "ngoài app" — thêm 20/8/2026 ═══
      * Toàn bộ màn này trước đây viết chữ Việt thẳng vào JSX, nên người chọn
      * English thấy một màn hình tiếng Việt. Kể cả nội dung tin nhắn lừa đảo
@@ -884,6 +888,10 @@ export const translations: Record<Lang, Record<string, string>> = {
     "Khoan Đã KHÔNG giữ mật khẩu. Đây chỉ là câu nhắc cho bác.": "Khoan Đã does NOT keep the password. This is only a hint for you.",
     "Một câu chỉ nhà mình biết. Ai xưng là con cháu mà không nói được — đừng làm theo.": "One phrase only your family knows. If a caller claims to be family and can't say it, don't do what they ask.",
     "Ghim": "Pinned",
+    "Câu nhà mình tự đặt, hiện lại đúng lúc có người thúc bác chuyển tiền": "A sentence your family wrote, shown back when someone is pushing you to send money",
+    "Một tờ để cầm đi ngân hàng hoặc công an": "One sheet to take to your bank or the police",
+    "Ba mươi ngày qua nhà mình gặp thủ đoạn nào": "Which tactics your household met in the last thirty days",
+    "Xong": "Done",
     /* ═══ Màn giả lập "ngoài app" — thêm 20/8/2026 ═══
      * Toàn bộ màn này trước đây viết chữ Việt thẳng vào JSX, nên người chọn
      * English thấy một màn hình tiếng Việt. Kể cả nội dung tin nhắn lừa đảo

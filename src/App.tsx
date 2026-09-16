@@ -11,6 +11,7 @@ import {
   LogOut,
   Bell,
   ShieldCheck,
+  Radar,
   ChevronLeft,
   ChevronRight,
   UserCircle,
@@ -51,7 +52,7 @@ import { translations, Lang, t as translate } from './i18n';
  * Backend trả ENUM và MÃ; chữ tiếng Việt / tiếng Anh nằm ở `catalog.ts`, và
  * CHỈ ở đó. Hệ quả cố ý: đổi ngôn ngữ KHÔNG THỂ làm đổi kết luận.
  */
-import { NHAN, MA_LY_DO, CHUA_KIEM, CHUA_LAY_TIN, NOI_CHAY_AI, tra, traNhieu, CHU_NATIVE , TRANG_THAI_MAY, NHAC_CUOC_GOI, MA_TAI_KHOAN, KHUNG_KICH_BAN, KET_KICH_BAN, MA_BUOC, KHUNG_PHUC_HOI, BUOC_PHUC_HOI, CANH_BAO_PHUC_HOI } from './catalog';
+import { NHAN, MA_LY_DO, CHUA_KIEM, CHUA_LAY_TIN, NOI_CHAY_AI, tra, traNhieu, CHU_NATIVE , TRANG_THAI_MAY, NHAC_CUOC_GOI, MA_TAI_KHOAN, KHUNG_KICH_BAN, KET_KICH_BAN, MA_BUOC, KHUNG_PHUC_HOI, BUOC_PHUC_HOI, CANH_BAO_PHUC_HOI, QUY_TAC_KHUNG, MAN_HO_SO, MAN_RA_DA } from './catalog';
 import { api } from './api-goc';
 import {
   dangKy as dangKyTaiKhoan, dangNhap as dangNhapTaiKhoan,
@@ -71,6 +72,10 @@ import {
 import { GuardianIntroView, GuardianAuthView, GuardianView } from './components/Guardian';
 import { AppMenuModal } from './components/AppMenuModal';
 import { MatKhauGiaDinh, docMatKhauGiaDinh } from './components/MatKhauGiaDinh';
+import { KhoiQuyTac, ManDatQuyTac } from './components/QuyTacGiaDinh';
+import { docVongTron, chonQuyTac, duocHienQuyTac } from './lib/vong-tron-gia-dinh';
+import { ManHoSoVuViec, ManRaDaThuDoan } from './components/HoSoVaRaDa';
+import { batDauDo, ketThucDo, ghiLuot } from './lib/do-thoi-gian-toi-nguoi-that';
 import { FloatingQuickAccess } from './components/FloatingQuickAccess';
 import { HoiNhanhView } from './components/HoiNhanh';
 import { CanhBaoToanManHinh } from './components/CanhBaoToanManHinh';
@@ -146,7 +151,7 @@ function KhungTaiTre({ t, children }: { t: any; children: React.ReactNode }) {
 }
 import { EMERGENCY_NUMBERS } from './data/so-khan-cap';
 
-export type ViewState = 'intro' | 'home' | 'voice' | 'phone' | 'link' | 'qr' | 'learn' | 'profile' | 'settings' | 'history' | 'family' | 'search' | 'login' | 'add_family' | 'warning' | 'guardian' | 'account' | 'privacy' | 'notifications' | 'device_data' | 'hoi_nhanh' | 'mat_khau_gia_dinh';
+export type ViewState = 'intro' | 'home' | 'voice' | 'phone' | 'link' | 'qr' | 'learn' | 'profile' | 'settings' | 'history' | 'family' | 'search' | 'login' | 'add_family' | 'warning' | 'guardian' | 'account' | 'privacy' | 'notifications' | 'device_data' | 'hoi_nhanh' | 'mat_khau_gia_dinh' | 'quy_tac_gia_dinh' | 'ho_so_vu_viec' | 'ra_da_thu_doan';
 
 /**
  * MỘT NGƯỜI THÂN TRONG VÒNG TRÒN GIA ĐÌNH.
@@ -226,7 +231,23 @@ export interface HistoryRecord {
   title: string;
   type: 'call' | 'sms' | 'link' | 'image' | 'qr';
   risk: 'CAO' | 'NGHI_NGO' | 'CHUA_THAY';
+  /**
+   * Chữ hiển thị trên màn Lịch sử ("12:55 16-09"). ĐỪNG PHÂN TÍCH CHUỖI NÀY —
+   * nó không có năm, và đổi theo locale của máy.
+   */
   date: string;
+  /**
+   * Mốc thời gian thật, để xếp và để lọc theo cửa sổ thời gian.
+   *
+   * ⚠️ THÊM 16/9/2026 SAU MỘT LỖI ĐO ĐƯỢC TRÊN BẢN CHẠY. Hồ sơ vụ việc và ra-đa
+   * thủ đoạn đọc `date` bằng `Date.parse`, và với chuỗi "12:55 16-09" thì
+   * `Date.parse` trả `NaN` — mọi bản ghi bị lọc sạch, ra-đa báo "chưa có lượt
+   * kiểm nào" trong khi máy có ba lượt. Hỏng im lặng, không lỗi nào hiện ra.
+   *
+   * Bản ghi cũ không có trường này; hai module trên có nhánh đọc chuỗi cũ để
+   * không bỏ rơi dữ liệu đã lưu.
+   */
+  luc?: number;
   saved?: boolean;
   data: KetQuaPhanTich;
 }
@@ -702,6 +723,7 @@ export default function App() {
             type: image ? 'image' : text.toLowerCase().includes('gọi') ? 'call' : text.toLowerCase().includes('link') || text.toLowerCase().includes('http') ? 'link' : 'sms',
             risk: finalResult.nhan,
             date: new Date().toLocaleDateString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' }),
+            luc: Date.now(),
             saved: false,
             data: finalResult
           };
@@ -1122,6 +1144,9 @@ export default function App() {
             {view === 'login' && <LoginView setView={setView} t={t} lang={lang} onDangNhapXong={setHoSo} userRole={userRole} setUserRole={setUserRole} />}
             {view === 'add_family' && <AddFamilyView setView={setView} t={t} setFamilyMembers={setFamilyMembers} />}
             {view === 'mat_khau_gia_dinh' && <MatKhauGiaDinh setView={setView} t={t} />}
+            {view === 'quy_tac_gia_dinh' && <ManDatQuyTac setView={setView} t={t} lang={lang} />}
+            {view === 'ho_so_vu_viec' && <ManHoSoVuViec setView={setView} t={t} lang={lang} lichSu={historyItems} />}
+            {view === 'ra_da_thu_doan' && <ManRaDaThuDoan setView={setView} t={t} lang={lang} lichSu={historyItems} />}
             {view === 'warning' && <WarningView setView={setView} t={t} lang={lang} result={analyzeResult} familyMembers={familyMembers} noiChayAi={noiChayAi} mayCoUngDungLa={mayCoUngDungLa} />}
             {view === 'guardian' && <GuardianView setView={setView} t={t} lang={lang} setUserRole={setUserRole} isDesktop={false} isLoggedIn={isLoggedIn} onAnalyze={handleAnalyze} familyMembers={familyMembers} onTriggerEmergency={triggerEmergencyAlert} />}
             {view === 'account' && <AccountView setView={setView} t={t} hoSo={hoSo} onDangXuat={dangXuat} onLuuTen={async (ten) => setHoSo(await suaHoSoTaiKhoan({ ten }))} />}
@@ -4382,6 +4407,69 @@ function SettingsView({
         <ChevronRight size={20} className="text-emerald-600 shrink-0" />
       </button>
 
+      {/*
+        QUY TẮC GIA ĐÌNH — đặt NGAY DƯỚI mật khẩu gia đình, vì cùng một họ:
+        cả hai là thứ nhà mình thống nhất lúc bình tĩnh để dùng lúc hoảng.
+
+        Khác nhau ở chỗ: mật khẩu trả lời câu 'người gọi có đúng là con mình
+        không'; quy tắc trả lời câu 'nhà mình đã hẹn nhau làm gì trong tình
+        huống này'. Quy tắc được đọc lại trên màn cảnh báo, kèm tên người đã
+        cùng đặt — xem `KhoiQuyTac`.
+      */}
+      <button
+        onClick={() => setView('quy_tac_gia_dinh')}
+        className="w-full max-w-[360px] bg-white rounded-3xl p-5 shadow-md border-2 border-indigo-200 mb-6 flex items-center gap-3 text-left active:scale-[0.98] transition-transform"
+      >
+        <div className="w-12 h-12 rounded-2xl bg-indigo-100 border border-indigo-300 flex items-center justify-center text-indigo-700 shrink-0">
+          <ShieldCheck size={24} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <h3 className="font-black text-[16px] text-[#311068] leading-snug">{tra(QUY_TAC_KHUNG, 'TIEU_DE', lang)}</h3>
+          <p className="text-[14px] text-slate-600 leading-snug mt-0.5">
+            {t('Câu nhà mình tự đặt, hiện lại đúng lúc có người thúc bác chuyển tiền')}
+          </p>
+        </div>
+        <ChevronRight size={20} className="text-indigo-600 shrink-0" />
+      </button>
+
+      {/*
+        HAI MÀN SAU SỰ CỐ — hồ sơ để cầm đi, và ra-đa để nhìn lại.
+
+        Đặt ở Cài đặt chứ không đặt ở trang chủ: đây là thứ dùng lúc bình tĩnh,
+        không phải lúc đang bị thúc. Trang chủ giữ cho đúng một việc — kiểm.
+      */}
+      <button
+        onClick={() => setView('ho_so_vu_viec')}
+        className="w-full max-w-[360px] bg-white rounded-3xl p-5 shadow-md border-2 border-slate-200 mb-6 flex items-center gap-3 text-left active:scale-[0.98] transition-transform"
+      >
+        <div className="w-12 h-12 rounded-2xl bg-slate-100 border border-slate-300 flex items-center justify-center text-slate-700 shrink-0">
+          <FileText size={24} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <h3 className="font-black text-[16px] text-[#311068] leading-snug">{tra(MAN_HO_SO, 'TIEU_DE', lang)}</h3>
+          <p className="text-[14px] text-slate-600 leading-snug mt-0.5">
+            {t('Một tờ để cầm đi ngân hàng hoặc công an')}
+          </p>
+        </div>
+        <ChevronRight size={20} className="text-slate-500 shrink-0" />
+      </button>
+
+      <button
+        onClick={() => setView('ra_da_thu_doan')}
+        className="w-full max-w-[360px] bg-white rounded-3xl p-5 shadow-md border-2 border-slate-200 mb-6 flex items-center gap-3 text-left active:scale-[0.98] transition-transform"
+      >
+        <div className="w-12 h-12 rounded-2xl bg-slate-100 border border-slate-300 flex items-center justify-center text-slate-700 shrink-0">
+          <Radar size={24} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <h3 className="font-black text-[16px] text-[#311068] leading-snug">{tra(MAN_RA_DA, 'TIEU_DE', lang)}</h3>
+          <p className="text-[14px] text-slate-600 leading-snug mt-0.5">
+            {t('Ba mươi ngày qua nhà mình gặp thủ đoạn nào')}
+          </p>
+        </div>
+        <ChevronRight size={20} className="text-slate-500 shrink-0" />
+      </button>
+
       {/* Floating Assistive Ball & Outside Mode Card — ẩn khi tối giản. */}
       {!superBasic && (
       <div className="w-full max-w-[360px] bg-gradient-to-br from-purple-900 to-indigo-950 rounded-3xl p-5 shadow-md border border-purple-400/30 text-white mb-6">
@@ -5497,6 +5585,35 @@ function WarningView({
   const laNghiNgo = nhan === 'NGHI_NGO';
   const laChuaThay = nhan === 'CHUA_THAY';
 
+  /*
+   * QUY TẮC NHÀ MÌNH — §4.1 `FAMILY_RULE`.
+   *
+   * ⚠️ ĐỌC MỘT LẦN LÚC DỰNG MÀN. Màn này có đồng hồ đếm ngược, tức là dựng lại
+   * mỗi giây; đọc `localStorage` mỗi giây là tốn vô ích, và tệ hơn, nó cho phép
+   * nội dung màn đổi giữa chừng trong lúc bác đang đọc.
+   *
+   * ⚠️ `chonQuyTac` CHỈ ĐỌC `maLyDo` mà bộ luật đã quyết. Nó không đổi được
+   * mức rủi ro, và không được phép đổi (§4.2).
+   */
+  const [vongTronNha] = useState(() => docVongTron());
+  const quyTacNha = chonQuyTac(vongTronNha.quyTac, result?.maLyDo ?? []);
+
+  /*
+   * ĐỒNG HỒ PHẢN ỨNG — mở phiên đo đúng lúc màn cảnh báo dựng lên.
+   *
+   * ⚠️ ĐO TỚI LÚC BẤM NÚT GỌI, KHÔNG PHẢI TỚI LÚC NGƯỜI THÂN NGHE MÁY. Trình
+   * duyệt chỉ mở ứng dụng gọi rồi hết phần của nó; app không biết có ai nhấc
+   * máy hay không, và không được nói như thể nó biết (§11).
+   *
+   * ⚠️ Mức "Chưa thấy dấu hiệu" KHÔNG mở phiên: không có cảnh báo thì không có
+   * phản ứng nào để đo, và đếm nó vào sẽ pha loãng đúng con số cần dùng.
+   */
+  const [phienDo] = useState(() => batDauDo(nhan ?? null, Date.now()));
+  const ghiNhanBamGoi = () => {
+    const luot = ketThucDo(phienDo, Date.now());
+    if (luot) ghiLuot(luot);
+  };
+
   /**
    * §HĐ luật 4 — MÀN theo `canThiep`. Mức `PROTECTED_CRITICAL` bỏ bớt điều hướng
    * và luôn phải có lối ra (§4.6, dưới cùng màn hình).
@@ -5723,6 +5840,9 @@ function WarningView({
 
   const handleCallRelative = () => {
     if (!firstContact.phone) { setView('family'); return; }
+    // Ghi TRƯỚC khi mở ứng dụng gọi: sau `window.open` trang có thể bị đẩy
+    // xuống nền và mã sau đó không chắc chạy.
+    ghiNhanBamGoi();
     window.open(`tel:${firstContact.phone}`, '_self');
   };
 
@@ -5900,6 +6020,23 @@ function WarningView({
             </p>
           )}
         </div>
+
+        {/*
+          KHỐI QUY TẮC NHÀ MÌNH — đặt DƯỚI nhãn rủi ro, TRÊN các nút hành động.
+          Bác không cãi lại một cái máy; bác nhớ ra lời đã hẹn với con mình.
+
+          ⚠️ KHÔNG hiện ở mức "Chưa thấy dấu hiệu" — `duocHienQuyTac` chặn. Nhắc
+          một quy tắc an toàn ngay dưới dòng đó là tự tạo ra một cảnh báo mà bộ
+          luật không hề đưa ra.
+        */}
+        {duocHienQuyTac(nhan) && quyTacNha && (
+          <KhoiQuyTac
+            quyTac={quyTacNha}
+            lang={lang}
+            nguoiThan={vongTronNha.nguoiThan}
+            onGoi={(dienThoai) => { ghiNhanBamGoi(); window.open(`tel:${dienThoai}`, '_self'); }}
+          />
+        )}
 
         {/*
           PAUSE_60S — một câu công nhận cảm xúc, không phải thêm áp lực.
