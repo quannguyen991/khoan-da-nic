@@ -18,7 +18,8 @@ const express = require('express');
 const { analyze, toHopDong } = require('./src/analysis/pipeline');
 const { CAU_HOI } = require('./src/bo-hoi-nhanh');
 const { trichTinHieu } = require('./src/analysis/llm-extractor');
-const { layCauHinh } = require('./src/ai/fable-client');
+const { layCauHinh, goiChat } = require('./src/ai/fable-client');
+const { kiemModelSong } = require('./src/ai/kiem-model-song');
 const { dungSafetyCard } = require('./src/safety-card');
 const { dungTrang } = require('./src/safety-card-page');
 const { layKeHoachPhucHoi } = require('./src/analysis/recovery-adapters');
@@ -1095,9 +1096,28 @@ app.get('/api/safety-card', (req, res) => res.json(dungSafetyCard()));
  * §11 — không lộ khoá, không lộ địa chỉ máy chủ. Chỉ nói ba điều người dùng có
  * quyền biết: AI có chạy không, chạy ở đâu, và nội dung của họ có rời máy không.
  */
-app.get('/api/suc-khoe', (req, res) => {
+app.get('/api/suc-khoe', async (req, res) => {
   const c = layCauHinh();
   const chay = c.daCauHinh && !KHONG_GOI_AI;
+
+  /*
+   * ⚠️ GỌI THỬ MODEL — chỉ khi được hỏi, và có đệm một phút.
+   *
+   * `bienDaDat` và `aiCauHinh` chỉ trả lời "biến môi trường có giá trị không".
+   * Ngày 16/9/2026 chúng vẫn báo `true` suốt sáu ngày trong khi nhà cung cấp đã
+   * gỡ model và mọi lượt gọi trả HTTP 503 — bản chạy thật rơi về rule-only mà
+   * không có gì kêu lên.
+   *
+   * Nên thêm câu hỏi còn lại: gọi thử một lượt. Mặc định TẮT để endpoint vẫn rẻ
+   * và vẫn dùng được làm phép kiểm sống của nền tảng; bật bằng `?goiThu=1`.
+   */
+  let kiemModel = null;
+  if (chay && (req.query.goiThu === '1' || req.query.goiThu === 'true')) {
+    kiemModel = await kiemModelSong(
+      (t) => goiChat(t),
+      { tenModel: c.model },
+    );
+  }
   res.json({
     ok: true,
     // §11 — nói thật AI có cấu hình hay không. KHÔNG lộ khoá, không lộ base URL.
@@ -1153,6 +1173,16 @@ app.get('/api/suc-khoe', (req, res) => {
     loiAiGanNhat,
     /** Lượt chạy được gần nhất: nhận mấy tín hiệu, loại mấy, vì sao loại. */
     chanDoanAiGanNhat,
+    /**
+     * Kết quả GỌI THỬ model, chỉ có khi hỏi bằng `?goiThu=1`.
+     *
+     * `null` nghĩa là CHƯA GỌI THỬ — không phải "model hỏng" và cũng không phải
+     * "model sống". Ba trạng thái khác nhau, và §4.3 nói đúng chuyện này.
+     *
+     * Mã trả về: `MODEL_KHONG_TON_TAI` (cần người vào sửa cấu hình) ·
+     * `KHOA_KHONG_DUNG` (cần người) · `LOI_TAM_THOI` (thường tự khỏi).
+     */
+    kiemModel,
   });
 });
 
