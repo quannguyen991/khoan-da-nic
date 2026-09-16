@@ -208,16 +208,46 @@ services:
       # mô tả bản đang chạy (§11).
       #
       # Ứng viên đo được cùng lúc, cùng một tin giả danh công an, cùng lời nhắc:
-      #   deepseek-v4.1-flash    1,7s   ✔ chọn
+      #   deepseek-v4.1-flash    1,7s   chạy được — nhưng ĐO CẢ BỘ THÌ LOẠI:
+      #                                 lệch Việt↔Anh 16,1 điểm, lát không dấu
+      #                                 61,9%, được cảnh báo chỉ 81,5%
+      #   deepseek-v4-flash-0731 2,5s   ✔ CHỌN — bản chốt ngày của chính model cũ
       #   qwen3.8-flash         15,4s   chậm gấp 9
       #   qwen3.6-flash         25,4s   chậm gấp 15, và tự bịa nhãn tiếng Việt
       #                                 thay vì trả mã trong danh mục
       #
       # 5 ca không đủ cơ sở để kết luận chất lượng — nên sau khi đổi PHẢI chạy
       # lại toàn bộ bộ đánh giá với `--bo-cache` và so với số cũ.
+      #
+      # ══════ ĐÃ ĐO qwen3.8-flash trên CẢ BỘ 571 MẪU — VÀ KHÔNG ĐỔI ══════
+      #
+      # Lát 40 mẫu đầu cho qwen thắng (recall 92,6% so với 88,9%), nhưng lát đó
+      # KHÔNG CÓ MẪU LÀNH NÀO nên chưa đo được báo nhầm. Chạy cả bộ thì bức
+      # tranh lật lại:
+      #
+      #                              0731      qwen3.8-flash
+      #   được cảnh báo             90,2%          92,1%
+      #   bỏ sót hoàn toàn      9,8% (26)      7,9% (21)
+      #   khớp đúng mức             70,2%          68,7%
+      #   báo nhầm mức cao           4,1%           4,1%
+      #   báo động lát lành khó     12,0%          14,4%
+      #   lệch Việt↔Anh          0,2 điểm       6,7 điểm  ← vượt ngưỡng 3,0
+      #   lát KHÔNG DẤU             76,2%          61,9%  ← tụt 14,3 điểm
+      #   thời gian 571 mẫu          430s           535s
+      #
+      # GIỮ 0731 vì hai dòng cuối. Người Việt nhắn không dấu rất nhiều, và kẻ
+      # lừa đảo cũng cố tình bỏ dấu để né bộ dò từ khoá — đổi +1,9 điểm ở "được
+      # cảnh báo" lấy −14,3 điểm ở lát không dấu là lỗ. Lệch parity 6,7 điểm thì
+      # vượt hẳn ngưỡng 3,0 của §6.14, tức là model đối xử hai ngôn ngữ khác
+      # hẳn nhau — đúng thứ ngưỡng đó sinh ra để chặn.
+      #
+      # glm-5.3 đã thử và LOẠI: hỏng 100% lượt gọi, bộ đo từ chối công bố số.
+      #
+      # ⚠️ ĐỪNG ĐO LẠI qwen bằng lát nhỏ rồi kết luận nó tốt hơn. Lát 40 mẫu đầu
+      # của bộ dữ liệu toàn mẫu nguy hiểm; muốn so thì phải chạy cả bộ.
 
       - key: RISK_LLM_MODEL
-        value: deepseek-v4.1-flash
+        value: deepseek-v4-flash-0731
       # ── Dự phòng 1: qwen trên máy chủ tự vận hành ──
       #
       # ⚠️ ĐỨNG TRƯỚC GEMINI DÙ BẮT ÍT HƠN MỘT CA (4/5 so với 5/5).
