@@ -196,8 +196,28 @@ services:
       #
       # KHÔNG ĐỔI `RISK_LLM_MODEL` theo bảng này. 5 ca không đủ cơ sở. Muốn đổi
       # thì chạy `npm run eval:quocte -- --bo-cache` trên model định chọn.
+      #
+      # ══════ 16/9/2026 — NHÀ CUNG CẤP GỠ MODEL, ĐỔI SANG BẢN KẾ NHIỆM ══════
+      #
+      # `deepseek-v4-flash` TRẢ HTTP 503 `model_not_found`: "Không có kênh khả
+      # dụng cho model deepseek-v4-flash trong nhóm default". Đo trực tiếp bằng
+      # một lượt gọi thật lúc 16/9/2026, và `/v1/models` không còn liệt kê ID đó.
+      #
+      # Hệ quả trong lúc chưa sửa: mọi lượt phân tích chạy RULE-ONLY, `aiDaChay:
+      # false`. Sản phẩm vẫn cảnh báo, nhưng mọi số đo gắn với model cũ không còn
+      # mô tả bản đang chạy (§11).
+      #
+      # Ứng viên đo được cùng lúc, cùng một tin giả danh công an, cùng lời nhắc:
+      #   deepseek-v4.1-flash    1,7s   ✔ chọn
+      #   qwen3.8-flash         15,4s   chậm gấp 9
+      #   qwen3.6-flash         25,4s   chậm gấp 15, và tự bịa nhãn tiếng Việt
+      #                                 thay vì trả mã trong danh mục
+      #
+      # 5 ca không đủ cơ sở để kết luận chất lượng — nên sau khi đổi PHẢI chạy
+      # lại toàn bộ bộ đánh giá với `--bo-cache` và so với số cũ.
+
       - key: RISK_LLM_MODEL
-        value: deepseek-v4-flash
+        value: deepseek-v4.1-flash
       # ── Dự phòng 1: qwen trên máy chủ tự vận hành ──
       #
       # ⚠️ ĐỨNG TRƯỚC GEMINI DÙ BẮT ÍT HƠN MỘT CA (4/5 so với 5/5).
