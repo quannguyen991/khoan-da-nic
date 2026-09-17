@@ -353,9 +353,30 @@ const KHUNG_GIAO_DUC = new RegExp([
   'đừng ai\\s', 'không ai[^.]{0,20}(nên|được)',
   '^\\s*không\\s+(cài|chuyển|đọc|bấm|tải)',
 
-  // Cơ quan / tổ chức đứng TRƯỚC động từ cảnh báo: "Công an TP Hà Nội cảnh báo:"
+  /**
+   * Cơ quan / tổ chức đứng TRƯỚC động từ cảnh báo: "Công an TP Hà Nội cảnh báo:"
+   *
+   * ⚠️ TÊN CƠ QUAN + "THÔNG BÁO" CŨNG PHẢI KÈM DẤU HIỆU TUYÊN TRUYỀN — 17/9/2026.
+   *
+   * Cùng họ với lỗ "Thông báo:" ngay phía trên, nhưng bản vá 5/9 sót dòng này.
+   * Mẫu cũ là `(công an|…|ngân hàng|…)[^.]{0,40}(cảnh báo|khuyến cáo|lưu ý|thông
+   * báo)` — TRỐNG. Đo được: 5 kiểu lệnh lừa × 8 tiền tố cơ quan, 40/40 ca về
+   * "Chưa thấy dấu hiệu rủi ro".
+   *
+   * Ca thật tìm ra lỗ này — đúng thủ đoạn Bộ Công an cảnh báo ngày 05/07/2025:
+   *   "Công an xã thông báo sáp nhập địa giới, bác cài ứng dụng VNeID mới qua
+   *    link này rồi cho cháu xem màn hình để cập nhật."
+   * ra CHUA_THAY KỂ CẢ KHI AI CHẠY, vì evidence-validator vứt tín hiệu AI nằm
+   * trong đoạn đã bị xếp là tuyên truyền.
+   *
+   * Giả danh cơ quan thì câu mở đầu CHÍNH LÀ tên cơ quan + "thông báo". Tin
+   * tuyên truyền thật của cơ quan thì NÓI VỀ thủ đoạn, hoặc dặn KHÔNG làm gì —
+   * "không cài", "không cung cấp". Tin lừa thì ra lệnh làm.
+   */
   '(công an|cảnh sát|cơ quan|ngân hàng|tổ dân phố|bộ|cục|chi cục)[^.]{0,40}'
-    + '(cảnh báo|khuyến cáo|lưu ý|thông báo)',
+    + '(cảnh báo|khuyến cáo|lưu ý|thông báo)[^.]{0,80}'
+    + '(lừa đảo|giả danh|mạo danh|thủ đoạn|chiêu trò|cảnh giác|không bao giờ|tuyệt đối không'
+    + '|không\\s+(cài|tải|bấm|nhấn|chuyển|đọc|cung cấp|chia sẻ|làm theo|truy cập))',
 
   // Khung TƯỜNG THUẬT về nạn nhân, hoặc về kẻ giả danh.
   '(nạn nhân|người bị hại)[^.]{0,30}(được|bị)\\s+(yêu cầu|dụ|lừa)',
@@ -531,6 +552,52 @@ function viTriTuDoiLap(n) {
   return m ? m.index : -1;
 }
 
+/**
+ * LỆNH TRỰC TIẾP — lối thoát thứ ba khỏi khung giáo dục. Đo 17/9/2026.
+ *
+ * Hai lối thoát cũ: động từ rủi ro đứng TRƯỚC khung, hoặc đứng sau TỪ NỐI ĐỐI
+ * LẬP. Cả hai bỏ sót chiêu "tài khoản an toàn" viết liền một câu — kẻ gian tự
+ * nhắc tới kẻ gian để lấy lòng tin, rồi ra lệnh ngay sau dấu phẩy:
+ *
+ *   "Tài khoản của bác đang bị kẻ gian tấn công, bác chuyển tiền vào tài
+ *    khoản an toàn 1902xxxx ngay"                                   → RỖNG
+ *   "Thông báo: tuyệt đối không được nói với ai, bác chuyển tiền…" → RỖNG
+ *
+ * Tin tuyên truyền thật NÓI VỀ người khác ("kẻ gian yêu cầu người dân chuyển
+ * tiền") hoặc dặn KHÔNG làm ("bác không đọc mã OTP"). Nó không bảo thẳng người
+ * đọc làm việc rủi ro. Một vế BẮT ĐẦU bằng người được gọi — hoặc "hãy / vui
+ * lòng" — rồi tới ngay động từ rủi ro, không phủ định, thì vế đó là tin nhắn.
+ *
+ * ⚠️ ĐÒI RANH GIỚI VẾ. "…gọi điện BẢO BÁC CÀI ứng dụng…" là tường thuật trong
+ * một bài cảnh báo — chủ ngữ đứng sau "bảo", không đứng đầu vế — nên không tính.
+ *
+ * ⚠️ ĐÒI NGƯỜI ĐƯỢC GỌI HOẶC "HÃY / VUI LÒNG". Động từ trần đầu vế ("Lưu ý lừa
+ * đảo: cài ứng dụng lạ là mất tiền") vẫn thường là lời giảng, nên không tính.
+ *
+ * ⚠️ KHÔNG DÙNG `\b` — `test/ranh-gioi-tu-unicode.test.js` chặn `\b` cạnh chữ có dấu.
+ */
+const LENH_TRUC_TIEP = new RegExp(
+  '(^|[,:;]|\\s(nên|thì))\\s*(xin\\s+)?'
+  + '((bác|anh|chị|ông|bà|cô|chú|em|con|cháu|bạn|quý khách)\\s+'
+  + '(hãy\\s+|vui lòng\\s+|cần\\s+|chỉ cần\\s+|phải\\s+|nhớ\\s+|mau\\s+)?'
+  + '|(hãy|vui lòng)\\s+)'
+  + '(chuyển|gửi|đọc|cài|tải|bấm|nhấn|nộp|cung cấp|đăng nhập|truy cập)',
+  'g',
+);
+
+/** Bản KHÔNG DẤU, sinh tự động — cùng lý do với `KHUNG_GIAO_DUC_KHONG_DAU`. */
+const LENH_TRUC_TIEP_KHONG_DAU = new RegExp(boDau(LENH_TRUC_TIEP.source), 'g');
+
+function viTriLenhTrucTiep(n) {
+  const re = CO_DAU.test(n) ? LENH_TRUC_TIEP : LENH_TRUC_TIEP_KHONG_DAU;
+  const chu = CO_DAU.test(n) ? n : boDau(n);
+  re.lastIndex = 0;
+  const ra = [];
+  let m = re.exec(chu);
+  while (m) { ra.push(m.index); m = re.exec(chu); }
+  return ra;
+}
+
 function viTriDongTuRuiRo(n) {
   DONG_TU_RUI_RO.lastIndex = 0;
   const ra = [];
@@ -577,7 +644,11 @@ function phanLoai(n) {
       && viTriDoiLap > viTriEdu
       && viTriRuiRo.some((v) => v > viTriDoiLap);
 
-    const coRuiRoNgoaiKhung = viTriRuiRo.some((v) => v < viTriEdu) || coRuiRoSauTuDoiLap;
+    // Lối thoát thứ ba — xem `LENH_TRUC_TIEP`.
+    const coLenhSauKhung = viTriLenhTrucTiep(n).some((v) => v > viTriEdu);
+
+    const coRuiRoNgoaiKhung = viTriRuiRo.some((v) => v < viTriEdu)
+      || coRuiRoSauTuDoiLap || coLenhSauKhung;
     if (!coRuiRoNgoaiKhung) {
       return /kẻ (lừa đảo|gian)|scammers?\b.*\b(told|said) me/.test(n)
         && /\btôi\b|\bme\b/.test(n) ? 'quoted_report' : 'warning_education';
