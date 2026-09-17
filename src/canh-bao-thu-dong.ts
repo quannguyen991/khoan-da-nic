@@ -33,6 +33,30 @@ import type { ManCanhBao } from './components/CanhBaoToanManHinh';
 /** Nhịp lấy tin từ lớp native. Thưa vừa đủ để không tốn pin, dày vừa đủ để kịp. */
 const NHIP_MS = 4000;
 
+/**
+ * ══════════ ⚠️ TIN NHẮN BẮT TỪ THÔNG BÁO KHÔNG TỰ LÊN MÁY CHỦ — 17/9/2026 ══════════
+ *
+ * Bản đầu của vòng này lấy tin mới nhất rồi gửi NGUYÊN VĂN lên `/api/detect`, cứ
+ * 4 giây một lần, không chờ bác bấm. Làm vậy trái với chính các cam kết đã viết ra:
+ *
+ *   · `docs/kien-truc-hai-phia.md` §3.2 — `/api/detect` "chỉ cho luồng web; APK
+ *     gọi detect.analyze() TẠI MÁY"; §3.3 — toàn văn tin nhắn KHÔNG BAO GIỜ đi lên.
+ *   · `PERMISSIONS-AND-POLICY.md` — tin bắt từ thông báo chỉ rời máy khi "the user
+ *     taps check — never automatically".
+ *
+ * Bản APK đang phát hành chưa từng gửi như vậy, nên bật lên là ĐỔI mô hình riêng
+ * tư — thứ §12 cấm tự ý thay. Phát hiện ra lúc gộp nhánh web vào dev.
+ *
+ * Nên đường tin nhắn của vòng này TẮT cho tới khi một trong hai việc xảy ra:
+ *   ① tầng 0 (`backend/src/detect/`) được nạp vào gói giao diện và chạy tại máy,
+ *   ② người dùng chốt đổi mô hình riêng tư — và sửa luôn hai tài liệu trên.
+ *
+ * Trong lúc đó tin đến vẫn được sàng lọc ngay trên máy (`DocThongBao.sangLocTaiCho`
+ * — hỏi bác có muốn kiểm không), và đường ứng dụng lạ phía trên vẫn chạy: nó chỉ
+ * gửi tên gói, tên hiển thị và nguồn cài, không mang nội dung của bác.
+ */
+const TU_GUI_TIN_NHAN_LEN_MAY_CHU = false;
+
 export interface VongTronToiThieu {
   chuTaiKhoanId: string;
   thanhVien: Array<{ id: string; vaiTro: string; daThuHoi?: boolean }>;
@@ -133,6 +157,8 @@ export function useCanhBaoThuDong({
           if (manRef.current) return;
         }
 
+        // Xem `TU_GUI_TIN_NHAN_LEN_MAY_CHU` — chưa được phép thì dừng ở đây.
+        if (!TU_GUI_TIN_NHAN_LEN_MAY_CHU) return;
         const tin = await tinMoiNhat();
         if (!tin?.co) return;
 

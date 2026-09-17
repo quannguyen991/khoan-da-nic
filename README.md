@@ -11,7 +11,29 @@ Dừng lại trước, kiểm sau, rồi hãy làm.
 
 **A scam-warning assistant for older adults in Vietnam. Pause first, check second, act last.**
 
-### What it is
+*Khoan Đã* is Vietnamese for "hold on a moment". Built by Nguyen Xuan Minh Quan, 16, Hanoi, Vietnam.
+
+### The person being scammed does not have to open anything
+
+Someone being told by a fake police officer to stay on the line will not open an app,
+find a paste box, and wait for a result. So on Android the first step happens where the
+person is already looking:
+
+- **A message arrives carrying two or more signals** — a code request plus pressure, an
+  agency name plus a transfer demand — and the phone asks: *would you like this checked?*
+  That screening runs on the phone with no network and no AI, and reaches no verdict of
+  its own. Nothing is sent anywhere until the person taps.
+- **A warning strip draws over whatever is on screen**, including the call screen, when
+  the rule engine returns High risk. It always has a dismiss button.
+- **A floating button** stays at the edge of the screen: check a message, send a picture,
+  pause for 60 seconds.
+- **During a long call** the app asks one question: is someone telling you to transfer
+  money? It counts time; it does not listen.
+
+What this costs in permissions, what the app refuses to take, and where every byte goes:
+[PERMISSIONS-AND-POLICY.md](PERMISSIONS-AND-POLICY.md).
+
+### When someone does open it
 
 You paste a message, a screenshot, or a link. The system names the specific warning signs
 it found, quoting the words it saw them in — then puts one large button on screen: call a
@@ -38,6 +60,34 @@ level. This matters because in this problem **the author of the input is the att
 The rule layer runs offline on the device. The verdict travels internally as an enum code,
 never as text, so switching language cannot change the result.
 
+A screenshot is transcribed first and the transcript goes through the same rules as typed
+text, so a scam does not get a softer verdict for arriving as a picture. If no model that
+can actually see images is available, the result says the image was not read.
+
+### For the family
+
+- **A rapid-response team of up to three relatives**, each with a role: first caller, bank
+  helper, phone helper. Every "call family" button points to the same person, chosen by the
+  situation. The older person always taps the call — the app never calls on their behalf.
+- **A 72-hour recovery watch** after money or a code was sent: reminders at 2, 24, 48 and
+  72 hours on Android, and a case record to take to the bank or the police. The app never
+  promises that money comes back.
+- **Official warnings.** When a result matches a tactic that police or a state agency has
+  warned about, the screen shows that warning with its link to a `.gov.vn` page. A warning
+  appears only after a named person has approved it.
+- **Bank hotlines** appear only after a named reviewer has checked each number against the
+  bank's own website. Until then the app says so and points to the number on the back of
+  the card.
+
+### Honest limits
+
+- **Nothing reaches a relative's phone yet.** Sending an alert to family needs device pairing
+  and a push provider, and neither is built. The app helps the older person make the call.
+- The app cannot block calls or bank transfers, and does not claim to.
+- Nothing here recovers money that has already been sent.
+- The AI layer needs a network connection. Without one the rules still run, and the result
+  says that no AI read the message.
+
 ### Running it
 
 Requires Node 20+. No API key is needed to run the rule engine or the test suite; the AI
@@ -46,7 +96,8 @@ layer degrades to rules-only without one.
 ```bash
 npm install
 npm run dev          # http://localhost:5173
-npm test             # 1,065 automated tests
+npm test             # 1,229 automated tests
+npm run build:apk    # Android bundle using the server address in .env.apk, then Capacitor sync
 ```
 
 Optional, for the AI layer — copy `.env.example` to `.env` and fill in one provider. The
@@ -79,13 +130,16 @@ and are documented as binding constraints rather than generated defaults.
 | `backend/src/risk-labels.js` · `src/catalog.ts` | the three labels; i18n cannot override them |
 | `eval/run.js` · `eval/results/latest.json` | the evaluation harness and its last measured run |
 | `test/unchecked-not-safe.test.js` | the test that fails if "could not check" is ever shown as "checked and found nothing" |
+| `PERMISSIONS-AND-POLICY.md` | the permission ladder, where data goes, and what the app refuses |
 | `CLAUDE.md` | the invariant constraints, including the ones already violated once |
 
 ### Measured
 
-Last run on commit `0d548b9`, rule engine v1.3.0, 571 held-out samples with 571 fresh model
-calls and 0% failed calls. **87.9%** of dangerous messages produced a warning; the system
-was silent on **12.1%**. False "High risk" on harmless messages: **3.6%**.
+Last run recorded commit `972488e`, rule engine v1.3.0, model `deepseek-v4-flash-0731`,
+571 held-out samples with 571 fresh model calls and 0% failed calls. **90.2%** of dangerous
+messages produced a warning (70.2% at High risk); the system was silent on **9.8%**. False
+"High risk" on harmless messages: **4.1%**. The figures live in `eval/results/latest.json`,
+which is also what the in-app transparency page reads.
 
 **No real-world samples are in the evaluation set** — 0 against a target of 25. Every
 figure is measured on messages written by the author. The harness prints this itself.
@@ -135,6 +189,31 @@ nó biết nhiều hơn thứ nó thật sự đọc được.**
 | **Bộ hỏi nhanh 4 nhánh** | Đang áp điện thoại vào tai, không gõ được. Chạm 1 lần, trả lời 2–3 câu CÓ/KHÔNG, ra kết luận trong ~8 giây |
 | **Dán tin nhắn / chia sẻ từ Zalo** | Nhận được tin đáng ngờ |
 | **Chụp ảnh màn hình · quét QR · nói ra** | Không biết gõ lại nội dung |
+
+**Người đang bị lừa không phải tự mở app.** Trên Android:
+
+- Tin nhắn đến mang từ hai dấu hiệu trở lên — đòi mã kèm thúc ép, tên cơ quan kèm đòi
+  chuyển tiền — máy hỏi *"Bác có muốn kiểm tin nhắn này không?"*. Bước sàng lọc chạy
+  ngay trên máy, không mạng, không AI, không tự kết luận; chưa gửi gì đi khi bác chưa bấm.
+- Kết quả **Nguy hiểm cao** thì dải cảnh báo hiện đè lên màn hình đang dùng, kể cả màn
+  cuộc gọi, và luôn có nút tắt.
+- Bong bóng nổi ở mép màn hình: kiểm tin nhắn, gửi ảnh đi kiểm, dừng 60 giây.
+- Cuộc gọi kéo dài bất thường thì app hỏi đúng một câu: có ai đang bảo bác chuyển tiền
+  không? App chỉ đếm thời gian, không nghe nội dung.
+
+Quyền nào được xin, dữ liệu nào đi đâu, và những gì app từ chối lấy:
+[PERMISSIONS-AND-POLICY.md](PERMISSIONS-AND-POLICY.md).
+
+**Cho gia đình:** đội phản ứng nhanh tối đa ba người, mỗi người một việc (gọi đầu tiên,
+lo ngân hàng, lo điện thoại) — mọi nút "gọi con cháu" trỏ cùng một người theo tình huống,
+và luôn là bác tự bấm gọi; theo dõi 72 giờ sau sự cố với lời nhắc ở mốc 2 · 24 · 48 · 72
+giờ; cảnh báo chính thức có đường dẫn tới trang `.gov.vn`, chỉ hiện khi đã có người duyệt
+ký tên; số tổng đài ngân hàng chỉ hiện sau khi có người đối chiếu với trang chính thức
+của ngân hàng.
+
+**Chưa làm được, nói thẳng:** cảnh báo chưa gửi tới được máy người thân (cần ghép cặp
+máy và dịch vụ đẩy thông báo); app không chặn được cuộc gọi hay giao dịch; không lấy lại
+được tiền đã chuyển.
 
 ---
 
@@ -223,7 +302,7 @@ có biểu tượng, chạy được khi mất mạng.
 | Giao diện | React 19 · TypeScript (strict) · Vite 6 · Tailwind 4 · PWA + service worker |
 | Máy chủ | Node · Express · bộ luật thuần, không phụ thuộc mạng |
 | AI | LLM qua giao thức OpenAI — chạy cục bộ (Ollama) hoặc qua gateway |
-| Đo lường | Bộ eval 571 mẫu giữ riêng, 1.065 test tự động |
+| Đo lường | Bộ eval 571 mẫu giữ riêng, 1.229 test tự động |
 
 ## Chạy thử
 
@@ -246,6 +325,7 @@ npm test
 | `src/catalog.ts` | Mã → chữ hiển thị (đổi ngôn ngữ không đổi được kết luận) |
 | `src/config/ma-hop-dong.json` | Hợp đồng mã giữa hai nửa |
 | `test/hop-dong.test.mjs` | Hàng rào cho các luật bất biến |
+| `PERMISSIONS-AND-POLICY.md` | Thang quyền, dữ liệu đi đâu, những gì app từ chối lấy |
 
 ## Mục tiêu Phát triển Bền vững
 
