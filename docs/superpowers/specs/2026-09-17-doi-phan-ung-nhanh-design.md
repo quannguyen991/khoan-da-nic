@@ -1,6 +1,6 @@
 # Đội phản ứng nhanh, số tổng đài ngân hàng, theo dõi 72 giờ — thiết kế
 
-Ngày 17/9/2026 · trạng thái: đã làm xong mã trên nhánh `sua-bo-luat-va-do-luong`, chưa lên web thật
+Ngày 17/9/2026 · trạng thái: đã lên web thật cùng ngày (gộp vào `main`), có trong APK 1.2 — APK chưa thử trên máy thật
 
 ## Quyết định người dùng đã chốt
 

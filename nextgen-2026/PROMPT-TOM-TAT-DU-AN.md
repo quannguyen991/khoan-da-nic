@@ -85,13 +85,12 @@ Nguyên tắc: **người đang gặp nguy không bao giờ phải trả tiền.
 
 ## 5. TÍNH NĂNG — THEO TRẠNG THÁI THẬT
 
-> ⚠️ Dự án có **hai nhánh mã chưa gộp**:
-> - Bản đang chạy ở **https://khoan-da.onrender.com** — nhánh `main`, cập nhật lần cuối **6/9/2026**.
-> - Nhánh phát triển `sua-bo-luat-va-do-luong` — nơi làm mọi tính năng mới.
->
-> Tính năng ở mục 5.2 **chưa có trên web**.
+> **Ngày 17/9/2026 đã gộp hai nhánh mã và đưa lên web.** Bản đang chạy ở
+> **https://khoan-da.onrender.com** (nhánh `main`) giờ có cả mục 5.1 lẫn 5.2. APK bản
+> 1.2 dựng cùng ngày, tải ở `https://khoan-da.onrender.com/khoan-da.apk` —
+> **chưa thử trên máy thật**.
 
-### 5.1 Đang chạy trên web thật
+### 5.1 Đã chạy trên web từ trước
 
 **Phía bố mẹ:**
 - Kiểm tra bằng chữ dán vào, ảnh chụp màn hình, đường link, mã QR, hoặc giọng nói. Với giọng nói, app hiện lại chữ đã nghe để bác sửa, không tự đoán.
@@ -107,6 +106,8 @@ Nguyên tắc: **người đang gặp nguy không bao giờ phải trả tiền.
 - 6 tình huống mẫu để học: giả danh công an · ngân hàng xin OTP · báo trúng thưởng · con cấp cứu · bưu kiện cấm · việc nhẹ lương cao.
 - Tin cảnh báo lừa đảo mới lấy từ báo, **luôn kèm tên báo và link gốc**.
 - Nút tròn quét nhanh nổi trong app. Tài khoản đăng ký, đăng nhập.
+- **Chế độ siêu đơn giản:** một màn, ba nút to (kiểm tin nhắn · gọi người nhà · khẩn cấp), không thanh điều hướng, luôn có dòng "Xem đầy đủ" để thoát. Cùng bộ luật, cùng ba nhãn như màn thường.
+- Ảnh chụp màn hình được **chép chữ trước, rồi chấm bằng đúng bộ luật** như chữ gõ. Không có model nào nhìn được ảnh thì kết quả nói thẳng là chưa đọc được ảnh.
 - Trang minh bạch `/transparency`: tách số **đã đo** khỏi số **mới là mục tiêu**.
 
 **Phía con cháu (máy tính):**
@@ -115,7 +116,7 @@ Nguyên tắc: **người đang gặp nguy không bao giờ phải trả tiền.
 - ⚠️ Ba công tắc bảo vệ — nhắc khi có số lạ gọi, cảnh báo chuyển khoản trên 5 triệu, ghim nút cảnh giác — **hiện mới là giao diện, chưa nối tới máy bố mẹ**.
 - ⚠️ **Chưa ghép cặp được máy con cháu với máy bố mẹ.**
 
-### 5.2 Có trong mã nhánh phát triển — CHƯA lên web
+### 5.2 Mới lên web ngày 17/9/2026
 
 - **Quy tắc nhà mình** (*Trusted Safety Rules*): gia đình tự đặt tối đa 3 câu lúc bình tĩnh, ví dụ "Nhà mình không đọc mã trong tin nhắn cho bất kỳ ai". Khi cảnh báo, app đọc lại đúng câu hợp với dấu hiệu, kèm dòng "Bác đặt ngày 16/9 cùng Lan" và nút gọi thẳng người đó. Lý do: bác không phải cãi lại một cái máy — bác nhớ ra lời đã hẹn với con mình.
 - **Hồ sơ vụ việc** (*Incident file*): tệp văn bản mang tới ngân hàng và công an — các lượt đã kiểm, lời khai của bác, những thứ chưa kiểm được. Không tự điền điều bác chưa khai, không chứa nội dung tin nhắn.
@@ -131,31 +132,43 @@ Nguyên tắc: **người đang gặp nguy không bao giờ phải trả tiền.
   - Đo ở tầng luật: 40/40 ca như vậy bị bỏ sót.
   - Một ca thật đúng thủ đoạn VNeID giả mà Bộ Công an cảnh báo cũng bị bỏ sót, **kể cả khi AI chạy**.
   - Đã vá. Tin tuyên truyền thật của công an vẫn không bị báo nhầm; 571 mẫu của bộ đánh giá không mẫu nào đổi kết quả.
+  - Lúc gộp nhánh, bộ test của bản web bắt thêm một ca: **thông báo thuế thật** ("Chi cục Thuế thông báo hộ kinh doanh nộp tờ khai… tại cơ quan thuế hoặc cổng dịch vụ công quốc gia") bị chấm Nguy hiểm cao. Đã vá: thông báo cơ quan nói về ngôi thứ ba, không gọi thẳng người đọc, không ra lệnh sau dấu câu thì vẫn được miễn. Chạy lại tầng luật trên bộ đánh giá: không mẫu nào đổi kết quả.
+- **Đội phản ứng nhanh** (làm ngày 17/9/2026): bác chọn tối đa 3 người thân, mỗi người một việc — người gọi đầu tiên, người lo ngân hàng, người lo điện thoại. Mọi nút "gọi con cháu" trỏ cùng một người, chọn theo tình huống (lỡ chuyển tiền → người lo ngân hàng lên trước). Màn cảnh báo có thêm nút "Không gọi được? Gọi người kế". **Luôn là bác tự bấm gọi — app không bao giờ gọi thay.**
+- **Theo dõi 72 giờ sau sự cố:** vào màn phục hồi là bắt đầu đếm; trang chủ hiện dải "Đang theo dõi 72 giờ · còn N giờ". Trên Android có lời nhắc ở mốc 2 · 24 · 48 · 72 giờ, dựng lại sau khi khởi động máy.
+- **Sổ số tổng đài ngân hàng:** số chỉ hiện khi đã có người duyệt ghi tên và đối chiếu với trang chính thức của đúng ngân hàng đó. **Hiện chưa có số nào được duyệt** — app nói thẳng như vậy và dặn gọi số ở mặt sau thẻ.
 - Trang sức khoẻ máy chủ kiểm được model AI còn hoạt động hay không.
-- **Android (nhánh dev):** vòng phát hiện thụ động — tự phân tích tin bắt được, tự bật màn cảnh báo toàn màn hình. Phát hiện ứng dụng lạ vừa được cài.
+
+### 5.2b Bản Android 1.2 — mới dựng 17/9/2026, chưa thử trên máy thật
+
+- **Bong bóng nổi thật** ở mép màn hình (vẽ đè lên app khác): chạm mở menu ba việc — kiểm tin nhắn, gửi ảnh đi kiểm, dừng 60 giây.
+- **Sàng lọc tin đến ngay trên máy:** tin mang từ hai dấu hiệu trở lên thì thông báo *hỏi* "Bác có muốn kiểm tin nhắn này không?" kèm hai nút Kiểm giúp tôi / Bỏ qua. Không mạng, không AI, không tự kết luận, **không gửi gì đi khi bác chưa bấm**.
+- Dải cảnh báo đè màn hình khi kết quả Nguy hiểm cao, và nói được vì sao không hiện (chưa cấp quyền, hoặc máy Xiaomi/Oppo/Vivo/Realme còn công tắc thứ hai).
+- **Đọc to bằng bộ đọc của máy** — trình duyệt trong app Android không đọc được, và trước đây hỏng im lặng.
+- Phát hiện ứng dụng lạ vừa được cài (chỉ gửi tên ứng dụng và nguồn cài lên máy chủ, không gửi nội dung).
+- ⚠️ **Vòng phát hiện thụ động KHÔNG tự gửi nội dung tin nhắn lên máy chủ.** Bản đầu ở nhánh dev có gửi, trái với cam kết trong `PERMISSIONS-AND-POLICY.md`; lúc gộp đã tắt đường đó, chờ đội chốt. Vì vậy màn cảnh báo toàn màn hình **chưa tự bật từ tin nhắn đến** — chỉ bật từ ứng dụng lạ vừa cài.
 
 ### 5.3 Có ở máy chủ, CHƯA có giao diện nào gọi tới
 
 - **Bộ nhớ vụ việc:** gom các sự kiện của cùng một vụ trong cửa sổ 14 ngày, **hỏi người dùng trước khi gộp**.
 - **Cảnh báo người thân qua push:** máy chủ không xác nhận được cảnh báo đã tới máy người thân, và nói thật như vậy.
 - **Khoan Proof:** ghép cặp thiết bị và xác minh yêu cầu chuyển tiền bằng passkey (vân tay, Face ID). Tuỳ chọn.
-- Chỉ ở nhánh dev:
+- Lên máy chủ web ngày 17/9/2026, giao diện chưa gọi tới:
   - **Diễn tập:** gửi tin lừa giả lập để luyện phản xạ. Phải đồng ý trước; không dùng kịch bản gây hoảng sợ; mắc bẫy không bị chê trách.
   - **Báo cáo tuần** cho người thân: tuần nào có khoảng trống không quét được thì nói ra khoảng trống.
-  - **Cảnh báo hai phía:** bố mẹ thấy màn toàn màn hình, người thân nhận đủ dữ kiện kèm nút gọi.
+- **Cảnh báo hai phía:** bố mẹ thấy màn toàn màn hình (APK 1.2 đã gọi, từ đường ứng dụng lạ); phần người thân nhận thông báo **chưa gửi thật tới máy nào** — cần ghép cặp máy và dịch vụ đẩy.
 
-### 5.4 Bản Android (Capacitor)
+### 5.4 Bản Android (Capacitor) — APK 1.2, dựng 17/9/2026
 
-Mã đã có các lớp native:
-- Đọc thông báo tin nhắn đến (quyền nhạy cảm, người dùng phải bật).
-- Kiểm tra máy có đang bị điều khiển từ xa không.
-- Nhận giọng nói **chỉ trên máy**, không qua mạng.
+Có trong gói (đã kiểm trong tệp APK, **chưa thử trên máy thật**):
+- Đọc thông báo tin nhắn đến (quyền nhạy cảm, người dùng phải bật) + sàng lọc tại máy (mục 5.2b).
+- Kiểm tra máy có đang bị điều khiển từ xa không; phát hiện ứng dụng lạ vừa cài.
+- Nhận giọng nói **chỉ trên máy**, không qua mạng; đọc to bằng bộ đọc của máy.
 - Nhận nội dung chia sẻ từ app khác.
-- Popup đè lên màn hình và thông báo nổi khi mức Cao.
-- Nhắc khi cuộc gọi kéo dài bất thường.
-- Thông báo ghim làm lối vào nhanh.
+- Dải cảnh báo đè màn hình và thông báo nổi khi mức Cao; bong bóng nổi.
+- Nhắc khi cuộc gọi kéo dài bất thường; nhắc theo dõi 72 giờ.
+- Thông báo ghim làm lối vào nhanh, có nút "Kiểm tin mới nhất".
 
-`[CẦN ĐỘI KIỂM: bản APK đã phát hành có đủ những tính năng này chưa]`
+⚠️ Bản dựng debug, ký bằng khoá debug của máy dựng. Máy đã cài bản cũ dựng ở máy khác có thể phải gỡ bản cũ trước khi cài.
 
 ### 5.5 Chưa làm
 
@@ -166,7 +179,8 @@ Mã đã có các lớp native:
 
 ### 5.6 Cố ý không làm (nói ra là được điểm)
 
-- **Danh bạ hotline ngân hàng để bấm gọi.** Sai một số là đưa người đang hoảng tới đúng kẻ gian. App dặn bấm số đã lưu sẵn trong máy, hoặc số in ở mặt sau thẻ.
+- **Số hotline ngân hàng chưa qua người duyệt.** Sai một số là đưa người đang hoảng tới đúng kẻ gian. Sổ số tổng đài (mục 5.2) chỉ hiện số đã có người duyệt ghi tên; chưa có thì dặn bấm số in ở mặt sau thẻ.
+- **Tự gọi thay bác, tự mở app ngân hàng** — đội chốt bỏ ngày 17/9/2026. Mọi cuộc gọi do bác tự bấm.
 - **Chặn cuộc gọi, chặn giao dịch** — không làm và không hứa.
 - **Cho con cháu đọc nội dung tin nhắn của bố mẹ.** Lạm dụng tài chính người cao tuổi phần lớn do chính người trong nhà gây ra.
 - **Điểm thưởng, chuỗi ngày, huy hiệu.** Ai ngày nào cũng mở app là ngày nào cũng bị nhắm tới.
@@ -193,7 +207,7 @@ Mã đã có các lớp native:
 
 ## 7. SỐ ĐO VÀ BẰNG CHỨNG
 
-**Bộ đánh giá** — đo ngày 16/9/2026, model `deepseek-v4-flash-0731`, trên **mã nhánh phát triển** (không phải bản web đang chạy):
+**Bộ đánh giá** — đo ngày 16/9/2026, model `deepseek-v4-flash-0731`, trên mã nhánh phát triển; mã đó lên web ngày 17/9/2026. Sau lượt đo có hai lần sửa bộ luật (17/9): chạy lại riêng tầng luật trên bộ mẫu thì **không mẫu nào đổi kết quả**; phần có AI **chưa đo lại**.
 - 571 tin nhắn do đội tự soạn và gán nhãn; chấm được 531.
 - Trên 265 tin nguy hiểm: 186 xếp Nguy hiểm cao, 53 Nghi ngờ, 26 bỏ sót → **90,2% có cảnh báo**, **9,8% bị im lặng**.
 - Trên 169 tin bình thường: **4,1%** bị báo nhầm mức Cao.
@@ -202,7 +216,7 @@ Mã đã có các lớp native:
 - Chênh lệch giữa tiếng Việt và tiếng Anh: 0,2 điểm phần trăm.
 - **Giới hạn phải nói kèm:** chưa có tin nhắn thật nào từ nạn nhân (0 trên mục tiêu 25). Lát tiếng Anh mới 49 mẫu (mục tiêu 90). Khi siết luật, báo động trên lát khó tăng từ 8,0% lên 12,0% — đánh đổi này không miễn phí.
 
-**Kiểm thử tự động** (nhánh phát triển, 17/9/2026): **1.178 phép thử, 0 lỗi**, trong 88 tệp.
+**Kiểm thử tự động** (bản đã gộp và lên web, 17/9/2026): **1.229 phép thử, 0 lỗi**.
 
 **Chi phí AI:** ước tính **~3,8 đồng mỗi lượt kiểm có gọi AI** — tính từ bảng giá và số token đo được. Chưa phải hoá đơn thật, chưa đo trên lượng truy cập thật.
 
@@ -239,6 +253,8 @@ Luôn nói kèm "840 đội, 41 quốc gia"; không nói "giải cao nhất th�
 5. **Chưa thử với người cao tuổi thật ngoài gia đình** `[CẦN ĐỘI ĐIỀN nếu đã thử: số người, ngày, phản ứng]`.
 6. Nếu cả tầng AI lẫn bộ luật cùng sai theo một hướng thì không có gì cứu được.
 7. Web chạy gói miễn phí nên máy chủ ngủ khi không có truy cập; lần mở đầu có thể chậm khoảng 50 giây. Demo phải mở trước.
+8. **Cảnh báo chưa tới được máy người thân** — cần ghép cặp máy và dịch vụ đẩy thông báo.
+9. **APK 1.2 chưa thử trên máy thật** (dựng và kiểm trong tệp ngày 17/9/2026).
 
 **Câu chốt bắt buộc:** *"Bọn em không hứa chặn được cuộc gọi lừa đảo. Bọn em hứa bác sẽ không chuyển tiền trong 60 giây tới."*
 
@@ -265,7 +281,8 @@ Luôn nói kèm "840 đội, 41 quốc gia"; không nói "giải cao nhất th�
 | "93,2 triệu USD lợi nhuận" (Life360) | "93,2 triệu USD Adjusted EBITDA" |
 | "Tin nhắn thật từ nạn nhân" | "Tin nhắn do đội tự soạn theo thủ đoạn đã công bố" |
 | "Không đối thủ nào có" / "cách mạng" / "đột phá" | "Điểm khác bọn em chọn là…; đối thủ mạnh hơn ở…" |
-| Nói tính năng ở mục 5.2–5.5 là "đã có trên app" | Giữ đúng trạng thái ghi trong mục 5 |
+| Nói tính năng ở mục 5.3–5.5 là "đã có trên app"; nói APK 1.2 "đã chạy tốt trên điện thoại" | Giữ đúng trạng thái ghi trong mục 5 |
+| "Cảnh báo tự gửi tới con cháu" | "Bác bấm một nút là gọi được người thân; gửi cảnh báo tự động tới máy người thân chưa làm" |
 
 ---
 
