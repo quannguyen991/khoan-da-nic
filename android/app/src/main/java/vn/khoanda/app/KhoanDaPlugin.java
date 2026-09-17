@@ -541,6 +541,50 @@ public class KhoanDaPlugin extends Plugin {
         call.resolve(r);
     }
 
+    // ─────────── Nhắc trong 72 giờ sau sự cố ───────────
+
+    /**
+     * ⚠️ NẠP CHỮ VÀ HẸN TRONG CÙNG MỘT LƯỢT — xem `NhacTheoDoi72Gio`.
+     *
+     * Lời nhắc tới khi app đã đóng, nên chữ phải nằm sẵn trong SharedPreferences,
+     * đã qua catalog i18n ở tầng web. Thiếu chữ, hoặc số câu không khớp số mốc,
+     * thì TỪ CHỐI — không hẹn một lời nhắc sẽ hiện ra trống hay lệch mốc.
+     */
+    @PluginMethod
+    public void henNhacTheoDoi72Gio(PluginCall call) {
+        Double batDau = call.getDouble("batDau");
+        String tieuDe = call.getString("tieuDe");
+        String noiDungJson = call.getString("noiDungJson");
+        if (batDau == null || batDau <= 0 || tieuDe == null || noiDungJson == null) {
+            call.reject("THIEU_DU_LIEU");
+            return;
+        }
+        try {
+            if (new org.json.JSONArray(noiDungJson).length() != NhacTheoDoi72Gio.MOC_GIO.length) {
+                call.reject("SAI_SO_MOC");
+                return;
+            }
+        } catch (JSONException e) {
+            call.reject("NOI_DUNG_HONG");
+            return;
+        }
+        getContext().getSharedPreferences(NhacTheoDoi72Gio.KHO, android.content.Context.MODE_PRIVATE)
+                .edit()
+                .putLong(NhacTheoDoi72Gio.KHOA_BAT_DAU, batDau.longValue())
+                .putString(NhacTheoDoi72Gio.KHOA_TIEU_DE, tieuDe)
+                .putString(NhacTheoDoi72Gio.KHOA_NOI_DUNG, noiDungJson)
+                .apply();
+        JSObject r = new JSObject();
+        r.put("soMocDaHen", NhacTheoDoi72Gio.henLich(getContext()));
+        call.resolve(r);
+    }
+
+    @PluginMethod
+    public void huyNhacTheoDoi72Gio(PluginCall call) {
+        NhacTheoDoi72Gio.huy(getContext());
+        call.resolve();
+    }
+
     // ─────────── Nhắc cuộc gọi dài ───────────
 
     /**

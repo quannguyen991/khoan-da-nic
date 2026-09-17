@@ -61,10 +61,42 @@ function timSoTrongChuoi(o) {
   return m ? m[0] : null;
 }
 
+/** Tóm tắt dài hơn thì không còn là tóm tắt — là dán nguyên bài báo vào kho. */
+const TOI_DA_TOM_TAT = 160;
+
+/**
+ * Số di động Việt Nam: 10 chữ số, bắt đầu bằng 0.
+ *
+ * ⚠️ VÌ SAO CHẶN RIÊNG TRONG sourceUrl. Đường dẫn của Bộ Công an có mã bài 10
+ * chữ số (`…-1758700973`), nên `sourceUrl` phải được miễn bộ chặn chuỗi số dài.
+ * Mã bài đó bắt đầu bằng 1 (dạng mốc thời gian); số di động bắt đầu bằng 0.
+ * Khác hình dạng, nên miễn cho mã bài mà vẫn chặn được số điện thoại.
+ */
+const RE_SO_DI_DONG = /(?<!\d)0\d{9}(?!\d)/;
+
+/**
+ * §11 — CẢNH BÁO CHÍNH THỨC PHẢI TRUY NGƯỢC ĐƯỢC TỚI CƠ QUAN NHÀ NƯỚC.
+ *
+ * Chỉ nhận `https` trên tên miền `.gov.vn`. Người dùng chốt ngày 17/9/2026:
+ * lấy trang của công an và cơ quan nhà nước, KHÔNG lấy báo chí đưa tin lại.
+ *
+ * Đọc bằng `new URL()` chứ không soi chuỗi: `https://bocongan.gov.vn@evil.com`
+ * trông như trang Bộ Công an nhưng tên miền thật là `evil.com`.
+ */
+function kiemSourceUrl(url) {
+  if (typeof url !== 'string' || !url) throw new LoiIntel('NGUON_A_THIEU_SOURCE_URL');
+  let u;
+  try { u = new URL(url); } catch { throw new LoiIntel('NGUON_A_THIEU_SOURCE_URL'); }
+  if (u.protocol !== 'https:') throw new LoiIntel('SOURCE_URL_PHAI_HTTPS');
+  if (u.username || u.password) throw new LoiIntel('NGUON_A_KHONG_PHAI_GOV_VN');
+  if (!u.hostname.endsWith('.gov.vn')) throw new LoiIntel('NGUON_A_KHONG_PHAI_GOV_VN');
+  if (RE_SO_DI_DONG.test(url)) throw new LoiIntel('SOURCE_URL_CHUA_SO_DIEN_THOAI');
+}
+
 /**
  * §11 — SỐ LƯỢT BÁO CÁO PHẢI CÓ THẬT. Mục nhập từ nguồn B phải kèm số báo cáo
  * đã đếm được, và số đó không được tự sinh ra.
- * §11 — CẢNH BÁO PHẢI CÓ NGUỒN. Nguồn A phải có `sourceUrl`.
+ * §11 — CẢNH BÁO PHẢI CÓ NGUỒN. Nguồn A phải có `sourceUrl` trên `.gov.vn`.
  */
 function kiemMuc(muc) {
   if (!muc || typeof muc !== 'object') throw new LoiIntel('MUC_KHONG_HOP_LE');
@@ -72,17 +104,35 @@ function kiemMuc(muc) {
   const viPham = timDanhTinh(muc);
   if (viPham) throw new LoiIntel('MUC_CHUA_DANH_TINH', viPham);
 
-  const so = timSoTrongChuoi(muc);
-  if (so) throw new LoiIntel('MUC_CHUA_CHUOI_SO_DAI', so);
-
+  if (muc.id !== undefined && (typeof muc.id !== 'string' || !/^[a-z0-9][a-z0-9-]{2,80}$/.test(muc.id))) {
+    throw new LoiIntel('ID_KHONG_HOP_LE');
+  }
   if (!muc.maThuDoan || !/^[a-z][a-z0-9_]+$/.test(muc.maThuDoan)) {
     throw new LoiIntel('THIEU_MA_THU_DOAN');
   }
   if (!Object.values(NGUON).includes(muc.nguon)) throw new LoiIntel('NGUON_LA');
 
-  if (muc.nguon === NGUON.A_CHINH_THUC) {
-    if (typeof muc.sourceUrl !== 'string' || !/^https?:\/\//.test(muc.sourceUrl)) {
-      throw new LoiIntel('NGUON_A_THIEU_SOURCE_URL');   // §11 — cảnh báo không nguồn
+  const laNguonA = muc.nguon === NGUON.A_CHINH_THUC;
+  if (laNguonA) kiemSourceUrl(muc.sourceUrl);   // §11 — cảnh báo không nguồn
+
+  /*
+   * ⚠️ MIỄN QUÉT SỐ DÀI CHO ĐÚNG MỘT TRƯỜNG, CỦA ĐÚNG MỘT NGUỒN.
+   * `sourceUrl` của nguồn A đã qua `kiemSourceUrl` ở trên. Mọi trường khác — kể
+   * cả `sourceUrl` của nguồn khác — vẫn bị quét như cũ.
+   */
+  const so = timSoTrongChuoi(laNguonA ? { ...muc, sourceUrl: undefined } : muc);
+  if (so) throw new LoiIntel('MUC_CHUA_CHUOI_SO_DAI', so);
+
+  for (const truong of ['tomTat', 'tomTatEn']) {
+    if (muc[truong] !== undefined && muc[truong] !== null) {
+      if (typeof muc[truong] !== 'string') throw new LoiIntel('TOM_TAT_KHONG_HOP_LE');
+      if (muc[truong].length > TOI_DA_TOM_TAT) throw new LoiIntel('TOM_TAT_QUA_DAI', truong);
+    }
+  }
+  if (muc.ngayCongBo !== undefined) {
+    const ngay = typeof muc.ngayCongBo === 'string' ? muc.ngayCongBo : '';
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(ngay) || Number.isNaN(Date.parse(ngay))) {
+      throw new LoiIntel('NGAY_CONG_BO_KHONG_HOP_LE');
     }
   }
   if (muc.nguon === NGUON.B_TONG_HOP) {
@@ -103,6 +153,15 @@ function kiemMuc(muc) {
  */
 const NGUONG_BAO_CAO_TOI_THIEU = 3;
 
+/**
+ * Khoá của một mục: `id` nếu có, không thì mã thủ đoạn.
+ *
+ * ⚠️ TRƯỚC ĐÂY CHỈ DÙNG MÃ THỦ ĐOẠN. Công an Lâm Đồng và Hưng Yên cùng cảnh báo
+ * "lấy lại tiền bị lừa" thì cảnh báo sau đè mất cảnh báo trước. Mục cũ không có
+ * `id` vẫn khoá theo mã thủ đoạn, nên mọi chỗ gọi cũ vẫn chạy.
+ */
+const khoaCua = (m) => m.id ?? m.maThuDoan;
+
 function taoKho() {
   const muc = new Map();
   return {
@@ -110,7 +169,7 @@ function taoKho() {
     them(m) {
       kiemMuc(m);
       const ban = { ...m, trangThai: 'cho_duyet', duyetBoi: null };
-      muc.set(m.maThuDoan, ban);
+      muc.set(khoaCua(m), ban);
       return ban;
     },
 
@@ -142,7 +201,44 @@ function taoKho() {
   };
 }
 
+/**
+ * Nạp tệp `backend/data/canh-bao-chinh-thuc.json` vào kho.
+ *
+ * ⚠️ VẪN ĐI QUA CỔNG DUYỆT. Tệp ghi `duyet: { boi, luc }` cho mục đã có người
+ * duyệt, nhưng mục vẫn vào kho bằng `them()` — tức là `cho_duyet` — rồi mới qua
+ * `duyet()` với đúng tên đó. Trường `trangThai` hay `duyetBoi` tự khai trong tệp
+ * bị bỏ đi trước khi nạp: không có đường nào nhập thẳng trạng thái đã duyệt.
+ *
+ * ⚠️ MỘT MỤC HỎNG KHÔNG LÀM HỎNG CẢ TỆP. Lỗi được gom lại để kể ra; máy chủ
+ * không được sập chỉ vì một đường dẫn gõ sai.
+ */
+function napTuDuLieu(kho, duLieu) {
+  const ketQua = { nap: 0, daDuyet: 0, loi: [] };
+  const ds = duLieu && Array.isArray(duLieu.canhBao) ? duLieu.canhBao : [];
+
+  for (const tho of ds) {
+    if (!tho || typeof tho !== 'object') {
+      ketQua.loi.push({ id: null, ma: 'MUC_KHONG_HOP_LE' });
+      continue;
+    }
+    // eslint-disable-next-line no-unused-vars
+    const { duyet, trangThai, duyetBoi, ...m } = tho;
+    try {
+      kho.them(m);
+      ketQua.nap += 1;
+      const nguoi = duyet && typeof duyet.boi === 'string' ? duyet.boi.trim() : '';
+      if (nguoi) {
+        kho.duyet(khoaCua(m), nguoi);
+        ketQua.daDuyet += 1;
+      }
+    } catch (e) {
+      ketQua.loi.push({ id: m.id ?? null, ma: e && e.ma ? e.ma : 'LOI_KHONG_RO' });
+    }
+  }
+  return ketQua;
+}
+
 module.exports = {
-  taoKho, kiemMuc, timDanhTinh, timSoTrongChuoi, LoiIntel,
-  TRUONG_DANH_TINH, TRANG_THAI, NGUON, NGUONG_BAO_CAO_TOI_THIEU,
+  taoKho, kiemMuc, kiemSourceUrl, napTuDuLieu, timDanhTinh, timSoTrongChuoi, LoiIntel,
+  TRUONG_DANH_TINH, TRANG_THAI, NGUON, NGUONG_BAO_CAO_TOI_THIEU, TOI_DA_TOM_TAT,
 };

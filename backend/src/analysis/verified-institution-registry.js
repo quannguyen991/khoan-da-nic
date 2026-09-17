@@ -24,7 +24,26 @@ const DUONG_MAC_DINH = path.join(__dirname, '..', '..', '..', 'public', 'config'
 const TRUONG_BAT_BUOC = [
   'id', 'countryCode', 'type', 'canonicalName',
   'officialDomains', 'officialPhoneNumbers', 'sourceUrl', 'verifiedAt', 'reviewStatus',
+  'reviewedBy',
 ];
+
+/**
+ * Nguồn phải nằm trên ĐÚNG tên miền chính thức của tổ chức đó.
+ *
+ * ⚠️ ĐỌC BẰNG `new URL()`, KHÔNG SOI CHUỖI. `https://vietcombank.com.vn@trang-la.com`
+ * trông như trang Vietcombank nhưng tên miền thật là `trang-la.com`. Và
+ * `vietcombank.com.vn.trang-la.com` KHÔNG kết thúc bằng `.vietcombank.com.vn`.
+ */
+function nguonTrenTenMienChinhThuc(sourceUrl, officialDomains) {
+  let u;
+  try { u = new URL(sourceUrl); } catch { return false; }
+  if (u.protocol !== 'https:' || u.username || u.password) return false;
+  const host = u.hostname.toLowerCase();
+  return officialDomains.some((d) => {
+    const mien = String(d).toLowerCase();
+    return host === mien || host.endsWith(`.${mien}`);
+  });
+}
 
 const TRANG_THAI_DUOC_HIEN = new Set(['approved']);
 
@@ -38,8 +57,19 @@ function mucHopLe(m) {
   if (typeof m.sourceUrl !== 'string' || !/^https?:\/\//.test(m.sourceUrl)) {
     return { hopLe: false, lyDo: 'sourceUrl phải là URL http(s) — số không nguồn thì không dùng được' };
   }
+  if (!nguonTrenTenMienChinhThuc(m.sourceUrl, m.officialDomains)) {
+    return { hopLe: false, lyDo: 'sourceUrl phải là https trên đúng tên miền chính thức của tổ chức' };
+  }
   if (!/^\d{4}-\d{2}-\d{2}$/.test(m.verifiedAt)) {
     return { hopLe: false, lyDo: 'verifiedAt phải dạng YYYY-MM-DD' };
+  }
+  // Duyệt là đứng tên chịu trách nhiệm — số không có người đứng tên thì không dùng.
+  if (typeof m.reviewedBy !== 'string' || !m.reviewedBy.trim()) {
+    return { hopLe: false, lyDo: 'reviewedBy phải ghi tên người duyệt' };
+  }
+  if (m.officialPhoneNumbers.length === 0
+    || !m.officialPhoneNumbers.every((so) => typeof so === 'string' && /^\+?[\d\s().-]{6,20}$/.test(so))) {
+    return { hopLe: false, lyDo: 'officialPhoneNumbers phải có ít nhất một số, chỉ gồm chữ số' };
   }
   return { hopLe: true, lyDo: null };
 }
@@ -116,5 +146,5 @@ function trangThaiDanhBa(duong) {
 
 module.exports = {
   layDanhBa, theoNuoc, laSoDaXacMinh, trangThaiDanhBa,
-  mucHopLe, themMucTuAi, TRUONG_BAT_BUOC, DUONG_MAC_DINH,
+  mucHopLe, themMucTuAi, nguonTrenTenMienChinhThuc, TRUONG_BAT_BUOC, DUONG_MAC_DINH,
 };

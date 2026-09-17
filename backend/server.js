@@ -31,7 +31,8 @@ const KP = require('./src/khoan-proof');
 const KY = require('./src/khoan-proof-ky');
 const VR = require('./src/verified-request');
 const TC = require('./src/trusted-circle');
-const { taoKho, traNguCanh } = require('./src/intel-radar');
+const { taoKho, traNguCanh, docMaRaDa } = require('./src/intel-radar');
+const { napTuDuLieu } = require('./src/intel-store');
 const { moKho } = require('./src/vault-store');
 const { canDangNhap } = require('./src/auth');
 const {
@@ -841,12 +842,32 @@ app.get('/api/ke-hoach-phuc-hoi', (req, res) => {
 
 /** Ra-đa: trả NGỮ CẢNH. §4.2 — không đụng vào mức rủi ro. */
 const khoIntel = taoKho();
+
+/*
+ * CẢNH BÁO CHÍNH THỨC — nạp một lần lúc khởi động, từ tệp trong mã nguồn.
+ *
+ * `require` chứ không đọc bằng `fs`: esbuild gói tệp JSON vào `dist/server.cjs`,
+ * nên bản chạy trên Render không phụ thuộc thư mục làm việc.
+ *
+ * ⚠️ HỎNG THÌ KHO RỖNG, MÁY CHỦ VẪN CHẠY. Ra-đa là ngữ cảnh đi kèm; phân tích
+ * lừa đảo không được chết theo một tệp dữ liệu gõ sai.
+ */
+try {
+  const kq = napTuDuLieu(khoIntel, require('./data/canh-bao-chinh-thuc.json'));
+  console.log(`[ra-da] nạp ${kq.nap} cảnh báo chính thức, ${kq.daDuyet} đã duyệt, ${kq.loi.length} lỗi`);
+  for (const l of kq.loi) console.error('[ra-da]', l.id, l.ma);
+} catch (e) {
+  console.error('[ra-da] không nạp được tệp cảnh báo chính thức:', e?.message);
+}
+
+/*
+ * ⚠️ NHẬN MÃ, KHÔNG NHẬN NỘI DUNG. Giao diện gửi `hoKichBan` + `maLyDo` của
+ * lượt phân tích bác đang xem. Gửi kèm `vanBan` cũng bị bỏ — xem `docMaRaDa`.
+ */
 app.post('/api/ra-da', chanDoc, (req, res) => {
-  const { vanBan } = req.body || {};
-  if (typeof vanBan !== 'string' || !vanBan.trim()) {
-    return res.status(400).json({ maLoi: 'THIEU_DAU_VAO' });
-  }
-  res.json(traNguCanh(khoIntel, analyze({ vanBan })));
+  const vao = docMaRaDa(req.body);
+  if (!vao.ok) return res.status(400).json({ maLoi: vao.maLoi });
+  res.json(traNguCanh(khoIntel, vao));
 });
 
 /**
@@ -1015,7 +1036,11 @@ app.post('/api/detect/canh-bao/:id/:hanhDong', (req, res) => {
   const luc = Date.now();
   switch (hanhDong) {
     case 'mo': return res.json(CB.ghiNhanMo(khoCanhBao, id, luc));
+    // `goi` là NGƯỜI THÂN bấm gọi; `bac-goi` là BÁC bấm gọi trên màn cảnh báo.
+    // Hai hành động hai người — gộp làm một là báo cáo tuần nói người thân đã gọi
+    // trong khi người bấm là bác.
     case 'goi': return res.json(CB.ghiNhanBamGoi(khoCanhBao, id, luc));
+    case 'bac-goi': return res.json(CB.ghiNhanBacGoi(khoCanhBao, id, luc));
     case 'toi-on': return res.json(CB.ghiNhanToiOn(khoCanhBao, id, luc));
     case 'ket-qua':
       try {

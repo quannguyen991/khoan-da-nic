@@ -179,7 +179,12 @@ export function useCanhBaoThuDong({
   }, [ghiHanhDong, dong]);
 
   const goi = useCallback(() => {
-    ghiHanhDong('goi');
+    /*
+     * ⚠️ `bac-goi`, KHÔNG PHẢI `goi`. Ở máy chủ, `goi` nghĩa là NGƯỜI THÂN bấm gọi.
+     * Bản trước gửi `goi` từ chính màn của bác, nên báo cáo tuần đếm là người thân
+     * đã gọi trong khi người bấm là bác. Sửa 17/9/2026.
+     */
+    ghiHanhDong('bac-goi');
     onGoiNguoiThan?.();
     dong();
   }, [ghiHanhDong, onGoiNguoiThan, dong]);

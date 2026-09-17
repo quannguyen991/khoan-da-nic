@@ -63,4 +63,9 @@
     <string name="kenh_cuoc_goi_mo_ta">Nhắc bác khi một cuộc gọi kéo dài bất thường</string>
     <string name="cuoc_goi_thuong_truc_tieu_de">Khoan Đã đang trông chừng cuộc gọi</string>
     <string name="cuoc_goi_thuong_truc_noi_dung">Chỉ đếm thời gian, không nghe nội dung. Chạm để tắt.</string>
+
+    <!-- ─── Nhắc trong 72 giờ sau sự cố ─── -->
+    <!-- §11: không hứa lấy lại tiền. Chữ của từng lời nhắc do tầng web nạp xuống. -->
+    <string name="kenh_theo_doi_72h_ten">Theo dõi 72 giờ sau sự cố</string>
+    <string name="kenh_theo_doi_72h_mo_ta">Nhắc bác các việc cần làm trong 72 giờ sau khi lỡ chuyển tiền hoặc đọc mã</string>
 </resources>

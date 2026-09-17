@@ -1081,6 +1081,166 @@ export const MAN_DONG_HO: Record<string, Cap> = {
   ),
 };
 
+// ═══════════════ Cảnh báo chính thức trong Ra-đa ═══════════════
+
+/**
+ * ⚠️ NÓI VỀ THỦ ĐOẠN, KHÔNG NÓI VỀ TIN NHẮN BÁC ĐANG CẦM (§11, §4.2).
+ * Cơ quan nhà nước cảnh báo một KIỂU lừa giống vậy. Họ không xác nhận gì về
+ * người đang nhắn cho bác — nên tiêu đề là "thủ đoạn tương tự", không phải
+ * "công an xác nhận đây là lừa đảo".
+ */
+// ═══════════════ Đội phản ứng nhanh ═══════════════
+
+/**
+ * ⚠️ KHÔNG CÂU NÀO HỨA MÁY TỰ GỌI. Người dùng chốt 17/9/2026: bỏ hẳn hướng gọi tự
+ * động thay bác. Đội chỉ quyết định nút gọi trỏ vào AI.
+ */
+export const DOI_PHAN_UNG: Record<string, Cap> = {
+  TIEU_DE: c('Đội phản ứng nhanh', 'Quick response team'),
+  MO_TA: c(
+    'Chọn tối đa 3 người bác tin, mỗi người một việc. Khi có cảnh báo, nút gọi sẽ trỏ đúng người. Khoan Đã không tự gọi thay bác.',
+    'Choose up to 3 people you trust, each with a job. When a warning appears, the call button points to the right person. Khoan Đã never calls on your behalf.',
+  ),
+  CHUA_CO_NGUOI: c(
+    'Bác chưa lưu người thân nào. Thêm người thân trước rồi lập đội.',
+    'You have not saved any family members yet. Add someone first, then build your team.',
+  ),
+  THEM_NGUOI_THAN: c('Thêm người thân', 'Add a family member'),
+  THU_TU_GOI: c('Thứ tự gọi', 'Call order'),
+  NGOAI_DOI: c('Người thân chưa vào đội', 'Family members not in the team'),
+  THEM_VAO_DOI: c('Thêm vào đội', 'Add to team'),
+  BO_KHOI_DOI: c('Bỏ khỏi đội', 'Remove from team'),
+  GOI_SOM_HON: c('Gọi sớm hơn', 'Call earlier'),
+  GOI_SAU: c('Gọi sau', 'Call later'),
+  DAY: c(
+    'Đội đã đủ 3 người. Bỏ bớt một người rồi thêm người mới.',
+    'The team already has 3 people. Remove someone before adding another.',
+  ),
+  VAI_NGUOI_GOI: c('Gọi đầu tiên khi có cảnh báo', 'First call on a warning'),
+  VAI_HO_TRO_NGAN_HANG: c('Hỗ trợ việc ngân hàng', 'Helps with the bank'),
+  VAI_HO_TRO_THIET_BI: c('Hỗ trợ việc điện thoại', 'Helps with the phone'),
+  CHUA_CO_VAI: c('Chưa nhận việc nào — vẫn được gọi theo thứ tự', 'No job yet — still called in order'),
+  KHONG_SO: c(
+    'Chưa có số điện thoại — nút gọi sẽ bỏ qua người này',
+    'No phone number — the call button will skip this person',
+  ),
+  CHUA_LAP_DOI: c(
+    'Chưa lập đội — nút gọi đang trỏ vào người đầu danh sách',
+    'No team yet — the call button uses the first person on your list',
+  ),
+  GOI_TIEP: c('Không gọi được? Gọi {ten}', "Can't reach them? Call {ten}"),
+};
+
+// ═══════════════ Thông báo gửi người thân ═══════════════
+
+/**
+ * Câu TỐI GIẢN cho thông báo gửi người thân, và dòng "bác đã làm gì".
+ *
+ * ⚠️ KHÔNG NỘI DUNG TIN NHẮN, KHÔNG OTP, KHÔNG SỐ TIỀN (§6.9). ⚠️ "Đã bấm gọi"
+ * không có nghĩa là đã nói chuyện được — câu nói đúng thứ hệ thống biết (§9.4).
+ * Mã đến từ `backend/src/canh-bao-hai-phia.js`; test giữ hai bên khớp nhau.
+ */
+export const THONG_BAO_NGUOI_THAN: Record<string, Cap> = {
+  dang_gap_rui_ro_cao_goi_ngay: c(
+    '{ten} đang gặp tình huống có rủi ro cao. Vui lòng gọi ngay.',
+    '{ten} is in a high-risk situation. Please call now.',
+  ),
+  co_tin_nghi_ngo_theo_doi: c(
+    '{ten} vừa gặp một tin có dấu hiệu nghi ngờ. Chưa cần gọi ngay — bạn có thể theo dõi.',
+    '{ten} just received a message with suspicious signs. No need to call yet — you can keep an eye on it.',
+  ),
+  goi_ngay: c('Cần gọi ngay', 'Call now'),
+  theo_doi: c('Theo dõi, chưa cần gọi', 'Keep an eye on it, no need to call yet'),
+  chua_thao_tac: c('{ten} chưa bấm gì trên màn cảnh báo', "{ten} hasn't pressed anything on the warning yet"),
+  da_bam_goi_nguoi_than: c('{ten} đã bấm gọi người thân', '{ten} pressed the button to call family'),
+  da_bam_toi_on: c('{ten} đã bấm "Tôi ổn"', '{ten} pressed "I\'m fine"'),
+};
+
+// ═══════════════ Theo dõi 72 giờ sau sự cố ═══════════════
+
+/**
+ * ⚠️ §11 — KHÔNG HỨA LẤY LẠI ĐƯỢC TIỀN, KHÔNG TRÁCH BÁC. Test chặn các cụm hứa hẹn:
+ * `test/theo-doi-72-gio.test.js`. `TB_*` là chữ của lời nhắc trên Android — tầng
+ * web nạp xuống, Java không tự viết câu nào.
+ */
+export const THEO_DOI_72_GIO: Record<string, Cap> = {
+  TIEU_DE: c('Đang theo dõi 72 giờ sau sự cố', 'Watching the 72 hours after the incident'),
+  CON_LAI: c('Còn khoảng {gio} giờ', 'About {gio} hours left'),
+  NHAC_1: c(
+    'Đừng chuyển thêm tiền cho bất kỳ ai, kể cả người xưng công an hay ngân hàng.',
+    'Do not send more money to anyone, even someone claiming to be the police or the bank.',
+  ),
+  NHAC_2: c(
+    'Ai hứa lấy lại tiền mà đòi nộp phí trước là lừa đảo lần hai.',
+    'Anyone who promises to recover your money for an upfront fee is running a second scam.',
+  ),
+  NHAC_3: c(
+    'Gọi ngân hàng bằng số trong danh sách của Khoan Đã hoặc số in ở mặt sau thẻ.',
+    'Call your bank using a number from the Khoan Đã list or the one on the back of your card.',
+  ),
+  KET_THUC: c('Kết thúc theo dõi', 'Stop watching'),
+  XEM: c('Xem các việc cần nhớ', 'See what to remember'),
+  KHONG_THEO_DOI: c('Hiện không có đợt theo dõi nào.', 'There is no active watch right now.'),
+  CO_NHAC_TREN_MAY: c(
+    'Điện thoại sẽ nhắc bác ở các mốc 2, 24, 48 và 72 giờ.',
+    'Your phone will remind you at 2, 24, 48 and 72 hours.',
+  ),
+  TB_TIEU_DE: c('Khoan Đã · theo dõi 72 giờ', 'Khoan Đã · 72-hour watch'),
+  TB_MOC_2: c(
+    'Bác đã gọi ngân hàng khoá tài khoản chưa? Dùng số trong Khoan Đã hoặc số in sau thẻ.',
+    'Have you called your bank to lock the account? Use the number in Khoan Đã or on the back of your card.',
+  ),
+  TB_MOC_24: c(
+    'Kẻ gian hay quay lại lần hai. Đừng chuyển thêm tiền, đừng đọc mã cho ai.',
+    'Scammers often come back a second time. Do not send more money, do not read out any code.',
+  ),
+  TB_MOC_48: c(
+    'Ai hứa lấy lại tiền mà đòi phí trước là lừa đảo. Hỏi con cháu trước khi làm gì.',
+    'Anyone offering to recover your money for a fee is a scam. Ask your family before doing anything.',
+  ),
+  TB_MOC_72: c(
+    'Hết 72 giờ theo dõi. Nếu còn ai liên lạc về chuyện tiền, bác vẫn hỏi con cháu trước.',
+    'The 72-hour watch is over. If anyone contacts you about the money, still ask your family first.',
+  ),
+};
+
+// ═══════════════ Số tổng đài ngân hàng ═══════════════
+
+/**
+ * ⚠️ Người dùng chốt 17/9/2026: số tổng đài CHỈ để sẵn trong app để bác tự bấm —
+ * không mở app ngân hàng, không tự gọi. Không câu nào ở đây được hứa hơn thế.
+ */
+export const SO_NGAN_HANG: Record<string, Cap> = {
+  TIEU_DE: c('Số tổng đài ngân hàng', 'Bank hotlines'),
+  MO_TA_THE: c(
+    'Số lấy từ trang chính thức của từng ngân hàng, có người kiểm lại',
+    "Numbers taken from each bank's official website and checked by a person",
+  ),
+  HUONG_DAN: c(
+    'Chỉ gọi số trong danh sách này hoặc số in ở mặt sau thẻ. Không gọi lại số vừa gọi cho bác, không bấm số trong tin nhắn.',
+    'Only call a number from this list or the one printed on the back of your card. Never call back the number that called you, and never tap a number in a message.',
+  ),
+  DANG_TAI: c('Đang tải danh sách số…', 'Loading the list…'),
+  RONG: c(
+    'Khoan Đã chưa có số ngân hàng nào đã được kiểm lại. Bác gọi số in ở mặt sau thẻ ngân hàng.',
+    'Khoan Đã has no checked bank numbers yet. Call the number printed on the back of your bank card.',
+  ),
+  LOI: c(
+    'Chưa tải được danh sách số. Bác gọi số in ở mặt sau thẻ ngân hàng.',
+    'Could not load the list. Call the number printed on the back of your bank card.',
+  ),
+  GOI: c('Gọi {so}', 'Call {so}'),
+  NGUON: c('Nguồn: {tenMien} · kiểm lại ngày {ngay}', 'Source: {tenMien} · checked on {ngay}'),
+  MO_DANH_SACH: c('Xem số tổng đài ngân hàng', 'Show bank hotlines'),
+  DONG_DANH_SACH: c('Ẩn số tổng đài ngân hàng', 'Hide bank hotlines'),
+};
+
+export const CANH_BAO_CHINH_THUC: Record<string, Cap> = {
+  TIEU_DE: c('Cơ quan nhà nước đã cảnh báo thủ đoạn tương tự', 'Authorities have warned about a similar tactic'),
+  CONG_BO: c('Công bố ngày {ngay}', 'Published {ngay}'),
+  DOC_BAN_GOC: c('Đọc cảnh báo gốc trên {tenMien}', 'Read the original warning on {tenMien}'),
+};
+
 // ═══════════════ Tra cứu ═══════════════
 
 /**

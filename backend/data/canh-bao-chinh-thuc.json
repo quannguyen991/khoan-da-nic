@@ -1,0 +1,114 @@
+{
+  "phienBan": 1,
+  "ghiChu": "Mục chưa có người duyệt KHÔNG hiện trong ứng dụng. Duyệt bằng scripts/duyet-canh-bao.js, ghi tên người thật. Tóm tắt viết bằng lời của Khoan Đã, không chép bài gốc. Ngày 17/9/2026 Claude đã đọc lại từng trang để đối chiếu tóm tắt; người duyệt vẫn phải tự mở trang gốc trước khi duyệt.",
+  "canhBao": [
+    {
+      "id": "soc-trang-gia-danh-cong-an-2025-02",
+      "maThuDoan": "gia_danh_cong_an",
+      "nguon": "a_canh_bao_chinh_thuc",
+      "coQuan": "Công an tỉnh Sóc Trăng",
+      "ngayCongBo": "2025-02-20",
+      "tomTat": "Kẻ gian gọi điện xưng công an, doạ có vấn đề pháp lý cần làm rõ, rồi đòi ảnh căn cước, thông tin cá nhân và mã OTP để rút tiền trong tài khoản.",
+      "tomTatEn": "Callers posing as police claim there is a legal problem, then demand ID photos, personal details and OTP codes to empty the bank account.",
+      "sourceUrl": "https://bocongan.gov.vn/bai-viet/canh-giac-thu-doan-gia-danh-luc-luong-cong-an-de-thuc-hien-hanh-vi-lua-dao-chiem-doat-tai-san-d22-t43600",
+      "tinHieuLienQuan": [
+        "ID_AUTHORITY_IMPERSONATION",
+        "MAN_FEAR_THREAT"
+      ],
+      "duyet": {
+        "boi": "quannguyen991",
+        "luc": "2026-09-17"
+      }
+    },
+    {
+      "id": "bca-vneid-gia-mao-2025-07",
+      "maThuDoan": "chiem_quyen_thiet_bi",
+      "nguon": "a_canh_bao_chinh_thuc",
+      "coQuan": "Bộ Công an",
+      "ngayCongBo": "2025-07-05",
+      "tomTat": "Kẻ gian xưng cán bộ xã, phường, bảo cài VNeID giả có mã độc để chiếm điện thoại và rút tiền. Muốn cập nhật thông tin thì đến thẳng công an xã, phường.",
+      "tomTatEn": "Callers posing as local officials push a fake VNeID app with malware that takes over the phone. Update your details in person at local police.",
+      "sourceUrl": "https://bocongan.gov.vn/bai-viet/canh-bao-thu-doan-lua-dao-cai-ung-dung-vneid-gia-mao-d22-t45880",
+      "tinHieuLienQuan": [
+        "DEV_INSTALL_APK_UNKNOWN",
+        "DEV_REMOTE_CONTROL_APP"
+      ],
+      "duyet": {
+        "boi": "quannguyen991",
+        "luc": "2026-09-17"
+      }
+    },
+    {
+      "id": "quang-tri-vneid-gia-mao-2025-07",
+      "maThuDoan": "chiem_quyen_thiet_bi",
+      "nguon": "a_canh_bao_chinh_thuc",
+      "coQuan": "Công an tỉnh Quảng Trị",
+      "ngayCongBo": "2025-07-07",
+      "tomTat": "Kẻ gian đọc đúng thông tin cá nhân của người nghe để lấy lòng tin, rồi bảo cài VNeID giả. Lỡ cài rồi thì gọi ngân hàng khoá tài khoản và tắt điện thoại.",
+      "tomTatEn": "Scammers recite your real personal details to win trust, then push a fake VNeID app. If installed, call your bank to lock the account and turn the phone off.",
+      "sourceUrl": "https://congan.quangtri.gov.vn/canh-bao-thu-doan-lua-dao-cai-ung-dung-vneid-gia-mao/",
+      "tinHieuLienQuan": [
+        "DEV_INSTALL_APK_UNKNOWN",
+        "DEV_REMOTE_CONTROL_APP"
+      ],
+      "duyet": {
+        "boi": "quannguyen991",
+        "luc": "2026-09-17"
+      }
+    },
+    {
+      "id": "lam-dong-lay-lai-tien-2025-09",
+      "maThuDoan": "gia_danh_ho_tro_lay_lai_tien",
+      "nguon": "a_canh_bao_chinh_thuc",
+      "coQuan": "Phòng Cảnh sát hình sự, Công an tỉnh Lâm Đồng",
+      "ngayCongBo": "2025-09-24",
+      "tomTat": "Tài khoản Facebook giả tìm người từng mất tiền vì cá cược trên mạng, nói có cách lấy lại tiền, bắt chuyển thêm tiền để xác minh rồi chặn liên lạc.",
+      "tomTatEn": "Fake Facebook accounts target people who lost money to online betting, claim they can recover it, ask for more transfers to verify, then vanish.",
+      "sourceUrl": "https://bocongan.gov.vn/bai-viet/canh-giac-voi-thu-doan-ho-tro-lay-lai-tien-bi-lua-dao-1758700973",
+      "tinHieuLienQuan": [
+        "FIN_RECOVERY_FEE",
+        "ID_RECOVERY_SUPPORT_IMPERSONATION"
+      ],
+      "duyet": {
+        "boi": "quannguyen991",
+        "luc": "2026-09-17"
+      }
+    },
+    {
+      "id": "hung-yen-lay-lai-tien-2025-09",
+      "maThuDoan": "gia_danh_ho_tro_lay_lai_tien",
+      "nguon": "a_canh_bao_chinh_thuc",
+      "coQuan": "Công an phường Trần Hưng Đạo, Công an tỉnh Hưng Yên",
+      "ngayCongBo": "2025-09-05",
+      "tomTat": "Kẻ gian xưng công an kinh tế hoặc tổ chức hỗ trợ đòi tiền, gọi hay nhắn cho người từng bị lừa, hứa lấy lại tiền rồi đòi nộp phí hồ sơ trước.",
+      "tomTatEn": "Scammers posing as economic police or recovery groups call or message past victims, promise to recover the money, then demand upfront fees.",
+      "sourceUrl": "https://congan.hungyen.gov.vn/canh-giac-voi-thu-doan-gia-danh-co-quan-chuc-nang-giup-lay-lai-tien-da-bi-lua-dao-tren-khong-gian-mang-c230762.html",
+      "tinHieuLienQuan": [
+        "FIN_RECOVERY_FEE",
+        "ID_RECOVERY_SUPPORT_IMPERSONATION"
+      ],
+      "duyet": {
+        "boi": "quannguyen991",
+        "luc": "2026-09-17"
+      }
+    },
+    {
+      "id": "antv-mao-danh-nhnn-2024-08",
+      "maThuDoan": "gia_danh_ngan_hang",
+      "nguon": "a_canh_bao_chinh_thuc",
+      "coQuan": "Truyền hình Công an nhân dân (ANTV)",
+      "ngayCongBo": "2024-08-24",
+      "tomTat": "Email giả danh Ngân hàng Nhà nước gửi link bắt cập nhật sinh trắc học trước hạn chót, kèm quyết định giả. Không bấm link lạ, không đưa OTP hay mật khẩu.",
+      "tomTatEn": "Fake emails claiming to be from the State Bank link to a biometric update with a deadline. Do not click unknown links; never share OTPs or passwords.",
+      "sourceUrl": "https://antv.gov.vn/phap-luat-3/canh-bao-lua-dao-mao-danh-ngan-hang-nha-nuoc-gui-link-cap-nhat-sinh-trac-hoc-0C2EBD169.html",
+      "tinHieuLienQuan": [
+        "ID_BANK_IMPERSONATION",
+        "WEB_BRAND_DOMAIN_MISMATCH"
+      ],
+      "duyet": {
+        "boi": "quannguyen991",
+        "luc": "2026-09-17"
+      }
+    }
+  ]
+}

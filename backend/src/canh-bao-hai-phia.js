@@ -204,6 +204,16 @@ function pushNguoiThan(kq, { canhBaoId, tenNguoiCaoTuoi = null, thoiDiem }) {
      * cũng chìm theo.
      */
     gomVaoBaoCaoNgay: !doChuong,
+    /*
+     * NGƯỜI THÂN CẦN LÀM GÌ — nói thành MÃ, không để họ tự đoán từ màu hay tiếng
+     * chuông. CAO: gọi ngay. NGHI_NGO: theo dõi, chưa cần gọi.
+     * `maCauThongBao` là câu tối giản của thông báo — chữ nằm ở catalog.
+     */
+    canLamGi: doChuong ? 'goi_ngay' : 'theo_doi',
+    maCauThongBao: doChuong ? 'dang_gap_rui_ro_cao_goi_ngay' : 'co_tin_nghi_ngo_theo_doi',
+    // Lúc đẩy đi thì bác chưa kịp làm gì. Mở chi tiết sẽ thấy bản cập nhật —
+    // xem `tinhTrangChoNguoiThan`.
+    nguoiCaoTuoiDaLam: ['chua_thao_tac'],
     hanhDong: ['goi_cho_bo_me_ngay', 'danh_dau_bao_nham'],
   };
 }
@@ -281,6 +291,8 @@ async function phatCanhBao({ kq, vongTron, kho, guiPush, ...tuyChon }) {
     nguoiThanDaDay: cong.gui ? endpointOk : false,
     nguoiThanDaMo: false,
     nguoiThanDaBamGoi: false,
+    hoKichBan: kq.hoKichBan || null,
+    nguoiCaoTuoiBamGoi: false,
     trangThaiGiaoNhan: trangThai,
     lyKhongGui: cong.gui ? loiGui : cong.lyDo,
 
@@ -329,6 +341,38 @@ const ghiNhanToiOn = (kho, id, luc = Date.now()) => kho.capNhat(id, {
   nguoiCaoTuoiBamToiOn: true, toiOnLuc: luc,
 });
 
+/** Người cao tuổi bấm gọi người thân trên màn cảnh báo. Không biết ai nhấc máy — chỉ biết đã bấm. */
+const ghiNhanBacGoi = (kho, id, luc = Date.now()) => kho.capNhat(id, {
+  nguoiCaoTuoiBamGoi: true, bacBamGoiLuc: luc,
+});
+
+/**
+ * NGƯỜI THÂN THẤY GÌ khi mở chi tiết một cảnh báo — TỐI THIỂU.
+ *
+ * Bốn thứ và chỉ bốn thứ: mức, loại tình huống, bác đã làm gì, và cần gọi ngay
+ * hay theo dõi. KHÔNG điểm số, KHÔNG nội dung tin nhắn, KHÔNG số điện thoại —
+ * người thân tin cậy được quyền NHẬN CẢNH BÁO, không được quyền xem đời sống
+ * của bác (`trusted-circle.js`, §9.8).
+ *
+ * "Đã bấm gọi" KHÔNG có nghĩa là đã nói chuyện được — mã nói đúng thứ hệ thống
+ * biết (§9.4).
+ */
+function tinhTrangChoNguoiThan(banGhi) {
+  if (!banGhi) return null;
+  const daLam = [];
+  if (banGhi.nguoiCaoTuoiBamGoi) daLam.push('da_bam_goi_nguoi_than');
+  if (banGhi.nguoiCaoTuoiBamToiOn) daLam.push('da_bam_toi_on');
+  return {
+    canhBaoId: banGhi.id,
+    thoiDiem: banGhi.thoiDiem,
+    nhan: banGhi.nhan,
+    hoKichBan: banGhi.hoKichBan ?? null,
+    maGiaiThich: banGhi.maGiaiThich ?? null,
+    canLamGi: NHAN_DO_CHUONG.has(banGhi.nhan) ? 'goi_ngay' : 'theo_doi',
+    nguoiCaoTuoiDaLam: daLam.length > 0 ? daLam : ['chua_thao_tac'],
+  };
+}
+
 /** Người thân đánh dấu báo nhầm — dữ liệu cải thiện luật, vào thẳng kho. */
 function danhDauKetQua(kho, id, ketQua, boi = null) {
   if (!KET_QUA.includes(ketQua)) throw new Error(`Kết quả không hợp lệ: ${ketQua}`);
@@ -338,29 +382,40 @@ function danhDauKetQua(kho, id, ketQua, boi = null) {
 /**
  * ĐƯỜNG DỰ PHÒNG KHI NGƯỜI THÂN KHÔNG NHẬN ĐƯỢC TRONG 60 GIÂY.
  *
- * ⚠️ CHƯA CẮM NHÀ CUNG CẤP NÀO — HÀM NÀY CHỈ QUYẾT ĐỊNH "CÓ CẦN HAY KHÔNG".
- * Nó KHÔNG gửi SMS, KHÔNG gọi tự động, và cố ý như vậy:
+ * ⚠️ CHƯA CẮM NHÀ CUNG CẤP NÀO — HÀM NÀY CHỈ QUYẾT ĐỊNH "CÓ CẦN HAY KHÔNG", VÀ
+ * BÁO AI LÀ NGƯỜI DỰ PHÒNG. Nó KHÔNG gửi SMS, KHÔNG gọi tự động:
  *
  *   TODO(cắm nhà cung cấp SMS) — cần trước khi bật:
  *     · hợp đồng brandname với nhà mạng (SMS từ số thường sẽ bị lọc spam,
  *       và mỉa mai thay, chính nó lại trông giống tin lừa đảo)
  *     · người thân đồng ý nhận SMS, có đường tắt
  *     · giới hạn tần suất — 60 giây × nhiều lượt = một trận bão tin nhắn
- *   TODO(gọi tự động) — §12 cấm "tự hứa chặn cuộc gọi"; gọi tự động thay người
- *     dùng cần một lần bàn riêng với chủ tài khoản, KHÔNG tự bật.
+ *
+ *   ĐÃ CHỐT 17/9/2026 — KHÔNG GỌI TỰ ĐỘNG. Người dùng bỏ hẳn hướng này. Chuyển
+ *     sang người kế tiếp là việc CON NGƯỜI bấm: bác bấm "không gọi được thì gọi
+ *     …", hoặc người dự phòng nhận thông báo rồi tự gọi. `daCam` giữ nguyên.
+ *
+ * `vongTron` (tuỳ chọn) để biết người dự phòng: thành viên vai `nguoi_du_phong`,
+ * chưa bị thu hồi, không phải người đã nhận cảnh báo đầu.
  *
  * Trả về ĐỀ NGHỊ, để tầng gọi (hoặc con người) quyết định. Không tự làm.
  */
-function canDuongDuPhong(banGhi, bayGio = Date.now()) {
+function canDuongDuPhong(banGhi, bayGio = Date.now(), vongTron = null) {
   if (!banGhi) return { can: false, ly: 'khong_co_ban_ghi' };
   if (banGhi.nhan !== 'CAO') return { can: false, ly: 'chi_ap_cho_nhan_cao' };
   if (banGhi.nguoiThanDaMo) return { can: false, ly: 'nguoi_than_da_mo' };
   if (bayGio - banGhi.thoiDiem < HAN_XAC_NHAN_MS) return { can: false, ly: 'chua_qua_60_giay' };
+  const nguoiDuPhongIds = Array.isArray(vongTron?.thanhVien)
+    ? vongTron.thanhVien
+      .filter((t) => t.vaiTro === 'nguoi_du_phong' && !t.daThuHoi && t.id !== banGhi.nguoiThanId)
+      .map((t) => t.id)
+    : [];
   return {
     can: true,
     ly: banGhi.nguoiThanDaDay ? 'day_di_nhung_khong_co_xac_nhan_mo' : 'khong_day_di_duoc',
     deNghi: ['sms_du_phong', 'bao_nguoi_du_phong'],
-    daCam: ['tu_dong_goi_thay_nguoi_dung'],   // §12
+    nguoiDuPhongIds,
+    daCam: ['tu_dong_goi_thay_nguoi_dung'],   // §12 — và người dùng chốt bỏ hẳn, 17/9/2026
   };
 }
 
@@ -383,8 +438,8 @@ function tongHop(danhSach = []) {
 
 module.exports = {
   taoKhoCanhBao, phatCanhBao, manNguoiCaoTuoi, pushNguoiThan,
-  ghiNhanMo, ghiNhanBamGoi, ghiNhanToiOn, danhDauKetQua,
-  canDuongDuPhong, tongHop,
+  ghiNhanMo, ghiNhanBamGoi, ghiNhanToiOn, ghiNhanBacGoi, danhDauKetQua,
+  canDuongDuPhong, tinhTrangChoNguoiThan, tongHop,
   KET_QUA, MA_DONG_BA, NHAN_DO_CHUONG, HAN_XAC_NHAN_MS,
   HANH_DONG_NGUOI_CAO_TUOI, HANH_DONG_KHI_CHUA_CO_QUY_TAC,
 };

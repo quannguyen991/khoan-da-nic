@@ -222,10 +222,18 @@ test('§15.6.1 — KHÔNG có ba mức xám/vàng/đỏ: chỉ đúng ba nhãn r
 
 // ═══════════ §15.9.10 — thẻ giả danh tổ chức ═══════════
 
-test('§15.9.10 — thẻ giả danh KHÔNG render khi chưa có mục nào approved', () => {
-  // §15.6.2: hôm nay support-directory.json có institutions rỗng.
-  assert.deepStrictEqual(layDanhBa(), [],
-    'nếu sổ đã có mục approved thì cập nhật ca này, đừng nới nó ra');
+test('§15.9.10 — sổ chỉ trả mục đã duyệt đủ nguồn, và KHÔNG mục approved nào bị loại im lặng', () => {
+  // 17/9/2026: người dùng chốt để sẵn số tổng đài ngân hàng trong app. Ca cũ khoá
+  // sổ ở trạng thái RỖNG; nay khoá CHẤT LƯỢNG từng mục thay cho số lượng. Không
+  // nới: mục nào ra được tới người dùng cũng phải qua đủ kiểm tra của sổ.
+  const { mucHopLe, trangThaiDanhBa } = require('../backend/src/analysis/verified-institution-registry');
+  for (const m of layDanhBa()) {
+    assert.ok(mucHopLe(m).hopLe, `${m.id} lọt ra mà không hợp lệ`);
+    assert.ok(m.reviewedBy && m.reviewedBy.trim(), `${m.id} không có tên người duyệt`);
+  }
+  // Mục đã đánh "approved" mà bị loại là một số điện thoại người duyệt tưởng
+  // đã lên app nhưng không lên — phải đỏ, không được im lặng.
+  assert.strictEqual(trangThaiDanhBa().soMucBiLoai, 0, JSON.stringify(trangThaiDanhBa().lyDoLoai));
 });
 
 // ═══════════ §15.16.16 — mã tham chiếu giả ═══════════

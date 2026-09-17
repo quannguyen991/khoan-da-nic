@@ -66,10 +66,48 @@ export interface QuyTacGiaDinh {
   hopVoi: string[];
 }
 
+/**
+ * ĐỘI PHẢN ỨNG NHANH — tối đa ba người bác tin, mỗi người một việc.
+ *
+ * Vòng tròn gia đình không chỉ để xem trạng thái. Lúc có cảnh báo, câu hỏi thật
+ * là "gọi AI trước": máy bị điều khiển thì cần người rành điện thoại, lỡ chuyển
+ * tiền thì cần người biết làm việc với ngân hàng. Vai trò trả lời câu đó TRƯỚC,
+ * lúc bình tĩnh, để lúc hoảng không phải nghĩ.
+ *
+ * ⚠️ KHÔNG TỰ GỌI THAY BÁC. Người dùng chốt ngày 17/9/2026: bỏ hẳn hướng gọi tự
+ * động. Đội chỉ quyết định nút gọi TRỎ VÀO AI; người bấm luôn là bác.
+ *
+ * ⚠️ KHÔNG ĐỔI MỨC RỦI RO — cùng ràng buộc với quy tắc nhà mình ở trên.
+ */
+export type VaiTroDoi = 'NGUOI_GOI' | 'HO_TRO_NGAN_HANG' | 'HO_TRO_THIET_BI';
+
+export const VAI_TRO_DOI: ReadonlyArray<VaiTroDoi> = Object.freeze([
+  'NGUOI_GOI', 'HO_TRO_NGAN_HANG', 'HO_TRO_THIET_BI',
+]);
+
+/** Ba người. Nhiều hơn thì lúc hoảng lại phải chọn — đúng thứ đội sinh ra để bỏ. */
+export const TOI_DA_DOI = 3;
+
+export interface ThanhVienDoi {
+  nguoiThanId: string;
+  vaiTro: VaiTroDoi[];
+}
+
+/** Tình huống quyết định vai nào được gọi trước. */
+export type TinhHuongGoi = 'CANH_BAO' | 'THIET_BI' | 'NGAN_HANG';
+
+const VAI_THEO_TINH_HUONG: Readonly<Record<TinhHuongGoi, VaiTroDoi>> = Object.freeze({
+  CANH_BAO: 'NGUOI_GOI',
+  THIET_BI: 'HO_TRO_THIET_BI',
+  NGAN_HANG: 'HO_TRO_NGAN_HANG',
+});
+
 export interface VongTron {
   phienBan: number;
   nguoiThan: NguoiThan[];
   quyTac: QuyTacGiaDinh[];
+  /** Thứ tự trong mảng là thứ tự gọi: người đầu tiên được gọi trước. */
+  doi: ThanhVienDoi[];
   capNhat: number;
 }
 
@@ -130,7 +168,7 @@ function sinhId(): string {
 const chuoi = (v: unknown): string => (typeof v === 'string' ? v : '');
 
 function vongTronRong(): VongTron {
-  return { phienBan: PHIEN_BAN, nguoiThan: [], quyTac: [], capNhat: 0 };
+  return { phienBan: PHIEN_BAN, nguoiThan: [], quyTac: [], doi: [], capNhat: 0 };
 }
 
 function chuanHoaNguoiThan(v: unknown): NguoiThan | null {
@@ -141,7 +179,49 @@ function chuanHoaNguoiThan(v: unknown): NguoiThan | null {
   const quanHe = chuoi(o.quanHe) || chuoi(o.relation);
   const dienThoai = chuoi(o.dienThoai) || chuoi(o.phone);
   if (!ten && !dienThoai) return null;
-  return { id: chuoi(o.id) || sinhId(), ten, quanHe, dienThoai };
+  /*
+   * ⚠️ ID SỐ PHẢI GIỮ NGUYÊN, KHÔNG SINH ID MỚI.
+   *
+   * `App.tsx` đặt id người thân là SỐ (`Date.now()`). Bản đầu chỉ nhận id chuỗi,
+   * nên mỗi lần đọc lại sinh một id ngẫu nhiên mới. Không ai thấy vì chưa có gì
+   * trỏ vào id — cho tới khi đội phản ứng nhanh cần trỏ vào đúng một người. Id
+   * đổi sau mỗi lần mở app thì đội tự rỗng.
+   */
+  const id = typeof o.id === 'number' && Number.isFinite(o.id) ? String(o.id) : chuoi(o.id);
+  return { id: id || sinhId(), ten, quanHe, dienThoai };
+}
+
+function chuanHoaDoi(v: unknown, nguoiThan: NguoiThan[]): ThanhVienDoi[] {
+  if (!Array.isArray(v)) return [];
+  const coThat = new Set(nguoiThan.map((n) => n.id));
+  const ra: ThanhVienDoi[] = [];
+  for (const x of v) {
+    if (!x || typeof x !== 'object') continue;
+    const o = x as Record<string, unknown>;
+    const nguoiThanId = chuoi(o.nguoiThanId);
+    // Người đã bị xoá khỏi danh sách người thân thì rời đội — không gọi vào khoảng không.
+    if (!coThat.has(nguoiThanId) || ra.some((t) => t.nguoiThanId === nguoiThanId)) continue;
+    const vaiTro = Array.isArray(o.vaiTro)
+      ? [...new Set((o.vaiTro as unknown[]).filter((r): r is VaiTroDoi => VAI_TRO_DOI.includes(r as VaiTroDoi)))]
+      : [];
+    ra.push({ nguoiThanId, vaiTro });
+    if (ra.length >= TOI_DA_DOI) break;
+  }
+  return ra;
+}
+
+/**
+ * ⚠️ DANH SÁCH NGƯỜI THÂN CÓ MỘT NGUỒN: khoá `familyMembers` mà `App.tsx` ghi.
+ *
+ * Bản đầu chỉ đọc khoá cũ MỘT LẦN để di trú. Sau khi bác lưu quy tắc đầu tiên,
+ * khoá mới tồn tại và người thân thêm hay sửa số sau đó không bao giờ sang được
+ * vòng tròn — nút gọi trong khối quy tắc có thể trỏ vào số cũ. Nên hễ App còn
+ * giữ danh sách thì đọc từ đó; khoá mới chỉ giữ quy tắc và đội.
+ */
+function nguoiThanTuApp(): NguoiThan[] | null {
+  const tho = docJson(KHOA_CU);
+  if (!Array.isArray(tho)) return null;
+  return (tho as unknown[]).map(chuanHoaNguoiThan).filter((x): x is NguoiThan => !!x);
 }
 
 function chuanHoaQuyTac(v: unknown): QuyTacGiaDinh | null {
@@ -167,12 +247,13 @@ function chuanHoaQuyTac(v: unknown): QuyTacGiaDinh | null {
  * rỗng — một trạng thái bình thường, không phải lỗi.
  */
 export function docVongTron(): VongTron {
+  const tuApp = nguoiThanTuApp();
   const thoNew = docJson(KHOA);
   if (thoNew && typeof thoNew === 'object') {
     const o = thoNew as Record<string, unknown>;
-    const nguoiThan = Array.isArray(o.nguoiThan)
+    const nguoiThan = tuApp ?? (Array.isArray(o.nguoiThan)
       ? (o.nguoiThan as unknown[]).map(chuanHoaNguoiThan).filter((x): x is NguoiThan => !!x)
-      : [];
+      : []);
     const quyTac = Array.isArray(o.quyTac)
       ? (o.quyTac as unknown[]).map(chuanHoaQuyTac).filter((x): x is QuyTacGiaDinh => !!x)
       : [];
@@ -180,18 +261,13 @@ export function docVongTron(): VongTron {
       phienBan: PHIEN_BAN,
       nguoiThan,
       quyTac: quyTac.slice(0, TOI_DA_QUY_TAC),
+      doi: chuanHoaDoi(o.doi, nguoiThan),
       capNhat: typeof o.capNhat === 'number' ? o.capNhat : 0,
     };
   }
 
-  const thoCu = docJson(KHOA_CU);
-  if (Array.isArray(thoCu)) {
-    return {
-      phienBan: PHIEN_BAN,
-      nguoiThan: (thoCu as unknown[]).map(chuanHoaNguoiThan).filter((x): x is NguoiThan => !!x),
-      quyTac: [],
-      capNhat: 0,
-    };
+  if (tuApp) {
+    return { phienBan: PHIEN_BAN, nguoiThan: tuApp, quyTac: [], doi: [], capNhat: 0 };
   }
 
   return vongTronRong();
@@ -274,4 +350,113 @@ export function chonQuyTac(
  */
 export function duocHienQuyTac(nhan?: string | null): boolean {
   return nhan === 'CAO' || nhan === 'NGHI_NGO';
+}
+
+// ─────────────────────── Đội phản ứng nhanh ───────────────────────
+
+export interface KetQuaDoi {
+  ok: boolean;
+  vongTron: VongTron;
+  lyDo?: 'DAY' | 'KHONG_CO_NGUOI';
+}
+
+/**
+ * Thêm một người vào đội. Chưa ai giữ vai "người gọi" thì người mới nhận vai đó,
+ * để đội vừa lập đã có người được gọi trước — không bắt bác chọn thêm một bước.
+ */
+export function themVaoDoi(vt: VongTron, nguoiThanId: string): KetQuaDoi {
+  if (!vt.nguoiThan.some((n) => n.id === nguoiThanId)) {
+    return { ok: false, vongTron: vt, lyDo: 'KHONG_CO_NGUOI' };
+  }
+  if (vt.doi.some((t) => t.nguoiThanId === nguoiThanId)) return { ok: true, vongTron: vt };
+  if (vt.doi.length >= TOI_DA_DOI) return { ok: false, vongTron: vt, lyDo: 'DAY' };
+  const coNguoiGoi = vt.doi.some((t) => t.vaiTro.includes('NGUOI_GOI'));
+  const moi: ThanhVienDoi = { nguoiThanId, vaiTro: coNguoiGoi ? [] : ['NGUOI_GOI'] };
+  return { ok: true, vongTron: { ...vt, doi: [...vt.doi, moi] } };
+}
+
+export function boKhoiDoi(vt: VongTron, nguoiThanId: string): VongTron {
+  return { ...vt, doi: vt.doi.filter((t) => t.nguoiThanId !== nguoiThanId) };
+}
+
+/** Bật / tắt một vai. Một người giữ được nhiều vai. */
+export function doiVaiTro(vt: VongTron, nguoiThanId: string, vai: VaiTroDoi): VongTron {
+  if (!VAI_TRO_DOI.includes(vai)) return vt;
+  return {
+    ...vt,
+    doi: vt.doi.map((t) => {
+      if (t.nguoiThanId !== nguoiThanId) return t;
+      const co = t.vaiTro.includes(vai);
+      return { ...t, vaiTro: co ? t.vaiTro.filter((r) => r !== vai) : [...t.vaiTro, vai] };
+    }),
+  };
+}
+
+/** Đưa một người lên (-1) hoặc xuống (+1) trong thứ tự gọi. */
+export function doiThuTu(vt: VongTron, nguoiThanId: string, huong: -1 | 1): VongTron {
+  const i = vt.doi.findIndex((t) => t.nguoiThanId === nguoiThanId);
+  const j = i + huong;
+  if (i < 0 || j < 0 || j >= vt.doi.length) return vt;
+  const doi = [...vt.doi];
+  const a = doi[i];
+  const b = doi[j];
+  if (!a || !b) return vt;
+  doi[i] = b;
+  doi[j] = a;
+  return { ...vt, doi };
+}
+
+/**
+ * Tình huống của một cảnh báo — HÀM THUẦN, chỉ đọc thứ bộ luật đã quyết.
+ *
+ * Lỡ mất tiền thì cần người lo ngân hàng. Máy có ứng dụng lạ đang xem và bấm
+ * thay, hoặc bị đòi cài ứng dụng, thì cần người rành điện thoại. Còn lại là
+ * người gọi.
+ */
+export function tinhHuongGoi(o: {
+  maLyDo?: string[] | null;
+  coUngDungDangNgo?: boolean;
+  dangPhucHoi?: boolean;
+}): TinhHuongGoi {
+  if (o.dangPhucHoi) return 'NGAN_HANG';
+  const ma = Array.isArray(o.maLyDo) ? o.maLyDo : [];
+  if (o.coUngDungDangNgo || ma.some((m) => m.startsWith('DEV_'))) return 'THIET_BI';
+  return 'CANH_BAO';
+}
+
+/**
+ * THỨ TỰ GỌI cho một tình huống. Người đầu tiên là nút gọi chính; người thứ hai
+ * là nút "không gọi được thì gọi …" — chuyển sang người kế tiếp do BÁC bấm, không
+ * phải máy tự quay.
+ *
+ * Đã lập đội: người giữ đúng vai lên trước (giữ thứ tự của đội), rồi tới các
+ * thành viên còn lại. Người ngoài đội KHÔNG chen vào — bác đã chọn tin ai.
+ * Chưa lập đội: giữ hành vi cũ, gọi theo thứ tự danh sách người thân.
+ *
+ * Người không có số điện thoại bị bỏ qua: một nút gọi không có số là một nút
+ * hỏng đúng lúc cần nó nhất.
+ */
+/** Vai được gọi trước trong một tình huống — để giao diện ghi rõ vì sao gọi người này. */
+export function vaiChoTinhHuong(tinhHuong: TinhHuongGoi): VaiTroDoi {
+  return VAI_THEO_TINH_HUONG[tinhHuong];
+}
+
+/**
+ * Người được gọi đầu tiên, đọc thẳng từ kho — cho các nút "gọi con cháu" nằm NGOÀI
+ * màn cảnh báo (menu tác vụ, nút tròn nổi). Mọi nút gọi phải trỏ cùng một người,
+ * không thì bác bấm hai chỗ ra hai người khác nhau.
+ */
+export function nguoiGoiDauTien(tinhHuong: TinhHuongGoi = 'CANH_BAO'): NguoiThan | null {
+  return thuTuGoi(docVongTron(), tinhHuong)[0] ?? null;
+}
+
+export function thuTuGoi(vt: VongTron, tinhHuong: TinhHuongGoi): NguoiThan[] {
+  const coSo = (n: NguoiThan | undefined): n is NguoiThan => !!n && n.dienThoai.trim().length > 0;
+  if (vt.doi.length === 0) return vt.nguoiThan.filter(coSo);
+
+  const vai = VAI_THEO_TINH_HUONG[tinhHuong];
+  const theoId = (id: string) => vt.nguoiThan.find((n) => n.id === id);
+  const dungVai = vt.doi.filter((t) => t.vaiTro.includes(vai));
+  const conLai = vt.doi.filter((t) => !t.vaiTro.includes(vai));
+  return [...dungVai, ...conLai].map((t) => theoId(t.nguoiThanId)).filter(coSo);
 }

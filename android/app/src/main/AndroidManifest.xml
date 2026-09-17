@@ -190,6 +190,18 @@
             </intent-filter>
         </receiver>
 
+        <!--
+          NHAC TRONG 72 GIO SAU SU CO - xem NhacTheoDoi72Gio.java.
+
+          exported="false": chi AlarmManager cua chinh app gui toi receiver nay.
+          Khong can quyen SCHEDULE_EXACT_ALARM vi hen khong chinh xac tung giay,
+          co y - xem chu thich trong lop Java.
+        -->
+        <receiver
+            android:name=".NhacTheoDoi72Gio"
+            android:enabled="true"
+            android:exported="false" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"

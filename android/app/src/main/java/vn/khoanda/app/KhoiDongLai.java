@@ -81,6 +81,18 @@ public class KhoiDongLai extends BroadcastReceiver {
             // Không có gì làm thêm ở đây; bác mở app là công tắc đồng bộ lại.
         }
 
+        /*
+         * NHẮC 72 GIỜ SAU SỰ CỐ — Android xoá mọi báo thức khi tắt máy. Dựng lại
+         * các mốc còn ở tương lai; hết đợt thì `henLich` không hẹn gì cả.
+         * Khởi động trực tiếp (máy chưa mở khoá) thì kho chưa đọc được và ném —
+         * nuốt đi, lượt BOOT_COMPLETED sau khi mở khoá sẽ dựng lại.
+         */
+        try {
+            NhacTheoDoi72Gio.henLich(ctx);
+        } catch (Throwable t) {
+            // Không dựng lại được thì thôi — bác mở app, thẻ theo dõi vẫn còn.
+        }
+
         if (!ThongBaoThuongTruc.daChonBat(ctx)) return;
 
         /*

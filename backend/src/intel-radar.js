@@ -17,7 +17,7 @@ const { taoKho, NGUON } = require('./intel-store');
 /**
  * @param {object} kho          kho intel (chỉ mục đã duyệt mới ra tới đây)
  * @param {object} envelope     kết quả phân tích
- * @returns {{maThuDoanTrung:string[], nguon:string[], soMuc:number, anhHuongMuc:false}}
+ * @returns {{maThuDoanTrung:string[], nguon:string[], soMuc:number, canhBao:object[], anhHuongMuc:false}}
  */
 function traNguCanh(kho, envelope) {
   const daDuyet = kho.layDaDuyet();
@@ -32,14 +32,76 @@ function traNguCanh(kho, envelope) {
     return false;
   });
 
+  /*
+   * CẢNH BÁO CHÍNH THỨC ĐỂ HIỂN THỊ — chỉ nguồn A, tối đa hai.
+   *
+   * Xếp: mỗi DẤU HIỆU trùng được 2 điểm, trùng HỌ kịch bản được 1, bằng điểm
+   * thì mới nhất trước.
+   *
+   * ⚠️ ĐẾM SỐ DẤU HIỆU TRÙNG, KHÔNG CHỈ HỎI "CÓ TRÙNG KHÔNG". Tin "tôi bên công
+   * an kinh tế, hỗ trợ lấy lại tiền, bác nộp phí hồ sơ" ra họ `gia_danh_cong_an`
+   * (dấu hiệu giả danh công an đứng đầu bảng họ). Chỉ hỏi có/không thì cảnh báo
+   * giả danh công an chung chung (trùng họ + một dấu hiệu) thắng cảnh báo lấy
+   * lại tiền (trùng hai dấu hiệu) — tức là đẩy đúng cảnh báo cần đọc xuống dưới.
+   *
+   * ⚠️ CHỈ TRẢ TRƯỜNG HIỂN THỊ. Không có `duyetBoi`: tên người duyệt là để truy
+   * trách nhiệm nội bộ, không phải để hiện trên màn hình người đang bị lừa.
+   */
+  const canhBao = trung
+    .filter((m) => m.nguon === NGUON.A_CHINH_THUC)
+    .map((m) => {
+      const soDauHieu = Array.isArray(m.tinHieuLienQuan)
+        ? m.tinHieuLienQuan.filter((t) => maLyDo.has(t)).length
+        : 0;
+      const khopHo = Boolean(hoKichBan) && m.maThuDoan === hoKichBan;
+      return { m, diem: soDauHieu * 2 + (khopHo ? 1 : 0) };
+    })
+    .sort((a, b) => b.diem - a.diem
+      || String(b.m.ngayCongBo ?? '').localeCompare(String(a.m.ngayCongBo ?? '')))
+    .slice(0, TOI_DA_CANH_BAO)
+    .map(({ m }) => ({
+      id: m.id ?? m.maThuDoan,
+      coQuan: m.coQuan ?? null,
+      ngayCongBo: m.ngayCongBo ?? null,
+      tomTat: m.tomTat ?? null,
+      tomTatEn: m.tomTatEn ?? null,
+      sourceUrl: m.sourceUrl,
+    }));
+
   return {
     maThuDoanTrung: trung.map((m) => m.maThuDoan),
     nguon: [...new Set(trung.map((m) => m.nguon))],
     soMuc: trung.length,
+    canhBao,
     // Khẳng định TRONG DỮ LIỆU TRẢ VỀ rằng Ra-đa không đổi mức. Frontend đọc
     // được, test đọc được, người đọc code đọc được.
     anhHuongMuc: false,
   };
+}
+
+/** Hai cảnh báo là đủ. Nhiều hơn thì người đang hoảng không đọc hết. */
+const TOI_DA_CANH_BAO = 2;
+
+/**
+ * Đọc đầu vào của `POST /api/ra-da` — CHỈ LẤY MÃ.
+ *
+ * ⚠️ KHÔNG NHẬN NỘI DUNG TIN NHẮN. Bản cũ nhận `vanBan` rồi phân tích lại trên
+ * máy chủ: tin nhắn đi lên máy chủ lần thứ hai, và cảnh báo khớp theo một lượt
+ * phân tích khác với lượt người dùng đang nhìn thấy. Giao diện đã có sẵn mã từ
+ * kết quả trước; gửi mã là đủ, và không lộ thêm gì.
+ *
+ * Mã sai định dạng bị lọc bỏ, không đi vào đối chiếu.
+ */
+function docMaRaDa(body) {
+  const b = body && typeof body === 'object' ? body : {};
+  const hoKichBan = typeof b.hoKichBan === 'string' && /^[a-z][a-z0-9_]{1,60}$/.test(b.hoKichBan)
+    ? b.hoKichBan
+    : null;
+  const maLyDo = Array.isArray(b.maLyDo)
+    ? [...new Set(b.maLyDo.filter((x) => typeof x === 'string' && /^[A-Z][A-Z0-9_]{1,60}$/.test(x)))].slice(0, 60)
+    : [];
+  if (!hoKichBan && maLyDo.length === 0) return { ok: false, maLoi: 'THIEU_MA' };
+  return { ok: true, hoKichBan, maLyDo };
 }
 
 /**
@@ -52,4 +114,4 @@ function raDaKhongDoiMuc(envelopeKhongRaDa, envelopeCoRaDa) {
     && envelopeKhongRaDa.canThiep === envelopeCoRaDa.canThiep;
 }
 
-module.exports = { traNguCanh, raDaKhongDoiMuc, taoKho, NGUON };
+module.exports = { traNguCanh, raDaKhongDoiMuc, docMaRaDa, taoKho, NGUON, TOI_DA_CANH_BAO };

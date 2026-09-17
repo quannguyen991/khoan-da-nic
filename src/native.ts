@@ -63,6 +63,8 @@ interface CauNoi {
   napChuCuocGoi(o: {
     tieuDe: string; noiDung: string; nutMo: string; nutOn: string; phut?: number;
   }): Promise<void>;
+  henNhacTheoDoi72Gio(o: { batDau: number; tieuDe: string; noiDungJson: string }): Promise<{ soMocDaHen: number }>;
+  huyNhacTheoDoi72Gio(): Promise<void>;
   trangThaiTheoDoiCuocGoi(): Promise<{ coQuyen: boolean; dangBat: boolean }>;
   datTheoDoiCuocGoi(o: { bat: boolean }): Promise<{ dangBat: boolean; maLoi?: string }>;
   trangThaiMay(): Promise<{
@@ -758,6 +760,39 @@ export function tomTatChoMayChu(t: TrangThaiMay | null): {
  * còn tầng web nào để hỏi chữ. Chữ nằm sẵn trong SharedPreferences, đã qua
  * catalog i18n. Thiếu chữ ⇒ lớp native KHÔNG hiện gì.
  */
+/**
+ * NHẮC TRONG 72 GIỜ SAU SỰ CỐ — chỉ bản Android. Bản web trả `null`: không có
+ * gì để hẹn, và thẻ theo dõi trên trang chủ vẫn nhắc khi bác mở app.
+ *
+ * `noiDung` là chữ của từng mốc, CÙNG THỨ TỰ với `MOC_NHAC_GIO` — đã qua catalog.
+ */
+export async function henNhacTheoDoi72Gio(o: {
+  batDau: number; tieuDe: string; noiDung: string[];
+}): Promise<number | null> {
+  const c = (await cauHoacNull())?.cau;
+  if (!c) return null;
+  try {
+    const r = await hanGio(
+      c.henNhacTheoDoi72Gio({ batDau: o.batDau, tieuDe: o.tieuDe, noiDungJson: JSON.stringify(o.noiDung) }),
+      { soMocDaHen: 0 },
+    );
+    return r.soMocDaHen;
+  } catch {
+    // Không hẹn được thì nói là không hẹn được — không giả vờ đã hẹn.
+    return null;
+  }
+}
+
+export async function huyNhacTheoDoi72Gio(): Promise<void> {
+  const c = (await cauHoacNull())?.cau;
+  if (!c) return;
+  try {
+    await hanGio(c.huyNhacTheoDoi72Gio(), undefined as unknown as void);
+  } catch {
+    // Không có gì để huỷ.
+  }
+}
+
 export async function napChuCuocGoi(o: {
   tieuDe: string; noiDung: string; nutMo: string; nutOn: string; phut?: number;
 }): Promise<void> {

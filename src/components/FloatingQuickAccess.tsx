@@ -21,6 +21,7 @@ import {
   Globe,
 } from 'lucide-react';
 import { ViewState, NguoiThan } from '../App';
+import { nguoiGoiDauTien } from '../lib/vong-tron-gia-dinh';
 
 interface FloatingQuickAccessProps {
   setView: (view: ViewState) => void;
@@ -69,7 +70,11 @@ export function FloatingQuickAccess({
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  const primaryContact = familyMembers && familyMembers.length > 0
+  // Cùng người mà mọi nút gọi con cháu khác trỏ vào — đội phản ứng nhanh nếu đã lập.
+  const nguoiDoi = nguoiGoiDauTien();
+  const primaryContact = nguoiDoi
+    ? { name: nguoiDoi.ten, phone: nguoiDoi.dienThoai }
+    : familyMembers && familyMembers.length > 0
     ? familyMembers[0]
     /*
      * ⚠️ `null`, KHÔNG PHẢI MỘT SỐ MẶC ĐỊNH. Trước đây chỗ này rơi về

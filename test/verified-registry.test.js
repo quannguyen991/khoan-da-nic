@@ -22,7 +22,33 @@ const MUC_TOT = {
   id: 'vn-x', countryCode: 'VN', type: 'bank', canonicalName: 'Ngân hàng X',
   aliases: ['X'], officialDomains: ['x.com.vn'], officialPhoneNumbers: ['1900 1234'],
   sourceUrl: 'https://x.com.vn/lien-he', verifiedAt: '2026-08-15', reviewStatus: 'approved',
+  reviewedBy: 'nguoi-duyet',
 };
+
+test('⚠️ nguồn KHÔNG nằm trên tên miền chính thức của chính tổ chức đó thì bị loại', () => {
+  for (const u of [
+    'https://baomoi.com/x-com-vn-hotline',        // báo chí đưa tin lại
+    'https://x.com.vn.trang-la.com/lien-he',      // tên miền giả đuôi
+    'https://x.com.vn@trang-la.com/lien-he',      // tên đăng nhập giả tên miền
+    'https://trang-la-x.com.vn/lien-he',          // chỉ trùng đuôi, không phải tên miền con
+    'http://x.com.vn/lien-he',                    // không mã hoá
+  ]) {
+    assert.strictEqual(R.layDanhBa(ghi({ institutions: [{ ...MUC_TOT, sourceUrl: u }] })).length, 0, u);
+  }
+  // Tên miền con của chính tổ chức thì được: contact.x.com.vn
+  assert.strictEqual(R.layDanhBa(ghi({ institutions: [{ ...MUC_TOT, sourceUrl: 'https://contact.x.com.vn/' }] })).length, 1);
+});
+
+test('⚠️ mục không ghi tên người duyệt bị loại — số không ai đứng tên thì không dùng', () => {
+  for (const ten of ['', '   ', null]) {
+    assert.strictEqual(R.layDanhBa(ghi({ institutions: [{ ...MUC_TOT, reviewedBy: ten }] })).length, 0, `reviewedBy=${ten}`);
+  }
+});
+
+test('mục đã duyệt mà không có số, hoặc số lẫn chữ, bị loại', () => {
+  assert.strictEqual(R.layDanhBa(ghi({ institutions: [{ ...MUC_TOT, officialPhoneNumbers: [] }] })).length, 0);
+  assert.strictEqual(R.layDanhBa(ghi({ institutions: [{ ...MUC_TOT, officialPhoneNumbers: ['gọi 1900 1234'] }] })).length, 0);
+});
 
 test('§2B.5 — mục đã duyệt, đủ trường thì được trả ra', () => {
   const d = R.layDanhBa(ghi({ institutions: [MUC_TOT] }));

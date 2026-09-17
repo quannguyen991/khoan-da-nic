@@ -95,10 +95,17 @@ test('§2B.5 — kế hoạch phục hồi KHÔNG cần đăng nhập', async ()
   assert.strictEqual(body.buoc[0], 'ngung_moi_lien_lac_voi_ben_kia');
 });
 
-test('§2B.5 — KHÔNG bịa hotline: danh sách rỗng và có cảnh báo', async () => {
+test('§2B.5 — KHÔNG bịa hotline: chỉ trả đúng số ĐÃ DUYỆT, kèm nguồn và ngày; sổ rỗng thì nói thẳng', async () => {
+  const { layDanhBa } = require('../backend/src/analysis/verified-institution-registry');
   const { body } = await get('/api/ke-hoach-phuc-hoi?nuoc=VN');
-  assert.deepStrictEqual(body.hotline, []);
-  assert.ok(body.canhBao.includes('chua_xac_minh_duoc_so_tong_dai_dung_so_in_sau_the'));
+  const daDuyet = layDanhBa().filter((m) => m.countryCode === 'VN');
+  assert.deepStrictEqual(body.hotline.map((h) => h.id).sort(), daDuyet.map((m) => m.id).sort());
+  for (const h of body.hotline) {
+    assert.ok(h.sourceUrl && h.verifiedAt && h.officialPhoneNumbers.length > 0, `${h.id} thiếu nguồn, ngày hoặc số`);
+  }
+  if (daDuyet.length === 0) {
+    assert.ok(body.canhBao.includes('chua_xac_minh_duoc_so_tong_dai_dung_so_in_sau_the'));
+  }
 });
 
 test('§2B.5 — nước lạ rơi về bước chung, có cảnh báo', async () => {
@@ -110,8 +117,35 @@ test('§2B.5 — nước lạ rơi về bước chung, có cảnh báo', async (
 // ═══════════ §4.2 — Ra-đa không đụng vào mức ═══════════
 
 test('§4.2 — Ra-đa tự khai không ảnh hưởng mức', async () => {
-  const { body } = await post('/api/ra-da', { vanBan: TIN });
+  const { status, body } = await post('/api/ra-da',
+    { hoKichBan: 'gia_danh_cong_an', maLyDo: ['ID_AUTHORITY_IMPERSONATION'] });
+  assert.strictEqual(status, 200);
   assert.strictEqual(body.anhHuongMuc, false);
+  assert.ok(Array.isArray(body.canhBao), 'phải luôn có mảng canhBao, kể cả khi rỗng');
+});
+
+test('⚠️ Ra-đa KHÔNG nhận nội dung tin nhắn — chỉ gửi văn bản thì bị từ chối', async () => {
+  // Bản cũ nhận `vanBan` rồi phân tích lại trên máy chủ: tin nhắn lên máy chủ
+  // lần thứ hai. Giao diện đã có sẵn mã của lượt phân tích đang xem.
+  const { status, body } = await post('/api/ra-da', { vanBan: TIN });
+  assert.strictEqual(status, 400);
+  assert.strictEqual(body.maLoi, 'THIEU_MA');
+  assert.ok(!JSON.stringify(body).includes('0912345678'), 'nội dung bị trả lại');
+});
+
+test('⚠️ Ra-đa qua HTTP không lộ tên người duyệt, và mọi nguồn đều là https .gov.vn', async () => {
+  const { body } = await post('/api/ra-da', {
+    hoKichBan: 'gia_danh_ho_tro_lay_lai_tien',
+    maLyDo: ['FIN_RECOVERY_FEE', 'ID_RECOVERY_SUPPORT_IMPERSONATION', 'DEV_INSTALL_APK_UNKNOWN'],
+  });
+  const chu = JSON.stringify(body);
+  assert.ok(!chu.includes('duyetBoi') && !chu.includes('"duyet"'), 'thông tin duyệt rò ra ngoài');
+  assert.ok(body.canhBao.length <= 2);
+  for (const c of body.canhBao) {
+    const u = new URL(c.sourceUrl);
+    assert.strictEqual(u.protocol, 'https:');
+    assert.ok(u.hostname.endsWith('.gov.vn'), c.sourceUrl);
+  }
 });
 
 // ═══════════ §9.4 — cảnh báo người thân ═══════════

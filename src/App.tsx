@@ -43,7 +43,8 @@ import {
   Maximize2,
   EyeOff, Users,
   PhoneOff,
-  Wallet
+  Wallet,
+  Landmark
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { translations, Lang, t as translate } from './i18n';
@@ -52,7 +53,7 @@ import { translations, Lang, t as translate } from './i18n';
  * Backend trả ENUM và MÃ; chữ tiếng Việt / tiếng Anh nằm ở `catalog.ts`, và
  * CHỈ ở đó. Hệ quả cố ý: đổi ngôn ngữ KHÔNG THỂ làm đổi kết luận.
  */
-import { NHAN, MA_LY_DO, CHUA_KIEM, CHUA_LAY_TIN, NOI_CHAY_AI, tra, traNhieu, CHU_NATIVE , TRANG_THAI_MAY, NHAC_CUOC_GOI, MA_TAI_KHOAN, KHUNG_KICH_BAN, KET_KICH_BAN, MA_BUOC, KHUNG_PHUC_HOI, BUOC_PHUC_HOI, CANH_BAO_PHUC_HOI, QUY_TAC_KHUNG, MAN_HO_SO, MAN_RA_DA } from './catalog';
+import { NHAN, MA_LY_DO, CHUA_KIEM, CHUA_LAY_TIN, NOI_CHAY_AI, tra, traNhieu, CHU_NATIVE , TRANG_THAI_MAY, NHAC_CUOC_GOI, MA_TAI_KHOAN, KHUNG_KICH_BAN, KET_KICH_BAN, MA_BUOC, KHUNG_PHUC_HOI, BUOC_PHUC_HOI, CANH_BAO_PHUC_HOI, QUY_TAC_KHUNG, MAN_HO_SO, MAN_RA_DA, DOI_PHAN_UNG, SO_NGAN_HANG } from './catalog';
 import { api } from './api-goc';
 import {
   dangKy as dangKyTaiKhoan, dangNhap as dangNhapTaiKhoan,
@@ -61,7 +62,7 @@ import {
   type HoSo as HoSoTaiKhoan,
 } from './tai-khoan';
 import {
-  laApk, hienCanhBaoHeadsUp, hienPopupCanhBao, anPopup,
+  laApk, hienCanhBaoHeadsUp, hienPopupCanhBao, anPopup, henNhacTheoDoi72Gio,
   datThongBaoThuongTruc, noiDungChiaSe, quyenPopup, xinQuyenPopup,
   ngheGiongNoi, dungNghe as dungNgheNative, coBoNghe, moCaiDatGiongNoi,
   quyenDocThongBao, xinQuyenDocThongBao, tinMoiNhat, xoaTinDaBat,
@@ -73,7 +74,14 @@ import { GuardianIntroView, GuardianAuthView, GuardianView } from './components/
 import { AppMenuModal } from './components/AppMenuModal';
 import { MatKhauGiaDinh, docMatKhauGiaDinh } from './components/MatKhauGiaDinh';
 import { KhoiQuyTac, ManDatQuyTac } from './components/QuyTacGiaDinh';
-import { docVongTron, chonQuyTac, duocHienQuyTac } from './lib/vong-tron-gia-dinh';
+import { CanhBaoChinhThuc } from './components/CanhBaoChinhThuc';
+import {
+  docVongTron, chonQuyTac, duocHienQuyTac, thuTuGoi, tinhHuongGoi, vaiChoTinhHuong, nguoiGoiDauTien,
+} from './lib/vong-tron-gia-dinh';
+import { ManDoiPhanUng, TheDoiPhanUng, nhanVai } from './components/DoiPhanUng';
+import { ManSoNganHang, DanhSachSoNganHang } from './components/SoNganHang';
+import { DaiTheoDoi72Gio, ManTheoDoi72Gio, chuNhac72Gio } from './components/TheoDoi72Gio';
+import { batDauTheoDoi } from './lib/theo-doi-72-gio';
 import { ManHoSoVuViec, ManRaDaThuDoan } from './components/HoSoVaRaDa';
 import { batDauDo, ketThucDo, ghiLuot } from './lib/do-thoi-gian-toi-nguoi-that';
 import { FloatingQuickAccess } from './components/FloatingQuickAccess';
@@ -151,7 +159,7 @@ function KhungTaiTre({ t, children }: { t: any; children: React.ReactNode }) {
 }
 import { EMERGENCY_NUMBERS } from './data/so-khan-cap';
 
-export type ViewState = 'intro' | 'home' | 'voice' | 'phone' | 'link' | 'qr' | 'learn' | 'profile' | 'settings' | 'history' | 'family' | 'search' | 'login' | 'add_family' | 'warning' | 'guardian' | 'account' | 'privacy' | 'notifications' | 'device_data' | 'hoi_nhanh' | 'mat_khau_gia_dinh' | 'quy_tac_gia_dinh' | 'ho_so_vu_viec' | 'ra_da_thu_doan';
+export type ViewState = 'intro' | 'home' | 'voice' | 'phone' | 'link' | 'qr' | 'learn' | 'profile' | 'settings' | 'history' | 'family' | 'search' | 'login' | 'add_family' | 'warning' | 'guardian' | 'account' | 'privacy' | 'notifications' | 'device_data' | 'hoi_nhanh' | 'mat_khau_gia_dinh' | 'quy_tac_gia_dinh' | 'ho_so_vu_viec' | 'ra_da_thu_doan' | 'doi_phan_ung' | 'so_ngan_hang' | 'theo_doi_72h';
 
 /**
  * MỘT NGƯỜI THÂN TRONG VÒNG TRÒN GIA ĐÌNH.
@@ -795,7 +803,9 @@ export default function App() {
         }
         setView(d.loiTat === 'dang-bi-goi' ? 'voice'
           : d.loiTat === 'goi-nguoi-than' ? 'family'
-            : 'guardian');
+            // Lời nhắc 72 giờ trên Android — mở thẳng màn theo dõi, không phải trang con cháu.
+            : d.loiTat === 'theo-doi-72-gio' ? 'theo_doi_72h'
+              : 'guardian');
         return;
       }
 
@@ -940,20 +950,28 @@ export default function App() {
    * cảnh báo đổi nút chính thành "Báo cho …" do BÁC bấm. §12 — không tự bật
    * auto-alert thay chủ tài khoản.
    */
-  const vongTronThuDong = React.useMemo(() => ({
-    chuTaiKhoanId: 'bac',
-    thanhVien: [
-      { id: 'bac', vaiTro: 'chu_tai_khoan', daThuHoi: false },
-      ...familyMembers.map((_m: NguoiThan, i: number) => ({
-        id: `nt-${i}`, vaiTro: 'nguoi_than_tin_cay', daThuHoi: false,
-      })),
-    ],
-  }), [familyMembers]);
+  const vongTronThuDong = React.useMemo(() => {
+    /*
+     * Đã lập đội phản ứng nhanh: người gọi đầu tiên là người thân tin cậy, những
+     * người còn lại trong đội là NGƯỜI DỰ PHÒNG — để máy chủ biết báo ai khi người
+     * đầu không mở cảnh báo trong 60 giây (`canDuongDuPhong`). Chưa lập đội thì
+     * giữ như cũ: mọi người thân đều là người thân tin cậy.
+     */
+    const doi = thuTuGoi(docVongTron(), 'CANH_BAO');
+    const thanhVien = doi.length > 0
+      ? doi.map((n, i) => ({ id: `nt-${n.id}`, vaiTro: i === 0 ? 'nguoi_than_tin_cay' : 'nguoi_du_phong', daThuHoi: false }))
+      : familyMembers.map((_m: NguoiThan, i: number) => ({ id: `nt-${i}`, vaiTro: 'nguoi_than_tin_cay', daThuHoi: false }));
+    return {
+      chuTaiKhoanId: 'bac',
+      thanhVien: [{ id: 'bac', vaiTro: 'chu_tai_khoan', daThuHoi: false }, ...thanhVien],
+    };
+  }, [familyMembers]);
 
   const canhBaoThuDong = useCanhBaoThuDong({
     bat: userRole === 'elder' && view !== 'intro' && view !== 'login',
     vongTron: vongTronThuDong,
-    tenNguoiThan: familyMembers[0]?.name ?? null,
+    // Cùng người mà nút gọi trỏ vào — đội phản ứng nhanh nếu đã lập.
+    tenNguoiThan: nguoiGoiDauTien()?.ten ?? familyMembers[0]?.name ?? null,
     /*
      * §12 — KHÔNG tự quay số. Đưa bác sang màn Vòng tròn gia đình, nơi có nút
      * gọi và nơi bác thấy mình đang gọi cho ai.
@@ -1133,6 +1151,7 @@ export default function App() {
                 familyMembers={familyMembers}
                 onTriggerEmergency={triggerEmergencyAlert}
                 superBasic={superBasic}
+                lang={lang}
               />
             )}
             {view === 'voice' && <VoiceView setView={setView} t={t} onAnalyze={handleAnalyze} isAnalyzing={isAnalyzing} />}
@@ -1145,6 +1164,9 @@ export default function App() {
             {view === 'add_family' && <AddFamilyView setView={setView} t={t} setFamilyMembers={setFamilyMembers} />}
             {view === 'mat_khau_gia_dinh' && <MatKhauGiaDinh setView={setView} t={t} />}
             {view === 'quy_tac_gia_dinh' && <ManDatQuyTac setView={setView} t={t} lang={lang} />}
+            {view === 'doi_phan_ung' && <ManDoiPhanUng setView={setView} t={t} lang={lang} />}
+            {view === 'so_ngan_hang' && <ManSoNganHang setView={setView} t={t} lang={lang} />}
+            {view === 'theo_doi_72h' && <ManTheoDoi72Gio setView={setView} t={t} lang={lang} />}
             {view === 'ho_so_vu_viec' && <ManHoSoVuViec setView={setView} t={t} lang={lang} lichSu={historyItems} />}
             {view === 'ra_da_thu_doan' && <ManRaDaThuDoan setView={setView} t={t} lang={lang} lichSu={historyItems} />}
             {view === 'warning' && <WarningView setView={setView} t={t} lang={lang} result={analyzeResult} familyMembers={familyMembers} noiChayAi={noiChayAi} mayCoUngDungLa={mayCoUngDungLa} />}
@@ -1439,10 +1461,12 @@ function HomeView({
   onOpenMenu,
   familyMembers,
   onTriggerEmergency,
-  superBasic = false
+  superBasic = false,
+  lang = 'vi'
 }: {
   setView: (v: ViewState) => void,
   t: any,
+  lang?: Lang,
   onAnalyze?: (text: string, image?: string | null) => void,
   isAnalyzing?: boolean,
   pinnedNotification?: boolean,
@@ -1549,6 +1573,12 @@ function HomeView({
           </button>
         </div>
       </div>
+
+      {/*
+        BẢO VỆ 72 GIỜ — chỉ hiện khi đang có đợt theo dõi sau sự cố. MỘT dải gọn:
+        trang chủ không cuộn trên điện thoại, thẻ to sẽ đẩy ô kiểm tra ra khỏi màn.
+      */}
+      <DaiTheoDoi72Gio lang={lang} setView={setView} />
 
       <div className="flex items-center justify-center gap-2 mt-2 sm:mt-3 mb-0.5 shrink-0 select-none">
         <img src="/logo.webp" alt="Khoan Đã Logo" draggable={false} className="h-7 w-7 sm:h-9 sm:w-9 object-contain drop-shadow-sm rounded-2xl pointer-events-none select-none" />
@@ -2921,11 +2951,35 @@ function FamilyView({
             <button onClick={() => setView('add_family')} className="w-full mt-1 min-h-[56px] py-3 bg-gradient-to-r from-[#9e76ea] via-[#ad8af0] to-[#9e76ea] text-white rounded-full font-bold text-[15px] border-[2.5px] border-[#2e1065] shadow-[4px_4px_0_#2e1065] flex items-center justify-center gap-1.5 active:scale-95 transition-transform">
                <Plus size={18} strokeWidth={2.5} /> {t("Thêm người thân")}
             </button>
+
+            {/*
+              ĐỘI PHẢN ỨNG NHANH — ngay dưới danh sách người thân, vì đội được lập
+              TỪ chính danh sách này. Thẻ nói thật nút gọi đang trỏ vào ai.
+            */}
+            <TheDoiPhanUng setView={setView} lang={lang} />
           </div>
         </div>
 
         {/* Right Column - Quick Support Cards */}
         <div className="flex flex-col gap-3 md:w-[380px]">
+           {/*
+             SỐ TỔNG ĐÀI NGÂN HÀNG — để sẵn trong app, bác tự bấm (người dùng chốt
+             17/9/2026). Đặt ĐẦU cột: sau một vụ lừa, đây là số bác cần nhất.
+           */}
+           <button
+             type="button"
+             onClick={() => setView('so_ngan_hang')}
+             className="w-full min-h-[56px] bg-white rounded-[20px] p-3.5 border-[2.5px] border-[#2e1065] shadow-[4px_4px_0_#2e1065] flex items-center gap-3 text-left active:scale-[0.98] transition-transform"
+           >
+             <span className="w-11 h-11 rounded-2xl bg-sky-100 border-2 border-[#2e1065] flex items-center justify-center text-sky-900 shrink-0">
+               <Landmark size={22} aria-hidden="true" />
+             </span>
+             <span className="flex-1 min-w-0">
+               <span className="block font-black text-[16px] text-[#1e1b4b] leading-snug">{tra(SO_NGAN_HANG, 'TIEU_DE', lang)}</span>
+               <span className="block text-[14px] text-slate-600 leading-snug mt-0.5">{tra(SO_NGAN_HANG, 'MO_TA_THE', lang)}</span>
+             </span>
+             <ChevronRight size={20} className="text-sky-800 shrink-0" aria-hidden="true" />
+           </button>
            <div className="bg-white rounded-[20px] p-4 border-[2.5px] border-[#2e1065] shadow-[4px_4px_0_#2e1065]">
               <div className="flex items-center justify-between mb-2.5 gap-2">
                 <h3 className="text-[15px] font-black text-[#2e1065] flex items-center gap-1.5">
@@ -5706,6 +5760,8 @@ function WarningView({
    * luật 4: đây là màn, không phải một kết quả phân tích mới).
    */
   const [daBamPhucHoi, setDaBamPhucHoi] = useState(false);
+  /** Danh sách số tổng đài ngân hàng mở tại chỗ — chung cho màn xác minh và màn 72 giờ. */
+  const [moSoNganHang, setMoSoNganHang] = useState(false);
   const canRecovery = canThiep === 'RECOVERY' || daBamPhucHoi;
   const [keHoachPhucHoi, setKeHoachPhucHoi] = useState<any>(null);
   useEffect(() => {
@@ -5718,6 +5774,17 @@ function WarningView({
       .catch(() => { /* §4.3 — mất mạng thì khối dưới tự ẩn vì vẫn null, không giả kết quả */ });
     return () => { huy = true; };
   }, [canRecovery]);
+
+  /*
+   * BẮT ĐẦU THEO DÕI 72 GIỜ — ngay khi màn phục hồi hiện ra.
+   * Đang theo dõi thì GIỮ mốc cũ (xem `batDauTheoDoi`). Bản Android hẹn thêm lời
+   * nhắc ở các mốc giờ; bản web không có gì để hẹn và hàm trả `null` êm.
+   */
+  useEffect(() => {
+    if (!canRecovery) return;
+    const batDau = batDauTheoDoi(Date.now());
+    void henNhacTheoDoi72Gio({ batDau, ...chuNhac72Gio(lang) });
+  }, [canRecovery, lang]);
   const buocPhucHoi = keHoachPhucHoi ? traNhieu(BUOC_PHUC_HOI, keHoachPhucHoi.buoc ?? [], lang) : [];
   const canhBaoPhucHoi = keHoachPhucHoi ? traNhieu(CANH_BAO_PHUC_HOI, keHoachPhucHoi.canhBao ?? [], lang) : [];
   /**
@@ -5834,7 +5901,31 @@ function WarningView({
    * `familyMembers` (thay cho `any[]`) là thứ khiến trình biên dịch chỉ ra
    * được cả hai.
    */
-  const nguoiDauTien = familyMembers?.[0];
+  /*
+   * ĐỘI PHẢN ỨNG NHANH — nút gọi trỏ vào ĐÚNG NGƯỜI cho tình huống này.
+   *
+   * Máy có ứng dụng lạ đang xem và bấm thay, hoặc bị đòi cài ứng dụng → người
+   * rành điện thoại lên trước. Bác đã lỡ chuyển tiền → người lo ngân hàng lên
+   * trước. Chưa lập đội thì giữ hành vi cũ: người đầu danh sách.
+   *
+   * ⚠️ KHÔNG TỰ QUAY SỐ, KHÔNG TỰ CHUYỂN SANG NGƯỜI KẾ. Người dùng chốt 17/9/2026
+   * bỏ hẳn hướng gọi tự động. "Không gọi được thì gọi …" là một nút BÁC bấm.
+   */
+  const tinhHuongNay = tinhHuongGoi({
+    maLyDo: result?.maLyDo ?? [],
+    coUngDungDangNgo: dangNgo.length > 0,
+    dangPhucHoi: canRecovery,
+  });
+  const dsGoi = thuTuGoi(vongTronNha, tinhHuongNay);
+  const nguoiGoiDau = dsGoi[0];
+  const nguoiGoiTiep = dsGoi[1] ?? null;
+  const vaiNguoiDau = nguoiGoiDau
+    && vongTronNha.doi.find((d) => d.nguoiThanId === nguoiGoiDau.id)?.vaiTro.includes(vaiChoTinhHuong(tinhHuongNay))
+    ? nhanVai(vaiChoTinhHuong(tinhHuongNay), lang)
+    : null;
+  const nguoiDauTien = nguoiGoiDau
+    ? { name: nguoiGoiDau.ten, phone: nguoiGoiDau.dienThoai }
+    : familyMembers?.[0];
   const firstContact: { name: string; phone: string } =
     nguoiDauTien ?? { name: t('Người thân'), phone: '' };
 
@@ -6087,6 +6178,20 @@ function WarningView({
         )}
 
         {/*
+          CẢNH BÁO CHÍNH THỨC — Ra-đa. Đặt ngay dưới lý do: lý do nói máy thấy
+          gì trong tin nhắn, khối này nói công an / cơ quan nhà nước đã cảnh báo
+          kiểu lừa giống vậy, kèm đường dẫn .gov.vn để bác tự mở.
+          ⚠️ Chỉ gửi MÃ lên máy chủ. Tự ẩn ở mức "Chưa thấy dấu hiệu", khi lỗi
+          mạng, và khi không có cảnh báo đã duyệt nào khớp.
+        */}
+        <CanhBaoChinhThuc
+          nhan={nhan ?? null}
+          hoKichBan={hoKichBanHienTai}
+          maLyDo={result?.maLyDo ?? []}
+          lang={lang}
+        />
+
+        {/*
           §16.1 — DỰ BÁO KỊCH BẢN. Chỉ ở VERIFY_PATH: đây là màn "đang nghi
           ngờ, cần xác minh", đúng lúc bác cần biết bước TIẾP THEO có thể là gì
           để tự nhận ra nếu nó xảy ra thật.
@@ -6136,6 +6241,25 @@ function WarningView({
             >
               {t('Soạn tin báo cáo tới đầu số 156')}
             </button>
+
+            {/*
+              SỐ TỔNG ĐÀI NGÂN HÀNG — mở ngay tại chỗ, không rời màn cảnh báo.
+              Câu dặn phía trên bảo bác "bấm số đã lưu sẵn": đây là nơi số đó nằm.
+            */}
+            <button
+              type="button"
+              aria-expanded={moSoNganHang}
+              onClick={() => setMoSoNganHang((x) => !x)}
+              className="w-full mt-2 min-h-[52px] px-4 bg-black/25 hover:bg-black/35 text-white font-bold rounded-2xl text-[15px] border border-white/30 flex items-center justify-center gap-2 transition-all"
+            >
+              <Landmark size={18} className="shrink-0" />
+              {tra(SO_NGAN_HANG, moSoNganHang ? 'DONG_DANH_SACH' : 'MO_DANH_SACH', lang)}
+            </button>
+            {moSoNganHang && (
+              <div className="mt-3">
+                <DanhSachSoNganHang lang={lang} kieu="toi" />
+              </div>
+            )}
           </div>
         )}
 
@@ -6322,6 +6446,32 @@ function WarningView({
                 ))}
               </ul>
             )}
+
+            {/*
+              SAU KHI LỠ CHUYỂN TIỀN, HAI THỨ CẦN NGAY: số ngân hàng thật để gọi
+              khoá tài khoản, và một tờ hồ sơ để đọc cho tổng đài. Cả hai đều mở
+              được từ đây, không phải đi tìm trong Cài đặt.
+            */}
+            <div className="flex flex-col gap-2 px-4 pb-4 pt-1">
+              <button
+                type="button"
+                aria-expanded={moSoNganHang}
+                onClick={() => setMoSoNganHang((x) => !x)}
+                className="w-full min-h-[52px] px-4 bg-white text-slate-900 font-extrabold rounded-2xl text-[16px] flex items-center justify-center gap-2 active:scale-95 transition-all"
+              >
+                <Landmark size={18} className="shrink-0" />
+                {tra(SO_NGAN_HANG, moSoNganHang ? 'DONG_DANH_SACH' : 'MO_DANH_SACH', lang)}
+              </button>
+              {moSoNganHang && <DanhSachSoNganHang lang={lang} kieu="toi" />}
+              <button
+                type="button"
+                onClick={() => setView('ho_so_vu_viec')}
+                className="w-full min-h-[52px] px-4 bg-black/25 hover:bg-black/35 text-white font-bold rounded-2xl text-[15px] border border-white/30 flex items-center justify-center gap-2 transition-all"
+              >
+                <FileText size={18} className="shrink-0" />
+                {tra(MAN_HO_SO, 'TIEU_DE', lang)}
+              </button>
+            </div>
           </div>
         )}
 
@@ -6394,10 +6544,24 @@ function WarningView({
           </span>
           {firstContact.phone && (
             <span className="text-[14px] font-bold text-amber-900/80">
-              {firstContact.name} ({firstContact.phone})
+              {firstContact.name} ({firstContact.phone}){vaiNguoiDau ? ` · ${vaiNguoiDau}` : ''}
             </span>
           )}
         </button>
+
+        {/*
+          NGƯỜI KẾ TIẾP TRONG ĐỘI — "không gọi được thì gọi …".
+          Chuyển sang người thứ hai là việc BÁC bấm, không phải máy tự quay.
+        */}
+        {nguoiGoiTiep && (
+          <button
+            onClick={() => { ghiNhanBamGoi(); window.open(`tel:${nguoiGoiTiep.dienThoai}`, '_self'); }}
+            className="w-full min-h-[52px] py-3 px-3 rounded-2xl font-bold text-[15px] bg-black/30 hover:bg-black/40 text-white border border-white/25 flex items-center justify-center gap-2 active:scale-98 transition-all"
+          >
+            <PhoneCall size={18} className="shrink-0" />
+            <span>{(tra(DOI_PHAN_UNG, 'GOI_TIEP', lang) ?? '').split('{ten}').join(nguoiGoiTiep.ten)}</span>
+          </button>
+        )}
 
         {/* ⚠️ "Soạn tin", KHÔNG phải "đã gửi" — §11. */}
         <button

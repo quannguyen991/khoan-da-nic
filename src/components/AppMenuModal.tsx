@@ -10,6 +10,7 @@ import {
   Zap,
 } from 'lucide-react';
 import { ViewState, NguoiThan } from '../App';
+import { nguoiGoiDauTien } from '../lib/vong-tron-gia-dinh';
 
 interface AppMenuModalProps {
   isOpen: boolean;
@@ -51,9 +52,16 @@ export function AppMenuModal({
    *
    * Chưa thêm ai thì đưa bác tới màn thêm người thân, đừng quay số bừa.
    */
-  const firstContact = familyMembers && familyMembers.length > 0
-    ? familyMembers[0]
-    : null;
+  /*
+   * Đã lập đội phản ứng nhanh thì gọi đúng người "gọi đầu tiên" — mọi nút gọi
+   * con cháu trong app phải trỏ CÙNG một người.
+   */
+  const nguoiDoi = nguoiGoiDauTien();
+  const firstContact = nguoiDoi
+    ? { name: nguoiDoi.ten, phone: nguoiDoi.dienThoai }
+    : familyMembers && familyMembers.length > 0
+      ? familyMembers[0]
+      : null;
 
   const handleCall = () => {
     onClose();
