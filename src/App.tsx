@@ -1689,11 +1689,16 @@ function ManSieuDonGian({
 }: {
   t: any,
   setView: (v: ViewState) => void,
-  familyMembers?: any[],
+  familyMembers?: NguoiThan[],
   onTriggerEmergency?: () => void,
   onTat: () => void,
 }) {
-  const nguoiDauTien = familyMembers && familyMembers.length > 0 ? familyMembers[0] : null;
+  // Cùng người mà mọi nút gọi con cháu khác trỏ vào — người đầu đội phản ứng nhanh
+  // nếu bác đã lập đội, không thì người thân đầu danh sách.
+  const nguoiDoi = nguoiGoiDauTien();
+  const nguoiDauTien = nguoiDoi
+    ? { name: nguoiDoi.ten, phone: nguoiDoi.dienThoai }
+    : familyMembers?.[0] ?? null;
 
   const goiNguoiNha = () => {
     if (nguoiDauTien?.phone) window.open(`tel:${String(nguoiDauTien.phone).replace(/\s/g, '')}`, '_self');

@@ -51,6 +51,10 @@
     <string name="cuoc_goi_thuong_truc_tieu_de">Khoan Đã is watching this call</string>
     <string name="cuoc_goi_thuong_truc_noi_dung">Counting time only, not listening. Tap to turn off.</string>
 
+    <!-- Nhắc trong 72 giờ sau sự cố. §11: không hứa lấy lại tiền. -->
+    <string name="kenh_theo_doi_72h_ten">72-Hour Recovery Watch</string>
+    <string name="kenh_theo_doi_72h_mo_ta">Reminds you what to do in the 72 hours after money or a code was sent by mistake</string>
+
     <!-- Sang loc tai cho: KHONG mang nhan rui ro nao, chi moi bac kiem. -->
     <string name="tb_sang_loc_tieu_de">Would you like this message checked?</string>
     <string name="tb_sang_loc_noi_dung">A message just arrived that is worth a look. Nothing has been sent anywhere yet.</string>
@@ -62,6 +66,6 @@
     <string name="bong_bong_noi_dung">Tap the round button at the edge of the screen to open the app. Tap here to turn it off.</string>
     <string name="bb_kiem_tin">Check a message</string>
     <string name="bb_gui_anh">Send a picture</string>
-    <string name="bb_dung_60s">Pause 60 seconds</string>
+    <string name="bb_dung_60s">Pause for 60 Seconds</string>
     <string name="bb_dong">Close</string>
 </resources>

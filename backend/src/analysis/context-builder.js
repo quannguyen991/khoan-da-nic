@@ -528,7 +528,45 @@ function viTriKhungGiaoDuc(n) {
   const re = coDau ? KHUNG_GIAO_DUC : KHUNG_GIAO_DUC_KHONG_DAU;
   re.lastIndex = 0;
   const m = re.exec(coDau ? n : boDau(n));
-  return m ? m.index : -1;
+  return m ? m.index : viTriThongBaoNgoiThuBa(n);
+}
+
+/**
+ * ══════ THÔNG BÁO CƠ QUAN NÓI VỀ NGÔI THỨ BA — VẪN ĐƯỢC MIỄN (17/9/2026) ══════
+ *
+ * Mẫu tên cơ quan trong `KHUNG_GIAO_DUC` giờ đòi dấu hiệu tuyên truyền, để
+ * "Công an xã thông báo …, bác cài ứng dụng…" hết được miễn. Nhưng nó kéo luôn
+ * thông báo THẬT ra khỏi khung — test của bản web bắt được khi gộp hai nhánh:
+ *
+ *   "Chi cục Thuế thông báo hộ kinh doanh nộp tờ khai quý 3 trước ngày 30/10 tại
+ *    cơ quan thuế hoặc cổng dịch vụ công quốc gia."        → NGUY HIỂM CAO (49đ)
+ *
+ * Điểm đó tới từ một lỗi có từ trước mà khung vẫn che: so không dấu gộp "tại" với
+ * "tải", "ngày" với "ngay" (xem `directPrecheck`). Sửa tận gốc lỗi đó đổi tín hiệu
+ * ở hàng chục mẫu — việc riêng, cần đo và người dùng chốt.
+ *
+ * Tin giả danh cơ quan nói THẲNG với người đọc ("bác", "quý khách") hoặc ra lệnh
+ * ngay sau dấu câu. Thông báo thật hay nói về NGÔI THỨ BA: "hộ kinh doanh",
+ * "người dân", "bà con". Nên câu có tên cơ quan + thông báo mà không gọi người
+ * đọc, không có lệnh sau dấu câu, thì được miễn như bản web đang chạy. Lối thoát
+ * `LENH_TRUC_TIEP` và từ nối đối lập trong `phanLoai` vẫn áp như mọi khung khác.
+ *
+ * ⚠️ CHỈ VĂN BẢN CÓ DẤU. Không dấu thì "co" là "cô" hay "có", "chi" là "chị" hay
+ * "chỉ" — không đoán được người đọc, nên giữ luật chặt.
+ *
+ * ⚠️ CÒN LỖ, NÓI RA: tin giả viết ngôi thứ ba mà không có lệnh sau dấu câu vẫn
+ * được miễn — y như bản web, không tệ hơn.
+ */
+const CO_QUAN_THONG_BAO = /(công an|cảnh sát|cơ quan|ngân hàng|tổ dân phố|bộ|cục|chi cục)[^.]{0,40}(cảnh báo|khuyến cáo|lưu ý|thông báo)/;
+const GOI_NGUOI_DOC = /(^|[\s,.:;!?"(])(bác|anh|chị|ông|bà(?!\s+con)|cô|chú(?!\s+ý)|em|con(?!\s+(số|dấu|người))|cháu|bạn|quý khách|quý vị|mẹ|bố)(?=[\s,.:;!?")]|$)/;
+const LENH_SAU_DAU_CAU = /[,:;]\s*(xin\s+)?(hãy\s+|vui lòng\s+)?(chuyển|gửi|đọc|cài|tải|bấm|nhấn|nộp|cung cấp|đăng nhập|truy cập)/;
+
+function viTriThongBaoNgoiThuBa(n) {
+  if (!CO_DAU.test(n)) return -1;
+  const m = CO_QUAN_THONG_BAO.exec(n);
+  if (!m) return -1;
+  if (GOI_NGUOI_DOC.test(n) || LENH_SAU_DAU_CAU.test(n)) return -1;
+  return m.index;
 }
 
 /**

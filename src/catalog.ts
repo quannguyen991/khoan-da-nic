@@ -818,6 +818,56 @@ export const MA_TAI_KHOAN: Record<string, Cap> = {
     'Chưa nối được với máy chủ. Bác kiểm tra mạng rồi thử lại.',
     'Could not reach the server. Please check your connection and try again.',
   ),
+
+  /*
+   * Mã của các đường phát hiện thụ động, cảnh báo hai phía và diễn tập (nhánh
+   * dev, gộp 17/9/2026). Giao diện hiện chưa hiện chúng ra — nhưng luật ở đầu
+   * khối vẫn áp: máy chủ đã trả lời thì không được nói "chưa nối được".
+   */
+  THIEU_NOI_DUNG: c(
+    'Cháu chưa nhận được nội dung nào để kiểm.',
+    'No content was received to check.',
+  ),
+  NOI_DUNG_QUA_DAI: c(
+    'Nội dung dài quá nên cháu chưa kiểm được. Bác gửi đoạn ngắn hơn giúp cháu.',
+    'The content is too long to check. Please send a shorter part.',
+  ),
+  THIEU_KET_QUA: c(
+    'Thiếu kết quả kiểm tra nên cháu chưa gửi cảnh báo được.',
+    'The check result is missing, so no alert was sent.',
+  ),
+  KHONG_CO_CANH_BAO: c(
+    'Cháu không tìm thấy cảnh báo này nữa.',
+    'This alert could not be found.',
+  ),
+  KET_QUA_KHONG_HOP_LE: c(
+    'Kết quả gửi lên không đúng dạng nên cháu chưa ghi nhận được.',
+    'The result was not in the expected form, so it was not recorded.',
+  ),
+  HANH_DONG_LA: c(
+    'Thao tác này cháu chưa hiểu nên chưa ghi nhận.',
+    'This action is not recognised, so it was not recorded.',
+  ),
+  THIEU_NGUOI: c(
+    'Cần chọn một người trong nhà trước đã.',
+    'Please choose a family member first.',
+  ),
+  KICH_BAN_KHONG_HOP_LE: c(
+    'Bài diễn tập này không đúng dạng nên cháu chưa gửi được.',
+    'This practice scenario is not valid, so it was not sent.',
+  ),
+  KHONG_CO_LUOT: c(
+    'Cháu không tìm thấy lượt diễn tập này nữa.',
+    'This practice round could not be found.',
+  ),
+  HANH_VI_LA: c(
+    'Phản hồi này cháu chưa hiểu nên chưa ghi nhận.',
+    'This response is not recognised, so it was not recorded.',
+  ),
+  KICH_BAN_KHONG_TON_TAI: c(
+    'Không có bài diễn tập nào tên như vậy.',
+    'There is no practice scenario with that name.',
+  ),
 };
 
 // ═══════════════ Nhắc cuộc gọi dài ═══════════════

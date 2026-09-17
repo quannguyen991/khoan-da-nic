@@ -291,6 +291,29 @@ test('tin tuyên truyền thật CÓ TÊN CƠ QUAN đứng đầu vẫn được
 });
 
 /**
+ * ⚠️ THÔNG BÁO THẬT CỦA CƠ QUAN NÓI VỀ NGÔI THỨ BA — gộp hai nhánh 17/9/2026.
+ *
+ * Mẫu tên cơ quan đòi dấu hiệu tuyên truyền kéo luôn thông báo thật ra khỏi khung,
+ * và câu thuế dưới đây lên NGUY HIỂM CAO (test của bản web bắt được). Thông báo
+ * không gọi người đọc, không ra lệnh sau dấu câu thì vẫn được miễn như bản web —
+ * nhưng chỉ cần gọi "bác" hoặc ra lệnh ngay sau dấu phẩy là hết miễn.
+ */
+test('thông báo cơ quan nói về ngôi thứ ba vẫn được miễn; gọi thẳng người đọc thì không', { skip: BO_QUA }, () => {
+  const { analyze } = require(path.join(DUONG, 'pipeline'));
+  const THAT = 'Chi cục Thuế thông báo hộ kinh doanh nộp tờ khai quý 3 trước ngày 30/10 tại cơ quan thuế hoặc cổng dịch vụ công quốc gia.';
+  const kq = analyze({ vanBan: THAT, llmSignals: [] });
+  assert.strictEqual(kq.nhan, 'CHUA_THAY', `thông báo thuế thật ra ${kq.nhan}: ${kq.maLyDo.join(',')}`);
+
+  for (const gia of [
+    'Chi cục Thuế thông báo, bác cài ứng dụng thuế mới qua link này để nộp tờ khai',
+    'Chi cục Thuế thông báo: cài ứng dụng qua link sau để nộp tờ khai quý 3',
+  ]) {
+    const kqGia = analyze({ vanBan: gia, llmSignals: [] });
+    assert.ok(kqGia.maLyDo.includes('DEV_INSTALL_APK_UNKNOWN'), `"${gia.slice(0, 50)}…" mất tín hiệu cài ứng dụng: ${kqGia.maLyDo.join(',')}`);
+  }
+});
+
+/**
  * ⚠️ NỬA KIA CỦA HÀNG RÀO — ĐỪNG XOÁ.
  *
  * Cách "sửa" sai là bỏ luôn khung giáo dục. Làm thế thì mọi tin tuyên truyền
