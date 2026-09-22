@@ -358,10 +358,24 @@ test('bộ đo · có @types/react và tsconfig bật strict', () => {
  * thường" thì đó là bug. `speechApiSupported` từng được đặt `false` mà không màn
  * hình nào đọc tới, nên trên máy không nhận được giọng nói bác vẫn thấy đúng
  * dòng "Đang nghe bác nói".
+ *
+ * ⚠️ SỬA 22/9/2026 — biến `speechApiSupported` đã bị đổi tên khi màn nghe được
+ * dựng lại (nay là `micHong` + `nguonNghe`), nên ca kiểm cũ canh đúng cái TÊN
+ * biến chứ không canh HÀNH VI, và tên biến đổi thì ca kiểm câm — cùng dạng lỗi
+ * mà chính ca này đang canh, chỉ khác chỗ xảy ra. Kiểm lại hành vi thật: nhánh
+ * không có `SpeechRecognition` (cả web lẫn Android) phải BẬT `micHong` — đúng
+ * biến đang được đọc ở JSX để đổi tiêu đề màn nghe thành "Cháu chưa nghe được".
  */
 test('§4.3 · máy không chuyển được lời nói thành chữ thì màn hình nói ra', () => {
   const s = doc('src/App.tsx');
-  assert.match(s, /!speechApiSupported/, 'không nơi nào đọc speechApiSupported');
+
+  // Nhánh trình duyệt không có SpeechRecognition.
+  const iKhongCoSR = s.indexOf('} else {\n      setMicHong(true);\n      setIsRecording(false);\n      themBaoLoiVaoHoiThoai(t(\'Máy chưa chuyển được lời nói thành chữ');
+  assert.ok(iKhongCoSR > 0,
+    'nhánh trình duyệt không có SpeechRecognition phải setMicHong(true) — không tìm thấy đúng khối đó');
+
+  // micHong phải được ĐỌC ở giao diện, không chỉ được ĐẶT.
+  assert.match(s, /micHong\s*\?/, 'không nơi nào đọc micHong để đổi giao diện — đặt cờ mà không ai đọc là câm');
 });
 
 /**
@@ -946,6 +960,38 @@ test('§6.9 · khung tự nhận ra mình đang ở trong khung', () => {
   const main = readFileSync(path.join(GOC, 'src', 'main.tsx'), 'utf8');
   assert.match(main, /if\s*\(!dungKhungDienThoai\(\)\)/,
     'main.tsx phải bỏ qua việc gắn React khi trang ngoài chỉ là cái vỏ máy');
+});
+
+/**
+ * Người dùng báo 22/9/2026: trong khung máy vẫn hiện bố cục máy tính. Nguyên
+ * nhân là HAI ngưỡng cho cùng một câu hỏi — iframe bật từ 900px, vỏ máy CSS của
+ * App.tsx bật từ `md:` (768px). Cửa sổ 768–899px có vỏ mà không có iframe.
+ */
+test('§6.9 · ngưỡng đóng khung iframe trùng mốc md: của vỏ máy CSS', () => {
+  const khung = readFileSync(path.join(GOC, 'src', 'khung-dien-thoai.ts'), 'utf8');
+  const nguong = Number((khung.match(/const NGUONG_RONG = (\d+);/) || [])[1]);
+  const app = readFileSync(path.join(GOC, 'src', 'App.tsx'), 'utf8');
+  assert.ok(/md:max-w-\[430px\]/.test(app) ? nguong <= 768 : true,
+    `App.tsx vẽ vỏ máy CSS từ md: (768px) nhưng iframe chỉ bật từ ${nguong}px — khe giữa hai mốc sẽ nhồi bố cục máy tính vào khung`);
+  const than = khung.slice(khung.indexOf('function dangOTrongKhung'), khung.indexOf('function nenDongKhung'));
+  assert.ok(!/return new URLSearchParams\(window\.location\.search\)\.has/.test(than),
+    'dấu ?khung=1 ở trang ngoài cùng không được coi là "đang trong khung" — không có cửa sổ cha thì không có khung');
+});
+
+/**
+ * Người dùng báo 22/9/2026: màn "Bảo vệ 72 giờ" chữ mờ loang. Hai đốm sáng
+ * trang trí là `absolute` nên vẽ ĐÈ lên mọi màn không tự đặt `relative`.
+ */
+test('§4.4 · đốm sáng trang trí nằm dưới nội dung, không đè lên chữ', () => {
+  const app = readFileSync(path.join(GOC, 'src', 'App.tsx'), 'utf8');
+  assert.match(app, /flex-col relative isolate overflow-hidden bg-\[#f8f4ff\]/,
+    'khung app phải `isolate` để đốm -z-10 nằm trên nền khung mà dưới nội dung');
+  for (const dom of ['bg-white opacity-60 rounded-full blur-3xl', 'bg-[#d8b4fe] opacity-30 rounded-full blur-[80px]']) {
+    const i = app.indexOf(dom);
+    assert.ok(i > 0, `không tìm thấy đốm "${dom}"`);
+    const lop = app.slice(app.lastIndexOf('className="', i), i);
+    assert.match(lop, /-z-10/, `đốm "${dom}" thiếu -z-10 — nó sẽ phủ lớp mờ lên chữ của màn bên dưới`);
+  }
 });
 
 /**

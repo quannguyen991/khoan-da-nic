@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   ShieldCheck, 
@@ -35,6 +35,14 @@ type KetQuaKiem = {
   aiDaChay?: boolean;
   canThiep?: string;
   khongGoiDuocMayChu?: boolean;
+};
+
+type GuardianEvent = {
+  id: number;
+  title: string;
+  detail: string;
+  time: string;
+  kind: 'scan' | 'warning' | 'connection';
 };
 
 // --- Guardian Intro (Role selection & Setup) ---
@@ -278,7 +286,19 @@ export function GuardianView({
    * "máy của bố mẹ chưa nối vào đây", nhưng một cái tên cụ thể nằm ngay trên
    * đầu màn thì mạnh hơn mọi lời cải chính đặt ở dưới.
    */
-  const [parentData] = useState<{ name: string; phone: string; network: string } | null>(null);
+  const [parentData, setParentData] = useState<{ name: string; phone: string; network: string } | null>(() => {
+    try {
+      return localStorage.getItem('khoan_da_guardian_demo_connected') === '1'
+        ? { name: 'Bác Nguyễn Thị Lan', phone: '0900 000 001', network: 'demo' }
+        : null;
+    } catch { return null; }
+  });
+  const [guardianEvents, setGuardianEvents] = useState<GuardianEvent[]>(() => {
+    try {
+      const raw = localStorage.getItem('khoan_da_guardian_events');
+      return raw ? JSON.parse(raw) as GuardianEvent[] : [];
+    } catch { return []; }
+  });
 
   // Protection Toggles
   const [rules, setRules] = useState({
@@ -292,6 +312,37 @@ export function GuardianView({
   const [queryResult, setQueryResult] = useState<KetQuaKiem | null>(null);
   const [isChecking, setIsChecking] = useState(false);
   const [sentAlertToast, setSentAlertToast] = useState(false);
+  const [messageDraft, setMessageDraft] = useState<string | null>(null);
+
+  useEffect(() => {
+    const capNhat = () => {
+      try {
+        const raw = localStorage.getItem('khoan_da_guardian_events');
+        if (raw) setGuardianEvents(JSON.parse(raw) as GuardianEvent[]);
+      } catch { /* dữ liệu hỏng thì giữ trạng thái đang có */ }
+    };
+    window.addEventListener('khoan-da-guardian-event', capNhat);
+    window.addEventListener('storage', capNhat);
+    return () => {
+      window.removeEventListener('khoan-da-guardian-event', capNhat);
+      window.removeEventListener('storage', capNhat);
+    };
+  }, []);
+
+  const napDuLieuMau = () => {
+    const parent = { name: 'Bác Nguyễn Thị Lan', phone: '0900 000 001', network: 'demo' };
+    const events: GuardianEvent[] = [
+      { id: Date.now(), kind: 'warning', title: 'Bố mẹ vừa nhận cảnh báo cần chú ý', detail: 'Một cuộc gọi yêu cầu chuyển tiền đã được đánh dấu mức cao.', time: 'Vừa xong' },
+      { id: Date.now() - 1, kind: 'scan', title: 'Bố mẹ vừa kiểm tra một tình huống', detail: 'Kết quả đã được gửi về bảng điều khiển của con cháu.', time: '2 phút trước' },
+      { id: Date.now() - 2, kind: 'connection', title: 'Máy bố mẹ đã nối với tài khoản này', detail: 'Dữ liệu mẫu dùng để kiểm tra luồng thông báo hai phía.', time: 'Hôm nay' },
+    ];
+    setParentData(parent);
+    setGuardianEvents(events);
+    try {
+      localStorage.setItem('khoan_da_guardian_demo_connected', '1');
+      localStorage.setItem('khoan_da_guardian_events', JSON.stringify(events));
+    } catch { /* demo vẫn hoạt động trong phiên hiện tại */ }
+  };
 
   const toggleRule = (key: keyof typeof rules) => {
     setRules(prev => ({ ...prev, [key]: !prev[key] }));
@@ -346,13 +397,22 @@ export function GuardianView({
     if (!parentData?.phone) return;
     const so = parentData.phone.replace(/\s/g, '');
     const noiDung = tr('Bố/mẹ ơi, có ai gọi hỏi tiền hay hỏi mã thì bố/mẹ cúp máy rồi gọi lại cho con nhé.');
+    /*
+     * ⚠️ SO BẰNG MÃ, KHÔNG BẰNG CHỮ — sửa 22/9/2026. Bản trước so với
+     * chuỗi hiển thị 'Đã nối thử'; dịch chuỗi đó sang tiếng Anh là phép so sánh
+     * sai im lặng và máy mẫu bị coi như máy thật (§4.1).
+     */
+    if (parentData.network === 'demo') {
+      setMessageDraft(noiDung);
+      return;
+    }
     window.open(`sms:${so}?body=${encodeURIComponent(noiDung)}`, '_self');
     setSentAlertToast(true);
     setTimeout(() => setSentAlertToast(false), 4000);
   };
 
   return (
-    <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col gap-6">
+    <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col gap-5">
       {/* Toast Notification when reminder sent */}
       <AnimatePresence>
         {sentAlertToast && (
@@ -368,6 +428,34 @@ export function GuardianView({
         )}
       </AnimatePresence>
 
+      <AnimatePresence>
+        {messageDraft && (
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 12 }}
+            className="fixed inset-x-4 bottom-5 z-50 mx-auto max-w-md rounded-3xl border border-sky-200 bg-white p-5 shadow-[0_18px_50px_rgba(15,23,42,0.2)]"
+          >
+            <div className="flex items-start justify-between gap-3 mb-3">
+              <div>
+                <p className="text-[14px] font-black uppercase tracking-wide text-sky-700">{tr('Tin nhắn mẫu')}</p>
+                <h3 className="text-[18px] font-black text-slate-900 mt-1">{tr('Nhắc bố mẹ cảnh giác')}</h3>
+              </div>
+              <button type="button" onClick={() => setMessageDraft(null)} className="text-slate-400 hover:text-slate-700 text-[22px] leading-none" aria-label={tr('Đóng')}>×</button>
+            </div>
+            <p className="rounded-2xl bg-sky-50 border border-sky-100 px-4 py-3 text-[16px] leading-relaxed text-slate-800">{messageDraft}</p>
+            <p className="text-[14px] text-slate-500 mt-3">{tr('Đây là bản xem trước cho máy mẫu, chưa gửi đi thật.')}</p>
+            <div className="flex gap-2 mt-4">
+              <button type="button" onClick={() => setMessageDraft(null)} className="flex-1 min-h-[48px] rounded-2xl border border-slate-200 bg-white text-slate-700 font-bold">{tr('Đóng')}</button>
+              <button type="button" onClick={() => {
+                const so = parentData?.phone.replace(/\s/g, '') ?? '';
+                if (so) window.open(`sms:${so}?body=${encodeURIComponent(messageDraft)}`, '_self');
+              }} className="flex-1 min-h-[48px] rounded-2xl bg-sky-600 text-white font-bold active:scale-[0.98] transition-transform">{tr('Mở ứng dụng SMS')}</button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/*
         §4.3 — BĂNG NÀY PHẢI Ở LẠI CHO TỚI KHI CÓ ĐƯỜNG DỮ LIỆU THẬT.
         Một bảng điều khiển hiện "pin 88% · tại nhà · đang an toàn" mà không có
@@ -375,58 +463,53 @@ export function GuardianView({
         nhìn để yên tâm — nó phải nói thật về việc nó biết được gì.
       */}
       <div className="flex flex-col lg:flex-row lg:items-center gap-3">
-        <div className="flex-1 bg-amber-50 border-2 border-amber-300 rounded-2xl px-4 py-3 flex items-start gap-2.5">
-          <Info size={20} className="text-amber-700 shrink-0 mt-0.5" />
-          <p className="text-[16px] font-semibold text-amber-900 leading-snug">
-            {tr("Bản xem thử: máy của bố mẹ chưa được nối vào đây. Những con số dưới đây là ví dụ, không phải trạng thái thật.")}
+        <div className="flex-1 bg-white border border-amber-200 rounded-2xl px-4 py-3 flex items-center gap-3 shadow-[0_6px_20px_rgba(120,53,15,0.05)]">
+          <span className="w-9 h-9 rounded-xl bg-amber-100 flex items-center justify-center shrink-0">
+            <Info size={18} className="text-amber-700" />
+          </span>
+          <p className="text-[14px] font-semibold text-slate-700 leading-snug">
+            {tr('Máy bố mẹ đang ở chế độ xem thử. Số liệu mẫu không phải trạng thái thật.')}
           </p>
         </div>
 
-        {/*
-          ⚠️ ĐỔI VAI PHẢI LUÔN THẤY ĐƯỢC, KHÔNG CHỈ Ở MÀN ĐẦU.
-          Vai được lưu vào máy, nên ai lỡ chọn nhầm "Người cao tuổi" trên máy
-          tính sẽ mắc kẹt trong giao diện điện thoại phóng to và không biết
-          đường ra. Đó chính là màn hình người dùng gửi ảnh báo lỗi.
-        */}
-        {setUserRole && (
-          <button
-            onClick={() => { setUserRole('elder'); setView('home'); }}
-            className="shrink-0 px-4 py-3 bg-white border-2 border-purple-300 hover:bg-purple-50 text-purple-800 rounded-2xl font-bold text-[15px] flex items-center justify-center gap-2 active:scale-95 transition-transform"
-          >
-            <Smartphone size={18} />
-            {tr("Xem giao diện của bác")}
-          </button>
-        )}
+        <button
+          type="button"
+          onClick={napDuLieuMau}
+          className="shrink-0 min-h-[52px] px-5 py-3 bg-sky-600 hover:bg-sky-700 text-white rounded-2xl font-bold text-[14px] flex items-center justify-center gap-2 active:scale-95 transition-transform shadow-[0_8px_18px_rgba(2,132,199,0.18)]"
+        >
+          <ShieldCheck size={18} />
+          {tr('Nạp tài khoản & máy mẫu')}
+        </button>
       </div>
 
       {/* Main 4-Card Responsive Grid - Minimalist & Low Text */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
 
         {/* Card 1: LIVE PARENT STATUS & QUICK CONTACT (Cols: 7) */}
-        <div className="lg:col-span-7 bg-white rounded-3xl p-6 shadow-sm border border-slate-200/80 flex flex-col justify-between">
+        <div className="lg:col-span-7 bg-white rounded-[28px] p-5 sm:p-6 border border-slate-200/80 shadow-[0_14px_35px_rgba(30,41,59,0.07)] flex flex-col justify-between">
           <div>
             {/* Header row */}
             <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-5">
               <div className="flex items-center gap-2">
-                <span className="inline-flex rounded-full h-3 w-3 bg-slate-400" />
-                <span className="text-[14px] font-black uppercase tracking-wider text-slate-600">
+                <span className={`inline-flex rounded-full h-2.5 w-2.5 ${parentData ? 'bg-emerald-500' : 'bg-slate-400'}`} />
+                <span className="text-[14px] font-extrabold text-slate-700">
                   {tr("Máy của bố mẹ")}
                 </span>
               </div>
-              <span className="text-[14px] font-bold text-slate-500">
-                {tr("Chưa nối")}
+              <span className={`text-[14px] font-bold px-2.5 py-1 rounded-full ${parentData ? 'text-emerald-700 bg-emerald-50' : 'text-slate-500 bg-slate-100'}`}>
+                {parentData ? tr('Đã nối thử') : tr("Chưa nối")}
               </span>
             </div>
 
             {/* Parent Profile & Live Badges */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
               <div className="flex items-center gap-4">
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-purple-100 to-indigo-100 border-2 border-purple-200 shadow-sm shrink-0 flex items-center justify-center text-purple-700">
+                <div className="w-16 h-16 rounded-2xl bg-sky-50 border border-sky-100 shrink-0 flex items-center justify-center text-sky-600">
                   <Smartphone size={28} />
                 </div>
                 <div>
-                  <h3 className="font-extrabold text-lg sm:text-xl text-slate-900">
-                    {parentData?.name ?? tr('Chưa nối máy nào')}
+                    <h3 className="font-black text-lg sm:text-xl text-slate-900 tracking-tight">
+                    {parentData ? tr(parentData.name) : tr('Chưa nối máy nào')}
                   </h3>
                   <p className="text-[14px] font-semibold text-slate-500">
                     {parentData?.phone ?? tr('Thêm máy của bố mẹ để theo dõi')}
@@ -436,27 +519,27 @@ export function GuardianView({
                     huy hiệu xanh "Đang an toàn" ngay dưới tên bố mẹ, trong khi
                     KHÔNG có số đo nào chống lưng cho câu đó.
                   */}
-                  <div className="inline-flex items-center gap-1 text-[14px] font-bold text-slate-700 bg-slate-100 border border-slate-300 px-2 py-0.5 rounded-md mt-1">
-                    <EyeOff size={14} /> {tr("Khoan Đã chưa đọc được gì từ máy này")}
+                  <div className="inline-flex items-center gap-1 text-[14px] font-semibold text-slate-600 bg-slate-50 border border-slate-200 px-2.5 py-1 rounded-lg mt-2">
+                    <EyeOff size={14} /> {parentData ? tr('Dữ liệu mẫu — chưa phải kết nối thật') : tr("Khoan Đã chưa đọc được gì từ máy này")}
                   </div>
                 </div>
               </div>
 
               {/* Ví dụ hiển thị — có nhãn "ví dụ" ngay trên, xem băng ở đầu màn. */}
-              <div className="flex items-center gap-3 bg-slate-50 border border-dashed border-slate-300 p-2.5 rounded-2xl shrink-0">
+              <div className="flex items-center gap-3 bg-slate-50 border border-slate-200 p-2.5 rounded-2xl shrink-0">
                 <div className="flex items-center gap-1 text-[14px] font-bold text-slate-500">
                   <BatteryMedium size={16} className="text-slate-400" />
-                  <span>—</span>
+                  <span>{parentData ? '74%' : '—'}</span>
                 </div>
                 <div className="h-4 w-px bg-slate-200" />
                 <div className="flex items-center gap-1 text-[14px] font-bold text-slate-500">
                   <Wifi size={16} className="text-slate-400" />
-                  <span>—</span>
+                  <span>{parentData ? tr('Đã nối thử') : '—'}</span>
                 </div>
                 <div className="h-4 w-px bg-slate-200" />
                 <div className="flex items-center gap-1 text-[14px] font-bold text-slate-500">
                   <MapPin size={16} className="text-slate-400" />
-                  <span>—</span>
+                  <span>{parentData ? tr('Vị trí mẫu') : '—'}</span>
                 </div>
               </div>
             </div>
@@ -475,7 +558,7 @@ export function GuardianView({
             <a
               href={parentData?.phone ? `tel:${parentData.phone.replace(/\s/g, '')}` : undefined}
               aria-disabled={!parentData?.phone}
-              className="py-2.5 px-3 bg-slate-900 hover:bg-slate-800 active:scale-95 text-white rounded-2xl font-bold text-[14px] flex items-center justify-center gap-1.5 transition-transform"
+              className="min-h-[48px] py-2.5 px-3 bg-slate-900 hover:bg-slate-800 active:scale-95 text-white rounded-2xl font-bold text-[14px] flex items-center justify-center gap-1.5 transition-transform"
             >
               <Phone size={14} className="text-sky-400" />
               {tr("Gọi điện")}
@@ -483,7 +566,7 @@ export function GuardianView({
 
             <button
               onClick={sendSafetyReminderToParent}
-              className="py-2.5 px-3 bg-sky-50 hover:bg-sky-100 active:scale-95 text-sky-800 border border-sky-200 rounded-2xl font-bold text-[14px] flex items-center justify-center gap-1.5 transition-transform"
+              className="min-h-[48px] py-2.5 px-3 bg-sky-50 hover:bg-sky-100 active:scale-95 text-sky-800 border border-sky-200 rounded-2xl font-bold text-[14px] flex items-center justify-center gap-1.5 transition-transform"
             >
               <MessageSquare size={14} />
               {tr("Gửi nhắc an toàn")}
@@ -494,7 +577,7 @@ export function GuardianView({
                 if (onTriggerEmergency) onTriggerEmergency();
                 else setView('warning');
               }}
-              className="py-2.5 px-3 bg-red-50 hover:bg-red-100 active:scale-95 text-red-700 border border-red-200 rounded-2xl font-bold text-[14px] flex items-center justify-center gap-1.5 transition-transform"
+              className="min-h-[48px] py-2.5 px-3 bg-red-50 hover:bg-red-100 active:scale-95 text-red-700 border border-red-200 rounded-2xl font-bold text-[14px] flex items-center justify-center gap-1.5 transition-transform"
             >
               <ShieldAlert size={14} className="text-red-600" />
               {tr("Báo động SOS")}
@@ -503,10 +586,10 @@ export function GuardianView({
         </div>
 
         {/* Card 2: REMOTE PROTECTION TOGGLES (Cols: 5) */}
-        <div className="lg:col-span-5 bg-white rounded-3xl p-6 shadow-sm border border-slate-200/80 flex flex-col justify-between">
+        <div className="lg:col-span-5 bg-white rounded-[28px] p-5 sm:p-6 border border-slate-200/80 shadow-[0_14px_35px_rgba(30,41,59,0.07)] flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
-              <span className="text-[14px] font-black uppercase tracking-wider text-slate-600 flex items-center gap-1.5">
+              <span className="text-[14px] font-extrabold text-slate-700 flex items-center gap-1.5">
                 <Sliders size={14} className="text-sky-600" />
                 {tr("Công tắc bảo vệ cốt lõi")}
               </span>
@@ -579,9 +662,9 @@ export function GuardianView({
         </div>
 
         {/* Card 3: RECENT SECURITY INCIDENTS (Cols: 6) */}
-        <div className="lg:col-span-6 bg-white rounded-3xl p-6 shadow-sm border border-slate-200/80">
+        <div className="lg:col-span-6 bg-white rounded-[28px] p-5 sm:p-6 border border-slate-200/80 shadow-[0_14px_35px_rgba(30,41,59,0.07)]">
           <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
-            <span className="text-[14px] font-black uppercase tracking-wider text-slate-600 flex items-center gap-1.5">
+            <span className="text-[14px] font-extrabold text-slate-700 flex items-center gap-1.5">
               <ShieldAlert size={14} className="text-amber-500" />
               {tr("Nhật ký sự vụ gần đây")}
             </span>
@@ -598,22 +681,32 @@ export function GuardianView({
             Rỗng là một KẾT QUẢ và nó trung thực. Khi có đường dữ liệu thật thì
             đổ vào đây, đừng lấp chỗ trống bằng ví dụ.
           */}
-          <div className="flex flex-col items-center justify-center text-center py-8 px-4 bg-slate-50 border border-dashed border-slate-300 rounded-2xl">
-            <EyeOff size={28} className="text-slate-400 mb-2" />
-            <p className="text-[16px] font-bold text-slate-700 mb-1">
-              {tr("Chưa có sự vụ nào được ghi")}
-            </p>
-            <p className="text-[14px] text-slate-500 leading-snug max-w-xs">
-              {tr("Máy của bố mẹ chưa nối vào đây nên Khoan Đã chưa đọc được gì. Đây không phải là đã kiểm và thấy ổn.")}
-            </p>
-          </div>
+          {guardianEvents.length === 0 ? (
+            <div className="flex flex-col items-center justify-center text-center py-8 px-4 bg-slate-50 border border-dashed border-slate-300 rounded-2xl">
+              <EyeOff size={28} className="text-slate-400 mb-2" />
+              <p className="text-[16px] font-bold text-slate-700 mb-1">{tr('Chưa có thông báo từ máy bố mẹ')}</p>
+              <p className="text-[14px] text-slate-500 leading-snug max-w-xs">{tr('Nạp bộ test để xem thử luồng cảnh báo và kết nối.')}</p>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-2.5">
+              {guardianEvents.slice(0, 4).map((event) => (
+                <div key={event.id} className={`rounded-2xl px-3.5 py-3 border ${event.kind === 'warning' ? 'bg-red-50 border-red-200' : 'bg-slate-50 border-slate-200'}`}>
+                  <div className="flex items-start justify-between gap-3">
+                    <p className="font-bold text-[15px] text-slate-900 leading-snug">{tr(event.title)}</p>
+                    <span className="text-[14px] font-semibold text-slate-500 shrink-0">{tr(event.time)}</span>
+                  </div>
+                  <p className="text-[14px] text-slate-600 leading-snug mt-1">{tr(event.detail)}</p>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Card 4: FAST SITUATION AI CHECK (Cols: 6) */}
-        <div className="lg:col-span-6 bg-white rounded-3xl p-6 shadow-sm border border-slate-200/80 flex flex-col justify-between">
+        <div className="lg:col-span-6 bg-white rounded-[28px] p-5 sm:p-6 border border-slate-200/80 shadow-[0_14px_35px_rgba(30,41,59,0.07)] flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
-              <span className="text-[14px] font-black uppercase tracking-wider text-slate-600 flex items-center gap-1.5">
+              <span className="text-[14px] font-extrabold text-slate-700 flex items-center gap-1.5">
                 <Sparkles size={14} className="text-purple-600" />
                 {tr("Quét nhanh tình huống / Số điện thoại")}
               </span>
@@ -730,7 +823,7 @@ export function GuardianView({
             <button
               type="button"
               onClick={() => {
-                setQueryInput('Số lạ gọi yêu cầu chuyển tiền gấp để nộp phạt bưu kiện');
+                setQueryInput(tr('Số lạ gọi yêu cầu chuyển tiền gấp để nộp phạt bưu kiện'));
               }}
               className="text-purple-700 font-bold hover:underline"
             >

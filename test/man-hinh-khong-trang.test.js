@@ -191,12 +191,26 @@ function gieoTrangThaiMoiCai(w) {
   w.localStorage.setItem('familyMembers', '[]');
   w.localStorage.setItem('hasOverlayPermission', 'true');
   w.localStorage.setItem('showFloatingBall', 'true');
+  /*
+   * ⚠️ TẮT MÀN GỌN CHO CÁC CA DƯỚI — thêm 19/9/2026.
+   *
+   * Từ 19/9, vai "bác" mặc định vào MÀN GỌN (xem `batManGonChoBac` trong App.tsx):
+   * bốn nút to, không thanh điều hướng, không Menu tác vụ. Các ca trong tệp này
+   * bấm đúng những thứ chỉ có ở màn đầy đủ, nên phải khai rõ mình đang đo màn nào
+   * thay vì ăn theo mặc định — mặc định đổi là test đỏ mà không ai biết vì sao.
+   *
+   * Màn gọn có ca riêng ở cuối tệp.
+   */
+  w.localStorage.setItem('khoan_da_da_chuyen_man_gon', '1');
+  w.localStorage.setItem('khoan_da_sieu_don_gian', '0');
 }
 
-async function moApp(t) {
+async function moApp(t, gieoThem) {
   const { w, loi, don } = dungCuaSo();
   t.after(don);
   gieoTrangThaiMoiCai(w);
+  // Ca nào muốn đo đúng trạng thái mặc định thì tự gỡ mấy khoá đã gieo ở trên.
+  if (gieoThem) gieoThem(w);
 
   const React = require(path.join(GOC, 'node_modules', 'react'));
   const { createRoot } = require(path.join(GOC, 'node_modules', 'react-dom', 'client'));
@@ -254,6 +268,11 @@ test('bấm từng tab điều hướng, không tab nào làm trắng màn', { s
 
 test('mở Menu tác vụ khi CHƯA CÓ người thân nào', { skip: BO_QUA }, async (t) => {
   const { w, loi, bam, doDac } = await moApp(t);
+  /*
+   * Từ 20/9/2026, Menu tác vụ được gom vào Cài đặt cùng phần thông báo
+   * theo thiết kế mới; mở Settings trước khi kiểm tra menu để test bám đúng UI.
+   */
+  assert.ok(await bam('Cài đặt'), 'không tìm thấy nút "Cài đặt"');
   assert.ok(await bam('Menu tác vụ'), 'không tìm thấy nút "Menu tác vụ"');
   const d = doDac();
   assert.ok(d.soNut > 0 && d.soChu > 0, `mở menu xong màn hình trắng — ${JSON.stringify(d)}`);
@@ -262,27 +281,42 @@ test('mở Menu tác vụ khi CHƯA CÓ người thân nào', { skip: BO_QUA }, 
   assert.deepStrictEqual(loi, [], `mở menu làm ném lỗi:\n${loi.join('\n')}`);
 });
 
+/** Bóng nổi đã được bỏ khỏi màn hình chính theo yêu cầu giao diện mới. */
+test('bỏ bóng nổi khỏi màn hình chính theo thiết kế mới', { skip: BO_QUA }, async (t) => {
+  const { w, loi } = await moApp(t);
+  /* Bóng nổi đã bỏ khỏi UI chính để tránh che nội dung và các nút thao tác. */
+  assert.equal(w.document.querySelector('.fixed.right-3.bottom-40'), null,
+    'bóng nổi vẫn còn trên màn hình chính');
+  assert.deepStrictEqual(loi, [], `màn hình chính làm ném lỗi:\n${loi.join('\n')}`);
+});
+
 /**
- * ⚠️ CA NÀY LÀ LÝ DO CẢ TỆP TỒN TẠI. Nút bóng nổi nằm trong LỐI TẮT KHẨN CẤP,
- * và nó từng ném `Cannot read properties of null (reading 'name')` làm trắng cả
- * app — không ai báo, không test nào thấy.
+ * ══════════ MÀN GỌN LÀ MẶC ĐỊNH CỦA VAI "BÁC" — 19/9/2026 ══════════
+ *
+ * Đo trên trình duyệt thật cùng ngày: màn gọn là màn DUY NHẤT đạt mọi ngưỡng đặt
+ * ra cho người cao tuổi (4 đích chạm, nút 80px, 56 ký tự chữ), trong khi trang chủ
+ * đầy đủ có 15 đích chạm. Nó từng là tuỳ chọn nằm ở thẻ thứ sáu trong Cài đặt.
+ *
+ * Ca này canh ba thứ, và cả ba đều là ràng buộc chứ không phải thẩm mỹ:
+ *   ① máy vai "bác" chưa từng chọn gì thì vào thẳng màn gọn;
+ *   ② §4.6 — màn gọn LUÔN có lối ra nhìn thấy được ("Xem đầy đủ");
+ *   ③ bác đã tự tắt thì lần sau KHÔNG bị bật lại (chuyển đúng một lần).
  */
-test('mở lối tắt bóng nổi khi CHƯA CÓ người thân nào', { skip: BO_QUA }, async (t) => {
-  const { w, loi, doDac } = await moApp(t);
-  const React = require(path.join(GOC, 'node_modules', 'react'));
+test('vai "bác" vào thẳng màn gọn, và bác tắt rồi thì không bị bật lại', { skip: BO_QUA }, async (t) => {
+  const { w, loi, doDac } = await moApp(t, (win) => {
+    win.localStorage.removeItem('khoan_da_da_chuyen_man_gon');
+    win.localStorage.removeItem('khoan_da_sieu_don_gian');
+  });
 
-  const bong = w.document.querySelector('.fixed.right-3.bottom-40');
-  assert.ok(bong, 'không tìm thấy bóng nổi — đổi vị trí thì sửa cả bộ chọn này');
-  const nut = bong.querySelector('button');
-  assert.ok(nut, 'bóng nổi không có nút bấm');
-
-  await React.act(async () => { nut.click(); await new Promise((r) => setTimeout(r, 300)); });
-
-  const d = doDac();
-  assert.ok(d.soNut > 0 && d.soChu > 0,
-    `mở bóng nổi xong màn hình TRẮNG — đúng lỗi đã lên bản web thật: ${JSON.stringify(d)}`);
-  assert.match(w.document.body.textContent, /Gọi ngay cho con cháu/, 'lối tắt không mở ra');
-  assert.match(w.document.body.textContent, /Chưa có ai/,
-    'chưa có người thân thì phải mời thêm, không được đọc thẳng tên của một người không tồn tại');
-  assert.deepStrictEqual(loi, [], `mở bóng nổi làm ném lỗi:\n${loi.join('\n')}`);
+  const chu = w.document.body.textContent;
+  // 20/9/2026: nút đâu là NÓI. "Kiểm tin nhắn" chuyển vào trong màn trợ lý,
+  // vì gõ chữ, gửi ảnh và nói là cùng một việc — xem chú thích ở ManSieuDonGian.
+  assert.match(chu, /Nói cho cháu nghe/, 'màn gọn không hiện — vai "bác" phải vào thẳng màn bốn nút');
+  assert.match(chu, /Đang bị ai gọi\?/, 'thiếu lối vào màn hỏi nhanh — xem chú thích ở ManSieuDonGian');
+  assert.match(chu, /Xem đầy đủ/, '§4.6 — màn gọn phải luôn có lối ra nhìn thấy được');
+  assert.ok(doDac().soNut <= 6,
+    `màn gọn có ${doDac().soNut} nút — nó tồn tại để chỉ còn vài việc, quá số này là hỏng chính lý do của nó`);
+  assert.strictEqual(w.localStorage.getItem('khoan_da_da_chuyen_man_gon'), '1',
+    'phải đánh dấu đã chuyển, nếu không lần sau lại đè lên lựa chọn của bác');
+  assert.deepStrictEqual(loi, [], `màn gọn ném lỗi:\n${loi.join('\n')}`);
 });

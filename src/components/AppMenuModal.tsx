@@ -1,5 +1,6 @@
+import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { 
+import {
   X, 
   ShieldAlert,  
   PhoneCall, 
@@ -41,6 +42,24 @@ export function AppMenuModal({
   showFloatingBall = true,
   setShowFloatingBall
 }: AppMenuModalProps) {
+
+  /**
+   * ⚠️ PHÍM ESC ĐÓNG LỚP PHỦ — thêm 19/9/2026.
+   *
+   * Đo cùng ngày: `grep "Escape"` trên cả `src/` ra 0 kết quả. Người dùng bàn
+   * phím (và người dùng trình đọc màn hình) mở tấm thẻ này ra thì không có cách
+   * nào thoát ngoài việc đi tìm nút X bằng phím Tab — §4.6 nói phải LUÔN có lối
+   * ra, và một lối ra chỉ bấm được bằng chuột thì không phải lối ra cho họ.
+   *
+   * ⚠️ CHỈ GẮN KHI ĐANG MỞ. Gắn thường trực thì mỗi lần bấm Esc ở màn khác cũng
+   * chạy qua hàm này — vô hại nhưng là rác, và rác kiểu đó hay biến thành lỗi.
+   */
+  useEffect(() => {
+    if (!isOpen) return undefined;
+    const khiBam = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', khiBam);
+    return () => window.removeEventListener('keydown', khiBam);
+  }, [isOpen, onClose]);
 
   /**
    * ⚠️ `null` KHI CHƯA CÓ AI — KHÔNG CÓ SỐ DỰ PHÒNG.

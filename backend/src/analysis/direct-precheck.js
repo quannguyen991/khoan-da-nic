@@ -9,7 +9,7 @@
  * Hàm thuần. Không mạng, không AI.
  */
 
-const { segmentsForScope, boDau } = require('./context-builder');
+const { segmentsForScope, boDau, chuanDauThanh, boThanh } = require('./context-builder');
 const { layPack } = require('./locale-pack-registry');
 const { laTinHieu } = require('./signal-registry');
 
@@ -83,6 +83,129 @@ function laPhuDinh(text, viTri) {
   return !KHONG_PHAI_PHU_DINH.test(truoc.slice(m.index));
 }
 
+/**
+ * ═════ BỎ DẤU LÀ ĐỂ ĐỌC CHỮ KHÔNG DẤU, KHÔNG PHẢI ĐỂ XOÁ NGHĨA ═════
+ *
+ * Đo 19/9/2026 — ba câu LÀNH, viết đủ dấu, đều nổ MAN_URGENCY:
+ *
+ *   "Hẹn gặp bác ngày mai ở nhà con nhé."        → [gặp → "gap" ≡ gấp]
+ *   "Bác nhớ mang theo khăn và mũ khi đi chơi."    → [khăn → "khan" ≡ khẩn]
+ *   "Cuộc họp tại nhà văn hoá ngày 20 tháng 9."  → [ngày → "ngay"]
+ *
+ * Bỏ dấu làm nhiều từ khác hẳn nhau sập vào cùng một chuỗi: gặp/gấp, khăn/khẩn,
+ * ngày/ngay, tại/tải, chuyện/chuyển. Tiếng Việt có sáu thanh điệu; bỏ dấu là
+ * mất sáu đường phân biệt cùng một lúc.
+ *
+ * NHƯNG KHÔNG ĐƯỢC BỎT PHẦN BỎT DẤU. SMS lừa đảo ở Việt Nam viết không dấu là
+ * chuyện thường — đo được "Bac chuyen het tien sang tai khoan an toan cua Bo
+ * Cong an ngay" chỉ 7 điểm nếu không bỏ dấu, bản có dấu 61 điểm.
+ *
+ * LẮT RẤT HẬP: bản bỏ dấu chỉ dùng để đọc CHỮ KHÔNG CÓ DẤU. Một khớp trên bản
+ * bỏ dấu chỉ được tính khi ĐOẠN CHỮ TƯƠNG ỨNG trong bản còn dấu cũng không mang
+ * dấu. Người viết "gặp" đã tự nói rằng họ không viết "gấp".
+ *
+ * ⚠️ XÉT THEO ĐOẠN KHỚP, KHÔNG THEO CẢ CÂU. Tin trộn nửa có dấu nửa không là ca
+ * thật: "Bác chuyển tiền gap giup con" — đoạn "gap" vẫn không dấu nên vẫn tính.
+ * Và vì thế phép quét phải duyệt MỌI lượt khớp chứ không dừng ở lượt đầu: câu
+ * "Hẹn gặp bác, chuyen tien gap di" có "gap" giả đứng trước "gap" thật.
+ *
+ * ⚠️ KHÔNG ĐỤNG VÀO NHÁNH NÀO KHÔNG ĐỒNG CHỈ SỐ. `boDau` giữ nguyên số ký tự
+ * nên bản bỏ dấu đồng chỉ số với bản còn dấu. Biến thể OCR thì không ("rn" → "m"
+ * làm ngắn chuỗi), nên nhánh đó giữ nguyên cách cũ — thà giữ một báo động giả
+ * hiếm còn hơn tự đổi chỉ số rồi cắt nhầm một tín hiệu thật (§4.2).
+ */
+/**
+ * ═════ `\b` CỦA JS KHÔNG BIẾT CHỮ CÓ DẤU LÀ CHỮ ═════
+ *
+ * Không có cờ `u`, `\w` của JS chỉ là `[A-Za-z0-9_]`. Nên "ẻ" là KÝ TỰ KHÔNG
+ * PHẢI CHỮ, và giữa "sẻ" với khoảng trắng đằng sau KHÔNG CÓ ranh giới từ nào cả.
+ *
+ * Hậu quả đo được 19/9/2026: mẫu `(chia sẻ|bật)\b[^.]{0,16}màn hình\b…` KHÔNG
+ * BAO GIỜ khớp được câu có dấu "chia sẻ màn hình khi đang đăng nhập ngân hàng".
+ * Nó sống được tới hôm nay là nhờ nhánh BỎ DẤU: "chia se\b" thì `e` lại là `\w`
+ * nên ranh giới xuất hiện trở lại. Một lỗi thầm lặng đúng kiểu §4.3: không ai
+ * thấy gì hỏng, chỉ thấy "chưa thấy dấu hiệu".
+ *
+ * Nên ranh giới từ phải được viết lại bằng chính bộ chữ tiếng Việt. Không dùng
+ * cờ `u` + `\p{L}`: cờ `u` siết chặt cú pháp escape, và hơn sáu trăm mẫu trong pack
+ * đang viết theo cú pháp cũ — đổi cờ là đổi ý nghĩa của cả sáu trăm cái một lượt.
+ */
+const CHU_VN = 'A-Za-z0-9_'
+  + '\u00c0-\u00c3\u00c8-\u00ca\u00cc\u00cd\u00d2-\u00d5\u00d9\u00da\u00dd'
+  + '\u00e0-\u00e3\u00e8-\u00ea\u00ec\u00ed\u00f2-\u00f5\u00f9\u00fa\u00fd'
+  + '\u0102\u0103\u0110\u0111\u0128\u0129\u0168\u0169\u01a0\u01a1\u01af\u01b0'
+  + '\u1ea0-\u1ef9';
+
+/** `\b` tương đương, nhưng biết chữ tiếng Việt cũng là chữ. */
+const RANH_GIOI = '(?:(?<=[' + CHU_VN + '])(?![' + CHU_VN + '])'
+  + '|(?<![' + CHU_VN + '])(?=[' + CHU_VN + ']))';
+
+/**
+ * ═════ ĐƯỢC PHÉP THIẾU DẤU THANH, KHÔNG ĐƯỢC ĐỔI DẤU THANH ═════
+ *
+ * Nhánh bỏ dấu cũ gộp hai việc rất khác nhau làm một:
+ *
+ *   ✓ người viết THIẾU dấu — "phi xu ly" cho mẫu "phí xử lý". Phải bắt.
+ *   ✗ người viết dấu KHÁC  — "mua hộ bác" cho mẫu "mua…bạc". Không được bắt.
+ *
+ * Hai ca đó giống hệt nhau sau khi bỏ dấu, nên bộ luật không cách nào chọn đúng.
+ * Chỗ phân biệt nằm ở CHIỀU: chữ trong tin được phép THIẾU cái mẫu có, nhưng
+ * không được MANG một dấu khác.
+ *
+ * Nên mỗi chữ có dấu thanh trong mẫu nở ra thành một lớp hai phần tử:
+ *
+ *   "phí xử lý"  →  "ph[íi] x[ửu]* l[ýy]"      (xử → ử giữ móc, chỉ bỏ thanh)
+ *   "mua…bạc"    →  "mua…b[ạa]c"  → "bác" trượt, đúng ý muốn
+ *
+ * ⚠️ DẤU TẠO CHỮ (ă â ê ô ơ ư đ) KHÔNG NỞ RA. Chúng không phải thanh điệu mà là
+ * chữ khác hẳn: gặp/gấp, khăn/khẩn, chứ/chức phân biệt nhau ở đây. Còn người
+ * viết KHÔNG DẤU HẲN thì nhánh bỏ dấu lo, và nhánh đó có luật riêng của nó.
+ *
+ * ⚠️ BIẾT MÌNH ĐANG Ở TRONG `[...]` HAY KHÔNG. Mẫu của pack có lớp ký tự sẵn;
+ * nhét thêm `[` vào giữa một lớp là hỏng cả mẫu — trong lớp thì chỉ thêm ký tự.
+ */
+function mauKhoanThanh(src) {
+  let ra = '';
+  let trongLop = false;
+  for (let i = 0; i < src.length; i += 1) {
+    const c = src[i];
+    if (c === '\\') { ra += c + (src[i + 1] || ''); i += 1; continue; }
+    if (c === '[') { trongLop = true; ra += c; continue; }
+    if (c === ']') { trongLop = false; ra += c; continue; }
+    const tron = boThanh(c);
+    if (tron === c || tron.length !== 1) { ra += c; continue; }
+    ra += trongLop ? c + tron : '[' + c + tron + ']';
+  }
+  return ra;
+}
+
+/** Biên dịch một mẫu của pack thành RegExp, đổi `\b` sang ranh giới hiểu dấu. */
+function bienDich(src) {
+  return new RegExp(String(src).replace(/(^|[^\\])\\b/g, (_, t) => t + RANH_GIOI), 'i');
+}
+
+function khopBoDauDungCho(normalized, chuoi, start, end) {
+  if (chuoi.length !== normalized.length) return true;   // không đồng chỉ số: không xét
+  const doanGoc = normalized.slice(start, end);
+  return boDau(doanGoc) === doanGoc;
+}
+
+/**
+ * Duyệt MỌI lượt khớp, trả lượt đầu tiên qua được `hopLe`.
+ * `exec` một lần chỉ trả lượt đầu — mà lượt đầu có thể là một "gap" do bỏ dấu
+ * sinh ra, trong khi "gap" thật nằm ngay sau đó.
+ */
+function timKhop(chuoi, re, hopLe) {
+  const co = re.flags.includes('g') ? re.flags : re.flags + 'g';
+  const reG = new RegExp(re.source, co);
+  let m;
+  while ((m = reG.exec(chuoi)) !== null) {
+    if (m[0].length === 0) { reG.lastIndex += 1; continue; }   // chống vòng lặp vô tận
+    if (hopLe(m)) return m;
+  }
+  return null;
+}
+
 /** C.5 — danh sách tắt vô điều kiện, so trên bản KHÔNG DẤU. */
 function biTatVoDieuKien(pack, signalId, folded) {
   const cum = pack.suppressors?.[signalId];
@@ -115,7 +238,13 @@ function directPrecheck(ctx, opts = {}) {
       if (biTatCoDieuKien(pack, signalId, opts)) continue;
 
       for (const mau of mauList) {
-        const re = new RegExp(mau.pattern, 'i');
+        const re = bienDich(mau.pattern);
+        /*
+         * ĐƯỜNG THỨ HAI: cùng mẫu đó nhưng cả mẫu lẫn văn bản đưa về MỘT LỐI
+         * ĐẶT DẤU THANH. Đây mới là chỗ nối "toà án" với "tòa án" — trước đây việc
+         * đó do nhánh bỏ dấu gánh hộ, và gánh kèm theo cả gặp/gấp, khăn/khẩn.
+         */
+        const reDauChuan = bienDich(mauKhoanThanh(chuanDauThanh(mau.pattern)));
         /**
          * ⚠️ TIẾNG VIỆT KHÔNG DẤU LÀ CA THẬT, KHÔNG PHẢI CA HIẾM.
          *
@@ -127,7 +256,7 @@ function directPrecheck(ctx, opts = {}) {
          * là ASCII nên không bị đụng tới. Bỏ dấu CẢ MẪU LẪN VĂN BẢN rồi so.
          */
         const mauKhongDau = boDau(mau.pattern);
-        const reKhongDau = mauKhongDau === mau.pattern ? null : new RegExp(mauKhongDau, 'i');
+        const reKhongDau = mauKhongDau === mau.pattern ? null : bienDich(mauKhongDau);
         const doanList = segmentsForScope(ctx, mau.scope);
 
         let batDuoc = null;
@@ -136,14 +265,18 @@ function directPrecheck(ctx, opts = {}) {
 
           // Khớp trên bản chuẩn hoá trước; nếu trượt thì thử các biến thể OCR.
           const ungVien = [
-            { chuoi: doan.normalized, re },
-            ...(reKhongDau ? [{ chuoi: doan.folded, re: reKhongDau }] : []),
-            ...doan.ocrVariants.map((c) => ({ chuoi: c, re: reKhongDau || re })),
+            { chuoi: doan.normalized, re, boDauRoi: false },
+            { chuoi: chuanDauThanh(doan.normalized), re: reDauChuan, boDauRoi: false },
+            ...(reKhongDau ? [{ chuoi: doan.folded, re: reKhongDau, boDauRoi: true }] : []),
+            ...doan.ocrVariants.map((c) => ({ chuoi: c, re: reKhongDau || re, boDauRoi: true })),
           ];
-          for (const { chuoi, re: reDung } of ungVien) {
-            const m = reDung.exec(chuoi);
+          for (const { chuoi, re: reDung, boDauRoi } of ungVien) {
+            const m = timKhop(chuoi, reDung, (k) => {
+              if (laPhuDinh(chuoi, k.index)) return false;
+              if (boDauRoi && !khopBoDauDungCho(doan.normalized, chuoi, k.index, k.index + k[0].length)) return false;
+              return true;
+            });
             if (!m) continue;
-            if (laPhuDinh(chuoi, m.index)) continue;
             batDuoc = {
               quote: m[0],
               start: m.index,

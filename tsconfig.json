@@ -43,5 +43,18 @@
     },
     "allowImportingTsExtensions": true,
     "noEmit": true
-  }
+  },
+  /*
+   * ⚠️ `codebrain/` LÀ MỘT APP RIÊNG, KHÔNG PHẢI SOURCE RUNTIME CỦA KHOAN ĐÃ
+   * — xem `BAN-GIAO-CLAUDE.md` §6. Nó có `package.json` và `tsconfig.json`
+   * của chính nó (`cd codebrain && npm run lint`).
+   *
+   * Không có "exclude" thì `tsc` mặc định quét MỌI tệp .ts/.tsx dưới thư mục
+   * gốc, kể cả `codebrain/`. Đo 22/9/2026: `npm run lint` ở gốc đỏ vì lỗi bên
+   * trong `codebrain/server.ts` và `codebrain/src/App.tsx` — hai tệp không
+   * thuộc đường an toàn nào của Khoan Đã, và checklist bàn giao đòi chạy
+   * `npm run lint` trước khi sửa bất cứ gì. Một lệnh kiểm phải đỏ vì việc của
+   * một app khác là đúng dạng "bộ đo báo lỗi mà không đo đúng chỗ".
+   */
+  "exclude": ["node_modules", "dist", "codebrain"]
 }

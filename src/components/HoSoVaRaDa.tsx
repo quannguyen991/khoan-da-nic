@@ -82,7 +82,7 @@ export function ManHoSoVuViec({
         inputMode={so ? 'numeric' : 'text'}
         value={gt}
         onChange={(e) => dat(e.target.value)}
-        className="w-full min-h-[52px] rounded-[16px] border-2 border-[#1e1b4b] px-4 text-[17px] text-[#1e1b4b]"
+        className="w-full min-h-[52px] rounded-[16px] border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] px-4 text-[17px] text-[#1e1b4b]"
       />
     </label>
   );
@@ -130,7 +130,7 @@ export function ManHoSoVuViec({
 
       {van && (
         <div className="mt-4">
-          <pre className="whitespace-pre-wrap break-words bg-white border-2 border-[#1e1b4b] rounded-[18px] p-4 text-[14px] leading-relaxed text-[#1e1b4b]">
+          <pre className="whitespace-pre-wrap break-words bg-white border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] rounded-[18px] p-4 text-[14px] leading-relaxed text-[#1e1b4b]">
             {van}
           </pre>
           <div className="flex gap-2 mt-3">
@@ -145,7 +145,7 @@ export function ManHoSoVuViec({
             <button
               type="button"
               onClick={taiVe}
-              className="flex-1 min-h-[56px] rounded-[18px] border-2 border-[#1e1b4b] text-[#1e1b4b] font-black text-[16px] flex items-center justify-center gap-2"
+              className="flex-1 min-h-[56px] rounded-[18px] border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] text-[#1e1b4b] font-black text-[16px] flex items-center justify-center gap-2"
             >
               <Download size={20} aria-hidden="true" />
               {tra(MAN_HO_SO, 'NUT_TAI', lang)}
@@ -225,7 +225,7 @@ export function ManRaDaThuDoan({
       </p>
 
       {tt.theoHo.length === 0 ? (
-        <p className="text-[16px] text-slate-700 bg-white border-2 border-[#1e1b4b] rounded-[18px] p-4">
+        <p className="text-[16px] text-slate-700 bg-white border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] rounded-[18px] p-4">
           {tra(MAN_RA_DA, 'KHONG_CO', lang)}
         </p>
       ) : (
@@ -233,7 +233,7 @@ export function ManRaDaThuDoan({
           {tt.theoHo.map((h) => {
             const cao = tt.theoHo[0]?.soLan || 1;
             return (
-              <div key={h.ho} className="bg-white border-2 border-[#1e1b4b] rounded-[18px] px-4 py-3">
+              <div key={h.ho} className="bg-white border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] rounded-[18px] px-4 py-3">
                 <div className="flex items-baseline justify-between gap-3">
                   <span className="font-bold text-[16px] text-[#1e1b4b] leading-snug">
                     {tra(HO_KICH_BAN, h.ho, lang) ?? h.ho}
@@ -256,7 +256,7 @@ export function ManRaDaThuDoan({
       )}
 
       {/* ── Đồng hồ phản ứng (vòng A) ── */}
-      <div className="mt-6 bg-white border-2 border-[#1e1b4b] rounded-[18px] px-4 py-4">
+      <div className="mt-6 bg-white border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] rounded-[18px] px-4 py-4">
         <h2 className="text-[16px] font-black text-[#1e1b4b] flex items-center gap-2 mb-2">
           <Timer size={20} aria-hidden="true" />
           {tra(MAN_DONG_HO, 'TIEU_DE', lang)}
@@ -294,7 +294,7 @@ export function ManRaDaThuDoan({
           <p className="text-[15px] font-bold text-emerald-700 mt-2">{thongBao}</p>
         )}
         {banChu && (
-          <pre className="mt-2 whitespace-pre-wrap break-words select-all bg-white border-2 border-[#1e1b4b] rounded-[18px] p-3 text-[14px] leading-relaxed text-[#1e1b4b]">
+          <pre className="mt-2 whitespace-pre-wrap break-words select-all bg-white border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] rounded-[18px] p-3 text-[14px] leading-relaxed text-[#1e1b4b]">
             {banChu}
           </pre>
         )}

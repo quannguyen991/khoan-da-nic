@@ -70,7 +70,7 @@ export function DanhSachSoNganHang({ lang, kieu }: { lang: Lang; kieu: 'sang' | 
           key={nh.id}
           className={toi
             ? 'rounded-2xl bg-black/35 border border-white/25 p-3.5'
-            : 'rounded-[20px] bg-white border-2 border-[#1e1b4b] p-3.5'}
+            : 'rounded-[20px] bg-white border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] p-3.5'}
         >
           <p className={`font-black text-[16px] leading-snug mb-2 ${toi ? 'text-white' : 'text-[#1e1b4b]'}`}>{nh.ten}</p>
           <div className="flex flex-col gap-2">

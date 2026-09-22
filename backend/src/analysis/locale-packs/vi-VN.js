@@ -46,6 +46,12 @@ module.exports = {
     FIN_TRANSFER_REQUEST: [
       { pattern: 'chuyển\\b[^.]{0,40}(tiền|triệu|đồng|khoản|vào tài khoản|sang tài khoản)', scope: 'action' },
       { pattern: '\\bchuyển khoản\\b', scope: 'action' },
+      /*
+       * Tin TRỘN hai thứ tiếng là ca thật trong bộ dữ liệu: "Mẹ transfer 6.000.000đ
+       * tới tài khoản…", "Chú, pay a 600,000đ release fee to account…". Pack
+       * tiếng Anh không được bật cho những tin này vì chúng được đoán là tiếng Việt.
+       */
+      { pattern: '\\b(transfer|pay|send)\\b[^.]{0,36}(tài khoản|account|\\d{3})', scope: 'action' },
       { pattern: '\\b(nộp|gửi)\\b[^.]{0,24}(tiền|triệu|đồng)\\b', scope: 'action' },
       /**
        * ⚠️ BỐN ĐỘNG TỪ "ĐƯA TIỀN VÀO" CÒN THIẾU — vá 15/8/2026.
@@ -96,6 +102,12 @@ module.exports = {
       { pattern: '(tài khoản|ví)\\s+(an toàn|bảo đảm|tạm giữ|phong toả)', scope: 'action' },
     ],
     FIN_CRYPTO_TRANSFER: [
+      /*
+       * "Đồng này sắp lên sàn lớn… Bác chuyển tiền vào ví em gửi địa chỉ" — không
+       * có chữ bitcoin nào, nên hai miếng dưới đều trượt. "Ví" + "địa chỉ" là
+       * cách nói của chính họ.
+       */
+      { pattern: '(chuyển|gửi|nạp)[^.]{0,24}(vào|tới|qua)\\s*ví(?![a-zà-ỹ])', scope: 'action' },
       { pattern: '(bitcoin|btc|usdt|tiền ảo|tiền mã hoá|tiền điện tử)', scope: 'action' },
     ],
     FIN_RECOVERY_FEE: [
@@ -236,6 +248,12 @@ module.exports = {
       { pattern: '(gọi|nhắn|điện)(?:(?!không|chẳng)[^.]){0,18}(từ|của|xưng là|tự xưng)[^.]{0,12}(công an|cảnh sát|viện kiểm sát|toà án)', scope: 'any' },
     ],
     ID_TAX_BENEFIT_IMPERSONATION: [
+      /*
+       * "Một chương trình hỗ trợ người cao tuổi đang cập nhật danh sách người thụ
+       * hưởng" — tin mở đường cho màn xin thông tin/lệ phí ở lượt sau. Không nêu
+       * tên cơ quan nào, không đường tra cứu nào — chính sách thật thì có cả hai.
+       */
+      { pattern: '(chương trình|gói|chính sách)\\s*(hỗ trợ|trợ cấp|ưu đãi)[^.]{0,44}(danh sách|thụ hưởng|đối tượng|xét duyệt)', scope: 'any' },
       { pattern: '(chi cục|cơ quan|cục)\\s+thuế', scope: 'any' },
       { pattern: '\\b(bảo hiểm xã hội|trợ cấp nhà nước)\\b', scope: 'any' },
     ],
@@ -299,6 +317,12 @@ module.exports = {
     ],
     MAN_SECRECY: [
       { pattern: '(đừng|không)\\s+(nói|kể|báo|tiết lộ)[^.]{0,28}(với ai|cho ai|người thân|gia đình|vợ|chồng|con)', scope: 'action' },
+      /*
+       * Danh sách trên thiếu đúng những người hay được nêu tên nhất. Đo 19/9/2026:
+       * "bà đừng nói với bố cháu bà nhé" — câu kinh điển của kịch bản giả danh cháu
+       * — không khớp được miếng nào, và trước đây nó chỉ nổ nhờ va chạm dấu.
+       */
+      { pattern: '(đừng|không)\\s+(nói|kể|báo|tiết lộ)[^.]{0,28}(bố|mẹ|ba|má|bà|ông|anh|chị|cô|chú|cậu)\\b', scope: 'action' },
       { pattern: 'giữ\\s+bí mật', scope: 'action' },
       { pattern: 'không được cho ai biết', scope: 'action' },
     ],
@@ -356,6 +380,16 @@ module.exports = {
        * bị đẩy lên CAO. `tạm ứng` là từ chuẩn của bệnh viện và cơ quan.
        */
       { pattern: '(đặt cọc|ứng trước|nạp trước|đóng trước)', scope: 'action' },
+      /*
+       * Ba lối viết đo được 19/9/2026, không miếng nào ở trên bắt được:
+       *   · "nạp thêm 4.800.000đ để đồng bộ lệnh, xong là rút được"
+       *   · "chuyển cọc 50 triệu vào tài khoản này để giữ chỗ"   (cọc đứng một mình)
+       *   · "em chuyển khoản giúp để giải phóng kiện hàng"
+       * Cả ba đều là một hình: trả tiền TRƯỚC để được một thứ hứa SAU.
+       */
+      { pattern: '(nạp|nộp|đóng|chuyển)\\s*(thêm\\s*)?[^.]{0,26}(để|thì mới|rồi mới)[^.]{0,26}(rút|nhận|giải ngân|kích hoạt|đồng bộ|mở khoá|mở khóa)', scope: 'action' },
+      { pattern: '(chuyển|đóng|nộp|đặt)\\s*cọc\\b', scope: 'action' },
+      { pattern: '(giải phóng|thông quan|giải toả|giải tỏa)[^.]{0,20}(kiện hàng|lô hàng|hàng|tiền)', scope: 'action' },
       { pattern: '(nộp|đóng|chuyển)[^.]{0,20}(phí|lệ phí)[^.]{0,30}(trước|rồi mới|thì mới)', scope: 'action' },
       /**
        * Bộ 100 chỉ ra ba lối viết mà hai mẫu trên không bắt:
@@ -408,6 +442,12 @@ module.exports = {
     ID_UTILITY_IMPERSONATION: [
       { pattern: '\\b(evn|điện lực|công ty (cấp )?nước|cấp điện)\\b[^.]{0,40}(nợ|quá hạn|cắt|ngừng cung cấp)', scope: 'any' },
       { pattern: '(cắt|ngừng)\\s*(điện|nước)[^.]{0,24}(trong|nếu không|hôm nay|\\d+\\s*(giờ|tiếng))', scope: 'any' },
+      /*
+       * Cướp SIM: "bấm mã **21*…# rồi bấm GỌI để hệ thống tự đồng bộ sóng 5G".
+       * Chữ "hệ thống" ở đây đang đóng vai nhà mạng — không nhà mạng nào bảo khách
+       * bấm mã chuyển hướng cuộc gọi để "nâng sóng".
+       */
+      { pattern: '(hệ thống|nhà mạng|tổng đài)[^.]{0,30}(sóng|5g|4g|sim)\\b', scope: 'any' },
     ],
     ID_DELIVERY_IMPERSONATION: [
       { pattern: '(bưu điện|bưu phẩm|kiện hàng|đơn hàng)[^.]{0,36}(đang (bị )?giữ|lưu kho|hải quan|tạm giữ)', scope: 'any' },
@@ -415,12 +455,33 @@ module.exports = {
     ID_EMPLOYER_JOB_IMPERSONATION: [
       { pattern: '(tuyển|tuyển dụng|tuyển gấp)[^.]{0,40}(cộng tác viên|ctv|nhân viên|việc tại nhà|part ?time)', scope: 'any' },
     ],
+    MAN_LOVE_BOMBING: [
+      /*
+       * "Thấy em sống tình cảm nên anh muốn làm quen" — lời khen của một người
+       * chưa từng gặp, đặt ngay trong tin đầu tiên. Đây là bước vào của kịch bản
+       * tình cảm; cảnh báo ở bước này còn kịp, cảnh báo ở bước xin tiền thì muộn.
+       */
+      { pattern: '(thấy|nhìn)\\s*(em|chị|cô)(?![a-zà-ỹ])[^.]{0,26}(tình cảm|hiền|dễ thương|đặc biệt|khác người)', scope: 'any' },
+    ],
     OFF_ROMANCE_EMERGENCY: [
+      /*
+       * "Anh là bạn của cô [đã ẩn], cô ấy cho anh số của em" — câu giải thích VÌ SAO
+       * một người lạ có số của bác. Đây là bước MỞ ĐẦU của kịch bản tình cảm,
+       * đứng trước lời xin tiền hàng tuần — và đúng lúc đó cảnh báo mới có tác dụng.
+       */
+      { pattern: '(bạn của|quen)[^.]{0,30}(cho|gửi)\\s*(anh|em|tôi|chị)\\s*số(?![a-zà-ỹ])', scope: 'any' },
+      { pattern: '(muốn|xin)\\s*(được\\s*)?(làm quen|kết bạn)[^.]{0,30}(lâu dài|nghiêm túc|trò chuyện)', scope: 'any' },
       { pattern: '(quen|nói chuyện|yêu)[^.]{0,26}(trên mạng|qua mạng|chưa gặp)[^.]{0,40}(gửi|chuyển|cho)\\s*(tiền|\\d)', scope: 'any' },
       { pattern: '(em yêu|anh yêu|bé yêu|honey|darling)\\b[^.]{0,60}(chuyển|gửi|đóng|nộp)[^.]{0,20}(tiền|\\d)', scope: 'any' },
     ],
     OFF_PRIZE_GIFT: [
       { pattern: '(trúng|nhận)\\s*(thưởng|giải|quà)[^.]{0,40}(nộp|đóng|chuyển|phí)', scope: 'any' },
+      /*
+       * "Bé nào Top 1 được hợp đồng 50 triệu" — mồi nhử nói bằng CON SỐ chứ không
+       * bằng chữ "trúng thưởng", nên miếng trên trượt. Giải thưởng lớn gắn với một
+       * cuộc thi phải nạp tiền mới được dự là hình của cả họ kịch bản "mẫu nhí".
+       */
+      { pattern: '(giải thưởng|hợp đồng|phần thưởng|giải nhất|top\\s*1)[^.]{0,24}\\d+\\s*(triệu|tỷ|tỉ)', scope: 'any' },
     ],
     MAN_SCARCITY_PRESSURE: [
       { pattern: '(chỉ còn|còn duy nhất|số lượng có hạn|suất cuối)[^.]{0,30}(hôm nay|trong ngày|tối nay|\\d+\\s*(suất|phút|giờ))', scope: 'any' },
@@ -428,6 +489,8 @@ module.exports = {
     ],
     OFF_TASK_PREPAY: [
       { pattern: '(nhiệm vụ|đơn hàng|chốt đơn)[^.]{0,40}(nạp|ứng|đặt cọc|chuyển)', scope: 'action' },
+      /* "nạp tiền mua lượt vote cho bé" — cuộc thi ảnh mẫu nhí, bộ 100 kịch bản. */
+      { pattern: '(nạp|mua|chuyển)[^.]{0,24}(lượt|vote|bình chọn)\\b', scope: 'action' },
       { pattern: '(nạp|ứng)[^.]{0,30}(làm nhiệm vụ|hoàn thành nhiệm vụ|nâng (gói|cấp)|rút (được|về))', scope: 'action' },
     ],
   },

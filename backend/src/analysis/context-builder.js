@@ -160,6 +160,57 @@ function chuanHoa(s) {
 }
 
 /** Bỏ dấu tiếng Việt — để so với danh sách C.5 (viết dạng không dấu). */
+/**
+ * ═════ HAI LỐI ĐẶT DẤU THANH, CÙNG MỘT TỪ ═════
+ *
+ * Tiếng Việt có hai quy ước đặt dấu trên vần "oa / oe / uy", và cả hai đều đúng
+ * chính tả:
+ *
+ *   kiểu cũ (dấu ở nguyên âm đầu):   tòa án · phong tỏa · hóa đơn · thủy điện
+ *   kiểu mới (dấu ở nguyên âm sau): toà án · phong toả · hoá đơn · thuỷ điện
+ *
+ * Mẫu trong pack viết một kiểu, tin nhắn thật viết kiểu kia — và trước 19/9/2026
+ * thứ duy nhất nối hai bên lại là nhánh BỎ DẤU. Đo được 4 mẫu thật sống nhờ vào
+ * đó: "Tòa án nhân dân tối cao…" khớp mẫu "toà án" chỉ vì cả hai cùng rụng
+ * xuống "toa an".
+ *
+ * Để nhánh bỏ dấu được quay về đúng việc của nó (đọc chữ KHÔNG DẤU), việc nối
+ * hai quy ước phải có đường riêng: đưa cả hai về kiểu cũ.
+ *
+ * ⚠️ GIỮ NGUYÊN SỐ KÝ TỰ. Mỗi luật đổi đúng hai ký tự lấy hai ký tự, nên chỉ số
+ * trong chuỗi đã chuẩn hoá vẫn trỏ đúng chỗ cũ — bằng chứng trích ra không lệch.
+ *
+ * ⚠️ CHỪ "QU" ĐỨNG NGOÀI. "quỳ" · "quýt" · "quỵ" viết như nhau ở cả hai kiểu;
+ * đổi nữa thành "qùy", một thứ không ai viết.
+ */
+const O_CO_DAU = { 'à': 'ò', 'á': 'ó', 'ả': 'ỏ', 'ã': 'õ', 'ạ': 'ọ' };
+const E_CO_DAU = { 'è': 'ò', 'é': 'ó', 'ẻ': 'ỏ', 'ẽ': 'õ', 'ẹ': 'ọ' };
+const U_CO_DAU = { 'ỳ': 'ù', 'ý': 'ú', 'ỷ': 'ủ', 'ỹ': 'ũ', 'ỵ': 'ụ' };
+
+/**
+ * Bỏ RIÊNG năm dấu thanh (huyền sắc hỏi ngã nặng), GIỮ dấu tạo chữ
+ * (ă â ê ô ơ ư đ). Khác `boDau` ở đúng điểm đó, và điểm đó là tất cả:
+ * "gặp" và "gấp" cùng rụng thành "gap" khi bỏ hết, nhưng thành "găp" và "gâp"
+ * khi chỉ bỏ thanh — vẫn phân biệt được.
+ *
+ * ⚠️ Giữ nguyên số ký tự (NFC vào, NFC ra).
+ */
+const NAM_THANH = /[\u0300\u0301\u0303\u0309\u0323]/g;
+
+function boThanh(s) {
+  return String(s).normalize('NFD').replace(NAM_THANH, '').normalize('NFC');
+}
+
+function chuanDauThanh(s) {
+  return String(s)
+    .replace(/o([àáảãạ])/g, (_, v) => O_CO_DAU[v] + 'a')
+    .replace(/O([àáảãạ])/g, (_, v) => O_CO_DAU[v].toUpperCase() + 'a')
+    .replace(/o([èéẻẽẹ])/g, (_, v) => E_CO_DAU[v] + 'e')
+    .replace(/O([èéẻẽẹ])/g, (_, v) => E_CO_DAU[v].toUpperCase() + 'e')
+    .replace(/(^|[^qQ])u([ỳýỷỹỵ])/g, (_, t, v) => t + U_CO_DAU[v] + 'y')
+    .replace(/(^|[^qQ])U([ỳýỷỹỵ])/g, (_, t, v) => t + U_CO_DAU[v].toUpperCase() + 'y');
+}
+
 function boDau(s) {
   return s.normalize('NFD').replace(/[̀-ͯ]/g, '')
     .replace(/đ/g, 'd').replace(/Đ/g, 'D');
@@ -758,6 +809,8 @@ function segmentsForScope(ctx, scope = 'action') {
 }
 
 module.exports = {
+  boThanh,
+  chuanDauThanh,
   buildContext, detectLanguage, segmentsForScope,
   chuanHoa, boDau, bienTheOcr, catCau, goCheChu,
   SPEECH_ACTS, NON_ACTIONABLE_ACTS,

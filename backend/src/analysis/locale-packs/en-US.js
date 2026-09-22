@@ -416,6 +416,15 @@ module.exports = {
       { pattern: '\\b(no experience needed|no experience required)\\b', scope: 'any' },
       { pattern: '\\b(recruiting|hiring|looking for)\\b[^.]{0,40}\\b(part.?time|work from home|collaborators?|helpers?)\\b', scope: 'any' },
     ],
+    MAN_LOVE_BOMBING: [
+      /*
+       * §6.10 — hai pack phủi cùng một tập tín hiệu. Nhóm này vừa thêm ở vi-VN cho
+       * bước MỞ ĐẦU của kịch bản tình cảm: lời khen của một người chưa từng gặp,
+       * đặt ngay trong tin đầu tiên, trước khi có bất kỳ lời xin tiền nào.
+       */
+      { pattern: '\\b(you (seem|look)|i (can tell|feel))\\b[^.]{0,30}\\b(special|different|kind|beautiful|caring)\\b', scope: 'any' },
+      { pattern: '\\b(never (felt|met) (anyone|someone) like (you|this))\\b', scope: 'any' },
+    ],
     OFF_ROMANCE_EMERGENCY: [
       { pattern: '\\b(card|account) is blocked\\b[^.]{0,30}\\b(abroad|overseas|here)\\b', scope: 'any' },
       { pattern: '\\b(receive|accept)\\b[^.]{0,34}\\b(and )?(forward|pass on|send on|transfer on)\\b', scope: 'any' },

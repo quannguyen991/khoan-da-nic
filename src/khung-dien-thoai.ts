@@ -36,8 +36,18 @@
  * nên vùng chạm 52px và cỡ chữ 14px vẫn đúng nghĩa — không phải thu nhỏ ảnh.
  */
 
-/** Dưới ngưỡng này thì đang là điện thoại/máy tính bảng thật — không đóng khung. */
-const NGUONG_RONG = 900;
+/**
+ * Dưới ngưỡng này thì đang là điện thoại thật — không đóng khung.
+ *
+ * ⚠️ PHẢI BẰNG ĐÚNG MỐC `md:` CỦA TAILWIND (768px). Sửa 22/9/2026.
+ * App.tsx có vỏ máy vẽ bằng CSS riêng (`md:max-w-[430px]` + "dynamic island"
+ * `hidden md:block`) bật từ 768px. Ngưỡng cũ ở đây là 900px, nên cửa sổ rộng
+ * 768–899px (và cửa sổ xem trước của công cụ) rơi đúng vào khe: KHÔNG có iframe,
+ * nhưng CÓ vỏ máy CSS — tức là đúng lỗi số 1 ở đầu tệp quay lại: tiêu đề cỡ máy
+ * tính nằm dưới tai thỏ, lưới tin 3 cột bị bóp tới mức chữ rơi dọc từng ký tự.
+ * Hai ngưỡng khác nhau là hai câu trả lời cho cùng một câu hỏi.
+ */
+const NGUONG_RONG = 768;
 
 /** Tham số đánh dấu "đây là bản chạy bên trong khung", để nó không tự bọc lại. */
 const DAU_TRONG_KHUNG = 'khung';
@@ -54,7 +64,20 @@ function dangOTrongKhung(): boolean {
   } catch {
     return true;
   }
-  return new URLSearchParams(window.location.search).has(DAU_TRONG_KHUNG);
+  /*
+   * ⚠️ DẤU `khung` Ở TRANG NGOÀI CÙNG LÀ DẤU CŨ, KHÔNG PHẢI "ĐANG Ở TRONG KHUNG".
+   * Sửa 22/9/2026: địa chỉ `?khung=1` lọt ra thanh địa chỉ (mở iframe trong tab
+   * mới, sao chép link, tải lại trang xem trước) thì bản cũ tin dấu đó và KHÔNG
+   * bọc — nhưng vỏ máy CSS của App.tsx vẫn bật theo bề rộng cửa sổ, nên bố cục
+   * máy tính lại bị nhồi vào cột 430px. Không có cửa sổ cha thì không có khung:
+   * gỡ dấu rồi bọc bình thường. Chốt chống bọc lồng vẫn là `window.self !== window.top`.
+   */
+  const u = new URL(window.location.href);
+  if (u.searchParams.has(DAU_TRONG_KHUNG)) {
+    u.searchParams.delete(DAU_TRONG_KHUNG);
+    try { window.history.replaceState(window.history.state, '', u.pathname + u.search + u.hash); } catch { /* không gỡ được thì vẫn bọc */ }
+  }
+  return false;
 }
 
 function nenDongKhung(): boolean {

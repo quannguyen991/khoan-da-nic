@@ -933,6 +933,30 @@ export async function docTo(chu: string, ngonNgu = 'vi-VN'): Promise<{ ok: boole
       const u = new SpeechSynthesisUtterance(chu);
       u.lang = ngonNgu;
       u.rate = 0.92;
+      /*
+       * Chỉ đặt `lang` chưa đủ trên Chrome/WebView: nếu danh sách giọng đã
+       * nạp sẵn mà không chọn voice, máy có thể lấy giọng mặc định (thường là
+       * English) và đọc tiếng Việt như đánh vần tiếng Anh.
+       */
+      let dsGiong = window.speechSynthesis.getVoices();
+      if (dsGiong.length === 0) {
+        dsGiong = await new Promise<SpeechSynthesisVoice[]>((resolve) => {
+          let xong = false;
+          const traVe = () => {
+            if (xong) return;
+            xong = true;
+            window.speechSynthesis.removeEventListener('voiceschanged', traVe);
+            resolve(window.speechSynthesis.getVoices());
+          };
+          window.speechSynthesis.addEventListener('voiceschanged', traVe, { once: true });
+          window.setTimeout(traVe, 700);
+        });
+      }
+      const maNgonNgu = ngonNgu.toLowerCase().split('-')[0];
+      const giong = dsGiong.find((v) => v.lang.toLowerCase().startsWith(`${maNgonNgu}-`))
+        || dsGiong.find((v) => v.lang.toLowerCase() === maNgonNgu);
+      if (maNgonNgu === 'vi' && !giong) return { ok: false, ma: 'MAY_CHUA_CO_GIONG' };
+      if (giong) u.voice = giong;
       window.speechSynthesis.speak(u);
       return { ok: true };
     } catch { return { ok: false, ma: 'DOC_HONG' }; }

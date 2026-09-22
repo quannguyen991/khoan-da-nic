@@ -102,3 +102,58 @@ html[data-bac-chu="lon"] .mascot-img {
   height: 40vh !important;
   max-height: 380px !important;
 }
+
+/*
+ * ═════ HAI NHỊP CỦA QUẢ CẦU NÓI ═════
+ *
+ * `toaVong`  — vòng sóng lan ra khi đang nghe. Ba vòng lệch pha.
+ * `songAm`   — các cột sóng bên trong co giãn.
+ *
+ * ⚠️ CẢ HAI CHỈ CHẠY KHI THẬT SỰ ĐANG NGHE. Xem chú thích ở `QuaCauNoi.tsx`:
+ * một cái sóng âm nhảy trong khi bộ nghe đã chết là màn hình nói dối (§4.3).
+ *
+ * ⚠️ BÁC BẬT "GIẢM CHUYỂN ĐỘNG" THÌ TẮT HẾT. Người tiền đình kém nhìn
+ * một vòng đập liên tục là chóng mặt thật, không phải khó chịu cho vui.
+ */
+@keyframes toaVong {
+  0%   { transform: scale(0.82); opacity: 0.55; }
+  70%  { opacity: 0.12; }
+  100% { transform: scale(1.35); opacity: 0; }
+}
+
+@keyframes songAm {
+  0%, 100% { transform: scaleY(0.55); }
+  50%      { transform: scaleY(1.25); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-\[toaVong_2\.4s_ease-out_infinite\],
+  .animate-\[songAm_1\.1s_ease-in-out_infinite\] {
+    animation: none !important;
+  }
+}
+
+/*
+ * Khoan Đã visual language — light lavender / soft glass.
+ * Các màn cũ dùng viền tím đậm và bóng đổ cứng theo từng component, khiến
+ * giao diện bị chia thành nhiều hệ màu. Giữ nguyên class hiện có để không
+ * ảnh hưởng logic, nhưng quy về một lớp bề mặt chung: viền sáng, bóng tím
+ * nhẹ, bo góc mềm và nền lavender thống nhất như màn tham chiếu.
+ */
+#root [class*="border-[#2e1065]"] {
+  border-color: rgba(226, 214, 255, 0.95) !important;
+}
+
+#root [class*="text-[#2e1065]"] {
+  color: #321379 !important;
+}
+
+#root [class*="bg-[#f0f9ff]"] {
+  background-color: #f7f3ff !important;
+}
+
+#root [class*="shadow-[2px_2px_0_#2e1065]"],
+#root [class*="shadow-[3px_3px_0_#2e1065]"],
+#root [class*="shadow-[4px_4px_0_#2e1065]"] {
+  box-shadow: 0 10px 28px rgba(109, 40, 217, 0.13) !important;
+}

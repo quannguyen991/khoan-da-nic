@@ -175,7 +175,7 @@ export function ManDatQuyTac({
       {vongTron.quyTac.length > 0 && buoc === 1 && (
         <div className="mb-5 mt-3 flex flex-col gap-2">
           {vongTron.quyTac.map((q) => (
-            <div key={q.id} className="bg-white border-2 border-[#1e1b4b] rounded-[18px] px-4 py-3 flex items-start gap-3">
+            <div key={q.id} className="bg-white border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] rounded-[18px] px-4 py-3 flex items-start gap-3">
               <div className="flex-1 min-w-0">
                 <p className="font-bold text-[16px] text-[#1e1b4b] leading-snug">{q.cau}</p>
                 <p className="text-[14px] text-slate-600 mt-1">
@@ -204,7 +204,7 @@ export function ManDatQuyTac({
               key={m.ma}
               type="button"
               onClick={() => chonMau(m.ma)}
-              className="w-full min-h-[56px] text-left px-4 py-3 rounded-[18px] bg-white border-2 border-[#1e1b4b] font-bold text-[16px] text-[#1e1b4b] leading-snug active:scale-[0.99] transition-transform"
+              className="w-full min-h-[56px] text-left px-4 py-3 rounded-[18px] bg-white border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] font-bold text-[16px] text-[#1e1b4b] leading-snug active:scale-[0.99] transition-transform"
             >
               {tra(QUY_TAC_MAU, m.ma, lang)}
             </button>
@@ -231,7 +231,7 @@ export function ManDatQuyTac({
             value={cau}
             onChange={(e) => setCau(e.target.value.slice(0, TOI_DA_KY_TU_CAU))}
             rows={3}
-            className="w-full rounded-[18px] border-2 border-[#1e1b4b] p-4 text-[17px] font-semibold text-[#1e1b4b] leading-snug"
+            className="w-full rounded-[18px] border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] p-4 text-[17px] font-semibold text-[#1e1b4b] leading-snug"
           />
           <p className="text-[14px] text-slate-600 mt-1 text-right tabular-nums">
             {cau.length}/{TOI_DA_KY_TU_CAU}
@@ -258,7 +258,7 @@ export function ManDatQuyTac({
                 key={n.id}
                 type="button"
                 onClick={() => { setNguoiCungDat(n.ten); luu(n.ten); }}
-                className="w-full min-h-[56px] text-left px-4 py-3 rounded-[18px] bg-white border-2 border-[#1e1b4b] font-bold text-[16px] text-[#1e1b4b]"
+                className="w-full min-h-[56px] text-left px-4 py-3 rounded-[18px] bg-white border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] font-bold text-[16px] text-[#1e1b4b]"
               >
                 {n.ten}{n.quanHe ? ` · ${n.quanHe}` : ''}
               </button>
@@ -266,7 +266,7 @@ export function ManDatQuyTac({
             <button
               type="button"
               onClick={() => { setNguoiCungDat(null); luu(null); }}
-              className="w-full min-h-[56px] px-4 py-3 rounded-[18px] border-2 border-[#1e1b4b] font-bold text-[16px] text-[#1e1b4b]"
+              className="w-full min-h-[56px] px-4 py-3 rounded-[18px] border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] font-bold text-[16px] text-[#1e1b4b]"
             >
               {tra(QUY_TAC_KHUNG, 'BO_QUA', lang)}
             </button>
@@ -277,7 +277,7 @@ export function ManDatQuyTac({
 
       {buoc === 4 && (
         <div className="mt-4">
-          <div className="bg-white border-2 border-[#1e1b4b] rounded-[22px] px-4 py-4">
+          <div className="bg-white border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] rounded-[22px] px-4 py-4">
             <p className="text-[19px] font-black text-[#1e1b4b] leading-snug">{cau}</p>
             {/*
               Đọc lại ĐÚNG thứ vừa được lưu, kèm tên người cùng đặt. Đây cũng là

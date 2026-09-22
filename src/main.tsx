@@ -41,7 +41,35 @@ if (!dungKhungDienThoai()) {
  * Cách tách bạch nhanh: nạp một service worker rỗng — rỗng mà cũng hỏng thì lỗi
  * không nằm ở mã của bạn.
  */
-if ('serviceWorker' in navigator && document.getElementById('root')) {
+/*
+ * ⚠️⚠️ KHÔNG ĐĂNG KÝ Ở BẢN DEV — SỬA 20/9/2026, SAU MỘT LẦN MẤT CÔNG THẬT.
+ *
+ * `public/sw.js` đệm tài nguyên tĩnh theo lối "đệm trước, nền tự làm mới". Trên
+ * bản dựng thật điều đó đúng. Trên máy chủ dev thì MÃ NGUỒN cũng là tài nguyên
+ * tĩnh cùng gốc: `/src/App.tsx`, `/src/i18n.ts`, từng mô-đun một. Chúng bị đệm
+ * y như ảnh và CSS.
+ *
+ * Hậu quả đo được hôm nay: máy chủ dev trả về đúng mã mới — kiểm bằng
+ * `fetch('/src/App.tsx')` thấy chuỗi mới — mà trình duyệt vẫn hiện giao diện
+ * của hôm trước. Người dùng nhìn màn hình cũ và kết luận "đã sửa gì đâu", còn
+ * người sửa thì nhìn máy mình thấy bản mới. Cả hai đều đúng, và không ai gỡ ra
+ * được cho tới khi nhìn vào tầng đệm.
+ *
+ * Cùng họ lỗi §4.3: thứ hỏng trông y hệt thứ đang chạy.
+ *
+ * Bản dev KHÔNG cần chạy ngoại tuyến. Nên ở dev, không những không đăng ký mà
+ * còn GỠ BỎ bản đã cài và xoá kho đệm — máy nào từng mở bản dev trước hôm nay
+ * sẽ tự sạch ngay lần nạp đầu tiên sau khi có đoạn này.
+ */
+if ((import.meta as any).env?.DEV && 'serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations()
+    .then((ds) => Promise.all(ds.map((d) => d.unregister())))
+    .then(() => (typeof caches !== 'undefined' ? caches.keys() : []))
+    .then((ten) => Promise.all([...ten].map((k) => caches.delete(k))))
+    .catch(() => { /* trình duyệt chặn — ở dev thì kệ */ });
+}
+
+if ((import.meta as any).env?.PROD && 'serviceWorker' in navigator && document.getElementById('root')) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js').catch((e) => {
       console.warn('[sw] không đăng ký được:', e?.message);

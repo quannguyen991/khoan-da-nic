@@ -81,7 +81,7 @@ export function ThuTinhHuong({ t, lang = 'vi' }: { t: (k: string) => string; lan
       : 'bg-slate-100 text-slate-800 border-slate-300');
 
   return (
-    <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200/80">
+    <div className="bg-white rounded-3xl p-6 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065]/80">
       <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-100 mb-4">
         <div>
           <h3 className="text-[18px] font-black text-slate-900">{t('Thử 10 tình huống')}</h3>

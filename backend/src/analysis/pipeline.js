@@ -619,6 +619,30 @@ function analyze(input = {}, nguCanhTinCay = {}) {
     riskLabel = 'SUSPICIOUS';
   }
 
+  /*
+   * ══════ SÀN "BÁC ĐÃ KHAI LỠ CHUYỂN TIỀN / ĐỌC MÃ" — thêm 22/9/2026 ══════
+   *
+   * Chủ dự án chốt: bác tự khai đã mất tiền thì nhãn là CAO.
+   *
+   * Đo trên màn thật trước khi có sàn này: "Tôi lỡ chuyển 5 triệu cho một người
+   * lạ rồi" ra `CHUA_THAY` — đúng về CHỮ (đó là lời kể, không có dấu hiệu lừa
+   * nào trong câu), nhưng sai về TÌNH HUỐNG. Người vừa mất tiền đọc "Chưa thấy
+   * dấu hiệu rủi ro" như một lời trấn an, ngay lúc từng phút gọi ngân hàng đều
+   * quý. Nhãn phải nói về chuyện đang xảy ra với bác, không chỉ về câu bác gõ.
+   *
+   * ⚠️ LÀ MỘT SÀN, KHÔNG PHẢI OVERRIDE THỨ 11. §12 khoá số override ở 10, khoá
+   * ngưỡng 20/45 và cap 69 — không cái nào bị đụng. Cùng dạng với các sàn ngay
+   * trên: chỉ NÂNG, không bao giờ hạ (§4.2). `canThiep` vẫn do thang can thiệp
+   * chọn (thường là RECOVERY; override vẫn thắng) — §HĐ luật 4, nhãn và màn là
+   * hai thứ riêng.
+   *
+   * ⚠️ `caseContext` CHỈ ĐẾN TỪ `locTrangThaiNguoiDung()` ở server.js, và hàm
+   * đó nhận đúng một mã. Thân yêu cầu gửi `caseContext` thô bị bỏ — có ca kiểm
+   * qua HTTP. Nên không có đường nào để NỘI DUNG tin nhắn tự bật sàn này; chỉ có
+   * một nút do chính bác bấm.
+   */
+  if (input.caseContext?.outcome === 'money_lost') riskLabel = 'HIGH';
+
   const chuaKiem = [...san.chuaKiem];
   /**
    * §15.9.1 — Khoan Đã KHÔNG nghe được cuộc gọi, và không bao giờ được để bác

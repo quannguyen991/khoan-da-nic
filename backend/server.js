@@ -26,6 +26,7 @@ const { layKeHoachPhucHoi } = require('./src/analysis/recovery-adapters');
 const { taoSuKien, timHoSoCoTheGop, dungCauHoiGop, tinHieuCase, baLop, GIAI_DOAN } = require('./src/journey-engine');
 const { buocTiepTheo } = require('./src/kich-ban-di-tiep');
 const { tinLuaDao } = require('./src/tin-lua-dao');
+const { traLoiTroLy } = require('./src/tro-ly-noi');
 const TK = require('./src/tai-khoan');
 const KP = require('./src/khoan-proof');
 const KY = require('./src/khoan-proof-ky');
@@ -33,6 +34,7 @@ const VR = require('./src/verified-request');
 const TC = require('./src/trusted-circle');
 const { taoKho, traNguCanh, docMaRaDa } = require('./src/intel-radar');
 const { napTuDuLieu } = require('./src/intel-store');
+const CONG_DONG = require('./src/cong-dong-canh-giac');
 const { moKho } = require('./src/vault-store');
 const { canDangNhap } = require('./src/auth');
 const {
@@ -344,12 +346,42 @@ function locTrangThaiMay(raw) {
   };
 }
 
+/**
+ * ═════ TRẠNG THÁI NGƯỜI DÙNG TỰ KHAI — thêm 22/9/2026 ═════
+ *
+ * Trước hôm nay nhánh `RECOVERY` của `intervention-ladder.js` KHÔNG CHẠY TỚI
+ * ĐƯỢC: nó cần `caseContext.outcome === 'money_lost'`, mà không route nào truyền
+ * `caseContext` vào `analyze()`. Bác đã lỡ chuyển tiền rồi gõ "tôi lỡ chuyển 5 triệu
+ * cho người lạ" vẫn có thể nhận màn "Chưa thấy dấu hiệu" — không một dòng nào về gọi
+ * ngân hàng.
+ *
+ * Trạng thái "đã chuyển" là thứ DUY NHẤT bộ luật không tự suy ra được từ nội dung
+ * tin nhắn: "đang bị thúc ép" đã là tín hiệu MAN_*, "sắp chuyển" là FIN_TRANSFER_*.
+ * Nên chỉ cần hỏi đúng một câu, và bác trả lời bằng một nút.
+ *
+ * ⚠️ CHỈ TĂNG CẢNH GIÁC (§4.2). Đã dò mọi nơi đọc `caseContext`:
+ *   · CO-06 (phí lấy lại tiền + ngữ cảnh mất tiền) có thể NỔ — tăng;
+ *   · `co-dinh-cuoc-goi` coi như có cuộc gọi ⇒ thêm `chuaKiem` — tăng;
+ *   · `chonMuc` chọn RECOVERY khi KHÔNG có override. Điểm và `nhan` KHÔNG đổi.
+ * Override vẫn THẮNG RECOVERY — thứ tự đó có chủ ý và có ca kiểm riêng: người vừa
+ * mất tiền là mục tiêu số một của kẻ hứa "lấy lại tiền", nên đang bị tấn công thì
+ * gấp hơn đã mất.
+ *
+ * ⚠️ NHẬN ĐÚNG MỘT GIÁ TRỊ. Không nhận `caseContext` thô từ thân yêu cầu — trường
+ * đó còn những khoá khác (`outcome: 'recovery'`…) mà máy chủ không cho người gọi tự đặt.
+ */
+function locTrangThaiNguoiDung(raw) {
+  return raw === 'da_chuyen_hoac_doc_ma' ? { outcome: 'money_lost', nguon: 'nguoi_dung_tu_khai' } : undefined;
+}
+
 async function xuLyPhanTich(req, res) {
   const {
     vanBan, anh, ghiAm, ghiAmConfidence, ghiAmFailed, ghiAmMaLoi,
     traLoiBoHoiNhanh: traLoiBoHoiNhanhRaw,
     trangThaiMay: trangThaiMayRaw,
+    trangThaiNguoiDung: trangThaiNguoiDungRaw,
   } = req.body || {};
+  const caseContext = locTrangThaiNguoiDung(trangThaiNguoiDungRaw);
 
   const traLoiBoHoiNhanh = locTraLoiBoHoiNhanh(traLoiBoHoiNhanhRaw);
   const trangThaiMay = locTrangThaiMay(trangThaiMayRaw);
@@ -393,7 +425,7 @@ async function xuLyPhanTich(req, res) {
    * lừa đảo thúc trên điện thoại ngồi chờ gateway là đánh đổi sai. 60 giây đã
    * mất thì không lấy lại được.
    */
-  const soBo = analyze({ vanBan: coVanBan ? vanBan : '', anh, traLoiBoHoiNhanh, trangThaiMay, ...nguonGhiAm });
+  const soBo = analyze({ vanBan: coVanBan ? vanBan : '', anh, traLoiBoHoiNhanh, trangThaiMay, caseContext, ...nguonGhiAm });
   if (soBo.overrides.length > 0) {
     return res.json(toHopDong(soBo));
   }
@@ -489,7 +521,7 @@ async function xuLyPhanTich(req, res) {
   }
 
   const envelope = analyze({
-    vanBan: coVanBan ? vanBan : '', anh, llmSignals, aiError, traLoiBoHoiNhanh, trangThaiMay,
+    vanBan: coVanBan ? vanBan : '', anh, llmSignals, aiError, traLoiBoHoiNhanh, trangThaiMay, caseContext,
     ocrText: chuTrongAnh,
     /*
      * ⚠️ §4.3 — HAI CÁCH KHÔNG ĐỌC ĐƯỢC ẢNH, CẢ HAI ĐỀU PHẢI KHAI.
@@ -508,6 +540,43 @@ async function xuLyPhanTich(req, res) {
 
 app.post('/api/analyze', chanPhanTich, xuLyPhanTich);
 app.post('/api/phan-tich', chanPhanTich, xuLyPhanTich);   // §5.2 — alias, cùng handler
+
+/**
+ * ═════════ TRỢ LÝ NÓI — MỘT ĐƯỜNG NÓI CHUYỆN, KHÔNG PHẢI MỘT QUAN TOÀ ═════════
+ *
+ * Người dùng chốt 20/9/2026: người già chỉ cần nói. Đúng — mỗi ô nhập chữ là
+ * một lý do nữa để không mở app.
+ *
+ * ⚠️ ĐƯỜNG NÀY KHÔNG TRẢ MỨC RỦI RO, VÀ ĐÓ LÀ CẢ THIẾT KẾ. Nó trả lời đáp
+ * bằng chữ, cộng một trường `canKiem` — phần lời bác kể cần đưa qua bộ luật.
+ * Frontend cầm `canKiem` đó gọi THẲNG `/api/analyze`, tức đi ĐÚNG ĐƯỜNG mà mọi lượt
+ * kiểm khác đi.
+ *
+ * Vì sao không chấm luôn ở đây cho tiện: hai đường chấm là hai đường sẽ lệch nhau,
+ * và đúng ngày chúng lệch thì không ai nhìn thấy — màn hình vẫn hiện một nhãn bình
+ * thường. Đó là đúng dạng lỗi §4.3 gọi tên.
+ *
+ * ⚠️ KHÔNG BẮT ĐĂNG NHẬP, giống `/api/analyze` (§5.3). Nhưng CÓ chặn tần suất:
+ * đây là đường gọi model đắt nhất trong app.
+ */
+app.post('/api/tro-ly', chanPhanTich, async (req, res) => {
+  const loiNoi = typeof req.body?.loiNoi === 'string' ? req.body.loiNoi : '';
+  if (!loiNoi.trim()) return res.status(400).json({ ma: 'THIEU_NOI_DUNG' });
+
+  const lang = req.body?.lang === 'en' ? 'en' : 'vi';
+  const lichSu = Array.isArray(req.body?.lichSu) ? req.body.lichSu : [];
+
+  const kq = await traLoiTroLy({ loiNoi, lichSu, lang });
+
+  /*
+   * `biCat` KHÔNG ra ngoài. Nó là việc nội bộ (hàng rào §11 vừa cắt một lời đáp),
+   * và nói ra chỉ làm bác mất lòng tin vào câu thay thế đang đứng ngay trước mắt.
+   * Nó vào log để còn hiệu chỉnh lời nhắc.
+   */
+  if (kq.biCat) console.warn('[tro-ly] hàng rào §11 cắt một lời đáp:', kq.biCat);
+
+  return res.json({ loiDap: kq.loiDap, canKiem: kq.canKiem, aiDaChay: kq.aiDaChay });
+});
 
 /**
  * ─────────────────── KẾT QUẢ SƠ BỘ, TRẢ NGAY ───────────────────
@@ -547,7 +616,9 @@ app.post('/api/analyze/so-bo', chanPhanTich, (req, res) => {
     vanBan, anh, ghiAm, ghiAmConfidence, ghiAmFailed, ghiAmMaLoi,
     traLoiBoHoiNhanh: traLoiBoHoiNhanhRaw,
     trangThaiMay: trangThaiMayRaw,
+    trangThaiNguoiDung: trangThaiNguoiDungRaw,
   } = req.body || {};
+  const caseContext = locTrangThaiNguoiDung(trangThaiNguoiDungRaw);
 
   const traLoiBoHoiNhanh = locTraLoiBoHoiNhanh(traLoiBoHoiNhanhRaw);
   /*
@@ -576,7 +647,7 @@ app.post('/api/analyze/so-bo', chanPhanTich, (req, res) => {
   if (!coVanBan && !anh && !ghiAm && !coBoHoiNhanh) return res.status(400).json({ maLoi: 'THIEU_DAU_VAO' });
 
   return res.json(toHopDong(analyze({
-    vanBan: coVanBan ? vanBan : '', anh, ghiAm, ghiAmConfidence, ghiAmFailed, ghiAmMaLoi, traLoiBoHoiNhanh, trangThaiMay,
+    vanBan: coVanBan ? vanBan : '', anh, ghiAm, ghiAmConfidence, ghiAmFailed, ghiAmMaLoi, traLoiBoHoiNhanh, trangThaiMay, caseContext,
     /*
      * ⚠️ ĐƯỜNG NÀY KHÔNG BAO GIỜ ĐỌC ẢNH — PHẢI KHAI RA (§4.3).
      *
@@ -926,6 +997,29 @@ app.post('/api/ra-da', chanDoc, (req, res) => {
   const vao = docMaRaDa(req.body);
   if (!vao.ok) return res.status(400).json({ maLoi: vao.maLoi });
   res.json(traNguCanh(khoIntel, vao));
+});
+
+/** Cộng đồng cảnh giác — nhận lời kể ẩn danh, chỉ trả bản đã duyệt. */
+app.get('/api/cong-dong/canh-giac', chanDoc, (req, res) => {
+  res.json({ baiViet: CONG_DONG.layDaDuyet(), thongKe: CONG_DONG.layThongKe() });
+});
+
+app.post('/api/cong-dong/canh-giac', chanDoc, async (req, res) => {
+  try {
+    const ban = await CONG_DONG.taoBanChoDuyet(req.body?.noiDung);
+    // Không trả nội dung gốc — kể cả cho chính máy vừa gửi.
+    res.status(202).json({ ok: true, id: ban.id, trangThai: ban.trangThai, aiDaChay: ban.aiDaChay });
+  } catch (e) {
+    const ma = e?.message === 'NOI_DUNG_QUA_NGAN' ? e.message : 'KHONG_TAO_DUOC_BAI';
+    res.status(400).json({ ok: false, maLoi: ma });
+  }
+});
+
+/** Cổng duyệt nội bộ — không có đường duyệt công khai. */
+app.post('/api/cong-dong/canh-giac/:id/duyet', chanDoc, (req, res) => {
+  const ban = CONG_DONG.duyet(req.params.id, req.get('x-khoan-da-review-token'));
+  if (!ban) return res.status(403).json({ ok: false, maLoi: 'KHONG_GOI_DUOC' });
+  return res.json({ ok: true, baiViet: ban });
 });
 
 /**

@@ -40,6 +40,39 @@ summary,
   overflow-wrap: break-word;
 }
 
+/* ── 1b. SÀN BỀ NGANG — THÊM 19/9/2026, VÀ NÓ VÁ MỘT LỖ ĐÃ MỞ SUỐT ─────────
+   Sàn ở trên chỉ ép CHIỀU CAO. Đo trên trình duyệt thật ngày 19/9/2026, khổ
+   375px và 320px, cả ba bậc chữ:
+
+     "Kiểm tra ngay"  (nút gửi của màn Tìm kiếm)   38,3 × 55,3px
+     "Chọn ảnh"                                     38,3 × 55,3px
+     "Cài đặt" (trang chủ)                          33,3 × 52,5px
+     "Quay lại"                                     41,0 × 55,3px
+
+   Chiều cao đạt sàn ở mọi chỗ; bề ngang thì không ai canh. Nút gửi của màn
+   quét là NÚT CHÍNH, sàn của nó là 56px, và nó đang thiếu 17,7px. Người tay run
+   bấm trượt thì không có gì xảy ra — và cái không-xảy-ra đó đọc ra là "máy hỏng".
+
+   ⚠️ CHỈ ÁP CHO NÚT, KHÔNG ÁP CHO `a[href]`. Một liên kết nằm giữa câu văn mà bị
+   ép rộng 52px sẽ xé dòng chữ ra. Nút thì luôn là một khối bấm được, nên ép
+   được an toàn.
+
+   ⚠️ `min-inline-size`, KHÔNG phải `min-width` — cùng lý do với `min-block-size`
+   ở trên: viết theo trục logic để không vỡ khi đổi hướng viết. */
+button,
+summary,
+[role="button"],
+[role="tab"],
+[role="switch"] {
+  min-inline-size: var(--touch-target);
+}
+
+/* Nút mang `data-vai-tro="nut-chinh"` là nút chính của màn: sàn 56px cả hai chiều. */
+[data-vai-tro="nut-chinh"] {
+  min-inline-size: var(--touch-target-primary);
+  min-block-size: var(--touch-target-primary);
+}
+
 /* ⚠️ `display: grid` TÁCH RIÊNG — SỬA 18/8/2026 CHO BẢN REACT + TAILWIND NÀY.
 
    Lý do gốc của `display: grid` (§FE0 lỗi 3) là `min-height` KHÔNG có tác dụng

@@ -28,6 +28,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { EMERGENCY_NUMBERS, SCAM_LESSONS, ScamLesson } from '../data/scamData';
 import { NHAN, tra } from '../catalog';
 import { ViewState } from '../App';
+import { docTo, dungDocTo } from '../native';
 
 interface LearnProps {
   setView: (v: ViewState) => void;
@@ -73,28 +74,20 @@ export function LearnView({ setView, t, lang = 'vi', onTriggerEmergency }: Learn
   };
 
   const speakText = (text: string) => {
-    if (!('speechSynthesis' in window)) return;
-    
     if (isSpeaking) {
-      window.speechSynthesis.cancel();
+      void dungDocTo();
       setIsSpeaking(false);
       return;
     }
 
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = lang === 'en' ? 'en-US' : 'vi-VN';
-    utterance.rate = 0.9;
-    utterance.onend = () => setIsSpeaking(false);
-    utterance.onerror = () => setIsSpeaking(false);
     setIsSpeaking(true);
-    window.speechSynthesis.speak(utterance);
+    void docTo(text, lang === 'en' ? 'en-US' : 'vi-VN').then((kq) => {
+      if (!kq.ok) setIsSpeaking(false);
+    });
   };
 
   const stopSpeaking = () => {
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-    }
+    void dungDocTo();
     setIsSpeaking(false);
   };
 
@@ -124,25 +117,25 @@ export function LearnView({ setView, t, lang = 'vi', onTriggerEmergency }: Learn
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
-      className="flex-1 flex flex-col w-full relative z-10 p-4 sm:p-6 overflow-y-auto pb-28 md:pb-12 max-w-5xl mx-auto"
+      className="flex-1 flex flex-col w-full relative z-10 p-4 sm:p-6 overflow-y-auto pb-28 md:pb-12 max-w-5xl mx-auto bg-[radial-gradient(circle_at_50%_0%,rgba(196,181,253,0.32),transparent_34%)]"
     >
       {/* Top Header */}
-      <div className="w-full flex items-center justify-between pt-2 mb-4">
+      <div className="w-full flex items-center justify-between pt-1 mb-5">
         <button aria-label={t("Quay lại")} 
           onClick={() => {
             stopSpeaking();
             setView('home');
           }}
- className="w-10 h-10 rounded-2xl bg-white/80 backdrop-blur-md flex items-center justify-center text-[#4c1d95] border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] active:scale-95 transition-transform"
+ className="w-11 h-11 rounded-full bg-white/65 backdrop-blur-md flex items-center justify-center text-[#4c1d95] border border-white shadow-[0_8px_22px_rgba(109,40,217,0.12)] active:scale-95 transition-transform"
         >
           <ArrowLeft size={22} />
         </button>
 
         <div className="text-center flex-1 px-2">
-          <h2 className="font-black text-[#2e1065] text-lg sm:text-xl leading-tight">
+          <h2 className="font-black text-[#321379] text-[20px] sm:text-2xl leading-tight tracking-tight">
             {lang === 'en' ? 'Scam Prevention & Hotline' : 'Cẩm Nang Cảnh Giác & Hotline'}
           </h2>
-          <p className="text-[14px] sm:text-[14px] text-purple-700 font-semibold">
+          <p className="text-[14px] sm:text-[14px] text-[#8065ad] font-semibold mt-1">
             {lang === 'en' ? 'International fraud cases & emergency contacts' : 'Nhận diện bẫy lừa đảo & Số khẩn cấp chuẩn'}
           </p>
         </div>
@@ -151,15 +144,15 @@ export function LearnView({ setView, t, lang = 'vi', onTriggerEmergency }: Learn
       </div>
 
       {/* Main Mode Toggle: Lessons vs Emergency Numbers */}
-      <div className="w-full bg-white/90 p-1.5 rounded-2xl border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] flex items-center gap-1.5 mb-5">
+      <div className="w-full bg-white/65 p-1.5 rounded-[24px] border border-white shadow-[0_10px_28px_rgba(109,40,217,0.12)] flex items-center gap-1.5 mb-5">
         <button
           onClick={() => {
             stopSpeaking();
             setActiveTab('lessons');
           }}
-          className={`flex-1 py-3 px-3 rounded-2xl font-extrabold text-[14px] sm:text-sm flex items-center justify-center gap-2 transition-all ${
+          className={`flex-1 py-3 px-2 rounded-[20px] font-extrabold text-[14px] sm:text-sm flex items-center justify-center gap-2 transition-all ${
             activeTab === 'lessons'
-              ? 'bg-gradient-to-r from-[#8b5cf6] to-[#6d28d9] text-white shadow-sm'
+              ? 'bg-gradient-to-r from-[#b68cf5] via-[#9b6cf0] to-[#7c3aed] text-white shadow-[0_8px_18px_rgba(124,58,237,0.2)]'
               : 'text-slate-600 hover:text-purple-900 hover:bg-purple-50'
           }`}
         >
@@ -184,9 +177,9 @@ export function LearnView({ setView, t, lang = 'vi', onTriggerEmergency }: Learn
             stopSpeaking();
             setActiveTab('emergency');
           }}
-          className={`flex-1 py-3 px-3 rounded-2xl font-extrabold text-[14px] sm:text-sm flex items-center justify-center gap-2 transition-all ${
+          className={`flex-1 py-3 px-2 rounded-[20px] font-extrabold text-[14px] sm:text-sm flex items-center justify-center gap-2 transition-all ${
             activeTab === 'emergency'
-              ? 'bg-gradient-to-r from-red-500 to-rose-600 text-white shadow-sm'
+              ? 'bg-gradient-to-r from-[#b68cf5] via-[#9b6cf0] to-[#7c3aed] text-white shadow-[0_8px_18px_rgba(124,58,237,0.2)]'
               : 'text-slate-600 hover:text-red-900 hover:bg-red-50'
           }`}
         >
@@ -199,7 +192,7 @@ export function LearnView({ setView, t, lang = 'vi', onTriggerEmergency }: Learn
       {activeTab === 'lessons' && (
         <div className="w-full space-y-4">
           {/* Search bar */}
-          <div className="relative flex items-center bg-white rounded-2xl p-1.5 pl-3 pr-2 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] focus-within:ring-2 ring-purple-400">
+          <div className="relative flex items-center bg-white/80 rounded-[22px] p-1.5 pl-4 pr-2 border border-white shadow-[0_8px_22px_rgba(109,40,217,0.1)] focus-within:ring-2 ring-purple-300">
             <Search size={18} className="text-purple-500 mr-2 shrink-0" />
             <input 
               type="text"
@@ -228,8 +221,8 @@ export function LearnView({ setView, t, lang = 'vi', onTriggerEmergency }: Learn
                   onClick={() => setSelectedCategory(cat.id)}
                   className={`px-3.5 py-2 rounded-2xl text-[14px] font-bold whitespace-nowrap flex items-center gap-1.5 transition-all shrink-0 ${
                     isSelected
-                      ? 'bg-purple-900 text-white shadow-xs'
-                      : 'bg-white text-slate-700 hover:bg-purple-50 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065]'
+                      ? 'bg-gradient-to-r from-[#8b5cf6] to-[#6d28d9] text-white shadow-[0_8px_18px_rgba(124,58,237,0.18)]'
+                      : 'bg-white/75 text-slate-700 hover:bg-purple-50 border border-[#e6dcff] shadow-[0_6px_16px_rgba(109,40,217,0.08)]'
                   }`}
                 >
                   <span>{cat.icon}</span>
@@ -240,7 +233,7 @@ export function LearnView({ setView, t, lang = 'vi', onTriggerEmergency }: Learn
           </div>
 
           {/* Quick Alert Banner for Golden Rule */}
-          <div className="w-full bg-gradient-to-r from-amber-500/10 via-purple-500/10 to-indigo-500/10 rounded-2xl p-4 border border-amber-200/60 flex items-start gap-3">
+          <div className="w-full bg-white/60 rounded-[24px] p-3.5 border border-[#eadfff] shadow-[0_8px_22px_rgba(109,40,217,0.08)] flex items-start gap-3">
             <div className="w-9 h-9 rounded-2xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-xs">
               <Sparkles size={20} />
             </div>
@@ -248,7 +241,7 @@ export function LearnView({ setView, t, lang = 'vi', onTriggerEmergency }: Learn
               <h4 className="font-extrabold text-sm text-[#2e1065]">
                 {lang === 'en' ? 'Rule 1 of Defense: The 60-Second Safe Pause' : 'Quy tắc vàng 1: Dừng lại 60 giây'}
               </h4>
-              <p className="text-[14px] text-slate-600 mt-0.5 leading-relaxed">
+              <p className="text-[14px] text-slate-600 mt-0.5 leading-relaxed line-clamp-2">
                 {lang === 'en' 
                   ? 'Whenever pressured to transfer funds, share SMS OTP, or download an app, immediately hang up and pause for 60 seconds before making decisions.' 
                   : 'Bất cứ khi nào bị hối thúc chuyển tiền gấp, đọc mã OTP hay cài app lạ, bác hãy nhớ: CÚP MÁY VÀ DỪNG LẠI 60 GIÂY để hỏi con cháu hoặc kiểm tra an toàn.'}
@@ -269,7 +262,7 @@ export function LearnView({ setView, t, lang = 'vi', onTriggerEmergency }: Learn
                     setSelectedLesson(lesson);
                     stopSpeaking();
                   }}
- className="bg-white rounded-3xl p-4 sm:p-5 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] hover:border-purple-300 hover: transition-all cursor-pointer flex flex-col justify-between group active:scale-[0.99]"
+ className="bg-white/80 rounded-[24px] p-4 sm:p-5 border border-white shadow-[0_10px_28px_rgba(109,40,217,0.1)] hover:border-purple-300 transition-all cursor-pointer flex flex-col justify-between group active:scale-[0.99]"
                 >
                   <div>
                     {/* Top Row: Icon, Danger Level & Read Time */}
@@ -309,7 +302,7 @@ export function LearnView({ setView, t, lang = 'vi', onTriggerEmergency }: Learn
                     </h3>
 
                     {/* Short Description */}
-                    <p className="text-[14px] text-slate-600 line-clamp-2 leading-relaxed mb-3">
+                    <p className="text-[14px] text-slate-600 line-clamp-1 leading-relaxed mb-3">
                       {lesson.shortDesc}
                     </p>
                   </div>
@@ -317,7 +310,7 @@ export function LearnView({ setView, t, lang = 'vi', onTriggerEmergency }: Learn
                   {/* Tags & Action Button */}
                   <div className="pt-2 border-t border-purple-50 flex items-center justify-between">
                     <div className="flex flex-wrap gap-1">
-                      {lesson.tags.slice(0, 2).map((tag, idx) => (
+                      {lesson.tags.slice(0, 1).map((tag, idx) => (
                         <span key={idx} className="text-[14px] font-semibold bg-purple-50 text-purple-700 px-2 py-0.5 rounded-md">
                           #{tag}
                         </span>

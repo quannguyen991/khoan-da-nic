@@ -59,7 +59,7 @@ export function ManDoiPhanUng({
     luu(kq.vongTron);
   };
 
-  const nutNho = 'min-h-[52px] min-w-[52px] rounded-2xl border-2 border-[#1e1b4b] bg-white text-[#1e1b4b] flex items-center justify-center disabled:opacity-40 active:scale-95 transition-transform';
+  const nutNho = 'min-h-[52px] min-w-[52px] rounded-2xl border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] bg-white text-[#1e1b4b] flex items-center justify-center disabled:opacity-40 active:scale-95 transition-transform';
 
   return (
     <div className="p-4 pb-24 max-w-xl mx-auto">
@@ -80,7 +80,7 @@ export function ManDoiPhanUng({
       </p>
 
       {vt.nguoiThan.length === 0 && (
-        <div className="bg-white border-2 border-[#1e1b4b] rounded-[18px] p-4">
+        <div className="bg-white border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] rounded-[18px] p-4">
           <p className="text-[16px] text-[#1e1b4b] font-semibold leading-snug mb-3">
             {tra(DOI_PHAN_UNG, 'CHUA_CO_NGUOI', lang)}
           </p>
@@ -103,7 +103,7 @@ export function ManDoiPhanUng({
           const n = theoId(tv.nguoiThanId);
           if (!n) return null;
           return (
-            <div key={tv.nguoiThanId} className="bg-white border-2 border-[#1e1b4b] rounded-[20px] p-3.5">
+            <div key={tv.nguoiThanId} className="bg-white border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] rounded-[20px] p-3.5">
               <div className="flex items-start gap-3">
                 <span className="w-9 h-9 rounded-full bg-[#1e1b4b] text-white font-black text-[17px] flex items-center justify-center shrink-0">
                   {i + 1}
@@ -185,7 +185,7 @@ export function ManDoiPhanUng({
                 key={n.id}
                 type="button"
                 onClick={() => them(n.id)}
-                className="w-full min-h-[56px] px-4 py-3 rounded-[18px] bg-white border-2 border-[#1e1b4b] text-left flex items-center gap-3 active:scale-[0.99] transition-transform"
+                className="w-full min-h-[56px] px-4 py-3 rounded-[18px] bg-white border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] text-left flex items-center gap-3 active:scale-[0.99] transition-transform"
               >
                 <UserPlus size={20} className="text-[#1e1b4b] shrink-0" aria-hidden="true" />
                 <span className="flex-1 min-w-0">

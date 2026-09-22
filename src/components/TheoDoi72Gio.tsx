@@ -96,7 +96,7 @@ export function ManTheoDoi72Gio({
 
           <ul className="flex flex-col gap-2 mb-4">
             {['NHAC_1', 'NHAC_2', 'NHAC_3'].map((k) => (
-              <li key={k} className="bg-white border-2 border-[#1e1b4b] rounded-[18px] px-4 py-3 text-[16px] font-semibold text-[#1e1b4b] leading-snug">
+              <li key={k} className="bg-white border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] rounded-[18px] px-4 py-3 text-[16px] font-semibold text-[#1e1b4b] leading-snug">
                 {tra(THEO_DOI_72_GIO, k, lang)}
               </li>
             ))}
@@ -118,7 +118,7 @@ export function ManTheoDoi72Gio({
             <button
               type="button"
               onClick={() => setView('ho_so_vu_viec')}
-              className="w-full min-h-[56px] rounded-[18px] bg-white border-2 border-[#1e1b4b] text-[#1e1b4b] font-black text-[17px] flex items-center justify-center gap-2"
+              className="w-full min-h-[56px] rounded-[18px] bg-white border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] text-[#1e1b4b] font-black text-[17px] flex items-center justify-center gap-2"
             >
               <FileText size={20} aria-hidden="true" />
               {tra(MAN_HO_SO, 'TIEU_DE', lang)}

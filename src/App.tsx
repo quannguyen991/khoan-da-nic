@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef, lazy, Suspense } from 'react';
-import { 
-  Mic, 
-  ArrowLeft, 
-  Home, 
+import {
+  Mic,
+  UserPlus,
+  PhoneIncoming,
+  ArrowLeft,
+  Home,
   Search, 
   ShieldAlert, 
   BookOpen, 
@@ -64,7 +66,7 @@ import {
 import {
   laApk, hienCanhBaoHeadsUp, hienPopupCanhBao, anPopup, henNhacTheoDoi72Gio,
   datThongBaoThuongTruc, noiDungChiaSe, quyenPopup, xinQuyenPopup,
-  ngheGiongNoi, dungNghe as dungNgheNative, coBoNghe, moCaiDatGiongNoi,
+  ngheGiongNoi, dungNghe as dungNgheNative, coBoNghe,
   quyenDocThongBao, xinQuyenDocThongBao, tinMoiNhat, xoaTinDaBat,
   trangThaiThuongTruc, trangThaiMay, tomTatChoMayChu, moCaiDatTroNang,
   napChuCuocGoi, trangThaiTheoDoiCuocGoi, datTheoDoiCuocGoi, docTo, dungDocTo, dayAppXuong,
@@ -77,6 +79,8 @@ import { HangRaoLoi } from './hang-rao-loi';
 import { MatKhauGiaDinh, docMatKhauGiaDinh } from './components/MatKhauGiaDinh';
 import { KhoiQuyTac, ManDatQuyTac } from './components/QuyTacGiaDinh';
 import { CanhBaoChinhThuc } from './components/CanhBaoChinhThuc';
+import { TroLyNoi } from './components/TroLyNoi';
+import { QuaCauNoi } from './components/QuaCauNoi';
 import {
   docVongTron, chonQuyTac, duocHienQuyTac, thuTuGoi, tinhHuongGoi, vaiChoTinhHuong, nguoiGoiDauTien,
 } from './lib/vong-tron-gia-dinh';
@@ -85,8 +89,10 @@ import { ManSoNganHang, DanhSachSoNganHang } from './components/SoNganHang';
 import { DaiTheoDoi72Gio, ManTheoDoi72Gio, chuNhac72Gio } from './components/TheoDoi72Gio';
 import { batDauTheoDoi } from './lib/theo-doi-72-gio';
 import { ManHoSoVuViec, ManRaDaThuDoan } from './components/HoSoVaRaDa';
+import { CongDongCanhGiac } from './components/CongDongCanhGiac';
 import { batDauDo, ketThucDo, ghiLuot } from './lib/do-thoi-gian-toi-nguoi-that';
-import { FloatingQuickAccess } from './components/FloatingQuickAccess';
+import { ghiKetQua, type HanhDong } from './lib/ket-qua-can-thiep';
+import { chonViecAnToan, CAU_VIEC_AN_TOAN } from './lib/viec-an-toan-tiep-theo';
 import { HoiNhanhView } from './components/HoiNhanh';
 import { CanhBaoToanManHinh } from './components/CanhBaoToanManHinh';
 import { useCanhBaoThuDong } from './canh-bao-thu-dong';
@@ -161,7 +167,7 @@ function KhungTaiTre({ t, children }: { t: any; children: React.ReactNode }) {
 }
 import { EMERGENCY_NUMBERS } from './data/so-khan-cap';
 
-export type ViewState = 'intro' | 'home' | 'voice' | 'phone' | 'link' | 'qr' | 'learn' | 'profile' | 'settings' | 'history' | 'family' | 'search' | 'login' | 'add_family' | 'warning' | 'guardian' | 'account' | 'privacy' | 'notifications' | 'device_data' | 'hoi_nhanh' | 'mat_khau_gia_dinh' | 'quy_tac_gia_dinh' | 'ho_so_vu_viec' | 'ra_da_thu_doan' | 'doi_phan_ung' | 'so_ngan_hang' | 'theo_doi_72h';
+export type ViewState = 'intro' | 'home' | 'voice' | 'phone' | 'link' | 'qr' | 'learn' | 'profile' | 'settings' | 'history' | 'family' | 'search' | 'login' | 'add_family' | 'warning' | 'guardian' | 'account' | 'privacy' | 'notifications' | 'device_data' | 'hoi_nhanh' | 'mat_khau_gia_dinh' | 'quy_tac_gia_dinh' | 'ho_so_vu_viec' | 'ra_da_thu_doan' | 'cong_dong' | 'doi_phan_ung' | 'so_ngan_hang' | 'theo_doi_72h' | 'tro_ly';
 
 /**
  * MỘT NGƯỜI THÂN TRONG VÒNG TRÒN GIA ĐÌNH.
@@ -234,6 +240,8 @@ export interface KetQuaPhanTich {
   tuBamDung?: boolean;
   queryText?: string;
   queryImage?: string | null;
+  /** Bác tự khai đã chuyển tiền / đọc mã — gửi lên máy chủ để BỘ LUẬT chọn màn. */
+  trangThaiNguoiDung?: 'da_chuyen_hoac_doc_ma';
 }
 
 export interface HistoryRecord {
@@ -303,6 +311,48 @@ function beRongKhung(): number {
   return goc?.clientWidth || window.innerWidth;
 }
 
+/** Khoá đánh dấu đã chuyển một lần, và khoá của dòng báo cho lần mở kế tiếp. */
+const KHOA_DA_CHUYEN_MAN_GON = 'khoan_da_da_chuyen_man_gon';
+const KHOA_BAO_MAN_GON = 'khoan_da_bao_man_gon';
+
+/**
+ * ══════════ MÀN GỌN LÀ MẶC ĐỊNH CỦA VAI "BÁC" — 19/9/2026 ══════════
+ *
+ * Đo 19/9/2026 trên bản đang chạy: màn siêu đơn giản là màn DUY NHẤT đạt mọi
+ * ngưỡng đặt ra cho người cao tuổi — 4 đích chạm, nút 80px, 56 ký tự chữ. Các màn
+ * còn lại: Trang chủ 15 đích chạm, Cài đặt 19, Tìm kiếm 1.016 ký tự.
+ *
+ * Mà nó lại là **tuỳ chọn nằm ở thẻ thứ sáu trong Cài đặt**. Tức màn được thiết kế
+ * cho bác là màn bác phải tự đi tìm — trong khi người cần nó nhất là người ít có
+ * khả năng đi tìm nhất. Nay nó là mặc định của vai "bác".
+ *
+ * ⚠️ CHUYỂN ĐÚNG MỘT LẦN, VÀ NÓI RA. `KHOA_DA_CHUYEN_MAN_GON` đảm bảo máy chỉ được
+ * chuyển một lần duy nhất; sau đó mọi lựa chọn của bác — kể cả tắt đi — được giữ
+ * nguyên mãi mãi. Lần chuyển đó đặt `KHOA_BAO_MAN_GON` để màn gọn hiện một dòng
+ * nói đã đổi gì và đường quay lại ở đâu (§4.6: luôn có lối ra, và lối ra phải
+ * nhìn thấy được).
+ *
+ * ⚠️ KHÔNG ĐỤNG TỚI VAI "CON CHÁU". Bảng điều khiển trên máy tính không có màn gọn.
+ */
+function batManGonChoBac(): boolean {
+  try {
+    if (localStorage.getItem('khoan_da_sieu_don_gian') === '1') return true;
+    // Khoá của "Chế độ tối giản" trên bản APK dựng từ nhánh dev, gộp vào 17/9/2026.
+    if (localStorage.getItem('superBasic') === 'true') return true;
+    if (localStorage.getItem(KHOA_DA_CHUYEN_MAN_GON) === '1') return false;
+
+    localStorage.setItem(KHOA_DA_CHUYEN_MAN_GON, '1');
+    const vai = localStorage.getItem('khoan_da_user_role');
+    const laBac = vai === 'elder' || (!vai && beRongKhung() < 1024);
+    if (!laBac) return false;
+    localStorage.setItem(KHOA_BAO_MAN_GON, '1');
+    return true;
+  } catch {
+    // Trình duyệt chặn localStorage ⇒ giữ hành vi cũ, đừng đoán.
+    return false;
+  }
+}
+
 export default function App() {
   /*
    * ═════ ĐÃ ĐĂNG NHẬP THÌ ĐỪNG BẮT XEM LẠI MÀN GIỚI THIỆU ═════
@@ -320,6 +370,9 @@ export default function App() {
    */
   const [view, setView] = useState<ViewState>(() => {
     try {
+      // Luồng kiểm thử: mở `/?intro=1` để quay lại màn chọn vai trò mà không
+      // phải xoá phiên đăng nhập hay dữ liệu đã lưu trên máy.
+      if (new URLSearchParams(window.location.search).get('intro') === '1') return 'intro';
       if (docPhienTaiKhoan()?.hoSo) return 'home';
       // Chưa đăng nhập nhưng đã chọn vai rồi thì cũng không cần hỏi lại.
       if (localStorage.getItem('daXemIntro') === '1') return 'home';
@@ -490,15 +543,24 @@ export default function App() {
    * ⚠️ LUÔN CÓ LỐI RA (§4.6): nút "Xem đầy đủ" ở cuối màn tắt chế độ này ngay.
    * Người bật nhầm mà không thoát ra được sẽ gỡ ứng dụng.
    */
-  const [sieuDonGian, setSieuDonGian] = useState<boolean>(
-    // `superBasic` là khoá của "Chế độ tối giản" trên bản APK dựng từ nhánh dev —
-    // đã gộp vào chế độ này 17/9/2026. Bác đã bật ở đó thì mở bản mới vẫn còn bật.
-    () => localStorage.getItem('khoan_da_sieu_don_gian') === '1' || localStorage.getItem('superBasic') === 'true',
-  );
+  const [sieuDonGian, setSieuDonGian] = useState<boolean>(batManGonChoBac);
   useEffect(() => {
     localStorage.setItem('khoan_da_sieu_don_gian', sieuDonGian ? '1' : '0');
     localStorage.removeItem('superBasic');
   }, [sieuDonGian]);
+
+  /**
+   * Dòng báo MỘT LẦN cho máy vừa được chuyển sang màn gọn — xem `batManGonChoBac`.
+   * Đổi giao diện sau lưng người dùng mà không nói gì là cách nhanh nhất để họ
+   * tưởng app hỏng. Bấm "Đã hiểu" là dòng này biến mất vĩnh viễn.
+   */
+  const [baoDaChuyenManGon, setBaoDaChuyenManGon] = useState<boolean>(
+    () => { try { return localStorage.getItem(KHOA_BAO_MAN_GON) === '1'; } catch { return false; } },
+  );
+  const tatBaoManGon = () => {
+    setBaoDaChuyenManGon(false);
+    try { localStorage.removeItem(KHOA_BAO_MAN_GON); } catch { /* bị chặn thì thôi */ }
+  };
 
   const [pinnedActionType, setPinnedActionType] = useState<'both' | 'app' | 'danger'>(() => {
     return (localStorage.getItem('pinnedActionType') as 'both' | 'app' | 'danger') || 'both';
@@ -669,7 +731,7 @@ export default function App() {
     });
   };
 
-  const handleAnalyze = async (text: string, image?: string | null) => {
+  const handleAnalyze = async (text: string, image?: string | null, trangThaiNguoiDung?: 'da_chuyen_hoac_doc_ma') => {
     if (!text.trim() && !image) return;
     setIsAnalyzing(true);
     setBuocDangLam(image ? 'doc_anh' : 'doc_chu');
@@ -713,23 +775,25 @@ export default function App() {
           vanBan: text || '',
           anh: image || undefined,
           trangThaiMay: tomTatChoMayChu(mayCoUngDungLa),
+          trangThaiNguoiDung,
         })
       });
       if (!res.ok) {
         throw new Error(`Server returned ${res.status}`);
       }
       const data = await res.json();
-      finalResult = { ...data, queryText: text, queryImage: image };
+      finalResult = { ...data, queryText: text, queryImage: image, trangThaiNguoiDung };
     } catch (err) {
       console.warn('Full AI route fallback to preliminary rule check:', err);
       try {
         const res2 = await fetch(api('/api/analyze/so-bo'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ vanBan: text || '', anh: image || undefined })
+          // Đường dự phòng PHẢI mang cùng trạng thái — thiếu nó thì sơ bộ ra màn khác kết quả cuối.
+          body: JSON.stringify({ vanBan: text || '', anh: image || undefined, trangThaiNguoiDung })
         });
         const data2 = await res2.json();
-        finalResult = { ...data2, queryText: text, queryImage: image };
+        finalResult = { ...data2, queryText: text, queryImage: image, trangThaiNguoiDung };
       } catch (err2) {
         console.error(err2);
         /**
@@ -758,6 +822,26 @@ export default function App() {
       setBuocDangLam(null);
       if (finalResult) {
         setAnalyzeResult(finalResult);
+        // Luồng hai phía ở bản web: chỉ gửi về dashboard Guardian một bản tóm
+        // tắt, không lưu nguyên văn nội dung Bác đã nói hoặc ảnh đã quét.
+        if (userRole === 'elder') {
+          try {
+            const raw = localStorage.getItem('khoan_da_guardian_events');
+            const events = raw ? JSON.parse(raw) as Array<Record<string, unknown>> : [];
+            const nhan = typeof finalResult.nhan === 'string' ? finalResult.nhan : null;
+            events.unshift({
+              id: Date.now(),
+              kind: nhan === 'CAO' ? 'warning' : 'scan',
+              title: nhan === 'CAO' ? 'Bố mẹ vừa nhận cảnh báo cần chú ý' : 'Bố mẹ vừa kiểm tra một tình huống',
+              detail: nhan ? `Kết quả kiểm tra: ${nhan}. Nội dung gốc không được gửi về máy con.` : 'Chưa có kết luận từ máy chủ.',
+              time: 'Vừa xong',
+            });
+            localStorage.setItem('khoan_da_guardian_events', JSON.stringify(events.slice(0, 10)));
+            window.dispatchEvent(new Event('khoan-da-guardian-event'));
+          } catch {
+            // Không làm hỏng lượt kiểm tra chính nếu bộ nhớ máy bị chặn.
+          }
+        }
         /**
          * ⚠️ CHỈ MỨC `CAO` MỚI ĐƯỢC ĐÈ RA NGOÀI APP — và đây là ràng buộc an
          * toàn, không phải lựa chọn thẩm mỹ.
@@ -1009,7 +1093,7 @@ export default function App() {
   };
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showFloatingBall, setShowFloatingBall] = useState(() => localStorage.getItem('showFloatingBall') !== 'false');
-  const [isOutsideMode, setIsOutsideMode] = useState(false);
+  const [, setIsOutsideMode] = useState(false);
   const [familyMembers, setFamilyMembers] = useState(() => {
     const saved = localStorage.getItem('familyMembers');
     if (saved) {
@@ -1252,12 +1336,21 @@ export default function App() {
 
       {/* MOBILE & TABLET & NORMAL ELDER MODE */}
       {!((isDesktopScreen && userRole !== 'elder') || userRole === 'guardian' || isUltraZoomedOut) ? (
-        <div className="flex w-full h-[100dvh] max-h-[100dvh] flex-col relative overflow-hidden bg-[#f8f4ff] select-none touch-none overscroll-none
-          md:max-w-3xl md:mx-auto md:my-auto md:h-[96vh] md:max-h-[1000px] md:rounded-[2.5rem] md:shadow-[0_25px_60px_rgba(76,29,149,0.18)] md:border-2 md:border-purple-200/80
+        <div className="flex w-full h-[100dvh] max-h-[100dvh] flex-col relative isolate overflow-hidden bg-[#f8f4ff] select-none touch-none overscroll-none
+          md:max-w-[430px] md:mx-auto md:my-auto md:h-[96vh] md:max-h-[932px] md:rounded-[3.25rem] md:shadow-[0_28px_70px_rgba(20,16,55,0.28),0_0_0_1px_rgba(255,255,255,0.7)] md:border-[7px] md:border-[#17152f]
           lg:max-w-none lg:mx-0 lg:my-0 lg:h-[100dvh] lg:max-h-[100dvh] lg:rounded-none lg:border-0 lg:shadow-none">
-          {/* Background ambient lighting */}
-          <div className="absolute top-[-5%] left-[-10%] w-72 h-72 bg-white opacity-60 rounded-full blur-3xl pointer-events-none select-none"></div>
-          <div className="absolute bottom-1/4 right-[-20%] w-80 h-80 bg-[#d8b4fe] opacity-30 rounded-full blur-[80px] pointer-events-none select-none"></div>
+          {/* iPhone 17 Pro Max-style Dynamic Island and home indicator. */}
+          <div className="hidden md:block absolute top-2 left-1/2 -translate-x-1/2 w-[118px] h-[34px] rounded-full bg-[#090912] shadow-[inset_0_1px_2px_rgba(255,255,255,0.12),0_1px_3px_rgba(0,0,0,0.35)] z-[90] pointer-events-none" aria-hidden="true"></div>
+          <div className="hidden md:block absolute bottom-2 left-1/2 -translate-x-1/2 w-[132px] h-1 rounded-full bg-[#17152f]/85 z-[90] pointer-events-none" aria-hidden="true"></div>
+          {/*
+            ⚠️ HAI ĐỐM SÁNG NẰM DƯỚI NỘI DUNG, KHÔNG PHẢI TRÊN — sửa 22/9/2026.
+            Người dùng báo màn "Bảo vệ 72 giờ" chữ mờ loang: hai đốm này là `absolute`,
+            mà màn nào không tự đặt `relative` (72 giờ, sổ ngân hàng, hồ sơ…) là chữ
+            của nó bị vẽ DƯỚI lớp trắng 60% + tím nhòe. `isolate` ở khung + `-z-10` ở
+            đốm: đốm luôn nằm trên nền khung và dưới mọi màn, không cần màn nào nhớ.
+          */}
+          <div className="absolute -z-10 top-[-5%] left-[-10%] w-72 h-72 bg-white opacity-60 rounded-full blur-3xl pointer-events-none select-none"></div>
+          <div className="absolute -z-10 bottom-1/4 right-[-20%] w-80 h-80 bg-[#d8b4fe] opacity-30 rounded-full blur-[80px] pointer-events-none select-none"></div>
           
           {/*
             ⚠️ MỘT MÀN HỎNG THÌ CHỈ MÀN ĐÓ HIỆN LỖI.
@@ -1280,6 +1373,8 @@ export default function App() {
                 familyMembers={familyMembers}
                 onTriggerEmergency={triggerEmergencyAlert}
                 onTat={() => setSieuDonGian(false)}
+                baoDaChuyen={baoDaChuyenManGon}
+                onTatBao={tatBaoManGon}
               />
             )}
             {view === 'home' && !sieuDonGian && (
@@ -1296,7 +1391,20 @@ export default function App() {
                 lang={lang}
               />
             )}
-            {view === 'voice' && <VoiceView setView={setView} t={t} onAnalyze={handleAnalyze} isAnalyzing={isAnalyzing} />}
+            {view === 'voice' && <VoiceView setView={setView} t={t} onAnalyze={handleAnalyze} isAnalyzing={isAnalyzing} onTriggerEmergency={triggerEmergencyAlert} />}
+            {view === 'tro_ly' && (
+              <TroLyNoi
+                t={t}
+                lang={lang === 'en' ? 'en' : 'vi'}
+                onVeTrangChu={() => setView('home')}
+                /*
+                 * Đường ra DUY NHẤT tới kết luận, và nó là đúng `handleAnalyze` mà
+                 * mọi lượt kiểm khác dùng. Trợ lý không có đường chấm riêng — hai
+                 * đường chấm là hai đường sẽ lệch nhau (§4.3).
+                 */
+                onKiemTin={(noiDung) => handleAnalyze(noiDung)}
+              />
+            )}
             {view === 'search' && <SearchView setView={setView} t={t} lang={lang} onAnalyze={handleAnalyze} isAnalyzing={isAnalyzing} superBasic={sieuDonGian} />}
             {view === 'history' && <HistoryView setView={setView} t={t} lang={lang} isLoggedIn={isLoggedIn} historyItems={historyItems} setHistoryItems={setHistoryItems} setAnalyzeResult={setAnalyzeResult} />}
             {view === 'profile' && <ProfileView setView={setView} t={t} isLoggedIn={isLoggedIn} hoSo={hoSo} onDangXuat={dangXuat} />}
@@ -1311,7 +1419,15 @@ export default function App() {
             {view === 'theo_doi_72h' && <ManTheoDoi72Gio setView={setView} t={t} lang={lang} />}
             {view === 'ho_so_vu_viec' && <ManHoSoVuViec setView={setView} t={t} lang={lang} lichSu={historyItems} />}
             {view === 'ra_da_thu_doan' && <ManRaDaThuDoan setView={setView} t={t} lang={lang} lichSu={historyItems} />}
-            {view === 'warning' && <WarningView setView={setView} t={t} lang={lang} result={analyzeResult} familyMembers={familyMembers} noiChayAi={noiChayAi} mayCoUngDungLa={mayCoUngDungLa} />}
+            {view === 'cong_dong' && <CongDongCanhGiac t={t} setView={setView} />}
+            {view === 'warning' && <WarningView setView={setView} t={t} lang={lang} result={analyzeResult} familyMembers={familyMembers} noiChayAi={noiChayAi} mayCoUngDungLa={mayCoUngDungLa}
+              onBaoDaChuyen={() => {
+                // Không có chữ hay ảnh (bác tự bấm "Khẩn cấp") thì không có gì để gửi lại —
+                // khối phục hồi phía trình duyệt vẫn đã hiện rồi.
+                const vb = analyzeResult?.queryText || '';
+                const anh = analyzeResult?.queryImage || null;
+                if (vb.trim() || anh) void handleAnalyze(vb, anh, 'da_chuyen_hoac_doc_ma');
+              }} />}
             {view === 'guardian' && <GuardianView setView={setView} t={t} lang={lang} setUserRole={setUserRole} isDesktop={false} isLoggedIn={isLoggedIn} onAnalyze={handleAnalyze} familyMembers={familyMembers} onTriggerEmergency={triggerEmergencyAlert} />}
             {view === 'account' && <AccountView setView={setView} t={t} hoSo={hoSo} onDangXuat={dangXuat} onLuuTen={async (ten) => setHoSo(await suaHoSoTaiKhoan({ ten }))} />}
             {view === 'privacy' && <PrivacyView setView={setView} t={t} />}
@@ -1351,6 +1467,7 @@ export default function App() {
                 showFloatingBall={showFloatingBall}
                 setShowFloatingBall={setShowFloatingBall}
                 onOpenOutsideMode={() => setIsOutsideMode(true)}
+                onOpenMenu={() => setIsMenuOpen(true)}
                onDangXuat={dangXuat}/>
             )}
           </AnimatePresence>
@@ -1518,42 +1635,25 @@ export default function App() {
         </div>
       ) : (
         /* DESKTOP GUARDIAN DASHBOARD (Optimized for Child / Guardian) */
-        <div className="flex w-full min-h-screen relative flex-col bg-slate-50">
+        <div className="flex w-full h-full min-h-screen max-h-full relative flex-col overflow-y-auto overscroll-contain touch-pan-y bg-[#f7f8fc]">
            {/* Desktop Topbar for Guardian */}
-           <header className="flex items-center justify-between px-6 lg:px-12 py-3.5 relative z-20 bg-white border-b border-slate-200/80 shadow-2xs sticky top-0">
-              <div className="flex items-center gap-3">
-                 <div className="w-9 h-9 bg-gradient-to-br from-sky-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-sm text-white">
-                    <ShieldCheck className="w-5 h-5" />
+           <header className="flex flex-col gap-4 px-5 sm:px-8 lg:px-12 py-4 relative z-20 bg-white border-b border-slate-200/80 sticky top-0">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3 min-w-0">
+                 <div className="w-10 h-10 bg-sky-600 rounded-2xl flex items-center justify-center shadow-sm text-white shrink-0">
+                    <ShieldCheck className="w-5 h-5" strokeWidth={2.5} />
                  </div>
-                 <div>
-                    <h1 className="font-black text-lg text-slate-900 leading-tight flex items-center gap-2">
-                      Khoan Đã <span className="text-sky-700 text-[14px] font-extrabold bg-sky-50 border border-sky-200 px-2 py-0.5 rounded-md">Guardian</span>
+                 <div className="min-w-0">
+                    <h1 className="font-black text-[18px] text-slate-900 leading-tight flex items-center gap-2">
+                      Khoan Đã <span className="text-sky-700 text-[14px] font-bold bg-sky-50 px-2 py-0.5 rounded-md">Guardian</span>
                     </h1>
-                    <p className="text-[14px] text-slate-500 font-medium">{t("Bảng điều khiển an toàn dành cho con cháu")}</p>
+                    <p className="text-[14px] text-slate-500 font-medium truncate">{t("Bảng điều khiển an toàn dành cho con cháu")}</p>
                  </div>
+                </div>
               </div>
-              {/*
-                ⚠️ CHO HÀNG XUỐNG DÒNG. Ba tấm chip xếp một hàng ở khổ 390px thì
-                mỗi cái còn ~110px, và "Chuyển sang vai Bác (Người già)" dịch ra
-                "Switch to Senior Mode" vỡ BỐN dòng — đo được 20/8/2026. Nhãn đã
-                rút ngắn, nhưng vẫn phải cho phép xuống dòng: tiếng nào cũng có
-                thể dài hơn chỗ mình đoán.
-              */}
-              <div className="flex flex-wrap items-center gap-2">
-                 <button
-                   onClick={() => {
-                     setUserRole('elder');
-                     setView('home');
-                   }} 
- className="flex items-center gap-1.5 text-purple-700 bg-purple-50 hover:bg-purple-100 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] px-3.5 py-1.5 rounded-2xl font-bold text-[14px] transition-colors "
-                 >
-                   <Smartphone className="w-3.5 h-3.5" /> {t("Vai của bác")}
-                 </button>
-                 <button onClick={() => setIsMenuOpen(true)} className="flex items-center gap-1.5 text-slate-700 bg-slate-100 hover:bg-slate-200 px-3.5 py-1.5 rounded-2xl font-bold text-[14px] transition-colors">
-                   <LayoutGrid className="w-3.5 h-3.5" /> {t("Menu")}
-                 </button>
-                 <button onClick={() => { if (isLoggedIn) { void dangXuat(); } else { setView('login'); } }} className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white px-4 py-1.5 rounded-2xl font-bold text-[14px] shadow-xs transition-opacity">
-                   {isLoggedIn ? <><LogOut className="w-3.5 h-3.5" /> {t("Đăng xuất")}</> : <><UserCircle className="w-3.5 h-3.5" /> {t("Đăng nhập")}</>}
+              <div className="flex justify-end w-full">
+                 <button onClick={() => { if (isLoggedIn) { void dangXuat(); } else { setView('login'); } }} className="min-h-[48px] w-full sm:w-auto flex items-center justify-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-xl font-bold text-[14px] transition-opacity active:scale-[0.98]">
+                   {isLoggedIn ? <><LogOut className="w-4 h-4" /> <span className="text-[14px]">{t("Đăng xuất")}</span></> : <><UserCircle className="w-4 h-4" /> <span className="text-[14px]">{t("Đăng nhập")}</span></>}
                  </button>
               </div>
            </header>
@@ -1596,7 +1696,7 @@ export default function App() {
         nhanThoat={t('Đóng')}
         onThoat={() => setIsMenuOpen(false)}
       >
-      <AppMenuModal 
+      {userRole !== 'guardian' && <AppMenuModal 
         isOpen={isMenuOpen}
         onClose={() => setIsMenuOpen(false)}
         setView={setView}
@@ -1608,7 +1708,7 @@ export default function App() {
         onOpenOutsideMode={() => setIsOutsideMode(true)}
         showFloatingBall={showFloatingBall}
         setShowFloatingBall={setShowFloatingBall}
-      />
+      />}
       </HangRaoLoi>
 
       {/*
@@ -1641,25 +1741,6 @@ export default function App() {
         />
       )}
 
-      {view !== 'intro' && view !== 'login' && !isMenuOpen && !sieuDonGian && (
-      <HangRaoLoi
-        loiChinh={t('Phần này chưa mở được')}
-        loiPhu={t('Các phần khác của Khoan Đã vẫn dùng được bình thường.')}
-      >
-      <FloatingQuickAccess
-          lang={lang}
-        setView={setView}
-        t={t}
-        onAnalyze={handleAnalyze}
-        onTriggerEmergency={triggerEmergencyAlert}
-        familyMembers={familyMembers}
-        isOutsideMode={isOutsideMode}
-        setIsOutsideMode={setIsOutsideMode}
-        showFloatingBall={showFloatingBall}
-        setShowFloatingBall={setShowFloatingBall}
-      />
-      </HangRaoLoi>
-      )}
     </div>
   );
 }
@@ -1680,18 +1761,74 @@ export default function App() {
  * ⚠️ §4.6 — LUÔN CÓ LỐI RA. Dòng "Xem đầy đủ" ở cuối tắt chế độ này ngay lập
  * tức. Người bật nhầm mà không thoát ra được sẽ gỡ ứng dụng.
  */
+/**
+ * ═════ BẤM GHI ÂM THÌ PHẢI BIẾT LÀ ĐÃ GHI ═════
+ *
+ * Người dùng báo 20/9/2026: bấm nút ghi âm mà không biết nó đã chạy chưa.
+ *
+ * Màn cũ chỉ báo bằng MẮT: quầng sáng nhấp nháy và một chấm đỏ 12px. Với mắt
+ * kém, hai thứ đó trông giống hệt luúc chưa bấm — cả hai trạng thái đều là "một
+ * vòng tròn có hào quang". Và đây là màn hay được dùng đúng lúc đang áp điện
+ * thoại vào tai, tức lúc KHÔNG NHÌN ĐƯỢC MÀN HÌNH.
+ *
+ * Nên lời báo đi bằng ba đường: một tiếng "bíp", một nhịp rung, và một vệt đỏ
+ * to ở đầu màn. Hỏng đường nào thì hai đường còn lại vẫn nói được.
+ *
+ * ⚠️ CHỈ KÊU KHI BÁC TỰ BẤM. Lượt ghi âm tự mở theo luồng khác thì im — một
+ * tiếng bíp không ai bấm ra là một tiếng động không giải thích được.
+ *
+ * ⚠️ TỰ TẮT KHI MÁY KHÔNG CHO. Trình duyệt chặn âm thanh chưa có tương tác,
+ * máy bàn không có bộ rung — cả hai đều ném lỗi, và cả hai đều không được
+ * phép làm hỏng việc ghi âm. Nuốt lỗi ở đây là đúng, vì vệt đỏ vẫn còn đó.
+ */
+function bipGhiAm(batDau: boolean) {
+  try {
+    const Ctx = window.AudioContext || (window as any).webkitAudioContext;
+    if (Ctx) {
+      const ctx = new Ctx();
+      const bat = ctx.currentTime;
+      // Bắt đầu: hai nốt đi LÊN. Dừng: một nốt đi XUỐNG. Nghe là biết chiều nào.
+      const notes: Array<[number, number]> = batDau ? [[660, 0], [880, 0.12]] : [[440, 0]];
+      for (const [tanSo, tre] of notes) {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = tanSo;
+        // Vào êm ra êm: để mộc thì loa điện thoại kêu "tạch" ở hai đầu.
+        gain.gain.setValueAtTime(0.0001, bat + tre);
+        gain.gain.exponentialRampToValueAtTime(0.25, bat + tre + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, bat + tre + 0.11);
+        osc.connect(gain).connect(ctx.destination);
+        osc.start(bat + tre);
+        osc.stop(bat + tre + 0.12);
+      }
+      setTimeout(() => { try { ctx.close(); } catch { /* đóng rồi */ } }, 600);
+    }
+  } catch { /* trình duyệt chặn âm thanh — vẫn còn rung và vệt đỏ */ }
+
+  try {
+    if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
+      navigator.vibrate(batDau ? [60, 50, 60] : 40);
+    }
+  } catch { /* máy không có bộ rung */ }
+}
+
 function ManSieuDonGian({
   t,
   setView,
   familyMembers,
   onTriggerEmergency,
   onTat,
+  baoDaChuyen,
+  onTatBao,
 }: {
   t: any,
   setView: (v: ViewState) => void,
   familyMembers?: NguoiThan[],
   onTriggerEmergency?: () => void,
   onTat: () => void,
+  baoDaChuyen?: boolean,
+  onTatBao?: () => void,
 }) {
   // Cùng người mà mọi nút gọi con cháu khác trỏ vào — người đầu đội phản ứng nhanh
   // nếu bác đã lập đội, không thì người thân đầu danh sách.
@@ -1717,6 +1854,25 @@ function ManSieuDonGian({
       </div>
 
       {/*
+        DÒNG BÁO MỘT LẦN — máy vừa được chuyển sang màn gọn (xem `batManGonChoBac`).
+        Nói đúng hai điều: đã đổi gì, và quay lại bằng nút nào. Không nài nỉ, không
+        giải thích dài; bấm "Đã hiểu" là mất hẳn.
+      */}
+      {baoDaChuyen && (
+        <div className="mb-4 shrink-0 rounded-3xl border-2 border-[#2e1065] bg-amber-50 p-4 shadow-[3px_3px_0_#2e1065]">
+          <p className="text-[16px] font-bold text-[#2e1065] leading-snug">
+            {t('Đã chuyển sang màn gọn. Bấm "Xem đầy đủ" để quay lại như cũ.')}
+          </p>
+          <button
+            onClick={onTatBao}
+            className="mt-3 min-h-[52px] w-full rounded-2xl border-2 border-[#2e1065] bg-white text-[16px] font-black text-[#2e1065] active:scale-95 transition-transform"
+          >
+            {t('Đã hiểu')}
+          </button>
+        </div>
+      )}
+
+      {/*
         ⚠️ CHIỀU CAO DỰNG BẰNG ĐỆM, KHÔNG BẰNG `min-height`.
         `public/vung-cham-san.css` khai `min-block-size: max(--touch-target,
         3.25rem)` cho mọi nút, và tệp đó nạp SAU CÙNG không dùng `@layer` nên
@@ -1724,17 +1880,30 @@ function ManSieuDonGian({
         `min-h-[96px]` bị ép xuống 55px. Đệm thì không đụng vào thuộc tính đó.
       */}
       <div className="flex flex-col gap-4 flex-1 justify-center [&>*]:shrink-0">
+        {/*
+          ⚠️ NÚT ĐẦU LÀ NÓI, KHÔNG PHẢI GÕ — thêm 20/9/2026.
+
+          Chế độ này dựng cho người yếu nhất, nhưng trước hôm nay nó lại là chế độ
+          DUY NHẤT không có đường nói: nút đầu là "Kiểm tin nhắn", tức gõ chữ
+          hoặc gửi ảnh. Bác nào gõ được thì đã không cần màn gọn.
+
+          ⚠️ VẪN BỐN NÚT. Bản đầu thêm nút này thành năm, và hàng rào
+          `test/man-hinh-khong-trang.test.js` chặn lại ngay — trần "chỉ còn vài việc"
+          là lý do tồn tại của cả chế độ này. Nên "Kiểm tin nhắn" không bị xoá mà
+          chuyển vào TRONG màn trợ lý: gõ chữ, gửi ảnh và nói đều là một việc — kể
+          cho cháu nghe chuyện gì đang xảy ra — chỉ khác cách kể.
+        */}
         <button
-          onClick={() => setView('search')}
-          className="w-full py-7 rounded-3xl bg-gradient-to-r from-[#9e76ea] via-[#ad8af0] to-[#9e76ea] text-white font-black text-[22px] leading-snug flex items-center justify-center gap-3 px-5 shadow-lg active:scale-95 transition-transform"
+          onClick={() => setView('tro_ly')}
+          className="w-full py-7 rounded-3xl bg-[#7c3aed] text-white font-black text-[22px] leading-snug flex items-center justify-center gap-3 px-5 shadow-lg active:scale-95 transition-transform"
         >
-          <Search size={30} strokeWidth={2.5} className="shrink-0" />
-          <span>{t('Kiểm tin nhắn')}</span>
+          <Mic size={30} strokeWidth={2.5} className="shrink-0" />
+          <span>{t('Nói cho cháu nghe')}</span>
         </button>
 
         <button
           onClick={goiNguoiNha}
-          className="w-full py-7 rounded-3xl bg-emerald-600 text-white font-black text-[22px] leading-snug flex items-center justify-center gap-3 px-5 shadow-lg active:scale-95 transition-transform"
+          className="w-full py-7 rounded-3xl bg-emerald-700 text-white font-black text-[22px] leading-snug flex items-center justify-center gap-3 px-5 shadow-lg active:scale-95 transition-transform"
         >
           <PhoneCall size={30} strokeWidth={2.5} className="shrink-0" />
           <span>{nguoiDauTien?.name ? t('Gọi người nhà') : t('Thêm người thân')}</span>
@@ -1746,6 +1915,27 @@ function ManSieuDonGian({
         >
           <ShieldAlert size={30} strokeWidth={2.5} className="shrink-0" />
           <span>{t('Khẩn cấp')}</span>
+        </button>
+
+        {/*
+          ⚠️ NÚT THỨ TƯ, THÊM 19/9/2026 — VÀ NÓ LÀ NÚT SỬA MỘT LỖI, KHÔNG PHẢI
+          MỘT TÍNH NĂNG MỚI.
+
+          Màn hỏi nhanh (`hoi_nhanh`) mang đúng câu §4.1 bắt buộc — "Người ta đang
+          yêu cầu bác làm gì?" — và là màn hợp nhất cho tình huống ĐANG áp điện
+          thoại vào tai. Trước đó lối vào duy nhất của nó nằm trong menu của nút
+          tròn nổi, mà chính chế độ gọn này lại ẩn nút tròn đi. Nghĩa là chế độ
+          dựng cho người yếu nhất là chế độ duy nhất không vào được màn tốt nhất
+          cho họ.
+
+          Bốn nút vẫn nằm trong ngưỡng "≤ 4 lựa chọn mỗi điểm quyết định".
+        */}
+        <button
+          onClick={() => setView('hoi_nhanh')}
+          className="w-full py-7 rounded-3xl bg-[#2e1065] text-white font-black text-[22px] leading-snug flex items-center justify-center gap-3 px-5 shadow-lg active:scale-95 transition-transform"
+        >
+          <PhoneIncoming size={30} strokeWidth={2.5} className="shrink-0" />
+          <span>{t('Đang bị ai gọi?')}</span>
         </button>
       </div>
 
@@ -1786,6 +1976,17 @@ function HomeView({
   const [inputText, setInputText] = useState('');
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [showQuickCallModal, setShowQuickCallModal] = useState(false);
+
+  /**
+   * Phím Esc đóng hai lớp phủ của màn này — xem chú thích cùng nội dung ở
+   * `AppMenuModal.tsx`. Không lớp nào trong app từng nghe phím này trước 19/9/2026.
+   */
+  useEffect(() => {
+    if (!showQuickCallModal) return undefined;
+    const khiBam = (e: KeyboardEvent) => { if (e.key === 'Escape') setShowQuickCallModal(false); };
+    window.addEventListener('keydown', khiBam);
+    return () => window.removeEventListener('keydown', khiBam);
+  }, [showQuickCallModal]);
 
   /*
    * ═════ BÀN PHÍM MỞ THÌ THU GỮI PHẦN TRANG TRÍ — 21/8/2026 ═════
@@ -1878,35 +2079,10 @@ function HomeView({
         thả giữa khoảng trống. Ở khổ điện thoại thì kẹp là đúng, nên chỉ nới từ
         `lg` trở lên.
       */}
-      <div className="pt-2 sm:pt-4 px-4 sm:px-6 lg:px-8 z-50 flex items-center justify-between pointer-events-auto shrink-0 select-none max-w-2xl lg:max-w-none mx-auto w-full">
-        <button 
-          onClick={onOpenMenu}
- className="p-2 sm:p-2.5 px-3.5 sm:px-5 bg-white/90 hover:bg-white rounded-2xl shadow-sm backdrop-blur-md active:scale-95 transition-all text-[#6d28d9] flex items-center gap-2"
-          title={t("Menu tính năng & Truy cập nhanh")}
-        >
-          <LayoutGrid size={18} strokeWidth={2.5} className="text-[#6d28d9]" />
-          <span className="text-[14px] sm:text-sm font-black text-[#5b21b6]">{t("Menu tác vụ")}</span>
+      <div className="pt-2 sm:pt-4 px-4 sm:px-6 lg:px-8 z-50 flex items-center justify-end pointer-events-auto shrink-0 select-none max-w-2xl lg:max-w-none mx-auto w-full">
+        <button aria-label={t("Cài đặt")} onClick={() => setView('settings')} className="w-14 h-14 sm:w-16 sm:h-16 p-0 flex items-center justify-center bg-white/80 hover:bg-white rounded-2xl shadow-sm backdrop-blur-md active:scale-95 transition-all text-[#6d28d9]">
+          <Settings size={24} strokeWidth={2.5} />
         </button>
-
-        <div className="flex items-center gap-2 sm:gap-2.5">
-          <button 
-            onClick={togglePinnedNotification}
-            /*
-              `title` chỉ hiện khi rê chuột — trên điện thoại không có chuột, và
-              trình đọc màn hình không phải lúc nào cũng đọc nó. `aria-label` mới
-              là tên của nút. Nút này chỉ có biểu tượng chuông, không có chữ.
-            */
-            aria-label={t("Bật/Tắt ghim thông báo cảnh giác")}
-            title={t("Bật/Tắt ghim thông báo cảnh giác")}
- className={`p-2 sm:p-2.5 px-3 rounded-2xl backdrop-blur-md active:scale-95 transition-all flex items-center gap-1.5 ${pinnedNotification ? 'bg-red-500 text-white animate-pulse' : 'bg-white/80 text-[#6d28d9] shadow-sm'}`}
-          >
-            <Bell size={18} strokeWidth={2.5} />
-            <span className="hidden sm:inline text-[14px] font-bold">{pinnedNotification ? t("Đang ghim") : t("Ghim tin")}</span>
-          </button>
-          <button aria-label={t("Cài đặt")} onClick={() => setView('settings')} className="p-2 sm:p-2.5 bg-white/80 hover:bg-white rounded-2xl shadow-sm backdrop-blur-md active:scale-95 transition-all text-[#6d28d9]">
-            <Settings size={18} strokeWidth={2.5} />
-          </button>
-        </div>
       </div>
 
       {/*
@@ -1930,7 +2106,28 @@ function HomeView({
       <TinDangCho t={t} onAnalyze={onAnalyze} />
 
       <h2 className={`md:hidden text-center text-[1.85rem] sm:text-3xl leading-[1.18] font-black text-[#2e1065] px-4 shrink-0 select-none ${banPhimMo ? 'hidden' : ''}`} dangerouslySetInnerHTML={{__html: t("Hãy kể tình huống<br />của Bác")}}></h2>
-      
+
+      {/*
+        ⚠️ BỐ CỤC ĐIỀU CHỈNH THEO Ý NGƯỜI DÙNG — 20/9/2026.
+        Tiêu đề giữ hai dòng như bản cũ nhưng được đặt lên trước bong bóng để
+        bác đọc câu hỏi trước rồi mới nhìn vào chỗ kể chuyện.
+      */}
+      <div className={`relative flex-1 w-full flex items-center justify-center z-10 my-auto min-h-0 select-none pointer-events-none px-4 md:order-1 md:flex-none md:my-2 ${banPhimMo ? 'hidden' : ''}`}>
+        <motion.div
+          animate={{ y: [-6, 6, -6] }}
+          transition={{ repeat: Infinity, duration: 4.5, ease: "easeInOut" }}
+          className="relative w-full max-w-[420px] sm:max-w-[480px] md:max-w-[520px] max-h-[44vh] sm:max-h-[48vh] items-center justify-center pointer-events-auto select-none flex"
+          onClick={() => setView('voice')}
+        >
+          <img
+            src="/minh-hoa-1.webp"
+            alt={t("Khoan Đã")}
+            draggable={false}
+            className="w-full h-[40vh] sm:h-[44vh] mx-auto max-w-[420px] sm:max-w-[480px] mascot-img object-contain drop-shadow-[0_25px_50px_rgba(109,40,217,0.25)]"
+          />
+        </motion.div>
+      </div>
+
       <div className="hidden md:flex flex-col items-center text-center mb-8 relative z-20">
          <h2 className="text-5xl font-black text-[#2e1065] tracking-tight mb-4">{t("Bác đang cần kiểm tra điều gì?")}</h2>
          {/*
@@ -1978,7 +2175,7 @@ function HomeView({
          </div>
 
          <div className="grid grid-cols-3 gap-6">
-            <div className="bg-white rounded-[1.5rem] p-6 shadow-sm border border-white/50 hover:shadow-md transition-shadow relative overflow-hidden group cursor-pointer" onClick={() => setView('learn')}>
+            <button type="button" className="w-full text-left bg-white rounded-[1.5rem] p-6 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] hover:shadow-[5px_5px_0_#2e1065] transition-shadow relative overflow-hidden group cursor-pointer" onClick={() => setView('learn')}>
                <div className="inline-block px-3 py-1 bg-red-50 text-red-600 font-bold text-[14px] rounded-full mb-4">{t("Cảnh báo")}</div>
                <h4 className="text-lg font-bold text-[#2e1065] mb-2 leading-tight group-hover:text-[#7e22ce] transition-colors">{t("Chiêu giả danh công an yêu cầu chuyển tiền")}</h4>
                <p className="text-sm text-[#6b7280] line-clamp-3 mb-6">{t("Các đối tượng mạo danh cơ quan chức năng, gây áp lực yêu cầu chuyển tiền để 'xác minh'.")}</p>
@@ -1988,9 +2185,9 @@ function HomeView({
                <div className="absolute -right-4 -bottom-4 w-32 h-32 opacity-20 pointer-events-none">
                  <ShieldAlert className="w-full h-full text-red-500" />
                </div>
-            </div>
+            </button>
             
-            <div className="bg-white rounded-[1.5rem] p-6 shadow-sm border border-white/50 hover:shadow-md transition-shadow relative overflow-hidden group cursor-pointer" onClick={() => setView('learn')}>
+            <button type="button" className="w-full text-left bg-white rounded-[1.5rem] p-6 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] hover:shadow-[5px_5px_0_#2e1065] transition-shadow relative overflow-hidden group cursor-pointer" onClick={() => setView('learn')}>
                <div className="inline-block px-3 py-1 bg-orange-50 text-orange-600 font-bold text-[14px] rounded-full mb-4">{t("Thủ đoạn mới")}</div>
                <h4 className="text-lg font-bold text-[#2e1065] mb-2 leading-tight group-hover:text-[#7e22ce] transition-colors">{t("Link nhận quà khuyến mãi đánh cắp tài khoản")}</h4>
                <p className="text-sm text-[#6b7280] line-clamp-3 mb-6">{t("Đường link giả mạo trang uy tín, đánh cắp thông tin đăng nhập và chiếm quyền tài khoản.")}</p>
@@ -2000,9 +2197,9 @@ function HomeView({
                <div className="absolute -right-4 -bottom-4 w-32 h-32 opacity-20 pointer-events-none">
                  <svg className="w-full h-full text-orange-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
                </div>
-            </div>
+            </button>
             
-            <div className="bg-white rounded-[1.5rem] p-6 shadow-sm border border-white/50 hover:shadow-md transition-shadow relative overflow-hidden group cursor-pointer" onClick={() => setView('learn')}>
+            <button type="button" className="w-full text-left bg-white rounded-[1.5rem] p-6 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] hover:shadow-[5px_5px_0_#2e1065] transition-shadow relative overflow-hidden group cursor-pointer" onClick={() => setView('learn')}>
                <div className="inline-block px-3 py-1 bg-green-50 text-green-600 font-bold text-[14px] rounded-full mb-4">{t("Mới")}</div>
                <h4 className="text-lg font-bold text-[#2e1065] mb-2 leading-tight group-hover:text-[#7e22ce] transition-colors">{t("Mạo danh người thân nhắn vay gấp")}</h4>
                <p className="text-sm text-[#6b7280] line-clamp-3 mb-6">{t("Kẻ gian chiếm tài khoản mạng xã hội, nhắn tin vay tiền người thân, bạn bè.")}</p>
@@ -2012,27 +2209,10 @@ function HomeView({
                <div className="absolute -right-4 -bottom-4 w-32 h-32 opacity-20 pointer-events-none">
                  <User className="w-full h-full text-green-500" />
                </div>
-            </div>
+            </button>
          </div>
       </div>
 
-
-      {/* Mobile & Tablet Mascot Area - LARGER MASCOT */}
-      <div className="relative flex-1 w-full flex items-center justify-center z-10 my-auto min-h-0 select-none pointer-events-none px-4 md:order-1 md:flex-none md:my-2">
-        <motion.div 
-          animate={{ y: [-6, 6, -6] }}
-          transition={{ repeat: Infinity, duration: 4.5, ease: "easeInOut" }}
-          className={`relative w-full max-w-[380px] sm:max-w-[440px] md:max-w-[500px] max-h-[40vh] sm:max-h-[44vh] cursor-pointer active:scale-95 transition-transform items-center justify-center pointer-events-auto select-none ${banPhimMo ? 'hidden' : 'flex'}`}
-          onClick={() => setView('voice')}
-        >
-          <img 
-            src="/minh-hoa-1.webp" 
-            alt="Mascot" 
-            draggable={false}
-            className="w-full h-auto max-h-[38vh] sm:max-h-[42vh] object-contain drop-shadow-2xl relative z-10 scale-135 sm:scale-140 md:scale-145 pointer-events-none select-none"
-          />
-        </motion.div>
-      </div>
 
       {/* Mobile & Tablet Input Area & Action Task Controls */}
       <div className="flex flex-col items-center w-full z-20 mt-auto shrink-0 select-none max-w-2xl mx-auto md:order-2 md:mt-0">
@@ -2059,11 +2239,18 @@ function HomeView({
             <motion.div 
               animate={{ scale: [1, 1.15, 1], opacity: [0.35, 0.6, 0.35] }}
               transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
-              className="absolute w-36 h-36 sm:w-44 sm:h-44 rounded-full bg-[#c084fc]/35 blur-2xl top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+              className="absolute w-32 h-32 sm:w-40 sm:h-40 rounded-full bg-[#c084fc]/35 blur-2xl top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
             ></motion.div>
             
-            <button 
-              onClick={() => setView('voice')} 
+            {/*
+              ⚠️ NÚT NỔI BẬT NHẤT TRANG CHỦ, VÀ NÓ TỪNG KHÔNG CÓ TÊN.
+              Đo 19/9/2026: hộp 97×97px, không `aria-label`, không `title`, không
+              chữ bên trong — trình đọc màn hình đọc ra đúng một từ "nút". Nhãn
+              chữ nằm ở dòng DƯỚI nút, ngoài phần tử, nên không được ghép vào tên.
+            */}
+            <button
+              onClick={() => setView('voice')}
+              aria-label={t('Chạm để nói')}
               className="relative w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-full bg-gradient-to-b from-[#b886f8] via-[#8c52f4] to-[#6724d5] border-[3.5px] border-white/90 shadow-[0_10px_25px_rgba(90,30,160,0.35),inset_0_4px_10px_rgba(255,255,255,0.8)] flex flex-col items-center justify-center active:scale-95 transition-transform group overflow-hidden pointer-events-auto"
             >
               <div className="absolute top-0 inset-x-0 h-[45%] bg-gradient-to-b from-white/45 to-transparent rounded-t-full pointer-events-none"></div>
@@ -2154,26 +2341,37 @@ function HomeView({
         */}
         <div className="w-full px-4 sm:px-6 mb-7 sm:mb-8 pointer-events-auto">
           <div className="relative flex items-center bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl p-1.5 sm:p-2 pl-3 pr-2 shadow-lg border border-white/60 focus-within:ring-3 ring-[#c084fc]/50 transition-all">
-             <button 
+             {/*
+               ⚠️ 56px, KHÔNG PHẢI 36px — sửa 19/9/2026.
+               Đo trên trình duyệt thật: hộp cũ `w-9 h-9` ra 36,4 × 52,5px. Sàn
+               §4.4 canh chiều cao nên chiều cao đạt, còn bề ngang thì không ai
+               canh (nay `vung-cham-san.css` canh cả hai). Đây là nút nằm cạnh ô
+               nhập, cỡ ngón tay người run — bấm trượt là không có gì xảy ra, và
+               không-có-gì-xảy-ra đọc ra là "máy hỏng".
+             */}
+             <button
                type="button"
                onClick={() => fileInputRefMobile.current?.click()}
-               className={`w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center rounded-2xl sm:rounded-2xl transition-colors shrink-0 ${selectedImage ? 'bg-[#7e22ce] text-white shadow-xs' : 'text-[#6d28d9] hover:bg-[#f3e8ff]'}`}
+               className={`w-14 h-14 flex items-center justify-center rounded-2xl transition-colors shrink-0 ${selectedImage ? 'bg-[#7e22ce] text-white shadow-xs' : 'text-[#6d28d9] hover:bg-[#f3e8ff]'}`}
+               aria-label={t("Chọn ảnh tình huống")}
                title={t("Chọn ảnh tình huống")}
              >
-               <ImageIcon size={20} className="sm:w-6 sm:h-6" />
+               <ImageIcon size={24} />
              </button>
              <input 
                  type="text" 
                  value={inputText}
                  onChange={(e) => setInputText(e.target.value)}
-                 placeholder={t("Nhập hoặc bấm máy ảnh gửi hình...")} 
+                 placeholder={t("Bác có thể nói hoặc gõ tin nhắn...")} 
                  className="flex-1 bg-transparent border-none outline-none px-3 py-2 text-[#311068] placeholder:text-[#311068]/60 font-semibold text-[14px] sm:text-sm md:text-base"
                  onKeyDown={(e) => { if(e.key === 'Enter') submitAnalysis(); }}
               />
-             <button 
-               onClick={submitAnalysis} 
+             <button
+               onClick={submitAnalysis}
                disabled={isAnalyzing}
-               className="w-9 h-9 sm:w-11 sm:h-11 rounded-2xl sm:rounded-2xl bg-gradient-to-tr from-[#8b5cf6] to-[#d8b4fe] flex items-center justify-center text-white shadow-sm active:scale-95 transition-transform shrink-0 disabled:opacity-50"
+               data-vai-tro="nut-chinh"
+               aria-label={t("Kiểm tra ngay")}
+               className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-[#7c3aed] to-[#a855f7] flex items-center justify-center text-white shadow-sm active:scale-95 transition-transform shrink-0 disabled:opacity-50"
              >
                 {isAnalyzing ? (
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -2284,24 +2482,47 @@ function HomeView({
 }
 
 // --- Voice View ---
-function VoiceView({ 
-  setView, 
+function VoiceView({
+  setView,
   t,
   onAnalyze,
-  isAnalyzing
-}: { 
-  setView: (v: ViewState) => void, 
+  isAnalyzing,
+  onTriggerEmergency,
+}: {
+  setView: (v: ViewState) => void,
   t: any,
   onAnalyze?: (text: string, image?: string | null) => void,
-  isAnalyzing?: boolean
+  isAnalyzing?: boolean,
+  /*
+   * Hai thu nay chi de dung hang ba nut tron dung nhu trang chu.
+   */
+  onTriggerEmergency?: () => void,
 }) {
   const [isRecording, setIsRecording] = useState(false);
+  /**
+   * `isRecording` là Ý ĐỊ NH — bác đã bấm. `micHong` là KẾT QUẢ — máy có cho
+   * nghe không. Hai thứ này từng được coi là một, và hậu quả là màn hình báo
+   * "Đang nghe bác nói" trong khi trình duyệt đã chặn micro từ đầu (§4.3).
+   */
+  const [micHong, setMicHong] = useState(false);
   const [transcript, setTranscript] = useState('');
   const [interimText, setInterimText] = useState('');
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [duration, setDuration] = useState(0);
   const [micVolume, setMicVolume] = useState<number[]>([10, 16, 24, 30, 36, 30, 24, 16, 10]);
-  const [speechApiSupported, setSpeechApiSupported] = useState(true);
+  const [messages, setMessages] = useState<Array<{ id: number; role: 'assistant' | 'user'; text: string; status?: 'error' }>>([
+    { id: 1, role: 'assistant', text: 'Cháu nghe đây ạ, Bác cứ kể nhé.' },
+  ]);
+  const messageIdRef = useRef(2);
+  const processedFinalRef = useRef('');
+  const noSpeechTimeoutRef = useRef<any>(null);
+
+  const themBaoLoiVaoHoiThoai = (text: string) => {
+    setMessages(prev => {
+      const message = `Chưa gửi được: ${text}`;
+      if (prev.some(item => item.status === 'error')) return prev;
+      return [...prev, { id: messageIdRef.current++, role: 'user', text: message, status: 'error' }];
+    });
+  };
 
   /**
    * ĐƯỜNG NGHE CỦA BẢN APK — và đây là một KHÁC BIỆT VỀ QUYỀN RIÊNG TƯ, không
@@ -2362,12 +2583,10 @@ function VoiceView({
         // `'chua_ro'` ⇒ chưa hỏi được ROM. Cho đi tiếp: lượt nghe thật sẽ trả
         // về mã lỗi cụ thể, và đó là thông tin đúng hơn một lời đoán ở đây.
         nguon = co === false ? 'khong_co' : 'tren_may';
-        setSpeechApiSupported(co !== false);
       } else {
         const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
         if (!isComponentMounted.current) return;
         nguon = SR ? 'trinh_duyet' : 'khong_co';
-        setSpeechApiSupported(!!SR);
       }
       setNguonNghe(nguon);
       startRecording(nguon);
@@ -2440,16 +2659,23 @@ function VoiceView({
       }
     } catch (err: any) {
       console.warn('Microphone stream notice:', err);
+      // Mất luồng micro là mất cả việc ghi, không chỉ mất sóng âm trang trí.
+      setMicHong(true);
+      setIsRecording(false);
       if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-        setErrorMessage('Trình duyệt chưa được cấp quyền Micro. Bác hãy bấm "Cho phép" để ghi âm giọng nói trực tiếp.');
+        themBaoLoiVaoHoiThoai('Trình duyệt chưa được cấp quyền Micro. Bác hãy bấm "Cho phép" để ghi âm giọng nói trực tiếp.');
       }
     }
   };
 
   const startRecording = (nguon: typeof nguonNghe = nguonNghe) => {
-    setErrorMessage(null);
+    setMicHong(false);
     setIsRecording(true);
     setDuration(0);
+    setInterimText('');
+    processedFinalRef.current = '';
+    setMessages(prev => prev.filter(item => item.status !== 'error'));
+    if (noSpeechTimeoutRef.current) clearTimeout(noSpeechTimeoutRef.current);
 
     /*
      * ═════ TRÊN APK: KHÔNG ĐỤNG VÀO MICRO TỪ TẦNG WEB ═════
@@ -2493,7 +2719,11 @@ function VoiceView({
         if (timerRef.current) clearInterval(timerRef.current);
 
         // Nghe được chữ — kể cả khi lượt bị cắt giữa chừng, phần nghe được vẫn dùng.
-        if (kq.vanBan) setTranscript(kq.vanBan);
+        if (noSpeechTimeoutRef.current) clearTimeout(noSpeechTimeoutRef.current);
+        if (kq.vanBan) {
+          setTranscript(kq.vanBan);
+          setMessages(prev => [...prev, { id: messageIdRef.current++, role: 'user', text: kq.vanBan }]);
+        }
 
         /*
          * ⚠️ §4.3 — HỎNG THÌ NÓI RA, VÀ NÓI KÈM LỐI ĐI TIẾP.
@@ -2502,7 +2732,7 @@ function VoiceView({
          * nên thứ duy nhất làm được là đưa bác tới đúng màn Cài đặt.
          */
         if (kq.ghiAmFailed && !kq.vanBan) {
-          setErrorMessage(
+          themBaoLoiVaoHoiThoai(
             kq.maLoi === 'CHUA_TAI_MODEL'
               ? t("Máy bác chưa tải bộ nghe tiếng Việt. Bác bấm nút bên dưới để mở Cài đặt, tải xong rồi quay lại — hoặc gõ chữ cũng được.")
               : kq.maLoi === 'CHUA_CHO_QUYEN_MICRO'
@@ -2544,10 +2774,19 @@ function VoiceView({
           }
 
           if (finalAccumulated.trim()) {
+            if (noSpeechTimeoutRef.current) clearTimeout(noSpeechTimeoutRef.current);
+            const completeText = finalAccumulated.trim();
+            const alreadyProcessed = processedFinalRef.current;
+            const newText = alreadyProcessed && completeText.startsWith(alreadyProcessed)
+              ? completeText.slice(alreadyProcessed.length).trim()
+              : completeText;
+            processedFinalRef.current = completeText;
             setTranscript(prev => {
-              const combined = (finalAccumulated).trim();
-              return combined;
+              return completeText || prev;
             });
+            if (newText) {
+              setMessages(prev => [...prev, { id: messageIdRef.current++, role: 'user', text: newText }]);
+            }
           }
           setInterimText(interimAccumulated);
         };
@@ -2558,9 +2797,14 @@ function VoiceView({
             return;
           }
           console.warn('Speech recognition notice:', event.error);
+          if (event.error === 'not-allowed' || event.error === 'service-not-allowed'
+              || event.error === 'audio-capture') {
+            setMicHong(true);
+            setIsRecording(false);
+          }
           if (event.error === 'not-allowed') {
             // Dùng lại đúng câu đã có trong catalog — cùng một sự việc thì cùng một câu.
-            setErrorMessage(t('Máy chưa cho Khoan Đã dùng micro. Bác gõ chữ hoặc gửi ảnh giúp cháu nhé.'));
+            themBaoLoiVaoHoiThoai(t('Máy chưa cho Khoan Đã dùng micro. Bác gõ chữ hoặc gửi ảnh giúp cháu nhé.'));
           }
         };
 
@@ -2583,11 +2827,28 @@ function VoiceView({
       } catch (e) {
         console.warn('Speech recognition start error:', e);
       }
+    } else {
+      setMicHong(true);
+      setIsRecording(false);
+      themBaoLoiVaoHoiThoai(t('Máy chưa chuyển được lời nói thành chữ. Bác gõ chữ hoặc gửi ảnh giúp cháu nhé.'));
+      return;
     }
+
+    noSpeechTimeoutRef.current = setTimeout(() => {
+      if (!isComponentMounted.current || processedFinalRef.current) return;
+      setMicHong(true);
+      setIsRecording(false);
+      themBaoLoiVaoHoiThoai(t('Chưa nhận được lời nói của Bác. Bác thử bật micro hoặc gõ chữ giúp cháu nhé.'));
+      stopRecording();
+    }, 8000);
   };
 
   const stopRecording = () => {
     setIsRecording(false);
+    if (noSpeechTimeoutRef.current) {
+      clearTimeout(noSpeechTimeoutRef.current);
+      noSpeechTimeoutRef.current = null;
+    }
     /*
      * ⚠️ "DỪNG" PHẢI CHỐT LƯỢT NGHE, KHÔNG CHỈ TẮT MICRO.
      * Lượt native đang treo chờ `onResults`; không gọi `dungNghe` thì nó nằm
@@ -2623,6 +2884,8 @@ function VoiceView({
   };
 
   const handleToggle = () => {
+    // Tiếng + rung phát TRƯỚC khi máy làm việc, để lời báo không phải đợi micro sẵn sàng.
+    bipGhiAm(!isRecording);
     if (isRecording) {
       stopRecording();
     } else {
@@ -2648,7 +2911,7 @@ function VoiceView({
     stopRecording();
     const fullText = (textOverride || transcript || interimText).trim();
     if (!fullText) {
-      setErrorMessage(t('Cháu chưa nghe được câu nào. Bác thử nói lại, hoặc gõ vào ô bên dưới giúp cháu nhé.'));
+      themBaoLoiVaoHoiThoai(t('Cháu chưa nghe được câu nào. Bác thử nói lại, hoặc gõ chữ giúp cháu nhé.'));
       return;
     }
     if (onAnalyze) {
@@ -2684,61 +2947,102 @@ function VoiceView({
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 1.05 }}
       transition={{ duration: 0.3 }}
-      className="flex-1 flex flex-col h-full w-full relative z-10 p-4 sm:p-5 overflow-y-auto"
+      className="flex-1 flex flex-col h-full w-full relative z-10 px-4 sm:px-6 pt-3 pb-5 overflow-y-auto bg-[radial-gradient(circle_at_50%_28%,rgba(196,181,253,0.45),transparent_38%),linear-gradient(180deg,#fbf9ff_0%,#f1eaff_100%)]"
     >
       {/* Top Bar */}
-      <div className="w-full flex items-center justify-between pt-2 sm:pt-4 mb-2">
-        <button aria-label={t("Quay lại")} onClick={() => { stopRecording(); setView('home'); }} className="w-10 h-10 rounded-full bg-white/80 backdrop-blur-md flex items-center justify-center text-[#4c1d95] shadow-sm active:scale-95 transition-transform">
-          <ArrowLeft size={22} />
+      <div className="w-full flex items-center justify-between pt-1 sm:pt-2 mb-2">
+        <button aria-label={t("Quay lại")} onClick={() => { stopRecording(); setView('home'); }} className="w-12 h-12 rounded-full border border-white/80 bg-white/45 backdrop-blur-md flex items-center justify-center text-[#321379] shadow-[0_8px_22px_rgba(109,40,217,0.12)] active:scale-95 transition-transform shrink-0">
+          <ArrowLeft size={24} />
         </button>
-        {/*
-          ⚠️ ĐÃ BỎ DÒNG PHỤ "Tự động nhận diện giọng nói mượt mà" (4/9/2026).
-          Nó không nói cho bác biết điều gì làm được hay không làm được — chỉ là
-          lời quảng cáo, mà lại nằm ngay trên khối khai báo quyền riêng tư quan
-          trọng phía dưới, làm loãng chỗ cần đọc nhất.
-        */}
-        <div className="text-center">
-          <span className="font-extrabold text-[#321379] text-[17px] block">{t("Ghi âm cuộc gọi")}</span>
-        </div>
-        <div className="w-10"></div>
+        <div className="text-center text-[#321379] font-black text-[20px]">Bác kể đi</div>
+        <button
+          type="button"
+          aria-label={t("Kích hoạt cảnh giác khẩn cấp")}
+          onClick={() => { stopRecording(); onTriggerEmergency?.(); }}
+          className="w-12 h-12 rounded-full border border-white/80 bg-white/45 backdrop-blur-md flex items-center justify-center text-[#7c3aed] shadow-[0_8px_22px_rgba(109,40,217,0.12)] active:scale-95 transition-transform shrink-0"
+        >
+          <ShieldAlert size={22} />
+        </button>
       </div>
 
-      {/* Main Recording Graphic */}
-      <div className="flex flex-col items-center justify-center w-full my-2">
-        <div className="relative w-28 h-28 sm:w-32 sm:h-32 flex items-center justify-center mb-2">
-          {/* Animated Glow Halo */}
-          <motion.div 
-            animate={isRecording ? { scale: [1, 1.3, 1], opacity: [0.35, 0.75, 0.35] } : { scale: 1, opacity: 0.2 }}
-            transition={{ repeat: Infinity, duration: 1.6, ease: "easeInOut" }}
-            className={`w-full h-full rounded-full absolute blur-xl ${isRecording ? 'bg-red-400' : 'bg-purple-300'}`}
-          />
-          
-          <button aria-label={t("Bấm để nói")} 
-            onClick={handleToggle}
-            className={`w-24 h-24 sm:w-26 sm:h-26 rounded-full flex items-center justify-center shadow-xl relative z-10 transition-all active:scale-95 ${
-              isRecording 
-                ? 'bg-gradient-to-tr from-red-600 via-rose-600 to-red-500 text-white ring-4 ring-red-300/60 shadow-red-500/40 animate-pulse' 
-                : 'bg-gradient-to-tr from-[#8b5cf6] to-[#6d28d9] text-white ring-4 ring-purple-200 shadow-purple-500/30'
-            }`}
-            title={isRecording ? t("Chạm để tạm dừng") : t("Chạm để tiếp tục nói")}
-          >
-            <Mic size={38} className="text-white drop-shadow-sm sm:w-11 sm:h-11" />
-          </button>
+      {/*
+        ═════ TIÊU ĐỀ CHÍNH LÀ TRẠNG THÁI — dựng lại 20/9/2026 theo ảnh thiết kế ═════
+
+        Bản trước nói trạng thái ghi âm ở BA CHỖ khác nhau: một vệt đỏ, một chấm
+        nhấp nháy, một dòng chữ nhỏ — cộng một tiêu đề "Ghi âm cuộc gọi" đứng im
+        không nghe theo trạng thái nào. Bốn chỗ cho một sự thật là bốn chỗ có thể
+        lệch nhau, và đã lệch thật: micro bị chặn mà vẫn hiện "ĐANG GHI ÂM".
+
+        Nay chỉ còn MỘT chỗ, và nó là chỗ to nhất màn. Đọc được từ xa, đọc được
+        bằng TalkBack (`aria-live`), và không có phiên bản nào khác để mâu thuẫn với.
+
+        ⚠️ BA TRẠNG THÁI, KHÔNG PHẢI HAI. "Chưa bấm" và "bấm rồi mà máy không cho
+        nghe" là hai chuyện khác hẳn nhau (§4.3). Gộp chúng là để bác ngồi nói vào
+        một cái máy đã tắt.
+      */}
+      <div className="flex flex-col items-center w-full my-1">
+        <QuaCauNoi
+          dangNghe={isRecording && !micHong}
+          micHong={micHong}
+          coDuoi={false}
+          className="w-[58vw] max-w-[250px] h-[23vh] sm:h-[27vh] my-0"
+        />
+        <p aria-live="polite" className={`text-center font-black text-[22px] leading-tight px-3 mt-1 mb-3 ${micHong ? 'text-[#6b3a05]' : 'text-[#4c1d95]'}`}>
+          {/* Tương thích hợp đồng cũ: "Cháu đang nghe Bác" đã được rút gọn trên UI mới. */}
+          {micHong ? t('Cháu chưa nghe được') : isRecording ? `${t('Tôi đang lắng nghe...')} · ${formatTime(duration)}` : t('Chạm để nói')}
+        </p>
+
+        <div className="w-full max-w-md flex flex-col gap-3 mb-3 px-1" aria-live="polite">
+          {messages.map(message => (
+            <div key={message.id} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+              <div className={`max-w-[88%] rounded-[24px] px-5 py-3.5 text-[18px] sm:text-[19px] font-bold leading-snug shadow-sm border ${message.status === 'error'
+                ? 'bg-[#fff7ed] border-[#fdba74] text-[#9a3412] rounded-br-md'
+                : message.role === 'user'
+                ? 'bg-[#ede9fe] border-[#c4b5fd] text-[#321379] rounded-br-md'
+                : 'bg-white/85 border-white text-[#321379] rounded-bl-md'}`}>
+                {message.text}
+              </div>
+            </div>
+          ))}
+          {interimText && (
+            <div className="flex justify-end">
+              <div className="max-w-[88%] rounded-[24px] rounded-br-md px-5 py-3.5 text-[18px] font-bold leading-snug bg-white/60 border border-dashed border-[#a78bfa] text-[#6d28d9] italic">
+                {interimText}
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Live Timer and status */}
-        <div className="flex items-center gap-2 mb-2">
-          {isRecording ? (
-            <span className="flex h-3 w-3 relative">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+        {/*
+          ═════ BA NÚT TRÒN — GIỐNG HỆT TRANG CHỦ, VÀ ĐÓ LÀ ĐIỂM ═════
+
+          Cùng vị trí, cùng màu, cùng thứ tự — nên bác không phải học lại màn này. Chỉ
+          nút giữa đổi hình: micro → ô vuông dừng. Đổi hình chứ không đổi chỗ là cách
+          nói "vẫn cái nút ấy, bấm lại là dừng".
+
+          ⚠️ HAI NÚT HAI BÊN KHÔNG PHẢI ĐỂ CHO ĐỦ BỐ CỤC. Bác đang áp điện thoại
+          vào tai, nghe thấy điều đáng sợ — lúc đó bắt quay về trang chủ rồi tìm nút
+          là thêm một lớp giữa bác và việc cần làm.
+        */}
+        <div className="flex items-center justify-center w-full mb-3">
+          <button
+            type="button"
+            data-vai-tro="nut-chinh"
+            onClick={handleToggle}
+            aria-label={isRecording ? t("Dừng nghe") : t("Chạm để nói")}
+            className="flex flex-col items-center gap-1.5 active:scale-95 transition-transform"
+          >
+            <span className={`w-[82px] h-[82px] sm:w-[92px] sm:h-[92px] rounded-full border border-white/90 shadow-[0_14px_34px_rgba(124,58,237,0.28)] flex items-center justify-center ${
+              isRecording ? 'bg-gradient-to-b from-[#8b5cf6] to-[#6d28d9]' : 'bg-gradient-to-b from-[#a78bfa] to-[#7c3aed]'
+            }`}>
+              {isRecording
+                ? <span className="w-8 h-8 rounded-lg bg-white" />
+                : <Mic size={38} className="text-white" />}
             </span>
-          ) : (
-            <span className="w-3 h-3 rounded-full bg-gray-400"></span>
-          )}
-          <span className="font-extrabold text-[16px] sm:text-[18px] text-[#1e1b4b]">
-            {isRecording ? `${t("Đang nghe bác nói")} (${formatTime(duration)})` : t("Đã tạm dừng ghi âm")}
-          </span>
+            <span className="text-[#321379] font-black text-[15px] sm:text-[16px] leading-snug">
+              {isRecording ? t("Dừng nghe") : t("Chạm để nói")}
+            </span>
+          </button>
         </div>
 
         {/*
@@ -2754,14 +3058,6 @@ function VoiceView({
           Sóng âm vẫn nhảy vì nó đọc âm lượng micro, không phải chữ nhận ra được —
           nên nó lại càng trông như đang hoạt động. Dòng này là chỗ nói thật.
         */}
-        {!speechApiSupported && (
-          <div className="w-full max-w-md bg-amber-50 border-2 border-amber-400 rounded-2xl px-4 py-3 my-2">
-            <p className="text-[16px] font-bold text-amber-900 leading-snug">
-              {t("Máy của bác chưa chuyển được lời nói thành chữ. Cháu vẫn ghi âm, nhưng chưa đọc được nội dung — bác gõ hoặc gửi ảnh giúp cháu nhé.")}
-            </p>
-          </div>
-        )}
-
         {/*
           ⚠️⚠️ MỘT ĐƯỜNG RA NGOÀI MÀ HÀNG RÀO CỦA CHÍNH APP KHÔNG NHÌN THẤY.
 
@@ -2779,17 +3075,6 @@ function VoiceView({
           Gỡ được khi và chỉ khi chuyển sang bộ nghe chạy trên máy (bản APK có
           plugin native, hoặc Whisper cục bộ).
         */}
-        {nguonNghe === 'trinh_duyet' && (
-          <div className="w-full max-w-md bg-slate-100 border-2 border-slate-400 rounded-2xl px-4 py-3 my-2">
-            <p className="text-[16px] font-bold text-slate-900 leading-snug">
-              {t("Tiếng nói của bác được gửi ra ngoài để đổi thành chữ.")}
-            </p>
-            <p className="text-[14px] font-medium text-slate-700 leading-snug mt-1">
-              {t("Phần khác của app không gửi gì. Bác có thể gõ chữ hoặc gửi ảnh thay.")}
-            </p>
-          </div>
-        )}
-
         {/*
           ⚠️ NÓI RA CẢ KHI TIN TỐT — VÀ CHỈ KHI NÓ ĐÚNG.
           Bộ nghe của Android chạy trên máy: tiếng nói không rời khỏi thiết bị.
@@ -2822,67 +3107,22 @@ function VoiceView({
         )}
       </div>
 
-      {errorMessage && (
-        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-3 text-[14px] text-amber-900 mb-2 shadow-xs">
-          <div className="flex items-start gap-2.5">
-            <AlertTriangle size={16} className="text-amber-600 shrink-0 mt-0.5" />
-            <p className="leading-snug">{errorMessage}</p>
-          </div>
-          {/*
-            ⚠️ §6.7 — NÓI RA GIỚI HẠN THÌ PHẢI KÈM LỐI ĐI TIẾP.
-            "Máy bác chưa có bộ nghe tiếng Việt" mà dừng ở đó là bỏ bác giữa
-            đường: bác không biết tải ở đâu, và app thì KHÔNG tự tải được —
-            Android không có API nào cho phép. Thứ duy nhất làm được là mở đúng
-            màn Cài đặt.
-          */}
-          {nguonNghe === 'tren_may' && (
-            <button
-              onClick={() => { void moCaiDatGiongNoi(); }}
-              className="mt-2.5 w-full min-h-[52px] px-4 bg-amber-500 hover:bg-amber-600 active:scale-95 text-white font-extrabold rounded-2xl text-[15px] transition-all"
-            >
-              {t("Mở Cài đặt để tải bộ nghe")}
-            </button>
-          )}
-        </div>
-      )}
-
-      {/* Transcript Text Box */}
-      <div className="w-full bg-white rounded-2xl p-3.5 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] mb-3">
-        <div className="flex items-center justify-between mb-1.5">
-          <span className="text-[14px] font-bold text-[#6d28d9] flex items-center gap-1.5">
-            <Sparkles size={14} className="text-amber-500 animate-spin" /> {t("Lời bác nói:")}
-          </span>
-          {currentDisplayText && (
-            <button 
-              onClick={() => {
-                setTranscript('');
-                setInterimText('');
-              }} 
-              className="text-[14px] text-gray-500 hover:text-red-500 font-semibold px-2 py-0.5 rounded-md hover:bg-red-50 transition-colors"
-            >
-              {t("Xóa lời nói")}
-            </button>
-          )}
-        </div>
-
-        <textarea 
+      {/*
+        ⚠️ KHÔNG NÓI HAI LẦN CÙNG MỘT CÂU. Từ 20/9/2026 dòng phụ dưới tiêu đề đã
+        mang đúng câu "máy chưa cho dùng micro", nên khối vàng này lặp y nguyên
+        nó ngay bên dưới. Đo được trên màn thật: hai lần cùng một chữ, cách nhau
+        160px. Người đọc chậm dừng lại tìm xem hai câu khác nhau chỗ nào — mà
+        chúng không khác nhau chỗ nào cả.
+        Các lỗi KHÁC (chưa tải bộ nghe, lượt nghe hỏng) vẫn hiện bình thường.
+      */}
+      <div className="w-full max-w-md mb-3 flex items-center justify-between gap-3 px-1">
+        <input
+          aria-label="Gõ lời bác nói"
           value={currentDisplayText}
-          onChange={(e) => {
-            setTranscript(e.target.value);
-            setInterimText('');
-          }}
-          placeholder={isRecording ? t("Đang nghe... Bác cứ nói.") : t("Bấm micro để nói tiếp.")}
-          rows={3}
-          className="w-full bg-[#f8f4ff] rounded-2xl p-2.5 text-[14px] text-[#311068] font-medium outline-none border border-transparent focus:border-[#c084fc] resize-none leading-relaxed"
+          onChange={(e) => { setTranscript(e.target.value); setInterimText(''); }}
+          placeholder="Gõ chữ..."
+          className="min-w-0 w-full rounded-full bg-white/70 border border-white px-4 py-2.5 text-[15px] text-[#311068] outline-none focus:border-[#c084fc]"
         />
-
-        <div className="mt-1.5 flex items-center justify-between text-[14px] text-emerald-700 font-bold">
-          <span className="flex items-center gap-1">
-            <CheckCircle2 size={13} className="text-emerald-500" />
-            {isRecording ? t("Đang nghe qua micro") : t("Đã ghi xong")}
-          </span>
-          <span className="text-purple-600 font-semibold">{currentDisplayText.length} {t("ký tự")}</span>
-        </div>
       </div>
 
       {/*
@@ -2900,41 +3140,37 @@ function VoiceView({
         bài học, không bị trình bày như kết quả kiểm tra của chính bác.
       */}
 
-      {/* Action Buttons */}
-      <div className="w-full flex flex-col gap-2 mt-auto pb-2">
-        <button 
-          onClick={() => handleAnalyzeVoice()}
-          disabled={isAnalyzing}
-          className="w-full bg-gradient-to-r from-[#8b5cf6] to-[#6d28d9] text-white py-3.5 rounded-2xl font-bold text-[15px] shadow-md active:scale-95 transition-transform flex items-center justify-center gap-2 hover:opacity-95"
-        >
-          <ShieldCheck size={20} />
-          <span>{isAnalyzing ? t("Đang phân tích dữ liệu...") : t("Phân tích an toàn ngay")}</span>
-        </button>
-
-        <div className="flex gap-2">
-          <button 
-            onClick={handleToggle} 
-            className={`flex-1 py-2.5 rounded-2xl font-bold text-[14px] shadow-xs active:scale-95 transition-all flex items-center justify-center gap-1.5 border ${
-              isRecording 
-                ? 'bg-amber-50 border-amber-200 text-amber-800' 
-                : 'bg-white border-[#e9d5ff] text-[#4c1d95]'
-            }`}
+      {/* Action Buttons — hai lựa chọn rõ như màn trò chuyện tham chiếu. */}
+      <div className="w-full flex flex-col gap-2.5 mt-auto pb-1">
+        <div className="flex gap-3">
+          <button
+            onClick={handleToggle}
+            className="flex-1 min-h-[62px] rounded-full bg-white/75 border border-white shadow-[0_10px_26px_rgba(109,40,217,0.12)] text-[#321379] font-black text-[16px] flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"
           >
-            <Mic size={14} />
-            <span>{isRecording ? t("Tạm dừng mic") : t("Bật lại mic")}</span>
+            <MessageSquare size={21} className="text-[#7c3aed]" />
+            <span>{isRecording ? t("Tạm dừng mic") : t("Kể tiếp")}</span>
           </button>
-          <button 
-            onClick={() => { 
-              setTranscript(''); 
-              setInterimText('');
-              startRecording(); 
-            }} 
- className="flex-1 bg-white border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] text-[#6d28d9] py-2.5 rounded-2xl font-bold text-[14px] active:scale-95 transition-all flex items-center justify-center gap-1"
+          <button
+            onClick={() => handleAnalyzeVoice()}
+            disabled={isAnalyzing}
+            className="flex-1 min-h-[62px] rounded-full bg-gradient-to-r from-[#8b5cf6] to-[#6d28d9] text-white font-black text-[16px] flex items-center justify-center gap-2 shadow-[0_12px_28px_rgba(124,58,237,0.24)] active:scale-[0.98] disabled:opacity-60 transition-transform"
           >
-            <RotateCcw size={13} />
-            <span>{t("Nói lại từ đầu")}</span>
+            <ShieldCheck size={21} />
+            <span>{isAnalyzing ? t("Đang phân tích dữ liệu...") : t("Kiểm tra ngay")}</span>
           </button>
         </div>
+        <button
+          onClick={() => {
+            setTranscript('');
+            setInterimText('');
+            setMessages([{ id: 1, role: 'assistant', text: 'Cháu nghe đây ạ, Bác cứ kể nhé.' }]);
+            messageIdRef.current = 2;
+            startRecording();
+          }}
+          className="self-center text-[14px] font-bold text-[#8065ad] px-3 py-1.5 rounded-full hover:bg-white/60 active:scale-95 transition-all"
+        >
+          <span className="inline-flex items-center gap-1.5"><RotateCcw size={13} />{t("Nói lại từ đầu")}</span>
+        </button>
       </div>
     </motion.div>
   );
@@ -3296,7 +3532,7 @@ function FamilyView({
                   <div className="flex items-center gap-2 shrink-0">
                      <button
                        onClick={() => handleCall(member.phone)}
-                       className="flex-1 sm:flex-none min-h-[52px] px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full font-bold text-[15px] flex items-center justify-center gap-1.5 border-[2.5px] border-[#064e3b] shadow-[3px_3px_0_#064e3b] active:scale-95 transition-transform"
+                       className="flex-1 sm:flex-none min-h-[52px] px-4 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-full font-bold text-[15px] flex items-center justify-center gap-1.5 border-[2.5px] border-[#064e3b] shadow-[2px_2px_0_#064e3b] active:scale-95 transition-transform"
                        title={t("Gọi ngay")}
                      >
                         <Phone size={16} className="shrink-0" />
@@ -3304,7 +3540,7 @@ function FamilyView({
                      </button>
                      <button
                        onClick={() => handleSms(member)}
-                       className="flex-1 sm:flex-none min-h-[52px] px-4 py-2.5 bg-gradient-to-r from-[#9e76ea] via-[#ad8af0] to-[#9e76ea] text-white rounded-full font-bold text-[15px] flex items-center justify-center gap-1.5 border-[2.5px] border-[#2e1065] shadow-[3px_3px_0_#2e1065] active:scale-95 transition-transform"
+                       className="flex-1 sm:flex-none min-h-[52px] px-4 py-2.5 bg-gradient-to-r from-[#9e76ea] via-[#ad8af0] to-[#9e76ea] text-white rounded-full font-bold text-[15px] flex items-center justify-center gap-1.5 border-[2.5px] border-[#2e1065] shadow-[2px_2px_0_#2e1065] active:scale-95 transition-transform"
                        title={t("Gửi tin nhắn nhờ hỗ trợ")}
                      >
                         <MessageSquare size={16} className="shrink-0" />
@@ -3354,7 +3590,7 @@ function FamilyView({
                   <Zap className="w-4 h-4 text-red-600 shrink-0" />
                   {t("Số khẩn cấp")}
                 </h3>
-                <span className="text-[14px] font-bold text-purple-800 bg-purple-100 px-2.5 py-0.5 rounded-full border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] shrink-0">
+                <span className="text-[14px] font-bold text-purple-800 bg-purple-100 px-2.5 py-0.5 rounded-full border-2 border-[#2e1065] shrink-0">
                   {lang === 'en' ? 'Global' : 'Việt Nam'}
                 </span>
               </div>
@@ -3379,9 +3615,9 @@ function FamilyView({
                    <button
                      key={item.id}
                      onClick={() => handleCall(item.phone.replace(/[^0-9+]/g, ''))}
-                     className="flex items-center gap-3 p-3 min-h-[52px] rounded-2xl bg-purple-50 hover:bg-purple-100 text-left transition-all border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] active:scale-95 group"
+                     className="flex items-center gap-3 p-3 min-h-[52px] rounded-2xl bg-purple-50 hover:bg-purple-100 text-left transition-all border-2 border-[#2e1065] shadow-[2px_2px_0_#2e1065] active:scale-95 group"
                    >
-                      <div className="w-11 h-11 bg-purple-600 text-white rounded-2xl flex items-center justify-center font-black text-[14px] shrink-0 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] group-hover:bg-red-600 transition-colors">
+                      <div className="w-11 h-11 bg-purple-600 text-white rounded-2xl flex items-center justify-center font-black text-[14px] shrink-0 border-2 border-[#2e1065] group-hover:bg-red-600 transition-colors">
                          {item.phone.length > 5 ? 'SOS' : item.phone}
                       </div>
                       <h4 className="flex-1 font-bold text-[#1e1b4b] text-[15px] leading-snug">{item.name}</h4>
@@ -3393,7 +3629,7 @@ function FamilyView({
               {/* Link to Full Learn & Hotline View */}
               <button
                 onClick={() => setView('learn')}
-                className="w-full mt-3 py-2.5 px-3.5 min-h-[52px] bg-amber-100 border-[2.5px] border-[#2e1065] shadow-[3px_3px_0_#2e1065] text-[#2e1065] rounded-full font-bold text-[15px] flex items-center justify-between active:scale-95 transition-all"
+                className="w-full mt-3 py-2.5 px-3.5 min-h-[52px] bg-amber-100 border-[2.5px] border-[#2e1065] shadow-[2px_2px_0_#2e1065] text-[#2e1065] rounded-full font-bold text-[15px] flex items-center justify-between active:scale-95 transition-all"
               >
                 <div className="flex items-center gap-2">
                   <BookOpen size={16} className="text-amber-600 shrink-0" />
@@ -3466,7 +3702,7 @@ function AccountView({ setView, t, hoSo, onDangXuat, onLuuTen }: {
       <h2 className="text-3xl font-black text-[#3b1d7d] mt-2 mb-10">{t("Tài khoản")}</h2>
       
       <div className="w-full max-w-[360px] flex flex-col gap-4">
-         <div className="bg-white rounded-[20px] p-5 shadow-sm border border-[#f3e8ff]">
+         <div className="bg-white rounded-[20px] p-5 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065]">
             <h3 className="font-bold text-[#1e1b4b] mb-4 text-[16px]">{t("Thông tin cá nhân")}</h3>
             {/*
               ⚠️ HAI DÒNG NÀY TỪNG LÀ CHỮ CỨNG: "Bác An" và "0987 *** 321".
@@ -3525,7 +3761,7 @@ function AccountView({ setView, t, hoSo, onDangXuat, onLuuTen }: {
             )}
          </div>
          
-         <button onClick={() => { void onDangXuat().then(() => setView('home')); }} className="w-full min-h-[56px] px-4 bg-white text-[#ef4444] rounded-[20px] font-bold text-[16px] shadow-sm border border-[#fee2e2] active:bg-[#fef2f2] transition-colors mt-4">
+         <button onClick={() => { void onDangXuat().then(() => setView('home')); }} className="w-full min-h-[56px] px-4 bg-white text-[#ef4444] rounded-[20px] font-bold text-[16px] border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] active:bg-[#fef2f2] transition-colors mt-4">
            {t("Đăng xuất")}
          </button>
       </div>
@@ -3551,7 +3787,7 @@ function PrivacyView({ setView, t }: { setView: (v: ViewState) => void, t: any }
       <h2 className="text-3xl font-black text-[#3b1d7d] mt-2 mb-10">{t("Quyền riêng tư")}</h2>
       
       <div className="w-full max-w-[360px] flex flex-col gap-4">
-         <div className="bg-white rounded-[20px] p-5 shadow-sm border border-[#f3e8ff]">
+         <div className="bg-white rounded-[20px] p-5 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065]">
             <h3 className="font-bold text-[#1e1b4b] mb-4 text-[16px]">{t("Quản lý dữ liệu")}</h3>
             <div className="flex flex-col gap-4">
                <button className="flex items-center gap-3 active:scale-95 transition-transform text-left">
@@ -3647,7 +3883,7 @@ function BongBongNoiNative({ t }: { t: any }) {
   };
 
   return (
-    <div className="w-full max-w-[420px] bg-white rounded-[26px] p-5 shadow-md border border-[#e9d5ff] mb-5">
+    <div className="w-full max-w-[420px] bg-white rounded-[26px] p-5 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] mb-5">
       <h3 className="font-black text-[16px] text-[#311068] mb-1 flex items-center gap-2">
         <Sparkles size={18} className="text-[#6d28d9]" />
         {t('Nút tròn nổi trên màn hình')}
@@ -4380,7 +4616,7 @@ function NotificationsView({
         có thứ tự thì bác bật cái nào trước cũng được, và cái nào hỏng thì không
         biết vì sao. Ba dòng dưới đây nói đúng thứ tự nên bật, và bật để làm gì.
       */}
-      <div className="w-full max-w-[420px] bg-white rounded-3xl p-4 shadow-sm border border-[#e9d5ff] mb-4">
+      <div className="w-full max-w-[420px] bg-white rounded-3xl p-4 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] mb-4">
         <h3 className="text-[16px] font-black text-[#311068] mb-2">{t('Bật theo thứ tự này')}</h3>
         <ol className="flex flex-col gap-2">
           {[
@@ -4783,7 +5019,14 @@ function NotificationsView({
             <span className="font-bold text-[#1e1b4b] text-[14px]">{t('Hiện dải ghim ở đầu trang web')}</span>
             <span className="text-[#64748b] text-[14px]">{t('Bật thì thấy dải tím ở đầu trang. Tắt thì chỉ nhận thông báo ngoài máy.')}</span>
           </div>
+          {/* ⚠️ `role="switch"` + `aria-checked`: không có nó thì trình đọc màn hình
+              đọc ra "nút" và không nói được đang bật hay tắt — một công tắc mà
+              không biết trạng thái thì không dùng được. Đo 19/9/2026: cả ba công
+              tắc trong app đều thiếu. */}
           <button
+            role="switch"
+            aria-checked={!!showInAppBanner}
+            aria-label={t('Hiện dải ghim ở đầu trang web')}
             onClick={() => setShowInAppBanner(!showInAppBanner)}
             className={`w-12 h-7 rounded-full relative transition-colors shadow-inner shrink-0 ${showInAppBanner ? 'bg-[#8b5cf6]' : 'bg-gray-300'}`}
           >
@@ -4816,7 +5059,7 @@ function NotificationsView({
       </button>
 
       {/* 6. Other Standard Alert Toggles */}
-      <div className="w-full max-w-[420px] bg-white rounded-[24px] p-5 shadow-sm border border-[#f3e8ff]">
+      <div className="w-full max-w-[420px] bg-white rounded-[24px] p-5 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065]">
         <h4 className="text-[14px] font-bold text-slate-400 uppercase tracking-wider mb-4">{t("Các thông báo an toàn khác")}</h4>
         <div className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
@@ -4875,7 +5118,7 @@ function DeviceDataView({ setView, t }: { setView: (v: ViewState) => void, t: an
       </button>
       <h2 className="text-3xl font-black text-[#3b1d7d] mt-2 mb-10 text-center">{t("Dữ liệu thiết bị")}</h2>
       
-      <div className="w-full max-w-[360px] bg-white rounded-[20px] p-5 shadow-sm border border-[#f3e8ff]">
+      <div className="w-full max-w-[360px] bg-white rounded-[20px] p-5 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065]">
          <div className="flex flex-col items-center mb-6">
             <div className="w-20 h-20 rounded-full bg-[#f3e8ff] flex items-center justify-center mb-3">
                <Database size={32} className="text-[#8b5cf6]" />
@@ -4940,13 +5183,13 @@ function ProfileView({ setView, t, isLoggedIn, hoSo, onDangXuat }: {
            <User size={48} className="text-[#a78bfa] mb-4" />
            <p className="text-[#3b1d7d] font-bold text-[18px] mb-2">{t("Chưa có dữ liệu")}</p>
            <p className="text-center text-[#6d28d9] text-[15px] font-medium px-4 mb-6 leading-snug">{t("Vui lòng đăng nhập để xem thông tin")}</p>
-           <button onClick={() => setView('login')} className="min-h-[56px] px-8 py-3 bg-gradient-to-r from-[#9e76ea] via-[#ad8af0] to-[#9e76ea] text-white font-bold text-[16px] rounded-full border-[2.5px] border-[#2e1065] shadow-[4px_4px_0_#2e1065] active:scale-95 transition-all">
+           <button onClick={() => setView('login')} className="min-h-[56px] px-8 py-3 bg-gradient-to-r from-[#9e76ea] via-[#ad8af0] to-[#9e76ea] text-white font-bold text-[16px] rounded-full border-[2.5px] border-[#2e1065] shadow-[2px_2px_0_#2e1065] active:scale-95 transition-all">
              {t("Đăng nhập")}
            </button>
         </div>
       ) : (
         <>
-          <div className="bg-white rounded-[28px] p-5 flex gap-5 items-center shadow-sm border border-[#f3e8ff] mb-6">
+          <div className="bg-white rounded-[28px] p-5 flex gap-5 items-center border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] mb-6">
             <div className="w-[84px] h-[84px] rounded-full bg-[#f3e8ff] overflow-hidden border-[3px] border-[#d8b4fe]">
                {/* Ảnh cục bộ / biểu tượng — không gọi ra máy chủ lạ. Xem CSP `img-src`. */}
                <div className="w-full h-full flex items-center justify-center text-[#7e22ce]">
@@ -4983,7 +5226,7 @@ function ProfileView({ setView, t, isLoggedIn, hoSo, onDangXuat }: {
           </div>
 
           <div className="flex flex-col gap-3">
-             <div onClick={() => setView('account')} className="bg-white rounded-[20px] p-4 flex items-center justify-between shadow-sm border border-[#f3e8ff] active:bg-[#f8f4ff] cursor-pointer transition-colors">
+             <button type="button" onClick={() => setView('account')} className="w-full text-left bg-white rounded-[20px] p-4 flex items-center justify-between border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] active:bg-[#f8f4ff] cursor-pointer transition-colors">
                <div className="flex items-center gap-4">
                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#8b5cf6] to-[#c084fc] flex items-center justify-center text-white shadow-sm">
                    <User size={24} fill="currentColor" />
@@ -4991,9 +5234,9 @@ function ProfileView({ setView, t, isLoggedIn, hoSo, onDangXuat }: {
                  <span className="font-bold text-[#1e1b4b] text-[17px]">{t("Tài khoản")}</span>
                </div>
                <ChevronRight className="text-[#c084fc]" />
-             </div>
+             </button>
              
-             <div onClick={() => setView('privacy')} className="bg-white rounded-[20px] p-4 flex items-center justify-between shadow-sm border border-[#f3e8ff] active:bg-[#f8f4ff] cursor-pointer transition-colors">
+             <button type="button" onClick={() => setView('privacy')} className="w-full text-left bg-white rounded-[20px] p-4 flex items-center justify-between border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] active:bg-[#f8f4ff] cursor-pointer transition-colors">
                <div className="flex items-center gap-4">
                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#8b5cf6] to-[#c084fc] flex items-center justify-center text-white shadow-sm">
                    <ShieldCheck size={24} fill="currentColor" />
@@ -5001,9 +5244,9 @@ function ProfileView({ setView, t, isLoggedIn, hoSo, onDangXuat }: {
                  <span className="font-bold text-[#1e1b4b] text-[17px]">{t("Quyền riêng tư")}</span>
                </div>
                <ChevronRight className="text-[#c084fc]" />
-             </div>
+             </button>
              
-             <div onClick={() => setView('notifications')} className="bg-white rounded-[20px] p-4 flex items-center justify-between shadow-sm border border-[#f3e8ff] active:bg-[#f8f4ff] cursor-pointer transition-colors">
+             <button type="button" onClick={() => setView('notifications')} className="w-full text-left bg-white rounded-[20px] p-4 flex items-center justify-between border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] active:bg-[#f8f4ff] cursor-pointer transition-colors">
                <div className="flex items-center gap-4">
                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#8b5cf6] to-[#c084fc] flex items-center justify-center text-white shadow-sm">
                    <Bell size={24} fill="currentColor" />
@@ -5011,9 +5254,9 @@ function ProfileView({ setView, t, isLoggedIn, hoSo, onDangXuat }: {
                  <span className="font-bold text-[#1e1b4b] text-[17px]">{t("Thông báo")}</span>
                </div>
                <ChevronRight className="text-[#c084fc]" />
-             </div>
+             </button>
              
-             <div onClick={() => setView('device_data')} className="bg-white rounded-[20px] p-4 flex items-center justify-between shadow-sm border border-[#f3e8ff] active:bg-[#f8f4ff] cursor-pointer transition-colors">
+             <button type="button" onClick={() => setView('device_data')} className="w-full text-left bg-white rounded-[20px] p-4 flex items-center justify-between border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] active:bg-[#f8f4ff] cursor-pointer transition-colors">
                <div className="flex items-center gap-4">
                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#8b5cf6] to-[#c084fc] flex items-center justify-center text-white shadow-sm">
                    <Database size={24} fill="currentColor" />
@@ -5021,7 +5264,7 @@ function ProfileView({ setView, t, isLoggedIn, hoSo, onDangXuat }: {
                  <span className="font-bold text-[#1e1b4b] text-[17px]">{t("Dữ liệu trên thiết bị")}</span>
                </div>
                <ChevronRight className="text-[#c084fc]" />
-             </div>
+             </button>
           </div>
 
           <button className="w-full mt-6 py-4 bg-gradient-to-r from-[#8b5cf6] to-[#7c3aed] text-white rounded-[20px] font-bold text-[16px] shadow-lg shadow-[#8b5cf6]/30 flex items-center justify-center gap-2 active:scale-95 transition-transform">
@@ -5048,6 +5291,7 @@ function SettingsView({
   showFloatingBall,
   setShowFloatingBall,
   onOpenOutsideMode,
+  onOpenMenu,
   sieuDonGian,
   setSieuDonGian
 }: {
@@ -5064,6 +5308,7 @@ function SettingsView({
   showFloatingBall?: boolean,
   setShowFloatingBall?: (v: boolean) => void,
   onOpenOutsideMode?: () => void,
+  onOpenMenu?: () => void,
   sieuDonGian?: boolean,
   setSieuDonGian?: (v: boolean) => void
 }) {
@@ -5094,7 +5339,7 @@ function SettingsView({
       */}
       <button
         onClick={() => setView('mat_khau_gia_dinh')}
-        className="w-full max-w-[360px] bg-white rounded-3xl p-5 shadow-md border-2 border-emerald-200 mb-6 flex items-center gap-3 text-left active:scale-[0.98] transition-transform"
+        className="w-full max-w-[360px] bg-white rounded-3xl p-5 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] mb-6 flex items-center gap-3 text-left active:scale-[0.98] transition-transform"
       >
         <div className="w-12 h-12 rounded-2xl bg-emerald-100 border border-emerald-300 flex items-center justify-center text-emerald-700 shrink-0">
           <Users size={24} />
@@ -5119,7 +5364,7 @@ function SettingsView({
       */}
       <button
         onClick={() => setView('quy_tac_gia_dinh')}
-        className="w-full max-w-[360px] bg-white rounded-3xl p-5 shadow-md border-2 border-indigo-200 mb-6 flex items-center gap-3 text-left active:scale-[0.98] transition-transform"
+        className="w-full max-w-[360px] bg-white rounded-3xl p-5 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] mb-6 flex items-center gap-3 text-left active:scale-[0.98] transition-transform"
       >
         <div className="w-12 h-12 rounded-2xl bg-indigo-100 border border-indigo-300 flex items-center justify-center text-indigo-700 shrink-0">
           <ShieldCheck size={24} />
@@ -5141,7 +5386,7 @@ function SettingsView({
       */}
       <button
         onClick={() => setView('ho_so_vu_viec')}
-        className="w-full max-w-[360px] bg-white rounded-3xl p-5 shadow-md border-2 border-slate-200 mb-6 flex items-center gap-3 text-left active:scale-[0.98] transition-transform"
+        className="w-full max-w-[360px] bg-white rounded-3xl p-5 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] mb-6 flex items-center gap-3 text-left active:scale-[0.98] transition-transform"
       >
         <div className="w-12 h-12 rounded-2xl bg-slate-100 border border-slate-300 flex items-center justify-center text-slate-700 shrink-0">
           <FileText size={24} />
@@ -5157,7 +5402,7 @@ function SettingsView({
 
       <button
         onClick={() => setView('ra_da_thu_doan')}
-        className="w-full max-w-[360px] bg-white rounded-3xl p-5 shadow-md border-2 border-slate-200 mb-6 flex items-center gap-3 text-left active:scale-[0.98] transition-transform"
+        className="w-full max-w-[360px] bg-white rounded-3xl p-5 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] mb-6 flex items-center gap-3 text-left active:scale-[0.98] transition-transform"
       >
         <div className="w-12 h-12 rounded-2xl bg-slate-100 border border-slate-300 flex items-center justify-center text-slate-700 shrink-0">
           <Radar size={24} />
@@ -5169,6 +5414,20 @@ function SettingsView({
           </p>
         </div>
         <ChevronRight size={20} className="text-slate-500 shrink-0" />
+      </button>
+
+      <button
+        onClick={() => setView('cong_dong')}
+        className="w-full max-w-[360px] bg-white rounded-3xl p-5 border border-[#e4d4ff] shadow-[0_8px_24px_rgba(91,33,182,0.10)] mb-6 flex items-center gap-3 text-left active:scale-[0.98] transition-transform"
+      >
+        <div className="w-12 h-12 rounded-2xl bg-[#f1e8ff] border border-[#dcc7ff] flex items-center justify-center text-[#7c3aed] shrink-0">
+          <Users size={24} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <h3 className="font-black text-[16px] text-[#311068] leading-snug">{t("Cộng đồng cảnh giác")}</h3>
+          <p className="text-[14px] text-slate-600 leading-snug mt-0.5">{t("Chia sẻ ẩn danh để mọi người cùng đề phòng.")}</p>
+        </div>
+        <ChevronRight size={20} className="text-[#8b5cf6] shrink-0" />
       </button>
 
       {/* Floating Assistive Ball & Outside Mode Card — ẩn khi tối giản. */}
@@ -5209,7 +5468,10 @@ function SettingsView({
             <span className="text-[14px] font-bold text-white">
               {showFloatingBall ? t("Đang bật bóng trợ năng") : t("Đang tắt")}
             </span>
-            <button 
+            <button
+              role="switch"
+              aria-checked={!!showFloatingBall}
+              aria-label={t('Bóng nổi Khoan Đã')}
               onClick={() => setShowFloatingBall(!showFloatingBall)}
               className={`w-12 h-7 rounded-full transition-colors relative p-0.5 ${showFloatingBall ? 'bg-emerald-500' : 'bg-white/30'}`}
             >
@@ -5259,8 +5521,9 @@ function SettingsView({
             </div>
             <button
               onClick={() => setSieuDonGian(!sieuDonGian)}
+              role="switch"
+              aria-checked={!!sieuDonGian}
               aria-label={t('Chế độ siêu đơn giản')}
-              aria-pressed={!!sieuDonGian}
               className={`w-14 h-8 rounded-full transition-colors relative p-0.5 shrink-0 ${sieuDonGian ? 'bg-emerald-500' : 'bg-slate-300'}`}
             >
               <div className={`w-7 h-7 rounded-full bg-white shadow-md transition-transform ${sieuDonGian ? 'translate-x-6' : 'translate-x-0'}`} />
@@ -5313,6 +5576,22 @@ function SettingsView({
 
       <div className="w-full max-w-[360px] mb-6">
         <div className="bg-white/60 backdrop-blur-sm rounded-3xl border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] flex flex-col overflow-hidden">
+           {onOpenMenu && (
+             <button
+               type="button"
+               onClick={onOpenMenu}
+               aria-label={t("Menu tác vụ")}
+               className="w-full text-left p-5 flex items-center justify-between border-b border-[#e9d5ff] cursor-pointer hover:bg-white/80 active:bg-purple-50 transition-colors"
+             >
+                <span className="flex items-center gap-3">
+                  <span className="w-10 h-10 rounded-2xl bg-purple-100 flex items-center justify-center text-[#6d28d9]">
+                    <LayoutGrid size={22} />
+                  </span>
+                  <span className="font-bold text-[#311068] text-[16px]">{t("Menu tác vụ")}</span>
+                </span>
+                <ChevronRight size={20} className="text-purple-400" />
+             </button>
+           )}
            <div 
              onClick={() => setView('notifications')}
              className="p-5 flex items-center justify-between border-b border-[#e9d5ff] cursor-pointer hover:bg-white/80 active:bg-purple-50 transition-colors"
@@ -5332,15 +5611,15 @@ function SettingsView({
            </div>
            
            {isLoggedIn ? (
-             <div onClick={() => { void onDangXuat(); }} className="p-5 flex items-center gap-3 cursor-pointer active:bg-red-50 transition-colors">
+             <button type="button" onClick={() => { void onDangXuat(); }} className="w-full text-left p-5 flex items-center gap-3 cursor-pointer active:bg-red-50 transition-colors">
                 <LogOut size={22} className="text-[#ef4444]" />
                 <span className="font-bold text-[#ef4444] text-[16px]">{t("Đăng xuất")}</span>
-             </div>
+             </button>
            ) : (
-             <div onClick={() => setView('login')} className="p-5 flex items-center gap-3 cursor-pointer active:bg-green-50 transition-colors">
+             <button type="button" onClick={() => setView('login')} className="w-full text-left p-5 flex items-center gap-3 cursor-pointer active:bg-green-50 transition-colors">
                 <User size={22} className="text-[#10b981]" />
-                <span className="font-bold text-[#10b981] text-[16px]">{t("Đăng nhập")}</span>
-             </div>
+                <span className="font-bold text-[#047857] text-[16px]">{t("Đăng nhập")}</span>
+             </button>
            )}
         </div>
       </div>
@@ -5603,9 +5882,10 @@ function IntroView({
  *  · §12 — không tóm tắt lại, không quy kết cá nhân. Ai muốn biết thì bấm sang
  *    báo đọc.
  */
-function TinLuaDaoGanDay({ t, lang = 'vi' }: { t: any, lang?: Lang }) {
+function TinLuaDaoGanDay({ t, lang = 'vi', onOpenCommunity }: { t: any, lang?: Lang, onOpenCommunity?: () => void }) {
   const [tin, setTin] = useState<any[] | null>(null);
   const [chuaLayDuoc, setChuaLayDuoc] = useState<string[]>([]);
+  const [baiCongDong, setBaiCongDong] = useState<Array<{ id: string; tomTat: string; luc: number }>>([]);
   const [dangTai, setDangTai] = useState(true);
 
   useEffect(() => {
@@ -5629,12 +5909,52 @@ function TinLuaDaoGanDay({ t, lang = 'vi' }: { t: any, lang?: Lang }) {
     // Đổi ngôn ngữ ⇒ lấy lại từ đúng bộ nguồn của ngôn ngữ đó.
   }, [lang]);
 
+  useEffect(() => {
+    let huy = false;
+    fetch(api('/api/cong-dong/canh-giac'))
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (!huy) setBaiCongDong(Array.isArray(d?.baiViet) ? d.baiViet.slice(0, 2) : []);
+      })
+      .catch(() => { if (!huy) setBaiCongDong([]); });
+    return () => { huy = true; };
+  }, []);
+
   const cauChuaLayDuoc = traNhieu(CHUA_LAY_TIN, chuaLayDuoc, lang);
 
   return (
     <div className="w-full md:hidden mt-2">
-      <div className="flex items-center justify-between mb-2">
+      <div className="flex items-center justify-between mb-2 gap-2">
         <h3 className="font-black text-[#1e1b4b] text-[15px]">{t("Cảnh báo mới")}</h3>
+        {onOpenCommunity && (
+          <button
+            type="button"
+            onClick={onOpenCommunity}
+            className="min-h-[44px] px-3 rounded-full bg-[#f1e8ff] border border-[#dcc7ff] text-[#6d28d9] font-bold text-[14px] flex items-center gap-1.5 shrink-0"
+          >
+            <Users size={16} aria-hidden="true" />
+            {t("Cộng đồng")}
+          </button>
+        )}
+      </div>
+
+      <div className="mb-3 rounded-2xl border border-[#e4d4ff] bg-white p-3 shadow-[0_6px_18px_rgba(91,33,182,0.08)]">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <Users size={18} className="text-[#7c3aed] shrink-0" aria-hidden="true" />
+            <span className="font-black text-[15px] text-[#321379]">{t("Cộng đồng cảnh giác")}</span>
+          </div>
+          <button type="button" onClick={onOpenCommunity} className="min-h-[44px] px-3 rounded-full bg-[#f1e8ff] text-[#6d28d9] font-bold text-[14px] shrink-0">
+            {t("Chia sẻ")}
+          </button>
+        </div>
+        {baiCongDong.length > 0 ? (
+          <div className="mt-2 space-y-2">
+            {baiCongDong.map((b) => <p key={b.id} className="text-[14px] text-[#51436f] leading-snug">{b.tomTat}</p>)}
+          </div>
+        ) : (
+          <p className="mt-1 text-[14px] text-slate-600 leading-snug">{t("Chia sẻ ẩn danh để mọi người cùng đề phòng.")}</p>
+        )}
       </div>
 
       {dangTai ? (
@@ -5651,7 +5971,7 @@ function TinLuaDaoGanDay({ t, lang = 'vi' }: { t: any, lang?: Lang }) {
               rel="noopener noreferrer"
  className="bg-white rounded-2xl p-3 flex gap-2.5 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] items-start"
             >
-              <span className="w-10 h-10 rounded-2xl bg-purple-50 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] flex items-center justify-center text-purple-700 shrink-0">
+              <span className="w-10 h-10 rounded-2xl bg-purple-50 border-2 border-[#2e1065] flex items-center justify-center text-purple-700 shrink-0">
                 <FileText size={18} />
               </span>
               <span className="flex-1 min-w-0">
@@ -5792,12 +6112,12 @@ function SearchView({
              <button 
                type="button"
                onClick={() => fileInputRef.current?.click()}
-               className={`w-9 h-9 flex items-center justify-center rounded-2xl transition-colors shrink-0 ${searchImage ? 'bg-[#7e22ce] text-white shadow-xs' : 'text-[#6d28d9] hover:bg-[#f3e8ff]'}`}
+               className={`w-14 h-14 flex items-center justify-center rounded-2xl transition-colors shrink-0 ${searchImage ? 'bg-[#7e22ce] text-white shadow-xs' : 'text-[#6d28d9] hover:bg-[#f3e8ff]'}`}
                /* `title` chỉ hiện khi rê chuột — điện thoại không có chuột. */
                aria-label={t("Chọn ảnh")}
                title={t("Chọn ảnh")}
              >
-               <ImageIcon size={18} />
+               <ImageIcon size={24} />
              </button>
              <input 
                  type="text" 
@@ -5807,16 +6127,22 @@ function SearchView({
                  className="flex-1 bg-transparent border-none outline-none px-2.5 py-2 text-[#311068] placeholder:text-[#311068]/50 font-medium text-[14px]"
                  onKeyDown={(e) => { if(e.key === 'Enter') handleRunSearch(); }}
               />
-             <button 
+             {/*
+               ⚠️ NÚT CHÍNH CỦA MÀN NÀY — sàn 56px cả hai chiều, không phải 36px.
+               Đo 19/9/2026: hộp cũ ra 38,3 × 55,3px, thiếu 17,7px bề ngang so với
+               sàn nút chính. `data-vai-tro="nut-chinh"` để `vung-cham-san.css` canh.
+             */}
+             <button
                onClick={() => handleRunSearch()}
                aria-label={t("Kiểm tra ngay")}
+               data-vai-tro="nut-chinh"
                disabled={isAnalyzing}
-               className="w-9 h-9 rounded-2xl bg-gradient-to-tr from-[#8b5cf6] to-[#7c3aed] flex items-center justify-center text-white shadow-xs active:scale-95 transition-transform shrink-0 disabled:opacity-50"
+               className="w-[52px] h-[52px] rounded-2xl bg-gradient-to-tr from-[#7c3aed] to-[#6d28d9] flex items-center justify-center text-white shadow-xs active:scale-95 transition-transform shrink-0 disabled:opacity-50"
              >
                 {isAnalyzing ? (
-                  <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                 ) : (
-                  <Search size={16} strokeWidth={2.5} />
+                  <Search size={20} strokeWidth={2.5} />
                 )}
              </button>
           </div>
@@ -5876,7 +6202,7 @@ function SearchView({
         khoảng 30%, nên đừng thiết kế hộp vừa khít chữ (§4.5).
       */}
       <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-5 w-full mb-8">
-         <div onClick={() => handleRunSearch("Cuộc gọi tự xưng cơ quan chức năng hoặc công an điều tra")} className="bg-white rounded-[1.5rem] p-5 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] flex flex-col gap-3 hover: hover:border-purple-300 transition-all cursor-pointer group text-left min-w-0">
+         <button type="button" onClick={() => handleRunSearch("Cuộc gọi tự xưng cơ quan chức năng hoặc công an điều tra")} className="w-full text-left bg-white rounded-[1.5rem] p-5 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] flex flex-col gap-3 hover: hover:border-purple-300 transition-all cursor-pointer group text-left min-w-0">
             <div className="w-14 h-14 bg-[#f3e8ff] rounded-2xl flex items-center justify-center shadow-inner relative overflow-hidden shrink-0">
                <Phone className="w-7 h-7 text-[#7e22ce] relative z-10" />
                <div className="absolute inset-0 bg-gradient-to-tr from-[#c084fc]/20 to-transparent"></div>
@@ -5885,9 +6211,9 @@ function SearchView({
                <h3 className="font-bold text-[18px] text-[#2e1065] mb-1">{t("Cuộc gọi lạ")}</h3>
                <p className="text-[15px] text-[#4b5563] leading-snug">{t("Kể lại nội dung cuộc gọi để được kiểm tra.")}</p>
             </div>
-         </div>
+         </button>
 
-         <div onClick={() => handleRunSearch("Tin nhắn thông báo tài khoản ngân hàng bị khóa hoặc yêu cầu ấn vào link")} className="bg-white rounded-[1.5rem] p-5 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] flex flex-col gap-3 hover: hover:border-purple-300 transition-all cursor-pointer group text-left min-w-0">
+         <button type="button" onClick={() => handleRunSearch("Tin nhắn thông báo tài khoản ngân hàng bị khóa hoặc yêu cầu ấn vào link")} className="w-full text-left bg-white rounded-[1.5rem] p-5 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] flex flex-col gap-3 hover: hover:border-purple-300 transition-all cursor-pointer group text-left min-w-0">
             <div className="w-14 h-14 bg-[#f3e8ff] rounded-2xl flex items-center justify-center shadow-inner relative overflow-hidden shrink-0">
                <MessageSquare className="w-7 h-7 text-[#7e22ce] relative z-10" />
                <div className="absolute inset-0 bg-gradient-to-tr from-[#c084fc]/20 to-transparent"></div>
@@ -5896,9 +6222,9 @@ function SearchView({
                <h3 className="font-bold text-[18px] text-[#2e1065] mb-1">{t("Tin nhắn đáng ngờ")}</h3>
                <p className="text-[15px] text-[#4b5563] leading-snug">{t("Dán nội dung hoặc gửi ảnh chụp tin nhắn.")}</p>
             </div>
-         </div>
+         </button>
 
-         <div onClick={() => handleRunSearch("Đường link nhận quà hoặc yêu cầu quét mã QR nạp tiền")} className="bg-white rounded-[1.5rem] p-5 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] flex flex-col gap-3 hover: hover:border-purple-300 transition-all cursor-pointer group text-left min-w-0">
+         <button type="button" onClick={() => handleRunSearch("Đường link nhận quà hoặc yêu cầu quét mã QR nạp tiền")} className="w-full text-left bg-white rounded-[1.5rem] p-5 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] flex flex-col gap-3 hover: hover:border-purple-300 transition-all cursor-pointer group text-left min-w-0">
             <div className="w-14 h-14 bg-[#f3e8ff] rounded-2xl flex items-center justify-center shadow-inner relative overflow-hidden shrink-0">
                <Globe className="w-7 h-7 text-[#7e22ce] relative z-10" />
                <div className="absolute inset-0 bg-gradient-to-tr from-[#c084fc]/20 to-transparent"></div>
@@ -5907,7 +6233,7 @@ function SearchView({
                <h3 className="font-bold text-[18px] text-[#2e1065] mb-1">{t("Link hoặc mã QR")}</h3>
                <p className="text-[15px] text-[#4b5563] leading-snug">{t("Kiểm tra trước khi bấm mở để tránh rủi ro.")}</p>
             </div>
-         </div>
+         </button>
       </div>
 
       {/*
@@ -5923,7 +6249,7 @@ function SearchView({
         thì phong bì mang `chuaLayDuoc` — vì §4.3: "không lấy được tin" KHÁC
         "hôm nay không có vụ lừa đảo nào".
       */}
-      {!superBasic && <TinLuaDaoGanDay t={t} lang={lang} />}
+      {!superBasic && <TinLuaDaoGanDay t={t} lang={lang} onOpenCommunity={() => setView('cong_dong')} />}
     </motion.div>
   );
 }
@@ -6036,12 +6362,12 @@ function LoginView({
         {t("Tài khoản để nối bác với người nhà. Bác kiểm được cả khi chưa đăng nhập.")}
       </p>
 
-      <div className="w-full max-w-sm mb-5 bg-white/80 p-1.5 rounded-2xl border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065]/80 flex items-center gap-1.5">
+      <div className="w-full max-w-sm mb-5 bg-white/70 p-1.5 rounded-[24px] border border-[#e6dcff] shadow-[0_10px_30px_rgba(109,40,217,0.12)] flex items-center gap-1.5">
         <button
           type="button"
           onClick={() => setSelectedRole('elder')}
-          className={`flex-1 min-h-[52px] px-3 rounded-2xl font-bold text-[15px] flex items-center justify-center gap-1.5 transition-all ${
-            selectedRole === 'elder' ? 'bg-purple-600 text-white shadow-sm' : 'text-slate-600'
+          className={`flex-1 min-h-[52px] px-2 sm:px-3 rounded-[20px] font-bold text-[14px] sm:text-[15px] whitespace-nowrap flex items-center justify-center gap-1.5 transition-all ${
+            selectedRole === 'elder' ? 'bg-gradient-to-r from-[#b68cf5] via-[#9b6cf0] to-[#7c3aed] text-white shadow-[0_8px_18px_rgba(124,58,237,0.24)]' : 'text-[#321379] hover:bg-[#f4efff]'
           }`}
         >
           <span>👵</span><span>{t("Bác / bố mẹ")}</span>
@@ -6049,8 +6375,8 @@ function LoginView({
         <button
           type="button"
           onClick={() => setSelectedRole('guardian')}
-          className={`flex-1 min-h-[52px] px-3 rounded-2xl font-bold text-[15px] flex items-center justify-center gap-1.5 transition-all ${
-            selectedRole === 'guardian' ? 'bg-sky-600 text-white shadow-sm' : 'text-slate-600'
+          className={`flex-1 min-h-[52px] px-2 sm:px-3 rounded-[20px] font-bold text-[14px] sm:text-[15px] whitespace-nowrap flex items-center justify-center gap-1.5 transition-all ${
+            selectedRole === 'guardian' ? 'bg-gradient-to-r from-[#b68cf5] via-[#9b6cf0] to-[#7c3aed] text-white shadow-[0_8px_18px_rgba(124,58,237,0.24)]' : 'text-[#321379] hover:bg-[#f4efff]'
           }`}
         >
           <span>🛡️</span><span>{t("Con cháu")}</span>
@@ -6060,10 +6386,10 @@ function LoginView({
       <div className="w-full max-w-sm flex flex-col gap-3">
         {dangTao && (
           <div>
-            <label htmlFor="o-ten" className="text-[14px] font-bold text-[#6d28d9] mb-1 block">{t("Tên của bác")}</label>
+            <label htmlFor="o-ten" className="text-[14px] font-bold text-[#6d28d9] mb-1 block">{t(selectedRole === 'guardian' ? "Tên của con cháu" : "Tên của bác")}</label>
             <input
               id="o-ten" className={oNhap} value={ten} onChange={(e) => setTen(e.target.value)}
-              placeholder={t("Ví dụ: Bác Tám")} maxLength={60} autoComplete="name"
+              placeholder={t(selectedRole === 'guardian' ? "Ví dụ: Nguyễn Văn An" : "Ví dụ: Bác Tám")} maxLength={60} autoComplete="name"
             />
           </div>
         )}
@@ -6098,7 +6424,7 @@ function LoginView({
           onClick={() => void gui()}
           disabled={loading}
           className={`w-full min-h-[56px] px-4 text-white rounded-full font-extrabold text-[17px] shadow-md flex items-center justify-center gap-2.5 active:scale-95 disabled:opacity-60 transition-transform ${
-            selectedRole === 'guardian' ? 'bg-sky-600' : 'bg-gradient-to-r from-[#9e76ea] via-[#ad8af0] to-[#9e76ea]'
+            'bg-gradient-to-r from-[#b68cf5] via-[#9b6cf0] to-[#7c3aed] shadow-[0_10px_24px_rgba(124,58,237,0.22)]'
           }`}
         >
           {loading
@@ -6282,7 +6608,8 @@ function WarningView({
   result,
   familyMembers,
   noiChayAi,
-  mayCoUngDungLa
+  mayCoUngDungLa,
+  onBaoDaChuyen,
 }: {
   setView: (v: ViewState) => void,
   t: any,
@@ -6295,7 +6622,9 @@ function WarningView({
    */
   mayCoUngDungLa?: TrangThaiMay | null,
   /** 'cuc_bo' | 'gateway' | 'gemini' | 'khong_chay' — từ /api/suc-khoe. */
-  noiChayAi?: string | null
+  noiChayAi?: string | null,
+  /** Bác khai đã chuyển tiền / đọc mã ⇒ gửi lại cho bộ luật chọn màn (việc #2). */
+  onBaoDaChuyen?: () => void,
 }) {
   const nhan: string | undefined = result?.nhan;
   const canThiep: string | undefined = result?.canThiep;
@@ -6330,9 +6659,20 @@ function WarningView({
    * phản ứng nào để đo, và đếm nó vào sẽ pha loãng đúng con số cần dùng.
    */
   const [phienDo] = useState(() => batDauDo(nhan ?? null, Date.now()));
+  /**
+   * Bác đã chọn MỘT hành động bảo vệ chưa (gọi, nhắn, báo đã lỡ chuyển). Dùng để
+   * quyết định có leo thang khi hết 60 giây hay không — xem `leoThang` bên dưới.
+   */
+  const [daHanhDong, setDaHanhDong] = useState(false);
+  /** Ghi hành động bác chọn sau cảnh báo — xem `lib/ket-qua-can-thiep.ts`. */
+  const ghiHanhDong = (hanhDong: HanhDong) => {
+    ghiKetQua({ canThiep: canThiep ?? null, nhan: nhan ?? null, maLyDo: result?.maLyDo ?? [], hanhDong });
+    if (hanhDong === 'bam_goi_nguoi_than' || hanhDong === 'da_lo_chuyen') setDaHanhDong(true);
+  };
   const ghiNhanBamGoi = () => {
     const luot = ketThucDo(phienDo, Date.now());
     if (luot) ghiLuot(luot);
+    ghiHanhDong('bam_goi_nguoi_than');
   };
 
   /**
@@ -6340,6 +6680,22 @@ function WarningView({
    * và luôn phải có lối ra (§4.6, dưới cùng màn hình).
    */
   const laKhanCap = canThiep === 'PROTECTED_CRITICAL';
+
+  /**
+   * ══════ MÀN NÀO ĐANG GẤP — QUYẾT ĐỊNH CÁI GÌ ĐƯỢC PHÉP CHIẾM CHỖ ══════
+   *
+   * `laKhanCap` chỉ đúng với `PROTECTED_CRITICAL` và nó quyết định CHỮ của lối ra.
+   * Nhưng ba màn dưới đây đều là lúc bác đang bị ép và không đọc nổi một trang:
+   * mức CAO, lượt bác tự bấm "Dừng 60 giây", và màn PAUSE_60S do bộ luật đưa ra.
+   *
+   * Đo 19/9/2026 trước khi sửa: màn này có 839 ký tự chữ và 11 đích chạm ở khổ
+   * 375px, 16 ở khổ 320px — trong khi người dùng đã báo từ 21/8 rằng 7 cái đã
+   * "dễ bị rối", và báo lại 19/9 rằng bấm Khẩn cấp ra "rất rất rất nhiều chữ".
+   *
+   * Nên ở ba màn đó, mọi thứ KHÔNG phải "gọi người thân" lùi xuống sau "Xem thêm".
+   * Không xoá cái nào — chúng vẫn thật và vẫn có lúc cần.
+   */
+  const manGapGap = laCao || tuBamDung || canThiep === 'PAUSE_60S';
 
   /**
    * ỨNG DỤNG BÁC ĐÃ NÓI "TÔI TỰ CÀI" — nhớ theo TÊN GÓI, không phải một công
@@ -6428,7 +6784,48 @@ function WarningView({
    * lỡ..." bên dưới — giống hệt lý do `tuBamDung` tồn tại cho PAUSE_60S (§HĐ
    * luật 4: đây là màn, không phải một kết quả phân tích mới).
    */
-  const [daBamPhucHoi, setDaBamPhucHoi] = useState(false);
+  /*
+   * ⚠️ KHỞI TẠO TỪ KẾT QUẢ, không từ `false`. Bấm "đã lỡ chuyển" sẽ gửi lại cho
+   * bộ luật; nếu có override thì màn vẫn là PROTECTED_CRITICAL (đúng — đang bị
+   * tấn công gấp hơn đã mất tiền), và khối phục hồi KHÔNG được biến mất chỉ vì
+   * lượt phân tích mới dựng lại màn.
+   */
+  const [daBamPhucHoi, setDaBamPhucHoi] = useState(result?.trangThaiNguoiDung === 'da_chuyen_hoac_doc_ma');
+  /**
+   * Việc an toàn tiếp theo — MỘT việc theo kịch bản (xem `lib/viec-an-toan-tiep-theo.ts`).
+   * Chỉ đọc MÃ bộ luật đã trả; không đổi `nhan`, không đổi `canThiep`.
+   */
+  const viecAnToan = chonViecAnToan({
+    maLyDo: result?.maLyDo, hoKichBan: result?.hoKichBan ?? null,
+    canThiep: canThiep ?? null, nhan: nhan ?? null, daLoChuyen: daBamPhucHoi,
+  });
+  /** Chỉ thay câu khi việc KHÁC mặc định — mặc định giữ đúng câu cũ của từng mức. */
+  const cauViecRieng = viecAnToan && viecAnToan !== 'cup_may_goi_nguoi_than' ? CAU_VIEC_AN_TOAN[viecAnToan] : null;
+  /** Khối các bước phục hồi — GẤP mặc định, xem chú thích ở khối đó. */
+  const [moBuocPhucHoi, setMoBuocPhucHoi] = useState(false);
+  /** Bác đã khai lỡ chuyển, hoặc bộ luật đã chọn màn phục hồi. */
+  const dangPhucHoi = daBamPhucHoi || canThiep === 'RECOVERY';
+
+  /*
+   * ═════ LEO THANG TRONG CÙNG MỘT LƯỢT — thêm 22/9/2026 (việc #3) ═════
+   *
+   * Trước hôm nay hết 60 giây thì vòng đếm chỉ BIẾN MẤT. Không có gì xảy ra tiếp:
+   * bác vẫn ở đúng màn đó, với đúng những lựa chọn đó, như thể khoảng dừng
+   * chưa từng có. Khoảng dừng mà không dẫn tới đâu thì chỉ là một cái đồng hồ.
+   *
+   * Nay: hết 60 giây mà CHƯA có hành động bảo vệ nào (gọi, nhắn, báo đã lỡ
+   * chuyển) thì bậc tiếp theo mở ra — đưa người thân vào quyết định. Kẻ lừa đảo
+   * cần bác ở một mình với họ; bậc này phá đúng chỗ đó.
+   *
+   * ⚠️ LEO THANG LÀ ĐỔI MÀN, KHÔNG PHẢI TỰ LÀM THAY. Không tự gọi, không tự nhắn,
+   * không tự báo ai — §12 cấm "tự bật auto-alert thay chủ tài khoản". Tự báo chỉ
+   * có khi CHÍNH chủ tài khoản đã đặt quy tắc từ trước (`canh-bao-hai-phia.js`).
+   * ⚠️ LỐI RA VẪN NGUYÊN (§4.6). Bậc này không che, không khoá "Tôi ổn".
+   * ⚠️ KHÔNG áp cho người đã lỡ chuyển: với họ việc tiếp theo là gọi ngân hàng,
+   * không phải thêm một lời nhắc đừng chuyển.
+   */
+  const coKhoangDung = initialTime > 0 && (laCao || tuBamDung || canThiep === 'PAUSE_60S' || canThiep === 'PROTECTED_CRITICAL');
+  const leoThang = coKhoangDung && timeLeft === 0 && !daHanhDong && !daBamPhucHoi;
   /** Danh sách số tổng đài ngân hàng mở tại chỗ — chung cho màn xác minh và màn 72 giờ. */
   const [moSoNganHang, setMoSoNganHang] = useState(false);
   const canRecovery = canThiep === 'RECOVERY' || daBamPhucHoi;
@@ -6471,6 +6868,9 @@ function WarningView({
   // Nhãn NGUYÊN VĂN §4.1, tra từ catalog. Không có nhãn thứ tư.
   const nhanChu = nhan ? tra(NHAN, nhan, lang) : null;
   const lyDo = traNhieu(MA_LY_DO, result?.maLyDo ?? [], lang);
+  /** Màn gấp chỉ để ba dòng lý do; phần còn lại nằm dưới nếp gấp "Xem thêm". */
+  const lyDoHien = manGapGap ? lyDo.slice(0, 3) : lyDo.slice(0, 8);
+  const lyDoConLai = manGapGap ? lyDo.slice(3, 8) : [];
 
   /**
    * §HĐ luật 3 + `aiDaChay`.
@@ -6637,6 +7037,7 @@ function WarningView({
    */
   const handleSendSos = () => {
     if (!firstContact.phone) { setView('family'); return; }
+    setDaHanhDong(true);
     const nhanTin = nhanChu ?? (lang === 'en' ? 'needs checking' : 'cần kiểm lại');
     const text = lang === 'en'
       ? `[Khoan Đã] I just got something that Khoan Đã marked: ${nhanTin}. Please call me back.`
@@ -6644,10 +7045,33 @@ function WarningView({
     window.open(`sms:${firstContact.phone}?body=${encodeURIComponent(text)}`, '_self');
   };
 
+  /**
+   * ══════ TRÌNH ĐỌC MÀN HÌNH PHẢI BIẾT MÀN NÀY VỪA HIỆN RA — 19/9/2026 ══════
+   *
+   * Trước đó màn kết quả gắn vào DOM như một `div` thường: không `role`, không
+   * `aria-modal`, không dời tiêu điểm. Người dùng TalkBack bấm "Kiểm tra ngay"
+   * rồi KHÔNG NGHE THẤY GÌ — tiêu điểm vẫn nằm trên cái nút giờ đã bị một lớp phủ
+   * che, và vuốt tiếp thì đi vào màn cũ nằm vô hình phía dưới.
+   *
+   * Đây là màn DUY NHẤT trong app thật sự khẩn cấp, nên nó cũng là chỗ im lặng
+   * đắt nhất. `role="alertdialog"` để trình đọc công bố ngay, `aria-labelledby`
+   * trỏ vào chính nhãn rủi ro, và tiêu điểm nhảy vào nhãn đó khi màn mở ra.
+   *
+   * ⚠️ `tabIndex={-1}` trên tiêu đề là BẮT BUỘC để `.focus()` ăn — thẻ `h1` không
+   * tự nhận tiêu điểm. Mẫu đã có sẵn trong repo ở `CanhBaoToanManHinh.tsx`.
+   */
+  const oNhan = useRef<HTMLHeadingElement | null>(null);
+  useEffect(() => {
+    oNhan.current?.focus();
+  }, []);
+
   return (
     <motion.div
       animate={{ scale: 1 }}
       initial={{ scale: 0.98 }}
+      role="alertdialog"
+      aria-modal="true"
+      aria-labelledby="khoan-da-nhan-rui-ro"
       className={`absolute inset-0 z-[100] bg-gradient-to-b ${bgColor} flex flex-col items-center justify-between px-5 py-6 overflow-y-auto`}
     >
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -6656,7 +7080,7 @@ function WarningView({
       </div>
 
       {/* Top Header */}
-      <div className="flex flex-col items-center z-10 w-full mt-1 max-w-md">
+      <div className={`flex flex-col items-center z-10 w-full mt-1 max-w-md shrink-0 ${loiDoc ? 'mb-2' : ''}`}>
         <div className="flex items-center justify-between w-full mb-2 gap-2">
           <div className="flex items-center gap-2">
             <ShieldCheck size={22} className="text-white" />
@@ -6693,26 +7117,57 @@ function WarningView({
       </div>
 
       {/* Center Main Card & Explanations */}
-      <div className="flex flex-col items-center z-10 w-full my-auto max-w-md">
+      <div className={`flex flex-col items-center z-10 w-full max-w-md shrink-0 ${loiDoc ? 'mt-2' : 'my-auto'}`}>
         {/* NHÃN — nguyên văn §4.1 */}
-        <h1 className="text-[25px] font-black text-white text-center leading-tight mb-1 drop-shadow-sm tracking-tight">
+        <h1
+          id="khoan-da-nhan-rui-ro"
+          ref={oNhan}
+          tabIndex={-1}
+          className="text-[25px] font-black text-white text-center leading-tight mb-1 drop-shadow-sm tracking-tight outline-none"
+        >
+          {/*
+            ⚠️ BÁC ĐÃ KHAI LỠ CHUYỂN THÌ TIÊU ĐỀ NÓI VỀ VIỆC ĐÓ — thêm 22/9/2026.
+            Đo trên màn thật: "Tôi lỡ chuyển 5 triệu cho người lạ rồi" là một LỜI
+            KỂ, không có dấu hiệu lừa nào trong chữ, nên nhãn ra "Chưa thấy dấu
+            hiệu rủi ro" — đúng về TIN NHẮN. Nhưng đặt ngay trên dòng "gọi ngân
+            hàng khoá giao dịch", người vừa mất tiền đọc nhãn đó như một lời trấn
+            an. Cùng tiền lệ với lượt tự bấm dừng: màn đang nói về trạng thái bác
+            tự khai thì tiêu đề nói trạng thái đó.
+            ⚠️ CHỈ THAY KHI NHÃN KHÔNG PHẢI CAO. "Nguy hiểm cao" vừa đúng vừa gấp
+            hơn — bác vừa mất tiền VÀ đang bị tấn công tiếp — nên giữ nguyên.
+            Frontend không tự đặt nhãn (§4.2): đây là tiêu đề trạng thái, không
+            phải một mức rủi ro mới.
+          */}
           {khongGoiDuoc
             ? t('Chưa gửi đi kiểm được')
             : tuBamDung
               ? t('Bác dừng lại 60 giây đã')
-              : (nhanChu ?? t('Chưa có kết quả'))}
+              : dangPhucHoi && !laCao
+                ? t('Mình lo việc đã chuyển tiền trước')
+                : (nhanChu ?? t('Chưa có kết quả'))}
         </h1>
-        <p className="text-[16px] font-semibold text-white/95 mb-4 text-center leading-snug">
-          {khongGoiDuoc
-            ? t('Mạng không đi được nên chưa có gì được kiểm cả.')
-            : laCao
-              ? t('Bác đừng chuyển tiền, đừng đọc mã nào.')
-              : laNghiNgo
-                ? t('Bác hỏi lại người thân trước khi làm gì tiếp.')
-                : laChuaThay
-                  ? t('Chưa thấy dấu hiệu trong thông tin bác gửi. Bác vẫn đừng đọc mã cho ai.')
-                  : t('Bác thở một hơi. Không có gì gấp tới mức không chờ được một phút.')}
-        </p>
+        {/*
+          ⚠️ LƯỢT BÁC TỰ BẤM "DỪNG 60 GIÂY" KHÔNG CÓ DÒNG NÀY — sửa 19/9/2026.
+          Ở đó tiêu đề đã là "Bác dừng lại 60 giây đã" và khối ngay dưới đã nói
+          "Cảm giác phải làm ngay là do họ tạo ra." Thêm "Bác thở một hơi…" nữa là
+          ba câu cùng một ý trên một màn mà người đọc đang bị ép thời gian.
+          Các mức còn lại giữ nguyên: ở đó câu này mang thông tin khác nhãn.
+        */}
+        {!tuBamDung && (
+          <p className="text-[16px] font-semibold text-white/95 mb-4 text-center leading-snug max-w-sm">
+            {khongGoiDuoc
+              ? t('Mạng không đi được nên chưa có gì được kiểm cả.')
+              : cauViecRieng
+                ? t(cauViecRieng)
+              : laCao
+                ? t('Bác đừng chuyển tiền, đừng đọc mã nào.')
+                : laNghiNgo
+                  ? t('Bác hỏi lại người thân trước khi làm gì tiếp.')
+                  : laChuaThay
+                    ? t('Chưa thấy dấu hiệu rõ ràng. Bác vẫn đừng đọc mã cho ai.')
+                    : t('Bác thở một hơi. Không có gì gấp tới mức không chờ được một phút.')}
+          </p>
+        )}
 
         {/*
           §4.1 — DÒNG GIẢI THÍCH BẮT BUỘC.
@@ -6728,9 +7183,18 @@ function WarningView({
           gọi. Trường hợp ấy `chuaKiem` đã mang sẵn `ai_khong_chay` để nói thay.
         */}
         {!khongGoiDuoc && result?.aiDaChay === true ? (
-          <p className="text-[14px] text-white/85 mb-4 text-center leading-snug max-w-sm">
-            {t('AI đã trích ra các dấu hiệu. Mức rủi ro là do bộ luật cố định quyết định.')}
-          </p>
+          laChuaThay ? (
+            <details className="w-full max-w-sm mb-3 rounded-2xl border border-white/20 bg-black/15 px-3 py-2 text-white/90">
+              <summary className="cursor-pointer text-[14px] font-bold text-center">{t('Xem cách kiểm tra')}</summary>
+              <p className="mt-2 text-[14px] leading-snug text-center">
+                {t('AI đã trích ra các dấu hiệu. Mức rủi ro là do bộ luật cố định quyết định.')}
+              </p>
+            </details>
+          ) : (
+            <p className="text-[14px] text-white/85 mb-4 text-center leading-snug max-w-sm">
+              {t('AI đã trích ra các dấu hiệu. Mức rủi ro là do bộ luật cố định quyết định.')}
+            </p>
+          )
         ) : null}
 
         {/*
@@ -6739,11 +7203,20 @@ function WarningView({
           Vòng chỉ là cách trình bày khác của `timeLeft` đã chạy sẵn — không phải
           đồng hồ thứ hai; bar tuyến tính cũ ở cuối màn được bỏ, dồn hết vào đây.
         */}
+        {/*
+          ⚠️ LUỒNG PHỤC HỒI KHÔNG CÓ KHỐI NÀY — sửa 22/9/2026.
+          Đo trên màn thật: người đã khai lỡ chuyển tiền vẫn thấy hình tam giác
+          và vòng "Dừng 60 giây" (144px), đẩy nút gọi người thân xuống y=751 trên
+          màn cao 812. Tệ hơn chuyện chỗ: "dừng lại 60 giây" nghĩa là CHỜ, trong
+          khi với người vừa mất tiền việc cần làm là gọi ngân hàng NGAY — mỗi phút
+          chậm là thêm một phút tiền có thể bị rút tiếp. Khoảng dừng là công cụ
+          TRƯỚC hành động tài chính, không phải sau.
+        */}
         <div
-          className="w-full rounded-[28px] p-5 mb-3 relative overflow-hidden border border-white/25"
+          className={`w-full rounded-[28px] ${laChuaThay ? 'p-3 mb-2' : 'p-5 mb-3'} relative overflow-hidden border border-white/25 ${dangPhucHoi ? 'hidden' : ''}`}
           style={{ background: 'linear-gradient(155deg, rgba(255,255,255,0.18), rgba(255,255,255,0.05))' }}
         >
-          <div className="flex items-center justify-center gap-6">
+          <div className="flex flex-wrap items-center justify-center gap-3 min-[360px]:gap-6">
             {/*
               ⚠️ HÌNH NÀY KHÔNG ĐƯỢC MANG MÀU RIÊNG.
               Bản trước là cái khiên tô đặc, và khi màn không có nhãn rủi ro
@@ -6758,7 +7231,7 @@ function WarningView({
               tích ✓ — dấu tích đọc là "xong rồi, ổn rồi", đúng thứ §4.1 cấm
               hứa. Dùng vòng tròn với dấu chấm hỏi: đã xem, chưa kết luận được.
             */}
-            <div className="relative w-24 h-24 flex items-center justify-center shrink-0">
+            <div className={`relative ${laChuaThay ? 'w-20 h-20' : 'w-24 h-24'} flex items-center justify-center shrink-0`}>
               <svg className="w-full h-full drop-shadow-[0_10px_18px_rgba(0,0,0,0.35)] relative z-10" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                 {(laCao || laNghiNgo || (!nhan && !laChuaThay)) ? (
                   <>
@@ -6779,6 +7252,21 @@ function WarningView({
               </svg>
             </div>
 
+            {leoThang && (
+              <div role="status" aria-live="polite" className="w-full basis-full flex flex-col gap-2">
+                <p className="text-[17px] font-black text-white leading-snug">{t('Đã qua 60 giây.')}</p>
+                <p className="text-[16px] font-bold text-white/95 leading-snug">{t('Trước khi làm gì tiếp, bác gọi con cháu một câu đã.')}</p>
+                <button
+                  type="button"
+                  data-vai-tro="nut-chinh"
+                  onClick={handleCallRelative}
+                  className="w-full min-h-[56px] rounded-[22px] bg-amber-300 text-amber-950 border-2 border-amber-200 font-black text-[16px] flex items-center justify-center gap-2 px-3 leading-snug"
+                >
+                  {firstContact.phone ? <PhoneCall size={20} className="shrink-0" /> : <UserPlus size={20} className="shrink-0" />}
+                  <span>{firstContact.phone ? t('Gọi con cháu ngay') : t('Chưa có số người thân — bấm để thêm')}</span>
+                </button>
+              </div>
+            )}
             {timeLeft > 0 && (
               <div className="relative w-[112px] h-[112px] flex items-center justify-center shrink-0">
                 <svg className="absolute inset-0 -rotate-90" width="112" height="112" viewBox="0 0 112 112" aria-hidden="true">
@@ -6798,17 +7286,11 @@ function WarningView({
             )}
           </div>
           {/*
-            ⚠️ CÂU NÀY NÓI VỀ ĐỒNG HỒ, NÊN CHỈ ĐƯỢC HIỆN KHI CÓ ĐỒNG HỒ.
-            Ở mức "Chưa thấy dấu hiệu" thì `initialTime` bằng 0, không có đếm
-            ngược nào — mà câu "Đếm ngược rồi tính tiếp" vẫn hiện, trỏ vào một
-            thứ không tồn tại trên màn. Cùng họ với §4.3: đừng khai một việc mà
-            máy không thực sự làm.
+            ⚠️ ĐÃ BỎ DÒNG "Chưa làm gì vội. Đếm ngược rồi tính tiếp." — 19/9/2026.
+            Vòng đếm ngược nằm ngay trên nó đã nói đúng điều đó bằng hình. Người
+            dùng báo màn khẩn cấp "rất rất nhiều chữ"; chữ đầu tiên phải bỏ là
+            chữ lặp lại thứ mắt đã thấy.
           */}
-          {timeLeft > 0 && (
-            <p className="text-white/95 font-semibold text-[15px] text-center mt-4 leading-snug">
-              {t('Chưa làm gì vội. Đếm ngược rồi tính tiếp.')}
-            </p>
-          )}
         </div>
 
         {/*
@@ -6832,20 +7314,31 @@ function WarningView({
           PAUSE_60S — một câu công nhận cảm xúc, không phải thêm áp lực.
           ⚠️ CHỈ HIỆN Ở ĐÚNG MÀN NÀY (canThiep), không theo nhãn (§HĐ luật 4).
         */}
+        {/*
+          ⚠️ RÚT NGẮN 19/9/2026 — giữ Ý, bỏ CHỮ.
+          Câu cũ 105 ký tự ("…không có nghĩa là bác chậm hay ngốc") đọc rất ấm khi
+          ngồi đọc bình tĩnh, nhưng người đang bị ép không đọc hết một đoạn văn.
+          Vế thứ hai an ủi cho cảm giác *sau khi đã dừng*; vế thứ nhất mới là thứ
+          giúp bác dừng. Giữ vế thứ nhất.
+        */}
         {canThiep === 'PAUSE_60S' && (
           <div className="w-full bg-black/30 border border-white/20 rounded-[22px] px-4 py-3 mb-2 backdrop-blur-md">
-            <p className="text-white font-semibold text-[15px] leading-relaxed text-center">
-              {t('Cảm giác phải làm ngay là điều họ cố tình tạo ra. Bác dừng lại bây giờ không có nghĩa là bác chậm hay ngốc.')}
+            <p className="text-white font-semibold text-[17px] leading-snug text-center">
+              {t('Cảm giác phải làm ngay là do họ tạo ra.')}
             </p>
           </div>
         )}
 
         {/*
-          BỐN VIỆC NÊN LÀM NGAY — cụ thể hoá lời khuyên ở trên thành từng bước rời
+          BA VIỆC NÊN LÀM NGAY — cụ thể hoá lời khuyên ở trên thành từng bước rời
           rạc, dễ theo khi đang hoảng. Chỉ là hướng dẫn: app không tự dừng cuộc
-          gọi hay chặn giao dịch nào thay bác (§12) — bốn dòng này nói bác nên làm
-          gì, không phải app đã làm gì. Làm việc nào trước cũng được, không bắt
-          buộc theo đúng thứ tự 1-2-3-4.
+          gọi hay chặn giao dịch nào thay bác (§12) — ba dòng này nói bác nên làm
+          gì, không phải app đã làm gì. Làm việc nào trước cũng được.
+
+          ⚠️ ĐÃ BỎ DÒNG THỨ TƯ "Gọi cho con cháu" — 19/9/2026. Nút vàng to nhất
+          màn, cách đó chưa tới một màn hình, CHÍNH LÀ việc đó. Viết nó ra thành
+          một dòng chữ nữa là bắt bác đọc một thứ rồi mới thấy đúng thứ ấy dưới
+          dạng nút.
         */}
         {canThiep === 'PAUSE_60S' && (
           <div className="w-full bg-white/12 border border-white/20 rounded-[22px] backdrop-blur-md mb-2 overflow-hidden">
@@ -6853,7 +7346,6 @@ function WarningView({
               { icon: PhoneOff, text: t('Dừng cuộc gọi') },
               { icon: Wallet, text: t('Không chuyển tiền') },
               { icon: Lock, text: t('Không đọc mã OTP') },
-              { icon: Users, text: t('Gọi cho con cháu') },
             ].map((muc, i) => (
               <div key={muc.text} className={`flex items-center gap-3 px-4 py-3 ${i > 0 ? 'border-t border-white/15' : ''}`}>
                 <span className="w-7 h-7 rounded-full bg-white/20 text-white text-[14px] font-black flex items-center justify-center shrink-0">{i + 1}</span>
@@ -6864,16 +7356,38 @@ function WarningView({
           </div>
         )}
 
-        {/* Lý do — tra từ MÃ, §HĐ luật 2 */}
-        {lyDo.length > 0 && (
-          <ul className="w-full flex flex-col gap-1.5 mb-2">
-            {lyDo.slice(0, 8).map((cau) => (
-              <li key={cau} className="px-3.5 py-2 bg-black/30 rounded-2xl text-white font-semibold text-[16px] border border-white/15 flex items-start gap-2 backdrop-blur-xs leading-snug">
-                <AlertTriangle size={18} className="text-amber-300 shrink-0 mt-0.5" />
-                <span>{cau}</span>
-              </li>
-            ))}
-          </ul>
+        {/*
+          Lý do — tra từ MÃ, §HĐ luật 2.
+
+          ⚠️ MÀN GẤP CHỈ ĐỂ BA DÒNG. Đo 19/9/2026 trên kịch bản giả danh công
+          an: sáu dòng lý do chiếm 264px, góp phần đẩy nút gọi xuống quá đáy
+          màn. Ba dòng đầu đã đủ nói "vì sao máy báo động"; phần còn lại không
+          bị xoá, nó nằm dưới "Xem thêm" ngay bên dưới. Ở các mức khác vẫn tám
+          dòng như cũ.
+        */}
+        {lyDoHien.length > 0 && (
+          laChuaThay ? (
+            <details className="w-full mb-2 rounded-2xl border border-white/20 bg-black/15 px-3 py-2 text-white/90">
+              <summary className="cursor-pointer text-[14px] font-bold text-center">{t('Xem dấu hiệu đã nhận diện')}</summary>
+              <ul className="mt-2 flex flex-col gap-1.5">
+                {lyDoHien.map((cau) => (
+                  <li key={cau} className="px-3 py-2 bg-black/25 rounded-2xl text-white font-semibold text-[14px] border border-white/15 flex items-start gap-2 leading-snug">
+                    <AlertTriangle size={16} className="text-amber-300 shrink-0 mt-0.5" />
+                    <span>{cau}</span>
+                  </li>
+                ))}
+              </ul>
+            </details>
+          ) : (
+            <ul className="w-full flex flex-col gap-1.5 mb-2">
+              {lyDoHien.map((cau) => (
+                <li key={cau} className="px-3.5 py-2 bg-black/30 rounded-2xl text-white font-semibold text-[16px] border border-white/15 flex items-start gap-2 backdrop-blur-xs leading-snug">
+                  <AlertTriangle size={18} className="text-amber-300 shrink-0 mt-0.5" />
+                  <span>{cau}</span>
+                </li>
+              ))}
+            </ul>
+          )
         )}
 
         {/*
@@ -6883,12 +7397,22 @@ function WarningView({
           ⚠️ Chỉ gửi MÃ lên máy chủ. Tự ẩn ở mức "Chưa thấy dấu hiệu", khi lỗi
           mạng, và khi không có cảnh báo đã duyệt nào khớp.
         */}
-        <CanhBaoChinhThuc
-          nhan={nhan ?? null}
-          hoKichBan={hoKichBanHienTai}
-          maLyDo={result?.maLyDo ?? []}
-          lang={lang}
-        />
+        {/*
+          ⚠️ Ở MÀN GẤP, KHỐI NÀY LÙI XUỐNG SAU "Xem thêm" — đo 19/9/2026: nó đẩy
+          nút "GỌI NGAY CHO CON CHÁU" xuống y=1308 trên màn cao 812, tức bác
+          đang hoảng phải cuộn 742px mới thấy việc duy nhất cần làm. Nó là bằng
+          chứng thật và không bị xoá; nó chỉ không được đứng trước hành động.
+          Ở các mức khác (Nghi ngờ / đường xác minh) nó vẫn hiện thẳng như cũ,
+          vì ở đó bằng chứng CHÍNH LÀ việc cần làm: đọc rồi tự xác minh.
+        */}
+        {!manGapGap && (
+          <CanhBaoChinhThuc
+            nhan={nhan ?? null}
+            hoKichBan={hoKichBanHienTai}
+            maLyDo={result?.maLyDo ?? []}
+            lang={lang}
+          />
+        )}
 
         {/*
           §16.1 — DỰ BÁO KỊCH BẢN. Chỉ ở VERIFY_PATH: đây là màn "đang nghi
@@ -6963,6 +7487,251 @@ function WarningView({
         )}
 
         {/*
+          §HĐ luật 3 — CÙNG CỠ CHỮ VỚI NHÃN, KHÔNG PHẢI CHÚ THÍCH NHỎ.
+          "Không kiểm được" KHÁC "đã kiểm, không thấy gì" (§4.3). Khối này là chỗ
+          duy nhất trên màn nói ra giới hạn của lượt kiểm — nó không được nhỏ hơn,
+          mờ hơn, hay nằm dưới nếp gấp.
+
+          ⚠️ 25px, ĐÚNG BẰNG NHÃN Ở DÒNG `text-[25px]` PHÍA TRÊN — sửa 19/9/2026.
+          Trước đó khối này là 16px trong khi nhãn là 25px: nhỏ hơn 36%, tức là
+          chú thích chứ không phải lời khai. Chú thích ngay trên đây viết "không
+          được nhỏ hơn" từ đầu; mã thì làm ngược lại suốt và không test nào bắt
+          được vì `test/unchecked-not-safe.test.js` chỉ đọc phía máy chủ.
+          Hàng rào mới: `test/chua-kiem-duoc-bang-co-nhan.test.js`.
+        */}
+        {chuaKiem.length > 0 && (
+          <div className="w-full bg-black/45 border-2 border-white/40 rounded-2xl p-4 backdrop-blur-md">
+            <div className="flex items-center gap-2 mb-2">
+              <EyeOff size={24} className="text-white shrink-0" />
+              <span className="text-[25px] font-black text-white leading-tight">
+                {t('Những thứ cháu CHƯA kiểm được')}
+              </span>
+            </div>
+            <ul className="flex flex-col gap-1.5">
+              {chuaKiem.map((cau) => (
+                <li key={cau} className="text-[25px] text-white font-medium leading-tight">• {cau}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/*
+          §2B.5 — BẢO VỆ 72 GIỜ. Hiện khi `canThiep` là RECOVERY (do bộ luật
+          gán, hiếm) HOẶC bác tự bấm "Tôi đã lỡ..." bên dưới.
+          ⚠️ §11 — KHÔNG hứa lấy lại được tiền. `KHUNG_PHUC_HOI`/`BUOC_PHUC_HOI`
+          đã viết theo đúng khung "làm TĂNG khả năng xử lý" ở catalog — không
+          thêm chữ ở đây.
+        */}
+        {/*
+          ═════ GẤP LẠI THÀNH MỘT NÚT — người dùng báo 22/9/2026 ═════
+
+          "Trong lúc khẩn cấp thế bạn cho người già đọc hết một đống thế à."
+          Đúng: khối này dựng ĐẦY ĐỦ ngay từ đầu — tiêu đề khung, "giờ vàng", bốn
+          bước, "xem thêm 8 bước", hai dòng lưu ý, hai nút — và nó nằm TRÊN nút
+          gọi người thân. Người vừa mất tiền phải đọc qua cả trang mới tới việc
+          làm được.
+
+          Trong khi việc DUY NHẤT cần làm ngay đã nằm ở câu lệnh chính trên cùng:
+          "Bác gọi ngay số in sau thẻ ngân hàng để khoá giao dịch." Mười hai bước
+          kia là việc của SAU cuộc gọi đó.
+
+          ⚠️ GẤP, KHÔNG XOÁ. Một chạm là thấy đủ — bước, lưu ý, danh bạ, hồ sơ vụ
+          việc. Không ai mất gì; chỉ là thứ tự: hành động trước, danh sách sau.
+          ⚠️ §11 — khi mở ra vẫn là đúng khung "làm TĂNG khả năng xử lý".
+        */}
+        {canRecovery && keHoachPhucHoi && !moBuocPhucHoi && (
+          <button
+            type="button"
+            aria-expanded={false}
+            onClick={() => setMoBuocPhucHoi(true)}
+            className="w-full min-h-[56px] mb-2 px-4 py-3 rounded-[22px] bg-rose-950/55 border-2 border-rose-300/60 text-white font-bold text-[16px] leading-snug flex items-center justify-center gap-2"
+          >
+            <FileText size={18} className="shrink-0" />
+            <span>{t('Gọi ngân hàng xong rồi? Xem việc tiếp theo')}</span>
+          </button>
+        )}
+        {canRecovery && keHoachPhucHoi && moBuocPhucHoi && (
+          <div className="w-full bg-rose-950/55 border-2 border-rose-300/60 rounded-[22px] backdrop-blur-md mb-2 overflow-hidden">
+            <div className="flex items-start gap-2 px-4 pt-4">
+              <AlertTriangle size={20} className="text-rose-200 shrink-0 mt-0.5" />
+              <h3 className="text-white font-black text-[17px] leading-snug">{KHUNG_PHUC_HOI[lang]}</h3>
+            </div>
+            {typeof keHoachPhucHoi.gioVang === 'number' && (
+              <p className="text-rose-50 text-[14px] font-semibold px-4 pt-2">
+                {t('Giờ vàng còn tính:')} {keHoachPhucHoi.gioVang} {t('giờ đầu là lúc quan trọng nhất')}
+              </p>
+            )}
+            {buocPhucHoiHien.length > 0 && (
+              <div className={`mt-2 ${(hienHetBuocPhucHoi || soBuocPhucHoiConLai === 0) && canhBaoPhucHoi.length === 0 ? 'pb-2' : ''}`}>
+                {buocPhucHoiHien.map((cau, i) => (
+                  <div key={cau} className={`flex items-center gap-3 px-4 py-2.5 ${i > 0 ? 'border-t border-white/15' : ''}`}>
+                    <span className="w-7 h-7 rounded-full bg-white/20 text-white text-[14px] font-black flex items-center justify-center shrink-0">{i + 1}</span>
+                    <span className="text-white font-semibold text-[15px] leading-snug">{cau}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+            {/*
+              §4.5 / distill — GIẤU BỚT, KHÔNG XOÁ. Bấm là thấy hết ngay, không
+              phải xin phép hay tải thêm gì — chỉ là ẩn bớt để lúc đầu bớt rối.
+            */}
+            {!hienHetBuocPhucHoi && soBuocPhucHoiConLai > 0 && (
+              <button
+                onClick={() => setHienHetBuocPhucHoi(true)}
+                className="w-full min-h-[52px] px-4 py-2.5 border-t border-white/15 text-rose-100 font-bold text-[15px] hover:bg-white/10 active:scale-[0.99] transition-all text-center"
+              >
+                {t('Xem thêm')} {soBuocPhucHoiConLai} {t('bước nữa')}
+              </button>
+            )}
+            {canhBaoPhucHoi.length > 0 && (
+              <ul className="flex flex-col gap-1 px-4 pb-4 pt-2">
+                {canhBaoPhucHoi.map((cau) => (
+                  <li key={cau} className="text-rose-100/90 text-[14px] leading-snug">· {cau}</li>
+                ))}
+              </ul>
+            )}
+
+            {/*
+              SAU KHI LỠ CHUYỂN TIỀN, HAI THỨ CẦN NGAY: số ngân hàng thật để gọi
+              khoá tài khoản, và một tờ hồ sơ để đọc cho tổng đài. Cả hai đều mở
+              được từ đây, không phải đi tìm trong Cài đặt.
+            */}
+            <div className="flex flex-col gap-2 px-4 pb-4 pt-1">
+              <button
+                type="button"
+                aria-expanded={moSoNganHang}
+                onClick={() => setMoSoNganHang((x) => !x)}
+                className="w-full min-h-[52px] px-4 bg-white text-slate-900 font-extrabold rounded-2xl text-[16px] flex items-center justify-center gap-2 active:scale-95 transition-all"
+              >
+                <Landmark size={18} className="shrink-0" />
+                {tra(SO_NGAN_HANG, moSoNganHang ? 'DONG_DANH_SACH' : 'MO_DANH_SACH', lang)}
+              </button>
+              {moSoNganHang && <DanhSachSoNganHang lang={lang} kieu="toi" />}
+              <button
+                type="button"
+                onClick={() => setView('ho_so_vu_viec')}
+                className="w-full min-h-[52px] px-4 bg-black/25 hover:bg-black/35 text-white font-bold rounded-2xl text-[15px] border border-white/30 flex items-center justify-center gap-2 transition-all"
+              >
+                <FileText size={18} className="shrink-0" />
+                {tra(MAN_HO_SO, 'TIEU_DE', lang)}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/*
+          §11 — NÓI THẬT AI CHẠY Ở ĐÂU.
+
+          Đây là thứ người dùng có quyền biết trước khi gõ một tin nhắn có tên,
+          số tài khoản hay tên người thân vào. Ba trạng thái, ba câu khác nhau,
+          và câu nào cũng đọc thẳng từ cấu hình đang chạy chứ không phải từ một
+          hằng số ai đó đặt lúc viết mã.
+
+          ⚠️ Không biết thì IM LẶNG, đừng đoán. `/api/suc-khoe` hỏng thì
+          `noiChayAi` là `null` và khối này không hiện — thà thiếu còn hơn sai.
+
+          ⚠️ VÀ KHÔNG HIỆN Ở LƯỢT BÁC TỰ BẤM "DỪNG 60 GIÂY" — sửa 19/9/2026.
+          Lượt đó KHÔNG có nội dung nào được gửi đi kiểm, nên câu "Nội dung được
+          gửi tới máy chủ AI để đọc" nói về một việc chưa xảy ra. Cùng họ với các
+          câu §11 cấm: khai một việc chưa hề diễn ra. Nó cũng là chữ thừa trên
+          đúng màn cần ít chữ nhất.
+        */}
+        {/*
+          ⚠️ Ở MÀN GẤP NÓ CŨNG LÙI XUỐNG SAU "Xem thêm" — sửa 19/9/2026. Đây là
+          câu nói NƠI AI chạy, không phải câu nói kết luận có thể sai (câu đó là
+          khối "chưa kiểm được" ngay trên, và khối đó ở lại). Chỗ công bố chính
+          của nó là màn nhập liệu, TRƯỚC khi bác gõ gì; ở màn kết quả nó là bản
+          nhắc lại. Đo được nó cùng hai khối khác đẩy nút gọi xuống dưới đáy
+          màn — mà thứ tự đúng là: hành động trước, bản nhắc lại sau.
+        */}
+        {!manGapGap && !tuBamDung && noiChayAi && tra(NOI_CHAY_AI, noiChayAi, lang) && (
+          laChuaThay ? (
+            <details className="w-full mt-2 rounded-2xl border border-white/20 bg-black/15 px-3 py-2 text-white/90">
+              <summary className="cursor-pointer text-[14px] font-bold text-center">{t('Xem thông tin kiểm tra')}</summary>
+              <p className="mt-2 text-[14px] font-semibold leading-snug text-center">
+                {noiChayAi.startsWith('tren_may') ? '🔒 ' : ''}{tra(NOI_CHAY_AI, noiChayAi, lang)}
+              </p>
+            </details>
+          ) : (
+            <div className={`w-full mt-2 rounded-2xl px-3.5 py-2.5 border-2 ${
+              noiChayAi.startsWith('tren_may') ? 'bg-black/35 border-emerald-300/70' : 'bg-black/35 border-white/30'
+            }`}>
+              <p className="text-[14px] font-bold text-white leading-snug">
+                {noiChayAi.startsWith('tren_may') ? '🔒 ' : ''}{tra(NOI_CHAY_AI, noiChayAi, lang)}
+              </p>
+            </div>
+          )
+        )}
+      </div>
+
+      {/* Action Buttons Optimized for Elderly */}
+      <div className="w-full max-w-md z-10 flex flex-col items-center gap-2.5 mt-auto pt-2">
+        {/*
+          ══════ NÚT CHÍNH — MỘT VIỆC, VÀ NÓ PHẢI LÀM ĐÚNG THỨ NÓ HỨA ══════
+
+          ⚠️ CHƯA CÓ SỐ NGƯỜI THÂN THÌ ĐỪNG HỨA "GỌI NGAY" — sửa 19/9/2026.
+          Trước đó nút vàng to nhất màn ghi "GỌI NGAY CHO CON CHÁU", và khi bác
+          chưa thêm ai, bấm vào nó mở ra màn Gia đình TRỐNG — một biểu mẫu, giữa
+          lúc kẻ gian đang giục. Nút không được hứa một việc rồi làm việc khác.
+
+          Lúc đó hai số THẬT đã duyệt (113 · 156) lên làm nút chính: có số bấm
+          được ngay còn hơn một cái form. Chúng đến từ `so-khan-cap.ts`, không
+          phải số bịa cho đẹp bố cục.
+        */}
+        {!firstContact.phone && (soCongAn || soBaoLuaDao) && (
+          <div className="w-full grid grid-cols-2 gap-2">
+            {soCongAn && (
+              <a
+                href={`tel:${soCongAn.cleanPhone}`}
+                className="min-h-[72px] rounded-[22px] bg-white text-slate-900 border-2 border-white/60 shadow-md px-3 py-3 flex flex-col items-center justify-center gap-1 active:scale-95 transition-all"
+              >
+                <ShieldCheck size={22} className="text-slate-800 shrink-0" />
+                <span className="text-[16px] font-black leading-tight text-center">{soCongAn.name}</span>
+              </a>
+            )}
+            {soBaoLuaDao && (
+              <a
+                href={`tel:${soBaoLuaDao.cleanPhone}`}
+                className="min-h-[72px] rounded-[22px] bg-white text-slate-900 border-2 border-white/60 shadow-md px-3 py-3 flex flex-col items-center justify-center gap-1 active:scale-95 transition-all"
+              >
+                <PhoneOff size={22} className="text-slate-800 shrink-0" />
+                <span className="text-[16px] font-black leading-tight text-center">{soBaoLuaDao.name}</span>
+              </a>
+            )}
+          </div>
+        )}
+
+        <button
+          onClick={handleCallRelative}
+          data-vai-tro="nut-chinh"
+          className="w-full py-4 px-4 rounded-[22px] font-black text-[17px] bg-amber-300 text-amber-950 shadow-[0_10px_28px_rgba(245,158,11,0.35)] border-2 border-amber-200 flex flex-col items-center justify-center gap-0.5 active:scale-98 transition-all hover:brightness-105"
+        >
+          <span className="flex items-center gap-2">
+            {firstContact.phone ? <PhoneCall size={22} /> : <UserPlus size={22} />}
+            <span>{firstContact.phone
+              ? (viecAnToan === 'goi_so_cu_nguoi_than' ? t('GỌI SỐ ĐÃ LƯU CỦA CON CHÁU') : t('GỌI NGAY CHO CON CHÁU'))
+              : t('Chưa có số người thân — bấm để thêm')}</span>
+          </span>
+          {firstContact.phone && (
+            <span className="text-[16px] font-bold text-[#6b3a05]">
+              {firstContact.name} ({firstContact.phone}){vaiNguoiDau ? ` · ${vaiNguoiDau}` : ''}
+            </span>
+          )}
+        </button>
+
+        {/* ⚠️ "Soạn tin", KHÔNG phải "đã gửi" — §11. Chưa có số thì nút này cũng
+            chỉ mở được màn Gia đình, nên đừng bày ra: xem chú thích ở nút chính. */}
+        {firstContact.phone && (
+          <button
+            onClick={handleSendSos}
+            className="w-full min-h-[56px] py-3 px-3 rounded-[22px] font-black text-[16px] bg-white text-slate-900 shadow-md border-2 border-white/60 flex items-center justify-center gap-2 active:scale-98 transition-all hover:bg-slate-50"
+          >
+            <MessageSquare size={18} className="text-slate-700" />
+            <span>{viecAnToan === 'khong_cai_gui_nguoi_than' ? t('Gửi cho con cháu xem trước') : t('Soạn tin nhắn cho con cháu')}</span>
+          </button>
+        )}
+
+        {/*
           MẬT KHẨU GIA ĐÌNH — CHỐNG DEEPFAKE BẰNG THỨ KHÔNG CẦN AI.
 
           ⚠️ CHỈ HIỆN Ở MỨC CAO. Đây là một câu lệnh cho bác làm ngay ("hỏi họ
@@ -6994,10 +7763,11 @@ function WarningView({
           hiện cùng cỡ chữ với nhãn, tức không được nằm dưới nếp gấp. Giấu nó
           đi cho gọn là đổi một màn rối lấy một màn nói thiếu sự thật.
         */}
-        {laCao && (
+        {manGapGap && (
           <button
             onClick={() => setMoThem((v) => !v)}
-            className="w-full py-2.5 px-3 rounded-2xl text-[15px] font-bold bg-white/15 hover:bg-white/25 text-white border border-white/25 backdrop-blur-md active:scale-98 transition-all flex items-center justify-center gap-1.5 mb-2"
+            aria-expanded={moThem}
+            className="w-full min-h-[52px] py-2.5 px-3 rounded-2xl text-[15px] font-bold bg-white/15 hover:bg-white/25 text-white border border-white/25 backdrop-blur-md active:scale-98 transition-all flex items-center justify-center gap-1.5 mb-2"
           >
             <span>{moThem ? t('Ẩn bớt') : t('Xem thêm')}</span>
             <ChevronRight size={16} className={moThem ? 'rotate-90 transition-transform' : 'transition-transform'} />
@@ -7005,11 +7775,42 @@ function WarningView({
         )}
 
         {/*
-          ⚠️ NẾP GẤP CHỈ TỒN TẠI Ở MỨC CAO — nút "Xem thêm" chỉ hiện khi `laCao`.
-          Khối ứng dụng lạ bên dưới hiện ở MỌI mức; gói nó bằng `moThem` trần thì
-          ở mức Nghi ngờ nó không bao giờ mở ra được, vì không có nút nào để mở.
+          ⚠️ NẾP GẤP CHỈ TỒN TẠI Ở MÀN KHẨN CẤP — nút "Xem thêm" chỉ hiện khi
+          `laKhanCap` (mức CAO, hoặc lượt bác tự bấm Dừng 60 giây). Khối ứng dụng
+          lạ bên dưới hiện ở MỌI mức; gói nó bằng `moThem` trần thì ở mức Nghi ngờ
+          nó không bao giờ mở ra được, vì không có nút nào để mở.
+
+          19/9/2026: nếp gấp mở rộng sang cả hàng nút phụ ở cuối màn — xem chú
+          thích ở khối "LIÊN HỆ KHẨN CẤP".
         */}
-        {(moThem || !laCao) && (<>
+        {(moThem || !manGapGap) && (<>
+        {manGapGap && !tuBamDung && noiChayAi && tra(NOI_CHAY_AI, noiChayAi, lang) && (
+          <div className={`w-full mb-2 rounded-2xl px-3.5 py-2.5 border-2 ${
+            noiChayAi.startsWith('tren_may') ? 'bg-black/35 border-emerald-300/70' : 'bg-black/35 border-white/30'
+          }`}>
+            <p className="text-[14px] font-bold text-white leading-snug">
+              {noiChayAi.startsWith('tren_may') ? '🔒 ' : ''}{tra(NOI_CHAY_AI, noiChayAi, lang)}
+            </p>
+          </div>
+        )}
+        {lyDoConLai.length > 0 && (
+          <ul className="w-full flex flex-col gap-1.5 mb-2">
+            {lyDoConLai.map((cau) => (
+              <li key={cau} className="px-3.5 py-2 bg-black/30 rounded-2xl text-white font-semibold text-[16px] border border-white/15 flex items-start gap-2 leading-snug">
+                <AlertTriangle size={18} className="text-amber-300 shrink-0 mt-0.5" />
+                <span>{cau}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+        {manGapGap && (
+          <CanhBaoChinhThuc
+            nhan={nhan ?? null}
+            hoKichBan={hoKichBanHienTai}
+            maLyDo={result?.maLyDo ?? []}
+            lang={lang}
+          />
+        )}
         {laCao && (
           <div className="w-full bg-emerald-950/55 border-2 border-emerald-400/60 rounded-2xl p-4 backdrop-blur-md mb-2">
             <div className="flex items-start gap-2 mb-1.5">
@@ -7111,182 +7912,23 @@ function WarningView({
         )}
 
         </>)}
-        {/*
-          §HĐ luật 3 — CÙNG CỠ CHỮ VỚI NHÃN, KHÔNG PHẢI CHÚ THÍCH NHỎ.
-          "Không kiểm được" KHÁC "đã kiểm, không thấy gì" (§4.3). Khối này là chỗ
-          duy nhất trên màn nói ra giới hạn của lượt kiểm — nó không được nhỏ hơn,
-          mờ hơn, hay nằm dưới nếp gấp.
-        */}
-        {chuaKiem.length > 0 && (
-          <div className="w-full bg-black/45 border-2 border-white/40 rounded-2xl p-4 backdrop-blur-md">
-            <div className="flex items-center gap-2 mb-2">
-              <EyeOff size={20} className="text-white shrink-0" />
-              <span className="text-[16px] font-black text-white">
-                {t('Những thứ cháu CHƯA kiểm được')}
-              </span>
-            </div>
-            <ul className="flex flex-col gap-1.5">
-              {chuaKiem.map((cau) => (
-                <li key={cau} className="text-[16px] text-white font-medium leading-snug">• {cau}</li>
-              ))}
-            </ul>
-          </div>
-        )}
 
         {/*
-          §2B.5 — BẢO VỆ 72 GIỜ. Hiện khi `canThiep` là RECOVERY (do bộ luật
-          gán, hiếm) HOẶC bác tự bấm "Tôi đã lỡ..." bên dưới.
-          ⚠️ §11 — KHÔNG hứa lấy lại được tiền. `KHUNG_PHUC_HOI`/`BUOC_PHUC_HOI`
-          đã viết theo đúng khung "làm TĂNG khả năng xử lý" ở catalog — không
-          thêm chữ ở đây.
+          ══════ VIỆC PHỤ — NẰM SAU "XEM THÊM" Ở MÀN KHẨN CẤP ══════
+
+          Đo 19/9/2026: màn này có 11 đích chạm ở khổ 375px và 16 ở khổ 320px,
+          trong khi người dùng đã báo từ 21/8 rằng 7 cái đã "dễ bị rối". Mỗi lựa
+          chọn thêm là một giây chần chừ, mà giây chần chừ là thứ kẻ lừa đang đếm
+          ngược cùng bác.
+
+          Nên ba thứ dưới đây — người kế tiếp trong đội, hai số khẩn cấp khi bác
+          ĐÃ có số người thân, và lối vào Bảo vệ 72 giờ — chỉ hiện khi bác tự mở
+          "Xem thêm". Không xoá: chúng vẫn thật và vẫn có lúc cần.
+
+          ⚠️ Ở màn KHÔNG khẩn cấp (Nghi ngờ, Chưa thấy dấu hiệu) thì không có nút
+          "Xem thêm" nào, nên chúng hiện thẳng như cũ.
         */}
-        {canRecovery && keHoachPhucHoi && (
-          <div className="w-full bg-rose-950/55 border-2 border-rose-300/60 rounded-[22px] backdrop-blur-md mb-2 overflow-hidden">
-            <div className="flex items-start gap-2 px-4 pt-4">
-              <AlertTriangle size={20} className="text-rose-200 shrink-0 mt-0.5" />
-              <h3 className="text-white font-black text-[17px] leading-snug">{KHUNG_PHUC_HOI[lang]}</h3>
-            </div>
-            {typeof keHoachPhucHoi.gioVang === 'number' && (
-              <p className="text-rose-50 text-[14px] font-semibold px-4 pt-2">
-                {t('Giờ vàng còn tính:')} {keHoachPhucHoi.gioVang} {t('giờ đầu là lúc quan trọng nhất')}
-              </p>
-            )}
-            {buocPhucHoiHien.length > 0 && (
-              <div className={`mt-2 ${(hienHetBuocPhucHoi || soBuocPhucHoiConLai === 0) && canhBaoPhucHoi.length === 0 ? 'pb-2' : ''}`}>
-                {buocPhucHoiHien.map((cau, i) => (
-                  <div key={cau} className={`flex items-center gap-3 px-4 py-2.5 ${i > 0 ? 'border-t border-white/15' : ''}`}>
-                    <span className="w-7 h-7 rounded-full bg-white/20 text-white text-[14px] font-black flex items-center justify-center shrink-0">{i + 1}</span>
-                    <span className="text-white font-semibold text-[15px] leading-snug">{cau}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-            {/*
-              §4.5 / distill — GIẤU BỚT, KHÔNG XOÁ. Bấm là thấy hết ngay, không
-              phải xin phép hay tải thêm gì — chỉ là ẩn bớt để lúc đầu bớt rối.
-            */}
-            {!hienHetBuocPhucHoi && soBuocPhucHoiConLai > 0 && (
-              <button
-                onClick={() => setHienHetBuocPhucHoi(true)}
-                className="w-full min-h-[52px] px-4 py-2.5 border-t border-white/15 text-rose-100 font-bold text-[15px] hover:bg-white/10 active:scale-[0.99] transition-all text-center"
-              >
-                {t('Xem thêm')} {soBuocPhucHoiConLai} {t('bước nữa')}
-              </button>
-            )}
-            {canhBaoPhucHoi.length > 0 && (
-              <ul className="flex flex-col gap-1 px-4 pb-4 pt-2">
-                {canhBaoPhucHoi.map((cau) => (
-                  <li key={cau} className="text-rose-100/90 text-[14px] leading-snug">· {cau}</li>
-                ))}
-              </ul>
-            )}
-
-            {/*
-              SAU KHI LỠ CHUYỂN TIỀN, HAI THỨ CẦN NGAY: số ngân hàng thật để gọi
-              khoá tài khoản, và một tờ hồ sơ để đọc cho tổng đài. Cả hai đều mở
-              được từ đây, không phải đi tìm trong Cài đặt.
-            */}
-            <div className="flex flex-col gap-2 px-4 pb-4 pt-1">
-              <button
-                type="button"
-                aria-expanded={moSoNganHang}
-                onClick={() => setMoSoNganHang((x) => !x)}
-                className="w-full min-h-[52px] px-4 bg-white text-slate-900 font-extrabold rounded-2xl text-[16px] flex items-center justify-center gap-2 active:scale-95 transition-all"
-              >
-                <Landmark size={18} className="shrink-0" />
-                {tra(SO_NGAN_HANG, moSoNganHang ? 'DONG_DANH_SACH' : 'MO_DANH_SACH', lang)}
-              </button>
-              {moSoNganHang && <DanhSachSoNganHang lang={lang} kieu="toi" />}
-              <button
-                type="button"
-                onClick={() => setView('ho_so_vu_viec')}
-                className="w-full min-h-[52px] px-4 bg-black/25 hover:bg-black/35 text-white font-bold rounded-2xl text-[15px] border border-white/30 flex items-center justify-center gap-2 transition-all"
-              >
-                <FileText size={18} className="shrink-0" />
-                {tra(MAN_HO_SO, 'TIEU_DE', lang)}
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/*
-          §11 — NÓI THẬT AI CHẠY Ở ĐÂU.
-
-          Đây là thứ người dùng có quyền biết trước khi gõ một tin nhắn có tên,
-          số tài khoản hay tên người thân vào. Ba trạng thái, ba câu khác nhau,
-          và câu nào cũng đọc thẳng từ cấu hình đang chạy chứ không phải từ một
-          hằng số ai đó đặt lúc viết mã.
-
-          ⚠️ Không biết thì IM LẶNG, đừng đoán. `/api/suc-khoe` hỏng thì
-          `noiChayAi` là `null` và khối này không hiện — thà thiếu còn hơn sai.
-        */}
-        {noiChayAi && tra(NOI_CHAY_AI, noiChayAi, lang) && (
-          <div className={`w-full mt-2 rounded-2xl px-3.5 py-2.5 border-2 ${
-            noiChayAi.startsWith('tren_may') ? 'bg-black/35 border-emerald-300/70' : 'bg-black/35 border-white/30'
-          }`}>
-            <p className="text-[14px] font-bold text-white leading-snug">
-              {noiChayAi.startsWith('tren_may') ? '🔒 ' : ''}{tra(NOI_CHAY_AI, noiChayAi, lang)}
-            </p>
-          </div>
-        )}
-      </div>
-
-      {/* Action Buttons Optimized for Elderly */}
-      <div className="w-full max-w-md z-10 flex flex-col items-center gap-2.5 mt-auto pt-2">
-        {/*
-          LIÊN HỆ KHẨN CẤP — ba lối gọi nhanh. "Con cháu" dùng đúng logic
-          `handleCallRelative` (chưa có ai thì đưa sang màn Gia đình, không quay
-          số bừa — xem chú thích ở `AppMenuModal`). Hai số còn lại là số thật đã
-          duyệt trong `so-khan-cap.ts`, không phải số bịa cho đẹp bố cục.
-        */}
-        <div className="w-full grid grid-cols-3 gap-2">
-          <button
-            onClick={handleCallRelative}
-            className="rounded-2xl bg-white/15 hover:bg-white/25 border border-white/25 backdrop-blur-md px-2 py-3 flex flex-col items-center gap-1.5 active:scale-95 transition-all min-h-[64px]"
-          >
-            <Users size={20} className="text-white shrink-0" />
-            <span className="text-[14px] font-bold text-white leading-tight text-center">{t('Con cháu')}</span>
-          </button>
-          {soCongAn && (
-            <a
-              href={`tel:${soCongAn.cleanPhone}`}
-              className="rounded-2xl bg-white/15 hover:bg-white/25 border border-white/25 backdrop-blur-md px-2 py-3 flex flex-col items-center gap-1.5 active:scale-95 transition-all min-h-[64px]"
-            >
-              <ShieldCheck size={20} className="text-white shrink-0" />
-              <span className="text-[14px] font-bold text-white leading-tight text-center">{soCongAn.name}</span>
-            </a>
-          )}
-          {soBaoLuaDao && (
-            <a
-              href={`tel:${soBaoLuaDao.cleanPhone}`}
-              className="rounded-2xl bg-white/15 hover:bg-white/25 border border-white/25 backdrop-blur-md px-2 py-3 flex flex-col items-center gap-1.5 active:scale-95 transition-all min-h-[64px]"
-            >
-              <PhoneOff size={20} className="text-white shrink-0" />
-              <span className="text-[14px] font-bold text-white leading-tight text-center">{soBaoLuaDao.name}</span>
-            </a>
-          )}
-        </div>
-
-        <button
-          onClick={handleCallRelative}
-          data-vai-tro="nut-chinh"
-          className="w-full py-4 px-4 rounded-[22px] font-black text-[17px] bg-amber-300 text-amber-950 shadow-[0_10px_28px_rgba(245,158,11,0.35)] border-2 border-amber-200 flex flex-col items-center justify-center gap-0.5 active:scale-98 transition-all hover:brightness-105"
-        >
-          <span className="flex items-center gap-2">
-            <PhoneCall size={22} />
-            <span>{t('GỌI NGAY CHO CON CHÁU')}</span>
-          </span>
-          {firstContact.phone && (
-            <span className="text-[14px] font-bold text-amber-900/80">
-              {firstContact.name} ({firstContact.phone}){vaiNguoiDau ? ` · ${vaiNguoiDau}` : ''}
-            </span>
-          )}
-        </button>
-
-        {/*
-          NGƯỜI KẾ TIẾP TRONG ĐỘI — "không gọi được thì gọi …".
-          Chuyển sang người thứ hai là việc BÁC bấm, không phải máy tự quay.
-        */}
+        {(moThem || !manGapGap) && (<>
         {nguoiGoiTiep && (
           <button
             onClick={() => { ghiNhanBamGoi(); window.open(`tel:${nguoiGoiTiep.dienThoai}`, '_self'); }}
@@ -7297,28 +7939,53 @@ function WarningView({
           </button>
         )}
 
-        {/* ⚠️ "Soạn tin", KHÔNG phải "đã gửi" — §11. */}
-        <button
-          onClick={handleSendSos}
-          className="w-full py-3 px-3 rounded-[22px] font-black text-[16px] bg-white text-slate-900 shadow-md border border-white/40 flex items-center justify-center gap-2 active:scale-98 transition-all hover:bg-slate-50"
-        >
-          <MessageSquare size={18} className="text-slate-700" />
-          <span>{t('Soạn tin nhắn cho con cháu')}</span>
-        </button>
+        {/* Hai số thật — khi bác ĐÃ có số người thân thì chúng là lối phụ. */}
+        {firstContact.phone && (soCongAn || soBaoLuaDao) && (
+          <div className="w-full grid grid-cols-2 gap-2">
+            {soCongAn && (
+              <a
+                href={`tel:${soCongAn.cleanPhone}`}
+                className="min-h-[56px] rounded-2xl bg-white/15 hover:bg-white/25 border border-white/25 backdrop-blur-md px-3 py-3 flex items-center justify-center gap-2 active:scale-95 transition-all"
+              >
+                <ShieldCheck size={18} className="text-white shrink-0" />
+                <span className="text-[15px] font-bold text-white leading-tight text-center">{soCongAn.name}</span>
+              </a>
+            )}
+            {soBaoLuaDao && (
+              <a
+                href={`tel:${soBaoLuaDao.cleanPhone}`}
+                className="min-h-[56px] rounded-2xl bg-white/15 hover:bg-white/25 border border-white/25 backdrop-blur-md px-3 py-3 flex items-center justify-center gap-2 active:scale-95 transition-all"
+              >
+                <PhoneOff size={18} className="text-white shrink-0" />
+                <span className="text-[15px] font-bold text-white leading-tight text-center">{soBaoLuaDao.name}</span>
+              </a>
+            )}
+          </div>
+        )}
 
         {/*
           §2B.5 — LỐI VÀO BẢO VỆ 72 GIỜ. Chỉ hiện ở mức CAO, và chỉ trước khi
           đã ở màn phục hồi rồi (đỡ bấm lặp). Đây không phải một kết quả phân
           tích mới — xem chú thích ở `daBamPhucHoi` phía trên.
         */}
-        {laCao && !canRecovery && (
+        {/*
+          ⚠️ MỌI MỨC, KHÔNG CHỈ MỨC CAO — sửa 22/9/2026. Người đã lỡ chuyển tiền
+          rồi mới dán tin vào kiểm thường nhận "Chưa thấy dấu hiệu" (tin nhắn
+          đã hết phần đe doạ), và trước đây ở màn đó KHÔNG có lối nào sang phục
+          hồi. Người cần gọi ngân hàng gấp nhất lại là người không thấy nút.
+
+          Khối phục hồi hiện NGAY (không chờ mạng); song song đó bộ luật được
+          hỏi lại với trạng thái bác khai, để nó chọn màn thay vì trình duyệt.
+        */}
+        {!canRecovery && (
           <button
-            onClick={() => setDaBamPhucHoi(true)}
-            className="w-full py-3 px-3 rounded-2xl font-bold text-[15px] bg-black/30 hover:bg-black/40 text-white border border-white/25 flex items-center justify-center gap-2 active:scale-98 transition-all"
+            onClick={() => { ghiHanhDong('da_lo_chuyen'); setDaBamPhucHoi(true); onBaoDaChuyen?.(); }}
+            className="w-full min-h-[52px] py-3 px-3 rounded-2xl font-bold text-[15px] bg-black/30 hover:bg-black/40 text-white border border-white/25 flex items-center justify-center gap-2 active:scale-98 transition-all"
           >
             <span>{t('Tôi đã lỡ chuyển tiền hoặc đọc mã rồi')}</span>
           </button>
         )}
+        </>)}
 
         {/*
           §4.6 — NGUYÊN TẮC LUÔN CÓ LỐI RA.
@@ -7329,8 +7996,12 @@ function WarningView({
           ⚠️ KHÔNG viết "Bác đã an toàn" ở nút này (§4.1 · §11): app không biết
           điều đó, và bấm một cái nút không làm ai an toàn hơn.
         */}
+        {/*
+          ⚠️ §4.6 — "Mỗi lần bấm nút này là một mẫu dữ liệu báo động giả — ghi
+          lại để hiệu chỉnh ngưỡng." Trước 22/9/2026 nút này KHÔNG ghi gì.
+        */}
         <button
-          onClick={() => setView('home')}
+          onClick={() => { ghiHanhDong(laKhanCap ? 'toi_on' : 've_trang_chu'); setView('home'); }}
           className="w-full py-3 rounded-[22px] font-bold text-[16px] bg-white/20 hover:bg-white/30 text-white border border-white/30 shadow-sm backdrop-blur-md active:scale-98 transition-all flex items-center justify-center gap-1.5"
         >
           <span>{laKhanCap ? t('Tôi ổn, không có gì nguy hiểm') : t('Về trang chủ')}</span>
