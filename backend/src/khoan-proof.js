@@ -357,6 +357,30 @@ async function danhSachDaGhep(chuTaiKhoanId) {
   return ban ? ban.thanhVien.map((t) => t.thanhVienId) : [];
 }
 
+/**
+ * Cả HAI chiều của vòng ghép, nhìn từ một tài khoản — thêm 22/9/2026 cho màn
+ * Guardian thật.
+ *
+ * `thanhVien`  — những người TÔI đã cho mã (tôi là chủ tài khoản, thường là bố mẹ).
+ * `chuTaiKhoan` — những người đã cho TÔI mã (tôi là con cháu).
+ *
+ * ⚠️ CHỈ TRẢ MÃ ĐỊNH DANH VÀ LÚC GHÉP. Tên, số lấy ở tầng trên từ hồ sơ công
+ * khai — hàm này không đọc bảng tài khoản, để không có đường nào lỡ trả `bam`.
+ */
+async function capGhepCuaToi(taiKhoanId) {
+  const kho = await layKho();
+  const cuaToi = await kho.doc(BANG.GHEP, taiKhoanId);
+  const thanhVien = (cuaToi?.thanhVien ?? []).map((t) => ({ id: t.thanhVienId, ghepLuc: t.ghepLuc }));
+  const chuTaiKhoan = [];
+  if (typeof kho.liet === 'function') {
+    for (const ban of await kho.liet(BANG.GHEP)) {
+      const t = (ban.thanhVien ?? []).find((x) => x.thanhVienId === taiKhoanId);
+      if (t) chuTaiKhoan.push({ id: ban.chuTaiKhoanId, ghepLuc: t.ghepLuc });
+    }
+  }
+  return { thanhVien, chuTaiKhoan };
+}
+
 /** Chỉ dùng cho TEST hàng rào §6.9 — trả về mọi bản ghi Khoan Proof đã lưu. */
 async function docTatCaBanGhi() {
   const kho = await layKho();
@@ -370,6 +394,6 @@ module.exports = {
   CAU_HINH, MAC_DINH_BAT, BANG, LoiProof, layKho,
   capPhienDemo, capPhien, huyPhien, khoChung, docPhien,
   batDauDangKy, xacNhanDangKy,
-  batDauGhep, xacNhanGhep, thuHoiGhep, danhSachDaGhep,
+  batDauGhep, xacNhanGhep, thuHoiGhep, danhSachDaGhep, capGhepCuaToi,
   docTatCaBanGhi,
 };

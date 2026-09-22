@@ -270,3 +270,18 @@ services:
       # Cho phép bản APK / tên miền khác gọi vào. Để trống nếu chỉ chạy web.
       - key: KHOAN_DA_ORIGIN_THEM
         sync: false
+      # ══════ CƠ SỞ DỮ LIỆU — thêm 22/9/2026 ══════
+      #
+      # ⚠️ ĐỂ TRỐNG THÌ TÀI KHOẢN VÀ CẶP GHÉP MẤT SAU MỖI LẦN DEPLOY.
+      # Không có biến này, máy chủ dùng SQLite trên ổ đĩa của instance — mà ổ
+      # đĩa gói free của Render là ổ TẠM: deploy, khởi động lại, hay ngủ dậy
+      # sau 15 phút không ai vào đều có thể xoá sạch. Ghi vẫn báo thành công,
+      # nên từ ngoài không thấy gì — phải hỏi `/api/suc-khoe`, trường
+      # `kho.giuQuaDeploy`.
+      #
+      # Dán chuỗi kết nối Postgres (Render Postgres, Neon, Supabase…) vào bảng
+      # Environment. Địa chỉ NGOÀI thì thêm `?sslmode=require` ở cuối. Bảng
+      # `kho` + `audit` tự tạo ở lần chạy đầu, không cần chạy migration tay.
+      # ⚠️ Chuỗi này CÓ MẬT KHẨU — đặt tay trong bảng, không viết vào tệp này.
+      - key: DATABASE_URL
+        sync: false

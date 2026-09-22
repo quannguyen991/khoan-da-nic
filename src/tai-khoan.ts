@@ -179,3 +179,46 @@ export async function doiMatKhau(matKhauCu: string, matKhauMoi: string): Promise
     body: JSON.stringify({ matKhauCu, matKhauMoi }),
   }, true);
 }
+
+/*
+ * ══════════ GHÉP BỐ MẸ ↔ CON CHÁU — thêm 22/9/2026 ══════════
+ *
+ * Bố mẹ (chủ tài khoản) lấy mã 6 số, đọc cho con cháu; con cháu nhập mã ở màn
+ * Guardian. Mã hạn 10 phút, dùng một lần; máy chủ chỉ giữ bản băm của mã.
+ *
+ * ⚠️ GHÉP CHỈ CHO BIẾT "AI LÀ AI" — tên và số điện thoại của nhau. Không có
+ * pin, vị trí, hay lịch sử kiểm nào đi theo: nội dung vẫn nằm trên máy bố mẹ
+ * (§12 — không đổi privacy model). Màn Guardian phải nói đúng điều đó.
+ * ⚠️ Chủ tài khoản thu hồi được bất cứ lúc nào, không cần con cháu đồng ý.
+ */
+
+export interface NguoiDaGhep {
+  id: string;
+  ten: string;
+  so: string;
+  ghepLuc: number;
+}
+
+export interface VongGhep {
+  /** Những người TÔI đã cho mã (tôi là bố mẹ). */
+  thanhVien: NguoiDaGhep[];
+  /** Những người đã cho TÔI mã (tôi là con cháu). */
+  chuTaiKhoan: NguoiDaGhep[];
+}
+
+export async function layMaGhep(): Promise<{ ma: string; hetHanSauGiay: number }> {
+  return goi('/api/proof/ghep/bat-dau', { method: 'POST', body: '{}' }, true);
+}
+
+export async function nhapMaGhep(ma: string): Promise<void> {
+  await goi('/api/proof/ghep/xac-nhan', { method: 'POST', body: JSON.stringify({ ma }) }, true);
+}
+
+export async function docVongGhep(): Promise<VongGhep> {
+  const t = await goi('/api/proof/ghep', {}, true);
+  return { thanhVien: t?.thanhVien ?? [], chuTaiKhoan: t?.chuTaiKhoan ?? [] };
+}
+
+export async function thuHoiNguoiDaGhep(thanhVienId: string): Promise<void> {
+  await goi('/api/proof/thu-hoi', { method: 'POST', body: JSON.stringify({ thanhVienId }) }, true);
+}

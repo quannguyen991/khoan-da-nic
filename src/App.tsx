@@ -46,7 +46,8 @@ import {
   EyeOff, Users,
   PhoneOff,
   Wallet,
-  Landmark
+  Landmark,
+  Link2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { translations, Lang, t as translate } from './i18n';
@@ -90,6 +91,7 @@ import { DaiTheoDoi72Gio, ManTheoDoi72Gio, chuNhac72Gio } from './components/The
 import { batDauTheoDoi } from './lib/theo-doi-72-gio';
 import { ManHoSoVuViec, ManRaDaThuDoan } from './components/HoSoVaRaDa';
 import { CongDongCanhGiac } from './components/CongDongCanhGiac';
+import { ManGhepConChau } from './components/GhepConChau';
 import { batDauDo, ketThucDo, ghiLuot } from './lib/do-thoi-gian-toi-nguoi-that';
 import { ghiKetQua, type HanhDong } from './lib/ket-qua-can-thiep';
 import { chonViecAnToan, CAU_VIEC_AN_TOAN } from './lib/viec-an-toan-tiep-theo';
@@ -167,7 +169,7 @@ function KhungTaiTre({ t, children }: { t: any; children: React.ReactNode }) {
 }
 import { EMERGENCY_NUMBERS } from './data/so-khan-cap';
 
-export type ViewState = 'intro' | 'home' | 'voice' | 'phone' | 'link' | 'qr' | 'learn' | 'profile' | 'settings' | 'history' | 'family' | 'search' | 'login' | 'add_family' | 'warning' | 'guardian' | 'account' | 'privacy' | 'notifications' | 'device_data' | 'hoi_nhanh' | 'mat_khau_gia_dinh' | 'quy_tac_gia_dinh' | 'ho_so_vu_viec' | 'ra_da_thu_doan' | 'cong_dong' | 'doi_phan_ung' | 'so_ngan_hang' | 'theo_doi_72h' | 'tro_ly';
+export type ViewState = 'intro' | 'home' | 'voice' | 'phone' | 'link' | 'qr' | 'learn' | 'profile' | 'settings' | 'history' | 'family' | 'search' | 'login' | 'add_family' | 'warning' | 'guardian' | 'account' | 'privacy' | 'notifications' | 'device_data' | 'hoi_nhanh' | 'mat_khau_gia_dinh' | 'quy_tac_gia_dinh' | 'ho_so_vu_viec' | 'ra_da_thu_doan' | 'cong_dong' | 'doi_phan_ung' | 'so_ngan_hang' | 'theo_doi_72h' | 'tro_ly' | 'ghep_con_chau';
 
 /**
  * MỘT NGƯỜI THÂN TRONG VÒNG TRÒN GIA ĐÌNH.
@@ -1420,6 +1422,7 @@ export default function App() {
             {view === 'ho_so_vu_viec' && <ManHoSoVuViec setView={setView} t={t} lang={lang} lichSu={historyItems} />}
             {view === 'ra_da_thu_doan' && <ManRaDaThuDoan setView={setView} t={t} lang={lang} lichSu={historyItems} />}
             {view === 'cong_dong' && <CongDongCanhGiac t={t} setView={setView} />}
+            {view === 'ghep_con_chau' && <ManGhepConChau t={t} setView={setView} />}
             {view === 'warning' && <WarningView setView={setView} t={t} lang={lang} result={analyzeResult} familyMembers={familyMembers} noiChayAi={noiChayAi} mayCoUngDungLa={mayCoUngDungLa}
               onBaoDaChuyen={() => {
                 // Không có chữ hay ảnh (bác tự bấm "Khẩn cấp") thì không có gì để gửi lại —
@@ -5412,6 +5415,20 @@ function SettingsView({
           <p className="text-[14px] text-slate-600 leading-snug mt-0.5">
             {t('Ba mươi ngày qua nhà mình gặp thủ đoạn nào')}
           </p>
+        </div>
+        <ChevronRight size={20} className="text-slate-500 shrink-0" />
+      </button>
+
+      <button
+        onClick={() => setView('ghep_con_chau')}
+        className="w-full max-w-[360px] bg-white rounded-3xl p-5 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] mb-6 flex items-center gap-3 text-left active:scale-[0.98] transition-transform"
+      >
+        <div className="w-12 h-12 rounded-2xl bg-sky-50 border border-sky-200 flex items-center justify-center text-sky-700 shrink-0">
+          <Link2 size={24} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <h3 className="font-black text-[16px] text-[#311068] leading-snug">{t('Nối với con cháu')}</h3>
+          <p className="text-[14px] text-slate-600 leading-snug mt-0.5">{t('Lấy mã để con cháu nối vào máy bác')}</p>
         </div>
         <ChevronRight size={20} className="text-slate-500 shrink-0" />
       </button>

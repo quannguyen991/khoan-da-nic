@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import { ViewState, NguoiThan } from '../App';
 import { api } from '../api-goc';
-import { dangNhap as dangNhapTaiKhoan, type HoSo as HoSoTaiKhoan } from '../tai-khoan';
+import { dangNhap as dangNhapTaiKhoan, type HoSo as HoSoTaiKhoan, docPhien, docVongGhep, nhapMaGhep, LoiTaiKhoan } from '../tai-khoan';
 import { MA_TAI_KHOAN } from '../catalog';
 import { Lang, NHAN, CHUA_KIEM, MA_LY_DO, tra, traNhieu } from '../catalog';
 import { ThuTinhHuong } from './ThuTinhHuong';
@@ -293,6 +293,62 @@ export function GuardianView({
         : null;
     } catch { return null; }
   });
+  /*
+   * ══════ NỐI THẬT BẰNG MÃ 6 SỐ — thêm 22/9/2026 ══════
+   * Bố mẹ lấy mã ở "Cài đặt → Nối với con cháu", con cháu nhập ở đây. Nối xong
+   * màn này có TÊN và SỐ thật của bố mẹ (nút Gọi điện gọi đúng người) — và CHỈ
+   * có thế. Pin, sóng, vị trí vẫn là "—", vì không có đường nào gửi chúng về
+   * (§12 giữ privacy model). `network: 'that'` là MÃ, không phải chữ hiển thị.
+   * ⚠️ Nối thật THẮNG dữ liệu mẫu: đã có máy thật thì không vẽ máy mẫu nữa.
+   */
+  const [maNhap, setMaNhap] = useState('');
+  const [dangNoi, setDangNoi] = useState(false);
+  const [loiNoi, setLoiNoi] = useState<string | null>(null);
+  const coPhien = docPhien() !== null;
+  useEffect(() => {
+    if (!coPhien) return;
+    let huy = false;
+    docVongGhep()
+      .then((v) => {
+        const bo = v.chuTaiKhoan[0];
+        if (!huy && bo) setParentData({ name: bo.ten, phone: bo.so, network: 'that' });
+      })
+      .catch(() => { /* §4.3 — không tải được thì giữ nguyên trạng thái đang có, không tự bịa "chưa nối" */ });
+    return () => { huy = true; };
+  }, [coPhien]);
+
+  const noiBangMa = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const ma = maNhap.replace(/\D/g, '');
+    if (ma.length !== 6 || dangNoi) return;
+    setDangNoi(true);
+    setLoiNoi(null);
+    try {
+      await nhapMaGhep(ma);
+      const v = await docVongGhep();
+      const bo = v.chuTaiKhoan[v.chuTaiKhoan.length - 1];
+      if (bo) {
+        setParentData({ name: bo.ten, phone: bo.so, network: 'that' });
+        try { localStorage.removeItem('khoan_da_guardian_demo_connected'); } catch { /* không sao */ }
+      }
+      setMaNhap('');
+    } catch (err) {
+      const maLoi = err instanceof LoiTaiKhoan ? err.ma : '';
+      setLoiNoi(
+        maLoi === 'MA_KHONG_TON_TAI' || maLoi === 'MA_DA_DUNG_ROI' || maLoi === 'MA_HET_HAN' || maLoi === 'MA_GHEP_SAI_DINH_DANG'
+          ? 'Mã không đúng hoặc đã hết hạn. Nhờ bố mẹ lấy mã mới.'
+          : maLoi === 'KHONG_GHEP_VOI_CHINH_MINH'
+            ? 'Đây là mã của chính tài khoản này. Cần mã lấy trên máy bố mẹ.'
+            : maLoi === 'CHUA_DANG_NHAP'
+              ? 'Anh/chị cần đăng nhập lại.'
+              : 'Chưa kết nối được máy chủ. Thử lại sau nhé.',
+      );
+    } finally {
+      setDangNoi(false);
+    }
+  };
+  const laThat = parentData?.network === 'that';
+
   const [guardianEvents, setGuardianEvents] = useState<GuardianEvent[]>(() => {
     try {
       const raw = localStorage.getItem('khoan_da_guardian_events');
@@ -462,6 +518,7 @@ export function GuardianView({
         máy nào gửi số về là một lời trấn an không ai kiểm. Đây là màn con cháu
         nhìn để yên tâm — nó phải nói thật về việc nó biết được gì.
       */}
+      {!laThat && (
       <div className="flex flex-col lg:flex-row lg:items-center gap-3">
         <div className="flex-1 bg-white border border-amber-200 rounded-2xl px-4 py-3 flex items-center gap-3 shadow-[0_6px_20px_rgba(120,53,15,0.05)]">
           <span className="w-9 h-9 rounded-xl bg-amber-100 flex items-center justify-center shrink-0">
@@ -481,6 +538,46 @@ export function GuardianView({
           {tr('Nạp tài khoản & máy mẫu')}
         </button>
       </div>
+      )}
+
+      {!laThat && (
+        <form onSubmit={noiBangMa} className="bg-white rounded-[24px] p-5 border border-slate-200/80 shadow-[0_10px_28px_rgba(30,41,59,0.06)] flex flex-col gap-3">
+          <h2 className="text-[17px] font-black text-slate-900">{tr('Nối với máy bố mẹ')}</h2>
+          <p className="text-[14px] text-slate-600 leading-snug">
+            {tr('Trên máy bố mẹ: Cài đặt → Nối với con cháu → Lấy mã. Rồi nhập 6 số đó vào đây.')}
+          </p>
+          {coPhien ? (
+            <>
+              <label htmlFor="ma-noi" className="text-[14px] font-bold text-slate-700">{tr('Mã 6 số')}</label>
+              <input
+                id="ma-noi"
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                maxLength={7}
+                value={maNhap}
+                onChange={(e) => setMaNhap(e.target.value)}
+                className="min-h-[56px] rounded-2xl border-2 border-slate-300 focus:border-sky-600 px-4 text-[24px] font-black tracking-[0.3em] text-slate-900 tabular-nums outline-none"
+              />
+              {loiNoi && <p role="alert" className="text-[14px] font-bold text-rose-700">{tr(loiNoi)}</p>}
+              <button
+                type="submit"
+                disabled={dangNoi || maNhap.replace(/\D/g, '').length !== 6}
+                className="min-h-[56px] rounded-2xl bg-sky-600 text-white font-black text-[16px] disabled:opacity-50"
+              >
+                {dangNoi ? tr('Đang nối…') : tr('Nối máy')}
+              </button>
+            </>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setView('login')}
+              className="min-h-[56px] rounded-2xl bg-sky-600 text-white font-black text-[16px]"
+            >
+              {tr('Đăng nhập để nối máy')}
+            </button>
+          )}
+        </form>
+      )}
 
       {/* Main 4-Card Responsive Grid - Minimalist & Low Text */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
@@ -497,7 +594,7 @@ export function GuardianView({
                 </span>
               </div>
               <span className={`text-[14px] font-bold px-2.5 py-1 rounded-full ${parentData ? 'text-emerald-700 bg-emerald-50' : 'text-slate-500 bg-slate-100'}`}>
-                {parentData ? tr('Đã nối thử') : tr("Chưa nối")}
+                {laThat ? tr('Đã nối') : parentData ? tr('Đã nối thử') : tr("Chưa nối")}
               </span>
             </div>
 
@@ -520,7 +617,7 @@ export function GuardianView({
                     KHÔNG có số đo nào chống lưng cho câu đó.
                   */}
                   <div className="inline-flex items-center gap-1 text-[14px] font-semibold text-slate-600 bg-slate-50 border border-slate-200 px-2.5 py-1 rounded-lg mt-2">
-                    <EyeOff size={14} /> {parentData ? tr('Dữ liệu mẫu — chưa phải kết nối thật') : tr("Khoan Đã chưa đọc được gì từ máy này")}
+                    <EyeOff size={14} /> {laThat ? tr('Chỉ có tên và số — không đọc pin, vị trí hay tin nhắn') : parentData ? tr('Dữ liệu mẫu — chưa phải kết nối thật') : tr("Khoan Đã chưa đọc được gì từ máy này")}
                   </div>
                 </div>
               </div>
@@ -529,17 +626,17 @@ export function GuardianView({
               <div className="flex items-center gap-3 bg-slate-50 border border-slate-200 p-2.5 rounded-2xl shrink-0">
                 <div className="flex items-center gap-1 text-[14px] font-bold text-slate-500">
                   <BatteryMedium size={16} className="text-slate-400" />
-                  <span>{parentData ? '74%' : '—'}</span>
+                  <span>{parentData && !laThat ? '74%' : '—'}</span>
                 </div>
                 <div className="h-4 w-px bg-slate-200" />
                 <div className="flex items-center gap-1 text-[14px] font-bold text-slate-500">
                   <Wifi size={16} className="text-slate-400" />
-                  <span>{parentData ? tr('Đã nối thử') : '—'}</span>
+                  <span>{parentData && !laThat ? tr('Đã nối thử') : '—'}</span>
                 </div>
                 <div className="h-4 w-px bg-slate-200" />
                 <div className="flex items-center gap-1 text-[14px] font-bold text-slate-500">
                   <MapPin size={16} className="text-slate-400" />
-                  <span>{parentData ? tr('Vị trí mẫu') : '—'}</span>
+                  <span>{parentData && !laThat ? tr('Vị trí mẫu') : '—'}</span>
                 </div>
               </div>
             </div>

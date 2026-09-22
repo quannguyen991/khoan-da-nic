@@ -77,9 +77,18 @@ function taoBoNhoTam() {
 
 // ─────────────────── Postgres ───────────────────
 
-async function taoPostgres(url) {
+/**
+ * ⚠️ `Pool` TRUYỀN VÀO ĐƯỢC — chỉ để test chạy đúng đường Postgres này trên một
+ * Postgres giả lập (pg-mem) khi máy không có Postgres thật. Chạy thật thì bỏ
+ * trống, dùng `pg`.
+ *
+ * ⚠️ SSL: Neon/Supabase/Render (địa chỉ NGOÀI) cần SSL — ghi `?sslmode=require`
+ * vào cuối `DATABASE_URL`, thư viện `pg` tự đọc. Địa chỉ NỘI BỘ của Render
+ * (cùng vùng với web service) không cần.
+ */
+async function taoPostgres(url, { Pool: PoolTiem } = {}) {
   // eslint-disable-next-line global-require
-  const { Pool } = require('pg');
+  const Pool = PoolTiem || require('pg').Pool;
   const pool = new Pool({ connectionString: url });
   await pool.query(`
     CREATE TABLE IF NOT EXISTS kho (
@@ -304,4 +313,4 @@ function bocHangRao(nen) {
   return nen;
 }
 
-module.exports = { moKho, taoBoNhoTam, taoSqlite, kiemTruongCam, TRUONG_CAM, LoiLuuTru };
+module.exports = { moKho, taoBoNhoTam, taoSqlite, taoPostgres, bocHangRao, kiemTruongCam, TRUONG_CAM, LoiLuuTru };

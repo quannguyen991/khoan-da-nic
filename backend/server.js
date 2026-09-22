@@ -798,6 +798,25 @@ app.post('/api/proof/ghep/bat-dau', chanProof, canPhien,
 app.post('/api/proof/ghep/xac-nhan', chanProof, canPhien,
   proof((req) => KP.xacNhanGhep(req.taiKhoanId, req.body?.ma)));
 
+/**
+ * Vòng ghép của tôi, cả hai chiều — cho màn "Nối với con cháu" và màn Guardian.
+ *
+ * ⚠️ CHỈ TÊN + SỐ ĐIỆN THOẠI của người ĐÃ GHÉP với mình. Hai bên đã đồng ý bằng
+ * mã 6 số (bố mẹ đọc mã cho con), và số điện thoại là thứ duy nhất màn Guardian
+ * cần để nút "Gọi điện" gọi đúng người. Không pin, không vị trí, không lịch sử
+ * kiểm — §12 giữ nguyên privacy model, nội dung vẫn nằm trên máy bố mẹ.
+ * ⚠️ Tài khoản đã xoá thì bỏ qua, không trả một dòng tên rỗng.
+ */
+app.get('/api/proof/ghep', chanDoc, canPhien, proof(async (req) => {
+  const kho = await KP.khoChung();
+  const cap = await KP.capGhepCuaToi(req.taiKhoanId);
+  const lamGiau = async (ds) => (await Promise.all(ds.map(async (x) => {
+    const hs = await TK.layHoSo(kho, x.id);
+    return hs ? { id: x.id, ten: hs.ten, so: hs.so, ghepLuc: x.ghepLuc } : null;
+  }))).filter(Boolean);
+  return { thanhVien: await lamGiau(cap.thanhVien), chuTaiKhoan: await lamGiau(cap.chuTaiKhoan) };
+}));
+
 /** §9.8 — chủ tài khoản thu hồi bất cứ lúc nào, KHÔNG cần người con đồng ý. */
 app.post('/api/proof/thu-hoi', chanProof, canPhien,
   proof((req) => KP.thuHoiGhep(req.taiKhoanId, req.body?.thanhVienId)));
@@ -1288,6 +1307,27 @@ app.get('/api/suc-khoe', async (req, res) => {
    * Nên thêm câu hỏi còn lại: gọi thử một lượt. Mặc định TẮT để endpoint vẫn rẻ
    * và vẫn dùng được làm phép kiểm sống của nền tảng; bật bằng `?goiThu=1`.
    */
+  /*
+   * ⚠️ KHO ĐANG DÙNG — thêm 22/9/2026. Đo được: Render không đặt `DATABASE_URL`
+   * nên bản thật chạy SQLite trên ổ TẠM của gói free. Ghi vẫn "thành công", rồi
+   * mỗi lần deploy hoặc khởi động lại là mất sạch tài khoản và cặp ghép — §4.3
+   * ở tầng lưu trữ: "chưa giữ được" trông y hệt "đã lưu". Nên nói thẳng ra đây.
+   * `giuQuaDeploy` chỉ `true` với Postgres, hoặc SQLite KHÔNG chạy trên Render
+   * (Render tự đặt biến `RENDER`; máy chạy tại chỗ thì tệp SQLite nằm yên).
+   * ⚠️ Không lộ địa chỉ DB, không lộ nguyên nhân lỗi thô (có thể chứa host).
+   */
+  let kho;
+  try {
+    const k = await KP.khoChung();
+    kho = {
+      loai: k.loai,
+      giuQuaDeploy: k.loai === 'postgres' || (k.loai === 'sqlite' && !process.env.RENDER),
+      canhBao: k.canhBao ?? null,
+    };
+  } catch {
+    kho = { loai: 'khong_mo_duoc', giuQuaDeploy: false, canhBao: 'KHONG_MO_DUOC_KHO' };
+  }
+
   let kiemModel = null;
   if (chay && (req.query.goiThu === '1' || req.query.goiThu === 'true')) {
     kiemModel = await kiemModelSong(
@@ -1318,7 +1358,7 @@ app.get('/api/suc-khoe', async (req, res) => {
       ['LLM_API_BASE', 'LLM_API_KEY', 'RISK_LLM_MODEL',
        'LLM_API_BASE2', 'LLM_API_KEY2', 'RISK_LLM_MODEL2',
        'GEMINI_API_KEY', 'LLM_DU_PHONG_BASE', 'LLM_DU_PHONG_MODEL',
-       'LLM_TIMEOUT_MS', 'NODE_ENV']
+       'LLM_TIMEOUT_MS', 'NODE_ENV', 'DATABASE_URL']
         .map((k) => [k, Boolean(process.env[k])]),
     ),
     /*
@@ -1360,6 +1400,7 @@ app.get('/api/suc-khoe', async (req, res) => {
      * `KHOA_KHONG_DUNG` (cần người) · `LOI_TAM_THOI` (thường tự khỏi).
      */
     kiemModel,
+    kho,
   });
 });
 
