@@ -127,7 +127,27 @@ public class DocThongBao extends NotificationListenerService {
         }
 
         them(sbn.getPackageName(), noiDung, trangThai, sbn.getPostTime());
+        // Phần 4 (23/9/2026): mã tới trong lúc đang gọi thì TỰ MỞ màn cảnh báo — xem CuocGoi.
+        if (kiemMaTrongCuocGoi(noiDung)) return;
         sangLocTaiCho(noiDung);
+    }
+
+    /**
+     * ① ĐANG GỌI + TIN CÓ MÃ ⇒ tự mở màn cảnh báo (Phần 4, 23/9/2026).
+     *
+     * ⚠️ Ở ĐÂY MỘT DẤU HIỆU LÀ ĐỦ — khác `sangLocTaiCho` đòi hai. Tin OTP thật của
+     * ngân hàng thì bình thường; cái bất thường là nó tới ĐÚNG LÚC có người đang
+     * nói chuyện với bác. Câu hiện ra dạng ĐIỀU KIỆN ("ai gọi mà xin mã…"), không
+     * buộc tội ai (§11): bác đang gọi cho con gái mà mua hàng online thì câu đó
+     * vẫn đúng, và nút "Tôi ổn" luôn ở đó (§4.6).
+     * ⚠️ Không đưa nội dung tin vào thông báo, không gửi đi đâu (§6.9).
+     */
+    private boolean kiemMaTrongCuocGoi(String noiDung) {
+        if (noiDung == null || !DAU_HIEU_MA.matcher(noiDung).find()) return false;
+        if (!CuocGoi.dangHoacVuaGoi(this, System.currentTimeMillis())) return false;
+        CuocGoi.batManCanhBao(this, "otp-trong-cuoc-goi",
+                R.string.tb_otp_cuoc_goi_tieu_de, R.string.tb_otp_cuoc_goi_noi_dung);
+        return true;
     }
 
     /**

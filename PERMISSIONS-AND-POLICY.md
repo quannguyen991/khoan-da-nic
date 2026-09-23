@@ -70,8 +70,9 @@ it costs, and any rung can be declined without breaking the ones below it.
 | **0** | none | Share a message into the app from any other app · family password · lessons · verified emergency numbers · QR and link checks | nothing |
 | **1** | `POST_NOTIFICATIONS` | Pinned one-tap shortcut, alerts the user can actually see | a notification in the shade |
 | **2** | Notification access | **On-device pre-screening.** An arriving message carrying two or more signals raises a local prompt to check it | the app can read notification text, so it must be trusted not to send it |
-| **3** | `SYSTEM_ALERT_WINDOW` | The warning strip that appears over the call screen — the only surface that reaches a person mid-scam | the same permission malware uses to draw over banking apps |
-| **4** | `READ_PHONE_STATE` | Long-call reminder after 25 minutes | call state only; no number, no log |
+| **3** | `SYSTEM_ALERT_WINDOW` | The warning strip that appears over the call screen — the only surface that reaches a person mid-scam. Since 23/9/2026 it also lets the app **open its own warning screen** when a code arrives or an app is installed during a call (Android only allows background activity starts to apps holding this permission) | the same permission malware uses to draw over banking apps |
+| **4** | `READ_PHONE_STATE` | Long-call reminder after 25 minutes · **code-during-call** and **install-during-call** warnings (see below) | call state only; no number, no log |
+| **4b** | `CALL_PHONE` | The "call family" button rings the saved number in **one tap** instead of opening the dial pad | the app can place a call — **only to a number the user saved, only when the user taps**; declined ⇒ the button opens the dial pad as before |
 | **5** | Guardian link | An adult child receives alerts | the real risk here is not the platform — see below |
 | ✗ | `READ_SMS`, `AccessibilityService` | would see everything | **refused, on the record** |
 
@@ -83,6 +84,15 @@ leaving the device. It uses a small set of local patterns and requires **two or
 more** signals before it says anything — a code request *plus* pressure, an agency
 name *plus* a transfer demand. One signal alone is not worth interrupting someone
 for: a genuine bank SMS contains the word OTP too.
+
+**One exception to the two-signal rule — a code during a call (added 23/9/2026).** A
+message carrying a one-time code is normal. The same message arriving **while the
+phone is on a call** (or within two minutes after) is the core move of the
+impersonation scam: a bank never phones to ask for a code. In that case one signal
+is enough, and the app opens its warning screen by itself. It still reads only
+*whether* a call is active — never the number — and the text stays on the phone.
+The wording is conditional ("anyone who calls and asks for a code is a scammer"),
+never an accusation, and "I'm fine" is always on screen.
 
 **Pre-screening produces no verdict.** It cannot say "high risk", because no rule
 engine has run. It says *this looks worth checking* and offers one tap. It is a
@@ -106,6 +116,8 @@ the user's message somewhere more exposed than where it already was.
 | Full message content | **never stored** | writing `vanBan`, `noiDung`, `anh`, `otp` or `matKhau` to the store throws, rather than silently dropping the field |
 | List of installed apps | **never sent** | the device check sends three counts, not an inventory |
 | Speech | **never leaves the phone** | recognition runs on-device where the platform supports it, and the app states which engine it used |
+| Alert to family (risk level, scenario type, or "code during a call"; later, which button the owner pressed) | **codes only** — never message content | only if the **account owner** switched alerts on, on their own phone (off by default) |
+| A family member's recorded voice message | **never leaves the phone** | recorded on the parent's phone during setup, stored there only |
 
 The gap between rows two and three is the whole privacy model. The app may *see* a
 message arriving, and may screen it locally. It may not *send* it. Automatic
@@ -152,7 +164,7 @@ apply, and the state of each.
 The permissions actually declared today, in full:
 
 ```
-CAMERA · INTERNET · POST_NOTIFICATIONS · READ_PHONE_STATE
+CALL_PHONE · CAMERA · INTERNET · POST_NOTIFICATIONS · READ_PHONE_STATE
 RECORD_AUDIO · SYSTEM_ALERT_WINDOW · FOREGROUND_SERVICE
 FOREGROUND_SERVICE_SPECIAL_USE · RECEIVE_BOOT_COMPLETED
 + BIND_NOTIFICATION_LISTENER_SERVICE (a service binding, granted in system settings)

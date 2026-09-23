@@ -118,8 +118,21 @@ public class NhanAppMoi extends BroadcastReceiver {
         final boolean laCapNhat = intent.getBooleanExtra(Intent.EXTRA_REPLACING, false);
         if (laCapNhat) return;
 
+        /*
+         * ⚠️ CHẶN XỬ LÝ HAI LẦN — Phần 4 (23/9/2026). Từ nay có HAI đường gọi vào
+         * đây: receiver khai trong manifest (hiếm khi chạy trên Android 8+) và
+         * receiver đăng ký động trong `TheoDoiCuocGoi`. Cùng một gói trong 10 giây
+         * là cùng một lượt cài — chỉ ghi và báo một lần.
+         */
+        final long bayGio = System.currentTimeMillis();
+        synchronized (NhanAppMoi.class) {
+            if (goi.equals(goiCuoi) && bayGio - lucCuoi < 10_000L) return;
+            goiCuoi = goi;
+            lucCuoi = bayGio;
+        }
+
         them(new AppMoi(goi, docTenHienThi(ctx, goi), docNguonCai(ctx, goi),
-                false, System.currentTimeMillis()));
+                false, bayGio));
 
         /*
          * ⚠️ RECEIVER KHÔNG DỰNG MÀN CẢNH BÁO, VÀ KHÔNG QUYẾT ĐỊNH MỨC.
@@ -131,17 +144,16 @@ public class NhanAppMoi extends BroadcastReceiver {
          * Chuỗi ở đây CỐ Ý không mang nhãn rủi ro nào (§4.1) và không hứa hẹn
          * gì — nó chỉ nói có việc cần xem, và mọi kết luận nằm sau khi mở app.
          *
-         * ⚠️ CHUỖI TIẾNG VIỆT MÃ CỨNG Ở ĐÂY LÀ MỘT KHOẢN NỢ ĐÃ BIẾT.
-         * §4.1 đòi mọi chuỗi người dùng đọc phải đến từ catalog i18n. Lớp
-         * native chạy trước khi WebView kịp khởi động nên chưa với tới catalog
-         * được. Cách trả nợ: đưa hai chuỗi này vào `strings.xml` theo locale,
-         * cùng cách `ThongBaoCanhBao` sẽ phải làm. Ghi ở đây để không ai tưởng
-         * đây là mẫu đúng để chép.
+         * ✅ KHOẢN NỢ CHUỖI MÃ CỨNG ĐÃ TRẢ (23/9/2026): hai câu nằm ở `strings.xml`
+         * theo ngôn ngữ máy (values / values-en), đúng §4.1.
          */
         ThongBaoCanhBao.hien(ctx,
-                "Khoan Đã",
-                "Có một việc cần bác xem. Chạm để mở.");
+                ctx.getString(R.string.tb_app_moi_tieu_de),
+                ctx.getString(R.string.tb_app_moi_noi_dung));
     }
+
+    private static String goiCuoi = null;
+    private static long lucCuoi = 0L;
 
     /**
      * Tên người dùng nhìn thấy. Rơi về chính tên gói khi không đọc được —

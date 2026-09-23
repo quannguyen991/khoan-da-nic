@@ -110,6 +110,16 @@ export const CAU_LENH_KHI_CHUA_CO_SO: Partial<Record<ViecAnToan, string>> = {
   cup_may_goi_nguoi_than: 'Cúp máy. Đừng chuyển tiền.',
 };
 
+/**
+ * CÂU LỆNH KHI MÁY TỰ BẬT MÀN CẢNH BÁO (Phần 4, 23/9/2026) — không có mã lý do
+ * nào từ bộ luật, chỉ có một SỰ KIỆN trên máy (xem `CuocGoi.java`).
+ * ⚠️ Câu dạng ĐIỀU KIỆN ("ai gọi MÀ xin mã…"), không buộc tội người đang gọi (§11).
+ */
+export const CAU_LENH_TU_BAT = Object.freeze({
+  otp_trong_cuoc_goi: 'Ai gọi mà xin mã là lừa đảo.',
+  cai_app_trong_cuoc_goi: 'Đừng cài gì. Cúp máy ngay.',
+});
+
 /** Khoá catalog của câu lệnh — người gọi bọc bằng `t()`. `null` (lượt tự bấm dừng) dùng câu mặc định. */
 export function cauLenhNgan(viec: ViecAnToan | null, coSoNguoiThan: boolean): string {
   const v: ViecAnToan = viec ?? 'cup_may_goi_nguoi_than';

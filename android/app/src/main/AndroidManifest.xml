@@ -328,6 +328,19 @@
     </queries>
 
     <!--
+      GỌI THẲNG MỘT CHẠM — Phần 4 "Cầu dao gia đình", người dùng duyệt 23/9/2026.
+
+      Trước đó nút "Gọi con cháu" chỉ mở bàn phím quay số (`tel:`), bác phải bấm
+      gọi THÊM một lần — hai chạm cho người đang hoảng. Quyền này cho nút đổ chuông
+      ngay. Xin LÚC CHẠY, ở bước "Con cháu cài giúp"; từ chối thì nút rơi về bàn
+      phím quay số như cũ.
+
+      ⚠️ CHỈ GỌI SỐ BÁC ĐÃ LƯU, CHỈ KHI BÁC BẤM. Không có đường nào tự gọi (§12:
+      không tự báo thay chủ tài khoản). Không đọc nhật ký cuộc gọi, không danh bạ.
+    -->
+    <uses-permission android:name="android.permission.CALL_PHONE" />
+
+    <!--
       ⚠️ CỐ Ý KHÔNG XIN, và đừng thêm vào:
         READ_SMS / RECEIVE_SMS  — đọc thẳng tin nhắn là bề mặt riêng tư rộng hơn
                                   hẳn so với đọc thông báo, và Play Store gần như

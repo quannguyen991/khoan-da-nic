@@ -73,6 +73,7 @@ import {
   quyenDocThongBao, xinQuyenDocThongBao, tinMoiNhat, xoaTinDaBat,
   trangThaiThuongTruc, trangThaiMay, tomTatChoMayChu, moCaiDatTroNang,
   napChuCuocGoi, trangThaiTheoDoiCuocGoi, datTheoDoiCuocGoi, docTo, dungDocTo, dayAppXuong,
+  goiDienThoai,
   batBongBong, tatBongBong, trangThaiBongBong,
   type QuyenNative, type TrangThaiMay,
 } from './native';
@@ -99,7 +100,7 @@ import { hopNhatNguoiThan } from './lib/hop-nhat-nguoi-than';
 import { useLoiNhanCon, usePhatMotLan } from './lib/loi-nhan-giong';
 import { batDauDo, ketThucDo, ghiLuot } from './lib/do-thoi-gian-toi-nguoi-that';
 import { ghiKetQua, type HanhDong } from './lib/ket-qua-can-thiep';
-import { chonViecAnToan, CAU_VIEC_AN_TOAN, cauLenhNgan } from './lib/viec-an-toan-tiep-theo';
+import { chonViecAnToan, CAU_VIEC_AN_TOAN, cauLenhNgan, CAU_LENH_TU_BAT } from './lib/viec-an-toan-tiep-theo';
 import { useDocToMotLan } from './lib/doc-to-mot-lan';
 import { HoiNhanhView } from './components/HoiNhanh';
 import { CanhBaoToanManHinh } from './components/CanhBaoToanManHinh';
@@ -252,6 +253,8 @@ export interface KetQuaPhanTich {
   trangThaiNguoiDung?: 'da_chuyen_hoac_doc_ma';
   /** Lượt diễn tập từ luồng "Con cháu cài giúp" (Phần 2). KHÔNG phải kết quả phân tích; không ghi số liệu. */
   dienTap?: boolean;
+  /** Máy tự bật màn cảnh báo (Phần 4) — một SỰ KIỆN trên máy, không phải nhãn rủi ro. */
+  lyDoTuBat?: 'otp_trong_cuoc_goi' | 'cai_app_trong_cuoc_goi';
 }
 
 export interface HistoryRecord {
@@ -991,6 +994,20 @@ export default function App() {
          * kể cả màn hình ngân hàng). Bác tự chụp bằng phím của máy, đây mở
          * chỗ chọn ảnh — một thao tác đổi lấy việc không phải xin quyền đó.
          */
+        /*
+         * ═════ MÁY TỰ BẬT: ĐANG GỌI + MÃ OTP / ĐANG GỌI + VỪA CÀI APP (Phần 4, 23/9/2026) ═════
+         * `CuocGoi.java` mở thẳng tới đây. Dựng lượt "dừng lại" (KHÔNG nhãn rủi ro —
+         * bộ luật chưa chạy, §4.2) mang `lyDoTuBat` để màn chọn đúng câu lệnh, và để
+         * báo cho con nếu bác đã bật quy tắc thứ hai. Không nội dung tin nào đi theo.
+         */
+        if (d.loiTat === 'otp-trong-cuoc-goi' || d.loiTat === 'cai-app-trong-cuoc-goi') {
+          setAnalyzeResult({
+            canThiep: 'PAUSE_60S', tuBamDung: true, maLyDo: [], daKiem: [], chuaKiem: [],
+            lyDoTuBat: d.loiTat === 'otp-trong-cuoc-goi' ? 'otp_trong_cuoc_goi' : 'cai_app_trong_cuoc_goi',
+          });
+          setView('warning');
+          return;
+        }
         if (d.loiTat === 'quet-anh') {
           setView('home');
           // Đợi màn chính dựng xong rồi mới mở chỗ chọn ảnh.
@@ -6702,6 +6719,8 @@ function WarningView({
   const tuBamDung = result?.tuBamDung === true;
   /** Lượt diễn tập từ "Con cháu cài giúp" (Phần 2): có băng báo, KHÔNG ghi số liệu. */
   const laDienTap = result?.dienTap === true;
+  /** Máy tự bật (Phần 4): đang gọi + mã OTP / vừa cài app. Không phải nhãn rủi ro. */
+  const lyDoTuBat = result?.lyDoTuBat ?? null;
 
   const laCao = nhan === 'CAO';
   const laNghiNgo = nhan === 'NGHI_NGO';
@@ -7104,7 +7123,7 @@ function WarningView({
    * chính là gọi ngân hàng / nói thật là chưa kiểm được, không phải gọi con.
    */
   const heroGap = manGapGap && !khongGoiDuoc && !dangPhucHoi;
-  const cauLenh = cauLenhNgan(viecAnToan, Boolean(firstContact.phone));
+  const cauLenh = lyDoTuBat ? CAU_LENH_TU_BAT[lyDoTuBat] : cauLenhNgan(viecAnToan, Boolean(firstContact.phone));
   /** Đã bấm gọi người thân trong lượt này ⇒ hỏi "Con bảo sao?". */
   const [daBamGoi, setDaBamGoi] = useState(false);
   /** Trả lời sau cuộc gọi. `null` = chưa trả lời. */
@@ -7133,9 +7152,11 @@ function WarningView({
   const [baoDong, setBaoDong] = useState<PhanHoiBaoDong | null>(null);
   const daGuiBaoDongRef = useRef(false);
   useEffect(() => {
-    if (daGuiBaoDongRef.current || !laCao || laDienTap || khongGoiDuoc || !docPhienTaiKhoan()) return;
+    // Phần 4: máy tự bật cũng báo — loại sự kiện riêng, máy chủ kiểm quy tắc thứ hai.
+    const loaiBaoDong = laCao ? 'ket_qua_kiem' : lyDoTuBat;
+    if (daGuiBaoDongRef.current || !loaiBaoDong || laDienTap || khongGoiDuoc || !docPhienTaiKhoan()) return;
     daGuiBaoDongRef.current = true;
-    void guiBaoDong({ loaiSuKien: 'ket_qua_kiem', nhan: 'CAO', hoKichBan: hoKichBanHienTai })
+    void guiBaoDong({ loaiSuKien: loaiBaoDong, nhan: laCao ? 'CAO' : undefined, hoKichBan: hoKichBanHienTai })
       .then((kq) => { suKienBaoDongRef.current = kq.suKienId ?? null; setBaoDong(kq); })
       .catch(() => { /* không mạng / phiên hết: màn vẫn chạy, không hiện dòng trạng thái nào */ });
   }, []);
@@ -7147,7 +7168,8 @@ function WarningView({
     // xuống nền và mã sau đó không chắc chạy.
     ghiNhanBamGoi();
     setDaBamGoi(true);
-    window.open(`tel:${firstContact.phone}`, '_self');
+    // Phần 4: APK gọi thẳng một chạm (nếu bác đã cho quyền); web mở `tel:` như cũ.
+    goiDienThoai(firstContact.phone);
   };
 
   /**

@@ -41,7 +41,9 @@ test('máy bố mẹ: gửi báo động đúng MỘT lần, chỉ mức CAO, kh
   const i = APP.indexOf('guiBaoDong({');
   assert.ok(i > 0, 'WarningView chưa gửi báo động');
   const khoi = APP.slice(APP.lastIndexOf('useEffect(() => {', i), i);
-  assert.match(khoi, /if \(daGuiBaoDongRef\.current \|\| !laCao \|\| laDienTap \|\| khongGoiDuoc \|\| !docPhienTaiKhoan\(\)\) return;/);
+  // Phần 4: loại sự kiện là "ket_qua_kiem" (chỉ khi nhãn CAO) hoặc sự kiện máy tự bật.
+  assert.match(khoi, /const loaiBaoDong = laCao \? 'ket_qua_kiem' : lyDoTuBat;/);
+  assert.match(khoi, /if \(daGuiBaoDongRef\.current \|\| !loaiBaoDong \|\| laDienTap \|\| khongGoiDuoc \|\| !docPhienTaiKhoan\(\)\) return;/);
   assert.match(khoi, /daGuiBaoDongRef\.current = true;/, 'StrictMode chạy effect hai lần — cờ ref chặn gửi đôi');
 });
 

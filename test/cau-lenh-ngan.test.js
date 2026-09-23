@@ -23,7 +23,12 @@ function goi(nguon, ten) {
 const V = goi(path.join(GOC, 'src', 'lib', 'viec-an-toan-tiep-theo.ts'), 'cau-lenh-ngan.cjs');
 const { translations } = goi(path.join(GOC, 'src', 'i18n.ts'), 'i18n-cau-lenh.cjs');
 
-const tatCa = () => [...Object.values(V.CAU_LENH_NGAN || {}), ...Object.values(V.CAU_LENH_KHI_CHUA_CO_SO || {})];
+// Phần 4: câu khi máy tự bật cũng phải qua đúng các luật đếm chữ, catalog, §11.
+const tatCa = () => [
+  ...Object.values(V.CAU_LENH_NGAN || {}),
+  ...Object.values(V.CAU_LENH_KHI_CHUA_CO_SO || {}),
+  ...Object.values(V.CAU_LENH_TU_BAT || {}),
+];
 
 test('mỗi việc an toàn có đúng một câu lệnh ngắn', () => {
   assert.ok(V.CAU_LENH_NGAN, 'chưa có CAU_LENH_NGAN');

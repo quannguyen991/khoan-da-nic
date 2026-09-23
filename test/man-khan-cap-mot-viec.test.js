@@ -46,7 +46,8 @@ test('thứ tự trên màn gấp: câu lệnh → nút chính → (dòng AI, l�
 });
 
 test('câu lệnh là câu ngắn đã kiểm đếm chữ, không phải câu dài', () => {
-  assert.match(APP, /const cauLenh = cauLenhNgan\(viecAnToan, Boolean\(firstContact\.phone\)\);/);
+  // Phần 4: máy tự bật dùng câu riêng (CAU_LENH_TU_BAT) — cũng là câu ngắn đã kiểm đếm chữ.
+  assert.match(APP, /const cauLenh = lyDoTuBat \? CAU_LENH_TU_BAT\[lyDoTuBat\] : cauLenhNgan\(viecAnToan, Boolean\(firstContact\.phone\)\);/);
   const i = APP.indexOf('data-vai-tro="cau-lenh"');
   assert.ok(i > 0);
   assert.match(APP.slice(i, i + 300), /\{t\(cauLenh\)\}/);

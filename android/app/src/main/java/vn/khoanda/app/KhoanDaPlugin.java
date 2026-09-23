@@ -68,7 +68,12 @@ import org.json.JSONException;
                  * dung, không số điện thoại, không lịch sử. Xem chú thích trong
                  * `TheoDoiCuocGoi.java` về vì sao cố ý không xin quyền kia.
                  */
-                @Permission(alias = "cuocGoi", strings = { Manifest.permission.READ_PHONE_STATE })
+                @Permission(alias = "cuocGoi", strings = { Manifest.permission.READ_PHONE_STATE }),
+                /*
+                 * Phần 4 (23/9/2026) — gọi thẳng một chạm cho số bác ĐÃ LƯU, chỉ khi
+                 * bác bấm. Xem chú thích `CALL_PHONE` trong AndroidManifest.xml.
+                 */
+                @Permission(alias = "goiDien", strings = { Manifest.permission.CALL_PHONE })
         }
 )
 public class KhoanDaPlugin extends Plugin {
@@ -809,6 +814,51 @@ public class KhoanDaPlugin extends Plugin {
             return;
         }
         batTheoDoi(call);
+    }
+
+    // ─────────── Gọi thẳng một chạm (Phần 4, 23/9/2026) ───────────
+
+    /**
+     * Gọi số bác ĐÃ LƯU, khi bác bấm. Có quyền CALL_PHONE ⇒ đổ chuông ngay
+     * (ACTION_CALL). Chưa có ⇒ mở bàn phím quay số như cũ (ACTION_DIAL) — nút
+     * không bao giờ "chết" vì thiếu quyền.
+     * ⚠️ Không có đường nào gọi mà không qua một cú bấm (§12).
+     */
+    @PluginMethod
+    public void goiThang(PluginCall call) {
+        String so = call.getString("so", "");
+        String sach = so == null ? "" : so.replaceAll("[^0-9+]", "");
+        if (sach.isEmpty()) { call.reject("THIEU_SO"); return; }
+        boolean coQuyen = getPermissionState("goiDien") == PermissionState.GRANTED;
+        try {
+            Intent i = new Intent(coQuyen ? Intent.ACTION_CALL : Intent.ACTION_DIAL,
+                    android.net.Uri.parse("tel:" + sach)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            getContext().startActivity(i);
+            JSObject r = new JSObject();
+            r.put("cach", coQuyen ? "goi_thang" : "mo_ban_phim");
+            call.resolve(r);
+        } catch (Exception e) {
+            call.reject("KHONG_GOI_DUOC");
+        }
+    }
+
+    @PluginMethod
+    public void xinQuyenGoiThang(PluginCall call) {
+        if (getPermissionState("goiDien") == PermissionState.GRANTED) {
+            JSObject r = new JSObject();
+            r.put("daCo", true);
+            call.resolve(r);
+            return;
+        }
+        requestPermissionForAlias("goiDien", call, "sauKhiXinGoiThang");
+    }
+
+    @PermissionCallback
+    private void sauKhiXinGoiThang(PluginCall call) {
+        // Từ chối là kết quả hợp lệ (§4.3) — nút gọi vẫn chạy bằng bàn phím quay số.
+        JSObject r = new JSObject();
+        r.put("daCo", getPermissionState("goiDien") == PermissionState.GRANTED);
+        call.resolve(r);
     }
 
     @PermissionCallback

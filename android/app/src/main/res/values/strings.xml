@@ -72,6 +72,13 @@
     <!-- Sang loc tai cho: KHONG mang nhan rui ro nao, chi moi bac kiem. -->
     <string name="tb_sang_loc_tieu_de">Bác có muốn kiểm tin nhắn này không?</string>
     <string name="tb_sang_loc_noi_dung">Một tin vừa đến có dấu hiệu nên xem lại. Cháu chưa gửi nó đi đâu cả.</string>
+    <!-- Phần 4 (23/9/2026): tự bật khi đang gọi. Câu dạng ĐIỀU KIỆN, không buộc tội ai (§11). -->
+    <string name="tb_otp_cuoc_goi_tieu_de">Đừng đọc mã này cho ai</string>
+    <string name="tb_otp_cuoc_goi_noi_dung">Mã vừa tới trong lúc bác đang nghe điện thoại. Ai gọi mà xin mã là lừa đảo. Chạm để mở.</string>
+    <string name="tb_cai_app_cuoc_goi_tieu_de">Khoan đã, đừng cài gì thêm</string>
+    <string name="tb_cai_app_cuoc_goi_noi_dung">Máy vừa cài một ứng dụng mới trong lúc bác đang nghe điện thoại. Chạm để mở.</string>
+    <string name="tb_app_moi_tieu_de">Khoan Đã</string>
+    <string name="tb_app_moi_noi_dung">Có một việc cần bác xem. Chạm để mở.</string>
     <string name="tb_nut_kiem_tin">Kiểm tin mới nhất</string>
     <string name="tb_nut_kiem_giup">Kiểm giúp tôi</string>
     <string name="tb_nut_bo_qua">Bỏ qua</string>

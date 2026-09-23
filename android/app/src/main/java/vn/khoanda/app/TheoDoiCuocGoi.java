@@ -113,6 +113,46 @@ public class TheoDoiCuocGoi extends Service {
             return;
         }
         batDauNghe();
+        dangKyNhanCaiApp();
+    }
+
+    /*
+     * ② ĐANG GỌI + VỪA CÀI APP — Phần 4 (23/9/2026).
+     *
+     * ⚠️ BỘ NHẬN `NhanAppMoi` KHAI TRONG MANIFEST GẦN NHƯ KHÔNG BAO GIỜ CHẠY. Từ
+     * Android 8, `PACKAGE_ADDED` là broadcast ngầm định — receiver khai tĩnh
+     * không nhận được (targetSdk 34). Đăng ký ĐỘNG trong service đang chạy thì
+     * nhận được, nên cảnh báo "vừa cài app lạ" từ nay mới thật sự sống — nhưng chỉ
+     * khi bác đã bật theo dõi cuộc gọi (service này).
+     * ⚠️ RECEIVER_NOT_EXPORTED: broadcast của HỆ THỐNG vẫn tới; app khác thì không
+     * giả được sự kiện "vừa cài app" để bật màn cảnh báo.
+     */
+    private android.content.BroadcastReceiver nhanCaiApp;
+
+    private void dangKyNhanCaiApp() {
+        try {
+            nhanCaiApp = new android.content.BroadcastReceiver() {
+                @Override
+                public void onReceive(Context c, Intent i) {
+                    if (i == null || i.getBooleanExtra(Intent.EXTRA_REPLACING, false)) return;
+                    // Giữ nguyên đường cũ: bộ đệm cho tầng web + thông báo trung tính.
+                    try { new NhanAppMoi().onReceive(c, i); } catch (Throwable t) { /* không sao */ }
+                    if (CuocGoi.dangHoacVuaGoi(c, System.currentTimeMillis())) {
+                        CuocGoi.batManCanhBao(c, "cai-app-trong-cuoc-goi",
+                                R.string.tb_cai_app_cuoc_goi_tieu_de, R.string.tb_cai_app_cuoc_goi_noi_dung);
+                    }
+                }
+            };
+            android.content.IntentFilter f = new android.content.IntentFilter(Intent.ACTION_PACKAGE_ADDED);
+            f.addDataScheme("package");
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                registerReceiver(nhanCaiApp, f, Context.RECEIVER_NOT_EXPORTED);
+            } else {
+                registerReceiver(nhanCaiApp, f);
+            }
+        } catch (Throwable t) {
+            nhanCaiApp = null;   // không đăng ký được thì thôi — theo dõi cuộc gọi vẫn chạy
+        }
     }
 
     @Override
@@ -125,6 +165,10 @@ public class TheoDoiCuocGoi extends Service {
     @Override
     public void onDestroy() {
         huyHen();
+        if (nhanCaiApp != null) {
+            try { unregisterReceiver(nhanCaiApp); } catch (Throwable t) { /* đã gỡ */ }
+            nhanCaiApp = null;
+        }
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && boNghe != null) {
                 tm.unregisterTelephonyCallback((TelephonyCallback) boNghe);
@@ -219,6 +263,8 @@ public class TheoDoiCuocGoi extends Service {
         if (state == TelephonyManager.CALL_STATE_OFFHOOK) {
             datHen();
         } else if (state == TelephonyManager.CALL_STATE_IDLE) {
+            // Phần 4: chỉ một mốc thời gian, để "vừa gác máy + mã tới" vẫn bắt được. Xem CuocGoi.
+            CuocGoi.lucGacMay = System.currentTimeMillis();
             huyHen();
             /*
              * ⚠️ GỠ LUÔN LỜI NHẮC KHI ĐÃ GÁC MÁY. Để nó nằm lại trên thanh sau

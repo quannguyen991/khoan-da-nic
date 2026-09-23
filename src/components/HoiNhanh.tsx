@@ -26,6 +26,7 @@ import {
 import { ghiKetQua } from '../lib/ket-qua-can-thiep';
 import { useDocToMotLan } from '../lib/doc-to-mot-lan';
 import { chonViecAnToan, cauLenhNgan } from '../lib/viec-an-toan-tiep-theo';
+import { goiDienThoai } from '../native';
 
 /**
  * §15.11.1 — BỘ HỎI NHANH LÚC ĐANG BỊ GỌI.
@@ -361,7 +362,7 @@ export function HoiNhanhView({ setView, t, lang = 'vi', onTriggerEmergency, fami
               <button
                 onClick={() => {
                   ghiKetQua({ canThiep: result.canThiep ?? null, nhan: nhan ?? null, maLyDo: result.maLyDo ?? [], hanhDong: 'bam_goi_nguoi_than' });
-                  window.open(`tel:${soNguoiThan}`, '_self');
+                  goiDienThoai(soNguoiThan);   // Phần 4: APK gọi thẳng một chạm; web mở `tel:`
                 }}
                 data-vai-tro="nut-chinh"
                 className="w-full min-h-[80px] py-4 px-4 bg-amber-300 text-amber-950 font-black text-[20px] rounded-2xl flex flex-col items-center justify-center gap-0.5 border-2 border-amber-200 shadow-lg active:scale-95"

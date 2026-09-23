@@ -73,6 +73,9 @@ interface CauNoi {
   huyNhacTheoDoi72Gio(): Promise<void>;
   trangThaiTheoDoiCuocGoi(): Promise<{ coQuyen: boolean; dangBat: boolean }>;
   datTheoDoiCuocGoi(o: { bat: boolean }): Promise<{ dangBat: boolean; maLoi?: string }>;
+  /** Phần 4 (23/9/2026) — gọi thẳng một chạm; thiếu quyền thì mở bàn phím quay số. */
+  goiThang(o: { so: string }): Promise<{ cach: 'goi_thang' | 'mo_ban_phim' }>;
+  xinQuyenGoiThang(): Promise<{ daCo: boolean }>;
   trangThaiMay(): Promise<{
     docDuoc: boolean;
     dichVuTroNang: { goi: string; ten: string; nguonCai: string; ngayCai: number }[];
@@ -1019,4 +1022,48 @@ export async function trangThaiBongBong(): Promise<{ dangChay: boolean; coQuyen:
   const c = (await cauHoacNull())?.cau;
   if (!c) return null;
   try { return await c.trangThaiBongBong(); } catch { return null; }
+}
+
+/*
+ * ══════════ GỌI NGƯỜI THÂN — MỘT CHẠM TRÊN APK (Phần 4, 23/9/2026) ══════════
+ *
+ * Web: mở `tel:` NGAY TRONG cú bấm (đồng bộ) — chờ một Promise trước rồi mới mở
+ * thì trình duyệt có thể coi là không còn do người dùng bấm.
+ * APK: nhờ Java gọi thẳng (ACTION_CALL) nếu bác đã cho quyền; chưa cho thì Java
+ * tự mở bàn phím quay số. Cầu nối hỏng thì rơi về `tel:` — nút không bao giờ chết.
+ *
+ * ⚠️ `window.Capacitor` do cầu nối native tiêm vào TRƯỚC khi app chạy, nên kiểm
+ * đồng bộ được. Trên web nó không có hoặc `isNativePlatform()` là false.
+ * ⚠️ Không có đường nào gọi mà không qua một cú bấm của bác (§12).
+ */
+function laMayCaiDongBo(): boolean {
+  try {
+    return typeof window !== 'undefined'
+      && (window as unknown as { Capacitor?: { isNativePlatform?: () => boolean } }).Capacitor?.isNativePlatform?.() === true;
+  } catch { return false; }
+}
+
+export function goiDienThoai(so: string): void {
+  const sach = String(so ?? '').replace(/[^\d+]/g, '');
+  if (!sach) return;
+  if (!laMayCaiDongBo()) {
+    window.open(`tel:${sach}`, '_self');
+    return;
+  }
+  void cauHoacNull().then(async (k) => {
+    const c = k?.cau;
+    if (!c) { window.open(`tel:${sach}`, '_self'); return; }
+    // ⚠️ Có hạn giờ như mọi lệnh native (xem `hanGio`): cầu nối treo thì rơi về `tel:`.
+    const kq = await hanGio(c.goiThang({ so: sach }).then(() => 'da_goi' as const), 'khong_xong' as const);
+    if (kq !== 'da_goi') window.open(`tel:${sach}`, '_self');
+  });
+}
+
+/** Xin quyền gọi thẳng (bước "Con cháu cài giúp"). `null` = không phải APK. */
+export async function xinQuyenGoiThang(): Promise<boolean | null> {
+  const c = (await cauHoacNull())?.cau;
+  if (!c) return null;
+  try {
+    return (await hanGio(c.xinQuyenGoiThang(), { daCo: false }, 60_000)).daCo;
+  } catch { return false; }
 }

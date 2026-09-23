@@ -7,7 +7,7 @@ import {
 } from '../tai-khoan';
 import { ManGhepConChau } from './GhepConChau';
 import { GhiLoiNhan } from './GhiLoiNhan';
-import { laApk } from '../native';
+import { laApk, xinQuyenGoiThang } from '../native';
 
 /**
  * ═════ CON CHÁU CÀI GIÚP — làm trên MÁY BỐ MẸ, con ngồi cạnh ═════
@@ -58,6 +58,9 @@ export function ManConCaiGiup({ t, setView, onDangNhapXong, onDanhSachGhep, onDi
    */
   const [dangChayApk, setDangChayApk] = useState(false);
   useEffect(() => { void laApk().then(setDangChayApk).catch(() => setDangChayApk(false)); }, []);
+  /** Phần 4 — quyền gọi thẳng (CALL_PHONE). `null` = chưa hỏi. Từ chối thì nút gọi vẫn mở bàn phím quay số. */
+  const [quyenGoiThang, setQuyenGoiThang] = useState<boolean | null>(null);
+  const xinGoiThang = async () => { setQuyenGoiThang((await xinQuyenGoiThang()) === true); };
 
   useEffect(() => {
     if (buoc !== 'quy_tac' || !docPhien()) return;
@@ -170,6 +173,24 @@ export function ManConCaiGiup({ t, setView, onDangNhapXong, onDanhSachGhep, onDi
               />
               <span className="text-[16px] font-bold text-[#1e1b4b] leading-snug">{t('Báo cho con khi máy nhận mã OTP trong lúc đang có cuộc gọi')}</span>
             </label>
+          )}
+          {/*
+            PHẦN 4 (23/9/2026) — CHỈ BẢN APK: quyền để máy tự làm được việc ở lúc cần.
+            Mỗi quyền bác tự bấm cho phép; từ chối thì phần đó rơi về cách cũ.
+          */}
+          {dangChayApk && (
+            <div className="flex flex-col gap-2 rounded-[18px] border-2 border-slate-300 p-4">
+              <p className="text-[16px] font-bold text-[#1e1b4b] leading-snug">{t('Để máy tự giúp bố mẹ lúc đang có cuộc gọi')}</p>
+              <button type="button" onClick={() => { void xinGoiThang(); }} className={nutPhu}>
+                {quyenGoiThang ? t('Đã cho phép gọi thẳng') : t('Cho phép nút gọi con đổ chuông ngay')}
+              </button>
+              {quyenGoiThang === false && (
+                <p role="status" className="text-[14px] font-semibold text-slate-700 leading-snug">{t('Chưa cho phép. Nút gọi sẽ mở bàn phím quay số như cũ.')}</p>
+              )}
+              <button type="button" onClick={() => setView('notifications')} className={nutPhu}>
+                {t('Bật theo dõi cuộc gọi và đọc thông báo')}
+              </button>
+            </div>
           )}
           {daLuuQuyTac && (
             <p role="status" className="text-[15px] font-bold text-emerald-800 flex items-center gap-1">

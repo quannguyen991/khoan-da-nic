@@ -58,6 +58,13 @@
     <!-- Sang loc tai cho: KHONG mang nhan rui ro nao, chi moi bac kiem. -->
     <string name="tb_sang_loc_tieu_de">Would you like this message checked?</string>
     <string name="tb_sang_loc_noi_dung">A message just arrived that is worth a look. Nothing has been sent anywhere yet.</string>
+    <!-- Part 4 (2026-09-23): auto-open during a call. Conditional wording, accuses no one. -->
+    <string name="tb_otp_cuoc_goi_tieu_de">Don\'t read this code to anyone</string>
+    <string name="tb_otp_cuoc_goi_noi_dung">A code arrived while you are on a call. Anyone who calls and asks for a code is a scammer. Tap to open.</string>
+    <string name="tb_cai_app_cuoc_goi_tieu_de">Wait, don\'t install anything else</string>
+    <string name="tb_cai_app_cuoc_goi_noi_dung">A new app was just installed while you are on a call. Tap to open.</string>
+    <string name="tb_app_moi_tieu_de">Khoan Đã</string>
+    <string name="tb_app_moi_noi_dung">There is something for you to look at. Tap to open.</string>
     <string name="tb_nut_kiem_tin">Check the latest message</string>
     <string name="tb_nut_kiem_giup">Yes, check it</string>
     <string name="tb_nut_bo_qua">No thanks</string>
