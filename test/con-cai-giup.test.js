@@ -98,8 +98,15 @@ test('màn khẩn cấp: có lời nhắn của con thì PHÁT LỜI NHẮN, kh�
 
 test('diễn tập: có băng "ĐÂY LÀ DIỄN TẬP" và KHÔNG ghi kết quả can thiệp (§4.6)', () => {
   const APP = doc('src', 'App.tsx');
-  assert.match(APP, /const laDienTap = result\?\.dienTap === true;/);
+  // Từ 23/9/2026 lượt MÔ PHỎNG (màn trình diễn) cũng tính là diễn tập — cùng mọi chặn.
+  assert.match(APP, /const laDienTap = result\?\.dienTap === true( \|\| laMoPhong)?;/);
   assert.match(APP, /t\('ĐÂY LÀ DIỄN TẬP — không có gì nguy hiểm\.'\)/);
   const i = APP.indexOf('const ghiHanhDong = (hanhDong: HanhDong) => {');
-  assert.match(APP.slice(i, i + 300), /if \(laDienTap\) return;/, 'lượt tập mà ghi vào sẽ làm bẩn tỷ lệ báo động giả');
+  const khoi = APP.slice(i, i + 900);
+  const iThoat = khoi.indexOf('if (laDienTap) return;');
+  assert.ok(iThoat > 0, 'lượt tập mà ghi vào sẽ làm bẩn tỷ lệ báo động giả');
+  // Trước chỗ thoát KHÔNG được có lệnh ghi hay gửi nào — chỉ báo sang máy con giả lập.
+  const truocThoat = khoi.slice(0, iThoat);
+  assert.ok(!/ghiKetQua\(|guiTrangThaiBaoDong\(|ghiLuot\(/.test(truocThoat), 'mô phỏng không được ghi số liệu hay gửi máy chủ');
+  assert.ok(khoi.indexOf('ghiKetQua(') > iThoat && khoi.indexOf('guiTrangThaiBaoDong(') > iThoat);
 });

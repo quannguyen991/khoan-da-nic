@@ -27,7 +27,7 @@ import { ghiKetQua } from '../lib/ket-qua-can-thiep';
 import { useDocToMotLan } from '../lib/doc-to-mot-lan';
 import { chonViecAnToan, cauLenhNgan } from '../lib/viec-an-toan-tiep-theo';
 import { goiDienThoai } from '../native';
-import { HoiCon } from './HoiCon';
+import { HoiCon, type ApiHoiCon } from './HoiCon';
 
 /**
  * §15.11.1 — BỘ HỎI NHANH LÚC ĐANG BỊ GỌI.
@@ -141,6 +141,8 @@ export interface HoiNhanhProps {
   onTriggerEmergency?: () => void;
   /** Để màn kết quả có nút gọi THẲNG người thân (23/9/2026). */
   familyMembers?: { name: string; phone: string }[];
+  /** Chỉ màn trình diễn truyền: nút "Hỏi con" chạy trên bản giả lập, không mạng. */
+  hoiConApi?: ApiHoiCon;
 }
 
 type KetQua = {
@@ -154,7 +156,7 @@ type KetQua = {
   khongGoiDuocMayChu?: boolean;
 };
 
-export function HoiNhanhView({ setView, t, lang = 'vi', onTriggerEmergency, familyMembers }: HoiNhanhProps) {
+export function HoiNhanhView({ setView, t, lang = 'vi', onTriggerEmergency, familyMembers, hoiConApi }: HoiNhanhProps) {
   const [selectedBranch, setSelectedBranch] = useState<string | null>(null);
   const [questionQueue, setQuestionQueue] = useState<string[]>([]);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
@@ -550,7 +552,7 @@ export function HoiNhanhView({ setView, t, lang = 'vi', onTriggerEmergency, fami
       </div>
 
       {/* Người gọi xưng là con, cháu ⇒ hỏi con qua kênh khác, một chạm (23/9/2026). */}
-      <HoiCon t={t} familyMembers={familyMembers} />
+      <HoiCon t={t} familyMembers={familyMembers} api={hoiConApi} nhipMs={hoiConApi ? 700 : undefined} />
 
       <div className="flex flex-col gap-3 mb-6">
         {MA_NHANH.map((ma) => {

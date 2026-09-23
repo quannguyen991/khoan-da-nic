@@ -28,26 +28,13 @@ import { Lang, NHAN, CHUA_KIEM, MA_LY_DO, tra, traNhieu } from '../catalog';
 import { ThuTinhHuong } from './ThuTinhHuong';
 import { KyChiaKhoa } from './KyChiaKhoa';
 import { TraLoiHoiCon } from './TraLoiHoiCon';
-import { cauNoiVoiBoMe } from '../lib/cau-noi-voi-bo-me';
+import { TheCanhBaoCon } from './TheCanhBaoCon';
 
 /*
- * PHẦN 3 (23/9/2026) — CÂU CHO MÀN "ĐANG CẦN" VÀ NÚT BẬT NHẬN. Mã → khoá catalog.
+ * PHẦN 3 (23/9/2026) — CÂU CHO NÚT BẬT NHẬN. Mã → khoá catalog.
+ * Câu của thẻ "đang cần" nằm cùng thẻ ở `TheCanhBaoCon.tsx`.
  * ⚠️ §11 — không "đã thấy", "đã đọc", "an toàn"; không buộc tội ai.
  */
-const CAU_LOAI_SU_KIEN: Record<string, string> = {
-  ket_qua_kiem: 'Khoan Đã thấy tình huống nguy hiểm cao trên máy {ten}.',
-  otp_trong_cuoc_goi: 'Máy {ten} vừa nhận mã OTP trong lúc đang có cuộc gọi.',
-  cai_app_trong_cuoc_goi: 'Máy {ten} vừa cài ứng dụng mới trong lúc đang có cuộc gọi.',
-  tien_ra_trong_cuoc_goi: 'Tiền vừa ra khỏi tài khoản của {ten} trong lúc đang có cuộc gọi.',
-};
-const CAU_HANH_DONG: Record<string, string> = {
-  bam_goi_nguoi_than: 'Đã bấm gọi người thân',
-  toi_on: 'Bấm "Tôi ổn, không có gì nguy hiểm"',
-  da_lo_chuyen: 'Báo đã lỡ chuyển tiền hoặc đọc mã',
-  con_bao_lua_dao: 'Bấm "Con bảo là lừa đảo"',
-  con_bao_khong_sao: 'Bấm "Con bảo không sao"',
-  ve_trang_chu: 'Đã rời màn cảnh báo',
-};
 const CAU_BAT_NHAN: Record<string, string> = {
   KHONG_HO_TRO: 'Máy hoặc trình duyệt này không nhận được thông báo. Mở Khoan Đã bằng Chrome để bật.',
   CHI_CO_BAN_DUNG: 'Bản chạy thử trên máy tính chưa bật được. Hãy dùng bản web đã đưa lên mạng.',
@@ -549,47 +536,16 @@ export function GuardianView({
       <TraLoiHoiCon t={tr} coPhien={coPhien} soBoMe={laThat ? parentData?.phone : undefined} />
       <KyChiaKhoa t={tr} coPhien={coPhien} soBoMe={laThat ? parentData?.phone : undefined} />
       {suKienId && (
-        <section role="alert" aria-labelledby="gd-can-con" className="rounded-[24px] bg-red-700 text-white p-5 flex flex-col gap-3 shadow-[0_14px_35px_rgba(185,28,28,0.35)]">
-          <h2 id="gd-can-con" className="text-[22px] font-black leading-snug">
-            {tr('{ten} đang cần anh/chị').split('{ten}').join(suKien?.tenBoMe || parentData?.name || tr('Bố mẹ'))}
-          </h2>
-          {suKien && CAU_LOAI_SU_KIEN[suKien.loaiSuKien] && (
-            <p className="text-[16px] font-semibold leading-snug">
-              {tr(CAU_LOAI_SU_KIEN[suKien.loaiSuKien] as string).split('{ten}').join(suKien.tenBoMe)}
-            </p>
-          )}
-          {parentData?.phone ? (
-            <button
-              type="button"
-              onClick={goiNgayTuCanhBao}
-              data-vai-tro="nut-chinh"
-              className="w-full min-h-[64px] rounded-[18px] bg-amber-300 text-amber-950 font-black text-[20px] flex items-center justify-center gap-2 px-3 leading-snug"
-            >
-              <Phone size={24} aria-hidden="true" /> {tr('Gọi ngay')} ({parentData.phone})
-            </button>
-          ) : (
-            <p className="text-[15px] font-bold leading-snug">{tr('Chưa có số của bố mẹ trên máy này.')}</p>
-          )}
-          {/* Ba câu cho lúc bố mẹ nhấc máy: một việc · đổ lỗi cho thủ đoạn · trấn an. Xem lib/cau-noi-voi-bo-me. */}
-          <div className="rounded-[18px] bg-white text-slate-900 p-4 flex flex-col gap-2">
-            <p className="text-[15px] font-bold text-red-800 leading-snug">{tr('Bố mẹ nghe máy thì nói:')}</p>
-            <ol className="flex flex-col gap-2 text-[18px] font-bold leading-snug list-none">
-              {cauNoiVoiBoMe(suKien?.loaiSuKien).map((c) => <li key={c}>“{tr(c)}”</li>)}
-            </ol>
-          </div>
-          {loiSuKien && <p className="text-[14px] font-semibold leading-snug">{tr('Không tải được chi tiết. Vẫn gọi được.')}</p>}
-          {suKien && (
-            <ul className="flex flex-col gap-1 text-[15px] font-semibold leading-snug">
-              {suKien.hanhDong.length === 0 ? (
-                <li>{tr('Chưa có phản hồi từ máy bố mẹ.')}</li>
-              ) : suKien.hanhDong.map((h) => (
-                <li key={`${h.ma}-${h.luc}`}>
-                  {new Date(h.luc).toLocaleTimeString(lang === 'en' ? 'en-GB' : 'vi-VN', { hour: '2-digit', minute: '2-digit' })} · {tr(CAU_HANH_DONG[h.ma] ?? h.ma)}
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
+        <TheCanhBaoCon
+          t={tr}
+          lang={lang === 'en' ? 'en' : 'vi'}
+          tenBoMe={suKien?.tenBoMe || parentData?.name || tr('Bố mẹ')}
+          loaiSuKien={suKien?.loaiSuKien}
+          hanhDong={suKien ? suKien.hanhDong : null}
+          soBoMe={parentData?.phone}
+          onGoiNgay={goiNgayTuCanhBao}
+          loiTai={loiSuKien}
+        />
       )}
 
       {/* Toast Notification when reminder sent */}

@@ -87,7 +87,7 @@ import { CanhBaoChinhThuc } from './components/CanhBaoChinhThuc';
 import { TroLyNoi } from './components/TroLyNoi';
 import { QuaCauNoi } from './components/QuaCauNoi';
 import {
-  docVongTron, chonQuyTac, duocHienQuyTac, thuTuGoi, tinhHuongGoi, vaiChoTinhHuong, nguoiGoiDauTien,
+  docVongTron, vongTronRong, chonQuyTac, duocHienQuyTac, thuTuGoi, tinhHuongGoi, vaiChoTinhHuong, nguoiGoiDauTien,
 } from './lib/vong-tron-gia-dinh';
 import { ManDoiPhanUng, TheDoiPhanUng, nhanVai } from './components/DoiPhanUng';
 import { ManSoNganHang, DanhSachSoNganHang } from './components/SoNganHang';
@@ -258,6 +258,12 @@ export interface KetQuaPhanTich {
   dienTap?: boolean;
   /** Máy tự bật màn cảnh báo (Phần 4) — một SỰ KIỆN trên máy, không phải nhãn rủi ro. */
   lyDoTuBat?: 'otp_trong_cuoc_goi' | 'cai_app_trong_cuoc_goi' | 'tien_ra_trong_cuoc_goi';
+  /**
+   * Màn trình diễn cho giám khảo (`?trinhDien=1`, 23/9/2026). Mọi chặn của diễn tập
+   * áp dụng y nguyên — không ghi số liệu, không báo máy chủ, KHÔNG quay số thật — và
+   * hành động của bác được chuyển sang máy con GIẢ LẬP qua `onHanhDongMoPhong`.
+   */
+  moPhong?: boolean;
 }
 
 export interface HistoryRecord {
@@ -6740,7 +6746,7 @@ function AddFamilyView({ setView, t, setFamilyMembers }: { setView: (v: ViewStat
  * `requestAnimationFrame` treo khi khung hình không được vẽ (màn tắt, chế độ
  * tiết kiệm pin) — đã đo được cả app trắng trơn. Hiệu ứng chỉ được DỜI CHỖ.
  */
-function WarningView({
+export function WarningView({
   setView,
   t,
   lang = 'vi',
@@ -6749,6 +6755,7 @@ function WarningView({
   noiChayAi,
   mayCoUngDungLa,
   onBaoDaChuyen,
+  onHanhDongMoPhong,
 }: {
   setView: (v: ViewState) => void,
   t: any,
@@ -6764,13 +6771,21 @@ function WarningView({
   noiChayAi?: string | null,
   /** Bác khai đã chuyển tiền / đọc mã ⇒ gửi lại cho bộ luật chọn màn (việc #2). */
   onBaoDaChuyen?: () => void,
+  /** Chỉ màn trình diễn truyền vào: hành động của bác → máy con GIẢ LẬP. */
+  onHanhDongMoPhong?: (hanhDong: HanhDong) => void,
 }) {
   const nhan: string | undefined = result?.nhan;
   const canThiep: string | undefined = result?.canThiep;
   const khongGoiDuoc = result?.khongGoiDuocMayChu === true;
   const tuBamDung = result?.tuBamDung === true;
-  /** Lượt diễn tập từ "Con cháu cài giúp" (Phần 2): có băng báo, KHÔNG ghi số liệu. */
-  const laDienTap = result?.dienTap === true;
+  /** Màn trình diễn (`?trinhDien=1`): như diễn tập, nhưng băng báo nói "mô phỏng". */
+  const laMoPhong = result?.moPhong === true;
+  /**
+   * Lượt diễn tập từ "Con cháu cài giúp" (Phần 2): có băng báo, KHÔNG ghi số liệu.
+   * ⚠️ Mô phỏng TÍNH LÀ diễn tập — để mọi chặn đã có (không ghi số liệu, không báo
+   * máy chủ, không vào đồng hồ phản ứng) tự áp dụng, không phải nhớ thêm chỗ nào.
+   */
+  const laDienTap = result?.dienTap === true || laMoPhong;
   /** Máy tự bật (Phần 4): đang gọi + mã OTP / vừa cài app. Không phải nhãn rủi ro. */
   const lyDoTuBat = result?.lyDoTuBat ?? null;
 
@@ -6788,7 +6803,13 @@ function WarningView({
    * ⚠️ `chonQuyTac` CHỈ ĐỌC `maLyDo` mà bộ luật đã quyết. Nó không đổi được
    * mức rủi ro, và không được phép đổi (§4.2).
    */
-  const [vongTronNha] = useState(() => docVongTron());
+  /*
+   * ⚠️ MÔ PHỎNG KHÔNG ĐỌC DỮ LIỆU CỦA MÁY — sửa 23/9/2026, đo trên màn trình diễn:
+   * nút gọi hiện SỐ THẬT đã lưu trên máy người trình bày thay vì số hư cấu, vì vòng
+   * tròn gia đình ở đây được ưu tiên hơn `familyMembers`. Trình diễn trước hội đồng
+   * mà lộ số của người nhà là rò dữ liệu thật. Mô phỏng dùng vòng tròn RỖNG.
+   */
+  const [vongTronNha] = useState(() => (laMoPhong ? vongTronRong() : docVongTron()));
   const quyTacNha = chonQuyTac(vongTronNha.quyTac, result?.maLyDo ?? []);
 
   /*
@@ -6811,6 +6832,11 @@ function WarningView({
   const suKienBaoDongRef = useRef<string | null>(null);
   /** Ghi hành động bác chọn sau cảnh báo — xem `lib/ket-qua-can-thiep.ts`. */
   const ghiHanhDong = (hanhDong: HanhDong) => {
+    // Trình diễn: chuyển hành động sang máy con giả lập — rồi thoát như diễn tập ngay dưới.
+    if (laMoPhong) {
+      onHanhDongMoPhong?.(hanhDong);
+      if (hanhDong === 'bam_goi_nguoi_than' || hanhDong === 'da_lo_chuyen') setDaHanhDong(true);
+    }
     // Diễn tập: bấm gì cũng không ghi — lượt tập mà vào số liệu là làm bẩn tỷ lệ báo động giả (§4.6).
     if (laDienTap) return;
     // Phần 3: con thấy bác đã làm gì (chỉ MÃ), và bậc leo thang tự dừng.
@@ -6862,7 +6888,8 @@ function WarningView({
    * Đây là màn hình bác nhìn khi đang bị thúc; nó không nên đổi nội dung giữa
    * chừng vì một thay đổi ở màn khác.
    */
-  const [matKhauNha] = useState(() => docMatKhauGiaDinh());
+  // Mô phỏng: KHÔNG hiện câu nhắc mật khẩu gia đình của máy người trình bày.
+  const [matKhauNha] = useState(() => (laMoPhong ? null : docMatKhauGiaDinh()));
 
   const [daBoQua, setDaBoQua] = useState<string[]>(() => {
     try {
@@ -7189,7 +7216,8 @@ function WarningView({
    * phát chồng lời nhắn lên một giây sau.
    */
   const loiNhan = useLoiNhanCon();
-  const coLoiNhan = Boolean(loiNhan.url);
+  // Mô phỏng: không phát lời nhắn giọng thật đã ghi trên máy người trình bày.
+  const coLoiNhan = !laMoPhong && Boolean(loiNhan.url);
   usePhatMotLan(loiNhan.url, heroGap && loiNhan.daTai && coLoiNhan);
   useDocToMotLan(cauTuDoc, heroGap && loiNhan.daTai && !coLoiNhan, lang === 'en' ? 'en-US' : 'vi-VN',
     () => setIsSpeaking(true), () => setIsSpeaking(false));
@@ -7220,6 +7248,8 @@ function WarningView({
     // xuống nền và mã sau đó không chắc chạy.
     ghiNhanBamGoi();
     setDaBamGoi(true);
+    // Trình diễn: KHÔNG BAO GIỜ quay số thật — máy con giả lập đổ chuông thay.
+    if (laMoPhong) return;
     // Phần 4: APK gọi thẳng một chạm (nếu bác đã cho quyền); web mở `tel:` như cũ.
     goiDienThoai(firstContact.phone);
   };
@@ -7375,7 +7405,7 @@ function WarningView({
         {/* PHẦN 2 — lượt diễn tập phải nói rõ là diễn tập, trước mọi chữ khác. */}
         {laDienTap && (
           <p role="status" className="w-full mb-2 rounded-2xl bg-white text-[#7f1d1d] border-2 border-white px-3 py-2 text-[18px] font-black text-center leading-snug">
-            {t('ĐÂY LÀ DIỄN TẬP — không có gì nguy hiểm.')}
+            {laMoPhong ? t('MÔ PHỎNG — màn thật của app, cuộc gọi là giả lập.') : t('ĐÂY LÀ DIỄN TẬP — không có gì nguy hiểm.')}
           </p>
         )}
         {/* NHÃN — nguyên văn §4.1 */}

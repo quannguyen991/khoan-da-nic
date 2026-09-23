@@ -91,6 +91,29 @@ gọi + OTP / cài app) rồi hiện màn, nó **không chặn** thao tác nào.
 
 ---
 
+## 4b. Màn trình diễn trước hội đồng
+
+Mở **`https://khoan-da.onrender.com/?trinhDien=1`** trên laptop (Chrome hoặc Edge, màn 1080p là
+đẹp nhất). Hai điện thoại đứng cạnh nhau: trái là máy bác Lan, phải là máy Minh (con). Dải vàng
+**"MÔ PHỎNG"** luôn ở trên cùng — đừng che, đừng cắt khỏi ảnh chụp.
+
+| Nút | Chuyện xảy ra | Bấm gì tiếp |
+|---|---|---|
+| ① Cuộc gọi + mã OTP | Máy bác: màn cuộc gọi "công an" + tin OTP → máy tự bật màn đỏ. Máy Minh: thông báo → thẻ "Bác Lan đang cần anh/chị" + ba câu để nói | Bên trái bấm **Gọi ngay cho con cháu** → bên phải **Nghe** → hai máy "đang nói chuyện" → **Kết thúc** → bên trái bấm **Con bảo là lừa đảo** → bên phải hiện dòng thời gian |
+| ② Người gọi xưng là con | Máy bác: số lạ "Mẹ ơi, con đây…" → màn "Đang bị ai gọi?" | Bên trái **Họ xưng là con? Hỏi con ngay** → bên phải **Không phải con** → bên trái hiện "Minh bấm: không phải Minh gọi. Bác cúp máy đi." |
+| ③ Tiền vừa ra trong lúc gọi | Máy bác: tin ngân hàng trừ 20 triệu → màn "Tiền vừa ra. Gọi con ngay." | Bên trái **Tôi vừa chuyển theo lời người gọi** → màn phục hồi, có số tổng đài 11 ngân hàng |
+
+- **"Xem bằng tiếng Anh"** đổi cả hai máy sang tiếng Anh — dùng khi thuyết trình bằng tiếng Anh.
+- **Không cần mạng hội trường** để hai máy nói với nhau (chúng nối trong trình duyệt). Nhưng trang
+  phải tải được — mở thử một lần ở nơi có mạng trước giờ thi.
+- **Nói đúng khi giới thiệu:** *"Two phones, one laptop. The screens are the real app; the calls
+  and the link between the phones are simulated so the demo can't fail on stage."*
+- Màn trình diễn **không quay số, không gọi máy chủ, không đọc dữ liệu trên máy**: số hiện ra là
+  số hư cấu (09xx xxx 111). Bấm nhầm nút gọi ngân hàng trong màn phục hồi thì máy tính có thể hỏi
+  mở ứng dụng gọi — bỏ qua.
+
+---
+
 ## 5. Số liệu được phép đưa lên slide
 
 | Số | Nguồn | Ngày |

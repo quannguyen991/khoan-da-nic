@@ -43,6 +43,8 @@ test('§4.1 — mọi câu có ở CẢ HAI catalog, và thẻ cảnh báo của
   for (const cau of new Set(Object.values(boCau()).flat())) {
     assert.strictEqual(I18N.split(JSON.stringify(cau) + ':').length - 1, 2, cau);
   }
-  const g = doc('src/components/Guardian.tsx');
-  assert.match(g, /cauNoiVoiBoMe\(suKien\?\.loaiSuKien\)\.map\(\(c\) => <li key=\{c\}>“\{tr\(c\)\}”<\/li>\)/);
+  // Thẻ tách khỏi Guardian sang TheCanhBaoCon.tsx (23/9/2026) để màn trình diễn dùng đúng thẻ thật.
+  const the = doc('src/components/TheCanhBaoCon.tsx');
+  assert.match(the, /cauNoiVoiBoMe\(loaiSuKien\)\.map\(\(c\) => <li key=\{c\}>“\{t\(c\)\}”<\/li>\)/);
+  assert.match(doc('src/components/Guardian.tsx'), /<TheCanhBaoCon[\s\S]*?loaiSuKien=\{suKien\?\.loaiSuKien\}/);
 });

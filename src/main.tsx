@@ -2,6 +2,7 @@ import {StrictMode} from 'react';
 import {createRoot} from 'react-dom/client';
 import App from './App.tsx';
 import {dungKhungDienThoai} from './khung-dien-thoai.ts';
+import {ManTrinhDien, MayTrinhDien} from './components/TrinhDien.tsx';
 import './index.css';
 
 /**
@@ -16,7 +17,26 @@ import './index.css';
  * lúc đó `#root` không còn tồn tại nữa, nên đây không phải "tối ưu", mà là
  * điều kiện để dòng dưới không ném lỗi.
  */
-if (!dungKhungDienThoai()) {
+/*
+ * MÀN TRÌNH DIỄN (`?trinhDien=1`, 23/9/2026) — quyết TRƯỚC khung điện thoại.
+ * Trang ngoài là bảng điều khiển rộng cả màn hình máy tính, KHÔNG bọc khung; nó tự
+ * chứa hai <iframe> `?trinhDien=bac` / `?trinhDien=con`, mỗi cái dựng đúng một "máy".
+ * Không có tham số này thì app chạy y như cũ.
+ */
+const vaiTrinhDien = new URLSearchParams(window.location.search).get('trinhDien');
+if (vaiTrinhDien === '1') {
+  createRoot(document.getElementById('root')!).render(
+    <StrictMode>
+      <ManTrinhDien />
+    </StrictMode>,
+  );
+} else if (vaiTrinhDien === 'bac' || vaiTrinhDien === 'con') {
+  createRoot(document.getElementById('root')!).render(
+    <StrictMode>
+      <MayTrinhDien vai={vaiTrinhDien} />
+    </StrictMode>,
+  );
+} else if (!dungKhungDienThoai()) {
   createRoot(document.getElementById('root')!).render(
     <StrictMode>
       <App />

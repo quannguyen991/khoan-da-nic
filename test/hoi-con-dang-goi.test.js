@@ -128,6 +128,9 @@ test('giao diện: mọi chuỗi có ở cả hai catalog, không "an toàn", h�
   assert.match(nhanhHet, /Bác cúp máy, gọi lại số của con đã lưu\./);
   assert.match(nhanhHet, /\{nutGoiLai\}/, 'chưa hỏi được thì đưa ngay nút gọi lại số đã lưu');
 
-  assert.match(doc('src/components/HoiNhanh.tsx'), /<HoiCon t=\{t\} familyMembers=\{familyMembers\} \/>/);
+  // `api` chỉ màn trình diễn truyền; bản thật dùng máy chủ thật (API_THAT) khi không có.
+  assert.match(doc('src/components/HoiNhanh.tsx'), /<HoiCon t=\{t\} familyMembers=\{familyMembers\} api=\{hoiConApi\}/);
+  assert.match(hoi, /const API_THAT: ApiHoiCon = \{ hoi: hoiConDangGoi, doc: docHoiCon, goi: goiDienThoai \};/);
+  assert.match(hoi, /if \(!api && docPhien\(\) === null\) return null;/, 'bản thật vẫn đòi đăng nhập');
   assert.match(doc('src/components/Guardian.tsx'), /<TraLoiHoiCon /);
 });

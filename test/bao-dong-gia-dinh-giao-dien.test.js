@@ -76,7 +76,12 @@ test('máy con: bật nhận cảnh báo nói đúng lý do khi không bật đ�
 });
 
 test('không câu giao diện nào của Phần 3 nói "đã thấy" / "đã đọc"', () => {
-  const nguon = boChuThich(doc('src', 'components', 'Guardian.tsx') + doc('src', 'components', 'GhepConChau.tsx') + doc('src', 'lib', 'cau-trang-thai-bao.ts'));
-  const chu = [...nguon.matchAll(/t[r]?\('([^']+)'\)/g)].map((m) => m[1]);
-  for (const c of chu) assert.ok(!/đã thấy|đã đọc/i.test(c), `§11: "${c}"`);
+  // Thẻ "đang cần" tách sang TheCanhBaoCon.tsx (23/9/2026) — soát cả tệp đó, kể cả câu trong bảng mã.
+  const the = boChuThich(doc('src', 'components', 'TheCanhBaoCon.tsx'));
+  assert.ok(the.length > 0, 'chưa có src/components/TheCanhBaoCon.tsx');
+  const nguon = boChuThich(doc('src', 'components', 'Guardian.tsx') + doc('src', 'components', 'GhepConChau.tsx') + doc('src', 'lib', 'cau-trang-thai-bao.ts')) + the;
+  const chu = [...nguon.matchAll(/t[r]?\('([^']+)'\)/g), ...the.matchAll(/:\s*'([^']+)',/g)].map((m) => m[1]);
+  // "Khoan Đã thấy…" là TÊN THƯƠNG HIỆU + "thấy", không phải lời khai "đã thấy" (§11).
+  for (const c of chu) assert.ok(!/(?<!khoan )đã thấy|đã đọc|an toàn/i.test(c), `§11: "${c}"`);
+  assert.match(doc('src', 'components', 'Guardian.tsx'), /<TheCanhBaoCon[\s\S]*?onGoiNgay=\{goiNgayTuCanhBao\}/, 'Guardian phải dùng đúng thẻ này, với nút gọi ghi nhận trước');
 });

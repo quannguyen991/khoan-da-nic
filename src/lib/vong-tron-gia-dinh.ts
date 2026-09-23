@@ -167,7 +167,7 @@ function sinhId(): string {
 
 const chuoi = (v: unknown): string => (typeof v === 'string' ? v : '');
 
-function vongTronRong(): VongTron {
+export function vongTronRong(): VongTron {
   return { phienBan: PHIEN_BAN, nguoiThan: [], quyTac: [], doi: [], capNhat: 0 };
 }
 

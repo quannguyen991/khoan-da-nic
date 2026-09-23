@@ -16,7 +16,24 @@ import { goiDienThoai } from '../native';
  */
 const TOI_DUOC = ['DA_DAY_DI', 'PUSH_DELIVERY_UNKNOWN'];
 
-export function HoiCon({ t, familyMembers }: { t: (s: string) => string; familyMembers?: { name: string; phone: string }[] }) {
+/**
+ * Ba việc thẻ này làm với bên ngoài. Mặc định là máy chủ thật và trình gọi thật;
+ * màn trình diễn (`?trinhDien=1`) truyền bản GIẢ LẬP — cùng thẻ, cùng chữ, không mạng.
+ */
+export interface ApiHoiCon {
+  hoi: () => Promise<{ hoiId: string; hetHan: number; guiToi: { ten: string; trangThai: string }[] }>;
+  doc: (id: string) => Promise<KetQuaHoiCon>;
+  goi: (so: string) => void;
+}
+const API_THAT: ApiHoiCon = { hoi: hoiConDangGoi, doc: docHoiCon, goi: goiDienThoai };
+
+export function HoiCon({ t, familyMembers, api, nhipMs = 3000 }: {
+  t: (s: string) => string;
+  familyMembers?: { name: string; phone: string }[];
+  api?: ApiHoiCon;
+  nhipMs?: number;
+}) {
+  const a = api ?? API_THAT;
   const [hoiId, setHoiId] = useState<string | null>(null);
   const [hetHan, setHetHan] = useState(0);
   const [khongToiAi, setKhongToiAi] = useState(false);
@@ -29,25 +46,27 @@ export function HoiCon({ t, familyMembers }: { t: (s: string) => string; familyM
   useEffect(() => {
     if (!hoiId) return;
     let huy = false;
-    const tai = () => docHoiCon(hoiId).then((r) => { if (!huy) setKq(r); }).catch(() => undefined);
+    const tai = () => a.doc(hoiId).then((r) => { if (!huy) setKq(r); }).catch(() => undefined);
     void tai();
-    const id = window.setInterval(() => { setBayGio(Date.now()); void tai(); }, 3000);
+    const id = window.setInterval(() => { setBayGio(Date.now()); void tai(); }, nhipMs);
     return () => { huy = true; window.clearInterval(id); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hoiId]);
 
-  if (docPhien() === null) return null;
+  // Màn trình diễn không có phiên đăng nhập — bản giả lập thay chỗ máy chủ.
+  if (!api && docPhien() === null) return null;
 
   const hoi = async () => {
     setDangGui(true); setLoi(false);
     try {
-      const r = await hoiConDangGoi();
+      const r = await a.hoi();
       setHoiId(r.hoiId); setHetHan(r.hetHan); setBayGio(Date.now());
       setKhongToiAi(!r.guiToi.some((g) => TOI_DUOC.includes(g.trangThai)));
     } catch { setLoi(true); } finally { setDangGui(false); }
   };
 
   const nutGoiLai = con && (
-    <button type="button" onClick={() => goiDienThoai(con.phone)}
+    <button type="button" onClick={() => a.goi(con.phone)}
       className="w-full min-h-[56px] rounded-[18px] bg-white text-[#2e1065] font-black text-[17px] px-3 leading-snug flex items-center justify-center gap-2">
       <Phone size={20} aria-hidden="true" /> {t('Gọi số của {ten} đã lưu').replace('{ten}', con.name)}
     </button>
