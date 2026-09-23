@@ -76,6 +76,8 @@ interface CauNoi {
   /** Phần 4 (23/9/2026) — gọi thẳng một chạm; thiếu quyền thì mở bàn phím quay số. */
   goiThang(o: { so: string }): Promise<{ cach: 'goi_thang' | 'mo_ban_phim' }>;
   xinQuyenGoiThang(): Promise<{ daCo: boolean }>;
+  /** Nhịp bảo vệ (23/9/2026): trao/thu hồi token cho dịch vụ nền báo về mỗi 6 giờ. */
+  datNhipBaoVe(o: { bat: boolean; token?: string; duong?: string }): Promise<{ ok: boolean }>;
   trangThaiMay(): Promise<{
     docDuoc: boolean;
     dichVuTroNang: { goi: string; ten: string; nguonCai: string; ngayCai: number }[];
@@ -1066,4 +1068,18 @@ export async function xinQuyenGoiThang(): Promise<boolean | null> {
   try {
     return (await hanGio(c.xinQuyenGoiThang(), { daCo: false }, 60_000)).daCo;
   } catch { return false; }
+}
+
+/**
+ * ══════ NHỊP BẢO VỆ — trao token cho dịch vụ nền (23/9/2026) ══════
+ * Chỉ gọi sau khi đã đọc quy tắc: bác CHƯA bật "cho con xem" thì luôn `{ bat: false }`,
+ * và native xoá token đã giữ. Bản web / APK cũ chưa có hàm này ⇒ lặng lẽ bỏ qua —
+ * nhịp lúc mở app vẫn chạy ở tầng web.
+ */
+export async function datNhipBaoVeNative(o: { bat: boolean; token?: string; duong?: string }): Promise<void> {
+  const c = (await cauHoacNull())?.cau;
+  if (!c) return;
+  try {
+    await hanGio(c.datNhipBaoVe(o), { ok: false });
+  } catch { /* APK cũ chưa có hàm này */ }
 }

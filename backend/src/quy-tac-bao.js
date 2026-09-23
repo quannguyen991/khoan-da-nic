@@ -11,7 +11,11 @@
  * Phần 3 đọc quy tắc này trước khi gửi bất kỳ thông báo nào cho con.
  */
 const BANG = 'quy_tac_bao';
-const MAC_DINH = Object.freeze({ baoKhiCao: false, baoKhiOtpTrongCuocGoi: false });
+/*
+ * Công tắc thứ ba (23/9/2026): cho con xem máy này còn được bảo vệ không — xem
+ * `nhip-bao-ve.js`. Cũng mặc định TẮT, cũng chỉ chủ tài khoản bật được.
+ */
+const MAC_DINH = Object.freeze({ baoKhiCao: false, baoKhiOtpTrongCuocGoi: false, choConXemBaoVe: false });
 
 class LoiQuyTac extends Error {
   constructor(ma) { super(ma); this.name = 'LoiQuyTac'; this.ma = ma; }
@@ -33,6 +37,7 @@ async function docQuyTac(kho, taiKhoanId) {
   return {
     baoKhiCao: ban?.baoKhiCao === true,
     baoKhiOtpTrongCuocGoi: ban?.baoKhiOtpTrongCuocGoi === true,
+    choConXemBaoVe: ban?.choConXemBaoVe === true,
   };
 }
 

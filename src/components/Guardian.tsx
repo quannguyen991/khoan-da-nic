@@ -29,6 +29,7 @@ import { ThuTinhHuong } from './ThuTinhHuong';
 import { KyChiaKhoa } from './KyChiaKhoa';
 import { TraLoiHoiCon } from './TraLoiHoiCon';
 import { TheCanhBaoCon } from './TheCanhBaoCon';
+import { TrangThaiBaoVeBoMeView } from './TrangThaiBaoVeBoMe';
 
 /*
  * PHẦN 3 (23/9/2026) — CÂU CHO NÚT BẬT NHẬN. Mã → khoá catalog.
@@ -743,6 +744,8 @@ export function GuardianView({
                 </div>
               </div>
             </div>
+            {/* Nhịp bảo vệ (23/9/2026): chỉ khi đã nối THẬT; bố mẹ chưa bật thì nói đúng thế. */}
+            {laThat && coPhien && <TrangThaiBaoVeBoMeView t={tr} />}
           </div>
 
           {/* Quick Action Buttons */}

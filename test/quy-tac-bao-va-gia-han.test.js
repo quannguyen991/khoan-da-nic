@@ -35,7 +35,7 @@ test('quy tắc báo: mặc định TẮT, chủ tài khoản bật được, ng
 
     const macDinh = await goi('GET', '/api/gia-dinh/quy-tac-bao', null, a.j.token);
     assert.strictEqual(macDinh.s, 200, `route chưa có: ${macDinh.s}`);
-    assert.deepStrictEqual(macDinh.j, { baoKhiCao: false, baoKhiOtpTrongCuocGoi: false }, '§12 — không tự bật báo thay chủ tài khoản');
+    assert.deepStrictEqual(macDinh.j, { baoKhiCao: false, baoKhiOtpTrongCuocGoi: false, choConXemBaoVe: false }, '§12 — không tự bật báo thay chủ tài khoản');
 
     const dat = await goi('PUT', '/api/gia-dinh/quy-tac-bao', { baoKhiCao: true, baoKhiOtpTrongCuocGoi: false }, a.j.token);
     assert.strictEqual(dat.s, 200);

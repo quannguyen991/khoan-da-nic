@@ -97,6 +97,7 @@ import { ManHoSoVuViec, ManRaDaThuDoan } from './components/HoSoVaRaDa';
 import { CongDongCanhGiac } from './components/CongDongCanhGiac';
 import { ManGhepConChau } from './components/GhepConChau';
 import { ManConCaiGiup } from './components/ConCaiGiup';
+import { dongBoNhipBaoVe } from './lib/nhip-bao-ve';
 import { ManChiaKhoa } from './components/ChiaKhoaThuHai';
 import { ManNganHangMoPhong } from './components/NganHangMoPhong';
 import { hopNhatNguoiThan } from './lib/hop-nhat-nguoi-than';
@@ -1248,6 +1249,18 @@ export default function App() {
       .catch(() => undefined);
     return () => { huy = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hoSo?.id]);
+
+  /*
+   * NHỊP BẢO VỆ (23/9/2026) — "máy bố mẹ còn được bảo vệ không?". Mở app, đăng
+   * nhập, quay lại app ⇒ `dongBoNhipBaoVe` tự đọc quy tắc: bác CHƯA bật thì không gửi
+   * gì và thu hồi token của dịch vụ nền; đăng xuất (hoSo = null) cũng thu hồi.
+   */
+  useEffect(() => {
+    void dongBoNhipBaoVe();
+    const khiQuayLai = () => { if (document.visibilityState === 'visible') void dongBoNhipBaoVe(); };
+    document.addEventListener('visibilitychange', khiQuayLai);
+    return () => document.removeEventListener('visibilitychange', khiQuayLai);
   }, [hoSo?.id]);
 
   /**

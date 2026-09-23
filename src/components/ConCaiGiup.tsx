@@ -8,6 +8,7 @@ import {
 import { ManGhepConChau } from './GhepConChau';
 import { GhiLoiNhan } from './GhiLoiNhan';
 import { laApk, xinQuyenGoiThang } from '../native';
+import { dongBoNhipBaoVe } from '../lib/nhip-bao-ve';
 
 /**
  * ═════ CON CHÁU CÀI GIÚP — làm trên MÁY BỐ MẸ, con ngồi cạnh ═════
@@ -49,7 +50,7 @@ export function ManConCaiGiup({ t, setView, onDangNhapXong, onDanhSachGhep, onDi
   const [matKhau, setMatKhau] = useState('');
   const [loi, setLoi] = useState<string | null>(null);
   const [dangLam, setDangLam] = useState(false);
-  const [quyTac, setQuyTac] = useState<QuyTacBao>({ baoKhiCao: false, baoKhiOtpTrongCuocGoi: false });
+  const [quyTac, setQuyTac] = useState<QuyTacBao>({ baoKhiCao: false, baoKhiOtpTrongCuocGoi: false, choConXemBaoVe: false });
   const [daLuuQuyTac, setDaLuuQuyTac] = useState(false);
   /*
    * ⚠️ `laApk()` TRẢ PROMISE (phải hỏi cầu nối native). Viết `laApk() && …` thẳng
@@ -93,8 +94,11 @@ export function ManConCaiGiup({ t, setView, onDangNhapXong, onDanhSachGhep, onDi
     setDaLuuQuyTac(false);
     setLoi(null);
     try {
-      setQuyTac(await datQuyTacBao(moi));
+      const daLuu = await datQuyTacBao(moi);
+      setQuyTac(daLuu);
       setDaLuuQuyTac(true);
+      // Vừa bật/tắt "cho con xem máy còn được bảo vệ" ⇒ báo (hoặc thu hồi) ngay, không đợi lần mở sau.
+      if (daLuu.choConXemBaoVe !== quyTac.choConXemBaoVe) void dongBoNhipBaoVe({ ep: true });
     } catch {
       setLoi(t('Chưa lưu được. Kiểm tra mạng rồi thử lại.'));
     }
@@ -174,6 +178,22 @@ export function ManConCaiGiup({ t, setView, onDangNhapXong, onDanhSachGhep, onDi
               <span className="text-[16px] font-bold text-[#2e1065] leading-snug">{t('Báo cho con khi máy nhận mã OTP trong lúc đang có cuộc gọi')}</span>
             </label>
           )}
+          {/*
+            CÔNG TẮC THỨ BA (23/9/2026) — "máy bố mẹ còn được bảo vệ không?". Mặc định TẮT
+            (§12). Câu phụ nói đúng thứ gì được gửi — và thứ gì KHÔNG.
+          */}
+          <label className="flex items-center gap-3 min-h-[56px] rounded-[18px] border-2 border-[#2e1065] px-4 py-3">
+            <input
+              type="checkbox"
+              className="w-6 h-6 shrink-0 accent-[#6d28d9]"
+              checked={quyTac.choConXemBaoVe}
+              onChange={(e) => { void luuQuyTac({ ...quyTac, choConXemBaoVe: e.target.checked }); }}
+            />
+            <span className="flex flex-col gap-0.5">
+              <span className="text-[16px] font-bold text-[#2e1065] leading-snug">{t('Cho con xem máy này còn được bảo vệ không')}</span>
+              <span className="text-[14px] text-slate-700 leading-snug">{t('Chỉ gửi bật/tắt của các quyền bảo vệ. Không gửi tin nhắn, vị trí hay pin.')}</span>
+            </span>
+          </label>
           {/*
             PHẦN 4 (23/9/2026) — CHỈ BẢN APK: quyền để máy tự làm được việc ở lúc cần.
             Mỗi quyền bác tự bấm cho phép; từ chối thì phần đó rơi về cách cũ.

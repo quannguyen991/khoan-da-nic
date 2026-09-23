@@ -820,6 +820,25 @@ app.get('/api/proof/ghep', chanDoc, canPhien, proof(async (req) => {
 }));
 
 const QT = require('./src/quy-tac-bao');
+const NBV = require('./src/nhip-bao-ve');
+
+/*
+ * NHỊP BẢO VỆ — "máy bố mẹ còn được bảo vệ không?" (23/9/2026). Chỉ mã và bool,
+ * chỉ khi chính bác đã bật; xem `src/nhip-bao-ve.js`.
+ */
+const nhipRoute = (fn) => async (req, res) => {
+  try {
+    return res.json(await fn(req));
+  } catch (e) {
+    if (e instanceof NBV.LoiNhip) return res.status(e.http).json({ maLoi: e.ma });
+    console.error('[nhip-bao-ve]', e?.message);
+    return res.status(500).json({ maLoi: 'LOI_MAY_CHU' });
+  }
+};
+app.post('/api/gia-dinh/nhip-bao-ve', canPhien, nhipRoute(async (req) =>
+  NBV.ghiNhip(await KP.khoChung(), req.taiKhoanId, req.body)));
+app.get('/api/gia-dinh/nhip-bao-ve/bo-me', chanDoc, canPhien, nhipRoute(async (req) =>
+  NBV.docNhipBoMe(await KP.khoChung(), req.taiKhoanId, { capGhep: (id) => KP.capGhepCuaToi(id), layHoSo: TK.layHoSo })));
 
 /**
  * QUY TẮC "BÁO CHO CON" — Phần 2 (23/9/2026). Id lấy TỪ PHIÊN, không từ thân
@@ -833,7 +852,11 @@ app.get('/api/gia-dinh/quy-tac-bao', chanDoc, canPhien, async (req, res) => {
 
 app.put('/api/gia-dinh/quy-tac-bao', chanProof, canPhien, async (req, res) => {
   try {
-    return res.json(await QT.datQuyTac(await KP.khoChung(), req.taiKhoanId, req.body));
+    const kho = await KP.khoChung();
+    const moi = await QT.datQuyTac(kho, req.taiKhoanId, req.body);
+    // Bác tắt "cho con xem máy còn được bảo vệ" ⇒ xoá luôn bản đã báo về, không giữ lại.
+    if (!moi.choConXemBaoVe) await NBV.xoaNhip(kho, req.taiKhoanId);
+    return res.json(moi);
   } catch (e) {
     if (e instanceof QT.LoiQuyTac) return res.status(400).json({ maLoi: e.ma });
     return res.status(500).json({ maLoi: 'LOI_MAY_CHU' });

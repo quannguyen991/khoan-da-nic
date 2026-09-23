@@ -273,6 +273,28 @@ public class KhoanDaPlugin extends Plugin {
      */
     // ───── Bong bóng nổi — KHÁC dải cảnh báo, xem `BongBongNoi` ─────
 
+    /**
+     * NHỊP BẢO VỆ (23/9/2026) — tầng web trao token khi bác ĐÃ bật "cho con xem máy
+     * còn được bảo vệ", và thu hồi (`bat: false`) khi bác tắt hoặc đăng xuất. Xem
+     * {@link NhipBaoVe}. Địa chỉ không phải `https://` thì từ chối và xoá luôn.
+     */
+    @PluginMethod
+    public void datNhipBaoVe(PluginCall call) {
+        JSObject r = new JSObject();
+        boolean bat = Boolean.TRUE.equals(call.getBoolean("bat", false));
+        String token = call.getString("token");
+        String duong = call.getString("duong");
+        if (!bat || token == null || token.isEmpty() || duong == null || !duong.startsWith("https://")) {
+            NhipBaoVe.xoa(getContext());
+            r.put("ok", !bat);
+            call.resolve(r);
+            return;
+        }
+        NhipBaoVe.luu(getContext(), token, duong);
+        r.put("ok", true);
+        call.resolve(r);
+    }
+
     @PluginMethod
     public void batBongBong(PluginCall call) {
         JSObject r = new JSObject();

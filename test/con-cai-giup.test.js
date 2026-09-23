@@ -55,7 +55,7 @@ test('luồng "Con cháu cài giúp" có đủ 5 bước, quy tắc báo mặc �
   const w = doc('src', 'components', 'ConCaiGiup.tsx');
   assert.ok(w.length > 0, 'chưa có ConCaiGiup.tsx');
   for (const buoc of ["'tai_khoan'", "'noi_may'", "'loi_nhan'", "'quy_tac'", "'dien_tap'"]) assert.ok(w.includes(buoc), `thiếu bước ${buoc}`);
-  assert.match(w, /useState<QuyTacBao>\(\{ baoKhiCao: false, baoKhiOtpTrongCuocGoi: false \}\)/, '§12 — công tắc báo mặc định TẮT');
+  assert.match(w, /useState<QuyTacBao>\(\{ baoKhiCao: false, baoKhiOtpTrongCuocGoi: false, choConXemBaoVe: false \}\)/, '§12 — công tắc báo mặc định TẮT');
   assert.match(w, /<ManGhepConChau t=\{t\} setView=\{setView\} nhung /, 'bước nối máy phải nhúng đúng màn ghép đã có — không viết lại luồng mã');
 });
 

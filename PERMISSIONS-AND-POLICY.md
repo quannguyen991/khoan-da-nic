@@ -118,6 +118,7 @@ the user's message somewhere more exposed than where it already was.
 | Speech | **never leaves the phone** | recognition runs on-device where the platform supports it, and the app states which engine it used |
 | Alert to family (risk level, scenario type, or "code during a call"; later, which button the owner pressed) | **codes only** — never message content | only if the **account owner** switched alerts on, on their own phone (off by default) |
 | A family member's recorded voice message | **never leaves the phone** | recorded on the parent's phone during setup, stored there only |
+| Protection status ("is this phone still protected?") — three on/off values: notification reading, call monitoring, show-on-top; plus the time it reported | **on/off values only** — no messages, no location, no battery, no app list; only the latest report is kept | only if the **account owner** switched on "let my family see", on their own phone (off by default); switching it off deletes the stored report. Sent when the app opens and, on the APK, every 6 hours from the background service |
 
 The gap between rows two and three is the whole privacy model. The app may *see* a
 message arriving, and may screen it locally. It may not *send* it. Automatic

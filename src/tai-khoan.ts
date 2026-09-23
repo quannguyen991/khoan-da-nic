@@ -246,16 +246,21 @@ export async function giaHanNeuSapHet(bayGio: number = Date.now()): Promise<bool
 export interface QuyTacBao {
   baoKhiCao: boolean;
   baoKhiOtpTrongCuocGoi: boolean;
+  /** Cho con xem máy này còn được bảo vệ không (23/9/2026) — mặc định TẮT, xem lib/nhip-bao-ve. */
+  choConXemBaoVe: boolean;
 }
+const quyTacTu = (t: any): QuyTacBao => ({
+  baoKhiCao: t?.baoKhiCao === true,
+  baoKhiOtpTrongCuocGoi: t?.baoKhiOtpTrongCuocGoi === true,
+  choConXemBaoVe: t?.choConXemBaoVe === true,
+});
 
 export async function docQuyTacBao(): Promise<QuyTacBao> {
-  const t = await goi('/api/gia-dinh/quy-tac-bao', {}, true);
-  return { baoKhiCao: t?.baoKhiCao === true, baoKhiOtpTrongCuocGoi: t?.baoKhiOtpTrongCuocGoi === true };
+  return quyTacTu(await goi('/api/gia-dinh/quy-tac-bao', {}, true));
 }
 
 export async function datQuyTacBao(q: Partial<QuyTacBao>): Promise<QuyTacBao> {
-  const t = await goi('/api/gia-dinh/quy-tac-bao', { method: 'PUT', body: JSON.stringify(q) }, true);
-  return { baoKhiCao: t?.baoKhiCao === true, baoKhiOtpTrongCuocGoi: t?.baoKhiOtpTrongCuocGoi === true };
+  return quyTacTu(await goi('/api/gia-dinh/quy-tac-bao', { method: 'PUT', body: JSON.stringify(q) }, true));
 }
 
 /*
@@ -386,4 +391,19 @@ export async function hoiConDangCho(): Promise<{ hoi: { hoiId: string; tenBoMe: 
 }
 export async function traLoiHoiCon(id: string, traLoi: TraLoiHoi): Promise<{ daGhi: boolean }> {
   return goi(`/api/gia-dinh/hoi-con/${encodeURIComponent(id)}/tra-loi`, { method: 'POST', body: JSON.stringify({ traLoi }) }, true);
+}
+
+// ─────────── "Máy bố mẹ còn được bảo vệ không?" — nhịp báo về (23/9/2026) ───────────
+
+/** Ba quyền của bản APK. `null` = không có để báo (bản web), KHÔNG phải "tắt". */
+export interface QuyenBaoVe { docThongBao: boolean | null; theoDoiCuocGoi: boolean | null; hienTrenApp: boolean | null }
+export interface NhipBaoVe { nguon: 'mo_app' | 'dich_vu_nen'; laApk: boolean; quyen: QuyenBaoVe }
+/** Máy bố mẹ báo về. Máy chủ chỉ lưu khi chính bác đã bật `choConXemBaoVe`. */
+export async function guiNhipBaoVe(nhip: NhipBaoVe): Promise<{ ghi: boolean; lyDo?: string }> {
+  return goi('/api/gia-dinh/nhip-bao-ve', { method: 'POST', body: JSON.stringify(nhip) }, true);
+}
+export interface TrangThaiBaoVeBoMe { tenBoMe: string; choXem: boolean; nhip: (NhipBaoVe & { luc: number }) | null }
+/** Máy con: trạng thái của từng bố mẹ đã ghép. */
+export async function docNhipBaoVeBoMe(): Promise<{ boMe: TrangThaiBaoVeBoMe[] }> {
+  return goi('/api/gia-dinh/nhip-bao-ve/bo-me', {}, true);
 }

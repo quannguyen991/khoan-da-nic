@@ -96,6 +96,8 @@ public class TheoDoiCuocGoi extends Service {
     private boolean dangGoiMang = false;
     private final Handler tay = new Handler(Looper.getMainLooper());
     private Runnable hen;
+    /** Nhịp bảo vệ mỗi 6 giờ (23/9/2026) — chỉ gửi khi bác đã bật, xem NhipBaoVe. */
+    private Runnable nhip;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -170,6 +172,7 @@ public class TheoDoiCuocGoi extends Service {
     @Override
     public void onDestroy() {
         huyHen();
+        huyNhipBaoVe();
         if (nhanCaiApp != null) {
             try { unregisterReceiver(nhanCaiApp); } catch (Throwable t) { /* đã gỡ */ }
             nhanCaiApp = null;
@@ -195,7 +198,30 @@ public class TheoDoiCuocGoi extends Service {
 
     // ─────────── Nghe trạng thái cuộc gọi ───────────
 
+    /**
+     * ══════ NHỊP BẢO VỆ — "máy bố mẹ còn được bảo vệ không?" (23/9/2026) ══════
+     * Dịch vụ còn sống thì báo về mỗi 6 giờ; nhịp đầu sau 1 phút (dịch vụ vừa bị hãng
+     * máy giết rồi dựng lại cũng báo "đang chạy lại"). Không có token ⇒ NhipBaoVe tự
+     * bỏ qua — nghĩa là bác chưa bật "cho con xem".
+     */
+    private void henNhipBaoVe() {
+        huyNhipBaoVe();
+        nhip = new Runnable() {
+            @Override
+            public void run() {
+                NhipBaoVe.gui(TheoDoiCuocGoi.this);
+                tay.postDelayed(this, NhipBaoVe.CHU_KY_MS);
+            }
+        };
+        tay.postDelayed(nhip, 60_000L);
+    }
+
+    private void huyNhipBaoVe() {
+        if (nhip != null) { tay.removeCallbacks(nhip); nhip = null; }
+    }
+
     private void batDauNghe() {
+        henNhipBaoVe();
         try {
             tm = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
             if (tm == null) { dungHan(); return; }
