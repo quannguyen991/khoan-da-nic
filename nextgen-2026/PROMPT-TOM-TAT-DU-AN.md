@@ -282,7 +282,7 @@ Luôn nói kèm "840 đội, 41 quốc gia"; không nói "giải cao nhất th�
 | "Tin nhắn thật từ nạn nhân" | "Tin nhắn do đội tự soạn theo thủ đoạn đã công bố" |
 | "Không đối thủ nào có" / "cách mạng" / "đột phá" | "Điểm khác bọn em chọn là…; đối thủ mạnh hơn ở…" |
 | Nói tính năng ở mục 5.3–5.5 là "đã có trên app"; nói APK 1.2 "đã chạy tốt trên điện thoại" | Giữ đúng trạng thái ghi trong mục 5 |
-| "Cảnh báo tự gửi tới con cháu" | "Bác bấm một nút là gọi được người thân; gửi cảnh báo tự động tới máy người thân chưa làm" |
+| "Cảnh báo tự gửi tới con cháu" (vô điều kiện) | "Bác tự bật 'báo cho con' thì máy con nhận cảnh báo — con cũng phải bật nhận; app không bao giờ tự bật thay bác. Trên web thật cần khoá VAPID đã đặt ở Render" |
 
 ---
 

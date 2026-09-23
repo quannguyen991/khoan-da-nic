@@ -45,6 +45,21 @@ test('thứ tự trên màn gấp: câu lệnh → nút chính → (dòng AI, l�
   assert.ok(iNut < iAi && iNut < iChuaKiem, 'nút chính phải đứng TRƯỚC mọi khối chữ giải thích — hành động trước, chữ sau');
 });
 
+test('câu để bác nói với người gọi: dưới nút gọi, dạng điều kiện, ngắn, có ở cả hai catalog', () => {
+  const iNut = APP.indexOf('{nutHanhDongGap}');
+  const iCau = APP.indexOf('data-vai-tro="cau-noi-voi-nguoi-goi"');
+  const iAi = APP.indexOf("t('AI đã trích ra các dấu hiệu. Mức rủi ro là do bộ luật cố định quyết định.')");
+  assert.ok(iCau > 0, 'thiếu câu để bác nói với người gọi');
+  assert.ok(iNut < iCau && iCau < iAi, 'câu nói đứng SAU nút gọi (hành động trước, chữ sau) và trước khối giải thích');
+  const khoi = APP.slice(iCau, iCau + 600);
+  assert.match(khoi, /t\('Đang nghe máy thì nói:'\)/, 'dạng ĐIỀU KIỆN — màn này cũng mở từ tin nhắn bác tự dán');
+  const cau = 'Để tôi hỏi con rồi gọi lại.';
+  assert.ok(khoi.includes(`t('${cau}')`));
+  assert.ok(cau.split(/\s+/).length <= 8, 'câu nói phải ngắn — bác đọc to trong lúc đang hoảng');
+  const i18n = doc('src', 'i18n.ts');
+  for (const k of ['Đang nghe máy thì nói:', cau]) assert.strictEqual(i18n.split(JSON.stringify(k) + ':').length - 1, 2, k);
+});
+
 test('câu lệnh là câu ngắn đã kiểm đếm chữ, không phải câu dài', () => {
   // Phần 4: máy tự bật dùng câu riêng (CAU_LENH_TU_BAT) — cũng là câu ngắn đã kiểm đếm chữ.
   assert.match(APP, /const cauLenh = lyDoTuBat \? CAU_LENH_TU_BAT\[lyDoTuBat\] : cauLenhNgan\(viecAnToan, Boolean\(firstContact\.phone\)\);/);

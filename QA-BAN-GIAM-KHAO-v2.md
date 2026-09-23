@@ -43,10 +43,14 @@ Ba mục dưới đây là thay đổi lớn nhất về cấu trúc. Học kỹ
 
 > "Người con biết đó là lừa đảo không khó ạ. Cái khó là bốn thứ: mẹ sẽ **thấy xấu hổ** nếu bị nói thẳng; mẹ **tin chú công an hơn tin con**; kẻ lừa đảo **đang nói** ở đầu dây bên kia; và con **đang ở công ty**.
 >
-> Nên sau mỗi kết quả, app đưa bốn thứ: **một tin nhắn soạn sẵn để gửi ngay** · **ba câu để nói khi gọi** · **một câu để MẸ nói với kẻ lừa đảo** · **số tổng đài chính thức để gọi lại**."
+> Nên app đưa bốn thứ, mỗi thứ nằm đúng chỗ cần nó: **ba câu để nói khi gọi** — ngay trên thẻ cảnh báo ở máy con · **một tin nhắn soạn sẵn** — nút "Gửi nhắc an toàn" ở màn của con · **một câu để MẸ nói với người gọi** — ngay dưới nút gọi trên màn khẩn cấp của mẹ · **số tổng đài chính thức của 11 ngân hàng** — trong màn phục hồi của mẹ, mỗi số kèm nguồn và ngày kiểm."
+
+> 🔄 Sửa 23/9/2026 cho khớp app: bản trước viết như thể cả bốn thứ nằm trên một màn "sau mỗi kết quả", và câu mẫu trích dưới đây không phải câu app hiện.
 
 Câu quan trọng nhất trong bốn thứ đó:
-> *"Cái này lừa cả người trẻ mẹ ạ, chỗ con vừa có người mất tiền."*
+> *"Bọn này giả làm cơ quan rất giống, ai cũng dễ tin."* — câu thứ hai trên thẻ cảnh báo của con.
+>
+> Và câu cho mẹ nói với người gọi: *"Để tôi hỏi con rồi gọi lại."* — nhiều người cao tuổi không dám cúp máy ngang với người xưng công an; một câu nói sẵn cho họ lối ra lịch sự.
 > — **đổ lỗi cho thủ đoạn, không đổ lỗi cho mẹ.** Người xấu hổ là người giấu chuyện, mà người giấu chuyện là người mất tiếp lần hai.
 
 ### M3. 🔄 "Không kiểm được" ≠ "Đã kiểm, không thấy gì"

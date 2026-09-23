@@ -7428,6 +7428,19 @@ function WarningView({
             <div className="w-full flex flex-col gap-2 mb-3">
               {nutHanhDongGap}
               {/*
+                ══════ CÂU ĐỂ BÁC NÓI VỚI NGƯỜI GỌI — thêm 23/9/2026 ══════
+                Nhiều người cao tuổi KHÔNG DÁM cúp máy với người xưng công an: cúp ngang
+                là "vô lễ", là "chống người thi hành công vụ". Một câu nói sẵn cho bác
+                lối ra lịch sự — và câu này nhắc tới con, đúng thứ kẻ gian dặn bác giấu.
+                ⚠️ Dạng ĐIỀU KIỆN ("đang nghe máy thì…"): màn này cũng mở từ tin nhắn bác
+                tự dán vào, lúc đó không có ai ở đầu dây.
+                ⚠️ Đứng DƯỚI nút gọi — hành động trước, chữ sau (test thứ tự màn gấp).
+              */}
+              <div data-vai-tro="cau-noi-voi-nguoi-goi" className="w-full rounded-[18px] bg-black/30 border-2 border-white/30 px-4 py-3 text-center">
+                <p className="text-[15px] font-bold text-white/85 leading-snug">{t('Đang nghe máy thì nói:')}</p>
+                <p className="text-[21px] font-black text-white leading-snug">“{t('Để tôi hỏi con rồi gọi lại.')}”</p>
+              </div>
+              {/*
                 Tiền vừa ra trong lúc gọi ⇒ một lối THẲNG vào các bước phục hồi. App không
                 biết khoản đó có phải do bị lừa không — bác nói, không phải app đoán (§4.2).
               */}
