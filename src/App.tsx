@@ -7013,11 +7013,8 @@ export function WarningView({
   }, [timeLeft]);
 
   useEffect(() => {
-    return () => {
-      if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-      }
-    };
+    // Qua `dungDocTo()` để tắt cả tiếng do máy chủ đọc hộ, không chỉ bộ đọc của trình duyệt.
+    return () => { void dungDocTo(); };
   }, []);
 
   /**

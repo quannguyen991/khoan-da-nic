@@ -12,6 +12,9 @@
  * quyết định thứ hai — §12 cấm.
  */
 
+// Chỉ dùng cho đường đọc to dự phòng (`/api/doc-to`) — bản APK phải gọi sang máy chủ thật.
+import { api } from './api-goc';
+
 /**
  * ⚠️ KHAI TẠI CHỖ, KHÔNG IMPORT — ba nhãn của §4.1.
  * Bản này không có `src/api.ts`; giữ nguyên ENUM để §HĐ luật 1 không bị phá:
@@ -928,16 +931,76 @@ export async function tinhTrangNghe(): Promise<TinhTrangNghe> {
  * Trả về `false` khi không đọc được, kèm mã lý do — để tầng giao diện nói
  * ra thay vì để bác ngồi chờ một giọng nói không bao giờ tới (§4.3).
  */
+/**
+ * Chọn giọng tốt nhất ĐÚNG ngôn ngữ, không bao giờ lấy giọng ngôn ngữ khác.
+ *
+ * ⚠️ `lang` CÓ MÁY VIẾT `vi_VN` (gạch dưới) — Chrome trên vài bản Android. So
+ * `startsWith('vi-')` trần thì giọng Việt có thật bị bỏ qua. Chuẩn hoá trước.
+ * Nhiều giọng cùng ngôn ngữ thì ưu tiên giọng tự nhiên (Natural/Online/Google)
+ * hơn giọng máy đọc cứng.
+ */
+export function chonGiong(dsGiong: SpeechSynthesisVoice[], ngonNgu: string): SpeechSynthesisVoice | null {
+  const ma = ngonNgu.toLowerCase().split(/[-_]/)[0];
+  const cungTieng = dsGiong.filter((v) => {
+    const l = String(v.lang || '').toLowerCase().replace('_', '-');
+    return l === ma || l.startsWith(`${ma}-`);
+  });
+  if (cungTieng.length === 0) return null;
+  return cungTieng.find((v) => /natural|online|neural|google/i.test(v.name)) ?? cungTieng[0] ?? null;
+}
+
+/*
+ * ═════ KHÔNG CÓ GIỌNG VIỆT TRÊN MÁY ⇒ NHỜ MÁY CHỦ ĐỌC — 23/9/2026 ═════
+ *
+ * Đo trên máy Windows của người dùng: trình duyệt chỉ có ba giọng tiếng Anh.
+ * Trước đây gặp máy như vậy thì nút "Đọc to" chỉ báo "máy chưa có giọng" — tức
+ * là trên máy tính của hội đồng, app không bao giờ nói được tiếng Việt.
+ *
+ * Nay: máy có giọng Việt thì dùng máy (không mạng, không chờ). Không có thì xin
+ * máy chủ một tệp âm thanh giọng Việt (`/api/doc-to`) rồi phát. Máy chủ cũng
+ * không đọc được thì vẫn trả `MAY_CHUA_CO_GIONG` để màn hình nói ra (§4.3) —
+ * KHÔNG BAO GIỜ đọc chữ Việt bằng giọng Anh.
+ */
+let amMayChu: HTMLAudioElement | null = null;
+let urlAmMayChu: string | null = null;
+
+function dungAmMayChu(): void {
+  try { amMayChu?.pause(); } catch { /* đã dừng */ }
+  if (urlAmMayChu) { try { URL.revokeObjectURL(urlAmMayChu); } catch { /* không sao */ } }
+  amMayChu = null;
+  urlAmMayChu = null;
+}
+
+async function docBangMayChu(chu: string, ngonNgu: string): Promise<{ ok: boolean; ma?: string }> {
+  try {
+    const r = await fetch(api('/api/doc-to'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chu, ngonNgu }),
+    });
+    if (!r.ok) return { ok: false, ma: 'MAY_CHUA_CO_GIONG' };
+    const tep = await r.blob();
+    dungAmMayChu();
+    const url = URL.createObjectURL(tep);
+    const am = new Audio(url);
+    amMayChu = am;
+    urlAmMayChu = url;
+    am.onended = () => { if (amMayChu === am) dungAmMayChu(); };
+    await am.play();
+    return { ok: true };
+  } catch {
+    return { ok: false, ma: 'MAY_CHUA_CO_GIONG' };
+  }
+}
+
 export async function docTo(chu: string, ngonNgu = 'vi-VN'): Promise<{ ok: boolean; ma?: string }> {
+  dungAmMayChu();
   const c = (await cauHoacNull())?.cau;
   if (!c) {
     // Không phải APK ⇒ dùng bộ đọc của trình duyệt, nơi nó thực sự chạy.
-    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return { ok: false, ma: 'MAY_KHONG_CO_BO_DOC' };
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return docBangMayChu(chu, ngonNgu);
     try {
       window.speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance(chu);
-      u.lang = ngonNgu;
-      u.rate = 0.92;
       /*
        * Chỉ đặt `lang` chưa đủ trên Chrome/WebView: nếu danh sách giọng đã
        * nạp sẵn mà không chọn voice, máy có thể lấy giọng mặc định (thường là
@@ -957,24 +1020,29 @@ export async function docTo(chu: string, ngonNgu = 'vi-VN'): Promise<{ ok: boole
           window.setTimeout(traVe, 700);
         });
       }
-      const maNgonNgu = ngonNgu.toLowerCase().split('-')[0];
-      const giong = dsGiong.find((v) => v.lang.toLowerCase().startsWith(`${maNgonNgu}-`))
-        || dsGiong.find((v) => v.lang.toLowerCase() === maNgonNgu);
-      if (maNgonNgu === 'vi' && !giong) return { ok: false, ma: 'MAY_CHUA_CO_GIONG' };
-      if (giong) u.voice = giong;
+      const giong = chonGiong(dsGiong, ngonNgu);
+      if (!giong) return docBangMayChu(chu, ngonNgu);
+      const u = new SpeechSynthesisUtterance(chu);
+      u.lang = giong.lang;
+      u.voice = giong;
+      u.rate = 0.92;
       window.speechSynthesis.speak(u);
       return { ok: true };
-    } catch { return { ok: false, ma: 'DOC_HONG' }; }
+    } catch { return docBangMayChu(chu, ngonNgu); }
   }
   try {
     await c.docTo({ chu, ngonNgu });
     return { ok: true };
   } catch (e: any) {
-    return { ok: false, ma: String(e?.message || e?.code || 'DOC_HONG') };
+    const ma = String(e?.message || e?.code || 'DOC_HONG');
+    // Máy thiếu giọng Việt hoặc không có bộ đọc ⇒ nhờ máy chủ, đừng im.
+    if (ma === 'MAY_CHUA_CO_GIONG' || ma === 'MAY_KHONG_CO_BO_DOC') return docBangMayChu(chu, ngonNgu);
+    return { ok: false, ma };
   }
 }
 
 export async function dungDocTo(): Promise<void> {
+  dungAmMayChu();
   const c = (await cauHoacNull())?.cau;
   if (!c) { try { window.speechSynthesis?.cancel(); } catch { /* không sao */ } return; }
   try { await c.dungDocTo(); } catch { /* đã dừng rồi */ }

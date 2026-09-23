@@ -321,9 +321,18 @@
       báo "máy bác chưa có bộ nghe" trong khi máy có. Một dạng §4.3 nữa: không
       nhìn thấy khác không tồn tại.
     -->
+    <!--
+      ⚠️ TTS_SERVICE — THÊM 23/9/2026. Cùng bẫy với bộ nghe ở trên, nhưng ở BỘ ĐỌC:
+      Android 11+ không cho app thấy bộ đọc chữ nào nếu không khai dòng này, nên
+      `new TextToSpeech(...)` trả lỗi và nút "Đọc to" trên APK báo "máy chưa có
+      bộ đọc" trên cả máy có sẵn giọng Google tiếng Việt.
+    -->
     <queries>
         <intent>
             <action android:name="android.speech.RecognitionService" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.TTS_SERVICE" />
         </intent>
     </queries>
 

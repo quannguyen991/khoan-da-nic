@@ -40,6 +40,7 @@ const { canDangNhap } = require('./src/auth');
 const {
   layCauHinhVapid, chuanHoaDangKy, chuanHoaDangKyNative, LOAI_DANG_KY,
 } = require('./src/push');
+const { docToMayChu, chuanHoaYeuCau, LoiDocTo } = require('./src/doc-to-may-chu');
 
 const CONG = Number(process.env.PORT) || 8089;
 const GIOI_HAN_VAN_BAN = 5000;          // §6.10
@@ -1615,7 +1616,32 @@ app.get('/api/suc-khoe', async (req, res) => {
      * Chỉ có/không — không lộ khoá.
      */
     pushCauHinh: layCauHinhVapid().daCauHinh,
+    /**
+     * 23/9/2026 — máy không có giọng Việt thì nút "Đọc to" nhờ máy chủ đọc, và
+     * CHỮ ĐEM ĐỌC đi sang Google. Chỉ báo có/không; `false` ⇒ máy thiếu giọng
+     * Việt thì màn hình nói thật là chưa đọc được.
+     */
+    giongDocMayChu: Boolean(process.env.GEMINI_API_KEY),
   });
+});
+
+/**
+ * ─────────────────── ĐỌC TO BẰNG GIỌNG VIỆT ───────────────────
+ * Xem `src/doc-to-may-chu.js`. Ngăn tần suất riêng — nghe lại một câu không được
+ * ăn vào lượt kiểm tin nhắn. Không ghi log chữ (§6.9).
+ */
+const chanDocTo = gioiHanTanSuat('doc_to');
+app.post('/api/doc-to', chanDocTo, async (req, res) => {
+  try {
+    const yeuCau = chuanHoaYeuCau(req.body);
+    const wav = await docToMayChu(yeuCau);
+    res.set('content-type', 'audio/wav');
+    res.set('cache-control', 'private, max-age=86400');
+    return res.send(wav);
+  } catch (e) {
+    const ma = e instanceof LoiDocTo ? e.ma : 'MAY_CHU_DOC_HONG';
+    return res.status(e instanceof LoiDocTo ? e.status : 500).json({ ma });
+  }
 });
 
 /**
