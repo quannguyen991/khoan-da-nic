@@ -66,14 +66,14 @@ export function KyChiaKhoa({ t, coPhien, soBoMe }: { t: (s: string) => string; c
 
   return (
     <section aria-labelledby="gd-chia-khoa" className="rounded-[24px] border-2 border-[#2e1065] bg-white p-5 flex flex-col gap-4">
-      <h2 id="gd-chia-khoa" className="text-[20px] font-black text-[#1e1b4b] leading-snug flex items-center gap-2">
+      <h2 id="gd-chia-khoa" className="text-[20px] font-black text-[#2e1065] leading-snug flex items-center gap-2">
         <KeyRound size={22} aria-hidden="true" /> {t('Bố mẹ nhờ anh/chị xác nhận')}
       </h2>
       <p className="text-[15px] font-bold text-slate-700 leading-snug">
         {t('Chỉ xác nhận khi anh/chị đã gọi nói chuyện với bố mẹ.')}
       </p>
       {soBoMe && (
-        <a href={`tel:${soBoMe.replace(/\s/g, '')}`} className="w-full min-h-[56px] rounded-[18px] bg-[#1e1b4b] text-white font-black text-[17px] px-3 leading-snug flex items-center justify-center">
+        <a href={`tel:${soBoMe.replace(/\s/g, '')}`} className="w-full min-h-[56px] rounded-[18px] bg-[#6d28d9] text-white font-black text-[17px] px-3 leading-snug flex items-center justify-center">
           {t('Gọi bố mẹ trước')}
         </a>
       )}
@@ -92,12 +92,12 @@ export function KyChiaKhoa({ t, coPhien, soBoMe }: { t: (s: string) => string; c
             <button type="button" disabled={dangLam !== null} onClick={() => { void ky(y, 'TU_CHOI'); }} className="min-h-[56px] rounded-[18px] bg-rose-700 text-white font-black text-[17px] px-2 leading-snug disabled:opacity-60">
               {t('Từ chối')}
             </button>
-            <button type="button" disabled={dangLam !== null} onClick={() => { void ky(y, 'XAC_NHAN'); }} className="min-h-[56px] rounded-[18px] border-2 border-[#1e1b4b] text-[#1e1b4b] font-black text-[17px] px-2 leading-snug disabled:opacity-60">
+            <button type="button" disabled={dangLam !== null} onClick={() => { void ky(y, 'XAC_NHAN'); }} className="min-h-[56px] rounded-[18px] border-2 border-[#6d28d9] text-[#2e1065] font-black text-[17px] px-2 leading-snug disabled:opacity-60">
               {t('Xác nhận')}
             </button>
           </div>
           {dangLam === y.yeuCauId && (
-            <p role="status" className="text-[15px] font-bold text-[#1e1b4b] leading-snug">{t('Máy đang hỏi vân tay hoặc khoá màn hình…')}</p>
+            <p role="status" className="text-[15px] font-bold text-[#2e1065] leading-snug">{t('Máy đang hỏi vân tay hoặc khoá màn hình…')}</p>
           )}
         </div>
       ))}

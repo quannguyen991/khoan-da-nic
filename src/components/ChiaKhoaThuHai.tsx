@@ -56,7 +56,7 @@ export function ChoConXacNhan({ t, yeuCauId, hetHan, onXong }: {
       <div role="status" className="rounded-[18px] border-2 border-emerald-700 bg-emerald-50 p-4 flex flex-col gap-2">
         <p className="text-[18px] font-black text-emerald-900 leading-snug">{t('Người thân đã xác nhận.')}</p>
         {cumTu && <p className="text-[16px] font-bold text-emerald-900 leading-snug">{t('Cụm từ đối chiếu:')} {cumTu}</p>}
-        <p className="text-[15px] text-emerald-900 leading-snug">{t('Xác nhận chỉ cho biết người thân đã ký. Nếu còn lo, bác gọi con hỏi lại.')}</p>
+        <p className="text-[15px] text-emerald-900 leading-snug">{t('Còn lo thì bác gọi con hỏi lại.')}</p>
       </div>
     );
   }
@@ -70,7 +70,7 @@ export function ChoConXacNhan({ t, yeuCauId, hetHan, onXong }: {
   if (trangThai === TRANG_THAI_KY.HET_HAN || conLai === 0) {
     return (
       <div role="alert" className="rounded-[18px] border-2 border-amber-700 bg-amber-50 p-4">
-        <p className="text-[18px] font-black text-amber-900 leading-snug">{t('Chưa liên lạc được người thân. Bác chờ gọi được cho con rồi hãy tính.')}</p>
+        <p className="text-[18px] font-black text-amber-900 leading-snug">{t('Chưa liên lạc được người thân. Bác chờ gọi được con đã.')}</p>
       </div>
     );
   }
@@ -78,9 +78,9 @@ export function ChoConXacNhan({ t, yeuCauId, hetHan, onXong }: {
   const giay = String(conLai % 60).padStart(2, '0');
   return (
     <div role="status" aria-live="polite" className="rounded-[18px] border-2 border-[#2e1065] bg-white p-4 flex flex-col gap-1">
-      <p className="text-[18px] font-black text-[#1e1b4b] leading-snug">{t('Đang chờ con xác nhận')}</p>
+      <p className="text-[18px] font-black text-[#2e1065] leading-snug">{t('Đang chờ con xác nhận')}</p>
       <p className="text-[15px] font-bold text-slate-700 tabular-nums">{t('Còn {t}').replace('{t}', `${phut}:${giay}`)}</p>
-      <p className="text-[15px] text-slate-700 leading-snug">{t('Trong lúc chờ, bác chưa chuyển gì cả.')}</p>
+      <p className="text-[15px] text-slate-700 leading-snug">{t('Bác chưa chuyển nhé.')}</p>
     </div>
   );
 }
@@ -114,22 +114,22 @@ export function ManChiaKhoa({ t, setView }: { t: (s: string) => string; setView:
     }
   };
 
-  const chip = (chon: boolean) => `min-h-[52px] px-3 rounded-[16px] border-2 font-bold text-[16px] leading-snug ${chon ? 'bg-[#1e1b4b] text-white border-[#1e1b4b]' : 'bg-white text-[#1e1b4b] border-slate-300'}`;
+  const chip = (chon: boolean) => `min-h-[52px] px-3 rounded-[16px] border-2 font-bold text-[16px] leading-snug ${chon ? 'bg-[#6d28d9] text-white border-[#6d28d9]' : 'bg-white text-[#2e1065] border-slate-300'}`;
 
   return (
     <div className="p-4 pb-24 max-w-xl mx-auto w-full overflow-y-auto">
-      <button type="button" onClick={() => setView('settings')} className="min-h-[52px] min-w-[52px] flex items-center gap-1 text-[#1e1b4b] font-bold text-[15px]">
+      <button type="button" onClick={() => setView('settings')} className="min-h-[52px] min-w-[52px] flex items-center gap-1 text-[#2e1065] font-bold text-[15px]">
         <ChevronLeft size={22} aria-hidden="true" /> {t('Quay lại')}
       </button>
-      <h1 className="text-[24px] font-black text-[#1e1b4b] mt-2 mb-1 leading-snug flex items-center gap-2">
+      <h1 className="text-[24px] font-black text-[#2e1065] mt-2 mb-1 leading-snug flex items-center gap-2">
         <KeyRound size={24} aria-hidden="true" /> {t('Chìa khoá thứ hai')}
       </h1>
       <p className="text-[16px] text-slate-700 leading-relaxed mb-4">
-        {t('Khoản chuyển lớn cho người nhận mới cần con xác nhận trên máy con. Khoan Đã không nối với ngân hàng — đây là lớp hỏi lại trong gia đình.')}
+        {t('Chuyển khoản lớn cho người nhận mới thì con xác nhận trước.')}
       </p>
 
       {!daDangNhap ? (
-        <button type="button" onClick={() => setView('con_cai_giup')} className="w-full min-h-[56px] rounded-[18px] bg-[#1e1b4b] text-white font-black text-[17px] px-3 leading-snug">
+        <button type="button" onClick={() => setView('con_cai_giup')} className="w-full min-h-[56px] rounded-[18px] bg-[#6d28d9] text-white font-black text-[17px] px-3 leading-snug">
           {t('Con cháu cài giúp')}
         </button>
       ) : (
@@ -137,8 +137,8 @@ export function ManChiaKhoa({ t, setView }: { t: (s: string) => string; setView:
           {caiDat && (
             <>
               <label className="flex items-center gap-3 min-h-[56px] rounded-[18px] border-2 border-[#2e1065] px-4 py-3">
-                <input type="checkbox" className="w-6 h-6 shrink-0" checked={caiDat.bat} onChange={(e) => { void doi({ bat: e.target.checked }); }} />
-                <span className="text-[16px] font-bold text-[#1e1b4b] leading-snug">{t('Bật chìa khoá thứ hai')}</span>
+                <input type="checkbox" className="w-6 h-6 shrink-0 accent-[#6d28d9]" checked={caiDat.bat} onChange={(e) => { void doi({ bat: e.target.checked }); }} />
+                <span className="text-[16px] font-bold text-[#2e1065] leading-snug">{t('Bật chìa khoá thứ hai')}</span>
               </label>
               <p className="text-[15px] font-bold text-slate-700">{t('Cần con xác nhận từ')}</p>
               <div className="flex flex-wrap gap-2">
@@ -154,7 +154,7 @@ export function ManChiaKhoa({ t, setView }: { t: (s: string) => string; setView:
           {dangCho ? (
             <ChoConXacNhan t={t} yeuCauId={dangCho.yeuCauId} hetHan={dangCho.hetHan} />
           ) : !moForm ? (
-            <button type="button" onClick={() => setMoForm(true)} className="w-full min-h-[56px] rounded-[18px] bg-[#1e1b4b] text-white font-black text-[17px] px-3 leading-snug">
+            <button type="button" onClick={() => setMoForm(true)} className="w-full min-h-[56px] rounded-[18px] bg-[#6d28d9] text-white font-black text-[17px] px-3 leading-snug">
               {t('Nhờ con xác nhận một khoản chuyển')}
             </button>
           ) : (
@@ -177,7 +177,7 @@ export function ManChiaKhoa({ t, setView }: { t: (s: string) => string; setView:
                   <button key={k} type="button" aria-pressed={aiBao === k} onClick={() => setAiBao(k)} className={chip(aiBao === k)}>{t(NHAN_AI_BAO[k])}</button>
                 ))}
               </div>
-              <button type="button" onClick={() => { void gui(); }} className="w-full min-h-[56px] rounded-[18px] bg-[#1e1b4b] text-white font-black text-[17px] px-3 leading-snug">
+              <button type="button" onClick={() => { void gui(); }} className="w-full min-h-[56px] rounded-[18px] bg-[#6d28d9] text-white font-black text-[17px] px-3 leading-snug">
                 {t('Gửi cho con')}
               </button>
             </div>

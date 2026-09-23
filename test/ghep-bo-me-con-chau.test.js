@@ -104,7 +104,7 @@ test('mã nối KHÔNG tự hiện — bác phải bấm lấy (mã này trông 
 });
 
 test('lời dặn chống lừa đứng TRƯỚC mã, và nói thẳng ai xin mã là lừa đảo', () => {
-  const iDan = GHEP.indexOf('Ai gọi đến hay nhắn tin xin mã này thì đó là lừa đảo');
+  const iDan = GHEP.indexOf('Ai gọi hay nhắn xin mã này là lừa đảo');
   const iMa = GHEP.indexOf("t('Mã nối của bác')");
   assert.ok(iDan > 0 && iMa > 0 && iDan < iMa, 'lời dặn phải nằm trên mã, không phải dưới');
 });

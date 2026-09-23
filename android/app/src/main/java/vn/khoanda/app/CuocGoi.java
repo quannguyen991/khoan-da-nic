@@ -2,6 +2,7 @@ package vn.khoanda.app;
 
 import android.content.Context;
 import android.content.Intent;
+import android.media.AudioManager;
 import android.net.Uri;
 import android.telephony.TelephonyManager;
 
@@ -19,6 +20,14 @@ import android.telephony.TelephonyManager;
  *
  * ⚠️ KHÔNG BIẾT AI GỌI. Chỉ đọc "máy có đang trong cuộc gọi" (READ_PHONE_STATE,
  * đã có). Không số, không nhật ký cuộc gọi, không danh bạ — xem TheoDoiCuocGoi.
+ *
+ * ⚠️ CUỘC GỌI ZALO / MESSENGER / VIBER — thêm 23/9/2026. `TelephonyManager` chỉ
+ * thấy cuộc gọi DI ĐỘNG. Ở Việt Nam rất nhiều vụ giả danh công an gọi qua Zalo —
+ * và khi đó tổ hợp "đang gọi + mã" không bao giờ nổ. Chế độ âm thanh của máy
+ * (`AudioManager.getMode()`) chuyển sang IN_COMMUNICATION khi BẤT KỲ app nào đang
+ * gọi thoại qua mạng. Không cần quyền gì thêm, và vẫn không biết app nào, ai gọi.
+ * Họp video (Meet, Zoom) cũng bật chế độ này — chấp nhận được, vì tự bật còn cần
+ * thêm tin có MÃ hoặc app mới cài; một mình cuộc gọi không làm gì cả.
  * ⚠️ §4.2 — KHÔNG RA NHÃN. Màn mở ra là lượt "dừng lại" (không nhãn rủi ro), với
  * một câu lệnh và nút gọi con. Bộ luật chỉ chạy khi bác bấm kiểm.
  * ⚠️ §6.9 — KHÔNG GỬI NỘI DUNG ĐI ĐÂU. Mã và tin nhắn nằm yên trên máy.
@@ -38,12 +47,30 @@ final class CuocGoi {
     private CuocGoi() {}
 
     static boolean dangGoi(Context ctx) {
+        return dangGoiDiDong(ctx) || dangGoiQuaMang(ctx);
+    }
+
+    static boolean dangGoiDiDong(Context ctx) {
         try {
             TelephonyManager tm = (TelephonyManager) ctx.getSystemService(Context.TELEPHONY_SERVICE);
             return tm != null && tm.getCallState() == TelephonyManager.CALL_STATE_OFFHOOK;
         } catch (SecurityException e) {
             // Chưa cấp READ_PHONE_STATE: không biết thì coi như KHÔNG — không tự bật mù.
             return false;
+        } catch (Throwable t) {
+            return false;
+        }
+    }
+
+    /** Chế độ âm thanh của một cuộc gọi: di động (IN_CALL) hoặc qua mạng (IN_COMMUNICATION). */
+    static boolean laCheDoGoi(int cheDo) {
+        return cheDo == AudioManager.MODE_IN_CALL || cheDo == AudioManager.MODE_IN_COMMUNICATION;
+    }
+
+    static boolean dangGoiQuaMang(Context ctx) {
+        try {
+            AudioManager am = (AudioManager) ctx.getSystemService(Context.AUDIO_SERVICE);
+            return am != null && laCheDoGoi(am.getMode());
         } catch (Throwable t) {
             return false;
         }

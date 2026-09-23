@@ -58,6 +58,18 @@ test('mốc "vừa gác máy" được ghi, và thông báo tự bật đi qua s
   }
 });
 
+test('cuộc gọi QUA MẠNG (Zalo, Messenger…) cũng tính là đang gọi — qua chế độ âm thanh, không thêm quyền', () => {
+  // TelephonyManager chỉ thấy cuộc gọi di động. Ở VN nhiều vụ giả danh công an gọi qua Zalo.
+  assert.match(CUOC_GOI, /return dangGoiDiDong\(ctx\) \|\| dangGoiQuaMang\(ctx\);/);
+  assert.match(CUOC_GOI, /AudioManager\.MODE_IN_COMMUNICATION/);
+  assert.match(CUOC_GOI, /am\.getMode\(\)/);
+  // Service nghe lúc vào/ra cuộc gọi qua mạng để có mốc "vừa gác máy" (API 31+).
+  assert.match(THEO_DOI, /am\.addOnModeChangedListener\(exec, b\)/);
+  assert.match(THEO_DOI, /am\.removeOnModeChangedListener/, 'gỡ bộ nghe khi service chết');
+  assert.match(THEO_DOI, /doiCheDoAmThanh\(am\.getMode\(\)\)/, 'service sống lại giữa cuộc gọi vẫn bắt được');
+  // getMode() và OnModeChangedListener không cần quyền nào — không thêm dòng nào vào manifest.
+});
+
 test('② vừa cài app: đăng ký ĐỘNG trong service (manifest không nhận được từ Android 8), chặn xử lý hai lần', () => {
   assert.match(THEO_DOI, /new android\.content\.IntentFilter\(Intent\.ACTION_PACKAGE_ADDED\)/);
   assert.match(THEO_DOI, /registerReceiver\(nhanCaiApp, f, Context\.RECEIVER_NOT_EXPORTED\)/);

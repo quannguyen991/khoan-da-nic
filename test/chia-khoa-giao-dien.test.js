@@ -46,7 +46,7 @@ test('§4.1/§11 — không "an toàn", "đã chặn", "Safe", "blocked" trong c
     for (const m of s.matchAll(/(?<![\w.])t\('([^']+)'\)/g)) assert.ok(!vi.test(m[1]), `${p}: "${m[1]}"`);
   }
   const i18n = doc('src/i18n.ts');
-  for (const k of ['Người thân đã xác nhận.', 'MÔ PHỎNG — ngân hàng thật chưa tích hợp Khoan Đã', 'Khoản này dưới ngưỡng bác đã đặt, hoặc bác chưa bật chìa khoá thứ hai. Trong mô phỏng, ngân hàng sẽ làm tiếp như bình thường.']) {
+  for (const k of ['Người thân đã xác nhận.', 'MÔ PHỎNG — ngân hàng thật chưa tích hợp Khoan Đã', 'Khoản này không cần con xác nhận.']) {
     const dong = i18n.split(/\r?\n/).filter((l) => l.includes(JSON.stringify(k) + ':'));
     assert.strictEqual(dong.length, 2, `"${k}" phải có ở cả vi và en`);
     for (const l of dong) assert.ok(!/\bsafe\b|blocked|an toàn/i.test(l.split(':').slice(1).join(':')), l);

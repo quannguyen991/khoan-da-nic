@@ -64,7 +64,7 @@ import {
   dangXuat as dangXuatTaiKhoan, layHoSo as layHoSoTaiKhoan,
   docPhien as docPhienTaiKhoan, suaHoSo as suaHoSoTaiKhoan,
   type HoSo as HoSoTaiKhoan,
-  guiBaoDong, guiTrangThaiBaoDong, type PhanHoiBaoDong,
+  guiBaoDong, guiTrangThaiBaoDong, type PhanHoiBaoDong, docVongGhep,
 } from './tai-khoan';
 import { cauTrangThaiBao } from './lib/cau-trang-thai-bao';
 import {
@@ -1218,6 +1218,24 @@ export default function App() {
   /** Ghép xong ở bất kỳ lối nào ⇒ người con vào danh sách gọi khẩn cấp (Phần 2, 23/9/2026). */
   const hopNhatDaGhep = (ds: { ten: string; so: string }[]) =>
     setFamilyMembers((cu: NguoiThan[]) => hopNhatNguoiThan(cu, ds));
+
+  /*
+   * ⚠️ MỞ APP LÀ NẠP LẠI NGƯỜI ĐÃ GHÉP — sửa 23/9/2026.
+   * Con nhập mã trên MÁY CON; máy bố mẹ không nghe được lúc đó. Trước đây số của
+   * con chỉ vào danh sách gọi khi bác tự mở "Nối với con cháu" — đo được: đã ghép
+   * với Minh mà màn khẩn cấp vẫn chỉ có "Gọi Cảnh Sát 113". Nút gọi con là việc
+   * DUY NHẤT của màn khẩn cấp, nên nó không được phụ thuộc vào một lần mở màn khác.
+   * Lỗi mạng thì giữ nguyên danh sách đang có (§4.3 — không tự xoá ai).
+   */
+  useEffect(() => {
+    if (!hoSo) return;
+    let huy = false;
+    docVongGhep()
+      .then((v) => { if (!huy && v.thanhVien.length > 0) hopNhatDaGhep(v.thanhVien); })
+      .catch(() => undefined);
+    return () => { huy = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hoSo?.id]);
 
   /**
    * DIỄN TẬP — đường "tự bấm dừng" có sẵn (KHÔNG nhãn rủi ro, §4.2) + cờ `dienTap`.
@@ -7613,7 +7631,13 @@ function WarningView({
           Vế thứ hai an ủi cho cảm giác *sau khi đã dừng*; vế thứ nhất mới là thứ
           giúp bác dừng. Giữ vế thứ nhất.
         */}
-        {canThiep === 'PAUSE_60S' && (
+        {/*
+          ⚠️ ẨN KHI ĐANG CÓ NÚT GỌI TO Ở TRÊN (heroGap) — 23/9/2026. Người dùng: "nhiều
+          chữ". Câu lệnh ngắn ở trên đã nói việc phải làm; câu này và ba bước bên dưới
+          nhắc lại đúng câu lệnh đó. Khi không có hero (không gọi được ai, đang phục hồi)
+          thì chúng vẫn hiện như cũ.
+        */}
+        {canThiep === 'PAUSE_60S' && !heroGap && (
           <div className="w-full bg-black/30 border border-white/20 rounded-[22px] px-4 py-3 mb-2 backdrop-blur-md">
             <p className="text-white font-semibold text-[17px] leading-snug text-center">
               {t('Cảm giác phải làm ngay là do họ tạo ra.')}
@@ -7632,7 +7656,7 @@ function WarningView({
           một dòng chữ nữa là bắt bác đọc một thứ rồi mới thấy đúng thứ ấy dưới
           dạng nút.
         */}
-        {canThiep === 'PAUSE_60S' && (
+        {canThiep === 'PAUSE_60S' && !heroGap && (
           <div className="w-full bg-white/12 border border-white/20 rounded-[22px] backdrop-blur-md mb-2 overflow-hidden">
             {[
               { icon: PhoneOff, text: t('Dừng cuộc gọi') },

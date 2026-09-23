@@ -49,8 +49,8 @@ export function ManNganHangMoPhong({ t, setView }: { t: (s: string) => string; s
 
   const lamLai = () => { setBuoc('nhap'); setCho(null); setLoi(null); };
   const oNhap = 'w-full min-h-[52px] rounded-[14px] border-2 border-slate-400 px-3 text-[17px] text-slate-900 bg-white';
-  const nutChinh = 'w-full min-h-[56px] rounded-[18px] bg-[#0f5132] text-white font-black text-[17px] px-3 leading-snug';
-  const chip = (chon: boolean) => `min-h-[52px] px-3 rounded-[16px] border-2 font-bold text-[16px] leading-snug ${chon ? 'bg-[#1e1b4b] text-white border-[#1e1b4b]' : 'bg-white text-[#1e1b4b] border-slate-300'}`;
+  const nutChinh = 'w-full min-h-[56px] rounded-[18px] bg-[#6d28d9] text-white font-black text-[17px] px-3 leading-snug';
+  const chip = (chon: boolean) => `min-h-[52px] px-3 rounded-[16px] border-2 font-bold text-[16px] leading-snug ${chon ? 'bg-[#6d28d9] text-white border-[#6d28d9]' : 'bg-white text-[#2e1065] border-slate-300'}`;
 
   return (
     <div className="pb-24 max-w-xl mx-auto w-full overflow-y-auto">
@@ -58,11 +58,11 @@ export function ManNganHangMoPhong({ t, setView }: { t: (s: string) => string; s
         {t('MÔ PHỎNG — ngân hàng thật chưa tích hợp Khoan Đã')}
       </div>
       <div className="p-4 flex flex-col gap-3">
-        <button type="button" onClick={() => setView('chia_khoa')} className="min-h-[52px] min-w-[52px] flex items-center gap-1 text-[#1e1b4b] font-bold text-[15px] self-start">
+        <button type="button" onClick={() => setView('chia_khoa')} className="min-h-[52px] min-w-[52px] flex items-center gap-1 text-[#2e1065] font-bold text-[15px] self-start">
           <ChevronLeft size={22} aria-hidden="true" /> {t('Quay lại')}
         </button>
         <h1 className="text-[22px] font-black text-slate-900 leading-snug">{t('Ngân hàng mẫu · Chuyển khoản')}</h1>
-        <p className="text-[15px] text-slate-700 leading-relaxed">{t('Màn này cho thấy chỗ chìa khoá thứ hai sẽ chen vào nếu một ngân hàng tích hợp. Tên người nhận và số tiền chỉ nằm trên máy này.')}</p>
+        <p className="text-[15px] text-slate-700 leading-relaxed">{t('Tên người nhận và số tiền chỉ nằm trên máy này.')}</p>
 
         {!daDangNhap && (
           <button type="button" onClick={() => setView('con_cai_giup')} className={nutChinh}>{t('Con cháu cài giúp')}</button>
@@ -80,7 +80,7 @@ export function ManNganHangMoPhong({ t, setView }: { t: (s: string) => string; s
             </label>
             {khoang && <p className="text-[15px] text-slate-700">{t('Lên máy chủ chỉ có khoảng:')} {t(NHAN_KHOANG[khoang])}</p>}
             <label className="flex items-center gap-3 min-h-[52px]">
-              <input type="checkbox" className="w-6 h-6 shrink-0" checked={nguoiMoi} onChange={(e) => setNguoiMoi(e.target.checked)} />
+              <input type="checkbox" className="w-6 h-6 shrink-0 accent-[#6d28d9]" checked={nguoiMoi} onChange={(e) => setNguoiMoi(e.target.checked)} />
               <span className="text-[16px] font-bold text-slate-800 leading-snug">{t('Lần đầu chuyển cho người này')}</span>
             </label>
             <button type="button" onClick={() => { void bamChuyen(); }} className={nutChinh}>{t('Chuyển')}</button>
@@ -89,14 +89,14 @@ export function ManNganHangMoPhong({ t, setView }: { t: (s: string) => string; s
 
         {buoc === 'can_xac_nhan' && (
           <div className="flex flex-col gap-3 rounded-[18px] border-2 border-[#2e1065] p-4">
-            <p className="text-[20px] font-black text-[#1e1b4b] leading-snug">{t('Khoản này cần con xác nhận.')}</p>
+            <p className="text-[20px] font-black text-[#2e1065] leading-snug">{t('Khoản này cần con xác nhận.')}</p>
             <p className="text-[15px] font-bold text-slate-700">{t('Ai bảo bác chuyển?')}</p>
             <div className="flex flex-wrap gap-2">
               {(Object.keys(NHAN_AI_BAO) as (keyof typeof NHAN_AI_BAO)[]).map((k) => (
                 <button key={k} type="button" aria-pressed={aiBao === k} onClick={() => setAiBao(k)} className={chip(aiBao === k)}>{t(NHAN_AI_BAO[k])}</button>
               ))}
             </div>
-            <button type="button" onClick={() => { void nhoCon(); }} className="w-full min-h-[56px] rounded-[18px] bg-[#1e1b4b] text-white font-black text-[17px] px-3 leading-snug">
+            <button type="button" onClick={() => { void nhoCon(); }} className="w-full min-h-[56px] rounded-[18px] bg-[#6d28d9] text-white font-black text-[17px] px-3 leading-snug">
               {t('Gửi cho con')}
             </button>
             <button type="button" onClick={lamLai} className="w-full min-h-[52px] rounded-[18px] border-2 border-slate-400 text-slate-700 font-bold text-[16px] px-3 leading-snug">
@@ -116,7 +116,7 @@ export function ManNganHangMoPhong({ t, setView }: { t: (s: string) => string; s
 
         {buoc === 'khong_can' && (
           <div className="flex flex-col gap-3 rounded-[18px] border-2 border-slate-400 p-4">
-            <p className="text-[17px] font-bold text-slate-800 leading-snug">{t('Khoản này dưới ngưỡng bác đã đặt, hoặc bác chưa bật chìa khoá thứ hai. Trong mô phỏng, ngân hàng sẽ làm tiếp như bình thường.')}</p>
+            <p className="text-[17px] font-bold text-slate-800 leading-snug">{t('Khoản này không cần con xác nhận.')}</p>
             <button type="button" onClick={lamLai} className="w-full min-h-[52px] rounded-[18px] border-2 border-slate-400 text-slate-700 font-bold text-[16px] px-3 leading-snug">
               {t('Làm lại')}
             </button>

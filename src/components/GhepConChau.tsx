@@ -128,12 +128,12 @@ export function ManGhepConChau({ t, setView, nhung = false, onDanhSach }: {
           <button
             type="button"
             onClick={() => setView('settings')}
-            className="min-h-[52px] min-w-[52px] flex items-center gap-1 text-[#1e1b4b] font-bold text-[15px]"
+            className="min-h-[52px] min-w-[52px] flex items-center gap-1 text-[#2e1065] font-bold text-[15px]"
           >
             <ChevronLeft size={22} aria-hidden="true" /> {t('Quay lại')}
           </button>
 
-          <h1 className="text-[24px] font-black text-[#1e1b4b] mt-2 mb-1 leading-snug">{t('Nối với con cháu')}</h1>
+          <h1 className="text-[24px] font-black text-[#2e1065] mt-2 mb-1 leading-snug">{t('Nối với con cháu')}</h1>
           <p className="text-[16px] text-slate-700 leading-relaxed mb-4">
             {t('Con cháu sẽ thấy tên và số điện thoại của bác để gọi khi cần. Tin nhắn, vị trí, pin của máy bác không gửi đi đâu.')}
           </p>
@@ -142,11 +142,11 @@ export function ManGhepConChau({ t, setView, nhung = false, onDanhSach }: {
 
       {!daDangNhap ? (
         <div className="bg-white border-2 border-[#2e1065] rounded-[18px] p-4">
-          <p className="text-[16px] font-semibold text-[#1e1b4b] leading-snug mb-3">{t('Bác cần có tài khoản để nối với con cháu.')}</p>
+          <p className="text-[16px] font-semibold text-[#2e1065] leading-snug mb-3">{t('Bác cần có tài khoản để nối với con cháu.')}</p>
           <button
             type="button"
             onClick={() => setView('login')}
-            className="w-full min-h-[56px] rounded-[18px] bg-[#1e1b4b] text-white font-black text-[17px]"
+            className="w-full min-h-[56px] rounded-[18px] bg-[#6d28d9] text-white font-black text-[17px]"
           >
             {t('Đăng nhập hoặc tạo tài khoản')}
           </button>
@@ -157,14 +157,14 @@ export function ManGhepConChau({ t, setView, nhung = false, onDanhSach }: {
           <div role="note" className="flex gap-3 bg-rose-50 border-2 border-rose-700 rounded-[18px] p-4 mb-3">
             <ShieldAlert size={22} className="text-rose-700 shrink-0 mt-0.5" aria-hidden="true" />
             <p className="text-[16px] font-bold text-rose-950 leading-snug">
-              {t('Chỉ đọc mã cho con cháu đang ngồi cạnh bác, hoặc khi bác tự gọi cho con bằng số đã lưu. Ai gọi đến hay nhắn tin xin mã này thì đó là lừa đảo.')}
+              {t('Chỉ đưa mã cho con đang ngồi cạnh bác. Ai gọi hay nhắn xin mã này là lừa đảo.')}
             </p>
           </div>
 
           {ma ? (
             <div className="bg-white border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] rounded-[18px] p-5 mb-3 text-center" aria-live="polite">
               <p className="text-[15px] font-bold text-slate-700 mb-1">{t('Mã nối của bác')}</p>
-              <p className="text-[44px] font-black text-[#1e1b4b] leading-tight tracking-[0.2em] tabular-nums" aria-label={ma.split('').join(' ')}>{ma}</p>
+              <p className="text-[44px] font-black text-[#2e1065] leading-tight tracking-[0.2em] tabular-nums" aria-label={ma.split('').join(' ')}>{ma}</p>
               <p className="text-[15px] font-semibold text-slate-700 mt-1">
                 {t('Còn hiệu lực')} {phut}:{giay} · {t('Dùng được một lần')}
               </p>
@@ -174,7 +174,7 @@ export function ManGhepConChau({ t, setView, nhung = false, onDanhSach }: {
               type="button"
               onClick={layMa}
               disabled={dangLam}
-              className="w-full min-h-[56px] mb-3 rounded-[18px] bg-[#1e1b4b] text-white font-black text-[17px] flex items-center justify-center gap-2 disabled:opacity-60"
+              className="w-full min-h-[56px] mb-3 rounded-[18px] bg-[#6d28d9] text-white font-black text-[17px] flex items-center justify-center gap-2 disabled:opacity-60"
             >
               <Link2 size={20} aria-hidden="true" /> {t('Lấy mã để con cháu nhập')}
             </button>
@@ -182,7 +182,7 @@ export function ManGhepConChau({ t, setView, nhung = false, onDanhSach }: {
 
           {loi && <p role="alert" className="text-[15px] font-bold text-rose-800 mb-3">{t(loi)}</p>}
 
-          <h2 className="flex items-center gap-2 text-[18px] font-black text-[#1e1b4b] mt-5 mb-2">
+          <h2 className="flex items-center gap-2 text-[18px] font-black text-[#2e1065] mt-5 mb-2">
             <Users size={20} aria-hidden="true" /> {t('Đang nối với')}
           </h2>
           {ds === null ? (
@@ -194,7 +194,7 @@ export function ManGhepConChau({ t, setView, nhung = false, onDanhSach }: {
               {ds.map((n) => (
                 <li key={n.id} className="bg-white border-2 border-[#2e1065] rounded-[18px] px-4 py-3 flex items-center gap-3">
                   <div className="flex-1 min-w-0">
-                    <p className="text-[16px] font-black text-[#1e1b4b] leading-snug break-words">{n.ten}</p>
+                    <p className="text-[16px] font-black text-[#2e1065] leading-snug break-words">{n.ten}</p>
                     <p className="text-[15px] font-semibold text-slate-700">{n.so}</p>
                     {n.id in dangNhanCanhBao && (
                       <p className={`text-[14px] font-bold leading-snug ${dangNhanCanhBao[n.id] ? 'text-emerald-800' : 'text-amber-800'}`}>

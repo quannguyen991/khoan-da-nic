@@ -101,7 +101,7 @@ export function ManConCaiGiup({ t, setView, onDangNhapXong, onDanhSachGhep, onDi
   };
 
   const o = 'w-full min-h-[56px] rounded-[18px] border-2 border-slate-300 focus:border-[#6d28d9] px-4 text-[18px] text-slate-900 outline-none';
-  const nutChinh = 'w-full min-h-[56px] rounded-[18px] bg-[#1e1b4b] text-white font-black text-[17px] px-3 leading-snug disabled:opacity-60';
+  const nutChinh = 'w-full min-h-[56px] rounded-[18px] bg-[#6d28d9] text-white font-black text-[17px] px-3 leading-snug disabled:opacity-60';
   const nutPhu = 'w-full min-h-[52px] rounded-[18px] border-2 border-slate-400 text-slate-700 font-bold text-[16px] px-3 leading-snug';
   const soBuoc = THU_TU.indexOf(buoc) + 1;
 
@@ -110,7 +110,7 @@ export function ManConCaiGiup({ t, setView, onDangNhapXong, onDanhSachGhep, onDi
       <button
         type="button"
         onClick={() => setView('home')}
-        className="min-h-[52px] min-w-[52px] flex items-center gap-1 text-[#1e1b4b] font-bold text-[15px]"
+        className="min-h-[52px] min-w-[52px] flex items-center gap-1 text-[#2e1065] font-bold text-[15px]"
       >
         <ChevronLeft size={22} aria-hidden="true" /> {t('Quay lại')}
       </button>
@@ -118,7 +118,7 @@ export function ManConCaiGiup({ t, setView, onDangNhapXong, onDanhSachGhep, onDi
 
       {buoc === 'tai_khoan' && (
         <section className="flex flex-col gap-3 mt-2">
-          <h1 className="text-[24px] font-black text-[#1e1b4b] leading-snug">{t('Tài khoản cho bố mẹ')}</h1>
+          <h1 className="text-[24px] font-black text-[#2e1065] leading-snug">{t('Tài khoản cho bố mẹ')}</h1>
           <p className="text-[16px] text-slate-700 leading-relaxed">{t('Dùng số điện thoại của bố mẹ. Mật khẩu để con giữ giúp.')}</p>
           <label className="text-[15px] font-bold text-slate-700" htmlFor="cg-so">{t('Số điện thoại của bố mẹ')}</label>
           <input id="cg-so" inputMode="tel" autoComplete="tel" value={so} onChange={(e) => setSo(e.target.value)} className={o} />
@@ -134,8 +134,8 @@ export function ManConCaiGiup({ t, setView, onDangNhapXong, onDanhSachGhep, onDi
 
       {buoc === 'noi_may' && (
         <section className="flex flex-col gap-3 mt-2">
-          <h1 className="text-[24px] font-black text-[#1e1b4b] leading-snug">{t('Nối với máy của con')}</h1>
-          <p className="text-[16px] text-slate-700 leading-relaxed">{t('Trên máy con: mở Khoan Đã, chọn "Con cháu", nhập mã dưới đây. Nối xong, số của con tự vào nút gọi khẩn cấp.')}</p>
+          <h1 className="text-[24px] font-black text-[#2e1065] leading-snug">{t('Nối với máy của con')}</h1>
+          <p className="text-[16px] text-slate-700 leading-relaxed">{t('Trên máy con: mở Khoan Đã → "Con cháu" → nhập mã.')}</p>
           <ManGhepConChau t={t} setView={setView} nhung onDanhSach={onDanhSachGhep} />
           <button type="button" onClick={tiep} className={nutChinh}>{t('Tiếp tục')}</button>
         </section>
@@ -143,7 +143,7 @@ export function ManConCaiGiup({ t, setView, onDangNhapXong, onDanhSachGhep, onDi
 
       {buoc === 'loi_nhan' && (
         <section className="flex flex-col gap-3 mt-2">
-          <h1 className="text-[24px] font-black text-[#1e1b4b] leading-snug">{t('Lời nhắn bằng giọng của con')}</h1>
+          <h1 className="text-[24px] font-black text-[#2e1065] leading-snug">{t('Lời nhắn bằng giọng của con')}</h1>
           <p className="text-[16px] text-slate-700 leading-relaxed">{t('Khi có nguy hiểm cao, máy sẽ phát lời nhắn này thay cho giọng máy đọc.')}</p>
           <GhiLoiNhan t={t} />
           <button type="button" onClick={tiep} className={nutChinh}>{t('Tiếp tục')}</button>
@@ -152,7 +152,7 @@ export function ManConCaiGiup({ t, setView, onDangNhapXong, onDanhSachGhep, onDi
 
       {buoc === 'quy_tac' && (
         <section className="flex flex-col gap-3 mt-2">
-          <h1 className="text-[24px] font-black text-[#1e1b4b] leading-snug">{t('Báo cho con khi có chuyện')}</h1>
+          <h1 className="text-[24px] font-black text-[#2e1065] leading-snug">{t('Báo cho con khi có chuyện')}</h1>
           <p className="text-[16px] text-slate-700 leading-relaxed">{t('Chỉ báo mức nguy hiểm và loại tình huống. Nội dung tin nhắn không gửi đi đâu.')}</p>
           <label className="flex items-center gap-3 min-h-[56px] rounded-[18px] border-2 border-[#2e1065] px-4 py-3">
             <input
@@ -161,7 +161,7 @@ export function ManConCaiGiup({ t, setView, onDangNhapXong, onDanhSachGhep, onDi
               checked={quyTac.baoKhiCao}
               onChange={(e) => { void luuQuyTac({ ...quyTac, baoKhiCao: e.target.checked }); }}
             />
-            <span className="text-[16px] font-bold text-[#1e1b4b] leading-snug">{t('Báo cho con khi Khoan Đã thấy nguy hiểm cao')}</span>
+            <span className="text-[16px] font-bold text-[#2e1065] leading-snug">{t('Báo cho con khi Khoan Đã thấy nguy hiểm cao')}</span>
           </label>
           {dangChayApk && (
             <label className="flex items-center gap-3 min-h-[56px] rounded-[18px] border-2 border-[#2e1065] px-4 py-3">
@@ -171,7 +171,7 @@ export function ManConCaiGiup({ t, setView, onDangNhapXong, onDanhSachGhep, onDi
                 checked={quyTac.baoKhiOtpTrongCuocGoi}
                 onChange={(e) => { void luuQuyTac({ ...quyTac, baoKhiOtpTrongCuocGoi: e.target.checked }); }}
               />
-              <span className="text-[16px] font-bold text-[#1e1b4b] leading-snug">{t('Báo cho con khi máy nhận mã OTP trong lúc đang có cuộc gọi')}</span>
+              <span className="text-[16px] font-bold text-[#2e1065] leading-snug">{t('Báo cho con khi máy nhận mã OTP trong lúc đang có cuộc gọi')}</span>
             </label>
           )}
           {/*
@@ -180,7 +180,7 @@ export function ManConCaiGiup({ t, setView, onDangNhapXong, onDanhSachGhep, onDi
           */}
           {dangChayApk && (
             <div className="flex flex-col gap-2 rounded-[18px] border-2 border-slate-300 p-4">
-              <p className="text-[16px] font-bold text-[#1e1b4b] leading-snug">{t('Để máy tự giúp bố mẹ lúc đang có cuộc gọi')}</p>
+              <p className="text-[16px] font-bold text-[#2e1065] leading-snug">{t('Để máy tự giúp bố mẹ lúc đang có cuộc gọi')}</p>
               <button type="button" onClick={() => { void xinGoiThang(); }} className={nutPhu}>
                 {quyenGoiThang ? t('Đã cho phép gọi thẳng') : t('Cho phép nút gọi con đổ chuông ngay')}
               </button>
@@ -204,7 +204,7 @@ export function ManConCaiGiup({ t, setView, onDangNhapXong, onDanhSachGhep, onDi
 
       {buoc === 'dien_tap' && (
         <section className="flex flex-col gap-3 mt-2">
-          <h1 className="text-[24px] font-black text-[#1e1b4b] leading-snug">{t('Tập một lần cho quen')}</h1>
+          <h1 className="text-[24px] font-black text-[#2e1065] leading-snug">{t('Tập một lần cho quen')}</h1>
           <p className="text-[16px] text-slate-700 leading-relaxed">{t('Bấm "Thử" để xem màn khẩn cấp. Bố mẹ tập bấm nút gọi con. Đây chỉ là diễn tập.')}</p>
           <button type="button" onClick={onDienTap} className={nutChinh}>{t('Thử')}</button>
           <button type="button" onClick={() => setView('home')} className={nutPhu}>{t('Xong')}</button>

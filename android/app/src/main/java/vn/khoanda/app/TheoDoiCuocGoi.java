@@ -8,6 +8,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
@@ -89,6 +90,10 @@ public class TheoDoiCuocGoi extends Service {
     private TelephonyManager tm;
     private Object boNghe;                 // TelephonyCallback (API 31+)
     private android.telephony.PhoneStateListener boNgheCu;   // dưới API 31
+    private AudioManager am;
+    private Object boNgheCheDo;            // AudioManager.OnModeChangedListener (API 31+)
+    /** Đang trong một cuộc gọi QUA MẠNG (Zalo, Messenger…) — thấy qua chế độ âm thanh. */
+    private boolean dangGoiMang = false;
     private final Handler tay = new Handler(Looper.getMainLooper());
     private Runnable hen;
 
@@ -170,6 +175,13 @@ public class TheoDoiCuocGoi extends Service {
             nhanCaiApp = null;
         }
         try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && am != null && boNgheCheDo != null) {
+                am.removeOnModeChangedListener((AudioManager.OnModeChangedListener) boNgheCheDo);
+            }
+        } catch (Throwable t) {
+            // đã gỡ
+        }
+        try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && boNghe != null) {
                 tm.unregisterTelephonyCallback((TelephonyCallback) boNghe);
             } else if (boNgheCu != null) {
@@ -193,6 +205,7 @@ public class TheoDoiCuocGoi extends Service {
                 BoNghe31 b = new BoNghe31();
                 boNghe = b;
                 tm.registerTelephonyCallback(exec, b);
+                batDauNgheCheDoAmThanh(exec);
             } else {
                 boNgheCu = new android.telephony.PhoneStateListener() {
                     @Override
@@ -242,6 +255,49 @@ public class TheoDoiCuocGoi extends Service {
             dungHan();
         } catch (Throwable t) {
             dungHan();
+        }
+    }
+
+    /**
+     * ══════ CUỘC GỌI QUA MẠNG (Zalo, Messenger, Viber…) — thêm 23/9/2026 ══════
+     *
+     * `TelephonyManager` không thấy các cuộc gọi này. Chế độ âm thanh thì thấy:
+     * IN_COMMUNICATION khi có app gọi thoại qua mạng. Ta coi lúc vào/ra chế độ
+     * đó như nhấc máy/gác máy — cùng hẹn giờ cuộc gọi dài, cùng mốc "vừa gác máy".
+     *
+     * Chỉ từ Android 12 (API 31) mới có bộ nghe. Máy cũ hơn: `CuocGoi.dangGoi()`
+     * vẫn hỏi được chế độ HIỆN TẠI lúc mã tới, chỉ thiếu mốc "vừa gác máy".
+     * ⚠️ Không biết app nào, ai gọi — chỉ biết "đang có cuộc gọi thoại".
+     */
+    private void batDauNgheCheDoAmThanh(Executor exec) {
+        try {
+            am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+            if (am == null) return;
+            BoNgheCheDo31 b = new BoNgheCheDo31();
+            boNgheCheDo = b;
+            am.addOnModeChangedListener(exec, b);
+            doiCheDoAmThanh(am.getMode());   // service sống lại giữa cuộc gọi — xem lỗi 19/8 bên dưới
+        } catch (Throwable t) {
+            // Không nghe được chế độ âm thanh: cuộc gọi di động vẫn được theo dõi như cũ.
+        }
+    }
+
+    private class BoNgheCheDo31 implements AudioManager.OnModeChangedListener {
+        @Override
+        public void onModeChanged(int cheDo) {
+            doiCheDoAmThanh(cheDo);
+        }
+    }
+
+    /** Cuộc gọi di động đã có bộ nghe riêng — ở đây chỉ lo phần qua mạng, không đếm hai lần. */
+    private void doiCheDoAmThanh(int cheDo) {
+        boolean goi = cheDo == AudioManager.MODE_IN_COMMUNICATION;
+        if (goi && !dangGoiMang) {
+            dangGoiMang = true;
+            if (!CuocGoi.dangGoiDiDong(this)) doiTrangThai(TelephonyManager.CALL_STATE_OFFHOOK);
+        } else if (!goi && dangGoiMang) {
+            dangGoiMang = false;
+            if (!CuocGoi.dangGoiDiDong(this)) doiTrangThai(TelephonyManager.CALL_STATE_IDLE);
         }
     }
 

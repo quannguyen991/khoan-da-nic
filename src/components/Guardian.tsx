@@ -27,6 +27,7 @@ import { MA_TAI_KHOAN } from '../catalog';
 import { Lang, NHAN, CHUA_KIEM, MA_LY_DO, tra, traNhieu } from '../catalog';
 import { ThuTinhHuong } from './ThuTinhHuong';
 import { KyChiaKhoa } from './KyChiaKhoa';
+import { cauNoiVoiBoMe } from '../lib/cau-noi-voi-bo-me';
 
 /*
  * PHẦN 3 (23/9/2026) — CÂU CHO MÀN "ĐANG CẦN" VÀ NÚT BẬT NHẬN. Mã → khoá catalog.
@@ -565,6 +566,13 @@ export function GuardianView({
           ) : (
             <p className="text-[15px] font-bold leading-snug">{tr('Chưa có số của bố mẹ trên máy này.')}</p>
           )}
+          {/* Ba câu cho lúc bố mẹ nhấc máy: một việc · đổ lỗi cho thủ đoạn · trấn an. Xem lib/cau-noi-voi-bo-me. */}
+          <div className="rounded-[18px] bg-white text-slate-900 p-4 flex flex-col gap-2">
+            <p className="text-[15px] font-bold text-red-800 leading-snug">{tr('Bố mẹ nghe máy thì nói:')}</p>
+            <ol className="flex flex-col gap-2 text-[18px] font-bold leading-snug list-none">
+              {cauNoiVoiBoMe(suKien?.loaiSuKien).map((c) => <li key={c}>“{tr(c)}”</li>)}
+            </ol>
+          </div>
           {loiSuKien && <p className="text-[14px] font-semibold leading-snug">{tr('Không tải được chi tiết. Vẫn gọi được.')}</p>}
           {suKien && (
             <ul className="flex flex-col gap-1 text-[15px] font-semibold leading-snug">
