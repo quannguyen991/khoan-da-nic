@@ -26,6 +26,7 @@ import { batNhanCanhBao, dangNhanTrenMayNay, type MaBatNhan } from '../lib/nhan-
 import { MA_TAI_KHOAN } from '../catalog';
 import { Lang, NHAN, CHUA_KIEM, MA_LY_DO, tra, traNhieu } from '../catalog';
 import { ThuTinhHuong } from './ThuTinhHuong';
+import { KyChiaKhoa } from './KyChiaKhoa';
 
 /*
  * PHẦN 3 (23/9/2026) — CÂU CHO MÀN "ĐANG CẦN" VÀ NÚT BẬT NHẬN. Mã → khoá catalog.
@@ -540,6 +541,8 @@ export function GuardianView({
         Đứng ĐẦU màn, trước mọi thứ khác: người con bấm thông báo vì lo, việc duy
         nhất cần làm là gọi.
       */}
+      {/* PHẦN 5 — bố mẹ nhờ ký "chìa khoá thứ hai". Tự ẩn khi không có gì chờ. */}
+      <KyChiaKhoa t={tr} coPhien={coPhien} soBoMe={laThat ? parentData?.phone : undefined} />
       {suKienId && (
         <section role="alert" aria-labelledby="gd-can-con" className="rounded-[24px] bg-red-700 text-white p-5 flex flex-col gap-3 shadow-[0_14px_35px_rgba(185,28,28,0.35)]">
           <h2 id="gd-can-con" className="text-[22px] font-black leading-snug">

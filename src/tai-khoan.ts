@@ -314,3 +314,53 @@ export async function docSuKienBaoDong(id: string): Promise<SuKienBaoDong> {
 export async function baoConDaGoi(id: string): Promise<void> {
   await goi(`/api/gia-dinh/su-kien/${encodeURIComponent(id)}/con-da-goi`, { method: 'POST', body: '{}' }, true);
 }
+
+/*
+ * ══════════ CHÌA KHOÁ THỨ HAI — Phần 5, 23/9/2026 ══════════
+ * Chỉ MÃ khoảng tiền đi lên máy chủ — không số tiền, không người nhận (§6.9).
+ * Xác nhận chỉ cho biết AI ĐÃ KÝ, không nói khoản chuyển an toàn (§11).
+ */
+export type MaKhoangTien = 'duoi_5' | '5_10' | '10_20' | '20_50' | 'tren_50';
+export interface CaiDatChiaKhoa { bat: boolean; nguong: 5 | 10 | 20 | 50 }
+export interface YeuCauChoKy {
+  yeuCauId: string; tenBoMe: string; khoangTien: MaKhoangTien;
+  hanhDong: 'chuyen_khoan' | 'rut_tien'; nguoiYeuCau: 'nguoi_la' | 'nguoi_quen' | 'khong_ro'; hetHan: number;
+}
+/** Mã trạng thái của Khoan Proof — xem `MA_KET_QUA` ở `backend/src/khoan-proof-ky.js`. */
+export const TRANG_THAI_KY = Object.freeze({
+  DA_XAC_NHAN: 'YEU_CAU_DA_DUOC_KY_BOI_TAI_KHOAN',
+  DA_TU_CHOI: 'TAI_KHOAN_DA_KY_TU_CHOI_YEU_CAU',
+  DANG_CHO: 'DANG_CHO_TAI_KHOAN_KIA_KY',
+  HET_HAN: 'CHUA_LIEN_LAC_DUOC_NGUOI_THAN',
+});
+
+export async function docChiaKhoa(): Promise<CaiDatChiaKhoa> {
+  return goi('/api/gia-dinh/chia-khoa', {}, true);
+}
+export async function datChiaKhoa(vao: Partial<CaiDatChiaKhoa>): Promise<CaiDatChiaKhoa> {
+  return goi('/api/gia-dinh/chia-khoa', { method: 'PUT', body: JSON.stringify(vao) }, true);
+}
+export async function kiemChiaKhoa(khoangTien: MaKhoangTien, nguoiNhanMoi: boolean): Promise<CaiDatChiaKhoa & { canXacNhan: boolean }> {
+  return goi('/api/chia-khoa/kiem', { method: 'POST', body: JSON.stringify({ khoangTien, nguoiNhanMoi }) }, true);
+}
+export async function nhoConXacNhan(vao: Pick<YeuCauChoKy, 'khoangTien' | 'hanhDong' | 'nguoiYeuCau'>): Promise<{ yeuCauId: string; hetHan: number }> {
+  return goi('/api/chia-khoa/yeu-cau', { method: 'POST', body: JSON.stringify(vao) }, true);
+}
+export async function docTrangThaiYeuCau(id: string): Promise<{ trangThai: string; cumTu?: string; hetHan: number }> {
+  return goi(`/api/proof/yeu-cau/${encodeURIComponent(id)}`, {}, true);
+}
+export async function dangChoToiKy(): Promise<{ yeuCau: YeuCauChoKy[] }> {
+  return goi('/api/chia-khoa/dang-cho', {}, true);
+}
+export async function layDeBaiKy(id: string): Promise<{ canDangKy: boolean; tuyChon?: any }> {
+  return goi(`/api/chia-khoa/yeu-cau/${encodeURIComponent(id)}/tuy-chon`, {}, true);
+}
+export async function kyYeuCau(id: string, quyetDinh: 'XAC_NHAN' | 'TU_CHOI', phanHoi: unknown): Promise<{ maKetQua: string; cumTu: string }> {
+  return goi(`/api/proof/yeu-cau/${encodeURIComponent(id)}/ky`, { method: 'POST', body: JSON.stringify({ quyetDinh, phanHoi }) }, true);
+}
+export async function batDauDangKyPasskey(): Promise<any> {
+  return goi('/api/proof/dang-ky/bat-dau', { method: 'POST', body: '{}' }, true);
+}
+export async function xacNhanDangKyPasskey(phanHoi: unknown): Promise<unknown> {
+  return goi('/api/proof/dang-ky/xac-nhan', { method: 'POST', body: JSON.stringify({ phanHoi }) }, true);
+}

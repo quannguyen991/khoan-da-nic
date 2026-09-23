@@ -300,3 +300,12 @@ services:
       # app, KHÔNG dùng email cá nhân — trường này đi ra bên thứ ba.
       - key: VAPID_SUBJECT
         value: https://khoan-da.onrender.com
+      # ══════ PASSKEY (Khoan Proof / Chìa khoá thứ hai) — thêm 23/9/2026 ══════
+      # Passkey gắn chặt với TÊN MIỀN. Mặc định trong code là 'localhost' — để
+      # nguyên trên Render thì mọi lượt ký thật đều bị trình duyệt từ chối.
+      # Bản APK không ký được passkey (WebView cần Digital Asset Links); con
+      # cháu ký trên trình duyệt của máy mình.
+      - key: KHOAN_DA_RP_ID
+        value: khoan-da.onrender.com
+      - key: KHOAN_DA_ORIGIN
+        value: https://khoan-da.onrender.com

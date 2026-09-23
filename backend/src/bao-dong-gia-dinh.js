@@ -71,6 +71,8 @@ const CHU = Object.freeze({
     con_bao_lua_dao: '{ten} bấm "Con bảo là lừa đảo".',
     con_bao_khong_sao: '{ten} bấm "Con bảo không sao".',
     ve_trang_chu: '{ten} đã rời màn cảnh báo.',
+    tieuDeXacNhan: 'Khoan Đã — {ten} nhờ con xác nhận',
+    xin_xac_nhan: '{ten} nhờ con xác nhận một khoản {viec} {khoang} cho người nhận mới. Mở để xác nhận hoặc từ chối.',
   },
   en: {
     tieuDe: 'Khoan Đã — {ten} needs you',
@@ -85,7 +87,19 @@ const CHU = Object.freeze({
     con_bao_lua_dao: '{ten} tapped "They said it\'s a scam".',
     con_bao_khong_sao: '{ten} tapped "They said it\'s fine".',
     ve_trang_chu: '{ten} left the warning screen.',
+    tieuDeXacNhan: 'Khoan Đã — {ten} asks you to confirm',
+    xin_xac_nhan: '{ten} asks you to confirm a {viec} of {khoang} to a new recipient. Open to confirm or decline.',
   },
+});
+
+/* Phần 5 — nhãn cho khoảng tiền và việc (mã → chữ theo ngôn ngữ người nhận). */
+const CHU_KHOANG = Object.freeze({
+  vi: { duoi_5: 'dưới 5 triệu', '5_10': '5–10 triệu', '10_20': '10–20 triệu', '20_50': '20–50 triệu', tren_50: 'trên 50 triệu' },
+  en: { duoi_5: 'under 5 million VND', '5_10': '5–10 million VND', '10_20': '10–20 million VND', '20_50': '20–50 million VND', tren_50: 'over 50 million VND' },
+});
+const CHU_VIEC = Object.freeze({
+  vi: { chuyen_khoan: 'chuyển khoản', rut_tien: 'rút tiền' },
+  en: { chuyen_khoan: 'transfer', rut_tien: 'cash withdrawal' },
 });
 
 class LoiBaoDong extends Error {
@@ -267,6 +281,26 @@ function taoBaoDong({
     };
   }
 
+  /**
+   * Phần 5 — bố mẹ nhờ con xác nhận một khoản chuyển (chìa khoá thứ hai). Đây là
+   * việc CHÍNH bố mẹ vừa bấm, nên không cần quy tắc báo (§12 chỉ cấm tự báo thay).
+   * Chỉ mã khoảng tiền + việc — không số tiền, không người nhận (§6.9).
+   */
+  async function baoXinXacNhan(boMeId, { yeuCauId, khoangTien, hanhDong }) {
+    const tenBoMe = await tenCua(boMeId);
+    const ketQua = await guiChoThanhVien(boMeId, (lang) => ({
+      tieuDe: dien(CHU[lang].tieuDeXacNhan, { ten: tenBoMe }),
+      noiDung: dien(CHU[lang].xin_xac_nhan, {
+        ten: tenBoMe, viec: CHU_VIEC[lang][hanhDong] || '', khoang: CHU_KHOANG[lang][khoangTien] || '',
+      }),
+      khan: true,
+      ma: `xac-nhan-${yeuCauId}`,
+      duong: `/?view=guardian&xacNhan=${encodeURIComponent(yeuCauId)}`,
+      lang,
+    }));
+    return ketQua.map(({ ten, trangThai }) => ({ ten, trangThai }));
+  }
+
   /** Máy bố mẹ: ai trong vòng đã bật nhận cảnh báo. */
   async function tinhTrang(boMeId) {
     const { thanhVien } = await capGhep(boMeId);
@@ -275,7 +309,7 @@ function taoBaoDong({
     return { thanhVien: ra };
   }
 
-  return { baoDong, leoThang, capNhat, conDaGoi, docSuKien, tinhTrang };
+  return { baoDong, leoThang, capNhat, conDaGoi, docSuKien, tinhTrang, baoXinXacNhan };
 }
 
 module.exports = {

@@ -178,14 +178,30 @@ async function taoYeuCau(yeuCau = {}, { bayGio = Date.now() } = {}) {
     userVerification: CAU_HINH.userVerification,
   });
 
+  /*
+   * ⚠️ LƯU ĐÚNG CHUỖI ĐÃ GỬI CHO TRÌNH DUYỆT — sửa 23/9/2026 (Phần 5).
+   *
+   * `generateAuthenticationOptions` MÃ HOÁ LẠI challenge dạng chuỗi (UTF-8 →
+   * base64url) trước khi đưa vào `tuyChon`. Đo: đưa vào "abcHASH_base64url",
+   * gửi đi "YWJjSEFTSF9iYXNlNjR1cmw". Trình duyệt ký trên chuỗi GỬI ĐI, nên bản
+   * trước — lưu và đối chiếu chuỗi THÔ — làm MỌI chữ ký từ passkey thật bị từ
+   * chối `CHU_KY_KHONG_HOP_LE`. Test không bắt được vì máy xác thực giả ký thẳng
+   * lên chuỗi mà hàm này trả về.
+   *
+   * Ràng buộc với payload KHÔNG yếu đi: chuỗi gửi đi chỉ là bản mã hoá của đúng
+   * bản băm payload. Đường đăng ký passkey (`khoan-proof.js`) vốn đã lưu
+   * `tuyChon.challenge` — giờ hai đường làm giống nhau.
+   */
+  const deBai = tuyChon.challenge;
+
   const kho = await layKho();
   await kho.luu(BANG.YEU_CAU, yeuCauId, {
-    yeuCauId, ...payload, challenge, trangThai: MA_KET_QUA.DANG_CHO_KY, taoLuc: bayGio,
+    yeuCauId, ...payload, challenge: deBai, trangThai: MA_KET_QUA.DANG_CHO_KY, taoLuc: bayGio,
   });
 
   // ⚠️ KHÔNG trả `cumTu` ở đây, và bản ghi cũng chưa có. Cụm từ chỉ tồn tại SAU
   // khi verify thành công — nếu nó tính ra được lúc này thì nó là sân khấu.
-  return { yeuCauId, challenge, hetHan, tuyChon, ...payload };
+  return { yeuCauId, challenge: deBai, hetHan, tuyChon, ...payload };
 }
 
 /** Trạng thái yêu cầu, cho cả hai đầu hỏi. Không có gì bí mật ở đây. */

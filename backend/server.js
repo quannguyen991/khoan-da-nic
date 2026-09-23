@@ -912,6 +912,52 @@ app.post('/api/gia-dinh/trang-thai', canPhien, baoDongRoute(async (req) =>
 app.get('/api/gia-dinh/su-kien/:id', chanDoc, canPhien, baoDongRoute(async (req) =>
   (await lopBaoDong(req)).docSuKien(req.taiKhoanId, req.params.id)));
 
+/**
+ * ══════════ CHÌA KHOÁ THỨ HAI — Phần 5 (23/9/2026) ══════════
+ * Xem `src/chia-khoa-thu-hai.js`. Mọi id lấy TỪ PHIÊN; chỉ mã khoảng tiền, không số,
+ * không người nhận (§6.9). Không hứa chặn giao dịch thật (§12) — "ngân hàng" dùng
+ * đường này là màn MÔ PHỎNG.
+ */
+const CK = require('./src/chia-khoa-thu-hai');
+
+const chiaKhoaRoute = (fn) => async (req, res) => {
+  try {
+    return res.json(await fn(req));
+  } catch (e) {
+    if (e instanceof CK.LoiChiaKhoa) return res.status(e.http).json({ maLoi: e.ma });
+    if (e instanceof KP.LoiProof) return res.status(e.http).json({ maLoi: e.ma });
+    console.error('[chia-khoa]', e?.message);
+    return res.status(500).json({ maLoi: 'LOI_MAY_CHU' });
+  }
+};
+
+app.get('/api/gia-dinh/chia-khoa', chanDoc, canPhien, chiaKhoaRoute(async (req) =>
+  CK.docCaiDat(await KP.khoChung(), req.taiKhoanId)));
+
+app.put('/api/gia-dinh/chia-khoa', chanProof, canPhien, chiaKhoaRoute(async (req) =>
+  CK.datCaiDat(await KP.khoChung(), req.taiKhoanId, req.body)));
+
+/** "Ngân hàng" (mô phỏng) hỏi: khoản này có cần con xác nhận không. */
+app.post('/api/chia-khoa/kiem', chanDoc, canPhien, chiaKhoaRoute(async (req) => {
+  const caiDat = await CK.docCaiDat(await KP.khoChung(), req.taiKhoanId);
+  return { ...caiDat, canXacNhan: CK.canXacNhan(caiDat, { khoangTien: req.body?.khoangTien, nguoiNhanMoi: req.body?.nguoiNhanMoi }) };
+}));
+
+/** Bố mẹ nhờ con xác nhận ⇒ yêu cầu Khoan Proof + thông báo tới máy con. */
+app.post('/api/chia-khoa/yeu-cau', chanProof, canPhien, chiaKhoaRoute(async (req) => {
+  const y = await CK.taoYeuCau(req.taiKhoanId, req.body);
+  const guiToi = await (await lopBaoDong(req)).baoXinXacNhan(req.taiKhoanId, y);
+  return { ...y, guiToi };
+}));
+
+/** Máy CON: yêu cầu đang chờ mình ký (không cần thông báo đẩy mới thấy được). */
+app.get('/api/chia-khoa/dang-cho', chanDoc, canPhien, chiaKhoaRoute(async (req) =>
+  CK.dangCho(await KP.khoChung(), req.taiKhoanId, TK.layHoSo)));
+
+/** Máy CON: đề bài để passkey ký đúng yêu cầu này. */
+app.get('/api/chia-khoa/yeu-cau/:id/tuy-chon', chanDoc, canPhien, chiaKhoaRoute(async (req) =>
+  CK.tuyChonKy(await KP.khoChung(), req.params.id, req.taiKhoanId)));
+
 /** Máy CON bấm "Gọi ngay" — ghi TRƯỚC khi mở trình gọi, để leo thang không báo thừa. */
 app.post('/api/gia-dinh/su-kien/:id/con-da-goi', canPhien, baoDongRoute(async (req) =>
   (await lopBaoDong(req)).conDaGoi(req.taiKhoanId, req.params.id)));
