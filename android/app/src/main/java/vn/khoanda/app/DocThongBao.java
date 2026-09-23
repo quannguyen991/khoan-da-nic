@@ -39,8 +39,10 @@ import java.util.List;
  *   thông báo đã bị xoá   → thong_bao_da_bi_xoa
  * Trả về chuỗi rỗng rồi để tầng trên đoán là đúng con bug §4.3 mô tả.
  *
- * ⚠️ CHỈ LẤY TỪ ỨNG DỤNG NHẮN TIN. Không quét thông báo của mọi app — vừa thừa
- * vừa làm bề mặt riêng tư rộng ra vô cớ.
+ * ⚠️ CHỈ LẤY TỪ ỨNG DỤNG NHẮN TIN — và, từ 23/9/2026 theo quyết định của người
+ * dùng, từ một danh sách CỐ ĐỊNH app ngân hàng/ví (xem GOI_NGAN_HANG), chỉ để kiểm
+ * "tiền vừa ra / mã vừa tới trong lúc gọi". Không quét thông báo của mọi app — vừa
+ * thừa vừa làm bề mặt riêng tư rộng ra vô cớ.
  *
  * ⚠️ CHƯA BIÊN DỊCH ĐƯỢC TRÊN MÁY DỰNG. Máy làm việc này không có JDK và Android
  * SDK, nên tệp này CHƯA TỪNG QUA javac. Phải mở bằng Android Studio và sửa lỗi
@@ -57,6 +59,46 @@ public class DocThongBao extends NotificationListenerService {
         add("com.facebook.orca");                    // Messenger
         add("org.telegram.messenger");
         add("com.viber.voip");
+    }};
+
+    /**
+     * ══════ APP NGÂN HÀNG / VÍ — thêm 23/9/2026, NGƯỜI DÙNG QUYẾT ══════
+     *
+     * Nhiều người giờ nhận biến động số dư qua thông báo TRONG app ngân hàng, không
+     * qua SMS. Chỉ đọc SMS thì bỏ lỡ đúng khoảnh khắc tiền ra. Người dùng đã quyết mở
+     * rộng phạm vi đọc sang các app dưới đây (§12 — đổi phạm vi riêng tư là việc của
+     * người dùng, không phải của Claude).
+     *
+     * ⚠️ CHỈ DÙNG CHO HAI PHÉP KIỂM TRONG LÚC GỌI: tiền vừa ra, và mã OTP vừa tới.
+     *    KHÔNG vào hàng đợi `HANG` (bác không "kiểm tin" thông báo ngân hàng), KHÔNG
+     *    sàng lọc, KHÔNG ghi log, KHÔNG gửi đi đâu. Đọc xong là bỏ.
+     * ⚠️ DANH SÁCH CỐ ĐỊNH, ĐÃ XÁC MINH trên Google Play ngày 23/9/2026 (tiêu đề trang
+     *    khớp tên app). Mã gói đoán mà không có trên Play thì KHÔNG đưa vào. Thêm
+     *    ngân hàng mới: xác minh trước, rồi thêm ở đây và ở PERMISSIONS-AND-POLICY.md.
+     */
+    static final List<String> GOI_NGAN_HANG = new ArrayList<String>() {{
+        add("com.VCB");                       // VCB Digibank
+        add("com.vietinbank.ipay");           // VietinBank iPay
+        add("com.vnpay.bidv");                // BIDV SmartBanking
+        add("com.vnpay.Agribank3g");          // Agribank Plus
+        add("vn.com.techcombank.bb.app");     // Techcombank Mobile
+        add("com.mbmobile");                  // MB Bank
+        add("mobile.acb.com.vn");             // ACB ONE
+        add("com.vnpay.vpbankonline");        // VPBank NEO
+        add("com.tpb.mb.gprsandroid");        // TPBank Mobile
+        add("com.vib.myvib2");                // MyVIB
+        add("com.sacombank.ewallet");         // Sacombank Pay
+        add("com.vnpay.hdbank");              // HDBank
+        add("vn.com.seabank.mb1");            // SeAMobile
+        add("vn.com.msb.smartBanking");       // MSB mBank
+        add("vn.com.ocb.awe");                // OCB OMNI
+        add("vn.com.lpb.lienviet24h");        // LPBank
+        add("xyz.be.cake");                   // Cake
+        add("vn.shb.saha.mbanking");          // SHB SAHA
+        add("com.ncb.bank");                  // NCB iziMobile
+        add("com.mservice.momotransfer");     // MoMo
+        add("vn.com.vng.zalopay");            // ZaloPay
+        add("com.bplus.vtpay");               // Viettel Money
     }};
 
     /**
@@ -96,7 +138,12 @@ public class DocThongBao extends NotificationListenerService {
 
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {
-        if (sbn == null || !GOI_NHAN_TIN.contains(sbn.getPackageName())) return;
+        if (sbn == null) return;
+        if (GOI_NGAN_HANG.contains(sbn.getPackageName())) {
+            kiemThongBaoNganHang(sbn.getNotification());
+            return;
+        }
+        if (!GOI_NHAN_TIN.contains(sbn.getPackageName())) return;
 
         Notification n = sbn.getNotification();
         if (n == null || n.extras == null) {
@@ -163,8 +210,8 @@ public class DocThongBao extends NotificationListenerService {
      *    thì tin khuyến mãi "giảm -50%" cũng khớp.
      * ⚠️ NGƯỠNG 1 TRIỆU LÀ LỰA CHỌN, KHÔNG PHẢI SỐ ĐO — trả tiền xe 50 nghìn trong lúc
      *    đang gọi không đáng một màn đỏ. Có số thật thì sửa ở đây và sửa câu này.
-     * ⚠️ CHỈ ĐỌC Ở ỨNG DỤNG NHẮN TIN (SMS biến động số dư). Thông báo TRONG app ngân
-     *    hàng không đọc — mở rộng tới đó là đổi phạm vi riêng tư, người dùng phải quyết.
+     * ⚠️ ĐỌC Ở SMS BIẾN ĐỘNG SỐ DƯ và, từ 23/9/2026 (người dùng quyết), ở thông báo
+     *    của các app trong GOI_NGAN_HANG — đọc xong bỏ, không lưu.
      * ⚠️ Câu hiện ra dạng điều kiện, không khẳng định bác bị lừa (§11); có "Tôi ổn" (§4.6).
      *    Số tiền và nội dung tin KHÔNG rời máy, không vào thông báo (§6.9).
      */
@@ -194,6 +241,25 @@ public class DocThongBao extends NotificationListenerService {
             }
         }
         return lonNhat;
+    }
+
+    /**
+     * Thông báo của app ngân hàng / ví: ghép tiêu đề + nội dung (app ngân hàng hay để
+     * "Biến động số dư" ở tiêu đề, con số ở thân), chạy hai phép kiểm trong lúc gọi,
+     * rồi BỎ. Không `them()`, không `sangLocTaiCho()` — xem chú thích ở GOI_NGAN_HANG.
+     */
+    private void kiemThongBaoNganHang(Notification n) {
+        if (n == null || n.extras == null) return;
+        Bundle x = n.extras;
+        StringBuilder sb = new StringBuilder();
+        for (String k : new String[] {
+                Notification.EXTRA_TITLE, Notification.EXTRA_TEXT, Notification.EXTRA_BIG_TEXT }) {
+            CharSequence cs = x.getCharSequence(k);
+            if (!TextUtils.isEmpty(cs)) sb.append(cs).append(' ');
+        }
+        String noiDung = sb.toString();
+        if (kiemTienRaTrongCuocGoi(noiDung)) return;
+        kiemMaTrongCuocGoi(noiDung);
     }
 
     private boolean kiemTienRaTrongCuocGoi(String noiDung) {

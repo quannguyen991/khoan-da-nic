@@ -81,6 +81,23 @@ test('④ tin TRỪ TIỀN tới trong lúc gọi ⇒ tự mở màn, có lối 
   assert.match(BDG.CHU.vi.tien_ra_trong_cuoc_goi, /\{ten\}/);
 });
 
+test('⑤ thông báo app NGÂN HÀNG (người dùng quyết 23/9): danh sách cố định, chỉ kiểm trong lúc gọi, không lưu, có nói trước', () => {
+  const nguon = doc(JAVA, 'DocThongBao.java');
+  const khoi = nguon.slice(nguon.indexOf('GOI_NGAN_HANG = new ArrayList'), nguon.indexOf('}};', nguon.indexOf('GOI_NGAN_HANG = new ArrayList')));
+  const goi = [...khoi.matchAll(/add\("([^"]+)"\)/g)].map((m) => m[1]);
+  assert.strictEqual(goi.length, 22, 'đổi danh sách thì xác minh trên Google Play rồi sửa số này và PERMISSIONS-AND-POLICY.md');
+  for (const g of ['com.VCB', 'com.vnpay.bidv', 'com.mservice.momotransfer']) assert.ok(goi.includes(g), g);
+  // Nhánh ngân hàng rẽ ra TRƯỚC khi vào đường tin nhắn, và kết thúc bằng return — không lọt vào HANG.
+  const nhanh = DOC_TB.slice(DOC_TB.indexOf('if (GOI_NGAN_HANG.contains(sbn.getPackageName())) {'));
+  assert.match(nhanh, /^if \(GOI_NGAN_HANG\.contains\(sbn\.getPackageName\(\)\)\) \{\s*kiemThongBaoNganHang\(sbn\.getNotification\(\)\);\s*return;/);
+  const ham = DOC_TB.slice(DOC_TB.indexOf('private void kiemThongBaoNganHang'), DOC_TB.indexOf('private boolean kiemTienRaTrongCuocGoi'));
+  assert.ok(!/them\(|sangLocTaiCho\(|Log\./.test(ham), 'thông báo ngân hàng: không lưu vào hàng đợi, không sàng lọc, không log');
+  assert.match(ham, /kiemTienRaTrongCuocGoi\(noiDung\)/);
+  // Nói trước khi xin quyền, và tài liệu quyền công khai nói đúng.
+  assert.match(APP, /data-noi-truoc="ngan-hang"/);
+  assert.match(doc(GOC, 'PERMISSIONS-AND-POLICY.md'), /fixed list of 22 Vietnamese bank and e-wallet apps/);
+});
+
 test('cuộc gọi QUA MẠNG (Zalo, Messenger…) cũng tính là đang gọi — qua chế độ âm thanh, không thêm quyền', () => {
   // TelephonyManager chỉ thấy cuộc gọi di động. Ở VN nhiều vụ giả danh công an gọi qua Zalo.
   assert.match(CUOC_GOI, /return dangGoiDiDong\(ctx\) \|\| dangGoiQuaMang\(ctx\);/);

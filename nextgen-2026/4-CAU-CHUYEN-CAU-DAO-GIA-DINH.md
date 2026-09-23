@@ -49,7 +49,7 @@ mặc định tắt.
 | "Con cháu cài giúp" — 5 bước, có diễn tập | ✅ chạy | Diễn tập không ghi gì, không báo ai |
 | Nối bố mẹ ↔ con bằng mã 6 số | ✅ chạy | |
 | Cảnh báo tới máy con (Web Push), leo thang 60 giây | ✅ code chạy, ⚠️ **trên web thật cần khoá VAPID ở Render** | iPhone chỉ nhận khi đã "Thêm vào màn hình chính". Máy chủ ngủ thì mất hẹn leo thang đang chờ |
-| Tự bật màn khi đang gọi (cả Zalo, Messenger) + OTP / cài app mới / tin trừ tiền ≥ 1 triệu | ✅ code + APK đã dựng, ⚠️ **chưa thử trên máy thật** | Xiaomi/Oppo có thể giết dịch vụ nền. Tin trừ tiền chỉ đọc SMS biến động số dư, không đọc thông báo trong app ngân hàng. Chỉ nói "đã chạy trên máy X" sau khi thử |
+| Tự bật màn khi đang gọi (cả Zalo, Messenger) + OTP / cài app mới / tin trừ tiền ≥ 1 triệu | ✅ code + APK đã dựng, ⚠️ **chưa thử trên máy thật** | Xiaomi/Oppo có thể giết dịch vụ nền. Tin trừ tiền đọc SMS biến động số dư và thông báo của 22 app ngân hàng/ví đã xác minh (đọc xong bỏ, không lưu). Chỉ nói "đã chạy trên máy X" sau khi thử |
 | "Có phải con đang gọi không?" — bác hỏi, con bấm Có/Không | ✅ chạy | Cần con đã bật nhận cảnh báo; chưa bật thì màn bác nói thật và đưa nút gọi lại số đã lưu |
 | Gọi thẳng một chạm (CALL_PHONE) | ✅ APK | Web thì mở trình quay số |
 | Chìa khoá thứ hai (passkey) | ✅ chạy, ⚠️ **cần `KHOAN_DA_RP_ID` đúng tên miền** | Chữ ký của con **không chứng minh** khoản chuyển an toàn |

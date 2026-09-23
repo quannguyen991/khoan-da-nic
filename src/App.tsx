@@ -4304,6 +4304,14 @@ function DocTinNhanNative({ t, onAnalyze }: { t: any; onAnalyze?: (text: string)
       <p className="text-[14px] text-slate-600 leading-relaxed mb-3">
         {t("Khoan Đã đọc thông báo tin nhắn mới (Tin nhắn, Zalo, Messenger…) để bác chạm một cái là kiểm được ngay, không phải chép tay. Tin chỉ nằm trong máy bác và chỉ được gửi đi kiểm khi bác bấm.")}
       </p>
+      {/*
+        ⚠️ NÓI TRƯỚC KHI XIN — thêm 23/9/2026. Bản APK giờ đọc cả thông báo của 22 app
+        ngân hàng / ví (DocThongBao.GOI_NGAN_HANG), do người dùng quyết. Cùng một quyền
+        hệ điều hành, nên câu này phải đứng ngay đây, trước nút cấp quyền.
+      */}
+      <p data-noi-truoc="ngan-hang" className="text-[14px] text-slate-600 leading-relaxed mb-3">
+        {t("Lúc bác đang gọi, Khoan Đã cũng xem thông báo của app ngân hàng, ví (Vietcombank, BIDV, MoMo…) để biết tiền vừa ra hay mã vừa tới. Không lưu, không gửi đi.")}
+      </p>
 
       {quyen === 'da_bat' ? (
         <>
