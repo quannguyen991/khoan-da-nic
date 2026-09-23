@@ -77,6 +77,8 @@
     <string name="tb_otp_cuoc_goi_noi_dung">Mã vừa tới trong lúc bác đang nghe điện thoại. Ai gọi mà xin mã là lừa đảo. Chạm để mở.</string>
     <string name="tb_cai_app_cuoc_goi_tieu_de">Khoan đã, đừng cài gì thêm</string>
     <string name="tb_cai_app_cuoc_goi_noi_dung">Máy vừa cài một ứng dụng mới trong lúc bác đang nghe điện thoại. Chạm để mở.</string>
+    <string name="tb_tien_ra_cuoc_goi_tieu_de">Tiền vừa ra khỏi tài khoản</string>
+    <string name="tb_tien_ra_cuoc_goi_noi_dung">Nếu người đang gọi bảo bác chuyển: gọi con và ngân hàng ngay. Chạm để mở.</string>
     <string name="tb_app_moi_tieu_de">Khoan Đã</string>
     <string name="tb_app_moi_noi_dung">Có một việc cần bác xem. Chạm để mở.</string>
     <string name="tb_nut_kiem_tin">Kiểm tin mới nhất</string>

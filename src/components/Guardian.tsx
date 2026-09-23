@@ -27,6 +27,7 @@ import { MA_TAI_KHOAN } from '../catalog';
 import { Lang, NHAN, CHUA_KIEM, MA_LY_DO, tra, traNhieu } from '../catalog';
 import { ThuTinhHuong } from './ThuTinhHuong';
 import { KyChiaKhoa } from './KyChiaKhoa';
+import { TraLoiHoiCon } from './TraLoiHoiCon';
 import { cauNoiVoiBoMe } from '../lib/cau-noi-voi-bo-me';
 
 /*
@@ -37,6 +38,7 @@ const CAU_LOAI_SU_KIEN: Record<string, string> = {
   ket_qua_kiem: 'Khoan Đã thấy tình huống nguy hiểm cao trên máy {ten}.',
   otp_trong_cuoc_goi: 'Máy {ten} vừa nhận mã OTP trong lúc đang có cuộc gọi.',
   cai_app_trong_cuoc_goi: 'Máy {ten} vừa cài ứng dụng mới trong lúc đang có cuộc gọi.',
+  tien_ra_trong_cuoc_goi: 'Tiền vừa ra khỏi tài khoản của {ten} trong lúc đang có cuộc gọi.',
 };
 const CAU_HANH_DONG: Record<string, string> = {
   bam_goi_nguoi_than: 'Đã bấm gọi người thân',
@@ -543,6 +545,8 @@ export function GuardianView({
         nhất cần làm là gọi.
       */}
       {/* PHẦN 5 — bố mẹ nhờ ký "chìa khoá thứ hai". Tự ẩn khi không có gì chờ. */}
+      {/* Bố mẹ hỏi "có phải con đang gọi không?" — đứng đầu: cuộc gọi kia vẫn đang diễn ra. */}
+      <TraLoiHoiCon t={tr} coPhien={coPhien} soBoMe={laThat ? parentData?.phone : undefined} />
       <KyChiaKhoa t={tr} coPhien={coPhien} soBoMe={laThat ? parentData?.phone : undefined} />
       {suKienId && (
         <section role="alert" aria-labelledby="gd-can-con" className="rounded-[24px] bg-red-700 text-white p-5 flex flex-col gap-3 shadow-[0_14px_35px_rgba(185,28,28,0.35)]">

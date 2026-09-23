@@ -21,7 +21,10 @@ const boCau = () => {
 
 test('mỗi loại sự kiện có ĐÚNG ba câu, và đủ ba loại mà máy chủ gửi', () => {
   const b = boCau();
-  assert.deepStrictEqual(Object.keys(b).sort(), ['cai_app_trong_cuoc_goi', 'ket_qua_kiem', 'otp_trong_cuoc_goi']);
+  assert.deepStrictEqual(Object.keys(b).sort(), ['cai_app_trong_cuoc_goi', 'ket_qua_kiem', 'otp_trong_cuoc_goi', 'tien_ra_trong_cuoc_goi']);
+  // Khớp đúng danh sách loại sự kiện máy chủ gửi — thiếu bộ câu là thẻ của con rơi về câu chung.
+  const BDG = require('../backend/src/bao-dong-gia-dinh');
+  assert.deepStrictEqual([...BDG.LOAI_SU_KIEN].sort(), Object.keys(b).sort());
   for (const [k, cau] of Object.entries(b)) assert.strictEqual(cau.length, 3, k);
 });
 

@@ -63,6 +63,8 @@
     <string name="tb_otp_cuoc_goi_noi_dung">A code arrived while you are on a call. Anyone who calls and asks for a code is a scammer. Tap to open.</string>
     <string name="tb_cai_app_cuoc_goi_tieu_de">Wait, don\'t install anything else</string>
     <string name="tb_cai_app_cuoc_goi_noi_dung">A new app was just installed while you are on a call. Tap to open.</string>
+    <string name="tb_tien_ra_cuoc_goi_tieu_de">Money just left your account</string>
+    <string name="tb_tien_ra_cuoc_goi_noi_dung">If the caller told you to send it: call your family and your bank now. Tap to open.</string>
     <string name="tb_app_moi_tieu_de">Khoan Đã</string>
     <string name="tb_app_moi_noi_dung">There is something for you to look at. Tap to open.</string>
     <string name="tb_nut_kiem_tin">Check the latest message</string>

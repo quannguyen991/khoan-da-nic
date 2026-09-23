@@ -128,6 +128,7 @@ public class DocThongBao extends NotificationListenerService {
 
         them(sbn.getPackageName(), noiDung, trangThai, sbn.getPostTime());
         // Phần 4 (23/9/2026): mã tới trong lúc đang gọi thì TỰ MỞ màn cảnh báo — xem CuocGoi.
+        if (kiemTienRaTrongCuocGoi(noiDung)) return;
         if (kiemMaTrongCuocGoi(noiDung)) return;
         sangLocTaiCho(noiDung);
     }
@@ -147,6 +148,59 @@ public class DocThongBao extends NotificationListenerService {
         if (!CuocGoi.dangHoacVuaGoi(this, System.currentTimeMillis())) return false;
         CuocGoi.batManCanhBao(this, "otp-trong-cuoc-goi",
                 R.string.tb_otp_cuoc_goi_tieu_de, R.string.tb_otp_cuoc_goi_noi_dung);
+        return true;
+    }
+
+    /**
+     * ③ ĐANG GỌI + TIN BÁO TIỀN VỪA RA KHỎI TÀI KHOẢN ⇒ tự mở màn (23/9/2026).
+     *
+     * Lúc bác đã lỡ chuyển là lúc báo ngân hàng sớm còn nhiều cơ hội nhất — trước
+     * đây app chỉ biết khi bác TỰ khai. Tin biến động số dư của ngân hàng Việt Nam
+     * luôn có một số tiền mang dấu TRỪ kèm chữ tài khoản / số dư / giao dịch:
+     *   "SD TK 0123 -5,000,000VND luc…"  ·  "TK:123|GD:-5,000,000VND|SDC:…"
+     *
+     * ⚠️ HAI VẾ CÙNG LÚC: dấu trừ trước một số tiền VÀ một chữ về tài khoản. Chỉ một vế
+     *    thì tin khuyến mãi "giảm -50%" cũng khớp.
+     * ⚠️ NGƯỠNG 1 TRIỆU LÀ LỰA CHỌN, KHÔNG PHẢI SỐ ĐO — trả tiền xe 50 nghìn trong lúc
+     *    đang gọi không đáng một màn đỏ. Có số thật thì sửa ở đây và sửa câu này.
+     * ⚠️ CHỈ ĐỌC Ở ỨNG DỤNG NHẮN TIN (SMS biến động số dư). Thông báo TRONG app ngân
+     *    hàng không đọc — mở rộng tới đó là đổi phạm vi riêng tư, người dùng phải quyết.
+     * ⚠️ Câu hiện ra dạng điều kiện, không khẳng định bác bị lừa (§11); có "Tôi ổn" (§4.6).
+     *    Số tiền và nội dung tin KHÔNG rời máy, không vào thông báo (§6.9).
+     */
+    static final long NGUONG_TIEN_RA = 1_000_000L;
+
+    private static final java.util.regex.Pattern SO_TIEN_TRU =
+            java.util.regex.Pattern.compile("(?:^|[\\s:|(])[-−]\\s?(\\d{1,3}(?:[.,]\\d{3})+|\\d{4,})",
+                    java.util.regex.Pattern.CASE_INSENSITIVE);
+
+    private static final java.util.regex.Pattern CHU_TAI_KHOAN =
+            java.util.regex.Pattern.compile(
+                    "(\\btk\\b|tài khoản|tai khoan|số dư|so du|\\bsd\\b|\\bsdc\\b|\\bgd\\b"
+                    + "|giao dịch|giao dich|biến động|bien dong)",
+                    java.util.regex.Pattern.CASE_INSENSITIVE);
+
+    /** Số tiền bị trừ lớn nhất trong tin, hoặc -1 nếu không phải tin trừ tiền. Hàm thuần — test được. */
+    static long soTienRa(String noiDung) {
+        if (noiDung == null || !CHU_TAI_KHOAN.matcher(noiDung).find()) return -1;
+        java.util.regex.Matcher m = SO_TIEN_TRU.matcher(noiDung);
+        long lonNhat = -1;
+        while (m.find()) {
+            try {
+                long so = Long.parseLong(m.group(1).replace(".", "").replace(",", ""));
+                if (so > lonNhat) lonNhat = so;
+            } catch (NumberFormatException ignored) {
+                // số quá dài — bỏ qua dòng này
+            }
+        }
+        return lonNhat;
+    }
+
+    private boolean kiemTienRaTrongCuocGoi(String noiDung) {
+        if (soTienRa(noiDung) < NGUONG_TIEN_RA) return false;
+        if (!CuocGoi.dangHoacVuaGoi(this, System.currentTimeMillis())) return false;
+        CuocGoi.batManCanhBao(this, "tien-ra-trong-cuoc-goi",
+                R.string.tb_tien_ra_cuoc_goi_tieu_de, R.string.tb_tien_ra_cuoc_goi_noi_dung);
         return true;
     }
 

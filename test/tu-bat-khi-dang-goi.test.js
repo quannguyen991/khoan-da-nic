@@ -39,7 +39,9 @@ test('CuocGoi: chỉ đọc "có đang gọi", không số, không nhật ký; t
   assert.match(CUOC_GOI, /getCallState\(\) == TelephonyManager\.CALL_STATE_OFFHOOK/);
   assert.ok(!/READ_CALL_LOG|CallLog|getLine1Number|incomingNumber/.test(CUOC_GOI), 'không được biết ai đang gọi');
   assert.match(CUOC_GOI, /GIAN_CACH_BAT_MS = 2 \* 60 \* 1000L/);
-  assert.match(CUOC_GOI, /if \(bayGio - lanBatCuoi < GIAN_CACH_BAT_MS\) return;/);
+  // Nhịp 2 phút RIÊNG từng loại: cảnh báo OTP vừa bật không được nuốt cảnh báo "tiền vừa ra".
+  assert.match(CUOC_GOI, /Long truoc = LAN_BAT\.get\(loiTat\);/);
+  assert.match(CUOC_GOI, /if \(truoc != null && bayGio - truoc < GIAN_CACH_BAT_MS\) return;/);
   assert.match(CUOC_GOI, /catch \(SecurityException e\) \{\s*return false;/, 'không có quyền thì KHÔNG tự bật mù');
   // Câu chữ đến từ strings.xml (§4.1), không soạn trong Java.
   assert.ok(!/"[^"]*[àáảãạăâđèéêìíòóôơùúưỳý][^"]*"/i.test(CUOC_GOI), 'CuocGoi.java không được chứa câu tiếng Việt');
@@ -56,6 +58,27 @@ test('mốc "vừa gác máy" được ghi, và thông báo tự bật đi qua s
     const cacChuoi = [...x.matchAll(/<string name="(tb_[a-z_]+)">([^<]*)<\/string>/g)];
     for (const [, ten, chu] of cacChuoi) assert.ok(!/(^|[^\\])'/.test(chu), `${f}: ${ten} có dấu ' chưa thoát`);
   }
+});
+
+test('④ tin TRỪ TIỀN tới trong lúc gọi ⇒ tự mở màn, có lối thẳng vào phục hồi; báo con theo quy tắc thứ hai', () => {
+  // Chạy TRƯỚC kiểm OTP: tin biến động số dư gấp hơn.
+  assert.ok(DOC_TB.indexOf('if (kiemTienRaTrongCuocGoi(noiDung)) return;') < DOC_TB.indexOf('if (kiemMaTrongCuocGoi(noiDung)) return;'));
+  assert.match(DOC_TB, /if \(soTienRa\(noiDung\) < NGUONG_TIEN_RA\) return false;/);
+  assert.match(DOC_TB, /NGUONG_TIEN_RA = 1_000_000L/);
+  assert.match(DOC_TB, /CuocGoi\.batManCanhBao\(this, "tien-ra-trong-cuoc-goi"/);
+  // Regex phải có dấu gạch chéo thật — bẫy heredoc đã từng làm `\d` thành ký tự rác.
+  const nguon = doc(JAVA, 'DocThongBao.java');
+  assert.match(nguon, /\(\\\\d\{1,3\}\(\?:\[\.,\]\\\\d\{3\}\)\+\|\\\\d\{4,\}\)/, 'SO_TIEN_TRU phải chứa \\\\d thật trong mã nguồn Java');
+  assert.ok(!/[\x00-\x08]/.test(nguon), 'không có ký tự điều khiển lọt vào mã nguồn');
+  for (const f of ['values', 'values-en']) {
+    const x = doc(GOC, 'android', 'app', 'src', 'main', 'res', f, 'strings.xml');
+    for (const k of ['tb_tien_ra_cuoc_goi_tieu_de', 'tb_tien_ra_cuoc_goi_noi_dung']) assert.ok(x.includes(`name="${k}"`), `${f} thiếu ${k}`);
+  }
+  assert.match(APP, /'tien-ra-trong-cuoc-goi': 'tien_ra_trong_cuoc_goi'/);
+  assert.match(APP, /lyDoTuBat === 'tien_ra_trong_cuoc_goi' && !canRecovery/);
+  const BDG = require('../backend/src/bao-dong-gia-dinh');
+  assert.ok(BDG.LOAI_SU_KIEN.includes('tien_ra_trong_cuoc_goi'));
+  assert.match(BDG.CHU.vi.tien_ra_trong_cuoc_goi, /\{ten\}/);
 });
 
 test('cuộc gọi QUA MẠNG (Zalo, Messenger…) cũng tính là đang gọi — qua chế độ âm thanh, không thêm quyền', () => {
@@ -90,10 +113,11 @@ test('③ gọi thẳng: có quyền thì ACTION_CALL, không có thì ACTION_DI
   assert.match(khoi, /hanGio\(/, 'mọi lệnh native phải có hạn giờ');
 });
 
-test('màn web: hai lối tắt tự bật dựng lượt KHÔNG NHÃN, và báo cho con đúng loại sự kiện', () => {
-  const i = APP.indexOf("if (d.loiTat === 'otp-trong-cuoc-goi' || d.loiTat === 'cai-app-trong-cuoc-goi') {");
+test('màn web: ba lối tắt tự bật dựng lượt KHÔNG NHÃN, và báo cho con đúng loại sự kiện', () => {
+  const i = APP.indexOf('const LY_DO_TU_BAT = {');
   assert.ok(i > 0);
-  const khoi = APP.slice(i, i + 500);
+  const khoi = APP.slice(i, APP.indexOf("setView('warning');", i));
+  for (const ma of ['otp-trong-cuoc-goi', 'cai-app-trong-cuoc-goi', 'tien-ra-trong-cuoc-goi']) assert.ok(khoi.includes(`'${ma}'`), ma);
   assert.match(khoi, /tuBamDung: true/);
   assert.ok(!/nhan:/.test(khoi), '§4.2 — máy tự bật không được tự đặt nhãn rủi ro');
   const CAP = doc(GOC, 'src', 'components', 'ConCaiGiup.tsx');

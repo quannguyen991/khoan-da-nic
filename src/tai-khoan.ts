@@ -274,7 +274,7 @@ export interface PhanHoiBaoDong {
 
 export interface SuKienBaoDong {
   id: string;
-  loaiSuKien: 'ket_qua_kiem' | 'otp_trong_cuoc_goi' | 'cai_app_trong_cuoc_goi';
+  loaiSuKien: 'ket_qua_kiem' | 'otp_trong_cuoc_goi' | 'cai_app_trong_cuoc_goi' | 'tien_ra_trong_cuoc_goi';
   nhan: string | null;
   hoKichBan: string | null;
   luc: number;
@@ -363,4 +363,27 @@ export async function batDauDangKyPasskey(): Promise<any> {
 }
 export async function xacNhanDangKyPasskey(phanHoi: unknown): Promise<unknown> {
   return goi('/api/proof/dang-ky/xac-nhan', { method: 'POST', body: JSON.stringify({ phanHoi }) }, true);
+}
+
+// ─────────── "Có phải con đang gọi không?" (23/9/2026) ───────────
+
+export type TraLoiHoi = 'CO' | 'KHONG';
+export interface KetQuaHoiCon {
+  hoiId: string; tenBoMe: string; hetHan: number; conHan: boolean;
+  traLoi: { ten: string; traLoi: TraLoiHoi; luc: number }[];
+  guiToi: { ten: string; trangThai: string }[];
+}
+/** Máy bố mẹ: hỏi mọi người con đã ghép. `guiToi` nói THẬT ai đã được báo tới. */
+export async function hoiConDangGoi(): Promise<{ hoiId: string; hetHan: number; guiToi: { ten: string; trangThai: string }[] }> {
+  return goi('/api/gia-dinh/hoi-con', { method: 'POST', body: '{}' }, true);
+}
+export async function docHoiCon(id: string): Promise<KetQuaHoiCon> {
+  return goi(`/api/gia-dinh/hoi-con/${encodeURIComponent(id)}`, {}, true);
+}
+/** Máy con: câu hỏi đang chờ mình trả lời. */
+export async function hoiConDangCho(): Promise<{ hoi: { hoiId: string; tenBoMe: string; hetHan: number }[] }> {
+  return goi('/api/gia-dinh/hoi-con/dang-cho', {}, true);
+}
+export async function traLoiHoiCon(id: string, traLoi: TraLoiHoi): Promise<{ daGhi: boolean }> {
+  return goi(`/api/gia-dinh/hoi-con/${encodeURIComponent(id)}/tra-loi`, { method: 'POST', body: JSON.stringify({ traLoi }) }, true);
 }

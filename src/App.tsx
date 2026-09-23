@@ -257,7 +257,7 @@ export interface KetQuaPhanTich {
   /** Lượt diễn tập từ luồng "Con cháu cài giúp" (Phần 2). KHÔNG phải kết quả phân tích; không ghi số liệu. */
   dienTap?: boolean;
   /** Máy tự bật màn cảnh báo (Phần 4) — một SỰ KIỆN trên máy, không phải nhãn rủi ro. */
-  lyDoTuBat?: 'otp_trong_cuoc_goi' | 'cai_app_trong_cuoc_goi';
+  lyDoTuBat?: 'otp_trong_cuoc_goi' | 'cai_app_trong_cuoc_goi' | 'tien_ra_trong_cuoc_goi';
 }
 
 export interface HistoryRecord {
@@ -1003,10 +1003,17 @@ export default function App() {
          * bộ luật chưa chạy, §4.2) mang `lyDoTuBat` để màn chọn đúng câu lệnh, và để
          * báo cho con nếu bác đã bật quy tắc thứ hai. Không nội dung tin nào đi theo.
          */
-        if (d.loiTat === 'otp-trong-cuoc-goi' || d.loiTat === 'cai-app-trong-cuoc-goi') {
+        const LY_DO_TU_BAT = {
+          'otp-trong-cuoc-goi': 'otp_trong_cuoc_goi',
+          'cai-app-trong-cuoc-goi': 'cai_app_trong_cuoc_goi',
+          // 23/9/2026: tin trừ tiền tới trong lúc gọi — xem DocThongBao.kiemTienRaTrongCuocGoi.
+          'tien-ra-trong-cuoc-goi': 'tien_ra_trong_cuoc_goi',
+        } as const;
+        const lyDoTuBat = LY_DO_TU_BAT[d.loiTat as keyof typeof LY_DO_TU_BAT];
+        if (lyDoTuBat) {
           setAnalyzeResult({
             canThiep: 'PAUSE_60S', tuBamDung: true, maLyDo: [], daKiem: [], chuaKiem: [],
-            lyDoTuBat: d.loiTat === 'otp-trong-cuoc-goi' ? 'otp_trong_cuoc_goi' : 'cai_app_trong_cuoc_goi',
+            lyDoTuBat,
           });
           setView('warning');
           return;
@@ -7412,6 +7419,19 @@ function WarningView({
             </p>
             <div className="w-full flex flex-col gap-2 mb-3">
               {nutHanhDongGap}
+              {/*
+                Tiền vừa ra trong lúc gọi ⇒ một lối THẲNG vào các bước phục hồi. App không
+                biết khoản đó có phải do bị lừa không — bác nói, không phải app đoán (§4.2).
+              */}
+              {lyDoTuBat === 'tien_ra_trong_cuoc_goi' && !canRecovery && (
+                <button
+                  type="button"
+                  onClick={() => { ghiHanhDong('da_lo_chuyen'); setDaBamPhucHoi(true); onBaoDaChuyen?.(); }}
+                  className="w-full min-h-[56px] rounded-[18px] bg-white text-slate-900 font-black text-[17px] px-3 leading-snug"
+                >
+                  {t('Tôi vừa chuyển theo lời người gọi')}
+                </button>
+              )}
               {coLoiNhan && loiNhan.url && (
                 <button
                   type="button"

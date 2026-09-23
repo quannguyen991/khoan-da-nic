@@ -42,7 +42,11 @@ final class CuocGoi {
 
     /** TheoDoiCuocGoi ghi lúc máy chuyển về IDLE. Chỉ một con số thời gian, không gì khác. */
     static volatile long lucGacMay = 0L;
-    private static volatile long lanBatCuoi = 0L;
+    /**
+     * Nhịp 2 phút RIÊNG cho từng loại — sửa 23/9/2026. Dùng chung một nhịp thì cảnh
+     * báo OTP vừa bật một phút trước sẽ nuốt mất cảnh báo "tiền vừa ra", đúng lúc nó gấp nhất.
+     */
+    private static final java.util.Map<String, Long> LAN_BAT = new java.util.concurrent.ConcurrentHashMap<>();
 
     private CuocGoi() {}
 
@@ -90,8 +94,9 @@ final class CuocGoi {
      */
     static void batManCanhBao(Context ctx, String loiTat, int tieuDeRes, int noiDungRes) {
         long bayGio = System.currentTimeMillis();
-        if (bayGio - lanBatCuoi < GIAN_CACH_BAT_MS) return;
-        lanBatCuoi = bayGio;
+        Long truoc = LAN_BAT.get(loiTat);
+        if (truoc != null && bayGio - truoc < GIAN_CACH_BAT_MS) return;
+        LAN_BAT.put(loiTat, bayGio);
 
         String dich = "khoanda://loi-tat/" + loiTat;
         if (PopupDeManHinh.daBatQuyen(ctx)) {

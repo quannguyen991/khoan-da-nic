@@ -31,8 +31,11 @@ const TOI_DA_MAY = 5;
 const GOP_MS = 30 * 1000;
 const LEO_THANG_MS = 60 * 1000;
 const GIU_SU_KIEN_MS = 24 * 60 * 60 * 1000;
+/** "Có phải con đang gọi không?" — 5 phút: đủ để con cầm máy lên, cuộc gọi kia vẫn còn. */
+const HAN_HOI_MS = 5 * 60 * 1000;
+const TRA_LOI_HOI = Object.freeze(['CO', 'KHONG']);
 
-const LOAI_SU_KIEN = Object.freeze(['ket_qua_kiem', 'otp_trong_cuoc_goi', 'cai_app_trong_cuoc_goi']);
+const LOAI_SU_KIEN = Object.freeze(['ket_qua_kiem', 'otp_trong_cuoc_goi', 'cai_app_trong_cuoc_goi', 'tien_ra_trong_cuoc_goi']);
 const HANH_DONG = Object.freeze(['bam_goi_nguoi_than', 'toi_on', 'da_lo_chuyen', 'con_bao_lua_dao', 'con_bao_khong_sao', 've_trang_chu']);
 const MA_HO = /^[a-z_]{1,60}$/;
 
@@ -63,6 +66,7 @@ const CHU = Object.freeze({
     ket_qua_kiem: '{ten} đang gặp tình huống nguy hiểm cao{ho}. Gọi ngay.',
     otp_trong_cuoc_goi: 'Máy {ten} vừa nhận mã OTP trong lúc đang có cuộc gọi. Gọi ngay.',
     cai_app_trong_cuoc_goi: 'Máy {ten} vừa cài ứng dụng mới trong lúc đang có cuộc gọi. Gọi ngay.',
+    tien_ra_trong_cuoc_goi: 'Tiền vừa ra khỏi tài khoản của {ten} trong lúc đang có cuộc gọi. Gọi ngay.',
     leo_thang: 'Chưa ai gọi {ten}. Gọi ngay.',
     tieuDeCapNhat: 'Khoan Đã — {ten}',
     bam_goi_nguoi_than: '{ten} đã bấm gọi người thân.',
@@ -73,12 +77,15 @@ const CHU = Object.freeze({
     ve_trang_chu: '{ten} đã rời màn cảnh báo.',
     tieuDeXacNhan: 'Khoan Đã — {ten} nhờ con xác nhận',
     xin_xac_nhan: '{ten} nhờ con xác nhận một khoản {viec} {khoang} cho người nhận mới. Mở để xác nhận hoặc từ chối.',
+    tieuDeHoiGoi: 'Khoan Đã — {ten} hỏi con',
+    hoi_goi: '{ten} đang nghe một cuộc gọi xưng là con. Có phải con đang gọi không? Mở để trả lời.',
   },
   en: {
     tieuDe: 'Khoan Đã — {ten} needs you',
     ket_qua_kiem: '{ten} is in a high-risk situation{ho}. Call now.',
     otp_trong_cuoc_goi: "{ten}'s phone just received a one-time code during a call. Call now.",
     cai_app_trong_cuoc_goi: "{ten}'s phone just installed a new app during a call. Call now.",
+    tien_ra_trong_cuoc_goi: "Money just left {ten}'s account during a call. Call now.",
     leo_thang: 'No one has called {ten} yet. Call now.',
     tieuDeCapNhat: 'Khoan Đã — {ten}',
     bam_goi_nguoi_than: '{ten} tapped "call family".',
@@ -89,6 +96,8 @@ const CHU = Object.freeze({
     ve_trang_chu: '{ten} left the warning screen.',
     tieuDeXacNhan: 'Khoan Đã — {ten} asks you to confirm',
     xin_xac_nhan: '{ten} asks you to confirm a {viec} of {khoang} to a new recipient. Open to confirm or decline.',
+    tieuDeHoiGoi: 'Khoan Đã — {ten} is asking you',
+    hoi_goi: '{ten} is on a call with someone saying they are you. Is it you calling? Open to answer.',
   },
 });
 
@@ -171,6 +180,7 @@ function taoKhoSuKien() {
   return {
     tao(ev) { ds.set(ev.id, ev); return ev; },
     lay(id) { return ds.get(id) || null; },
+    liet() { return [...ds.values()]; },
     ganDay(boMeId, loai, bayGio) {
       for (const [id, ev] of ds) {
         if (bayGio - ev.luc > GIU_SU_KIEN_MS) { ds.delete(id); continue; }
@@ -309,10 +319,86 @@ function taoBaoDong({
     return { thanhVien: ra };
   }
 
-  return { baoDong, leoThang, capNhat, conDaGoi, docSuKien, tinhTrang, baoXinXacNhan };
+  /*
+   * ══════ "CÓ PHẢI CON ĐANG GỌI KHÔNG?" — thêm 23/9/2026 ══════
+   *
+   * Bản gia đình của tính năng "Revolut có đang gọi bạn không": có người gọi xưng
+   * là con (giọng có thể giả bằng AI), bác bấm một nút, máy con đổ thông báo, con
+   * bấm "Con đang gọi" hoặc "Không phải con". Kiểm qua KÊNH KHÁC, không tin kênh
+   * đang gọi.
+   *
+   * ⚠️ Bác tự bấm ⇒ không cần quy tắc báo (§12 chỉ cấm tự báo thay chủ tài khoản).
+   * ⚠️ §4.3 — hết 5 phút không ai trả lời là "chưa hỏi được", KHÔNG phải "không sao".
+   * ⚠️ §11 — "Con đang gọi" chỉ nói con đã bấm thế, không nói cuộc gọi an toàn.
+   * ⚠️ Không gửi số người đang gọi, không nội dung cuộc gọi — máy không biết cả hai.
+   */
+  async function hoiCon(boMeId) {
+    const luc = bayGio();
+    const ev = khoSuKien.tao({
+      id: crypto.randomUUID(), boMeId, loaiSuKien: 'hoi_goi', luc, hetHan: luc + HAN_HOI_MS, traLoi: [], guiToi: [],
+    });
+    const tenBoMe = await tenCua(boMeId);
+    const ketQua = await guiChoThanhVien(boMeId, (lang) => ({
+      tieuDe: dien(CHU[lang].tieuDeHoiGoi, { ten: tenBoMe }),
+      noiDung: dien(CHU[lang].hoi_goi, { ten: tenBoMe }),
+      khan: true,
+      ma: `hoi-goi-${ev.id}`,
+      duong: `/?view=guardian&hoiGoi=${encodeURIComponent(ev.id)}`,
+      lang,
+    }));
+    ev.guiToi = ketQua.map(({ id, ten, trangThai }) => ({ id, ten, trangThai }));
+    return { hoiId: ev.id, hetHan: ev.hetHan, guiToi: ketQua.map(({ ten, trangThai }) => ({ ten, trangThai })) };
+  }
+
+  function layHoi(hoiId) {
+    const ev = khoSuKien.lay(hoiId);
+    if (!ev || ev.loaiSuKien !== 'hoi_goi') throw new LoiBaoDong('KHONG_CO_CAU_HOI', 404);
+    return ev;
+  }
+
+  async function traLoiHoi(taiKhoanId, hoiId, traLoi) {
+    if (!TRA_LOI_HOI.includes(traLoi)) throw new LoiBaoDong('TRA_LOI_KHONG_HOP_LE');
+    const ev = layHoi(hoiId);
+    if (!(await laThanhVien(taiKhoanId, ev.boMeId))) throw new LoiBaoDong('KHONG_THUOC_VONG_TRON', 403);
+    if (bayGio() > ev.hetHan) throw new LoiBaoDong('CAU_HOI_DA_HET_HAN');
+    ev.traLoi = ev.traLoi.filter((x) => x.id !== taiKhoanId);
+    ev.traLoi.push({ id: taiKhoanId, traLoi, luc: bayGio() });
+    return { daGhi: true };
+  }
+
+  async function docHoi(taiKhoanId, hoiId) {
+    const ev = layHoi(hoiId);
+    if (taiKhoanId !== ev.boMeId && !(await laThanhVien(taiKhoanId, ev.boMeId))) {
+      throw new LoiBaoDong('KHONG_THUOC_VONG_TRON', 403);
+    }
+    const traLoi = [];
+    for (const x of ev.traLoi) traLoi.push({ ten: await tenCua(x.id), traLoi: x.traLoi, luc: x.luc });
+    return {
+      hoiId: ev.id, tenBoMe: await tenCua(ev.boMeId), hetHan: ev.hetHan, conHan: bayGio() <= ev.hetHan,
+      traLoi, guiToi: ev.guiToi.map(({ ten, trangThai }) => ({ ten, trangThai })),
+    };
+  }
+
+  /** Máy CON: câu hỏi đang chờ mình trả lời (mở app mà không qua thông báo vẫn thấy). */
+  async function hoiDangCho(taiKhoanId) {
+    const luc = bayGio();
+    const ra = [];
+    for (const ev of khoSuKien.liet()) {
+      if (ev.loaiSuKien !== 'hoi_goi' || luc > ev.hetHan) continue;
+      if (ev.traLoi.some((x) => x.id === taiKhoanId)) continue;
+      if (!(await laThanhVien(taiKhoanId, ev.boMeId))) continue;
+      ra.push({ hoiId: ev.id, tenBoMe: await tenCua(ev.boMeId), hetHan: ev.hetHan });
+    }
+    return { hoi: ra };
+  }
+
+  return {
+    baoDong, leoThang, capNhat, conDaGoi, docSuKien, tinhTrang, baoXinXacNhan,
+    hoiCon, traLoiHoi, docHoi, hoiDangCho,
+  };
 }
 
 module.exports = {
-  BANG_NHAN, LOAI_SU_KIEN, HANH_DONG, CHUA_BAT_NHAN, LoiBaoDong, CHU,
+  BANG_NHAN, LOAI_SU_KIEN, HANH_DONG, CHUA_BAT_NHAN, LoiBaoDong, CHU, HAN_HOI_MS, TRA_LOI_HOI,
   dangKyNhan, tatNhan, taoKhoSuKien, taoBaoDong, soanCanhBao,
 };

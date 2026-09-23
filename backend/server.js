@@ -962,6 +962,20 @@ app.get('/api/chia-khoa/yeu-cau/:id/tuy-chon', chanDoc, canPhien, chiaKhoaRoute(
 app.post('/api/gia-dinh/su-kien/:id/con-da-goi', canPhien, baoDongRoute(async (req) =>
   (await lopBaoDong(req)).conDaGoi(req.taiKhoanId, req.params.id)));
 
+/*
+ * "CÓ PHẢI CON ĐANG GỌI KHÔNG?" — bố mẹ hỏi, con trả lời Có/Không (23/9/2026).
+ * ⚠️ §6.10 — đường báo gia đình KHÔNG gắn bộ giới hạn lượt: bác bấm lần thứ ba
+ * vì lo mà bị chặn là hỏng đúng lúc cần nhất.
+ */
+app.post('/api/gia-dinh/hoi-con', canPhien, baoDongRoute(async (req) =>
+  (await lopBaoDong(req)).hoiCon(req.taiKhoanId)));
+app.get('/api/gia-dinh/hoi-con/dang-cho', canPhien, baoDongRoute(async (req) =>
+  (await lopBaoDong(req)).hoiDangCho(req.taiKhoanId)));
+app.get('/api/gia-dinh/hoi-con/:id', canPhien, baoDongRoute(async (req) =>
+  (await lopBaoDong(req)).docHoi(req.taiKhoanId, req.params.id)));
+app.post('/api/gia-dinh/hoi-con/:id/tra-loi', canPhien, baoDongRoute(async (req) =>
+  (await lopBaoDong(req)).traLoiHoi(req.taiKhoanId, req.params.id, req.body?.traLoi)));
+
 /** §9.8 — chủ tài khoản thu hồi bất cứ lúc nào, KHÔNG cần người con đồng ý. */
 app.post('/api/proof/thu-hoi', chanProof, canPhien,
   proof((req) => KP.thuHoiGhep(req.taiKhoanId, req.body?.thanhVienId)));

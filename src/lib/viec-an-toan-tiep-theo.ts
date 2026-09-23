@@ -118,6 +118,7 @@ export const CAU_LENH_KHI_CHUA_CO_SO: Partial<Record<ViecAnToan, string>> = {
 export const CAU_LENH_TU_BAT = Object.freeze({
   otp_trong_cuoc_goi: 'Ai gọi mà xin mã là lừa đảo.',
   cai_app_trong_cuoc_goi: 'Đừng cài gì. Cúp máy ngay.',
+  tien_ra_trong_cuoc_goi: 'Tiền vừa ra. Gọi con ngay.',
 });
 
 /** Khoá catalog của câu lệnh — người gọi bọc bằng `t()`. `null` (lượt tự bấm dừng) dùng câu mặc định. */

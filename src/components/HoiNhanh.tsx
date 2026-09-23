@@ -27,6 +27,7 @@ import { ghiKetQua } from '../lib/ket-qua-can-thiep';
 import { useDocToMotLan } from '../lib/doc-to-mot-lan';
 import { chonViecAnToan, cauLenhNgan } from '../lib/viec-an-toan-tiep-theo';
 import { goiDienThoai } from '../native';
+import { HoiCon } from './HoiCon';
 
 /**
  * §15.11.1 — BỘ HỎI NHANH LÚC ĐANG BỊ GỌI.
@@ -547,6 +548,9 @@ export function HoiNhanhView({ setView, t, lang = 'vi', onTriggerEmergency, fami
         <h1 className="text-[25px] font-black text-white mb-1.5">{chu('tieu_de')}</h1>
         <p className="text-[14px] text-purple-200">{chu('dan_dat')}</p>
       </div>
+
+      {/* Người gọi xưng là con, cháu ⇒ hỏi con qua kênh khác, một chạm (23/9/2026). */}
+      <HoiCon t={t} familyMembers={familyMembers} />
 
       <div className="flex flex-col gap-3 mb-6">
         {MA_NHANH.map((ma) => {
