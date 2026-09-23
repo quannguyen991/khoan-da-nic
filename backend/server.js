@@ -219,8 +219,10 @@ app.use((req, res, next) => {
      *
      * ⚠️ THÊM PHƯƠNG THỨC MỚI VÀO `server.js` THÌ THÊM VÀO ĐÂY LUÔN.
      * Hàng rào: test 'CORS cho đủ mọi phương thức máy chủ thật sự nhận'.
+     * 23/9/2026: thêm PUT cho `/api/gia-dinh/quy-tac-bao` — hàng rào bắt được
+     * ngay lượt đầu, trước khi bản APK kịp bị chặn im lặng.
      */
-    res.setHeader('access-control-allow-methods', 'GET, POST, PATCH, OPTIONS');
+    res.setHeader('access-control-allow-methods', 'GET, POST, PUT, PATCH, OPTIONS');
     res.setHeader('access-control-max-age', '600');
   }
   // Preflight: trả sớm, đừng để nó rơi xuống handler thật.
@@ -817,6 +819,103 @@ app.get('/api/proof/ghep', chanDoc, canPhien, proof(async (req) => {
   return { thanhVien: await lamGiau(cap.thanhVien), chuTaiKhoan: await lamGiau(cap.chuTaiKhoan) };
 }));
 
+const QT = require('./src/quy-tac-bao');
+
+/**
+ * QUY TẮC "BÁO CHO CON" — Phần 2 (23/9/2026). Id lấy TỪ PHIÊN, không từ thân
+ * yêu cầu: không ai đặt được quy tắc của nhà người khác (§12).
+ */
+app.get('/api/gia-dinh/quy-tac-bao', chanDoc, canPhien, async (req, res) => {
+  try {
+    return res.json(await QT.docQuyTac(await KP.khoChung(), req.taiKhoanId));
+  } catch { return res.status(500).json({ maLoi: 'LOI_MAY_CHU' }); }
+});
+
+app.put('/api/gia-dinh/quy-tac-bao', chanProof, canPhien, async (req, res) => {
+  try {
+    return res.json(await QT.datQuyTac(await KP.khoChung(), req.taiKhoanId, req.body));
+  } catch (e) {
+    if (e instanceof QT.LoiQuyTac) return res.status(400).json({ maLoi: e.ma });
+    return res.status(500).json({ maLoi: 'LOI_MAY_CHU' });
+  }
+});
+
+/**
+ * GIA HẠN PHIÊN — Phần 2 (23/9/2026). Phiên sống 30 ngày; hết là mọi cảnh báo cho
+ * con LẶNG LẼ ngừng (§4.3: "chưa báo được" trông y hệt "đã báo"). Máy bố mẹ gọi
+ * đường này khi phiên còn dưới 7 ngày. Cấp token MỚI rồi HUỶ token cũ — hai token
+ * sống song song là nhân đôi chỗ rò.
+ */
+app.post('/api/tai-khoan/gia-han', chanProof, canPhien, async (req, res) => {
+  try {
+    const moi = await KP.capPhien(req.taiKhoanId);
+    await KP.huyPhien(req.headers.authorization);
+    return res.json(moi);
+  } catch { return res.status(500).json({ maLoi: 'LOI_MAY_CHU' }); }
+});
+
+/**
+ * ══════════ BÁO ĐỘNG GIA ĐÌNH — Phần 3 (23/9/2026) ══════════
+ * Xem `src/bao-dong-gia-dinh.js`. Tóm tắt ràng buộc:
+ *   · §12 — chỉ gửi khi CHÍNH bố mẹ đã bật quy tắc (Phần 2).
+ *   · §6.9 — chỉ MÃ; route chỉ chuyển đúng các trường khai báo.
+ *   · §6.10 — KHÔNG gắn bộ giới hạn tần suất vào đường báo; chống dội bằng gộp 30 giây.
+ *   · Test tiêm bộ gửi / hẹn giờ qua `app.set('guiPushThay')` / `app.set('henGioThay')`.
+ */
+const BDG = require('./src/bao-dong-gia-dinh');
+const { guiThatWebPush } = require('./src/gui-web-push');
+const khoSuKienGiaDinh = BDG.taoKhoSuKien();
+
+async function lopBaoDong(req) {
+  const kho = await KP.khoChung();
+  return BDG.taoBaoDong({
+    kho,
+    khoSuKien: khoSuKienGiaDinh,
+    capGhep: (id) => KP.capGhepCuaToi(id),
+    layHoSo: TK.layHoSo,
+    guiThat: req.app.get('guiPushThay') || guiThatWebPush,
+    henGio: req.app.get('henGioThay') || ((fn, ms) => setTimeout(fn, ms)),
+  });
+}
+
+const baoDongRoute = (fn) => async (req, res) => {
+  try {
+    return res.json(await fn(req));
+  } catch (e) {
+    if (e instanceof BDG.LoiBaoDong) return res.status(e.http).json({ maLoi: e.ma });
+    console.error('[bao-dong]', e?.message);
+    return res.status(500).json({ maLoi: 'LOI_MAY_CHU' });
+  }
+};
+
+/** Máy CON bật nhận cảnh báo (Web Push). Lưu theo tài khoản con, tối đa 5 máy. */
+app.post('/api/gia-dinh/nhan-canh-bao', chanDoc, canPhien, baoDongRoute(async (req) =>
+  BDG.dangKyNhan(await KP.khoChung(), req.taiKhoanId, req.body?.dangKy, req.body?.lang)));
+
+app.post('/api/gia-dinh/nhan-canh-bao/tat', chanDoc, canPhien, baoDongRoute(async (req) =>
+  BDG.tatNhan(await KP.khoChung(), req.taiKhoanId, req.body?.endpoint)));
+
+/** Máy BỐ MẸ: ai trong vòng đã bật nhận — để "chưa báo được" không trông như "đã báo" (§4.3). */
+app.get('/api/gia-dinh/tinh-trang-bao', chanDoc, canPhien, baoDongRoute(async (req) =>
+  (await lopBaoDong(req)).tinhTrang(req.taiKhoanId)));
+
+/** Máy BỐ MẸ gửi báo động. Chỉ đúng ba trường mã được chuyển tiếp. */
+app.post('/api/gia-dinh/bao-dong', canPhien, baoDongRoute(async (req) => {
+  const { loaiSuKien, nhan, hoKichBan } = req.body || {};
+  return (await lopBaoDong(req)).baoDong(req.taiKhoanId, { loaiSuKien, nhan, hoKichBan });
+}));
+
+/** Máy BỐ MẸ báo hành động đã làm (mã) — con thấy được, và leo thang tự dừng. */
+app.post('/api/gia-dinh/trang-thai', canPhien, baoDongRoute(async (req) =>
+  (await lopBaoDong(req)).capNhat(req.taiKhoanId, req.body?.suKienId, req.body?.hanhDong)));
+
+app.get('/api/gia-dinh/su-kien/:id', chanDoc, canPhien, baoDongRoute(async (req) =>
+  (await lopBaoDong(req)).docSuKien(req.taiKhoanId, req.params.id)));
+
+/** Máy CON bấm "Gọi ngay" — ghi TRƯỚC khi mở trình gọi, để leo thang không báo thừa. */
+app.post('/api/gia-dinh/su-kien/:id/con-da-goi', canPhien, baoDongRoute(async (req) =>
+  (await lopBaoDong(req)).conDaGoi(req.taiKhoanId, req.params.id)));
+
 /** §9.8 — chủ tài khoản thu hồi bất cứ lúc nào, KHÔNG cần người con đồng ý. */
 app.post('/api/proof/thu-hoi', chanProof, canPhien,
   proof((req) => KP.thuHoiGhep(req.taiKhoanId, req.body?.thanhVienId)));
@@ -1358,7 +1457,8 @@ app.get('/api/suc-khoe', async (req, res) => {
       ['LLM_API_BASE', 'LLM_API_KEY', 'RISK_LLM_MODEL',
        'LLM_API_BASE2', 'LLM_API_KEY2', 'RISK_LLM_MODEL2',
        'GEMINI_API_KEY', 'LLM_DU_PHONG_BASE', 'LLM_DU_PHONG_MODEL',
-       'LLM_TIMEOUT_MS', 'NODE_ENV', 'DATABASE_URL']
+       'LLM_TIMEOUT_MS', 'NODE_ENV', 'DATABASE_URL',
+       'VAPID_PUBLIC_KEY', 'VAPID_PRIVATE_KEY', 'VAPID_SUBJECT']
         .map((k) => [k, Boolean(process.env[k])]),
     ),
     /*
@@ -1401,6 +1501,12 @@ app.get('/api/suc-khoe', async (req, res) => {
      */
     kiemModel,
     kho,
+    /**
+     * Phần 3 (23/9/2026) — máy chủ có gửi được cảnh báo cho con không. `false` ⇒
+     * mọi báo động ra `CHUA_CAU_HINH_PUSH`, và màn bố mẹ nói đúng như vậy.
+     * Chỉ có/không — không lộ khoá.
+     */
+    pushCauHinh: layCauHinhVapid().daCauHinh,
   });
 });
 

@@ -122,4 +122,5 @@ function layThongKe() {
   };
 }
 
-module.exports = { taoBanChoDuyet, layDaDuyet, duyet, layThongKe, MAX };
+// TEN_HO: Phần 3 (23/9/2026) dùng lại tên họ kịch bản cho thông báo gửi con — một bảng, không chép.
+module.exports = { taoBanChoDuyet, layDaDuyet, duyet, layThongKe, MAX, TEN_HO };

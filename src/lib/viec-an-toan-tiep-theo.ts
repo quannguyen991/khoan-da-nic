@@ -84,3 +84,35 @@ export const CAU_VIEC_AN_TOAN: Record<ViecAnToan, string> = {
   khong_doc_ma: 'Bác đừng đọc mã cho ai, kể cả người xưng là ngân hàng.',
   cup_may_goi_nguoi_than: 'Bác đừng chuyển tiền, đừng đọc mã nào.',
 };
+
+/**
+ * CÂU LỆNH NGẮN — dòng chữ to nhất trên màn khẩn cấp, và là câu máy tự đọc to.
+ * Thêm 23/9/2026 (Phần 1 "Cầu dao gia đình").
+ *
+ * ⚠️ TỐI ĐA 8 CHỮ, có test đếm (`test/cau-lenh-ngan.test.js`). Người đang bị ép
+ * không đọc hết một câu dài; `CAU_VIEC_AN_TOAN` ở trên vẫn là bản đầy đủ cho các
+ * màn không gấp.
+ *
+ * ⚠️ CHƯA CÓ SỐ NGƯỜI THÂN THÌ KHÔNG BẢO "GỌI CON CHÁU". Nút chính lúc đó là
+ * Cảnh sát 113; câu lệnh bảo gọi một người không có số là sai với nút ngay dưới.
+ */
+export const CAU_LENH_NGAN: Record<ViecAnToan, string> = {
+  goi_ngan_hang_phuc_hoi: 'Gọi ngay số in sau thẻ ngân hàng.',
+  khong_cai_gui_nguoi_than: 'Đừng cài gì. Gọi con cháu.',
+  goi_so_cu_nguoi_than: 'Gọi lại số cũ của người thân.',
+  goi_so_sau_the: 'Cúp máy. Gọi số sau thẻ.',
+  khong_doc_ma: 'Đừng đọc mã cho ai.',
+  cup_may_goi_nguoi_than: 'Cúp máy. Gọi con cháu ngay.',
+};
+
+export const CAU_LENH_KHI_CHUA_CO_SO: Partial<Record<ViecAnToan, string>> = {
+  khong_cai_gui_nguoi_than: 'Đừng cài gì. Cúp máy ngay.',
+  cup_may_goi_nguoi_than: 'Cúp máy. Đừng chuyển tiền.',
+};
+
+/** Khoá catalog của câu lệnh — người gọi bọc bằng `t()`. `null` (lượt tự bấm dừng) dùng câu mặc định. */
+export function cauLenhNgan(viec: ViecAnToan | null, coSoNguoiThan: boolean): string {
+  const v: ViecAnToan = viec ?? 'cup_may_goi_nguoi_than';
+  const thay = coSoNguoiThan ? undefined : CAU_LENH_KHI_CHUA_CO_SO[v];
+  return thay ?? CAU_LENH_NGAN[v];
+}

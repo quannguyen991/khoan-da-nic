@@ -33,7 +33,9 @@ export type HanhDong =
   | 'bam_goi_nguoi_than'   // bấm nút gọi — KHÔNG biết có nối máy không
   | 'da_lo_chuyen'         // bác tự báo đã chuyển tiền / đọc mã
   | 'toi_on'               // §4.6 — mẫu báo động giả
-  | 've_trang_chu';        // rời màn không chọn hành động bảo vệ nào
+  | 've_trang_chu'         // rời màn không chọn hành động bảo vệ nào
+  | 'con_bao_lua_dao'      // gọi xong, bác bấm "Con bảo là lừa đảo"
+  | 'con_bao_khong_sao';   // gọi xong, bác bấm "Con bảo không sao" — mẫu hiệu chỉnh, KHÔNG hạ nhãn
 
 export interface BanGhiKetQua {
   luc: number;

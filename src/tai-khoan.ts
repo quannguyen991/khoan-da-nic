@@ -153,6 +153,8 @@ export async function dangXuat(): Promise<void> {
  */
 export async function layHoSo(): Promise<HoSo | null> {
   if (!docPhien()) return null;
+  // Phần 2 (23/9/2026): phiên còn dưới 7 ngày thì đổi token mới — xem `giaHanNeuSapHet`.
+  await giaHanNeuSapHet();
   try {
     const t = await goi('/api/tai-khoan/toi', {}, true);
     const p = docPhien();
@@ -221,4 +223,94 @@ export async function docVongGhep(): Promise<VongGhep> {
 
 export async function thuHoiNguoiDaGhep(thanhVienId: string): Promise<void> {
   await goi('/api/proof/thu-hoi', { method: 'POST', body: JSON.stringify({ thanhVienId }) }, true);
+}
+
+/*
+ * ══════════ GIA HẠN PHIÊN — Phần 2, 23/9/2026 ══════════
+ * Phiên sống 30 ngày. Hết là mọi cảnh báo cho con LẶNG LẼ ngừng (§4.3). `layHoSo`
+ * chạy mỗi lần mở app, nên gọi ở đó: còn dưới 7 ngày thì đổi token mới.
+ * ⚠️ Hỏng mạng thì thôi, KHÔNG đăng xuất — phiên cũ vẫn còn hạn.
+ */
+export async function giaHanNeuSapHet(bayGio: number = Date.now()): Promise<boolean> {
+  const p = docPhien();
+  if (!p || typeof p.hetHanLuc !== 'number') return false;
+  if (p.hetHanLuc - bayGio > 7 * 24 * 60 * 60 * 1000) return false;
+  try {
+    const t = await goi('/api/tai-khoan/gia-han', { method: 'POST', body: '{}' }, true);
+    if (t?.token) { luuPhien({ ...p, token: t.token, hetHanLuc: t.hetHanLuc }); return true; }
+  } catch { /* giữ phiên cũ */ }
+  return false;
+}
+
+/* ══════════ QUY TẮC "BÁO CHO CON" — Phần 2 ══════════ */
+export interface QuyTacBao {
+  baoKhiCao: boolean;
+  baoKhiOtpTrongCuocGoi: boolean;
+}
+
+export async function docQuyTacBao(): Promise<QuyTacBao> {
+  const t = await goi('/api/gia-dinh/quy-tac-bao', {}, true);
+  return { baoKhiCao: t?.baoKhiCao === true, baoKhiOtpTrongCuocGoi: t?.baoKhiOtpTrongCuocGoi === true };
+}
+
+export async function datQuyTacBao(q: Partial<QuyTacBao>): Promise<QuyTacBao> {
+  const t = await goi('/api/gia-dinh/quy-tac-bao', { method: 'PUT', body: JSON.stringify(q) }, true);
+  return { baoKhiCao: t?.baoKhiCao === true, baoKhiOtpTrongCuocGoi: t?.baoKhiOtpTrongCuocGoi === true };
+}
+
+/*
+ * ══════════ BÁO ĐỘNG GIA ĐÌNH — Phần 3, 23/9/2026 ══════════
+ * Chỉ MÃ đi qua các hàm này (§6.9). Trạng thái gửi chỉ có bốn loại, không có
+ * "đã thấy" (§9.4, §11). Xem `backend/src/bao-dong-gia-dinh.js`.
+ */
+export type TrangThaiGuiBao = 'DA_DAY_DI' | 'PUSH_DELIVERY_UNKNOWN' | 'CHUA_BAT_NHAN' | 'CHUA_CAU_HINH_PUSH' | 'DANG_KY_HET_HAN';
+
+export interface PhanHoiBaoDong {
+  gui: boolean;
+  lyDo?: string;
+  suKienId?: string;
+  ketQua?: { ten: string; trangThai: TrangThaiGuiBao }[];
+}
+
+export interface SuKienBaoDong {
+  id: string;
+  loaiSuKien: 'ket_qua_kiem' | 'otp_trong_cuoc_goi' | 'cai_app_trong_cuoc_goi';
+  nhan: string | null;
+  hoKichBan: string | null;
+  luc: number;
+  tenBoMe: string;
+  hanhDong: { ma: string; luc: number }[];
+  conDaGoi: boolean;
+}
+
+export async function guiBaoDong(vao: {
+  loaiSuKien: SuKienBaoDong['loaiSuKien'];
+  nhan?: string;
+  hoKichBan?: string | null;
+}): Promise<PhanHoiBaoDong> {
+  return goi('/api/gia-dinh/bao-dong', { method: 'POST', body: JSON.stringify(vao) }, true);
+}
+
+export async function guiTrangThaiBaoDong(suKienId: string, hanhDong: string): Promise<void> {
+  await goi('/api/gia-dinh/trang-thai', { method: 'POST', body: JSON.stringify({ suKienId, hanhDong }) }, true);
+}
+
+export async function dangKyNhanCanhBao(dangKy: unknown, lang: string): Promise<{ daBat: boolean; soMay: number }> {
+  return goi('/api/gia-dinh/nhan-canh-bao', { method: 'POST', body: JSON.stringify({ dangKy, lang }) }, true);
+}
+
+export async function tatNhanCanhBao(endpoint?: string): Promise<void> {
+  await goi('/api/gia-dinh/nhan-canh-bao/tat', { method: 'POST', body: JSON.stringify({ endpoint }) }, true);
+}
+
+export async function docTinhTrangBao(): Promise<{ thanhVien: { id: string; ten: string; coDangKy: boolean }[] }> {
+  return goi('/api/gia-dinh/tinh-trang-bao', {}, true);
+}
+
+export async function docSuKienBaoDong(id: string): Promise<SuKienBaoDong> {
+  return goi(`/api/gia-dinh/su-kien/${encodeURIComponent(id)}`, {}, true);
+}
+
+export async function baoConDaGoi(id: string): Promise<void> {
+  await goi(`/api/gia-dinh/su-kien/${encodeURIComponent(id)}/con-da-goi`, { method: 'POST', body: '{}' }, true);
 }

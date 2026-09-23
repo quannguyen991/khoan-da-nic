@@ -87,13 +87,23 @@ test('leo thang chỉ bật khi HẾT giờ, CHƯA hành động, và CHƯA lỡ
     'điều kiện leo thang đã đổi — người đã gọi người thân mà vẫn bị giục gọi là màn nói sai về hành động của họ');
 });
 
-test('leo thang KHÔNG tự gọi, không tự nhắn — chỉ đưa nút cho bác bấm (§12)', () => {
+/*
+ * ⚠️ ĐỔI 23/9/2026 (Phần 1 "Cầu dao gia đình"): bậc leo thang không còn mang nút
+ * gọi riêng. Nút gọi của màn gấp đã nằm NGAY TRÊN nó — hai nút gọi sát nhau là
+ * thêm một lựa chọn cho người đang hoảng. Ý canh gác giữ nguyên: leo thang chỉ
+ * NÓI, không tự làm (§12), và nút gọi phải nằm ngay đó.
+ */
+test('leo thang KHÔNG tự gọi, không tự nhắn — chỉ NÓI; nút gọi đã nằm ngay trên nó (§12)', () => {
   const i = APP.indexOf('{leoThang && (');
   assert.ok(i > 0, 'không tìm thấy khối leo thang');
-  const khoi = APP.slice(i, APP.indexOf('{timeLeft > 0 && (', i));
+  const het = APP.indexOf('{!leoThang && timeLeft > 0 && (', i);
+  assert.ok(het > i, 'khối leo thang phải đứng ngay trước dòng đếm giây');
+  const khoi = APP.slice(i, het);
+  assert.ok(khoi.length < 1500, 'khối leo thang phình to bất thường — xem lại');
   assert.ok(!/window\.open|tel:|sms:|fetch\(|useEffect/.test(khoi),
-    '§12 cấm "tự bật auto-alert thay chủ tài khoản" — bậc leo thang chỉ được bày ra, không được tự làm');
-  assert.match(khoi, /onClick=\{handleCallRelative\}/, 'bậc leo thang phải đưa đúng nút gọi người thân');
+    '§12 cấm "tự bật auto-alert thay chủ tài khoản" — bậc leo thang chỉ được nói, không được tự làm');
+  const iNut = APP.indexOf('{nutHanhDongGap}');
+  assert.ok(iNut > 0 && iNut < i, 'nút gọi của màn gấp phải đứng NGAY TRÊN bậc leo thang');
 });
 
 test('gọi, nhắn, hoặc báo đã lỡ chuyển đều tính là đã hành động', () => {
@@ -116,6 +126,7 @@ test('khối các bước phục hồi GẤP mặc định — mở ra mới th�
 });
 
 test('luồng phục hồi KHÔNG có vòng "Dừng 60 giây" — khoảng dừng là để TRƯỚC khi chuyển tiền, không phải sau', () => {
-  assert.match(APP, /relative overflow-hidden border border-white\/25 \$\{dangPhucHoi \? 'hidden' : ''\}/,
+  // 23/9/2026: thẻ này ẩn cả ở màn gấp (`heroGap`) — vòng đếm thành một dòng dưới nút chính.
+  assert.match(APP, /relative overflow-hidden border border-white\/25 \$\{dangPhucHoi \|\| heroGap \? 'hidden' : ''\}/,
     'người vừa mất tiền mà thấy "dừng 60 giây" là bị bảo CHỜ, trong khi việc cần làm là gọi ngân hàng ngay');
 });

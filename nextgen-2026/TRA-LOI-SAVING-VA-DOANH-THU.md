@@ -100,7 +100,7 @@ Câu này phải nói TRƯỚC khi nói giá, nếu không phần còn lại ngh
 | 1 | **Ngân hàng / ví điện tử** | Lớp cảnh báo đặt ngay trước nút xác nhận chuyển tiền, cho nhóm khách hàng cao tuổi | mỗi tài khoản được bảo vệ / tháng | **Nguồn chính.** Chưa có hợp đồng, chưa có pilot |
 | 2 | **Gia đình (con cái 30–50)** | Gói tiện lợi cho NGƯỜI VẬN HÀNH: nhiều bố mẹ trong một bảng, báo cáo tuần, ghép cặp máy để nhận cảnh báo, xuất hồ sơ vụ việc | mỗi gia đình / tháng | Giá là **giả định cần kiểm chứng** |
 | 3 | **Bảo hiểm, nhà mạng** | Tín hiệu giảm rủi ro cho gói bảo hiểm gian lận; nhà mạng đang chịu sức ép về cuộc gọi lừa đảo | thoả thuận | **Giả thuyết**, chưa nói chuyện với ai |
-| 4 | **Tài trợ công / CSR / giải thưởng** | Nuôi bản miễn phí, để bản miễn phí không phụ thuộc vào bản trả phí | theo chương trình | Đang có: Grand Prix AI-JAM US 2026 |
+| 4 | **Tài trợ công / CSR / giải thưởng** | Nuôi bản miễn phí, để bản miễn phí không phụ thuộc vào bản trả phí | theo chương trình | **Chưa có khoản nào.** Grand Prix AI-JAM US 2026 là danh hiệu, **không kèm tiền thưởng** — dùng làm uy tín khi xin quỹ, đừng tính là nguồn tiền |
 
 ### Vì sao NGÂN HÀNG trả — ba khoản chi họ đang gánh
 

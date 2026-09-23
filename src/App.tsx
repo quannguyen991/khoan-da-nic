@@ -63,7 +63,9 @@ import {
   dangXuat as dangXuatTaiKhoan, layHoSo as layHoSoTaiKhoan,
   docPhien as docPhienTaiKhoan, suaHoSo as suaHoSoTaiKhoan,
   type HoSo as HoSoTaiKhoan,
+  guiBaoDong, guiTrangThaiBaoDong, type PhanHoiBaoDong,
 } from './tai-khoan';
+import { cauTrangThaiBao } from './lib/cau-trang-thai-bao';
 import {
   laApk, hienCanhBaoHeadsUp, hienPopupCanhBao, anPopup, henNhacTheoDoi72Gio,
   datThongBaoThuongTruc, noiDungChiaSe, quyenPopup, xinQuyenPopup,
@@ -92,9 +94,13 @@ import { batDauTheoDoi } from './lib/theo-doi-72-gio';
 import { ManHoSoVuViec, ManRaDaThuDoan } from './components/HoSoVaRaDa';
 import { CongDongCanhGiac } from './components/CongDongCanhGiac';
 import { ManGhepConChau } from './components/GhepConChau';
+import { ManConCaiGiup } from './components/ConCaiGiup';
+import { hopNhatNguoiThan } from './lib/hop-nhat-nguoi-than';
+import { useLoiNhanCon, usePhatMotLan } from './lib/loi-nhan-giong';
 import { batDauDo, ketThucDo, ghiLuot } from './lib/do-thoi-gian-toi-nguoi-that';
 import { ghiKetQua, type HanhDong } from './lib/ket-qua-can-thiep';
-import { chonViecAnToan, CAU_VIEC_AN_TOAN } from './lib/viec-an-toan-tiep-theo';
+import { chonViecAnToan, CAU_VIEC_AN_TOAN, cauLenhNgan } from './lib/viec-an-toan-tiep-theo';
+import { useDocToMotLan } from './lib/doc-to-mot-lan';
 import { HoiNhanhView } from './components/HoiNhanh';
 import { CanhBaoToanManHinh } from './components/CanhBaoToanManHinh';
 import { useCanhBaoThuDong } from './canh-bao-thu-dong';
@@ -169,7 +175,7 @@ function KhungTaiTre({ t, children }: { t: any; children: React.ReactNode }) {
 }
 import { EMERGENCY_NUMBERS } from './data/so-khan-cap';
 
-export type ViewState = 'intro' | 'home' | 'voice' | 'phone' | 'link' | 'qr' | 'learn' | 'profile' | 'settings' | 'history' | 'family' | 'search' | 'login' | 'add_family' | 'warning' | 'guardian' | 'account' | 'privacy' | 'notifications' | 'device_data' | 'hoi_nhanh' | 'mat_khau_gia_dinh' | 'quy_tac_gia_dinh' | 'ho_so_vu_viec' | 'ra_da_thu_doan' | 'cong_dong' | 'doi_phan_ung' | 'so_ngan_hang' | 'theo_doi_72h' | 'tro_ly' | 'ghep_con_chau';
+export type ViewState = 'intro' | 'home' | 'voice' | 'phone' | 'link' | 'qr' | 'learn' | 'profile' | 'settings' | 'history' | 'family' | 'search' | 'login' | 'add_family' | 'warning' | 'guardian' | 'account' | 'privacy' | 'notifications' | 'device_data' | 'hoi_nhanh' | 'mat_khau_gia_dinh' | 'quy_tac_gia_dinh' | 'ho_so_vu_viec' | 'ra_da_thu_doan' | 'cong_dong' | 'doi_phan_ung' | 'so_ngan_hang' | 'theo_doi_72h' | 'tro_ly' | 'ghep_con_chau' | 'con_cai_giup';
 
 /**
  * MỘT NGƯỜI THÂN TRONG VÒNG TRÒN GIA ĐÌNH.
@@ -244,6 +250,8 @@ export interface KetQuaPhanTich {
   queryImage?: string | null;
   /** Bác tự khai đã chuyển tiền / đọc mã — gửi lên máy chủ để BỘ LUẬT chọn màn. */
   trangThaiNguoiDung?: 'da_chuyen_hoac_doc_ma';
+  /** Lượt diễn tập từ luồng "Con cháu cài giúp" (Phần 2). KHÔNG phải kết quả phân tích; không ghi số liệu. */
+  dienTap?: boolean;
 }
 
 export interface HistoryRecord {
@@ -1187,6 +1195,19 @@ export default function App() {
     setView('warning');
   };
 
+  /** Ghép xong ở bất kỳ lối nào ⇒ người con vào danh sách gọi khẩn cấp (Phần 2, 23/9/2026). */
+  const hopNhatDaGhep = (ds: { ten: string; so: string }[]) =>
+    setFamilyMembers((cu: NguoiThan[]) => hopNhatNguoiThan(cu, ds));
+
+  /**
+   * DIỄN TẬP — đường "tự bấm dừng" có sẵn (KHÔNG nhãn rủi ro, §4.2) + cờ `dienTap`.
+   * Màn cảnh báo hiện băng "ĐÂY LÀ DIỄN TẬP" và KHÔNG ghi kết quả can thiệp (§4.6).
+   */
+  const triggerDienTap = () => {
+    setAnalyzeResult({ canThiep: 'PAUSE_60S', tuBamDung: true, dienTap: true, maLyDo: [], daKiem: [], chuaKiem: [] });
+    setView('warning');
+  };
+
   useEffect(() => {
     localStorage.setItem('familyMembers', JSON.stringify(familyMembers));
   }, [familyMembers]);
@@ -1422,7 +1443,10 @@ export default function App() {
             {view === 'ho_so_vu_viec' && <ManHoSoVuViec setView={setView} t={t} lang={lang} lichSu={historyItems} />}
             {view === 'ra_da_thu_doan' && <ManRaDaThuDoan setView={setView} t={t} lang={lang} lichSu={historyItems} />}
             {view === 'cong_dong' && <CongDongCanhGiac t={t} setView={setView} />}
-            {view === 'ghep_con_chau' && <ManGhepConChau t={t} setView={setView} />}
+            {view === 'ghep_con_chau' && <ManGhepConChau t={t} setView={setView} onDanhSach={hopNhatDaGhep} />}
+            {view === 'con_cai_giup' && (
+              <ManConCaiGiup t={t} setView={setView} onDangNhapXong={setHoSo} onDanhSachGhep={hopNhatDaGhep} onDienTap={triggerDienTap} />
+            )}
             {view === 'warning' && <WarningView setView={setView} t={t} lang={lang} result={analyzeResult} familyMembers={familyMembers} noiChayAi={noiChayAi} mayCoUngDungLa={mayCoUngDungLa}
               onBaoDaChuyen={() => {
                 // Không có chữ hay ảnh (bác tự bấm "Khẩn cấp") thì không có gì để gửi lại —
@@ -1453,7 +1477,7 @@ export default function App() {
               />
             )}
             {view === 'device_data' && <DeviceDataView setView={setView} t={t} />}
-            {view === 'hoi_nhanh' && <HoiNhanhView setView={setView} t={t} lang={lang} onTriggerEmergency={triggerEmergencyAlert} />}
+            {view === 'hoi_nhanh' && <HoiNhanhView setView={setView} t={t} lang={lang} onTriggerEmergency={triggerEmergencyAlert} familyMembers={familyMembers} />}
             {view === 'settings' && (
               <SettingsView
                 sieuDonGian={sieuDonGian}
@@ -1673,7 +1697,7 @@ export default function App() {
               */}
               {view === 'intro' && <GuardianIntroView setView={setView} setUserRole={setUserRole} t={t} />}
               {view === 'login' && <GuardianAuthView setView={setView} onDangNhapXong={setHoSo} setUserRole={setUserRole} t={t} />}
-              {view === 'hoi_nhanh' && <HoiNhanhView setView={setView} t={t} lang={lang} onTriggerEmergency={triggerEmergencyAlert} />}
+              {view === 'hoi_nhanh' && <HoiNhanhView setView={setView} t={t} lang={lang} onTriggerEmergency={triggerEmergencyAlert} familyMembers={familyMembers} />}
               {view === 'learn' && <KhungTaiTre t={t}><LearnView setView={setView} t={t} lang={lang} onTriggerEmergency={triggerEmergencyAlert} /></KhungTaiTre>}
               {view !== 'intro' && view !== 'login' && view !== 'hoi_nhanh' && view !== 'learn' && (
                 <GuardianView
@@ -5420,6 +5444,20 @@ function SettingsView({
       </button>
 
       <button
+        onClick={() => setView('con_cai_giup')}
+        className="w-full max-w-[360px] bg-white rounded-3xl p-5 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] mb-6 flex items-center gap-3 text-left active:scale-[0.98] transition-transform"
+      >
+        <div className="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-700 shrink-0">
+          <Users size={24} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <h3 className="font-black text-[16px] text-[#311068] leading-snug">{t('Con cháu cài giúp')}</h3>
+          <p className="text-[14px] text-slate-600 leading-snug mt-0.5">{t('Nối máy, ghi lời nhắn, bật báo cho con — 3 phút')}</p>
+        </div>
+        <ChevronRight size={20} className="text-slate-500 shrink-0" />
+      </button>
+
+      <button
         onClick={() => setView('ghep_con_chau')}
         className="w-full max-w-[360px] bg-white rounded-3xl p-5 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] mb-6 flex items-center gap-3 text-left active:scale-[0.98] transition-transform"
       >
@@ -5675,7 +5713,8 @@ function IntroView({
     {
       logo: true,
       title: t("Kiểm tra nhanh, phát hiện sớm"),
-      desc: t("AI thông minh kiểm tra cuộc gọi, tin nhắn, đường link và giao dịch lạ."),
+      // ⚠️ Khoá = đúng chữ hiện ra (sửa 23/9/2026). Khoá cũ "AI thông minh kiểm tra cuộc gọi, … giao dịch lạ" nói quá (§11).
+      desc: t("AI đọc tin nhắn, đường link và ảnh bác gửi để tìm dấu hiệu. Bộ luật cố định mới quyết mức rủi ro."),
       image: "/minh-hoa-2.webp",
       button: t("Tiếp tục"),
     },
@@ -5881,6 +5920,20 @@ function IntroView({
         >
           {slides[currentSlide]?.button}
         </button>
+
+        {/*
+          PHẦN 2 (23/9/2026) — LỐI "CON CHÁU CÀI GIÚP". Người cài app cho người già
+          thường là con cháu; đo trước đó 4 trang giới thiệu không bước nào xin số
+          con, nên nút gọi khẩn cấp mặc định trống.
+        */}
+        {currentSlide === slides.length - 1 && (
+          <button
+            onClick={() => { if (setUserRole) setUserRole('elder'); danhDauDaXem(); setView('con_cai_giup'); }}
+            className="w-full max-w-sm mt-2 min-h-[52px] rounded-2xl border-2 border-[#6d28d9] text-[#4c1d95] font-bold text-[16px] bg-white/80 px-3 leading-snug active:scale-95 transition-transform"
+          >
+            {t("Con cháu cài giúp")}
+          </button>
+        )}
       </div>
     </motion.div>
   );
@@ -6647,6 +6700,8 @@ function WarningView({
   const canThiep: string | undefined = result?.canThiep;
   const khongGoiDuoc = result?.khongGoiDuocMayChu === true;
   const tuBamDung = result?.tuBamDung === true;
+  /** Lượt diễn tập từ "Con cháu cài giúp" (Phần 2): có băng báo, KHÔNG ghi số liệu. */
+  const laDienTap = result?.dienTap === true;
 
   const laCao = nhan === 'CAO';
   const laNghiNgo = nhan === 'NGHI_NGO';
@@ -6681,14 +6736,21 @@ function WarningView({
    * quyết định có leo thang khi hết 60 giây hay không — xem `leoThang` bên dưới.
    */
   const [daHanhDong, setDaHanhDong] = useState(false);
+  /** Mã sự kiện báo động gia đình của lượt này (Phần 3) — để báo hành động của bác cho con. */
+  const suKienBaoDongRef = useRef<string | null>(null);
   /** Ghi hành động bác chọn sau cảnh báo — xem `lib/ket-qua-can-thiep.ts`. */
   const ghiHanhDong = (hanhDong: HanhDong) => {
+    // Diễn tập: bấm gì cũng không ghi — lượt tập mà vào số liệu là làm bẩn tỷ lệ báo động giả (§4.6).
+    if (laDienTap) return;
+    // Phần 3: con thấy bác đã làm gì (chỉ MÃ), và bậc leo thang tự dừng.
+    if (suKienBaoDongRef.current) void guiTrangThaiBaoDong(suKienBaoDongRef.current, hanhDong).catch(() => undefined);
     ghiKetQua({ canThiep: canThiep ?? null, nhan: nhan ?? null, maLyDo: result?.maLyDo ?? [], hanhDong });
     if (hanhDong === 'bam_goi_nguoi_than' || hanhDong === 'da_lo_chuyen') setDaHanhDong(true);
   };
   const ghiNhanBamGoi = () => {
     const luot = ketThucDo(phienDo, Date.now());
-    if (luot) ghiLuot(luot);
+    // Diễn tập không vào đồng hồ phản ứng — cùng lý do với `ghiHanhDong`.
+    if (luot && !laDienTap) ghiLuot(luot);
     ghiHanhDong('bam_goi_nguoi_than');
   };
 
@@ -7027,11 +7089,64 @@ function WarningView({
   const firstContact: { name: string; phone: string } =
     nguoiDauTien ?? { name: t('Người thân'), phone: '' };
 
+  /**
+   * ══════ MÀN GẤP: MỘT CÂU, MỘT NÚT — 23/9/2026 (Phần 1 "Cầu dao gia đình") ══════
+   *
+   * Người dùng báo: "trong trường hợp hoảng loạn mà cho 1 đống chữ thì ai thèm
+   * đọc". Đo 375×812 ở PROTECTED_CRITICAL: nút gọi con ở y=716–805, giữa màn là
+   * khối "CHƯA kiểm được" 25px, và máy chỉ đọc to khi bác bấm.
+   *
+   * Nay ở màn gấp: nhãn → CÂU LỆNH ≤ 8 chữ → NÚT CHÍNH, ngay nửa trên màn, và máy
+   * tự đọc câu lệnh. Mọi khối chữ khác (dòng AI, lý do, "chưa kiểm được" — VẪN
+   * cùng cỡ với nhãn, §HĐ luật 3) nằm DƯỚI nút.
+   *
+   * ⚠️ Luồng phục hồi (`dangPhucHoi`) và màn mất mạng giữ bố cục cũ: ở đó việc
+   * chính là gọi ngân hàng / nói thật là chưa kiểm được, không phải gọi con.
+   */
+  const heroGap = manGapGap && !khongGoiDuoc && !dangPhucHoi;
+  const cauLenh = cauLenhNgan(viecAnToan, Boolean(firstContact.phone));
+  /** Đã bấm gọi người thân trong lượt này ⇒ hỏi "Con bảo sao?". */
+  const [daBamGoi, setDaBamGoi] = useState(false);
+  /** Trả lời sau cuộc gọi. `null` = chưa trả lời. */
+  const [conBao, setConBao] = useState<'lua_dao' | null>(null);
+  const cauTuDoc = heroGap
+    ? `${tuBamDung ? t('Bác dừng lại 60 giây đã') : (nhanChu ?? '')}. ${t(cauLenh)}`
+    : '';
+  /*
+   * LỜI NHẮN BẰNG GIỌNG CỦA CON (Phần 2) — có thì PHÁT LỜI NHẮN thay giọng máy.
+   * Đợi đọc xong IndexedDB (`daTai`) rồi mới chọn, để không đọc giọng máy rồi
+   * phát chồng lời nhắn lên một giây sau.
+   */
+  const loiNhan = useLoiNhanCon();
+  const coLoiNhan = Boolean(loiNhan.url);
+  usePhatMotLan(loiNhan.url, heroGap && loiNhan.daTai && coLoiNhan);
+  useDocToMotLan(cauTuDoc, heroGap && loiNhan.daTai && !coLoiNhan, lang === 'en' ? 'en-US' : 'vi-VN',
+    () => setIsSpeaking(true), () => setIsSpeaking(false));
+
+  /*
+   * ══════ BÁO CHO CON — Phần 3 (23/9/2026) ══════
+   * Mức CAO + bác đã đăng nhập ⇒ gửi MÃ lên máy chủ. Máy chủ CHỈ gửi khi chính bác
+   * đã bật quy tắc (Phần 2, §12); tắt thì trả `CHUA_BAT_QUY_TAC` và màn không nói gì.
+   * ⚠️ ĐÚNG MỘT LẦN mỗi lượt — cờ ref, vì StrictMode chạy effect hai lần ở dev.
+   * ⚠️ Diễn tập và mất mạng không gửi.
+   */
+  const [baoDong, setBaoDong] = useState<PhanHoiBaoDong | null>(null);
+  const daGuiBaoDongRef = useRef(false);
+  useEffect(() => {
+    if (daGuiBaoDongRef.current || !laCao || laDienTap || khongGoiDuoc || !docPhienTaiKhoan()) return;
+    daGuiBaoDongRef.current = true;
+    void guiBaoDong({ loaiSuKien: 'ket_qua_kiem', nhan: 'CAO', hoKichBan: hoKichBanHienTai })
+      .then((kq) => { suKienBaoDongRef.current = kq.suKienId ?? null; setBaoDong(kq); })
+      .catch(() => { /* không mạng / phiên hết: màn vẫn chạy, không hiện dòng trạng thái nào */ });
+  }, []);
+  const cauBaoDong = baoDong?.gui && baoDong.ketQua ? cauTrangThaiBao(baoDong.ketQua, t) : '';
+
   const handleCallRelative = () => {
     if (!firstContact.phone) { setView('family'); return; }
     // Ghi TRƯỚC khi mở ứng dụng gọi: sau `window.open` trang có thể bị đẩy
     // xuống nền và mã sau đó không chắc chạy.
     ghiNhanBamGoi();
+    setDaBamGoi(true);
     window.open(`tel:${firstContact.phone}`, '_self');
   };
 
@@ -7061,6 +7176,54 @@ function WarningView({
       : `[Khoan Đã] Bố/mẹ vừa nhận được một nội dung, Khoan Đã ghi là: ${nhanTin}. Con gọi lại cho bố/mẹ nhé.`;
     window.open(`sms:${firstContact.phone}?body=${encodeURIComponent(text)}`, '_self');
   };
+
+  /** Nút gọi người thân — MỘT định nghĩa, hai chỗ đặt (màn gấp: trên cùng; màn thường: cuối). */
+  const nutGoiChinh = (
+    <button
+      onClick={handleCallRelative}
+      data-vai-tro="nut-chinh"
+      className={`w-full ${heroGap ? 'min-h-[80px] text-[20px]' : 'text-[17px]'} py-4 px-4 rounded-[22px] font-black bg-amber-300 text-amber-950 shadow-[0_10px_28px_rgba(245,158,11,0.35)] border-2 border-amber-200 flex flex-col items-center justify-center gap-0.5 active:scale-98 transition-all hover:brightness-105`}
+    >
+      <span className="flex items-center gap-2">
+        {firstContact.phone ? <PhoneCall size={heroGap ? 26 : 22} /> : <UserPlus size={22} />}
+        <span>{firstContact.phone
+          ? (viecAnToan === 'goi_so_cu_nguoi_than' ? t('GỌI SỐ ĐÃ LƯU CỦA CON CHÁU') : t('GỌI NGAY CHO CON CHÁU'))
+          : t('Chưa có số người thân — bấm để thêm')}</span>
+      </span>
+      {firstContact.phone && (
+        <span className="text-[16px] font-bold text-[#6b3a05]">
+          {firstContact.name} ({firstContact.phone}){vaiNguoiDau ? ` · ${vaiNguoiDau}` : ''}
+        </span>
+      )}
+    </button>
+  );
+
+  /** ⚠️ "Soạn tin", KHÔNG phải "đã gửi" — §11. Chưa có số thì không bày ra. */
+  const nutNhanTin = firstContact.phone ? (
+    <button
+      onClick={handleSendSos}
+      className="w-full min-h-[56px] py-3 px-3 rounded-[22px] font-black text-[16px] bg-white text-slate-900 shadow-md border-2 border-white/60 flex items-center justify-center gap-2 active:scale-98 transition-all hover:bg-slate-50"
+    >
+      <MessageSquare size={18} className="text-slate-700" />
+      <span>{viecAnToan === 'khong_cai_gui_nguoi_than' ? t('Gửi cho con cháu xem trước') : t('Soạn tin nhắn cho con cháu')}</span>
+    </button>
+  ) : null;
+
+  /**
+   * NÚT CHÍNH CỦA MÀN GẤP. Có số người thân → gọi người thân. Chưa có → Cảnh sát
+   * 113 (số đã duyệt ở `so-khan-cap.ts`), KHÔNG mở biểu mẫu giữa lúc bị giục.
+   * 156 là tổng đài PHẢN ÁNH, không cứu được tiền lúc đó — nó nằm trong "Xem thêm".
+   */
+  const nutHanhDongGap = firstContact.phone || !soCongAn ? nutGoiChinh : (
+    <a
+      href={`tel:${soCongAn.cleanPhone}`}
+      data-vai-tro="nut-chinh"
+      className="w-full min-h-[80px] py-4 px-4 rounded-[22px] font-black text-[20px] bg-amber-300 text-amber-950 shadow-[0_10px_28px_rgba(245,158,11,0.35)] border-2 border-amber-200 flex items-center justify-center gap-2 active:scale-98 transition-all"
+    >
+      <ShieldCheck size={26} className="shrink-0" />
+      <span>{t('Gọi')} {soCongAn.name}</span>
+    </a>
+  );
 
   /**
    * ══════ TRÌNH ĐỌC MÀN HÌNH PHẢI BIẾT MÀN NÀY VỪA HIỆN RA — 19/9/2026 ══════
@@ -7135,6 +7298,12 @@ function WarningView({
 
       {/* Center Main Card & Explanations */}
       <div className={`flex flex-col items-center z-10 w-full max-w-md shrink-0 ${loiDoc ? 'mt-2' : 'my-auto'}`}>
+        {/* PHẦN 2 — lượt diễn tập phải nói rõ là diễn tập, trước mọi chữ khác. */}
+        {laDienTap && (
+          <p role="status" className="w-full mb-2 rounded-2xl bg-white text-[#7f1d1d] border-2 border-white px-3 py-2 text-[18px] font-black text-center leading-snug">
+            {t('ĐÂY LÀ DIỄN TẬP — không có gì nguy hiểm.')}
+          </p>
+        )}
         {/* NHÃN — nguyên văn §4.1 */}
         <h1
           id="khoan-da-nhan-rui-ro"
@@ -7170,7 +7339,82 @@ function WarningView({
           ba câu cùng một ý trên một màn mà người đọc đang bị ép thời gian.
           Các mức còn lại giữ nguyên: ở đó câu này mang thông tin khác nhãn.
         */}
-        {!tuBamDung && (
+        {/*
+          ⚠️ MÀN GẤP: CÂU LỆNH + NÚT CHÍNH NGAY DƯỚI NHÃN — 23/9/2026. Xem chú thích
+          ở `heroGap`. Câu lệnh là bản ≤ 8 chữ (`cauLenhNgan`), không phải câu dài
+          của `CAU_VIEC_AN_TOAN`; câu dài vẫn dùng ở các màn không gấp bên dưới.
+          "Con bảo sao?" hiện ngay khi bác bấm gọi — bác quay lại app là thấy, không
+          phụ thuộc máy có báo được "đã quay lại" hay không.
+        */}
+        {heroGap ? (
+          <>
+            <p data-vai-tro="cau-lenh" className="text-[30px] leading-tight font-black text-white text-center mb-4 max-w-sm">
+              {t(cauLenh)}
+            </p>
+            <div className="w-full flex flex-col gap-2 mb-3">
+              {nutHanhDongGap}
+              {coLoiNhan && loiNhan.url && (
+                <button
+                  type="button"
+                  onClick={() => { void new Audio(loiNhan.url as string).play().catch(() => undefined); }}
+                  className="w-full min-h-[52px] rounded-[18px] bg-white/15 text-white border-2 border-white/40 font-bold text-[16px] px-3 leading-snug flex items-center justify-center gap-2"
+                >
+                  <Volume2 size={18} className="shrink-0" /> {t('Nghe lại lời nhắn của con')}
+                </button>
+              )}
+              {daBamGoi && conBao === null && (
+                <div role="group" aria-labelledby="con-bao-sao" className="w-full bg-black/35 border-2 border-white/40 rounded-[22px] p-3 flex flex-col gap-2">
+                  <p id="con-bao-sao" className="text-[18px] font-black text-white text-center leading-snug">{t('Gọi xong rồi? Con bảo sao?')}</p>
+                  <button
+                    type="button"
+                    onClick={() => { ghiHanhDong('con_bao_lua_dao'); setConBao('lua_dao'); }}
+                    className="w-full min-h-[56px] rounded-[18px] bg-white text-[#7f1d1d] font-black text-[17px] px-3 leading-snug"
+                  >
+                    {t('Con bảo là lừa đảo')}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { ghiHanhDong('con_bao_khong_sao'); setView('home'); }}
+                    className="w-full min-h-[56px] rounded-[18px] bg-white/15 text-white border-2 border-white/40 font-bold text-[16px] px-3 leading-snug"
+                  >
+                    {t('Con bảo không sao')}
+                  </button>
+                </div>
+              )}
+              {conBao === 'lua_dao' && (
+                <div role="status" className="w-full bg-black/35 border-2 border-white/40 rounded-[22px] p-3 flex flex-col gap-2">
+                  <p className="text-[22px] font-black text-white text-center leading-snug">{t('Không nghe máy số đó nữa.')}</p>
+                  {!canRecovery && (
+                    <button
+                      type="button"
+                      onClick={() => { ghiHanhDong('da_lo_chuyen'); setDaBamPhucHoi(true); onBaoDaChuyen?.(); }}
+                      className="w-full min-h-[56px] rounded-[18px] bg-white text-slate-900 font-black text-[16px] px-3 leading-snug"
+                    >
+                      {t('Tôi đã lỡ chuyển tiền hoặc đọc mã rồi')}
+                    </button>
+                  )}
+                </div>
+              )}
+              {leoThang && (
+                <div role="status" aria-live="polite" className="w-full bg-black/35 rounded-[18px] px-3 py-2 text-center">
+                  <p className="text-[17px] font-black text-white leading-snug">{t('Đã qua 60 giây.')}</p>
+                  <p className="text-[16px] font-bold text-white/95 leading-snug">
+                    {firstContact.phone ? t('Trước khi làm gì tiếp, bác gọi con cháu một câu đã.') : t('Trước khi làm gì tiếp, bác gọi hỏi thật đã.')}
+                  </p>
+                </div>
+              )}
+              {!leoThang && timeLeft > 0 && (
+                <p className="text-[15px] font-bold text-white/85 text-center tabular-nums">
+                  {t('Còn {n} giây').replace('{n}', String(timeLeft))}
+                </p>
+              )}
+              {/* Phần 3 — MỘT dòng, nói đúng điều máy chủ biết; không bao giờ "con đã thấy" (§11). */}
+              {cauBaoDong && (
+                <p role="status" className="text-[15px] font-bold text-white/90 text-center leading-snug">{cauBaoDong}</p>
+              )}
+            </div>
+          </>
+        ) : !tuBamDung && (
           <p className="text-[16px] font-semibold text-white/95 mb-4 text-center leading-snug max-w-sm">
             {khongGoiDuoc
               ? t('Mạng không đi được nên chưa có gì được kiểm cả.')
@@ -7230,7 +7474,7 @@ function WarningView({
           TRƯỚC hành động tài chính, không phải sau.
         */}
         <div
-          className={`w-full rounded-[28px] ${laChuaThay ? 'p-3 mb-2' : 'p-5 mb-3'} relative overflow-hidden border border-white/25 ${dangPhucHoi ? 'hidden' : ''}`}
+          className={`w-full rounded-[28px] ${laChuaThay ? 'p-3 mb-2' : 'p-5 mb-3'} relative overflow-hidden border border-white/25 ${dangPhucHoi || heroGap ? 'hidden' : ''}`}
           style={{ background: 'linear-gradient(155deg, rgba(255,255,255,0.18), rgba(255,255,255,0.05))' }}
         >
           <div className="flex flex-wrap items-center justify-center gap-3 min-[360px]:gap-6">
@@ -7269,21 +7513,11 @@ function WarningView({
               </svg>
             </div>
 
-            {leoThang && (
-              <div role="status" aria-live="polite" className="w-full basis-full flex flex-col gap-2">
-                <p className="text-[17px] font-black text-white leading-snug">{t('Đã qua 60 giây.')}</p>
-                <p className="text-[16px] font-bold text-white/95 leading-snug">{t('Trước khi làm gì tiếp, bác gọi con cháu một câu đã.')}</p>
-                <button
-                  type="button"
-                  data-vai-tro="nut-chinh"
-                  onClick={handleCallRelative}
-                  className="w-full min-h-[56px] rounded-[22px] bg-amber-300 text-amber-950 border-2 border-amber-200 font-black text-[16px] flex items-center justify-center gap-2 px-3 leading-snug"
-                >
-                  {firstContact.phone ? <PhoneCall size={20} className="shrink-0" /> : <UserPlus size={20} className="shrink-0" />}
-                  <span>{firstContact.phone ? t('Gọi con cháu ngay') : t('Chưa có số người thân — bấm để thêm')}</span>
-                </button>
-              </div>
-            )}
+            {/*
+              ⚠️ BẬC LEO THANG "ĐÃ QUA 60 GIÂY" ĐÃ DỜI LÊN NGAY DƯỚI NÚT CHÍNH CỦA MÀN
+              GẤP — 23/9/2026. Mọi lúc `leoThang` đúng thì `heroGap` cũng đúng, và
+              thẻ này bị ẩn ở màn gấp; để khối đó ở đây là để nó không bao giờ hiện.
+            */}
             {timeLeft > 0 && (
               <div className="relative w-[112px] h-[112px] flex items-center justify-center shrink-0">
                 <svg className="absolute inset-0 -rotate-90" width="112" height="112" viewBox="0 0 112 112" aria-hidden="true">
@@ -7695,7 +7929,7 @@ function WarningView({
           được ngay còn hơn một cái form. Chúng đến từ `so-khan-cap.ts`, không
           phải số bịa cho đẹp bố cục.
         */}
-        {!firstContact.phone && (soCongAn || soBaoLuaDao) && (
+        {!heroGap && !firstContact.phone && (soCongAn || soBaoLuaDao) && (
           <div className="w-full grid grid-cols-2 gap-2">
             {soCongAn && (
               <a
@@ -7718,35 +7952,10 @@ function WarningView({
           </div>
         )}
 
-        <button
-          onClick={handleCallRelative}
-          data-vai-tro="nut-chinh"
-          className="w-full py-4 px-4 rounded-[22px] font-black text-[17px] bg-amber-300 text-amber-950 shadow-[0_10px_28px_rgba(245,158,11,0.35)] border-2 border-amber-200 flex flex-col items-center justify-center gap-0.5 active:scale-98 transition-all hover:brightness-105"
-        >
-          <span className="flex items-center gap-2">
-            {firstContact.phone ? <PhoneCall size={22} /> : <UserPlus size={22} />}
-            <span>{firstContact.phone
-              ? (viecAnToan === 'goi_so_cu_nguoi_than' ? t('GỌI SỐ ĐÃ LƯU CỦA CON CHÁU') : t('GỌI NGAY CHO CON CHÁU'))
-              : t('Chưa có số người thân — bấm để thêm')}</span>
-          </span>
-          {firstContact.phone && (
-            <span className="text-[16px] font-bold text-[#6b3a05]">
-              {firstContact.name} ({firstContact.phone}){vaiNguoiDau ? ` · ${vaiNguoiDau}` : ''}
-            </span>
-          )}
-        </button>
-
-        {/* ⚠️ "Soạn tin", KHÔNG phải "đã gửi" — §11. Chưa có số thì nút này cũng
-            chỉ mở được màn Gia đình, nên đừng bày ra: xem chú thích ở nút chính. */}
-        {firstContact.phone && (
-          <button
-            onClick={handleSendSos}
-            className="w-full min-h-[56px] py-3 px-3 rounded-[22px] font-black text-[16px] bg-white text-slate-900 shadow-md border-2 border-white/60 flex items-center justify-center gap-2 active:scale-98 transition-all hover:bg-slate-50"
-          >
-            <MessageSquare size={18} className="text-slate-700" />
-            <span>{viecAnToan === 'khong_cai_gui_nguoi_than' ? t('Gửi cho con cháu xem trước') : t('Soạn tin nhắn cho con cháu')}</span>
-          </button>
-        )}
+        {/* Màn gấp: nút chính đã nằm ngay dưới nhãn (`nutHanhDongGap`), nút soạn
+            tin nằm trong "Xem thêm". Màn thường giữ chỗ cũ. */}
+        {!heroGap && nutGoiChinh}
+        {!heroGap && nutNhanTin}
 
         {/*
           MẬT KHẨU GIA ĐÌNH — CHỐNG DEEPFAKE BẰNG THỨ KHÔNG CẦN AI.
@@ -7946,6 +8155,17 @@ function WarningView({
           "Xem thêm" nào, nên chúng hiện thẳng như cũ.
         */}
         {(moThem || !manGapGap) && (<>
+        {heroGap && nutNhanTin}
+        {heroGap && !firstContact.phone && (
+          <button
+            type="button"
+            onClick={() => setView('family')}
+            className="w-full min-h-[52px] py-3 px-3 rounded-2xl font-bold text-[15px] bg-black/30 hover:bg-black/40 text-white border border-white/25 flex items-center justify-center gap-2 active:scale-98 transition-all"
+          >
+            <UserPlus size={18} className="shrink-0" />
+            <span>{t('Thêm số con cháu')}</span>
+          </button>
+        )}
         {nguoiGoiTiep && (
           <button
             onClick={() => { ghiNhanBamGoi(); window.open(`tel:${nguoiGoiTiep.dienThoai}`, '_self'); }}
@@ -7956,10 +8176,10 @@ function WarningView({
           </button>
         )}
 
-        {/* Hai số thật — khi bác ĐÃ có số người thân thì chúng là lối phụ. */}
-        {firstContact.phone && (soCongAn || soBaoLuaDao) && (
+        {/* Hai số thật — lối phụ. Màn gấp chưa có số: 113 đã là nút chính, ở đây chỉ còn 156. */}
+        {(firstContact.phone || heroGap) && (soCongAn || soBaoLuaDao) && (
           <div className="w-full grid grid-cols-2 gap-2">
-            {soCongAn && (
+            {soCongAn && firstContact.phone && (
               <a
                 href={`tel:${soCongAn.cleanPhone}`}
                 className="min-h-[56px] rounded-2xl bg-white/15 hover:bg-white/25 border border-white/25 backdrop-blur-md px-3 py-3 flex items-center justify-center gap-2 active:scale-95 transition-all"

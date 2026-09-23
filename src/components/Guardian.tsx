@@ -18,10 +18,40 @@ import {
 } from 'lucide-react';
 import { ViewState, NguoiThan } from '../App';
 import { api } from '../api-goc';
-import { dangNhap as dangNhapTaiKhoan, type HoSo as HoSoTaiKhoan, docPhien, docVongGhep, nhapMaGhep, LoiTaiKhoan } from '../tai-khoan';
+import {
+  dangNhap as dangNhapTaiKhoan, type HoSo as HoSoTaiKhoan, docPhien, docVongGhep, nhapMaGhep, LoiTaiKhoan,
+  docSuKienBaoDong, baoConDaGoi, type SuKienBaoDong,
+} from '../tai-khoan';
+import { batNhanCanhBao, dangNhanTrenMayNay, type MaBatNhan } from '../lib/nhan-canh-bao';
 import { MA_TAI_KHOAN } from '../catalog';
 import { Lang, NHAN, CHUA_KIEM, MA_LY_DO, tra, traNhieu } from '../catalog';
 import { ThuTinhHuong } from './ThuTinhHuong';
+
+/*
+ * PHẦN 3 (23/9/2026) — CÂU CHO MÀN "ĐANG CẦN" VÀ NÚT BẬT NHẬN. Mã → khoá catalog.
+ * ⚠️ §11 — không "đã thấy", "đã đọc", "an toàn"; không buộc tội ai.
+ */
+const CAU_LOAI_SU_KIEN: Record<string, string> = {
+  ket_qua_kiem: 'Khoan Đã thấy tình huống nguy hiểm cao trên máy {ten}.',
+  otp_trong_cuoc_goi: 'Máy {ten} vừa nhận mã OTP trong lúc đang có cuộc gọi.',
+  cai_app_trong_cuoc_goi: 'Máy {ten} vừa cài ứng dụng mới trong lúc đang có cuộc gọi.',
+};
+const CAU_HANH_DONG: Record<string, string> = {
+  bam_goi_nguoi_than: 'Đã bấm gọi người thân',
+  toi_on: 'Bấm "Tôi ổn, không có gì nguy hiểm"',
+  da_lo_chuyen: 'Báo đã lỡ chuyển tiền hoặc đọc mã',
+  con_bao_lua_dao: 'Bấm "Con bảo là lừa đảo"',
+  con_bao_khong_sao: 'Bấm "Con bảo không sao"',
+  ve_trang_chu: 'Đã rời màn cảnh báo',
+};
+const CAU_BAT_NHAN: Record<string, string> = {
+  KHONG_HO_TRO: 'Máy hoặc trình duyệt này không nhận được thông báo. Mở Khoan Đã bằng Chrome để bật.',
+  CHI_CO_BAN_DUNG: 'Bản chạy thử trên máy tính chưa bật được. Hãy dùng bản web đã đưa lên mạng.',
+  BI_TU_CHOI: 'Thông báo đang bị chặn. Mở cài đặt trình duyệt để cho phép.',
+  MAY_CHU_CHUA_CAU_HINH: 'Máy chủ chưa bật gửi cảnh báo.',
+  CHUA_DANG_NHAP: 'Anh/chị cần đăng nhập lại.',
+  LOI_DANG_KY: 'Chưa bật được. Thử lại sau nhé.',
+};
 
 /**
  * Hình dạng §HĐ mà `/api/analyze` trả về. Frontend KHÔNG thêm trường nào, và
@@ -349,6 +379,42 @@ export function GuardianView({
   };
   const laThat = parentData?.network === 'that';
 
+  /*
+   * ══════ PHẦN 3 (23/9/2026) — NHẬN CẢNH BÁO CỦA BỐ MẸ + MÀN "ĐANG CẦN" ══════
+   * Bấm thông báo đẩy ⇒ app mở `/?view=guardian&canhBao=<mã>` ⇒ thẻ đỏ ở đầu màn với
+   * MỘT nút "Gọi ngay". Chỉ hiện đúng điều máy chủ biết: loại sự kiện và các hành
+   * động (mã) bố mẹ đã bấm. KHÔNG có nội dung tin nhắn (§6.9), KHÔNG "đã thấy" (§11).
+   */
+  const [dangNhan, setDangNhan] = useState(false);
+  const [maBatNhan, setMaBatNhan] = useState<MaBatNhan | 'OK' | null>(null);
+  useEffect(() => { void dangNhanTrenMayNay().then(setDangNhan); }, []);
+  const batNhan = async () => {
+    const kq = await batNhanCanhBao(lang);
+    setMaBatNhan(kq.ok ? 'OK' : kq.ma);
+    if (kq.ok) setDangNhan(true);
+  };
+  const [suKienId] = useState<string | null>(() => {
+    try { return new URLSearchParams(window.location.search).get('canhBao'); } catch { return null; }
+  });
+  const [suKien, setSuKien] = useState<SuKienBaoDong | null>(null);
+  const [loiSuKien, setLoiSuKien] = useState(false);
+  useEffect(() => {
+    if (!suKienId || !coPhien) return;
+    let huy = false;
+    const tai = () => docSuKienBaoDong(suKienId)
+      .then((s) => { if (!huy) { setSuKien(s); setLoiSuKien(false); } })
+      .catch(() => { if (!huy) setLoiSuKien(true); });
+    void tai();
+    // Bố mẹ bấm gì thì con thấy trong vài giây — hỏi lại mỗi 5 giây khi thẻ còn mở.
+    const id = window.setInterval(() => { void tai(); }, 5000);
+    return () => { huy = true; window.clearInterval(id); };
+  }, [suKienId, coPhien]);
+  /** Ghi "con đã gọi" TRƯỚC khi mở trình gọi — để bậc leo thang không báo thừa cho người khác. */
+  const goiNgayTuCanhBao = () => {
+    if (suKienId) void baoConDaGoi(suKienId).catch(() => undefined);
+    if (parentData?.phone) window.open(`tel:${parentData.phone.replace(/\s/g, '')}`, '_self');
+  };
+
   const [guardianEvents, setGuardianEvents] = useState<GuardianEvent[]>(() => {
     try {
       const raw = localStorage.getItem('khoan_da_guardian_events');
@@ -469,6 +535,48 @@ export function GuardianView({
 
   return (
     <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col gap-5">
+      {/*
+        PHẦN 3 — MỞ TỪ THÔNG BÁO: thẻ đỏ "{tên} đang cần anh/chị", MỘT nút gọi.
+        Đứng ĐẦU màn, trước mọi thứ khác: người con bấm thông báo vì lo, việc duy
+        nhất cần làm là gọi.
+      */}
+      {suKienId && (
+        <section role="alert" aria-labelledby="gd-can-con" className="rounded-[24px] bg-red-700 text-white p-5 flex flex-col gap-3 shadow-[0_14px_35px_rgba(185,28,28,0.35)]">
+          <h2 id="gd-can-con" className="text-[22px] font-black leading-snug">
+            {tr('{ten} đang cần anh/chị').split('{ten}').join(suKien?.tenBoMe || parentData?.name || tr('Bố mẹ'))}
+          </h2>
+          {suKien && CAU_LOAI_SU_KIEN[suKien.loaiSuKien] && (
+            <p className="text-[16px] font-semibold leading-snug">
+              {tr(CAU_LOAI_SU_KIEN[suKien.loaiSuKien] as string).split('{ten}').join(suKien.tenBoMe)}
+            </p>
+          )}
+          {parentData?.phone ? (
+            <button
+              type="button"
+              onClick={goiNgayTuCanhBao}
+              data-vai-tro="nut-chinh"
+              className="w-full min-h-[64px] rounded-[18px] bg-amber-300 text-amber-950 font-black text-[20px] flex items-center justify-center gap-2 px-3 leading-snug"
+            >
+              <Phone size={24} aria-hidden="true" /> {tr('Gọi ngay')} ({parentData.phone})
+            </button>
+          ) : (
+            <p className="text-[15px] font-bold leading-snug">{tr('Chưa có số của bố mẹ trên máy này.')}</p>
+          )}
+          {loiSuKien && <p className="text-[14px] font-semibold leading-snug">{tr('Không tải được chi tiết. Vẫn gọi được.')}</p>}
+          {suKien && (
+            <ul className="flex flex-col gap-1 text-[15px] font-semibold leading-snug">
+              {suKien.hanhDong.length === 0 ? (
+                <li>{tr('Chưa có phản hồi từ máy bố mẹ.')}</li>
+              ) : suKien.hanhDong.map((h) => (
+                <li key={`${h.ma}-${h.luc}`}>
+                  {new Date(h.luc).toLocaleTimeString(lang === 'en' ? 'en-GB' : 'vi-VN', { hour: '2-digit', minute: '2-digit' })} · {tr(CAU_HANH_DONG[h.ma] ?? h.ma)}
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      )}
+
       {/* Toast Notification when reminder sent */}
       <AnimatePresence>
         {sentAlertToast && (
@@ -577,6 +685,30 @@ export function GuardianView({
             </button>
           )}
         </form>
+      )}
+
+      {/* PHẦN 3 — bật nhận cảnh báo của bố mẹ trên máy này (chỉ khi đã nối thật). */}
+      {laThat && (
+        <section className="bg-white rounded-[24px] p-5 border border-slate-200/80 shadow-[0_10px_28px_rgba(30,41,59,0.06)] flex flex-col gap-3">
+          <h2 className="text-[17px] font-black text-slate-900">{tr('Nhận cảnh báo của bố mẹ trên máy này')}</h2>
+          <p className="text-[14px] text-slate-600 leading-snug">
+            {tr('Khi bố mẹ gặp nguy hiểm cao và đã bật "báo cho con", máy này sẽ đổ thông báo. Chỉ có mức nguy hiểm và loại tình huống, không có nội dung tin nhắn.')}
+          </p>
+          {dangNhan ? (
+            <p role="status" className="text-[15px] font-bold text-emerald-800">{tr('Máy này đang nhận cảnh báo.')}</p>
+          ) : (
+            <button
+              type="button"
+              onClick={() => { void batNhan(); }}
+              className="min-h-[56px] rounded-2xl bg-sky-600 text-white font-black text-[16px] px-3 leading-snug"
+            >
+              {tr('Bật nhận cảnh báo')}
+            </button>
+          )}
+          {maBatNhan && maBatNhan !== 'OK' && (
+            <p role="alert" className="text-[14px] font-bold text-rose-700 leading-snug">{tr(CAU_BAT_NHAN[maBatNhan] ?? 'Chưa bật được. Thử lại sau nhé.')}</p>
+          )}
+        </section>
       )}
 
       {/* Main 4-Card Responsive Grid - Minimalist & Low Text */}

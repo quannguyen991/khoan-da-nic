@@ -285,3 +285,18 @@ services:
       # ⚠️ Chuỗi này CÓ MẬT KHẨU — đặt tay trong bảng, không viết vào tệp này.
       - key: DATABASE_URL
         sync: false
+      # ══════ GỬI CẢNH BÁO CHO CON (Web Push) — thêm 23/9/2026 ══════
+      #
+      # Thiếu hai khoá dưới thì mọi báo động ra `CHUA_CAU_HINH_PUSH` — màn bố mẹ
+      # nói thật "máy chủ chưa bật gửi cảnh báo", không giả vờ đã gửi.
+      # Sinh khoá: `npx web-push generate-vapid-keys` — chạy MỘT lần, dán vào bảng
+      # Environment. ⚠️ Đổi khoá là mọi máy con phải bật nhận lại từ đầu.
+      # ⚠️ KHOÁ RIÊNG TƯ không bao giờ viết vào tệp này.
+      - key: VAPID_PUBLIC_KEY
+        sync: false
+      - key: VAPID_PRIVATE_KEY
+        sync: false
+      # Địa chỉ liên hệ gửi kèm cho dịch vụ push (Google/Mozilla). Dùng URL của
+      # app, KHÔNG dùng email cá nhân — trường này đi ra bên thứ ba.
+      - key: VAPID_SUBJECT
+        value: https://khoan-da.onrender.com

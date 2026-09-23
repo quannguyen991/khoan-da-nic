@@ -23,6 +23,9 @@ import {
   CAU_HOI_NHANH, NHANH_HANH_DONG, CAU_HOI_NHANH_KHUNG,
   tra, traNhieu,
 } from '../catalog';
+import { ghiKetQua } from '../lib/ket-qua-can-thiep';
+import { useDocToMotLan } from '../lib/doc-to-mot-lan';
+import { chonViecAnToan, cauLenhNgan } from '../lib/viec-an-toan-tiep-theo';
 
 /**
  * §15.11.1 — BỘ HỎI NHANH LÚC ĐANG BỊ GỌI.
@@ -97,6 +100,18 @@ const MAU_VIEN_NHANH: Record<string, string> = {
 };
 
 /**
+ * CÂU DẶN HIỆN NGAY TỪ LẦN CHẠM ĐẦU — 23/9/2026 (Phần 1 "Cầu dao gia đình").
+ * Đo trước đó: chọn "Đưa mã OTP" (đã chắc chắn là lừa) vẫn phải trả lời thêm
+ * hai câu mới thấy lời dặn. Hai câu đó vẫn hỏi — bộ luật cần đủ tín hiệu, KHÔNG
+ * đổi bộ luật — nhưng lời dặn đứng TRÊN câu hỏi ngay từ đầu.
+ */
+const DAN_NGAY_CUA_NHANH: Record<string, string> = {
+  doi_otp: 'Dù thế nào: đừng đọc mã cho ai.',
+  cai_ung_dung: 'Đừng cài gì trong lúc đang gọi.',
+  chuyen_tien: 'Chưa chuyển gì cả.',
+};
+
+/**
  * ⚠️ HÀNG RÀO CHỐNG PHÂN KỲ IM LẶNG.
  *
  * Danh sách mã là của backend (`public/config/ma-hop-dong.json`, sinh từ
@@ -122,6 +137,8 @@ export interface HoiNhanhProps {
   t: (key: string) => string;
   lang?: Lang;
   onTriggerEmergency?: () => void;
+  /** Để màn kết quả có nút gọi THẲNG người thân (23/9/2026). */
+  familyMembers?: { name: string; phone: string }[];
 }
 
 type KetQua = {
@@ -135,7 +152,7 @@ type KetQua = {
   khongGoiDuocMayChu?: boolean;
 };
 
-export function HoiNhanhView({ setView, t, lang = 'vi', onTriggerEmergency }: HoiNhanhProps) {
+export function HoiNhanhView({ setView, t, lang = 'vi', onTriggerEmergency, familyMembers }: HoiNhanhProps) {
   const [selectedBranch, setSelectedBranch] = useState<string | null>(null);
   const [questionQueue, setQuestionQueue] = useState<string[]>([]);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
@@ -144,6 +161,24 @@ export function HoiNhanhView({ setView, t, lang = 'vi', onTriggerEmergency }: Ho
   const [result, setResult] = useState<KetQua | null>(null);
 
   const chu = (ma: string, bang = CAU_HOI_NHANH_KHUNG) => tra(bang, ma, lang) ?? '';
+
+  const nguoiThanCoSo = familyMembers?.find((n) => n.phone);
+  const soNguoiThan = nguoiThanCoSo?.phone ?? '';
+  const tenNguoiThan = nguoiThanCoSo?.name ?? '';
+  /*
+   * ĐỌC TO MỘT LẦN KHI KẾT QUẢ LÀ CAO — 23/9/2026.
+   * ⚠️ HOOK PHẢI Ở ĐẦU COMPONENT, trước mọi `if (result)`: đặt trong nhánh là
+   * phá luật hook của React (thứ tự hook đổi giữa các lần dựng).
+   */
+  const laCaoKQ = !!result && !result.khongGoiDuocMayChu
+    && (result.nhan === 'CAO' || result.canThiep === 'PROTECTED_CRITICAL');
+  const cauDocKQ = laCaoKQ
+    ? `${tra(NHAN, 'CAO', lang) ?? ''}. ${t(cauLenhNgan(
+      chonViecAnToan({ maLyDo: result?.maLyDo, nhan: result?.nhan, canThiep: result?.canThiep }),
+      Boolean(soNguoiThan),
+    ))}`
+    : '';
+  useDocToMotLan(cauDocKQ, laCaoKQ, lang === 'en' ? 'en-US' : 'vi-VN');
 
   const handleSelectBranch = (branchMa: string) => {
     setSelectedBranch(branchMa);
@@ -294,20 +329,57 @@ export function HoiNhanhView({ setView, t, lang = 'vi', onTriggerEmergency }: Ho
                 : 'Mạng không đi được nên chưa có gì được kiểm cả. Trong lúc chưa rõ, bác cúp máy rồi tự gọi cho con cháu nhé.'}
             </p>
           ) : (
-            <>
-              {laCao && (
-                <p className="text-[18px] font-black text-white mb-2">
-                  {lang === 'en' ? 'Please hang up now.' : 'Bác cúp máy ngay nhé.'}
-                </p>
-              )}
+            /*
+              ⚠️ MỨC CAO CHỈ CÒN MỘT CÂU LỆNH — 23/9/2026. Câu dài bên dưới lặp lại
+              đúng việc mà nút gọi ngay dưới thẻ này làm; người đang hoảng không
+              đọc hết. Các mức khác giữ câu đầy đủ.
+            */
+            laCao ? (
+              <p className="text-[22px] font-black text-white leading-snug">
+                {lang === 'en' ? 'Please hang up now.' : 'Bác cúp máy ngay nhé.'}
+              </p>
+            ) : (
               <p className="text-[16px] text-white/95 leading-relaxed font-medium">
                 {lang === 'en'
                   ? 'Do not transfer money and do not read out any code. Hang up and call your family yourself.'
                   : 'Bác đừng chuyển tiền và đừng đọc mã nào. Cúp máy rồi tự gọi cho con cháu.'}
               </p>
-            </>
+            )
           )}
         </div>
+
+        {/*
+          HÀNH ĐỘNG TRƯỚC, CHỮ SAU — 23/9/2026. Đo trước đó: màn này dặn "tự gọi cho
+          con cháu" mà KHÔNG có nút gọi, và nút chính ghi "Cúp máy & dừng 60 giây"
+          trong khi app không cúp máy được.
+          ⚠️ Nút "Tôi đã cúp máy" dẫn sang màn khẩn cấp (câu lệnh + nút gọi, hoặc
+          113 khi chưa có số) — không phải một lời hứa app làm thay.
+        */}
+        {(laCao || laKhanCap) && !khongGoiDuoc && (
+          <div className="flex flex-col gap-3 mb-4">
+            {soNguoiThan && (
+              <button
+                onClick={() => {
+                  ghiKetQua({ canThiep: result.canThiep ?? null, nhan: nhan ?? null, maLyDo: result.maLyDo ?? [], hanhDong: 'bam_goi_nguoi_than' });
+                  window.open(`tel:${soNguoiThan}`, '_self');
+                }}
+                data-vai-tro="nut-chinh"
+                className="w-full min-h-[80px] py-4 px-4 bg-amber-300 text-amber-950 font-black text-[20px] rounded-2xl flex flex-col items-center justify-center gap-0.5 border-2 border-amber-200 shadow-lg active:scale-95"
+              >
+                <span className="flex items-center gap-2"><PhoneCall size={24} /> {t('GỌI NGAY CHO CON CHÁU')}</span>
+                <span className="text-[16px] font-bold text-[#6b3a05]">{tenNguoiThan} ({soNguoiThan})</span>
+              </button>
+            )}
+            <button
+              onClick={() => (onTriggerEmergency ? onTriggerEmergency() : setView('warning'))}
+              data-vai-tro="nut-chinh"
+              className={`w-full min-h-[56px] py-4 px-6 ${soNguoiThan ? 'bg-white/15 border border-white/30' : 'bg-red-600 shadow-lg shadow-red-600/40'} active:scale-95 text-white font-black text-[18px] rounded-2xl flex items-center justify-center gap-2`}
+            >
+              <PhoneOff size={20} />
+              <span>{t('Tôi đã cúp máy')}</span>
+            </button>
+          </div>
+        )}
 
         {/* Lý do — MÃ tra ra câu, không phải câu do máy chủ gửi sang. */}
         {lyDo.length > 0 && (
@@ -331,15 +403,21 @@ export function HoiNhanhView({ setView, t, lang = 'vi', onTriggerEmergency }: Ho
         */}
         {chuaKiem.length > 0 && (
           <div className="bg-slate-800/90 border-2 border-slate-500 rounded-2xl p-4 mb-4">
+            {/*
+              ⚠️ 25px, ĐÚNG BẰNG NHÃN (`h2 text-[25px]`) — sửa 23/9/2026. Trước đó
+              khối này 16px ở màn này trong khi nhãn 25px: vi phạm §HĐ luật 3 mà
+              không test nào bắt, vì test cũ chỉ đọc App.tsx. Hàng rào mới ở
+              `test/man-khan-cap-mot-viec.test.js`. Khối vẫn nằm DƯỚI nút gọi.
+            */}
             <div className="flex items-center gap-2 mb-2">
-              <EyeOff size={20} className="text-slate-300 shrink-0" />
-              <span className="text-[16px] font-black text-slate-100">
+              <EyeOff size={24} className="text-slate-300 shrink-0" />
+              <span className="text-[25px] font-black text-slate-100 leading-tight">
                 {lang === 'en' ? 'What I could NOT check' : 'Những thứ cháu CHƯA kiểm được'}
               </span>
             </div>
             <ul className="flex flex-col gap-1.5">
               {chuaKiem.map((cau) => (
-                <li key={cau} className="text-[16px] text-slate-100 font-medium leading-snug">
+                <li key={cau} className="text-[25px] text-slate-100 font-medium leading-tight">
                   • {cau}
                 </li>
               ))}
@@ -349,17 +427,6 @@ export function HoiNhanhView({ setView, t, lang = 'vi', onTriggerEmergency }: Ho
         )}
 
         <div className="flex flex-col gap-3 mt-auto">
-          {laKhanCap && (
-            <button
-              onClick={() => (onTriggerEmergency ? onTriggerEmergency() : setView('warning'))}
-              data-vai-tro="nut-chinh"
-              className="w-full py-4 px-6 bg-red-600 hover:bg-red-700 active:scale-95 text-white font-black text-[18px] rounded-2xl flex items-center justify-center gap-2 shadow-lg shadow-red-600/40"
-            >
-              <PhoneOff size={20} />
-              <span>{lang === 'en' ? 'Hang up & pause 60 seconds' : 'Cúp máy & dừng 60 giây'}</span>
-            </button>
-          )}
-
           <button
             onClick={handleReset}
             className="w-full py-3.5 px-4 bg-white/10 hover:bg-white/20 active:scale-95 text-white font-bold text-[16px] rounded-2xl flex items-center justify-center gap-2 border border-white/10"
@@ -415,6 +482,12 @@ export function HoiNhanhView({ setView, t, lang = 'vi', onTriggerEmergency }: Ho
               style={{ width: `${progressPercent}%` }}
             />
           </div>
+
+          {selectedBranch && DAN_NGAY_CUA_NHANH[selectedBranch] && (
+            <p role="status" className="w-full mb-4 rounded-2xl bg-red-600 border-2 border-red-300 px-4 py-3 text-[20px] font-black text-white text-center leading-snug">
+              {t(DAN_NGAY_CUA_NHANH[selectedBranch])}
+            </p>
+          )}
 
           <div className="bg-white text-slate-900 rounded-3xl p-6 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] mb-6">
             <span className="text-[14px] font-extrabold uppercase text-purple-700 tracking-wider mb-2 block">

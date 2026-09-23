@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ChevronLeft, Link2, ShieldAlert, UserMinus, Users } from 'lucide-react';
 import type { ViewState } from '../App';
-import { docPhien, docVongGhep, layMaGhep, thuHoiNguoiDaGhep, LoiTaiKhoan, type NguoiDaGhep } from '../tai-khoan';
+import { docPhien, docVongGhep, layMaGhep, thuHoiNguoiDaGhep, docTinhTrangBao, LoiTaiKhoan, type NguoiDaGhep } from '../tai-khoan';
 
 /**
  * ══════════ NỐI VỚI CON CHÁU — màn của BỐ MẸ (chủ tài khoản) ══════════
@@ -32,18 +32,40 @@ function chuLoi(e: unknown): string {
   return LOI[ma] ?? 'Chưa kết nối được máy chủ. Bác thử lại sau nhé.';
 }
 
-export function ManGhepConChau({ t, setView }: { t: (s: string) => string; setView: (v: ViewState) => void }) {
+export function ManGhepConChau({ t, setView, nhung = false, onDanhSach }: {
+  t: (s: string) => string;
+  setView: (v: ViewState) => void;
+  /** Nhúng trong luồng "Con cháu cài giúp": bỏ nút quay lại, tiêu đề, đoạn giới thiệu. */
+  nhung?: boolean;
+  /** Báo danh sách người đã nối ra ngoài mỗi lần tải — để họ vào nút gọi khẩn cấp (Phần 2). */
+  onDanhSach?: (ds: NguoiDaGhep[]) => void;
+}) {
   const daDangNhap = docPhien() !== null;
+  /*
+   * ⚠️ GIỮ HÀM BÁO RA NGOÀI Ở REF, không cho vào phụ thuộc của `taiDs`. App tạo
+   * hàm mới mỗi lần dựng lại; để nó trong phụ thuộc thì mỗi lần App dựng lại là
+   * một lượt gọi máy chủ.
+   */
+  const onDanhSachRef = useRef(onDanhSach);
+  onDanhSachRef.current = onDanhSach;
   const [ma, setMa] = useState<string | null>(null);
   const [hetHanLuc, setHetHanLuc] = useState(0);
   const [conLai, setConLai] = useState(0);
   const [ds, setDs] = useState<NguoiDaGhep[] | null>(null);
+  /** id người đã nối → đã bật nhận cảnh báo trên ít nhất một máy chưa. Thiếu id = chưa biết. */
+  const [dangNhanCanhBao, setDangNhanCanhBao] = useState<Record<string, boolean>>({});
   const [loi, setLoi] = useState<string | null>(null);
   const [dangLam, setDangLam] = useState(false);
 
   const taiDs = useCallback(async () => {
     try {
-      setDs((await docVongGhep()).thanhVien);
+      const v = (await docVongGhep()).thanhVien;
+      setDs(v);
+      onDanhSachRef.current?.(v);
+      // Phần 3 (23/9/2026): ai đã bật nhận cảnh báo — "chưa báo được" không được trông như "đã báo" (§4.3).
+      void docTinhTrangBao()
+        .then((tt) => setDangNhanCanhBao(Object.fromEntries(tt.thanhVien.map((x) => [x.id, x.coDangKy]))))
+        .catch(() => setDangNhanCanhBao({}));
     } catch (e) {
       // §4.3 — không tải được thì nói là không tải được, KHÔNG vẽ "chưa nối ai".
       setDs(null);
@@ -100,19 +122,23 @@ export function ManGhepConChau({ t, setView }: { t: (s: string) => string; setVi
   const giay = String(conLai % 60).padStart(2, '0');
 
   return (
-    <div className="p-4 pb-24 max-w-xl mx-auto w-full overflow-y-auto">
-      <button
-        type="button"
-        onClick={() => setView('settings')}
-        className="min-h-[52px] min-w-[52px] flex items-center gap-1 text-[#1e1b4b] font-bold text-[15px]"
-      >
-        <ChevronLeft size={22} aria-hidden="true" /> {t('Quay lại')}
-      </button>
+    <div className={nhung ? 'w-full' : 'p-4 pb-24 max-w-xl mx-auto w-full overflow-y-auto'}>
+      {!nhung && (
+        <>
+          <button
+            type="button"
+            onClick={() => setView('settings')}
+            className="min-h-[52px] min-w-[52px] flex items-center gap-1 text-[#1e1b4b] font-bold text-[15px]"
+          >
+            <ChevronLeft size={22} aria-hidden="true" /> {t('Quay lại')}
+          </button>
 
-      <h1 className="text-[24px] font-black text-[#1e1b4b] mt-2 mb-1 leading-snug">{t('Nối với con cháu')}</h1>
-      <p className="text-[16px] text-slate-700 leading-relaxed mb-4">
-        {t('Con cháu sẽ thấy tên và số điện thoại của bác để gọi khi cần. Tin nhắn, vị trí, pin của máy bác không gửi đi đâu.')}
-      </p>
+          <h1 className="text-[24px] font-black text-[#1e1b4b] mt-2 mb-1 leading-snug">{t('Nối với con cháu')}</h1>
+          <p className="text-[16px] text-slate-700 leading-relaxed mb-4">
+            {t('Con cháu sẽ thấy tên và số điện thoại của bác để gọi khi cần. Tin nhắn, vị trí, pin của máy bác không gửi đi đâu.')}
+          </p>
+        </>
+      )}
 
       {!daDangNhap ? (
         <div className="bg-white border-2 border-[#2e1065] rounded-[18px] p-4">
@@ -170,6 +196,11 @@ export function ManGhepConChau({ t, setView }: { t: (s: string) => string; setVi
                   <div className="flex-1 min-w-0">
                     <p className="text-[16px] font-black text-[#1e1b4b] leading-snug break-words">{n.ten}</p>
                     <p className="text-[15px] font-semibold text-slate-700">{n.so}</p>
+                    {n.id in dangNhanCanhBao && (
+                      <p className={`text-[14px] font-bold leading-snug ${dangNhanCanhBao[n.id] ? 'text-emerald-800' : 'text-amber-800'}`}>
+                        {dangNhanCanhBao[n.id] ? t('Đang nhận cảnh báo') : t('Chưa bật nhận cảnh báo')}
+                      </p>
+                    )}
                   </div>
                   <button
                     type="button"
