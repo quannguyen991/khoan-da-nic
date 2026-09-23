@@ -52,6 +52,7 @@ mặc định tắt.
 | Tự bật màn khi đang gọi (cả Zalo, Messenger) + OTP / cài app mới / tin trừ tiền ≥ 1 triệu | ✅ code + APK đã dựng, ⚠️ **chưa thử trên máy thật** | Xiaomi/Oppo có thể giết dịch vụ nền. Tin trừ tiền đọc SMS biến động số dư và thông báo của 22 app ngân hàng/ví đã xác minh (đọc xong bỏ, không lưu). Chỉ nói "đã chạy trên máy X" sau khi thử |
 | "Có phải con đang gọi không?" — bác hỏi, con bấm Có/Không | ✅ chạy | Cần con đã bật nhận cảnh báo; chưa bật thì màn bác nói thật và đưa nút gọi lại số đã lưu |
 | Gọi thẳng một chạm (CALL_PHONE) | ✅ APK | Web thì mở trình quay số |
+| Số tổng đài 8 ngân hàng lớn (Vietcombank, BIDV, VietinBank, Agribank, Techcombank, ACB, Sacombank, VPBank) | ✅ đã duyệt 23/9/2026 | Mỗi số đối chiếu từng chữ số với trang của chính ngân hàng, có người duyệt đứng tên; hiện nguồn và ngày kiểm ngay dưới số. Chỉ số cho khách cá nhân |
 | Chìa khoá thứ hai (passkey) | ✅ chạy, ⚠️ **cần `KHOAN_DA_RP_ID` đúng tên miền** | Chữ ký của con **không chứng minh** khoản chuyển an toàn |
 | Màn ngân hàng mô phỏng | ✅ chạy | Luôn có dải "MÔ PHỎNG". **Không ngân hàng thật nào tích hợp** |
 | Ba công tắc bảo vệ ở màn con cháu | ⚠️ chỉ giao diện | Đừng giới thiệu |

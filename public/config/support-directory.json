@@ -9,114 +9,169 @@
     "Mục chờ duyệt KHÔNG mang số điện thoại nào. Số chỉ lên đĩa cùng lúc với tên người đứng ra xác nhận nó.",
     "Người dùng chốt 17/9/2026: số tổng đài chỉ để sẵn trong app để bác tự bấm — không mở app ngân hàng, không tự gọi."
   ],
-  "_trang_thai": "CHƯA CÓ MỤC NÀO ĐƯỢC DUYỆT. Tám ngân hàng dưới đây đang chờ; sourceUrl là trang chính thức nơi người duyệt tra số.",
-
-  "institutions": [],
-
-  "_cho_duyet": [
+  "_trang_thai": "23/9/2026: tám ngân hàng đã duyệt (người duyệt quannguyen991). Số được đối chiếu từng chữ số với sourceUrl — trang của chính ngân hàng. Chỉ số dành cho khách cá nhân. Thêm ngân hàng mới: đưa vào _cho_duyet KHÔNG kèm số, rồi chạy scripts/duyet-so-ngan-hang.js.",
+  "institutions": [
     {
       "id": "vn-vietcombank",
       "countryCode": "VN",
       "type": "bank",
       "canonicalName": "Ngân hàng TMCP Ngoại thương Việt Nam (Vietcombank)",
-      "aliases": ["Vietcombank", "VCB"],
-      "officialDomains": ["vietcombank.com.vn"],
-      "officialPhoneNumbers": [],
+      "aliases": [
+        "Vietcombank",
+        "VCB"
+      ],
+      "officialDomains": [
+        "vietcombank.com.vn"
+      ],
+      "officialPhoneNumbers": [
+        "1900 545413"
+      ],
       "sourceUrl": "https://www.vietcombank.com.vn/",
-      "verifiedAt": "",
-      "reviewStatus": "pending",
-      "_can_lam": "Mở sourceUrl, chép số tổng đài, rồi chạy scripts/duyet-so-ngan-hang.js."
+      "verifiedAt": "2026-09-23",
+      "reviewStatus": "approved",
+      "reviewedBy": "quannguyen991"
     },
     {
       "id": "vn-bidv",
       "countryCode": "VN",
       "type": "bank",
       "canonicalName": "Ngân hàng TMCP Đầu tư và Phát triển Việt Nam (BIDV)",
-      "aliases": ["BIDV"],
-      "officialDomains": ["bidv.com.vn"],
-      "officialPhoneNumbers": [],
+      "aliases": [
+        "BIDV"
+      ],
+      "officialDomains": [
+        "bidv.com.vn"
+      ],
+      "officialPhoneNumbers": [
+        "1900 9247"
+      ],
       "sourceUrl": "https://bidv.com.vn/",
-      "verifiedAt": "",
-      "reviewStatus": "pending",
-      "_can_lam": "Như trên. Lấy số dành cho khách hàng cá nhân."
+      "verifiedAt": "2026-09-23",
+      "reviewStatus": "approved",
+      "reviewedBy": "quannguyen991"
     },
     {
       "id": "vn-vietinbank",
       "countryCode": "VN",
       "type": "bank",
       "canonicalName": "Ngân hàng TMCP Công thương Việt Nam (VietinBank)",
-      "aliases": ["VietinBank", "CTG"],
-      "officialDomains": ["vietinbank.vn"],
-      "officialPhoneNumbers": [],
+      "aliases": [
+        "VietinBank",
+        "CTG"
+      ],
+      "officialDomains": [
+        "vietinbank.vn"
+      ],
+      "officialPhoneNumbers": [
+        "1900 558 868",
+        "1900 6658"
+      ],
       "sourceUrl": "https://www.vietinbank.vn/vietinbank-trien-khai-hotline-du-phong-cho-tong-dai-cham-soc-khach-hang-20250702011922-00-html",
-      "verifiedAt": "",
-      "reviewStatus": "pending",
-      "_can_lam": "Như trên. Trang chủ không hiện số; số nằm ở thông báo tổng đài của chính VietinBank."
+      "verifiedAt": "2026-09-23",
+      "reviewStatus": "approved",
+      "reviewedBy": "quannguyen991"
     },
     {
       "id": "vn-agribank",
       "countryCode": "VN",
       "type": "bank",
       "canonicalName": "Ngân hàng Nông nghiệp và Phát triển Nông thôn Việt Nam (Agribank)",
-      "aliases": ["Agribank"],
-      "officialDomains": ["agribank.com.vn"],
-      "officialPhoneNumbers": [],
+      "aliases": [
+        "Agribank"
+      ],
+      "officialDomains": [
+        "agribank.com.vn"
+      ],
+      "officialPhoneNumbers": [
+        "1900 558818",
+        "024 3205 3205"
+      ],
       "sourceUrl": "https://www.agribank.com.vn/",
-      "verifiedAt": "",
-      "reviewStatus": "pending",
-      "_can_lam": "Như trên."
+      "verifiedAt": "2026-09-23",
+      "reviewStatus": "approved",
+      "reviewedBy": "quannguyen991"
     },
     {
       "id": "vn-techcombank",
       "countryCode": "VN",
       "type": "bank",
       "canonicalName": "Ngân hàng TMCP Kỹ thương Việt Nam (Techcombank)",
-      "aliases": ["Techcombank", "TCB"],
-      "officialDomains": ["techcombank.com", "techcombank.com.vn"],
-      "officialPhoneNumbers": [],
+      "aliases": [
+        "Techcombank",
+        "TCB"
+      ],
+      "officialDomains": [
+        "techcombank.com",
+        "techcombank.com.vn"
+      ],
+      "officialPhoneNumbers": [
+        "1800 588 822"
+      ],
       "sourceUrl": "https://techcombank.com/",
-      "verifiedAt": "",
-      "reviewStatus": "pending",
-      "_can_lam": "Như trên. Lấy số dành cho khách hàng cá nhân."
+      "verifiedAt": "2026-09-23",
+      "reviewStatus": "approved",
+      "reviewedBy": "quannguyen991"
     },
     {
       "id": "vn-acb",
       "countryCode": "VN",
       "type": "bank",
       "canonicalName": "Ngân hàng TMCP Á Châu (ACB)",
-      "aliases": ["ACB"],
-      "officialDomains": ["acb.com.vn"],
-      "officialPhoneNumbers": [],
+      "aliases": [
+        "ACB"
+      ],
+      "officialDomains": [
+        "acb.com.vn"
+      ],
+      "officialPhoneNumbers": [
+        "1900 54 54 86",
+        "(028) 38 247 247"
+      ],
       "sourceUrl": "https://acb.com.vn/",
-      "verifiedAt": "",
-      "reviewStatus": "pending",
-      "_can_lam": "Như trên."
+      "verifiedAt": "2026-09-23",
+      "reviewStatus": "approved",
+      "reviewedBy": "quannguyen991"
     },
     {
       "id": "vn-sacombank",
       "countryCode": "VN",
       "type": "bank",
       "canonicalName": "Ngân hàng TMCP Sài Gòn Thương Tín (Sacombank)",
-      "aliases": ["Sacombank", "STB"],
-      "officialDomains": ["sacombank.com.vn"],
-      "officialPhoneNumbers": [],
+      "aliases": [
+        "Sacombank",
+        "STB"
+      ],
+      "officialDomains": [
+        "sacombank.com.vn"
+      ],
+      "officialPhoneNumbers": [
+        "1800 5858 88"
+      ],
       "sourceUrl": "https://www.sacombank.com.vn/",
-      "verifiedAt": "",
-      "reviewStatus": "pending",
-      "_can_lam": "Như trên."
+      "verifiedAt": "2026-09-23",
+      "reviewStatus": "approved",
+      "reviewedBy": "quannguyen991"
     },
     {
       "id": "vn-vpbank",
       "countryCode": "VN",
       "type": "bank",
       "canonicalName": "Ngân hàng TMCP Việt Nam Thịnh Vượng (VPBank)",
-      "aliases": ["VPBank", "VPB"],
-      "officialDomains": ["vpbank.com.vn"],
-      "officialPhoneNumbers": [],
+      "aliases": [
+        "VPBank",
+        "VPB"
+      ],
+      "officialDomains": [
+        "vpbank.com.vn"
+      ],
+      "officialPhoneNumbers": [
+        "1900 545415"
+      ],
       "sourceUrl": "https://www.vpbank.com.vn/bi-kip-va-chia-se/retail-story-and-tips/goc-canh-giac/canh-giac-voi-so-dien-thoai-gia-mao-ngan-hang-vpbank",
-      "verifiedAt": "",
-      "reviewStatus": "pending",
-      "_can_lam": "Như trên. Lấy số dành cho khách hàng tiêu chuẩn (cá nhân)."
+      "verifiedAt": "2026-09-23",
+      "reviewStatus": "approved",
+      "reviewedBy": "quannguyen991"
     }
-  ]
+  ],
+  "_cho_duyet": []
 }

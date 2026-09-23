@@ -30,11 +30,32 @@ test('§2B.5 — nước CHƯA DUYỆT rơi về bước chung, KHÔNG bịa bư
 });
 
 test('§2B.5 — KHÔNG BỊA SỐ HOTLINE: sổ trống thì danh sách rỗng', () => {
-  const kh = R.layKeHoachPhucHoi('VN');
-  assert.deepStrictEqual(kh.hotline, [],
-    'sổ tổ chức hiện chưa có mục nào được duyệt, nên hotline PHẢI rỗng');
+  // Sổ thật đã có mục duyệt từ 23/9/2026 — ca "sổ trống" giờ dựng bằng một tệp tạm.
+  const fs = require('node:fs');
+  const os = require('node:os');
+  const path = require('node:path');
+  const tam = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'so-trong-')), 'support-directory.json');
+  fs.writeFileSync(tam, JSON.stringify({ institutions: [] }));
+  const kh = R.layKeHoachPhucHoi('VN', tam);
+  assert.deepStrictEqual(kh.hotline, [], 'sổ không có mục nào được duyệt ⇒ hotline PHẢI rỗng');
   assert.ok(kh.canhBao.includes('chua_xac_minh_duoc_so_tong_dai_dung_so_in_sau_the'),
     '§9.6 — chưa xác minh được thì nói thẳng, bảo người dùng lấy số sau thẻ');
+});
+
+test('§2B.5 — sổ thật: MỖI số trả ra đều đúng là số của một mục đã duyệt, có tên người duyệt', () => {
+  const fs = require('node:fs');
+  const path = require('node:path');
+  const so = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'public', 'config', 'support-directory.json'), 'utf8'));
+  const daDuyet = new Map(so.institutions
+    .filter((m) => m.reviewStatus === 'approved' && String(m.reviewedBy || '').trim())
+    .map((m) => [m.id, m.officialPhoneNumbers]));
+  const kh = R.layKeHoachPhucHoi('VN');
+  for (const h of kh.hotline) {
+    assert.ok(daDuyet.has(h.id), `${h.id} không phải mục đã duyệt có người đứng tên`);
+    assert.deepStrictEqual(h.officialPhoneNumbers, daDuyet.get(h.id), `${h.id}: số trả ra khác số đã duyệt`);
+  }
+  // Mục chờ duyệt không bao giờ mang số (số chỉ lên đĩa cùng tên người duyệt).
+  for (const m of so._cho_duyet || []) assert.deepStrictEqual(m.officialPhoneNumbers || [], [], `${m.id} chờ duyệt mà đã có số`);
 });
 
 test('§2B.5 — mọi số hotline trả ra đều PHẢI kèm nguồn và ngày xác minh', () => {
