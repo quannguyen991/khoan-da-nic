@@ -291,9 +291,9 @@ Lưu ý: gọi `npm run eval -- --bo-cache` qua npm từng bị lỗi mã 4 khô
 ### 7.4 Con số "90,2% được cảnh báo" tính từ đâu
 
 Từ ma trận nhầm lẫn của 265 tin nguy hiểm:
-- xếp `CAO`: 169 · xếp `NGHI_NGO`: 64 · xếp `CHUA_THAY`: 32
-- được cảnh báo = (169 + 64) ÷ 265 = **90,2%**
-- bị im lặng = 32 ÷ 265 = **9,8%**
+- xếp `CAO`: 186 · xếp `NGHI_NGO`: 53 · xếp `CHUA_THAY`: 26
+- được cảnh báo = (186 + 53) ÷ 265 = **90,2%**
+- bị im lặng = 26 ÷ 265 = **9,8%**
 
 Hai con số recall khác nhau vì: recall 70,2% chỉ tính mức `CAO` là đúng; con số 90,2% tính cả mức
 `NGHI_NGO`, vì ở mức đó người dùng vẫn thấy cảnh báo và nút gọi người thân.
@@ -370,8 +370,8 @@ một model.
 ## 8 · KIỂM THỬ
 
 - Chạy: `npm test`
-- Đo lại ngày 16/9/2026: **1.086 phép thử · pass 1.070 · fail 0 · skip 0**, trong **80 tệp** trong
-  thư mục `test/`, chạy hết **25,9 giây**.
+- Đo lại ngày 23/9/2026: **1.387 phép thử · pass 1.387 · fail 0 · skip 0**, trong **113 tệp** trong
+  thư mục `test/`, chạy hết khoảng **40 giây**. Số này đổi theo từng bản — hôm thi chạy lại rồi đọc số mới.
 - Có phép thử bắt buộc phải gọi trình biên dịch TypeScript (commit `cc538fc`).
 - Một số phép thử quan trọng nên nhớ tên:
 

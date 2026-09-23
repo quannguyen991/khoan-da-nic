@@ -189,7 +189,7 @@ Không có thì đừng bịa:
 >
 > **Bố mẹ là người được bảo vệ**: dùng trên điện thoại, thấy một câu hỏi và vài nút lớn.
 > **Con cái là người vận hành**: đăng nhập vào bảng điều khiển trên máy tính, có ô kiểm hộ, nhật ký
-> sự vụ, ba công tắc bảo vệ, và nút gọi, nhắc, báo động.
+> sự vụ, thẻ nhận cảnh báo của bố mẹ, thẻ ký "chìa khoá thứ hai", và nút gọi, nhắc, báo động.
 >
 > Và **người trả tiền là bên thứ ba** — ngân hàng hoặc gia đình — không bao giờ là người đang gặp
 > nguy."
@@ -814,7 +814,7 @@ Chưa thử thì nói thẳng, rồi chuyển sang cái đã đo được:
 
 ### 4.11 "Các em có bao nhiêu kiểm thử tự động?" — A
 
-> "**1.086 phép thử, chạy xanh toàn bộ**, trong 80 tệp — bọn em vừa chạy lại hôm nay, hết khoảng 26
+> "**1.387 phép thử, chạy xanh toàn bộ**, trong 113 tệp — bọn em vừa chạy lại hôm nay, hết khoảng 40
 > giây.
 >
 > Em xin nói rõ: phép thử **không chứng minh phần mềm không có lỗi**. Nó chứng minh những lỗi bọn em
@@ -822,7 +822,7 @@ Chưa thử thì nói thẳng, rồi chuyển sang cái đã đo được:
 > dò — giờ có phép thử chặn đúng ca đó."
 
 **🇬🇧**
-> "**1,086 automated tests, all passing**, across 80 files — we re-ran them today; it takes about 26
+> "**1,387 automated tests, all passing**, across 113 files — we re-ran them today; it takes about 40
 > seconds. To be precise: tests **don't prove the software is bug-free**. They prove the bugs we already
 > hit cannot come back. For instance, typing *'Notice:'* at the start of a message once disabled our
 > whole detector — there's now a test pinned to that exact case."
@@ -1334,10 +1334,10 @@ Chưa quyết:
 
 ### 7.2 ⚠️ "Con số 90,2% tính ra từ đâu?" — B
 
-> "Từ 265 tin nguy hiểm trong bộ kiểm tra ạ: **169 tin** được xếp đúng mức 'Nguy hiểm cao', **64 tin**
+> "Từ 265 tin nguy hiểm trong bộ kiểm tra ạ: **186 tin** được xếp đúng mức 'Nguy hiểm cao', **53 tin**
 > xếp mức 'Nghi ngờ', và **26 tin bị bỏ sót hoàn toàn**.
 >
-> Cộng 169 với 64 rồi chia 265 được 90,2% — đó là tỉ lệ tin lừa đảo mà người dùng **nhìn thấy cảnh
+> Cộng 186 với 53 rồi chia 265 được 90,2% — đó là tỉ lệ tin lừa đảo mà người dùng **nhìn thấy cảnh
 > báo**, vì ở mức 'Nghi ngờ' màn hình vẫn hiện cảnh báo và nút gọi người thân."
 
 **🇬🇧**
@@ -1462,14 +1462,14 @@ Không có số:
 
 ### 7.12 "Bao nhiêu kiểm thử tự động, và nó chứng minh điều gì?" — B
 
-> "**1.086 phép thử, chạy xanh toàn bộ**, trên 80 tệp, chạy hết khoảng 26 giây — bọn em chạy lại hôm
+> "**1.387 phép thử, chạy xanh toàn bộ**, trên 113 tệp, chạy hết khoảng 40 giây — bọn em chạy lại hôm
 > nay.
 >
 > Nó **không chứng minh phần mềm không có lỗi**. Nó chứng minh những lỗi bọn em đã từng gặp thì không
 > quay lại được, và các ràng buộc an toàn không bị phá trong lúc sửa code."
 
 **🇬🇧**
-> "**1,086 automated tests, all green**, across 80 files, in about 26 seconds — we re-ran them today. They
+> "**1,387 automated tests, all green**, across 113 files, in about 40 seconds — we re-ran them today. They
 > **don't prove the software is bug-free**. They prove the bugs we already hit can't return, and that our
 > safety constraints can't be broken by a later code change."
 
@@ -1828,11 +1828,13 @@ Ba thứ dễ xin và dễ nhận nhất:
 3. **Chưa đo được chi phí thật cho mỗi người dùng.**
 
 Câu chốt bắt buộc:
-> **"Bọn em không hứa chặn được cuộc gọi lừa đảo. Bọn em hứa bác sẽ không chuyển tiền trong 60 giây
-> tới."**
+> **"Bọn em không hứa chặn được cuộc gọi lừa đảo. Bọn em không để bác một mình trong 60 giây đó."**
 
-**🇬🇧** — *"We do not promise to block scam calls. We promise this person will not transfer money in the
-next 60 seconds."*
+**🇬🇧** — *"We do not promise to block scam calls. We promise this person will not be alone in those 60
+seconds."*
+
+> ⚠️ Sửa 23/9/2026: câu cũ "hứa bác sẽ không chuyển tiền" là lời hứa ứng dụng không giữ được — bác
+> vẫn có thể bấm chuyển. Việc ứng dụng làm được là nối bác với người nhà ngay trong lúc đó.
 
 ### 10.4 "Có gì mới không, hay chỉ ghép mấy thứ có sẵn?"
 
@@ -2202,13 +2204,13 @@ Nếu chưa chọn, nói tiêu chí thay vì nói bừa một nước:
 | **90,2%** | tin lừa đảo được cảnh báo | scams that produce a warning |
 | **9,8%** | tin lừa đảo bị bỏ sót hoàn toàn | scams missed silently |
 | **70,2%** | khớp đúng mức | exact-level match |
-| **169 / 64 / 32** | tin nguy hiểm xếp Cao / Nghi ngờ / bỏ sót | High / Suspicious / missed |
+| **186 / 53 / 26** | tin nguy hiểm xếp Cao / Nghi ngờ / bỏ sót | High / Suspicious / missed |
 | **4,1%** | tin bình thường bị báo nhầm mức cao | false high-risk rate |
 | **12,0%** | báo động trên 125 tin bình thường khó | alarms on the hard benign slice |
 | **76,2%** | bắt được trên 40 tin viết không dấu | recall without diacritics |
 | **0,2 điểm %** | chênh lệch tiếng Việt / tiếng Anh | VI–EN parity gap |
 | **0** | tin nhắn thật trong bộ đánh giá | real victim messages |
-| **1.086 / 0 / 81** | test pass / fail / số tệp | tests passing / failing / files |
+| **1.387 / 0 / 113** (23/9) | test pass / fail / số tệp | tests passing / failing / files |
 | **59 · 8 · 10** | dấu hiệu · nhóm · tổ hợp chốt chặn | signals · groups · hard overrides |
 | **9** | dấu hiệu chạy không cần AI | signals that run without AI |
 | **840 · 41 · 1.240** | đội · quốc gia · người, AI-JAM US 2026 | teams · countries · participants |

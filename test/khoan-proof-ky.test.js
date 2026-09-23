@@ -169,20 +169,20 @@ test('CỤM TỪ KHÔNG TÍNH RA ĐƯỢC TRƯỚC KHI VERIFY THÀNH CÔNG', asy
 });
 
 test('cụm từ sinh từ CHỮ KÝ, không phải từ caseId', async () => {
-  // Cùng caseId, hai lượt ký khác nhau ⇒ cụm từ phải KHÁC.
-  const a = await K.taoYeuCau(YEU_CAU);
-  const cumA = (await K.xacMinhChuKy({
-    yeuCauId: a.yeuCauId, taiKhoanId: 'con-minh', quyetDinh: 'XAC_NHAN',
-    phanHoi: await mayCon.ky(a.challenge),
-  })).cumTu;
+  // Cùng caseId, nhiều lượt ký khác nhau ⇒ cụm từ phải KHÁC NHAU.
+  // ⚠️ Không so HAI lượt (sửa 23/9/2026): không gian cụm từ chỉ 16 × 48 = 768, nên
+  // hai chữ ký khác nhau vẫn trùng cụm từ ~1/768 lần — test đỏ ngẫu nhiên. Năm lượt
+  // mà trùng hết do may rủi là ~(1/768)^4; trùng hết thật thì chỉ có thể là sinh từ caseId.
+  const cacCumTu = new Set();
+  for (let i = 0; i < 5; i += 1) {
+    const y = await K.taoYeuCau(YEU_CAU);
+    cacCumTu.add((await K.xacMinhChuKy({
+      yeuCauId: y.yeuCauId, taiKhoanId: 'con-minh', quyetDinh: 'XAC_NHAN',
+      phanHoi: await mayCon.ky(y.challenge),
+    })).cumTu);
+  }
 
-  const b = await K.taoYeuCau(YEU_CAU);
-  const cumB = (await K.xacMinhChuKy({
-    yeuCauId: b.yeuCauId, taiKhoanId: 'con-minh', quyetDinh: 'XAC_NHAN',
-    phanHoi: await mayCon.ky(b.challenge),
-  })).cumTu;
-
-  assert.notStrictEqual(cumA, cumB, 'cụm từ giống nhau ⇒ nó đang sinh từ caseId');
+  assert.ok(cacCumTu.size > 1, 'năm lượt ký ra cùng một cụm từ ⇒ nó đang sinh từ caseId');
 });
 
 test('cụm từ lấy từ danh sách TĨNH và giống nhau ở CẢ HAI ĐẦU', async () => {

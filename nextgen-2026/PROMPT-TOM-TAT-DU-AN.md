@@ -256,7 +256,7 @@ Luôn nói kèm "840 đội, 41 quốc gia"; không nói "giải cao nhất th�
 8. **Cảnh báo chưa tới được máy người thân** — cần ghép cặp máy và dịch vụ đẩy thông báo.
 9. **APK 1.2 chưa thử trên máy thật** (dựng và kiểm trong tệp ngày 17/9/2026).
 
-**Câu chốt bắt buộc:** *"Bọn em không hứa chặn được cuộc gọi lừa đảo. Bọn em hứa bác sẽ không chuyển tiền trong 60 giây tới."*
+**Câu chốt bắt buộc:** *"Bọn em không hứa chặn được cuộc gọi lừa đảo. Bọn em không để bác một mình trong 60 giây đó."*
 
 ---
 

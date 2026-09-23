@@ -278,7 +278,7 @@ Ba lý do, nói ngắn:
 > not one country's vocabulary. Second, **the architecture is already separated**: the decision engine
 > is shared across languages and only the lexicon is country-specific; the server returns **codes** and
 > the interface renders the words, so adding a language means adding a word list, not rewriting the
-> system. We measure a **0.4 percentage point** gap between Vietnamese and English today. Third, the
+> system. We measure a **0.2 percentage point** gap between Vietnamese and English today. Third, the
 > safety constraints — never say 'safe', never let the model decide — are not culture-specific.
 >
 > The honest limit: our English slice is only **49 samples** against a target of 90. We have
@@ -387,7 +387,10 @@ Cách đội xử lý, nói đúng theo thứ tự này:
 | Danh sách máy của bố mẹ | ✅ | Linked devices | Hiện cả trạng thái "Chưa nối" |
 | Ô quét nhanh tin nhắn / số điện thoại | ✅ | Check on behalf of a parent | Chỗ con dán tin mẹ gửi để kiểm hộ |
 | Nhật ký sự vụ gần đây | ✅ | Incident log | Thời điểm và mức — **không hiện nội dung tin của bố mẹ** |
-| Ba công tắc bảo vệ | ✅ | Protection switches | ① nhắc khi có số lạ gọi (ghi rõ: *không chặn cuộc gọi*) ② cảnh báo khi chuyển khoản trên 5 triệu ③ ghim nút cảnh giác trên máy bố mẹ |
+| Ba công tắc bảo vệ | ⚠️ | Protection switches | **Chỉ là giao diện, chưa nối tới máy bố mẹ** — đừng giới thiệu như tính năng chạy được. Bản chạy thật của ý "cảnh báo chuyển khoản lớn" là *Chìa khoá thứ hai* (dòng dưới) |
+| Nhận cảnh báo của bố mẹ (Web Push) | ✅ | Parent alerts | Bố mẹ gặp mức Cao / tổ hợp "cuộc gọi + OTP" và **đã tự bật "báo cho con"** ⇒ máy con đổ thông báo, thấy bố mẹ bấm gì, một nút "Gọi ngay". Không có nội dung tin nhắn. Cần khoá VAPID trên Render |
+| Nối với bố mẹ bằng mã 6 số | ✅ | 6-digit pairing | Bố mẹ lấy mã trong Cài đặt, con nhập ở đây |
+| Ký "Chìa khoá thứ hai" | ✅ | Second Key | Con ký xác nhận / từ chối bằng passkey; hai máy thấy cùng một cụm từ đối chiếu. Chỉ khoảng tiền, không số tiền, không người nhận |
 | Gọi điện · Gửi nhắc an toàn · Báo động SOS | ✅ | Call · Send a safety nudge · SOS | Ba nút hành động nhanh |
 | Xem thử giao diện của bác | ✅ | Preview the parent's view | Để con hiểu bố mẹ đang nhìn thấy gì |
 | Mẫu câu "Nói gì với bố mẹ" | ⚠️ | "What to say to your parent" scripts | Có trong thiết kế, **chưa dựng giao diện** |
@@ -540,7 +543,7 @@ dùng chạm vào điểm rủi ro là mở đúng cái cửa kẻ lừa đảo 
 
 | | Bố mẹ thấy gì | Con cái thấy gì |
 |---|---|---|
-| **TRƯỚC** | Mật khẩu gia đình · 6 tình huống mẫu để học · nút cảnh giác ghim sẵn | Bật ba công tắc bảo vệ cho máy bố mẹ |
+| **TRƯỚC** | Mật khẩu gia đình · 6 tình huống mẫu để học · nút cảnh giác ghim sẵn · diễn tập | Cài giúp bố mẹ trong 3 phút: nối máy, ghi lời nhắn giọng mình, bật "báo cho con" |
 | **TRONG** | Kiểm tra → dấu hiệu → dừng 60 giây → nút gọi người thân · 8 câu hỏi nhanh · luôn có lối ra "Tôi ổn" | Nhận cảnh báo · kiểm hộ · gọi · gửi nhắc · SOS |
 | **SAU** | Bảo vệ 72 giờ · gom các sự việc liên quan trong 14 ngày | Nhật ký sự vụ |
 
@@ -699,12 +702,14 @@ Third, incorporate — we need a legal entity to publish on Zalo and to sign wit
 
 ## 9.2 Bộ kiểm thử tự động
 
-Chạy lại ngày 16/9/2026: **1.086 phép thử · pass 1.070 · fail 0**, trong **80 tệp**, hết **25,9 giây**.
+Chạy lại ngày 23/9/2026: **1.387 phép thử · pass 1.387 · fail 0**, trong **113 tệp**, hết khoảng **40 giây**.
+
+> ⚠️ Số này đổi theo từng bản. Sáng hôm thi chạy lại `npm test` và đọc đúng số vừa chạy.
 
 > "Phép thử không chứng minh phần mềm không có lỗi — nó chứng minh những lỗi bọn em đã từng gặp thì
 > không quay lại."
 
-**🇬🇧** — *"1,086 automated tests, all passing, across 80 files. Tests don't prove the software is
+**🇬🇧** — *"1,387 automated tests, all passing, across 113 files. Tests don't prove the software is
 bug-free; they prove the bugs we already hit cannot come back."*
 
 ## 9.3 Bộ đánh giá độ chính xác
@@ -780,11 +785,13 @@ Dịch để nói trên sân khấu:
 
 **Câu chốt bắt buộc:**
 
-> **"Bọn em không hứa chặn được cuộc gọi lừa đảo. Bọn em hứa bác sẽ không chuyển tiền trong 60
-> giây tới."**
+> **"Bọn em không hứa chặn được cuộc gọi lừa đảo. Bọn em không để bác một mình trong 60 giây đó."**
 
-**🇬🇧** — *"We do not promise to block scam calls. We promise that this person will not transfer
-money in the next 60 seconds."*
+**🇬🇧** — *"We do not promise to block scam calls. We promise this person will not be alone in those 60
+seconds."*
+
+> ⚠️ Sửa 23/9/2026: câu cũ "hứa bác sẽ không chuyển tiền" là lời hứa ứng dụng không giữ được — bác
+> vẫn có thể bấm chuyển. Việc ứng dụng làm được là nối bác với người nhà ngay trong lúc đó.
 
 ---
 
@@ -841,7 +848,7 @@ dừng.
 > gia đình bán cho con cái.
 >
 > Về bằng chứng: trên bộ 571 tin nhắn, ứng dụng cảnh báo 90,2% tin lừa đảo, báo nhầm 4,1% tin bình
-> thường, và có 1.086 phép thử tự động đang chạy xanh. Bộ 571 tin này bọn em tự soạn, chưa có tin
+> thường, và có 1.387 phép thử tự động đang chạy xanh. Bộ 571 tin này bọn em tự soạn, chưa có tin
 > thật — đó là việc đầu tiên bọn em làm tiếp.
 >
 > Và bọn em không chỉ nhìn thị trường Việt Nam. Năm 2025 thế giới mất khoảng 442 tỷ đô la vì lừa
@@ -887,7 +894,7 @@ dừng.
 > plan sold to adult children.
 >
 > On evidence: on 571 labelled messages, the app warns on 90.2% of scams and wrongly flags 4.1% of
-> harmless messages, and we have 1,086 automated tests passing. We wrote that test set ourselves —
+> harmless messages, and we have 1,387 automated tests passing. We wrote that test set ourselves —
 > it has no real victim messages yet, and that is the first thing we fix next.
 >
 > And we are not only looking at Vietnam. Globally, an estimated 442 billion dollars was lost to
@@ -982,7 +989,7 @@ Nói một câu, chuyển ngay, **không sửa máy trên sân khấu**.
 | **76,2%** | bắt được trên 40 tin viết không dấu | recall without diacritics |
 | **0,2 điểm %** | chênh lệch tiếng Việt / tiếng Anh | VI–EN parity gap |
 | **0** | tin nhắn thật trong bộ đánh giá | real victim messages |
-| **1.086 / 0 / 81** | test pass / fail / số tệp | tests passing / failing / files |
+| **1.387 / 0 / 113** (23/9) | test pass / fail / số tệp | tests passing / failing / files |
 | **59 · 8 · 10** | dấu hiệu · nhóm · tổ hợp chốt chặn | signals · groups · hard overrides |
 | **840 · 41 · 1.240** | đội · quốc gia · người ở AI-JAM US 2026 | teams · countries · participants |
 | **60 giây · 72 giờ · 14 ngày** | dừng · bảo vệ sau mất tiền · gom sự việc | pause · recovery watch · case window |
