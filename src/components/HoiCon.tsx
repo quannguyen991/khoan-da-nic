@@ -67,7 +67,7 @@ export function HoiCon({ t, familyMembers, api, nhipMs = 3000 }: {
 
   const nutGoiLai = con && (
     <button type="button" onClick={() => a.goi(con.phone)}
-      className="w-full min-h-[56px] rounded-[18px] bg-white text-[#2e1065] font-black text-[17px] px-3 leading-snug flex items-center justify-center gap-2">
+      className="w-full min-h-[56px] rounded-full border-2 border-[#e4d7ff] bg-white text-[color:var(--color-ink)] font-black text-[17px] px-4 leading-snug flex items-center justify-center gap-2 shadow-[0_6px_14px_-8px_rgba(90,30,160,0.35)]">
       <Phone size={20} aria-hidden="true" /> {t('Gọi số của {ten} đã lưu').replace('{ten}', con.name)}
     </button>
   );
@@ -76,10 +76,10 @@ export function HoiCon({ t, familyMembers, api, nhipMs = 3000 }: {
     return (
       <div className="flex flex-col gap-2 mb-5">
         <button type="button" onClick={() => { void hoi(); }} disabled={dangGui} data-vai-tro="nut-chinh"
-          className="w-full min-h-[64px] rounded-[20px] bg-[#6d28d9] text-white font-black text-[18px] px-4 leading-snug flex items-center justify-center gap-3 border-2 border-white/30 disabled:opacity-60">
+          className="w-full min-h-[64px] rounded-full bg-[#6d28d9] text-white font-black text-[18px] px-5 leading-snug flex items-center justify-center gap-3 shadow-[0_12px_24px_-12px_rgba(109,40,217,0.7)] disabled:opacity-60">
           <UserCheck size={26} aria-hidden="true" className="shrink-0" /> {t('Họ xưng là con? Hỏi con ngay')}
         </button>
-        {loi && <p role="alert" className="text-[15px] font-bold text-amber-200 leading-snug">{t('Chưa hỏi được. Bác cúp máy, gọi lại số của con đã lưu.')}</p>}
+        {loi && <p role="alert" className="text-[15px] font-bold text-[#92400e] leading-snug">{t('Chưa hỏi được. Bác cúp máy, gọi lại số của con đã lưu.')}</p>}
         {loi && nutGoiLai}
       </div>
     );
@@ -92,7 +92,7 @@ export function HoiCon({ t, familyMembers, api, nhipMs = 3000 }: {
 
   if (khong.length > 0) {
     return (
-      <div role="alert" className="rounded-[20px] bg-red-700 p-4 mb-5 flex flex-col gap-3">
+      <div role="alert" className="rounded-[28px] bg-red-700 text-white p-5 mb-5 flex flex-col gap-3 shadow-[0_14px_28px_-14px_rgba(185,28,28,0.7)]">
         {khong.map((x) => (
           <p key={x.ten} className="text-[20px] font-black leading-snug">{t('{ten} bấm: không phải {ten} gọi.').split('{ten}').join(x.ten)}</p>
         ))}
@@ -103,17 +103,17 @@ export function HoiCon({ t, familyMembers, api, nhipMs = 3000 }: {
   }
   if (co.length > 0) {
     return (
-      <div role="status" className="rounded-[20px] bg-white/10 border-2 border-white/30 p-4 mb-5 flex flex-col gap-2">
+      <div role="status" className="rounded-[28px] bg-white text-[color:var(--color-ink)] border-2 border-[#e4d7ff] p-5 mb-5 flex flex-col gap-2 shadow-[0_10px_24px_-14px_rgba(90,30,160,0.35)]">
         {co.map((x) => (
           <p key={x.ten} className="text-[20px] font-black leading-snug">{t('{ten} bấm: đúng {ten} đang gọi.').split('{ten}').join(x.ten)}</p>
         ))}
-        <p className="text-[15px] text-purple-100 leading-snug">{t('Dù vậy, bác chưa chuyển tiền hay đọc mã nhé.')}</p>
+        <p className="text-[15px] font-bold text-[#5b21b6] leading-snug">{t('Dù vậy, bác chưa chuyển tiền hay đọc mã nhé.')}</p>
       </div>
     );
   }
   if (khongToiAi || hetGio) {
     return (
-      <div role="alert" className="rounded-[20px] bg-amber-300 text-amber-950 p-4 mb-5 flex flex-col gap-3">
+      <div role="alert" className="rounded-[28px] bg-amber-300 text-amber-950 p-5 mb-5 flex flex-col gap-3">
         <p className="text-[19px] font-black leading-snug">
           {khongToiAi ? t('Máy con chưa nhận được câu hỏi.') : t('Con chưa trả lời.')}
         </p>
@@ -125,9 +125,9 @@ export function HoiCon({ t, familyMembers, api, nhipMs = 3000 }: {
   const phut = Math.floor(conLai / 60);
   const giay = String(conLai % 60).padStart(2, '0');
   return (
-    <div role="status" aria-live="polite" className="rounded-[20px] bg-white/10 border-2 border-white/30 p-4 mb-5 flex flex-col gap-1">
+    <div role="status" aria-live="polite" className="rounded-[28px] bg-white text-[color:var(--color-ink)] border-2 border-[#e4d7ff] p-5 mb-5 flex flex-col gap-1 shadow-[0_10px_24px_-14px_rgba(90,30,160,0.35)]">
       <p className="text-[19px] font-black leading-snug">{t('Đang hỏi con…')}</p>
-      <p className="text-[15px] font-bold text-purple-100 tabular-nums">{t('Còn {t}').replace('{t}', `${phut}:${giay}`)}</p>
+      <p className="text-[15px] font-bold text-[#5b21b6] tabular-nums">{t('Còn {t}').replace('{t}', `${phut}:${giay}`)}</p>
     </div>
   );
 }

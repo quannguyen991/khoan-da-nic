@@ -4,7 +4,6 @@ import {
   ShieldAlert,
   AlertTriangle,
   HelpCircle,
-  ArrowRight,
   RotateCcw,
   PhoneOff,
   Home,
@@ -156,6 +155,17 @@ type KetQua = {
   khongGoiDuocMayChu?: boolean;
 };
 
+/**
+ * NỀN SÁNG, CÙNG THẾ GIỚI VỚI TRANG CHỦ — 23/9/2026.
+ * Người dùng: "nền màu này và thiết kế xấu quá". Ba bước của màn này từng nằm trên
+ * ba nền tối khác nhau (#1e1035 · #2e1065 · slate-900) trong khi trang chủ và màn
+ * gọn là tím nhạt — bấm "Đang bị ai gọi?" là như sang một app khác. Nay cả ba
+ * bước dùng cùng một nền tím nhạt; màu mạnh chỉ còn ở chỗ mang ý nghĩa (nút đỏ,
+ * khối kết quả).
+ */
+const NEN_MAN = 'min-h-full w-full bg-gradient-to-b from-[#f9f7ff] via-[#f4eeff] to-[#ebe2ff] text-[color:var(--color-ink)] flex flex-col p-5 pb-24 overflow-y-auto';
+const NUT_TRON = 'grid place-items-center w-12 h-12 rounded-full bg-white border border-[#e9dcff] text-[color:var(--color-ink)] shadow-[0_6px_14px_-8px_rgba(90,30,160,0.45)] transition-transform duration-150 ease-out active:scale-95 motion-reduce:transition-none';
+
 export function HoiNhanhView({ setView, t, lang = 'vi', onTriggerEmergency, familyMembers, hoiConApi }: HoiNhanhProps) {
   const [selectedBranch, setSelectedBranch] = useState<string | null>(null);
   const [questionQueue, setQuestionQueue] = useState<string[]>([]);
@@ -281,32 +291,35 @@ export function HoiNhanhView({ setView, t, lang = 'vi', onTriggerEmergency, fami
     const laKhanCap = result.canThiep === 'PROTECTED_CRITICAL';
 
     // ⚠️ §15.16 test 13 — KHÔNG màu xanh lá cho kết luận ở màn này.
+    // Nền ĐẶC để chữ trắng đạt sàn 4.5:1 trên nền trang sáng: đỏ 6,5:1 · nâu hổ phách 7:1 · tím 8,6:1.
     const khungMau = laCao
-      ? 'bg-red-950/90 border-red-500'
+      ? 'bg-[#b91c1c] shadow-[0_18px_36px_-16px_rgba(185,28,28,0.75)]'
       : laNghiNgo
-        ? 'bg-amber-950/90 border-amber-500'
-        : 'bg-purple-950/90 border-purple-500';
+        ? 'bg-[#92400e] shadow-[0_18px_36px_-16px_rgba(146,64,14,0.7)]'
+        : 'bg-[#5b21b6] shadow-[0_18px_36px_-16px_rgba(91,33,182,0.7)]';
 
     return (
-      <div className="min-h-full w-full bg-slate-900 text-white flex flex-col p-5 pb-24 overflow-y-auto">
-        <div className="flex items-center justify-between mb-4">
+      <div className={NEN_MAN}>
+        <div className="flex items-center justify-between mb-5">
           <button
+            type="button"
             onClick={handleReset}
             aria-label={chu('hoi_lai')}
-            className="p-3 bg-slate-800 hover:bg-slate-700 active:scale-95 rounded-full text-slate-300"
+            className={NUT_TRON}
           >
-            <ChevronLeft size={22} />
+            <ChevronLeft size={24} />
           </button>
-          <span className="text-[14px] font-bold uppercase tracking-wider text-purple-300">
+          <span className="text-[15px] font-bold text-[color:var(--color-ink-2)]">
             {chu('ket_qua')}
           </span>
-          <div className="w-8" />
+          <div className="w-12" />
         </div>
 
-        <div className={`${khungMau} border-2 rounded-3xl p-6 mb-4 shadow-2xl flex flex-col items-center text-center`}>
+        <div className={`${khungMau} text-white rounded-[32px] p-6 mb-4 flex flex-col items-center text-center`}>
           <div
-            className={`w-16 h-16 rounded-full flex items-center justify-center text-white mb-3 shadow-lg ${
-              laCao ? 'bg-red-600' : laNghiNgo ? 'bg-amber-600' : 'bg-purple-600'
+            aria-hidden="true"
+            className={`w-16 h-16 rounded-full flex items-center justify-center bg-white mb-3 shadow-[0_6px_14px_-4px_rgba(0,0,0,0.3)] ${
+              laCao ? 'text-[#b91c1c]' : laNghiNgo ? 'text-[#92400e]' : 'text-[#5b21b6]'
             }`}
           >
             {laCao ? <ShieldAlert size={36} /> : laNghiNgo ? <AlertTriangle size={36} /> : <HelpCircle size={36} />}
@@ -327,7 +340,7 @@ export function HoiNhanhView({ setView, t, lang = 'vi', onTriggerEmergency, fami
           </h2>
 
           {khongGoiDuoc ? (
-            <p className="text-[16px] text-purple-100 leading-relaxed font-medium">
+            <p className="text-[16px] text-white leading-relaxed font-medium">
               {lang === 'en'
                 ? 'The network did not go through, so nothing was checked. While it is unclear, please hang up and call your family yourself.'
                 : 'Mạng không đi được nên chưa có gì được kiểm cả. Trong lúc chưa rõ, bác cúp máy rồi tự gọi cho con cháu nhé.'}
@@ -368,7 +381,7 @@ export function HoiNhanhView({ setView, t, lang = 'vi', onTriggerEmergency, fami
                   goiDienThoai(soNguoiThan);   // Phần 4: APK gọi thẳng một chạm; web mở `tel:`
                 }}
                 data-vai-tro="nut-chinh"
-                className="w-full min-h-[80px] py-4 px-4 bg-amber-300 text-amber-950 font-black text-[20px] rounded-2xl flex flex-col items-center justify-center gap-0.5 border-2 border-amber-200 shadow-lg active:scale-95"
+                className="w-full min-h-[80px] py-4 px-6 bg-amber-300 text-amber-950 font-black text-[20px] rounded-[32px] flex flex-col items-center justify-center gap-0.5 shadow-[0_14px_28px_-14px_rgba(180,83,9,0.6)] transition-transform duration-150 ease-out active:scale-[0.98] motion-reduce:transition-none"
               >
                 <span className="flex items-center gap-2"><PhoneCall size={24} /> {t('GỌI NGAY CHO CON CHÁU')}</span>
                 <span className="text-[16px] font-bold text-[#6b3a05]">{tenNguoiThan} ({soNguoiThan})</span>
@@ -377,7 +390,7 @@ export function HoiNhanhView({ setView, t, lang = 'vi', onTriggerEmergency, fami
             <button
               onClick={() => (onTriggerEmergency ? onTriggerEmergency() : setView('warning'))}
               data-vai-tro="nut-chinh"
-              className={`w-full min-h-[56px] py-4 px-6 ${soNguoiThan ? 'bg-white/15 border border-white/30' : 'bg-red-600 shadow-lg shadow-red-600/40'} active:scale-95 text-white font-black text-[18px] rounded-2xl flex items-center justify-center gap-2`}
+              className={`w-full min-h-[56px] py-4 px-6 ${soNguoiThan ? 'bg-white border-2 border-[#d9c6ff] text-[color:var(--color-ink)]' : 'bg-[#b91c1c] text-white shadow-[0_14px_28px_-12px_rgba(185,28,28,0.7)]'} font-black text-[18px] rounded-full flex items-center justify-center gap-2 transition-transform duration-150 ease-out active:scale-[0.98] motion-reduce:transition-none`}
             >
               <PhoneOff size={20} />
               <span>{t('Tôi đã cúp máy')}</span>
@@ -391,9 +404,9 @@ export function HoiNhanhView({ setView, t, lang = 'vi', onTriggerEmergency, fami
             {lyDo.map((cau) => (
               <li
                 key={cau}
-                className="bg-white/10 border border-white/15 rounded-2xl px-4 py-3 text-[16px] font-medium text-white flex items-start gap-2.5"
+                className="bg-white border border-[#e9dcff] rounded-[24px] px-4 py-3 text-[16px] font-medium text-[color:var(--color-ink)] flex items-start gap-2.5 shadow-[0_8px_18px_-12px_rgba(90,30,160,0.35)]"
               >
-                <AlertTriangle size={18} className="text-amber-300 shrink-0 mt-0.5" />
+                <AlertTriangle size={20} aria-hidden="true" className="text-[#b45309] shrink-0 mt-0.5" />
                 <span>{cau}</span>
               </li>
             ))}
@@ -406,7 +419,7 @@ export function HoiNhanhView({ setView, t, lang = 'vi', onTriggerEmergency, fami
           bác phải đọc được nó mà không cần tìm.
         */}
         {chuaKiem.length > 0 && (
-          <div className="bg-slate-800/90 border-2 border-slate-500 rounded-2xl p-4 mb-4">
+          <div className="bg-[color:var(--color-unchecked-bg)] border-2 border-[color:var(--color-unchecked-border)] text-[color:var(--color-unchecked-ink)] rounded-[28px] p-5 mb-4">
             {/*
               ⚠️ 25px, ĐÚNG BẰNG NHÃN (`h2 text-[25px]`) — sửa 23/9/2026. Trước đó
               khối này 16px ở màn này trong khi nhãn 25px: vi phạm §HĐ luật 3 mà
@@ -414,28 +427,29 @@ export function HoiNhanhView({ setView, t, lang = 'vi', onTriggerEmergency, fami
               `test/man-khan-cap-mot-viec.test.js`. Khối vẫn nằm DƯỚI nút gọi.
             */}
             <div className="flex items-center gap-2 mb-2">
-              <EyeOff size={24} className="text-slate-300 shrink-0" />
-              <span className="text-[25px] font-black text-slate-100 leading-tight">
+              <EyeOff size={24} aria-hidden="true" className="shrink-0" />
+              <span className="text-[25px] font-black leading-tight">
                 {lang === 'en' ? 'What I could NOT check' : 'Những thứ cháu CHƯA kiểm được'}
               </span>
             </div>
             <ul className="flex flex-col gap-1.5">
               {chuaKiem.map((cau) => (
-                <li key={cau} className="text-[25px] text-slate-100 font-medium leading-tight">
+                <li key={cau} className="text-[25px] font-medium leading-tight">
                   • {cau}
                 </li>
               ))}
             </ul>
-            <p className="text-[14px] text-slate-300 mt-2.5 leading-snug">{chu('nhac_gioi_han')}</p>
+            <p className="text-[15px] mt-2.5 leading-snug">{chu('nhac_gioi_han')}</p>
           </div>
         )}
 
         <div className="flex flex-col gap-3 mt-auto">
           <button
+            type="button"
             onClick={handleReset}
-            className="w-full py-3.5 px-4 bg-white/10 hover:bg-white/20 active:scale-95 text-white font-bold text-[16px] rounded-2xl flex items-center justify-center gap-2 border border-white/10"
+            className="w-full py-3.5 px-4 rounded-full border-2 border-[#e4d7ff] bg-white text-[#6d28d9] font-bold flex items-center justify-center gap-2 shadow-[0_8px_18px_-10px_rgba(90,30,160,0.4)] transition-transform duration-150 ease-out active:scale-[0.98] motion-reduce:transition-none"
           >
-            <RotateCcw size={18} />
+            <RotateCcw size={20} aria-hidden="true" />
             <span>{chu('hoi_lai')}</span>
           </button>
 
@@ -444,10 +458,11 @@ export function HoiNhanhView({ setView, t, lang = 'vi', onTriggerEmergency, fami
             báo động giả sẽ hoảng và gỡ ứng dụng.
           */}
           <button
+            type="button"
             onClick={() => setView('home')}
-            className="w-full py-3.5 px-4 bg-purple-600 hover:bg-purple-700 active:scale-95 text-white font-black text-[16px] rounded-2xl flex items-center justify-center gap-2 shadow-md shadow-purple-600/30"
+            className="w-full py-3.5 px-4 rounded-full bg-gradient-to-r from-[#9e76ea] via-[#ad8af0] to-[#9e76ea] text-[color:var(--color-ink)] font-bold flex items-center justify-center gap-2 shadow-[0_14px_28px_-12px_rgba(90,30,160,0.6),inset_0_2px_0_rgba(255,255,255,0.4)] transition-transform duration-150 ease-out active:scale-[0.98] motion-reduce:transition-none"
           >
-            <Home size={18} />
+            <Home size={20} aria-hidden="true" />
             <span>{chu('ve_trang_chu')}</span>
           </button>
         </div>
@@ -462,66 +477,70 @@ export function HoiNhanhView({ setView, t, lang = 'vi', onTriggerEmergency, fami
     const progressPercent = Math.round(((currentIndex + 1) / questionQueue.length) * 100);
 
     return (
-      <div className="min-h-full w-full bg-[#2e1065] text-white flex flex-col p-6 pb-20 justify-between">
+      <div className={`${NEN_MAN} justify-between`}>
         <div>
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-5">
             <button
+              type="button"
               onClick={handleReset}
               aria-label={chu('hoi_lai')}
-              className="p-3 bg-white/10 hover:bg-white/20 active:scale-95 rounded-full text-white"
+              className={NUT_TRON}
             >
-              <ChevronLeft size={22} />
+              <ChevronLeft size={24} />
             </button>
-            <span className="text-[14px] font-bold text-purple-200">
+            <span className="text-[15px] font-bold text-[color:var(--color-ink-2)]">
               {chu('cau_so')
                 .replace('{i}', String(currentIndex + 1))
                 .replace('{n}', String(questionQueue.length))}
             </span>
-            <div className="w-8" />
+            <div className="w-12" />
           </div>
 
-          <div className="w-full h-2 bg-purple-950 rounded-full overflow-hidden mb-6 border border-purple-800">
+          <div className="w-full h-2.5 bg-[#e9dcff] rounded-full overflow-hidden mb-6">
             <div
-              className="h-full bg-amber-400 transition-all duration-300 rounded-full"
+              className="h-full bg-gradient-to-r from-[#9e76ea] to-[#6d28d9] transition-all duration-300 rounded-full"
               style={{ width: `${progressPercent}%` }}
             />
           </div>
 
           {selectedBranch && DAN_NGAY_CUA_NHANH[selectedBranch] && (
-            <p role="status" className="w-full mb-4 rounded-2xl bg-red-600 border-2 border-red-300 px-4 py-3 text-[20px] font-black text-white text-center leading-snug">
+            <p role="status" className="w-full mb-4 rounded-[28px] bg-red-700 px-5 py-4 text-[20px] font-black text-white text-center [text-wrap:balance] shadow-[0_12px_24px_-14px_rgba(185,28,28,0.7)]">
               {t(DAN_NGAY_CUA_NHANH[selectedBranch])}
             </p>
           )}
 
-          <div className="bg-white text-slate-900 rounded-3xl p-6 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] mb-6">
-            <span className="text-[14px] font-extrabold uppercase text-purple-700 tracking-wider mb-2 block">
+          <div className="bg-white rounded-[32px] p-6 border border-[#e9dcff] shadow-[0_14px_30px_-16px_rgba(90,30,160,0.45)] mb-6">
+            <span className="text-[15px] font-bold text-[#6d28d9] mb-2 block">
               {chu('tro_ly_hoi')}
             </span>
-            <h2 className="text-[22px] sm:text-[25px] font-black text-[#1e1b4b] leading-snug">{cauHoi}</h2>
+            <h2 className="text-[22px] sm:text-[25px] font-black text-[color:var(--color-ink)]">{cauHoi}</h2>
           </div>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-3.5">
           <button
+            type="button"
             onClick={() => handleAnswer(true)}
             data-vai-tro="nut-chinh"
             disabled={loading}
-            className="w-full py-5 px-6 bg-red-600 hover:bg-red-700 active:scale-95 text-white font-black text-[18px] rounded-2xl flex items-center justify-center gap-3 shadow-lg shadow-red-600/40 transition-transform disabled:opacity-70"
+            className="w-full py-5 px-6 rounded-full bg-gradient-to-r from-[#c81e1e] via-[#dc2626] to-[#c81e1e] text-white flex items-center justify-center shadow-[0_14px_28px_-12px_rgba(220,38,38,0.7),inset_0_2px_0_rgba(255,255,255,0.25)] transition-transform duration-150 ease-out active:scale-[0.98] motion-reduce:transition-none disabled:opacity-70"
           >
-            <span>{loading ? chu('dang_kiem') : chu('tra_loi_co')}</span>
+            <span className="text-[1.25rem] font-bold">{loading ? chu('dang_kiem') : chu('tra_loi_co')}</span>
           </button>
 
           {/*
             ⚠️ Trả lời KHÔNG không trừ điểm — máy chủ chỉ sinh tín hiệu từ câu CÓ.
-            Nút này không được vẽ như một lối thoát "an toàn".
+            Nút này không được vẽ như một lối thoát "an toàn": trắng, viền tím,
+            không xanh lá.
           */}
           <button
+            type="button"
             onClick={() => handleAnswer(false)}
             data-vai-tro="nut-chinh"
             disabled={loading}
-            className="w-full py-4 px-6 bg-white/15 hover:bg-white/25 active:scale-95 text-purple-100 font-bold text-[16px] rounded-2xl flex items-center justify-center gap-3 border border-white/20 transition-transform disabled:opacity-70"
+            className="w-full py-4 px-6 rounded-full border-2 border-[#d9c6ff] bg-white text-[color:var(--color-ink)] flex items-center justify-center shadow-[0_8px_18px_-10px_rgba(90,30,160,0.4)] transition-transform duration-150 ease-out active:scale-[0.98] motion-reduce:transition-none disabled:opacity-70"
           >
-            <span>{loading ? chu('dang_kiem') : chu('tra_loi_khong')}</span>
+            <span className="text-[1.125rem] font-bold">{loading ? chu('dang_kiem') : chu('tra_loi_khong')}</span>
           </button>
         </div>
       </div>
@@ -530,25 +549,26 @@ export function HoiNhanhView({ setView, t, lang = 'vi', onTriggerEmergency, fami
 
   // ══════════════════ MÀN CHỌN NHÁNH ══════════════════
   return (
-    <div className="min-h-full w-full bg-[#1e1035] text-white flex flex-col p-5 pb-24 overflow-y-auto">
-      <div className="flex items-center justify-between mb-4">
+    <div className={NEN_MAN}>
+      <div className="flex items-center justify-between mb-5">
         <button
+          type="button"
           onClick={() => setView('home')}
           aria-label={chu('ve_trang_chu')}
-          className="p-3 bg-white/10 hover:bg-white/20 active:scale-95 rounded-full text-white"
+          className={NUT_TRON}
         >
-          <ChevronLeft size={22} />
+          <ChevronLeft size={24} />
         </button>
-        <div className="flex items-center gap-1.5 px-3 py-1 bg-red-500/20 text-red-200 rounded-full border border-red-500/40 text-[14px] font-bold">
-          <PhoneCall size={14} />
+        <div className="flex items-center gap-1.5 px-3.5 py-1.5 bg-red-50 text-red-700 rounded-full border border-red-200 text-[14px] font-bold">
+          <PhoneCall size={16} aria-hidden="true" />
           <span>{chu('dang_nghe_may')}</span>
         </div>
-        <div className="w-8" />
+        <div className="w-12" />
       </div>
 
-      <div className="mb-5 text-center">
-        <h1 className="text-[25px] font-black text-white mb-1.5">{chu('tieu_de')}</h1>
-        <p className="text-[14px] text-purple-200">{chu('dan_dat')}</p>
+      <div className="mb-6 text-center">
+        <h1 className="text-[25px] font-black text-[color:var(--color-ink)] mb-2">{chu('tieu_de')}</h1>
+        <p className="text-[16px] text-[color:var(--color-ink-2)]">{chu('dan_dat')}</p>
       </div>
 
       {/* Người gọi xưng là con, cháu ⇒ hỏi con qua kênh khác, một chạm (23/9/2026). */}
@@ -561,20 +581,23 @@ export function HoiNhanhView({ setView, t, lang = 'vi', onTriggerEmergency, fami
           if (!nhan) return null;
           return (
             <button
+              type="button"
               key={ma}
               onClick={() => handleSelectBranch(ma)}
               data-vai-tro="nut-chinh"
- className="w-full p-4 bg-white/95 text-slate-900 rounded-2xl flex items-center justify-between border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065]/50 hover:bg-white active:scale-98 transition-all text-left"
+              className="w-full flex items-center gap-3 rounded-[32px] border border-[#e9dcff] bg-white py-3 pl-3 pr-4 text-left shadow-[0_10px_24px_-14px_rgba(90,30,160,0.45)] transition-transform duration-150 ease-out active:scale-[0.98] motion-reduce:transition-none"
             >
-              <span className="flex items-center gap-3.5">
-                <span
-                  className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border ${MAU_VIEN_NHANH[ma] ?? ''}`}
-                >
-                  <IconComponent size={24} />
-                </span>
-                <span className="font-extrabold text-[16px] text-[#1e1b4b] leading-tight">{nhan}</span>
+              <span
+                aria-hidden="true"
+                className={`grid place-items-center w-12 h-12 shrink-0 rounded-full border ${MAU_VIEN_NHANH[ma] ?? ''}`}
+              >
+                <IconComponent size={24} />
               </span>
-              <ArrowRight size={20} className="text-purple-700 shrink-0" />
+              {/*
+                Không mũi tên ở cuối: cả thẻ là nút, và mũi tên ăn mất ~34px khiến
+                "Đưa mã OTP / Mật khẩu" gãy thành "Mật / khẩu" ở khổ 375px.
+              */}
+              <span className="flex-1 text-[1.0625rem] font-bold text-[color:var(--color-ink)] [text-wrap:balance]">{nhan}</span>
             </button>
           );
         })}
@@ -582,11 +605,12 @@ export function HoiNhanhView({ setView, t, lang = 'vi', onTriggerEmergency, fami
 
       <div className="mt-auto pt-2">
         <button
+          type="button"
           onClick={() => (onTriggerEmergency ? onTriggerEmergency() : setView('warning'))}
-          className="w-full py-3.5 px-4 bg-red-700 hover:bg-red-600 active:scale-95 text-white font-extrabold text-[16px] rounded-2xl flex items-center justify-center gap-2 border border-red-400 shadow-lg shadow-red-600/30"
+          className="w-full flex items-center justify-center gap-3 rounded-full bg-gradient-to-r from-[#c81e1e] via-[#dc2626] to-[#c81e1e] text-white py-4 px-6 text-center shadow-[0_14px_28px_-12px_rgba(220,38,38,0.7),inset_0_2px_0_rgba(255,255,255,0.25)] transition-transform duration-150 ease-out active:scale-[0.98] motion-reduce:transition-none"
         >
-          <ShieldAlert size={18} />
-          <span>{chu('so_hai')}</span>
+          <ShieldAlert size={24} aria-hidden="true" className="shrink-0" />
+          <span className="text-[1.0625rem] font-bold">{chu('so_hai')}</span>
         </button>
       </div>
     </div>
