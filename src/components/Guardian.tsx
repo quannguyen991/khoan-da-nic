@@ -327,16 +327,36 @@ export function GuardianView({
   const [dangNoi, setDangNoi] = useState(false);
   const [loiNoi, setLoiNoi] = useState<string | null>(null);
   const coPhien = docPhien() !== null;
+  /*
+   * ⚠️ "CHƯA TẢI ĐƯỢC" KHÁC "CHƯA NỐI" — sửa 23/9/2026, lỗi đo được trên trình duyệt.
+   * Máy chủ trả 429 (giới hạn lượt) cho `/api/proof/ghep`; bản trước nuốt lỗi nhưng
+   * trạng thái ban đầu là "không có máy", nên màn vẫn vẽ "Chưa nối máy nào" — kèm băng
+   * "chế độ xem thử" và ô mời nhập mã nối lại. Người con đã nối rồi bị bảo là chưa nối:
+   * đúng dạng lỗi §4.3. Giờ ba trạng thái tách bạch, và tải hỏng thì tự thử lại, giãn dần.
+   */
+  const [taiGhep, setTaiGhep] = useState<'dang_tai' | 'loi' | 'xong'>(coPhien ? 'dang_tai' : 'xong');
   useEffect(() => {
-    if (!coPhien) return;
+    if (!coPhien) { setTaiGhep('xong'); return undefined; }
     let huy = false;
-    docVongGhep()
-      .then((v) => {
-        const bo = v.chuTaiKhoan[0];
-        if (!huy && bo) setParentData({ name: bo.ten, phone: bo.so, network: 'that' });
-      })
-      .catch(() => { /* §4.3 — không tải được thì giữ nguyên trạng thái đang có, không tự bịa "chưa nối" */ });
-    return () => { huy = true; };
+    let hen: number | undefined;
+    let lan = 0;
+    const tai = () => {
+      docVongGhep()
+        .then((v) => {
+          if (huy) return;
+          const bo = v.chuTaiKhoan[0];
+          if (bo) setParentData({ name: bo.ten, phone: bo.so, network: 'that' });
+          setTaiGhep('xong');
+        })
+        .catch(() => {
+          if (huy) return;
+          setTaiGhep('loi');
+          lan += 1;
+          hen = window.setTimeout(tai, Math.min(60_000, 15_000 * lan));
+        });
+    };
+    tai();
+    return () => { huy = true; window.clearTimeout(hen); };
   }, [coPhien]);
 
   const noiBangMa = async (e: React.FormEvent) => {
@@ -598,7 +618,13 @@ export function GuardianView({
         máy nào gửi số về là một lời trấn an không ai kiểm. Đây là màn con cháu
         nhìn để yên tâm — nó phải nói thật về việc nó biết được gì.
       */}
-      {!laThat && (
+      {/* Tải hỏng: nói đúng là chưa tải được — KHÔNG mời nối lại, KHÔNG bật chế độ xem thử. */}
+      {!laThat && taiGhep === 'loi' && (
+        <p role="status" className="bg-white border-2 border-amber-600 rounded-2xl px-4 py-3 text-[15px] font-bold text-amber-900 leading-snug">
+          {tr('Chưa tải được trạng thái nối với máy bố mẹ — đang thử lại.')}
+        </p>
+      )}
+      {!laThat && taiGhep === 'xong' && (
       <div className="flex flex-col lg:flex-row lg:items-center gap-3">
         <div className="flex-1 bg-white border border-amber-200 rounded-2xl px-4 py-3 flex items-center gap-3 shadow-[0_6px_20px_rgba(120,53,15,0.05)]">
           <span className="w-9 h-9 rounded-xl bg-amber-100 flex items-center justify-center shrink-0">
@@ -620,7 +646,7 @@ export function GuardianView({
       </div>
       )}
 
-      {!laThat && (
+      {!laThat && taiGhep === 'xong' && (
         <form onSubmit={noiBangMa} className="bg-white rounded-[24px] p-5 border border-slate-200/80 shadow-[0_10px_28px_rgba(30,41,59,0.06)] flex flex-col gap-3">
           <h2 className="text-[17px] font-black text-slate-900">{tr('Nối với máy bố mẹ')}</h2>
           <p className="text-[14px] text-slate-600 leading-snug">
@@ -698,7 +724,7 @@ export function GuardianView({
                 </span>
               </div>
               <span className={`text-[14px] font-bold px-2.5 py-1 rounded-full ${parentData ? 'text-emerald-700 bg-emerald-50' : 'text-slate-500 bg-slate-100'}`}>
-                {laThat ? tr('Đã nối') : parentData ? tr('Đã nối thử') : tr("Chưa nối")}
+                {laThat ? tr('Đã nối') : parentData ? tr('Đã nối thử') : taiGhep === 'xong' ? tr("Chưa nối") : taiGhep === 'loi' ? tr('Chưa tải được') : tr('Đang tải…')}
               </span>
             </div>
 
@@ -710,7 +736,7 @@ export function GuardianView({
                 </div>
                 <div>
                     <h3 className="font-black text-lg sm:text-xl text-slate-900 tracking-tight">
-                    {parentData ? tr(parentData.name) : tr('Chưa nối máy nào')}
+                    {parentData ? tr(parentData.name) : taiGhep === 'xong' ? tr('Chưa nối máy nào') : taiGhep === 'loi' ? tr('Chưa tải được') : tr('Đang tải…')}
                   </h3>
                   <p className="text-[14px] font-semibold text-slate-500">
                     {parentData?.phone ?? tr('Thêm máy của bố mẹ để theo dõi')}

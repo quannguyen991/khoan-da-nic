@@ -134,7 +134,9 @@ test('Guardian: so trạng thái nối bằng MÃ, không bằng chữ hiển th
 test('Guardian: băng "chế độ xem thử" chỉ biến mất khi đã nối thật', () => {
   const i = GUARDIAN.indexOf("tr('Máy bố mẹ đang ở chế độ xem thử.");
   const truoc = GUARDIAN.slice(Math.max(0, i - 600), i);
-  assert.match(truoc, /\{!laThat && \(/, 'băng xem thử bị gỡ vô điều kiện, hoặc còn hiện khi đã nối thật');
+  // Từ 23/9/2026 còn chờ tải xong (`taiGhep === 'xong'`): tải hỏng thì nói "chưa tải được",
+  // không bật "xem thử" — xem test/chua-tai-khac-chua-noi.test.js.
+  assert.match(truoc, /\{!laThat && (taiGhep === 'xong' && )?\(/, 'băng xem thử bị gỡ vô điều kiện, hoặc còn hiện khi đã nối thật');
 });
 
 // ── i18n ────────────────────────────────────────────────────────────────────

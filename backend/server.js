@@ -278,6 +278,31 @@ const chanDoc = gioiHanTanSuat('doc');
 const chanVuViec = gioiHanTanSuat('vu_viec');
 
 /**
+ * ⚠️ ĐỌC CỦA GIA ĐÌNH ĐẾM THEO TÀI KHOẢN, KHÔNG THEO IP — sửa 23/9/2026, đo được.
+ *
+ * Hai máy trong cùng một nhà đi chung MỘT IP công cộng (NAT). Ngăn `doc` 30 lượt/phút
+ * theo IP thì máy con đang mở thẻ cảnh báo (hỏi mỗi 5 giây) cộng máy bố mẹ là cạn —
+ * rồi `/api/proof/ghep` trả 429 và màn của con hiện "Chưa nối máy nào" dù đã nối.
+ * §6.10: giới hạn tần suất KHÔNG được chặn đường báo gia đình.
+ *
+ * Các route dùng bộ đếm này đều đứng SAU `canPhien` (phải có phiên thật), nên đếm theo
+ * tài khoản với trần rộng hơn: một token bị lạm dụng vẫn bị chặn, cả nhà thì không.
+ * ⚠️ PHẢI đặt sau `canPhien` — trước đó chưa có `req.taiKhoanId`.
+ */
+const SO_LUOT_GIA_DINH = 120;
+const gioiHanTheoTaiKhoan = (ngan, toiDa) => function chan(req, res, next) {
+  const khoa = `${ngan}|tk:${req.taiKhoanId || req.ip || 'khong_ro'}`;
+  const gio = Date.now();
+  const muc = soLuot.get(khoa) || { dem: 0, moc: gio };
+  if (gio - muc.moc > CUA_SO_RATE) { muc.dem = 0; muc.moc = gio; }
+  muc.dem += 1;
+  soLuot.set(khoa, muc);
+  if (muc.dem > toiDa) return res.status(429).json({ maLoi: 'RATE_LIMITED' });
+  return next();
+};
+const chanGiaDinh = gioiHanTheoTaiKhoan('gia_dinh', SO_LUOT_GIA_DINH);
+
+/**
  * HANDLER DUY NHẤT cho cả hai route.
  * Trả về ĐÚNG bảy trường của §HĐ — không rò trường nội bộ ra ngoài.
  *
@@ -766,7 +791,7 @@ app.post('/api/tai-khoan/dang-xuat', chanProof, taiKhoan(async (req) => ({
   daHuy: await KP.huyPhien(req.headers.authorization),
 })));
 
-app.get('/api/tai-khoan/toi', chanDoc, canPhien, taiKhoan(async (req) => {
+app.get('/api/tai-khoan/toi', canPhien, chanGiaDinh, taiKhoan(async (req) => {
   const kho = await KP.khoChung();
   const hs = await TK.layHoSo(kho, req.taiKhoanId);
   if (!hs) throw new TK.LoiTaiKhoan('KHONG_CO_TAI_KHOAN');
@@ -809,7 +834,7 @@ app.post('/api/proof/ghep/xac-nhan', chanProof, canPhien,
  * kiểm — §12 giữ nguyên privacy model, nội dung vẫn nằm trên máy bố mẹ.
  * ⚠️ Tài khoản đã xoá thì bỏ qua, không trả một dòng tên rỗng.
  */
-app.get('/api/proof/ghep', chanDoc, canPhien, proof(async (req) => {
+app.get('/api/proof/ghep', canPhien, chanGiaDinh, proof(async (req) => {
   const kho = await KP.khoChung();
   const cap = await KP.capGhepCuaToi(req.taiKhoanId);
   const lamGiau = async (ds) => (await Promise.all(ds.map(async (x) => {
@@ -837,14 +862,14 @@ const nhipRoute = (fn) => async (req, res) => {
 };
 app.post('/api/gia-dinh/nhip-bao-ve', canPhien, nhipRoute(async (req) =>
   NBV.ghiNhip(await KP.khoChung(), req.taiKhoanId, req.body)));
-app.get('/api/gia-dinh/nhip-bao-ve/bo-me', chanDoc, canPhien, nhipRoute(async (req) =>
+app.get('/api/gia-dinh/nhip-bao-ve/bo-me', canPhien, chanGiaDinh, nhipRoute(async (req) =>
   NBV.docNhipBoMe(await KP.khoChung(), req.taiKhoanId, { capGhep: (id) => KP.capGhepCuaToi(id), layHoSo: TK.layHoSo })));
 
 /**
  * QUY TẮC "BÁO CHO CON" — Phần 2 (23/9/2026). Id lấy TỪ PHIÊN, không từ thân
  * yêu cầu: không ai đặt được quy tắc của nhà người khác (§12).
  */
-app.get('/api/gia-dinh/quy-tac-bao', chanDoc, canPhien, async (req, res) => {
+app.get('/api/gia-dinh/quy-tac-bao', canPhien, chanGiaDinh, async (req, res) => {
   try {
     return res.json(await QT.docQuyTac(await KP.khoChung(), req.taiKhoanId));
   } catch { return res.status(500).json({ maLoi: 'LOI_MAY_CHU' }); }
@@ -919,7 +944,7 @@ app.post('/api/gia-dinh/nhan-canh-bao/tat', chanDoc, canPhien, baoDongRoute(asyn
   BDG.tatNhan(await KP.khoChung(), req.taiKhoanId, req.body?.endpoint)));
 
 /** Máy BỐ MẸ: ai trong vòng đã bật nhận — để "chưa báo được" không trông như "đã báo" (§4.3). */
-app.get('/api/gia-dinh/tinh-trang-bao', chanDoc, canPhien, baoDongRoute(async (req) =>
+app.get('/api/gia-dinh/tinh-trang-bao', canPhien, chanGiaDinh, baoDongRoute(async (req) =>
   (await lopBaoDong(req)).tinhTrang(req.taiKhoanId)));
 
 /** Máy BỐ MẸ gửi báo động. Chỉ đúng ba trường mã được chuyển tiếp. */
@@ -932,7 +957,7 @@ app.post('/api/gia-dinh/bao-dong', canPhien, baoDongRoute(async (req) => {
 app.post('/api/gia-dinh/trang-thai', canPhien, baoDongRoute(async (req) =>
   (await lopBaoDong(req)).capNhat(req.taiKhoanId, req.body?.suKienId, req.body?.hanhDong)));
 
-app.get('/api/gia-dinh/su-kien/:id', chanDoc, canPhien, baoDongRoute(async (req) =>
+app.get('/api/gia-dinh/su-kien/:id', canPhien, chanGiaDinh, baoDongRoute(async (req) =>
   (await lopBaoDong(req)).docSuKien(req.taiKhoanId, req.params.id)));
 
 /**
@@ -954,7 +979,7 @@ const chiaKhoaRoute = (fn) => async (req, res) => {
   }
 };
 
-app.get('/api/gia-dinh/chia-khoa', chanDoc, canPhien, chiaKhoaRoute(async (req) =>
+app.get('/api/gia-dinh/chia-khoa', canPhien, chanGiaDinh, chiaKhoaRoute(async (req) =>
   CK.docCaiDat(await KP.khoChung(), req.taiKhoanId)));
 
 app.put('/api/gia-dinh/chia-khoa', chanProof, canPhien, chiaKhoaRoute(async (req) =>
@@ -974,11 +999,11 @@ app.post('/api/chia-khoa/yeu-cau', chanProof, canPhien, chiaKhoaRoute(async (req
 }));
 
 /** Máy CON: yêu cầu đang chờ mình ký (không cần thông báo đẩy mới thấy được). */
-app.get('/api/chia-khoa/dang-cho', chanDoc, canPhien, chiaKhoaRoute(async (req) =>
+app.get('/api/chia-khoa/dang-cho', canPhien, chanGiaDinh, chiaKhoaRoute(async (req) =>
   CK.dangCho(await KP.khoChung(), req.taiKhoanId, TK.layHoSo)));
 
 /** Máy CON: đề bài để passkey ký đúng yêu cầu này. */
-app.get('/api/chia-khoa/yeu-cau/:id/tuy-chon', chanDoc, canPhien, chiaKhoaRoute(async (req) =>
+app.get('/api/chia-khoa/yeu-cau/:id/tuy-chon', canPhien, chanGiaDinh, chiaKhoaRoute(async (req) =>
   CK.tuyChonKy(await KP.khoChung(), req.params.id, req.taiKhoanId)));
 
 /** Máy CON bấm "Gọi ngay" — ghi TRƯỚC khi mở trình gọi, để leo thang không báo thừa. */
@@ -1024,7 +1049,7 @@ app.post('/api/proof/yeu-cau/tao', chanProof, canPhien, proof(async (req) => {
 }));
 
 /** Cả hai đầu cùng hỏi trạng thái ở đây. Không có gì bí mật trong phản hồi. */
-app.get('/api/proof/yeu-cau/:yeuCauId', chanProof, canPhien,
+app.get('/api/proof/yeu-cau/:yeuCauId', canPhien, chanGiaDinh,
   proof((req) => KY.docYeuCau(req.params.yeuCauId)));
 
 /**
