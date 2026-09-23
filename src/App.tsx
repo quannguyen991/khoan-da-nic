@@ -1906,6 +1906,85 @@ function bipGhiAm(batDau: boolean) {
   } catch { /* máy không có bộ rung */ }
 }
 
+/**
+ * ══════════════ BỐN SẮC CỦA BỐN NÚT MÀN GỌN — 23/9/2026 ══════════════
+ *
+ * Người dùng yêu cầu: "màu tím kia thì cho giống với màu thanh taskbar". Nên nút
+ * "Nói" lấy ĐÚNG dải màu của thanh điều hướng dưới (`from-[#9e76ea] via-[#ad8af0]
+ * to-[#9e76ea]`, xem khối `!sieuDonGian` ở trên), không pha thêm bậc nào.
+ *
+ * ⚠️ NHƯNG CHỮ TRÊN NÓ LÀ MỰC ĐẬM, KHÔNG PHẢI CHỮ TRẮNG. Đo: chữ trắng trên dải
+ * này chỉ đạt 3,37:1 ở stop tối nhất và 2,68:1 ở giữa — dưới sàn 4.5:1 (§4.4).
+ * Mực `--color-ink` đạt 5,42:1 ở stop tối nhất. Hợp đồng a11y thắng ảnh thiết kế.
+ *
+ * Ba nút kia giữ chữ trắng, nên nền phải đủ tối ở MỌI điểm của dải loang, kể cả
+ * stop sáng ở giữa: xanh 4,93:1 · đỏ 4,83:1 · tím đêm 9,95:1. Làm sáng stop giữa
+ * thêm một bậc là trượt sàn — đo lại trước khi đổi.
+ *
+ * ⚠️ KHÔNG PHỦ LỚP BÓNG TRẮNG LÊN NỬA TRÊN NÚT như các nút tròn ở trang chủ. Các
+ * nút đó không mang chữ; ở đây lớp bóng nằm đè lên chữ và kéo tương phản xuống
+ * dưới sàn. Độ bóng chỉ đi bằng một đường sáng 2px ở mép trên (inset).
+ */
+const SAC_NUT_GON = {
+  noi: {
+    nen: 'bg-gradient-to-r from-[#9e76ea] via-[#ad8af0] to-[#9e76ea] text-[color:var(--color-ink)] shadow-[0_14px_28px_-12px_rgba(90,30,160,0.6),inset_0_2px_0_rgba(255,255,255,0.4)]',
+    bieuTuong: 'text-[#6d28d9]',
+  },
+  nguoiNha: {
+    nen: 'bg-gradient-to-r from-[#047857] via-[#08805d] to-[#047857] text-white shadow-[0_14px_28px_-12px_rgba(4,120,87,0.65),inset_0_2px_0_rgba(255,255,255,0.25)]',
+    bieuTuong: 'text-[#047857]',
+  },
+  khanCap: {
+    nen: 'bg-gradient-to-r from-[#c81e1e] via-[#dc2626] to-[#c81e1e] text-white shadow-[0_14px_28px_-12px_rgba(220,38,38,0.7),inset_0_2px_0_rgba(255,255,255,0.25)]',
+    bieuTuong: 'text-[#dc2626]',
+  },
+  cuocGoi: {
+    nen: 'bg-gradient-to-r from-[#3d1d8f] via-[#4a27a3] to-[#3d1d8f] text-white shadow-[0_14px_28px_-12px_rgba(46,16,101,0.7),inset_0_2px_0_rgba(255,255,255,0.2)]',
+    bieuTuong: 'text-[#4a27a3]',
+  },
+} as const;
+
+/**
+ * Một nút của màn gọn: viên thuốc bo tròn hẳn, biểu tượng nằm trong một đồng xu
+ * trắng ở đầu trái, nhãn canh trái — bốn biểu tượng thẳng một cột, mắt không phải
+ * đi tìm chữ bắt đầu ở đâu.
+ *
+ * ⚠️ ĐỒNG XU ĐỒNG TÂM VỚI ĐẦU TRÒN CỦA NÚT: đệm trái = đệm dọc (`pl-4.5` = `py-4.5`),
+ * nên tâm đồng xu trùng tâm nửa vòng tròn ở mọi bậc cỡ chữ — mọi số đều theo rem.
+ *
+ * ⚠️ CỠ CHỮ ĐẶT TRÊN <span>, KHÔNG TRÊN <button>. `public/vung-cham-san.css` khai
+ * `button { font-size: max(var(--text-xs), 1em) }`, không dùng `@layer`, nên thắng
+ * mọi utility Tailwind trên chính thẻ nút. Đo 23/9/2026: bản trước ghi
+ * `text-[22px]` lên nút mà nhãn chỉ ra 17px. Đặt bằng rem để đi theo bậc A/A+/A++.
+ */
+function NutGon({
+  sac,
+  Icon,
+  onClick,
+  children,
+}: {
+  sac: keyof typeof SAC_NUT_GON,
+  Icon: React.ComponentType<{ size?: number, strokeWidth?: number }>,
+  onClick: () => void,
+  children: React.ReactNode,
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`w-full flex items-center gap-4 rounded-full border border-white/35 py-4.5 pl-4.5 pr-6 text-left transition-transform duration-150 ease-out active:scale-[0.98] motion-reduce:transition-none ${SAC_NUT_GON[sac].nen}`}
+    >
+      <span
+        aria-hidden="true"
+        className={`grid place-items-center w-14 h-14 shrink-0 rounded-full bg-gradient-to-b from-white to-[#f3eefc] shadow-[0_6px_14px_-4px_rgba(30,10,70,0.35),inset_0_-2px_0_rgba(46,16,101,0.08)] ${SAC_NUT_GON[sac].bieuTuong}`}
+      >
+        <Icon size={30} strokeWidth={2.4} />
+      </span>
+      <span className="text-[1.3125rem] font-bold">{children}</span>
+    </button>
+  );
+}
+
 function ManSieuDonGian({
   t,
   setView,
@@ -1939,9 +2018,9 @@ function ManSieuDonGian({
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="flex-1 flex flex-col w-full relative z-10 px-5 pt-6 pb-6 overflow-y-auto"
+      className="flex-1 flex flex-col w-full relative z-10 px-5 pt-5 pb-5 overflow-y-auto"
     >
-      <div className="flex items-center justify-center gap-2 mb-6 shrink-0">
+      <div className="flex items-center justify-center gap-2 mb-5 shrink-0">
         <img src="/logo.webp" alt="" className="w-9 h-9 object-contain" />
         <span className="text-[22px] font-black text-[#2e1065]">Khoan Đã</span>
       </div>
@@ -1951,14 +2030,20 @@ function ManSieuDonGian({
         Nói đúng hai điều: đã đổi gì, và quay lại bằng nút nào. Không nài nỉ, không
         giải thích dài; bấm "Đã hiểu" là mất hẳn.
       */}
+      {/*
+        Viền và bóng viết thẳng ra đây, không mượn lớp `border-[#2e1065]` /
+        `shadow-[3px_3px_0_#2e1065]` rồi để `src/index.css` bẻ thành viền sáng —
+        đọc mã phải thấy đúng thứ hiện trên màn.
+      */}
       {baoDaChuyen && (
-        <div className="mb-4 shrink-0 rounded-3xl border-2 border-[#2e1065] bg-amber-50 p-4 shadow-[3px_3px_0_#2e1065]">
-          <p className="text-[16px] font-bold text-[#2e1065] leading-snug">
+        <div className="mb-4 shrink-0 rounded-[28px] border border-amber-200/80 bg-amber-50 p-4 shadow-[0_12px_28px_-14px_rgba(109,40,217,0.35)]">
+          <p className="text-[16px] font-bold text-[color:var(--color-ink)]">
             {t('Đã chuyển sang màn gọn. Bấm "Xem đầy đủ" để quay lại như cũ.')}
           </p>
           <button
+            type="button"
             onClick={onTatBao}
-            className="mt-3 min-h-[52px] w-full rounded-2xl border-2 border-[#2e1065] bg-white text-[16px] font-black text-[#2e1065] active:scale-95 transition-transform"
+            className="mt-3 w-full rounded-full border border-amber-200 bg-white py-3 font-bold text-[color:var(--color-ink)] shadow-[0_6px_14px_-8px_rgba(120,53,15,0.35)] transition-transform duration-150 ease-out active:scale-[0.98] motion-reduce:transition-none"
           >
             {t('Đã hiểu')}
           </button>
@@ -1970,9 +2055,10 @@ function ManSieuDonGian({
         `public/vung-cham-san.css` khai `min-block-size: max(--touch-target,
         3.25rem)` cho mọi nút, và tệp đó nạp SAU CÙNG không dùng `@layer` nên
         thắng mọi utility của Tailwind — kể cả một giá trị LỚN HƠN. Đo 20/8/2026:
-        `min-h-[96px]` bị ép xuống 55px. Đệm thì không đụng vào thuộc tính đó.
+        `min-h-[96px]` bị ép xuống 55px. Đệm thì không đụng vào thuộc tính đó:
+        `py-4.5` hai đầu + đồng xu `h-14` = 5.75rem, tức ~98px ở gốc 17px.
       */}
-      <div className="flex flex-col gap-4 flex-1 justify-center [&>*]:shrink-0">
+      <div className="flex flex-col gap-3.5 flex-1 justify-center [&>*]:shrink-0">
         {/*
           ⚠️ NÚT ĐẦU LÀ NÓI, KHÔNG PHẢI GÕ — thêm 20/9/2026.
 
@@ -1986,29 +2072,21 @@ function ManSieuDonGian({
           chuyển vào TRONG màn trợ lý: gõ chữ, gửi ảnh và nói đều là một việc — kể
           cho cháu nghe chuyện gì đang xảy ra — chỉ khác cách kể.
         */}
-        <button
-          onClick={() => setView('tro_ly')}
-          className="w-full py-7 rounded-3xl bg-[#7c3aed] text-white font-black text-[22px] leading-snug flex items-center justify-center gap-3 px-5 shadow-lg active:scale-95 transition-transform"
-        >
-          <Mic size={30} strokeWidth={2.5} className="shrink-0" />
-          <span>{t('Nói cho cháu nghe')}</span>
-        </button>
+        <NutGon sac="noi" Icon={Mic} onClick={() => setView('tro_ly')}>
+          {t('Nói cho cháu nghe')}
+        </NutGon>
 
-        <button
-          onClick={goiNguoiNha}
-          className="w-full py-7 rounded-3xl bg-emerald-700 text-white font-black text-[22px] leading-snug flex items-center justify-center gap-3 px-5 shadow-lg active:scale-95 transition-transform"
-        >
-          <PhoneCall size={30} strokeWidth={2.5} className="shrink-0" />
-          <span>{nguoiDauTien?.name ? t('Gọi người nhà') : t('Thêm người thân')}</span>
-        </button>
+        <NutGon sac="nguoiNha" Icon={PhoneCall} onClick={goiNguoiNha}>
+          {nguoiDauTien?.name ? t('Gọi người nhà') : t('Thêm người thân')}
+        </NutGon>
 
-        <button
+        <NutGon
+          sac="khanCap"
+          Icon={ShieldAlert}
           onClick={() => (onTriggerEmergency ? onTriggerEmergency() : setView('warning'))}
-          className="w-full py-7 rounded-3xl bg-red-600 text-white font-black text-[22px] leading-snug flex items-center justify-center gap-3 px-5 shadow-lg active:scale-95 transition-transform"
         >
-          <ShieldAlert size={30} strokeWidth={2.5} className="shrink-0" />
-          <span>{t('Khẩn cấp')}</span>
-        </button>
+          {t('Khẩn cấp')}
+        </NutGon>
 
         {/*
           ⚠️ NÚT THỨ TƯ, THÊM 19/9/2026 — VÀ NÓ LÀ NÚT SỬA MỘT LỖI, KHÔNG PHẢI
@@ -2023,19 +2101,16 @@ function ManSieuDonGian({
 
           Bốn nút vẫn nằm trong ngưỡng "≤ 4 lựa chọn mỗi điểm quyết định".
         */}
-        <button
-          onClick={() => setView('hoi_nhanh')}
-          className="w-full py-7 rounded-3xl bg-[#2e1065] text-white font-black text-[22px] leading-snug flex items-center justify-center gap-3 px-5 shadow-lg active:scale-95 transition-transform"
-        >
-          <PhoneIncoming size={30} strokeWidth={2.5} className="shrink-0" />
-          <span>{t('Đang bị ai gọi?')}</span>
-        </button>
+        <NutGon sac="cuocGoi" Icon={PhoneIncoming} onClick={() => setView('hoi_nhanh')}>
+          {t('Đang bị ai gọi?')}
+        </NutGon>
       </div>
 
       {/* §4.6 — lối ra, luôn có, không giấu */}
       <button
+        type="button"
         onClick={onTat}
-        className="w-full min-h-[52px] mt-6 rounded-full border-2 border-purple-200 bg-white text-[#6d28d9] font-bold text-[15px] active:scale-95 transition-transform shrink-0"
+        className="w-full mt-5 shrink-0 rounded-full border-2 border-[#e4d7ff] bg-white font-bold text-[#6d28d9] shadow-[0_8px_18px_-10px_rgba(90,30,160,0.45)] transition-transform duration-150 ease-out active:scale-[0.98] motion-reduce:transition-none"
       >
         {t('Xem đầy đủ')}
       </button>

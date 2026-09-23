@@ -180,8 +180,16 @@ h1, h2, h3, h4, [data-vai-tro="tieu-de-lon"] { line-height: var(--leading-tight)
 :focus-visible {
   outline: 3px solid var(--color-focus);
   outline-offset: 3px;
-  border-radius: var(--radius-xs);
   box-shadow: 0 0 0 6px var(--color-focus-halo);
+}
+
+/* ⚠️ CHỈ BO GÓC CHO PHẦN TỬ CHƯA TỰ BO — SỬA 23/9/2026.
+   Bản trước ép `border-radius` lên MỌI phần tử có tiêu điểm. Tệp này không dùng
+   `@layer` nên thắng `rounded-*` của Tailwind: đo trên màn gọn, nút viên thuốc
+   bấm Tab tới là vuông lại còn 8,5px. Phần tử đã tự bo thì giữ hình của nó —
+   viền tiêu điểm tự đi theo góc bo, sàn "nhìn thấy rõ" không mất gì. */
+:focus-visible:not([class*="rounded"]) {
+  border-radius: var(--radius-xs);
 }
 
 /* ── 7. CẤM CẮT CHỮ TRÊN PHẦN TỬ BẤM ĐƯỢC ──────────────────────────────────
