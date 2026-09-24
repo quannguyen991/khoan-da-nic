@@ -1465,6 +1465,8 @@ export default function App() {
             của nó bị vẽ DƯỚI lớp trắng 60% + tím nhòe. `isolate` ở khung + `-z-10` ở
             đốm: đốm luôn nằm trên nền khung và dưới mọi màn, không cần màn nào nhớ.
           */}
+          {/* Nền kẻ ô caro — nằm dưới hai đốm sáng, cùng lớp -z-10 (người dùng duyệt 24/9/2026). */}
+          <div className="absolute inset-0 -z-10 nen-caro pointer-events-none select-none" aria-hidden="true"></div>
           <div className="absolute -z-10 top-[-5%] left-[-10%] w-72 h-72 bg-white opacity-60 rounded-full blur-3xl pointer-events-none select-none"></div>
           <div className="absolute -z-10 bottom-1/4 right-[-20%] w-80 h-80 bg-[#d8b4fe] opacity-30 rounded-full blur-[80px] pointer-events-none select-none"></div>
           
@@ -3153,7 +3155,7 @@ function VoiceView({
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 1.05 }}
       transition={{ duration: 0.3 }}
-      className="flex-1 flex flex-col h-full w-full relative z-10 px-4 sm:px-6 pt-3 pb-5 overflow-y-auto bg-[radial-gradient(circle_at_50%_28%,rgba(196,181,253,0.45),transparent_38%),linear-gradient(180deg,#fbf9ff_0%,#f1eaff_100%)]"
+      className="flex-1 flex flex-col h-full w-full relative z-10 px-4 sm:px-6 pt-3 pb-5 overflow-y-auto bg-[radial-gradient(circle_at_50%_28%,rgba(196,181,253,0.45),transparent_38%)]"
     >
       {/* Top Bar */}
       <div className="w-full flex items-center justify-between pt-1 sm:pt-2 mb-2">
@@ -3853,7 +3855,9 @@ function FamilyView({
            <div className="bg-purple-50 rounded-[20px] p-3.5 border-[2.5px] border-[#2e1065] shadow-[4px_4px_0_#2e1065] flex items-center gap-2.5">
               <ShieldCheck className="w-6 h-6 text-[#7e22ce] shrink-0" />
               <p className="text-[14px] text-purple-900 font-semibold leading-snug">
-                {t("Danh bạ lưu an toàn trên máy của bác, bảo mật tuyệt đối.")}
+                {/* Bỏ "bảo mật tuyệt đối" (24/9/2026): không hệ thống nào hứa được "tuyệt đối",
+                    và số của con cháu đã ghép có đi qua máy chủ — chỉ nói điều có thật. */}
+                {t("Danh sách này lưu trên máy của bác.")}
               </p>
            </div>
         </div>

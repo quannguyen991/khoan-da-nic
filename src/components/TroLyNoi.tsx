@@ -206,7 +206,7 @@ export function TroLyNoi({
         một ô chữ và một nút tròn — hai màn cùng việc "kể cho cháu" mà trông như
         hai app khác nhau. Nay dùng lại đúng quả cầu, nền và nút của màn đó.
       */
-      className={`flex-1 flex flex-col w-full relative z-10 px-5 pt-3 overflow-y-auto bg-[radial-gradient(circle_at_50%_26%,rgba(196,181,253,0.5),transparent_42%),linear-gradient(180deg,#fbf9ff_0%,#f1eaff_100%)] ${coThanhDuoi ? 'pb-32' : 'pb-6'}`}
+      className={`flex-1 flex flex-col w-full relative z-10 px-5 pt-3 overflow-y-auto bg-[radial-gradient(circle_at_50%_26%,rgba(196,181,253,0.5),transparent_42%)] ${coThanhDuoi ? 'pb-32' : 'pb-6'}`}
     >
       <div className="w-full flex items-center justify-between gap-3 mb-1 shrink-0">
         <button

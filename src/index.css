@@ -127,6 +127,21 @@ html[data-bac-chu="lon"] .mascot-img {
 }
 
 /*
+ * NỀN KẺ Ô CARO — 24/9/2026, người dùng xem bản thử rồi duyệt ("để nền background đằng sau sọc caro").
+ * Đường tím 7% — đủ thấy là giấy kẻ ô, không đủ để tranh với chữ (tương phản chữ
+ * vẫn đo trên nền #f8f4ff). Mờ dần ra mép để không thành lưới cứng đóng khung màn.
+ */
+.nen-caro {
+  background-image:
+    linear-gradient(to right, rgba(109, 40, 217, 0.07) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(109, 40, 217, 0.07) 1px, transparent 1px);
+  background-size: 26px 26px;
+  background-position: center top;
+  -webkit-mask-image: radial-gradient(ellipse 95% 80% at 50% 38%, #000 55%, transparent 100%);
+  mask-image: radial-gradient(ellipse 95% 80% at 50% 38%, #000 55%, transparent 100%);
+}
+
+/*
  * Ba nhịp thêm 24/9/2026 cho màn "Nói cho cháu nghe":
  * `troiNoi`  — quả cầu trôi lên xuống 10px. Trang trí, KHÔNG chạy khi micro hỏng.
  * `bongDuoi` — bóng dưới đáy co lại khi quả cầu nổi lên, cùng nhịp.
