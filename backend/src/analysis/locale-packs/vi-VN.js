@@ -18,7 +18,8 @@
 module.exports = {
   locale: 'vi-VN',
   language: 'vi',
-  localePackVersion: 'vi-VN@1.2.0',   // 1.2.0 (25/9/2026): mẫu cố định cho tín hiệu AI hay bỏ
+  localePackVersion: 'vi-VN@1.2.1',   // 1.2.1 (24/9/2026): lời kể lại "ngân hàng bảo chuyển", "không thì TK bị khoá"
+                                      // 1.2.0 (25/9/2026): mẫu cố định cho tín hiệu AI hay bỏ
   supportedCountryProfiles: ['VN', 'GLOBAL'],
 
   directPatterns: {
@@ -427,6 +428,13 @@ module.exports = {
     ID_BANK_IMPERSONATION: [
       { pattern: '(tôi là|đây là)[^.]{0,26}(nhân viên|cán bộ)[^.]{0,16}ngân hàng', scope: 'any' },
       { pattern: '(vietcombank|bidv|vietinbank|techcombank|agribank)\\b[^.]{0,26}(thông báo|yêu cầu)', scope: 'any' },
+      /*
+       * 24/9/2026 — lời bác KỂ LẠI: "ngân hàng bảo chuyển tiền…", "bên ngân hàng yêu cầu
+       * nộp…". Ngân hàng thật không đòi khách chuyển tiền đi đâu cả. Không trườn qua từ
+       * phủ định ("ngân hàng KHÔNG BAO GIỜ yêu cầu chuyển tiền" là lời dặn), và
+       * `khong_canh_bao` bỏ các câu tuyên truyền.
+       */
+      { pattern: '(ngân hàng|nhân viên ngân hàng|bên ngân hàng)(?:(?!không|chẳng|đừng|chưa|chớ)[^.]){0,20}(bảo|yêu cầu|đề nghị|đòi|hướng dẫn|bắt)(?:(?!không|chẳng|đừng|chưa|chớ)[^.]){0,30}(chuyển|nộp|nạp|gửi tiền)', scope: 'khong_canh_bao' },
     ],
     /**
      * ══ HAI MÃ DANH TÍNH CHƯA TỪNG CÓ MẪU Ở NGÔN NGỮ NÀO — thêm 24/9/2026 ══
@@ -561,6 +569,14 @@ module.exports = {
       { pattern: '(sẽ|bị)\\s+(tạm\\s+)?(khóa|khoá|ngừng|ngắt|cắt|phong tỏa|thu hồi)[^.]{0,40}(nếu|khi)\\s+([^.,]{0,20}\\s)?(không|chưa)', scope: 'khong_canh_bao' },
       { pattern: 'nếu\\s+(không|chưa)[^.]{0,40}(sẽ\\s+)?(bị\\s+)?(tạm\\s+)?(khóa|khoá|ngắt|cắt|ngừng|khởi kiện|truy cứu)', scope: 'khong_canh_bao' },
       { pattern: '(hết hạn|quá hạn)[^.]{0,20}(sẽ\\s+)?bị\\s+(tạm\\s+)?(khóa|khoá|ngắt|cắt|ngừng)', scope: 'khong_canh_bao' },
+      /*
+       * 24/9/2026 — người dùng gõ vào trợ lý: "ngân hàng bảo chuyển tiền KHÔNG TÀI KHOẢN
+       * BỊ KHOÁ" — lời doạ không có chữ "nếu". Bộ luật chỉ thấy "chuyển tiền" (14 điểm)
+       * ⇒ chưa thấy dấu hiệu. Đòi dạng doạ: "không (thì) / kẻo / … sẽ bị khoá". Câu báo
+       * thật "tài khoản đã bị khoá do nhập sai mật khẩu" không có dạng đó.
+       */
+      { pattern: '(không\\s+(thì\\s+)?|kẻo\\s+)(tài khoản|tk|thẻ|sim|số|thuê bao)[^.]{0,20}(sẽ\\s+)?bị\\s+(tạm\\s+)?(khóa|khoá|phong tỏa|phong toả|đóng băng)', scope: 'khong_canh_bao' },
+      { pattern: '(tài khoản|tk|thẻ|sim|thuê bao)[^.]{0,20}sẽ\\s+bị\\s+(tạm\\s+)?(khóa|khoá|phong tỏa|phong toả|đóng băng)', scope: 'khong_canh_bao' },
     ],
     MAN_URGENCY: [
       { pattern: '\\b(ngay|gấp|lập tức|khẩn|trong vòng \\d+)\\b', scope: 'action' },

@@ -15,7 +15,10 @@ module.exports = {
                                //   FIN_ACCOUNT_OPENING_FOR_OTHERS, CRED_ID_BIOMETRIC_DOCS,
                                //   DEV_SIM_SWAP_ESIM (người dùng duyệt)
                                // 1.2.0 (24/9/2026): 64 — thêm MAN_HEALTH_MIRACLE_CLAIM
-  RULE_VERSION: '1.6.1',       // cap nhóm + 26 cộng hưởng + 1 suy ra + 20/45/69, Phụ lục B
+  RULE_VERSION: '1.6.2',       // cap nhóm + 26 cộng hưởng + 1 suy ra + 20/45/69, Phụ lục B
+                               // 1.6.2 (24/9/2026): lời bác KỂ LẠI trong trợ lý — "ngân hàng
+                               //   bảo chuyển tiền", "không (thì) tài khoản bị khoá". Hai bộ
+                               //   mẫu không mẫu lành nào đổi mức. vi-VN@1.2.1.
                                // 1.6.1 (25/9/2026): mẫu cố định cho tín hiệu AI "lúc có lúc
                                //   không" (so 3 lượt AI, temperature 0 vẫn dao động): thanh
                                //   toán vào TK/link/số tiền, bổ sung vốn, tiền mặt, đăng nhập

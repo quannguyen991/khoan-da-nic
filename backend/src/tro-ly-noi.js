@@ -126,6 +126,64 @@ function duPhong(ma, lang) {
   return bang[ma] || bang.AI_HONG;
 }
 
+/**
+ * ═════ LƯỚI AN TOÀN BẰNG BỘ LUẬT — thêm 24/9/2026 ═════
+ *
+ * Người dùng thử trên web thật: "ngân hàng bảo chuyển tiền không tài khoản bị khoá"
+ * → trợ lý chỉ HỎI LẠI; rồi "ngân hàng bảo chuyển tiền để nhận thưởng ô tô 1 tỷ"
+ * → "máy chủ đang bận" (lượt AI quá 35 giây). Hai lượt, không một lời nhắc dừng
+ * lại nào, trong khi bộ luật cố định — chạy không cần AI, dưới 50ms — nhận ra
+ * ngay từ câu đầu.
+ *
+ * Nên việc có hiện nút "Kiểm tin này ngay" hay không KHÔNG còn chỉ do model quyết:
+ * bộ luật thấy dấu hiệu là nút LUÔN hiện (§4.2: chỉ làm TĂNG cảnh giác), và lời
+ * đáp mở đầu bằng MỘT câu "khoan" cố định theo việc người ta đòi. Câu đó không nói
+ * mức rủi ro, không nói "lừa đảo", không buộc tội ai — đúng tên app.
+ *
+ * Xét câu này cùng tối đa HAI lượt trước của bác: người già kể nhỏ giọt, và "ngân
+ * hàng bảo chuyển tiền" + "để nhận thưởng ô tô" mới là một chuyện đủ nghĩa.
+ *
+ * ⚠️ MODULE NÀY VẪN KHÔNG IMPORT BỘ LUẬT (test/tro-ly-khong-ket-luan.test.js): không
+ * được có đường thứ hai ra NHÃN rủi ro. Máy chủ chạy bộ luật và chỉ trao vào đây
+ * `kiemLuat(vanBan) → { loai: 'FIN'|'CRED'|'DEV'|'KHAC' } | null` — có dấu hiệu hay
+ * không, và người ta đòi loại việc gì. Không nhãn, không điểm. Nhãn vẫn chỉ đến từ
+ * `/api/analyze` khi bác bấm nút; và vì AI chỉ THÊM tín hiệu, nhãn đó không bao giờ
+ * thấp hơn cái đã làm bật câu "khoan" ở đây — hai đường không thể nói ngược nhau.
+ */
+const CAU_KHOAN = {
+  vi: {
+    FIN: 'Bác khoan chuyển tiền đã.',
+    CRED: 'Bác khoan đọc mã hay mật khẩu cho ai đã.',
+    DEV: 'Bác khoan cài hay bấm gì đã.',
+    KHAC: 'Bác khoan làm theo họ đã.',
+    CAN_KIEM: 'Chuyện bác kể có điều cần kiểm ngay — bác bấm nút vàng bên dưới để cháu kiểm nhé.',
+  },
+  en: {
+    FIN: 'Please hold off on sending any money.',
+    CRED: 'Please hold off on reading any code or password to anyone.',
+    DEV: 'Please hold off on installing or tapping anything.',
+    KHAC: 'Please hold off on doing what they ask.',
+    CAN_KIEM: 'What you told me needs checking right away — tap the yellow button below.',
+  },
+};
+
+function kiemBangLuat(cau, lichSu, lang, kiemLuat) {
+  if (typeof kiemLuat !== 'function') return null;
+  const truoc = (Array.isArray(lichSu) ? lichSu : [])
+    .filter((l) => l && l.vai === 'bac' && typeof l.noiDung === 'string')
+    .slice(-2)
+    .map((l) => l.noiDung.slice(0, GIOI_HAN_LOI_NOI));
+  const vanBan = [...truoc, cau].join('. ').slice(0, GIOI_HAN_LOI_NOI);
+  let kq;
+  try { kq = kiemLuat(vanBan); } catch { return null; }
+  if (!kq) return null;
+  const bang = lang === 'en' ? CAU_KHOAN.en : CAU_KHOAN.vi;
+  return { vanBan, cauKhoan: bang[kq.loai] || bang.KHAC, cauCanKiem: bang.CAN_KIEM };
+}
+
+/** Đã có "khoan" / "đừng" ở đầu lời đáp thì không nhắc lần hai. */
+const daNhacDung = (loiDap) => /(khoan|đừng|hold off|do not|don't)/i.test(loiDap.slice(0, 80));
+
 /** Model hay bọc JSON trong ```json … ``` hoặc thêm lời dẫn. Gỡ cả hai. */
 function docJson(tho) {
   if (!tho || typeof tho !== 'string') return null;
@@ -150,7 +208,9 @@ function docJson(tho) {
  * KHÔNG BAO GIỜ ném lỗi. Model hỏng là một trạng thái phải nói ra (§4.3), không
  * phải một trang lỗi.
  */
-async function traLoiTroLy({ loiNoi, lichSu = [], lang = 'vi' } = {}) {
+async function traLoiTroLy({
+  loiNoi, lichSu = [], lang = 'vi', goiChatFn = goiChat, kiemLuat = null,
+} = {}) {
   const cau = String(loiNoi || '').slice(0, GIOI_HAN_LOI_NOI).trim();
   if (!cau) {
     return { loiDap: duPhong('AI_HONG', lang), canKiem: null, aiDaChay: false, biCat: null };
@@ -173,18 +233,25 @@ async function traLoiTroLy({ loiNoi, lichSu = [], lang = 'vi' } = {}) {
     { role: 'user', content: `<loi_bac_noi>\n${cau}\n</loi_bac_noi>` },
   ];
 
+  // Chạy bộ luật TRƯỚC khi gọi AI: kết quả dùng được cả khi AI hỏng.
+  const luat = kiemBangLuat(cau, lichSu, lang, kiemLuat);
+  /** AI hỏng: bộ luật thấy dấu hiệu thì vẫn nói được câu "khoan" và đưa nút kiểm. */
+  const khiAiHong = () => (luat
+    ? { loiDap: `${luat.cauKhoan} ${luat.cauCanKiem}`, canKiem: luat.vanBan, aiDaChay: false, biCat: null }
+    : { loiDap: duPhong('AI_HONG', lang), canKiem: null, aiDaChay: false, biCat: null });
+
   let tho = null;
   try {
-    const kq = await goiChat(messages, {});
+    const kq = await goiChatFn(messages, {});
     tho = kq && typeof kq === 'object' ? kq.noiDung : kq;
   } catch {
     // §6.7 — nhà cung cấp hỏng giống hệt mã hỏng. Cả hai đều rơi về đây.
-    return { loiDap: duPhong('AI_HONG', lang), canKiem: null, aiDaChay: false, biCat: null };
+    return khiAiHong();
   }
 
   const doc = docJson(tho);
   if (!doc || typeof doc.loiDap !== 'string' || !doc.loiDap.trim()) {
-    return { loiDap: duPhong('AI_HONG', lang), canKiem: null, aiDaChay: false, biCat: null };
+    return khiAiHong();
   }
 
   /*
@@ -193,16 +260,17 @@ async function traLoiTroLy({ loiNoi, lichSu = [], lang = 'vi' } = {}) {
    * dung của người dùng. Model không thể dùng trường này để ra lệnh cho bộ luật,
    * vì bộ luật không đọc lệnh, nó chỉ đếm tín hiệu.
    */
-  const canKiem = typeof doc.canKiem === 'string' && doc.canKiem.trim()
+  const canKiemModel = typeof doc.canKiem === 'string' && doc.canKiem.trim()
     ? doc.canKiem.slice(0, GIOI_HAN_LOI_NOI).trim()
     : null;
+  // Bộ luật thấy dấu hiệu ⇒ nút kiểm LUÔN có, và kiểm cả mạch lời bác kể (đủ nghĩa hơn một câu).
+  const canKiem = luat ? luat.vanBan : canKiemModel;
 
   const maCam = catCauCam(doc.loiDap);
-  if (maCam) {
-    return { loiDap: duPhong(maCam, lang), canKiem, aiDaChay: true, biCat: maCam };
-  }
+  const loiDap = maCam ? duPhong(maCam, lang) : doc.loiDap.trim();
+  const coKhoan = luat && !daNhacDung(loiDap) ? `${luat.cauKhoan} ${loiDap}` : loiDap;
 
-  return { loiDap: doc.loiDap.trim(), canKiem, aiDaChay: true, biCat: null };
+  return { loiDap: coKhoan, canKiem, aiDaChay: true, biCat: maCam || null };
 }
 
 module.exports = { traLoiTroLy, catCauCam, CHI_THI, GIOI_HAN_LOI_NOI };

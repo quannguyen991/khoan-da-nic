@@ -36,6 +36,10 @@ const PHAI_BAT = [
   ['Quét mã QR này rồi đăng nhập; mã chỉ còn hiệu lực hai phút.', 'WEB_QR_TO_LOGIN_PAYMENT'],
   ['Quét mã để nhận tiền lì xì nhé.', 'WEB_QR_TO_LOGIN_PAYMENT'],
   ['Scan the QR code to claim your refund.', 'WEB_QR_TO_LOGIN_PAYMENT'],
+  // Lời bác KỂ LẠI trong trợ lý (người dùng thử 24/9/2026).
+  ['ngân hàng bảo chuyển tiền không tài khoản bị khóa', 'ID_BANK_IMPERSONATION'],
+  ['ngân hàng bảo chuyển tiền không tài khoản bị khóa', 'MAN_FEAR_THREAT'],
+  ['Bên ngân hàng yêu cầu bác nộp phí kẻo thẻ bị khóa.', 'MAN_FEAR_THREAT'],
 ];
 
 const KHONG_DUOC_BAT = [
@@ -46,6 +50,9 @@ const KHONG_DUOC_BAT = [
   ['Ngân hàng thông báo: vui lòng xác minh thông tin theo hướng dẫn tại quầy.', 'CRED_CARD_SECRET'],
   ['Gửi tiết kiệm kỳ hạn 12 tháng, lãi suất hấp dẫn 6%/năm.', 'OFF_INVESTMENT_GUARANTEE'],
   ['Cảnh báo: kẻ gian doạ sẽ khóa tài khoản nếu không làm theo, bà con cảnh giác.', 'MAN_FEAR_THREAT'],
+  ['Ngân hàng không bao giờ yêu cầu khách chuyển tiền qua điện thoại.', 'ID_BANK_IMPERSONATION'],
+  ['Cảnh báo: kẻ gian giả ngân hàng bảo chuyển tiền kẻo tài khoản bị khóa.', 'ID_BANK_IMPERSONATION'],
+  ['Tài khoản của quý khách đã bị khóa do nhập sai mật khẩu 5 lần.', 'MAN_FEAR_THREAT'],
 ];
 
 for (const [t, id] of PHAI_BAT) {

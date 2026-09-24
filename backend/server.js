@@ -586,6 +586,20 @@ app.post('/api/analyze', chanPhanTich, xuLyPhanTich);
 app.post('/api/phan-tich', chanPhanTich, xuLyPhanTich);   // §5.2 — alias, cùng handler
 
 /**
+ * Lưới an toàn của trợ lý (24/9/2026) — chạy BỘ LUẬT DUY NHẤT (chỉ tầng luật, không
+ * AI, dưới 50ms) và trao cho trợ lý đúng một thông tin tối thiểu: có dấu hiệu hay
+ * không, người ta đòi loại việc gì. KHÔNG nhãn, KHÔNG điểm — nhãn chỉ đến từ
+ * /api/analyze khi bác bấm nút. Xem khối "LƯỚI AN TOÀN" trong tro-ly-noi.js.
+ */
+function kiemLuatChoTroLy(vanBan) {
+  const kq = analyze({ vanBan });
+  if (kq.nhan !== 'CAO' && kq.nhan !== 'NGHI_NGO') return null;
+  const ma = kq.maLyDo || [];
+  const co = (tienTo) => ma.some((m) => m.startsWith(tienTo));
+  return { loai: co('FIN_') ? 'FIN' : co('CRED_') ? 'CRED' : co('DEV_') ? 'DEV' : 'KHAC' };
+}
+
+/**
  * ═════════ TRỢ LÝ NÓI — MỘT ĐƯỜNG NÓI CHUYỆN, KHÔNG PHẢI MỘT QUAN TOÀ ═════════
  *
  * Người dùng chốt 20/9/2026: người già chỉ cần nói. Đúng — mỗi ô nhập chữ là
@@ -600,6 +614,10 @@ app.post('/api/phan-tich', chanPhanTich, xuLyPhanTich);   // §5.2 — alias, c�
  * và đúng ngày chúng lệch thì không ai nhìn thấy — màn hình vẫn hiện một nhãn bình
  * thường. Đó là đúng dạng lỗi §4.3 gọi tên.
  *
+ * Lưới an toàn (24/9/2026) KHÔNG phải đường chấm thứ hai: nó gọi đúng `analyze()`
+ * của /api/analyze và chỉ dùng kết quả để quyết có nhắc "khoan" + có đưa nút kiểm
+ * hay không. Không nhãn, không điểm nào ra khỏi route này.
+ *
  * ⚠️ KHÔNG BẮT ĐĂNG NHẬP, giống `/api/analyze` (§5.3). Nhưng CÓ chặn tần suất:
  * đây là đường gọi model đắt nhất trong app.
  */
@@ -610,7 +628,7 @@ app.post('/api/tro-ly', chanPhanTich, async (req, res) => {
   const lang = req.body?.lang === 'en' ? 'en' : 'vi';
   const lichSu = Array.isArray(req.body?.lichSu) ? req.body.lichSu : [];
 
-  const kq = await traLoiTroLy({ loiNoi, lichSu, lang });
+  const kq = await traLoiTroLy({ loiNoi, lichSu, lang, kiemLuat: kiemLuatChoTroLy });
 
   /*
    * `biCat` KHÔNG ra ngoài. Nó là việc nội bộ (hàng rào §11 vừa cắt một lời đáp),
