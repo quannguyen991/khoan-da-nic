@@ -22,6 +22,7 @@ const { layCauHinh, goiChat, layCacDuong, locDuongThiGiac } = require('./src/ai/
 const { kiemModelSong } = require('./src/ai/kiem-model-song');
 const { dungSafetyCard } = require('./src/safety-card');
 const { dungTrang } = require('./src/safety-card-page');
+const { dungTrangGioiThieu, docThongTinApk } = require('./src/trang-gioi-thieu');
 const { layKeHoachPhucHoi } = require('./src/analysis/recovery-adapters');
 const {
   taoSuKien, timHoSoCoTheGop, dungCauHoiGop, tinHieuCase, baLop, GIAI_DOAN, tinHieuMangTheo, locHoSo,
@@ -1797,10 +1798,13 @@ app.post('/api/push/dang-ky', chanDoc, async (req, res) => {
  * Có tệp thì mở đường tải; không có thì KHÔNG có route (404 thật, không phải
  * một trang trắng giả vờ).
  *
- * ⚠️ ĐÂY LÀ ĐƯỜNG CÔNG KHAI KHI CHẠY QUA TUNNEL. Ai có địa chỉ cũng tải được.
- * Chấp nhận được với bản `debug` để cài thử trong nhóm, nhưng:
- *  · KHÔNG đặt bản `release` đã ký ở đây
- *  · Tắt bằng `KHOAN_DA_KHONG_PHAT_APK=1` khi không còn cần
+ * ⚠️ ĐƯỜNG CÔNG KHAI. Từ 24/9/2026 (người dùng duyệt) tệp ở đây là bản PHÁT HÀNH
+ * đã ký bằng khoá riêng (scripts/tao-khoa-phat-hanh.js), không còn là bản debug —
+ * bản debug mở cổng gỡ lỗi, không được phát cho người lạ.
+ *  · Chỉ dẫn tới đây từ /gioi-thieu, mục cài đặt có cảnh báo + các bước tắt lại
+ *    quyền cài từ nguồn không rõ. Đừng gửi link .apk trần qua tin nhắn: chính bộ
+ *    luật của app chấm tin kiểu đó là CAO.
+ *  · Tắt bằng `KHOAN_DA_KHONG_PHAT_APK=1`; trang giới thiệu tự đổi sang "dùng web".
  *
  * ⚠️ `Content-Disposition: attachment` để Android tải xuống chứ không cố mở
  * trong trình duyệt. Thiếu nó thì một số máy hiện tệp nhị phân ra màn hình.
@@ -1813,6 +1817,18 @@ if (fs.existsSync(DUONG_APK) && process.env.KHOAN_DA_KHONG_PHAT_APK !== '1') {
     res.sendFile(DUONG_APK);
   });
 }
+
+/**
+ * /gioi-thieu — trang giới thiệu cho con cháu, dựng ở máy chủ, không cần JS
+ * (cùng kiểu /transparency). `/` vẫn là app — đổi route chính là §12.
+ */
+app.get(['/gioi-thieu', '/gioi-thieu/'], (req, res) => {
+  const ngonNgu = String(req.query.lang || '').toLowerCase() === 'en' ? 'en' : 'vi';
+  const coApk = fs.existsSync(DUONG_APK) && process.env.KHOAN_DA_KHONG_PHAT_APK !== '1';
+  res.setHeader('content-type', 'text/html; charset=utf-8');
+  res.setHeader('content-language', ngonNgu);
+  res.send(dungTrangGioiThieu(ngonNgu, { apk: coApk ? docThongTinApk(DUONG_APK) : null }));
+});
 
 // §6.7 — mọi lỗi còn lại vẫn ra JSON có cấu trúc, không bao giờ trắng trang.
 app.use((err, req, res, next) => {   // eslint-disable-line no-unused-vars

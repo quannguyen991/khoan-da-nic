@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chính sách quyền riêng tư — Khoan Đã</title>
+<meta name="description" content="Khoan Đã thu những gì, gửi đi đâu, lưu ở đâu, và những gì Khoan Đã không làm.">
+<!--
+  Trang tĩnh, không cần JavaScript: chợ ứng dụng (Galaxy Store, CH Play) đòi một
+  đường link chính sách đọc được mà không phải cài app.
+
+  ⚠️ NGUỒN SỰ THẬT là code + PERMISSIONS-AND-POLICY.md. Đổi luồng dữ liệu nào
+  (thêm quyền, thêm nơi gửi, thêm bảng lưu) thì PHẢI sửa trang này cùng commit —
+  một chính sách nói sai là lời hứa sai với người dùng lẫn với chợ ứng dụng.
+  Đối chiếu lần cuối: 24/9/2026, bản APK 1.3 (versionCode 4).
+-->
+<style>
+  :root {
+    --nen: #faf7ff; --giay: #ffffff; --muc: #1e1b4b; --muc-phu: #4c4470;
+    --vien: #d9ccf5; --nhan: #5b21b6; --ghi-chu: #f3edff;
+    --chu: 17px; --dong: 1.6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --nen: #16122a; --giay: #1f1a38; --muc: #f3efff; --muc-phu: #cfc6ea;
+      --vien: #4a3f78; --nhan: #c4b5fd; --ghi-chu: #2a2350;
+    }
+  }
+  :root[data-theme="dark"] {
+    --nen: #16122a; --giay: #1f1a38; --muc: #f3efff; --muc-phu: #cfc6ea;
+    --vien: #4a3f78; --nhan: #c4b5fd; --ghi-chu: #2a2350;
+  }
+  * { box-sizing: border-box; }
+  html { font-size: var(--chu); -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; background: var(--nen); color: var(--muc);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif;
+    line-height: var(--dong);
+  }
+  main { max-width: 44rem; margin: 0 auto; padding: 24px 16px 64px; }
+  header { margin-bottom: 8px; }
+  .ten { font-weight: 800; color: var(--nhan); letter-spacing: .01em; }
+  h1 { font-size: 1.75rem; line-height: 1.3; margin: .3em 0 .2em; }
+  h2 { font-size: 1.25rem; line-height: 1.35; margin: 2em 0 .5em; }
+  h3 { font-size: 1.05rem; line-height: 1.4; margin: 1.4em 0 .3em; }
+  p, li { color: var(--muc); }
+  .phu { color: var(--muc-phu); }
+  ul { padding-left: 1.2em; }
+  li { margin: .35em 0; }
+  nav.ngon-ngu { display: flex; gap: 12px; flex-wrap: wrap; margin: 12px 0 8px; }
+  nav.ngon-ngu a {
+    display: inline-flex; align-items: center; min-height: 52px; padding: 0 20px;
+    border: 2px solid var(--vien); border-radius: 999px; background: var(--giay);
+    color: var(--nhan); font-weight: 700; text-decoration: none;
+  }
+  .the {
+    background: var(--giay); border: 1px solid var(--vien); border-radius: 20px;
+    padding: 4px 20px 12px; margin: 16px 0;
+  }
+  .ghi-chu { background: var(--ghi-chu); border-radius: 16px; padding: 12px 16px; }
+  table { width: 100%; border-collapse: collapse; margin: 8px 0; }
+  th, td { text-align: left; vertical-align: top; padding: 10px 8px; border-bottom: 1px solid var(--vien); }
+  th { font-size: .9rem; color: var(--muc-phu); font-weight: 700; }
+  .bang { overflow-x: auto; }
+  a { color: var(--nhan); }
+  hr { border: 0; border-top: 2px solid var(--vien); margin: 48px 0 16px; }
+</style>
+</head>
+<body>
+<main>
+
+<header>
+  <div class="ten">Khoan Đã</div>
+  <h1>Chính sách quyền riêng tư</h1>
+  <p class="phu">Có hiệu lực từ 24/9/2026 · áp dụng cho ứng dụng Android và trang web khoan-da.onrender.com</p>
+  <nav class="ngon-ngu" aria-label="Ngôn ngữ / Language">
+    <a href="#vi" lang="vi">Tiếng Việt</a>
+    <a href="#en" lang="en">English</a>
+  </nav>
+</header>
+
+<section id="vi" lang="vi">
+
+<div class="ghi-chu">
+  <p><strong>Tóm tắt:</strong> nội dung bạn đưa vào để kiểm chỉ rời máy khi bạn bấm kiểm, và máy chủ không lưu nội dung đó. Những gì ứng dụng tự nhìn thấy trên điện thoại (thông báo, trạng thái cuộc gọi) được xét ngay trên máy. Khoan Đã không bán dữ liệu, không quảng cáo, không dùng nội dung của bạn để huấn luyện AI.</p>
+</div>
+
+<h2>1. Nội dung bạn đưa vào để kiểm</h2>
+<p>Tin nhắn bạn gõ hoặc dán, ảnh chụp màn hình bạn chọn, đường link, và lời bạn kể trong mục “Nói cho cháu nghe”.</p>
+<ul>
+  <li><strong>Khi nào gửi đi:</strong> chỉ khi bạn bấm kiểm hoặc bấm gửi. Không có gì được gửi tự động.</li>
+  <li><strong>Gửi tới đâu:</strong> máy chủ Khoan Đã, và một dịch vụ AI bên thứ ba để trích các dấu hiệu lừa đảo. Mức rủi ro cuối cùng do bộ luật cố định của Khoan Đã quyết định, không do AI.</li>
+  <li><strong>Lưu lại không:</strong> máy chủ Khoan Đã <strong>không lưu</strong> nội dung thô: mã nguồn chặn việc ghi nội dung tin nhắn, ảnh, mã OTP, mật khẩu hay số tài khoản vào kho lưu trữ. Dịch vụ AI xử lý nội dung theo điều khoản của nhà cung cấp đó.</li>
+</ul>
+
+<h2>2. Giọng nói và đọc to</h2>
+<ul>
+  <li><strong>Nói vào ứng dụng:</strong> việc đổi tiếng nói thành chữ do dịch vụ nhận dạng giọng nói của điện thoại hoặc trình duyệt thực hiện (thường là của Google), nên tiếng nói có thể được gửi tới nhà cung cấp đó. Ứng dụng báo điều này cho bạn trước lần nói đầu tiên. Trên ứng dụng Android, Khoan Đã yêu cầu nhận dạng ngay trên máy nếu máy hỗ trợ. Micro chỉ bật khi bạn đang nói với ứng dụng; không chạy nền, không chạy trong cuộc gọi.</li>
+  <li><strong>Đọc to:</strong> nếu máy có giọng đọc tiếng Việt, câu được đọc ngay trên máy. Nếu không có, câu cần đọc được gửi qua máy chủ Khoan Đã tới dịch vụ tạo giọng của Google, không ghi nhật ký.</li>
+  <li><strong>Lời nhắn của người thân</strong> ghi âm lúc cài đặt chỉ nằm trên điện thoại.</li>
+</ul>
+
+<h2>3. Những gì ứng dụng Android nhìn thấy trên máy — chỉ khi bạn bật</h2>
+<p>Mỗi quyền dưới đây đều có thể từ chối hoặc tắt trong Cài đặt của điện thoại bất cứ lúc nào; ứng dụng vẫn dùng được khi không có chúng.</p>
+<div class="bang">
+<table>
+  <thead><tr><th scope="col">Quyền</th><th scope="col">Dùng để</th><th scope="col">Có gửi đi không</th></tr></thead>
+  <tbody>
+    <tr><td>Đọc thông báo</td><td>Xét sơ bộ tin nhắn đến ngay trên máy; nếu thấy từ hai dấu hiệu trở lên thì nhắc bạn kiểm. Thông báo từ một danh sách cố định ứng dụng ngân hàng, ví điện tử chỉ được xét để nhận ra tiền chuyển đi hoặc mã một lần xuất hiện trong lúc đang gọi.</td><td>Không, trừ khi bạn bấm kiểm tin đó. Thông báo ngân hàng không bao giờ được lưu hay gửi.</td></tr>
+    <tr><td>Trạng thái cuộc gọi</td><td>Biết máy <em>đang</em> có cuộc gọi hay không, để nhắc khi cuộc gọi kéo dài bất thường hoặc khi có mã OTP đến trong lúc gọi.</td><td>Không. Ứng dụng không biết số gọi đến, không đọc nhật ký cuộc gọi, không nghe hay ghi âm cuộc gọi.</td></tr>
+    <tr><td>Hiện trên ứng dụng khác</td><td>Hiện dải cảnh báo và nút nổi, kể cả khi bạn đang nghe gọi.</td><td>Không áp dụng.</td></tr>
+    <tr><td>Gọi điện</td><td>Nút “gọi người thân” gọi thẳng số bạn đã lưu, chỉ khi bạn bấm.</td><td>Không.</td></tr>
+    <tr><td>Camera</td><td>Chụp ảnh khi bạn chủ động chụp để kiểm.</td><td>Ảnh chỉ gửi đi khi bạn bấm kiểm (mục 1).</td></tr>
+    <tr><td>Kiểm tra máy</td><td>Nhận ra ứng dụng lạ có quyền điều khiển máy, hoặc ứng dụng vừa được cài từ tệp tải về.</td><td>Không gửi danh sách ứng dụng; chỉ gửi ba con số đếm.</td></tr>
+  </tbody>
+</table>
+</div>
+<p>Khoan Đã <strong>không</strong> xin quyền đọc SMS, nhật ký cuộc gọi hay danh bạ điện thoại, và <strong>không</strong> dùng dịch vụ trợ năng (Accessibility).</p>
+
+<h2>4. Tài khoản và Vòng tròn gia đình</h2>
+<p>Dùng ứng dụng không bắt buộc có tài khoản. Nếu bạn tạo tài khoản, máy chủ lưu tên, số điện thoại và vai trò (bác hay con cháu); mật khẩu và phiên đăng nhập chỉ được lưu dưới dạng băm, không lưu bản gốc.</p>
+<p>Khi bạn ghép máy với con cháu, máy chủ lưu phần tối thiểu để nối hai máy: mối liên kết giữa hai người, mã nhận thông báo của từng thiết bị, các sự kiện báo động và lời nhờ “hỏi con cháu” cùng câu trả lời — dưới dạng mã và thời gian.</p>
+<ul>
+  <li>Báo động gửi cho người thân <strong>chỉ gồm mã</strong> (mức rủi ro, loại tình huống, nút bạn đã bấm) — <strong>không bao giờ</strong> gồm nội dung tin nhắn.</li>
+  <li>Báo động và mục “cho gia đình xem trạng thái bảo vệ” đều <strong>tắt sẵn</strong>. Chỉ chủ tài khoản bật được, trên chính máy của mình; người cài giúp không bật thay được.</li>
+  <li>Chủ tài khoản gỡ bất kỳ người thân nào, bất cứ lúc nào, không cần họ đồng ý.</li>
+  <li>Mỗi lần người thân xem dữ liệu, một dòng nhật ký được ghi lại và người xem không xoá được.</li>
+</ul>
+
+<h2>5. Lưu trên điện thoại của bạn</h2>
+<p>Danh sách người thân, cài đặt, lịch sử kiểm và lời nhắn ghi âm nằm trên điện thoại. Gỡ ứng dụng hoặc xoá dữ liệu ứng dụng là xoá chúng.</p>
+
+<h2>6. Máy chủ đặt ở đâu</h2>
+<p>Máy chủ và cơ sở dữ liệu của Khoan Đã chạy trên dịch vụ đám mây đặt ngoài Việt Nam (Render, Neon). Dịch vụ AI và dịch vụ giọng nói nói ở mục 1 và 2 cũng ở ngoài Việt Nam.</p>
+
+<h2>7. Những gì Khoan Đã không làm</h2>
+<ul>
+  <li>Không bán hay chia sẻ dữ liệu để quảng cáo; không có quảng cáo trong ứng dụng.</li>
+  <li>Không dùng tin nhắn hay lời kể của bạn để huấn luyện AI.</li>
+  <li>Không theo dõi vị trí.</li>
+  <li>Không kết luận một cá nhân cụ thể là tội phạm.</li>
+</ul>
+
+<h2>8. Quyền của bạn</h2>
+<ul>
+  <li>Tắt bất kỳ quyền nào trong Cài đặt của điện thoại.</li>
+  <li>Tắt báo động gia đình, tắt chia sẻ trạng thái (tắt là xoá bản trạng thái đã lưu), gỡ người thân.</li>
+  <li>Yêu cầu xem hoặc xoá dữ liệu đang lưu trên máy chủ bằng cách liên hệ ở mục 9. Riêng nhật ký truy cập ở mục 4 được giữ để bảo vệ chủ tài khoản.</li>
+</ul>
+
+<h2>9. Liên hệ</h2>
+<p>Nhóm phát triển Khoan Đã — <a href="mailto:quannxm.sags@gmail.com">quannxm.sags@gmail.com</a></p>
+<p class="phu">Khi luồng dữ liệu thay đổi, trang này được cập nhật và ngày hiệu lực ở đầu trang đổi theo.</p>
+
+</section>
+
+<hr>
+
+<section id="en" lang="en">
+<h1>Privacy policy</h1>
+<p class="phu">Effective 24 September 2026 · covers the Android app and the website khoan-da.onrender.com</p>
+
+<div class="ghi-chu">
+  <p><strong>In short:</strong> content you give the app to check leaves your phone only when you tap check, and our server does not store it. What the app can see on your phone (notifications, call state) is evaluated on the phone. Khoan Đã does not sell data, shows no ads, and does not use your content to train AI.</p>
+</div>
+
+<h2>1. Content you submit for a check</h2>
+<p>Messages you type or paste, screenshots you pick, links, and what you tell the “Tell me about it” assistant.</p>
+<ul>
+  <li><strong>When it is sent:</strong> only when you tap check or send. Nothing is sent automatically.</li>
+  <li><strong>Where it goes:</strong> the Khoan Đã server, and a third-party AI service that extracts scam signals. The final risk level is set by Khoan Đã’s fixed safety rules, not by the AI.</li>
+  <li><strong>Is it stored:</strong> the Khoan Đã server <strong>does not store</strong> raw content: the code refuses to write message text, images, one-time codes, passwords or account numbers to storage. The AI provider processes content under its own terms.</li>
+</ul>
+
+<h2>2. Voice and read-aloud</h2>
+<ul>
+  <li><strong>Speaking to the app:</strong> speech-to-text is performed by your phone’s or browser’s speech recognition service (usually Google’s), so your voice may be sent to that provider. The app tells you this before the first time you speak. On Android, Khoan Đã asks for on-device recognition where the phone supports it. The microphone is on only while you are speaking to the app — never in the background, never during calls.</li>
+  <li><strong>Read aloud:</strong> if the phone has a Vietnamese voice, text is read on the phone. If not, the sentence is sent through the Khoan Đã server to Google’s speech service, without logging.</li>
+  <li><strong>A family member’s voice message</strong> recorded during setup stays on the phone.</li>
+</ul>
+
+<h2>3. What the Android app can see — only if you turn it on</h2>
+<p>Each permission below can be declined or revoked in your phone’s settings at any time; the app keeps working without them.</p>
+<div class="bang">
+<table>
+  <thead><tr><th scope="col">Permission</th><th scope="col">Used for</th><th scope="col">Sent anywhere?</th></tr></thead>
+  <tbody>
+    <tr><td>Notification access</td><td>On-device pre-screening of incoming messages; two or more signals trigger a prompt to check. Notifications from a fixed list of banking and e-wallet apps are checked only to spot money leaving the account or a one-time code arriving during a call.</td><td>No, unless you tap check on that message. Banking notifications are never stored or sent.</td></tr>
+    <tr><td>Phone state</td><td>Knowing <em>whether</em> a call is in progress, to remind you when a call runs unusually long or a one-time code arrives mid-call.</td><td>No. The app does not know the caller’s number, does not read call logs, and does not listen to or record calls.</td></tr>
+    <tr><td>Display over other apps</td><td>Showing a warning strip and floating button, including during a call.</td><td>Not applicable.</td></tr>
+    <tr><td>Phone calls</td><td>The “call family” button dials a number you saved, only when you tap it.</td><td>No.</td></tr>
+    <tr><td>Camera</td><td>Taking a photo when you choose to photograph something to check.</td><td>Only when you tap check (section 1).</td></tr>
+    <tr><td>Device check</td><td>Spotting unknown apps with control permissions, or apps just installed from a downloaded file.</td><td>No app list is sent; only three counts.</td></tr>
+  </tbody>
+</table>
+</div>
+<p>Khoan Đã does <strong>not</strong> request SMS, call-log or contacts permissions, and does <strong>not</strong> use an Accessibility service.</p>
+
+<h2>4. Accounts and Trusted Circle</h2>
+<p>An account is optional. If you create one, the server keeps your name, phone number and role (parent or family member); passwords and sign-in sessions are stored only as hashes, never in the original form.</p>
+<p>When you link your phone with a family member, the server keeps the minimum needed to connect the two phones: the link between the two people, each device’s notification token, alert events and “ask my family” requests with their answers — as codes and timestamps.</p>
+<ul>
+  <li>Alerts to family carry <strong>codes only</strong> (risk level, scenario type, the button you pressed) — <strong>never</strong> message content.</li>
+  <li>Alerts and “let my family see my protection status” are <strong>off by default</strong>. Only the account owner can turn them on, on their own phone; whoever set up the phone cannot do it for them.</li>
+  <li>The account owner can remove any family member at any time, without their consent.</li>
+  <li>Every time a family member views data, an audit entry is written that the viewer cannot delete.</li>
+</ul>
+
+<h2>5. Stored on your phone</h2>
+<p>Your family list, settings, check history and recorded voice messages live on the phone. Uninstalling the app or clearing its data removes them.</p>
+
+<h2>6. Where the server is</h2>
+<p>Khoan Đã’s server and database run on cloud services outside Vietnam (Render, Neon). The AI and speech services in sections 1 and 2 are also outside Vietnam.</p>
+
+<h2>7. What Khoan Đã does not do</h2>
+<ul>
+  <li>No selling or sharing of data for advertising; no ads in the app.</li>
+  <li>No use of your messages or conversations to train AI.</li>
+  <li>No location tracking.</li>
+  <li>No labelling of a specific person as a criminal.</li>
+</ul>
+
+<h2>8. Your choices</h2>
+<ul>
+  <li>Revoke any permission in your phone’s settings.</li>
+  <li>Turn off family alerts or status sharing (turning it off deletes the stored status), or remove a family member.</li>
+  <li>Ask to see or delete data held on the server by contacting us (section 9). The access audit log in section 4 is kept to protect the account owner.</li>
+</ul>
+
+<h2>9. Contact</h2>
+<p>The Khoan Đã team — <a href="mailto:quannxm.sags@gmail.com">quannxm.sags@gmail.com</a></p>
+<p class="phu">When data flows change, this page is updated and the effective date at the top changes with it.</p>
+</section>
+
+</main>
+</body>
+</html>

@@ -21,6 +21,7 @@ const KHONG_CAN_DANG_NHAP = Object.freeze([
   '/api/suc-khoe',
   '/api/safety-card',
   '/transparency',
+  '/gioi-thieu',   // trang giới thiệu — người chưa có tài khoản là đúng người cần đọc nó
 ]);
 
 /**
