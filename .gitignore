@@ -88,3 +88,9 @@ khoan-da.apk
 android/app/google-services.json
 *firebase-adminsdk*.json
 *service-account*.json
+
+# Khoá ký bản phát hành (Galaxy Store / CH Play) — KHÔNG BAO GIỜ vào git.
+# Mất khoá này = không phát hành bản cập nhật cho app đang trên chợ được nữa.
+*.jks
+*.keystore
+android/keystore.properties
