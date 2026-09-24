@@ -5653,6 +5653,27 @@ function SettingsView({
         <ChevronRight size={20} className="text-slate-500 shrink-0" />
       </button>
 
+      {/*
+        Trang giới thiệu /gioi-thieu (24/9/2026) — viết cho con cháu. `api()` cho ra
+        địa chỉ đầy đủ trong APK (APK chạy bản web đóng gói, không có route máy chủ),
+        đường tương đối trên web. Mở ra ngoài như các link tin báo khác.
+      */}
+      <a
+        href={`${api('/gioi-thieu')}${lang === 'en' ? '?lang=en' : ''}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="w-full max-w-[360px] bg-white rounded-3xl p-5 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] mb-6 flex items-center gap-3 text-left active:scale-[0.98] transition-transform"
+      >
+        <div className="w-12 h-12 rounded-2xl bg-purple-50 border border-purple-200 flex items-center justify-center text-purple-700 shrink-0">
+          <Globe size={24} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <h3 className="font-black text-[16px] text-[#311068] leading-snug">{t('Trang giới thiệu Khoan Đã')}</h3>
+          <p className="text-[14px] text-slate-600 leading-snug mt-0.5">{t('Gửi con cháu đọc trước khi cài giúp')}</p>
+        </div>
+        <ChevronRight size={20} className="text-slate-500 shrink-0" />
+      </a>
+
       <button
         onClick={() => setView('chia_khoa')}
         className="w-full max-w-[360px] bg-white rounded-3xl p-5 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] mb-6 flex items-center gap-3 text-left active:scale-[0.98] transition-transform"

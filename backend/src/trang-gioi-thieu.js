@@ -49,15 +49,7 @@ const CHU = {
     nutAndroid: 'Cài bản Android cho bố mẹ',
     ghiNho: 'Miễn phí · Không quảng cáo · Tiếng Việt và tiếng Anh',
 
-    mayNhan: 'Minh hoạ màn Nói cho cháu nghe',
-    mayTieuDe: 'Nói cho cháu nghe',
-    aiBac: 'Bác kể:',
-    loiBac: 'Ngân hàng bảo chuyển tiền, không thì tài khoản bị khoá.',
-    aiChau: 'Khoan Đã đáp:',
-    loiDap1: 'Bác khoan chuyển tiền đã.',
-    loiDap2: 'Bác ơi, ngân hàng gọi điện hay nhắn tin bảo vậy ạ?',
-    mayNut: 'Kiểm tin này ngay',
-    chuThichMay: 'Câu đầu do bộ luật cố định thêm vào ngay khi thấy dấu hiệu. Câu sau là AI trò chuyện, mỗi lần mỗi khác.',
+    capTroLy: 'Màn “Nói cho cháu nghe” thật. Bác vừa kể: “Ngân hàng bảo chuyển tiền, không thì tài khoản bị khoá.” Câu đầu do bộ luật cố định thêm vào ngay khi thấy dấu hiệu; câu sau là AI trò chuyện, mỗi lần mỗi khác.',
 
     vdTieuDe: 'Người đang bị lừa sẽ không tự mở một ứng dụng',
     vdDoan1: 'Lừa đảo qua điện thoại thắng bằng hai thứ: sự gấp gáp và sự cô lập. “Phải làm ngay”, “đừng nói với ai”. Người đang bị ép như vậy không tự tìm đến một ứng dụng để hỏi.',
@@ -76,12 +68,7 @@ const CHU = {
     truoc4: 'Ai gọi xưng là con cháu mà không nói được mật khẩu thì dừng lại. App chỉ lưu câu nhắc, không lưu mật khẩu.',
     truoc5T: 'Học năm bài ngắn',
     truoc5: 'Các kiểu lừa hay gặp, mỗi bài có câu đố.',
-    toQuyTac: 'Quy tắc nhà mình',
-    quyTac1: 'Nhà mình không đọc mã OTP cho ai qua điện thoại.',
-    quyTac2: 'Ai đòi chuyển tiền gấp thì gọi con trước đã.',
-    viDuQuyTac: 'Ví dụ. Mỗi nhà tự viết quy tắc của mình.',
-    maNoiMay: 'Mã nối máy',
-    viDuMa: 'Ví dụ',
+    capQuyTac: 'Màn “Quy tắc nhà mình” thật, sau khi đặt một quy tắc cùng con.',
 
     trongTen: 'Trong',
     trongTieuDe: 'lúc đang bị gọi: Khoan Đã giữ bố mẹ lại',
@@ -90,7 +77,7 @@ const CHU = {
     trong2T: 'Đang bị ai gọi?',
     trong2: 'Một câu hỏi: “Người ta đang yêu cầu bác làm gì?”, rồi vài câu Có hoặc Không. Bộ luật chấm, không cần gõ chữ.',
     trong3T: 'Khẩn cấp: dừng 60 giây',
-    trong3: 'Đồng hồ đếm ngược, ba việc không làm, nút gọi bạn và gọi 113. Luôn có dòng “Tôi ổn, không có gì nguy hiểm” để thoát ra.',
+    trong3: 'Một nút ở màn chính là tới: đồng hồ đếm ngược 60 giây, nút gọi ngay cho bạn và gọi 113, và một câu nói sẵn “Để tôi hỏi con rồi gọi lại.” Luôn có nút về trang chủ để thoát ra.',
     trong4T: 'Báo cho bạn',
     trong4: 'Nếu bố mẹ đã bật “báo cho con”, bạn nhận cảnh báo trên Chrome. Không ai phản ứng sau 60 giây thì báo lần hai.',
     trong5T: 'Báo ngay khi mã OTP về hoặc tiền đi ra',
@@ -100,32 +87,18 @@ const CHU = {
     trong7T: 'Nhắc khi cuộc gọi kéo dài',
     trong7: 'Sau 25 phút, nếu bố mẹ bật.',
     chiAndroid: 'Bản Android',
-    manDungNhan: 'Minh hoạ màn Khẩn cấp',
-    giay: 'giây',
-    dungTieuDe: 'Bác dừng lại 60 giây đã',
-    dung1: 'Dừng cuộc gọi',
-    dung2: 'Không chuyển tiền',
-    dung3: 'Không đọc mã OTP',
-    dungGoiCon: 'Gọi ngay cho con cháu',
-    dungGoi113: 'Gọi cảnh sát 113',
-    dungToiOn: 'Tôi ổn, không có gì nguy hiểm',
+    capKhanCap: 'Màn Khẩn cấp thật: bấm một nút ở màn chính là tới.',
 
     sauTen: 'Sau',
     sauTieuDe: 'khi lỡ chuyển tiền: không để bố mẹ một mình',
     sau1T: 'Việc cần làm ngay',
-    sau1: 'Bấm “Tôi đã lỡ chuyển tiền hoặc đọc mã rồi” để có các bước làm tăng khả năng xử lý, kèm số tổng đài của 11 ngân hàng đã được duyệt, có ghi nguồn.',
+    sau1: 'Bấm “Tôi đã lỡ chuyển tiền hoặc đọc mã rồi”: app nhắc ngay dừng cuộc gọi, không chuyển tiền, không đọc mã OTP. Gọi ngân hàng xong thì có các bước làm tăng khả năng xử lý, số tổng đài của 11 ngân hàng đã được duyệt, và hồ sơ vụ việc.',
     sau2T: 'Theo dõi 72 giờ',
     sau2: 'Kẻ gian hay quay lại lần hai, kiểu “nộp phí để lấy lại tiền”. App nhắc ở các mốc 2, 24, 48 và 72 giờ. Bản Android nhắc cả khi app đã đóng.',
     sau3T: 'Nhớ vụ việc 14 ngày',
     sau3: 'Tin sau giống tin trước, app hỏi có phải cùng một người không. Phần nhớ này nằm trên máy.',
-    sauManNhan: 'Minh hoạ màn sau khi bấm “Tôi đã lỡ chuyển tiền hoặc đọc mã rồi”',
-    sauTheoDoi: 'Đang theo dõi 72 giờ sau sự cố',
-    sauKhung: 'Những bước sau làm TĂNG khả năng xử lý — không ai hứa lấy lại được tiền',
-    sauBuoc: [
-      'Ngừng mọi liên lạc với bên kia — đừng nghe máy, đừng nhắn lại',
-      'Không chuyển thêm bất kỳ khoản nào nữa, dù họ nói lý do gì',
-      'Gọi ngay ngân hàng bằng số in trên thẻ hoặc mặt sau thẻ — không dùng số họ gửi',
-    ],
+    capPhucHoi: 'Màn thật sau khi bấm “Tôi đã lỡ chuyển tiền hoặc đọc mã rồi”, rồi “Xem việc tiếp theo”.',
+    duLieuMau: 'Chụp từ app thật. Dữ liệu mẫu: người thân tên Lan.',
 
     qdTieuDe: 'AI chỉ trích dấu hiệu. Bộ luật cố định mới quyết mức rủi ro.',
     qdDoan: 'AI đọc tin và đánh dấu những gì nó thấy, như giả danh cơ quan, đòi chuyển tiền, đòi mã OTP. Mức rủi ro do một bộ luật viết sẵn tính ra, nên cùng một tin luôn cho cùng một kết luận, và đổi ngôn ngữ không làm đổi kết luận.',
@@ -213,15 +186,7 @@ const CHU = {
     nutAndroid: 'Install the Android app for them',
     ghiNho: 'Free · No ads · Vietnamese and English',
 
-    mayNhan: 'Illustration of the Talk to me screen',
-    mayTieuDe: 'Talk to me',
-    aiBac: 'Parent says:',
-    loiBac: 'The bank says transfer money or the account gets locked.',
-    aiChau: 'Khoan Đã replies:',
-    loiDap1: 'Hold off on that transfer.',
-    loiDap2: 'Did the bank call you, or send a message?',
-    mayNut: 'Check this now',
-    chuThichMay: 'The first sentence is added by the fixed rules the moment they see a signal. The second is the AI conversation, different every time.',
+    capTroLy: 'The real Talk to me screen. The parent said: “Someone from the bank asked me to read out the OTP code they just sent.” The first sentence is added by the fixed rules the moment they see a signal; the rest is the AI conversation, different every time.',
 
     vdTieuDe: 'A person being scammed will not open an app on their own',
     vdDoan1: 'Phone scams win with two things: urgency and isolation. “Do it now.” “Don’t tell anyone.” Someone under that pressure does not go looking for an app to ask.',
@@ -240,12 +205,7 @@ const CHU = {
     truoc4: 'Anyone calling as a relative who cannot say the password gets a pause. The app stores only the hint, never the password.',
     truoc5T: 'Five short lessons',
     truoc5: 'The common scam patterns, each with a quiz.',
-    toQuyTac: 'Our family rules',
-    quyTac1: 'We never read out an OTP code over the phone.',
-    quyTac2: 'If anyone demands an urgent transfer, call your child first.',
-    viDuQuyTac: 'Example. Each family writes its own.',
-    maNoiMay: 'Linking code',
-    viDuMa: 'Example',
+    capQuyTac: 'The real family rules screen, after setting one rule together with a child.',
 
     trongTen: 'During',
     trongTieuDe: 'the call: Khoan Đã holds them back',
@@ -254,7 +214,7 @@ const CHU = {
     trong2T: 'Someone calling you?',
     trong2: 'One question, “What are you being asked to do?”, then a few yes-or-no answers. The rules decide; no typing needed.',
     trong3T: 'Emergency: Pause for 60 Seconds',
-    trong3: 'A countdown, three things not to do, a button to call you and one for 113. “I am fine, nothing dangerous here” is always there as a way out.',
+    trong3: 'One tap from the main screen: a 60-second countdown, buttons to call you and the police, and a ready-made line: “Let me ask my family and call you back.” There is always a way back to the home screen.',
     trong4T: 'Alert you',
     trong4: 'If your parents switched on “alert my family”, you get an alert in Chrome. If nobody responds within 60 seconds, it alerts again.',
     trong5T: 'Warn when a code arrives or money leaves',
@@ -264,32 +224,18 @@ const CHU = {
     trong7T: 'Long-call reminder',
     trong7: 'After 25 minutes, if switched on.',
     chiAndroid: 'Android app',
-    manDungNhan: 'Illustration of the Emergency screen',
-    giay: 'sec',
-    dungTieuDe: 'Let us pause for 60 seconds',
-    dung1: 'Hang up the call',
-    dung2: 'Do not transfer money',
-    dung3: 'Do not share the OTP code',
-    dungGoiCon: 'Call family now',
-    dungGoi113: 'Call police 113',
-    dungToiOn: 'I am fine, nothing dangerous here',
+    capKhanCap: 'The real Emergency screen, one tap from the main screen.',
 
     sauTen: 'After',
     sauTieuDe: 'money has gone: they are not left alone',
     sau1T: 'What to do right now',
-    sau1: 'Tapping “I already sent money or read out a code” opens the steps that improve the chance of resolving it, with hotline numbers for 11 reviewed banks and their sources.',
+    sau1: 'Tapping “I already sent money or read out a code” first says: hang up, do not transfer, do not share the OTP. After calling the bank come the steps that improve the chance of resolving it, hotline numbers for 11 reviewed banks, and an incident file.',
     sau2T: '72-Hour Recovery Watch',
     sau2: 'Scammers often come back a second time, as in “pay a fee to get your money back”. The app reminds at 2, 24, 48 and 72 hours. The Android app reminds even when closed.',
     sau3T: 'Case memory for 14 days',
     sau3: 'When a new message looks like an earlier one, the app asks whether it is the same person. This memory stays on the phone.',
-    sauManNhan: 'Illustration of the screen after tapping “I already sent money or read out a code”',
-    sauTheoDoi: 'Watching the 72 hours after the incident',
-    sauKhung: 'These steps increase the chance of a resolution — no one can promise your money back',
-    sauBuoc: [
-      'Stop all contact with them — do not answer calls or reply to messages',
-      'Do not send any more money, no matter what reason they give',
-      'Call your bank now using the number printed on your card — not a number they sent you',
-    ],
+    capPhucHoi: 'The real screen after tapping “I already sent money or read out a code”, then “See what to do next”.',
+    duLieuMau: 'Captured from the real app. Sample data: a family member named Lan.',
 
     qdTieuDe: 'AI only extracts signals. Fixed rules decide the risk level.',
     qdDoan: 'The AI reads the message and marks what it sees, such as someone impersonating an agency or demanding a transfer or an OTP code. A pre-written rulebook computes the risk level, so the same message always gets the same result, and switching language cannot change it.',
@@ -466,28 +412,13 @@ a{color:var(--muc-dam);text-underline-offset:3px}
 .hang-nut{display:flex;flex-wrap:wrap;gap:14px;margin-top:32px}
 .ghi-nho{margin-top:18px;color:var(--muc-phu);font-size:.9rem}
 
-/* điện thoại minh hoạ */
-.dien-thoai{margin:0;justify-self:center;width:min(100%,360px)}
-.may{position:relative;border-radius:44px;border:10px solid var(--muc);background:radial-gradient(circle at 50% 22%,rgba(196,181,253,.6),transparent 46%),var(--tim-nen);padding:26px 18px 28px;box-shadow:var(--bong);display:flex;flex-direction:column;gap:14px;min-height:540px;pointer-events:none;color:var(--muc)}
-.may-toi{border-color:var(--tim-1);box-shadow:0 30px 60px -24px rgba(0,0,0,.55)}
-.may-toi::before{background:var(--tim-1)}
-.may-sau{min-height:0}
-.hoi-trong .chu-thich{color:var(--dem-phu)}
-.may::before{content:"";position:absolute;top:8px;left:50%;width:84px;height:8px;border-radius:99px;background:var(--muc);transform:translateX(-50%);opacity:.9}
-.may-tieu-de{text-align:center;font-weight:700;color:var(--muc-dam);margin-top:6px}
-.qua-cau{width:112px;height:112px;margin:6px auto 4px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff 0,#e9dcff 18%,var(--tim-2) 52%,var(--tim) 100%);box-shadow:0 20px 40px -16px rgba(109,40,217,.6),inset 0 -8px 18px rgba(46,16,101,.25)}
-.bong{padding:14px 16px;border-radius:22px;font-size:.95rem;line-height:1.5}
-.bong-bac{align-self:flex-end;max-width:86%;background:var(--muc-dam);color:#fff;border-bottom-right-radius:8px}
-.bong-chau{align-self:flex-start;max-width:92%;background:var(--giay);border:1px solid var(--tim-vien);border-bottom-left-radius:8px}
-.bong-chau strong{display:block;color:var(--muc-dam)}
-.may-nut{display:flex;align-items:center;justify-content:center;gap:8px;min-height:var(--cham-chinh);border-radius:999px;background:var(--vang);color:var(--muc);font-weight:700;margin-top:auto}
+/* màn THẬT của app (scripts/chup-man-that.mjs), nhúng tĩnh trong vỏ máy — không vẽ tay */
+.dien-thoai{margin:0;justify-self:center;--ti:.78;width:calc(390px * var(--ti) + 20px)}
+@media (max-width:420px){.dien-thoai{--ti:.72}}
+.vo-may{position:relative;overflow:hidden;border-radius:46px;border:10px solid var(--muc);background:#f8f4ff;box-shadow:var(--bong);width:calc(390px * var(--ti) + 20px);height:calc(844px * var(--ti) + 20px)}
+.man-that{display:block;width:390px;height:844px;border:0;transform:scale(var(--ti));transform-origin:0 0;pointer-events:none}
 .chu-thich{margin-top:14px;font-size:.85rem;color:var(--muc-phu);text-align:center}
-@media (prefers-reduced-motion:no-preference){
-  .bong-bac{animation:hien .6s var(--ra) .25s both}
-  .bong-chau{animation:hien .6s var(--ra) 1.35s both}
-  .may-nut{animation:hien .5s var(--ra) 2.05s both}
-}
-@keyframes hien{from{opacity:0;transform:translateY(14px) scale(.97);filter:blur(4px)}to{opacity:1;transform:none;filter:none}}
+.chu-thich span{display:block;margin-top:4px}
 
 /* vấn đề */
 .van-de{padding:72px 0;background:var(--giay);border-block:1px solid var(--tim-vien)}
@@ -510,44 +441,14 @@ a{color:var(--muc-dam);text-underline-offset:3px}
 .viec p{color:var(--muc-phu);margin-top:4px;max-width:58ch}
 .the-android{display:inline-flex;align-items:center;min-height:30px;padding:2px 12px;border-radius:999px;font-size:.85rem;font-weight:700;background:var(--tim-nhat);color:var(--muc-dam)}
 
-/* hồi Trước: tờ quy tắc */
-.to-quy-tac{background:var(--giay);border-radius:var(--bo);padding:26px 24px 22px;box-shadow:var(--bong);border:1px solid var(--tim-vien);max-width:420px;justify-self:center;width:100%}
-.to-quy-tac h3{font-size:1.2rem;color:var(--muc-dam)}
-.to-quy-tac ul{list-style:none;padding:0;margin:16px 0 0;display:grid;gap:12px}
-.to-quy-tac li{display:flex;gap:10px;align-items:flex-start;font-size:1.02rem}
-.to-quy-tac li .bt{color:var(--tim);margin-top:3px}
-.vi-du{margin-top:16px;font-size:.85rem;color:var(--muc-phu)}
-.ma-noi{margin-top:22px;padding-top:18px;border-top:1px dashed var(--tim-vien)}
-.ma-noi p{font-size:.9rem;color:var(--muc-phu)}
-.o-ma{display:flex;gap:8px;margin-top:8px}
-.o-ma span{display:grid;place-items:center;width:42px;height:52px;border-radius:12px;background:var(--giay);border:2px solid var(--tim-vien);font-weight:700;font-size:1.3rem;color:var(--muc-dam)}
-
 /* hồi Trong: dải tím đậm */
 .hoi-trong{background:var(--muc-dam);color:var(--dem-chu);background-image:linear-gradient(to right,rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(to bottom,rgba(255,255,255,.05) 1px,transparent 1px);background-size:26px 26px}
 .hoi-trong h2,.hoi-trong h3{color:#fff}
 .hoi-trong .ten-hoi{color:var(--tim-2)}
 .hoi-trong .viec p{color:var(--dem-phu)}
 .hoi-trong .the-android{background:rgba(255,255,255,.14);color:#fff}
-.man-dung{text-align:center;gap:10px;padding-top:34px}
-.vong{width:176px;height:176px;margin:0 auto;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--vang) 0 100%);position:relative;box-shadow:0 16px 34px -16px rgba(180,83,9,.55)}
-.vong::after{content:"";position:absolute;inset:14px;border-radius:50%;background:var(--tim-nen)}
-.vong span{position:relative;z-index:1;font-weight:700;font-size:3rem;line-height:1.1;color:var(--muc-dam)}
-.vong small{display:block;font-size:.85rem;line-height:1.3;color:var(--muc-phu);margin-top:4px}
-.man-dung h3{font-size:1.25rem;color:var(--muc-dam);margin-top:18px}
-.ba-viec{list-style:none;padding:0;margin:16px 0 18px;display:grid;gap:8px;text-align:left}
-.ba-viec li{display:flex;align-items:center;gap:10px;background:var(--giay);border:1px solid var(--tim-vien);border-radius:16px;padding:10px 14px;font-weight:700}
-.ba-viec .bt{color:var(--do-chu)}
-.gia-nut{display:flex;align-items:center;justify-content:center;min-height:var(--cham-chinh);border-radius:999px;font-weight:700;margin-top:10px;padding:10px 18px}
-.gia-xanh{background:var(--xanh);color:#fff}
-.gia-vang{background:var(--vang);color:var(--muc)}
-.toi-on{display:block;margin-top:14px;color:var(--muc-phu);text-decoration:underline;text-underline-offset:3px;min-height:var(--cham);line-height:var(--cham)}
-
-/* hồi Sau: màn phục hồi trong khung điện thoại */
-.the-theo-doi{align-self:center;margin-top:10px;padding:8px 16px;border-radius:999px;background:var(--muc-dam);color:#fff;font-weight:700;font-size:.9rem;text-align:center}
-.may-khung{font-weight:700;color:var(--muc-dam);line-height:1.45}
-.buoc-may{list-style:none;counter-reset:m;padding:0;margin:0;display:grid;gap:10px}
-.buoc-may li{counter-increment:m;display:grid;grid-template-columns:32px 1fr;gap:10px;align-items:start;background:var(--giay);border:1px solid var(--tim-vien);border-radius:16px;padding:12px;font-size:.95rem;line-height:1.45}
-.buoc-may li::before{content:counter(m);display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:var(--tim-nhat);color:var(--muc-dam);font-weight:700}
+.hoi-trong .chu-thich{color:var(--dem-phu)}
+.hoi-trong .vo-may{border-color:var(--tim-1);box-shadow:0 30px 60px -24px rgba(0,0,0,.6)}
 
 /* cách quyết định */
 .quyet{padding:88px 0;background:var(--giay);border-block:1px solid var(--tim-vien)}
@@ -647,6 +548,12 @@ function dungTrangGioiThieu(ngonNgu = 'vi', { apk = null } = {}) {
   const viec = (ds) => ds.map(([k, android]) => `
         <li><h3>${t(`${k}T`)}${android ? ` <span class="the-android">${t('chiAndroid')}</span>` : ''}</h3><p>${t(k)}</p></li>`).join('');
 
+  /** Màn thật chụp sẵn: iframe tĩnh (CSP cấm script ở /man-that), chữ mô tả nằm ở figcaption. */
+  const manThat = (ten, khoaChu, tai = 'lazy') => `<figure class="dien-thoai hinh">
+          <div class="vo-may"><iframe class="man-that" src="/man-that/${ten}.${l}.html" title="${t(khoaChu)}" width="390" height="844" loading="${tai}" tabindex="-1" aria-hidden="true" sandbox="allow-same-origin"></iframe></div>
+          <figcaption class="chu-thich">${t(khoaChu)}<span>${t('duLieuMau')}</span></figcaption>
+        </figure>`;
+
   const hangSoSanh = c.ssHang.map(([ten, web, adr]) => {
     const o = (co) => `<td class="o${co ? '' : ' khong'}">${co ? BT.co : BT.khong}<span class="an">${esc(co ? c.ssCo : c.ssKhong)}</span></td>`;
     return `<tr><th scope="row">${esc(ten)}</th>${o(web)}${o(adr)}</tr>`;
@@ -724,16 +631,7 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
         </div>
         <p class="ghi-nho">${t('ghiNho')}</p>
       </div>
-      <figure class="dien-thoai">
-        <div class="may" role="group" aria-label="${t('mayNhan')}">
-          <p class="may-tieu-de">${t('mayTieuDe')}</p>
-          <div class="qua-cau" aria-hidden="true"></div>
-          <p class="bong bong-bac"><span class="an">${t('aiBac')} </span>${t('loiBac')}</p>
-          <p class="bong bong-chau"><span class="an">${t('aiChau')} </span><strong>${t('loiDap1')}</strong>${t('loiDap2')}</p>
-          <span class="may-nut">${t('mayNut')}</span>
-        </div>
-        <figcaption class="chu-thich">${t('chuThichMay')}</figcaption>
-      </figure>
+        ${manThat('tro-ly', 'capTroLy', 'eager')}
     </div>
   </section>
 
@@ -753,18 +651,7 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
           <ul class="viec">${viec([['truoc1'], ['truoc2'], ['truoc3'], ['truoc4'], ['truoc5']])}
           </ul>
         </div>
-        <aside class="to-quy-tac hinh" aria-label="${t('toQuyTac')}">
-          <h3>${t('toQuyTac')}</h3>
-          <ul>
-            <li>${BT.co}<span>${t('quyTac1')}</span></li>
-            <li>${BT.co}<span>${t('quyTac2')}</span></li>
-          </ul>
-          <p class="vi-du">${t('viDuQuyTac')}</p>
-          <div class="ma-noi">
-            <p>${t('maNoiMay')} · ${t('viDuMa')}</p>
-            <div class="o-ma" aria-hidden="true"><span>4</span><span>8</span><span>2</span><span>1</span><span>9</span><span>6</span></div>
-          </div>
-        </aside>
+        ${manThat('quy-tac', 'capQuyTac')}
       </div>
     </div>
   </section>
@@ -777,21 +664,7 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
           <ul class="viec">${viec([['trong1'], ['trong2'], ['trong3'], ['trong4'], ['trong5', true], ['trong6', true], ['trong7', true]])}
           </ul>
         </div>
-        <figure class="dien-thoai hinh">
-          <div class="may may-toi man-dung">
-            <div class="vong" aria-hidden="true"><span>60<small>${t('giay')}</small></span></div>
-            <p class="may-tieu-de">${t('dungTieuDe')}</p>
-            <ul class="ba-viec">
-              <li>${BT.cam}<span>${t('dung1')}</span></li>
-              <li>${BT.cam}<span>${t('dung2')}</span></li>
-              <li>${BT.cam}<span>${t('dung3')}</span></li>
-            </ul>
-            <span class="gia-nut gia-xanh">${t('dungGoiCon')}</span>
-            <span class="gia-nut gia-vang">${t('dungGoi113')}</span>
-            <span class="toi-on">${t('dungToiOn')}</span>
-          </div>
-          <figcaption class="chu-thich">${t('manDungNhan')}</figcaption>
-        </figure>
+        ${manThat('khan-cap', 'capKhanCap')}
       </div>
     </div>
   </section>
@@ -802,14 +675,7 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
       <div class="hoi-luoi">
         <ul class="viec">${viec([['sau1'], ['sau2'], ['sau3']])}
         </ul>
-        <figure class="dien-thoai hinh">
-          <div class="may may-sau">
-            <p class="the-theo-doi">${t('sauTheoDoi')}</p>
-            <p class="may-khung">${t('sauKhung')}</p>
-            <ol class="buoc-may">${c.sauBuoc.map((b) => `<li><span>${esc(b)}</span></li>`).join('')}</ol>
-          </div>
-          <figcaption class="chu-thich">${t('sauManNhan')}</figcaption>
-        </figure>
+        ${manThat('phuc-hoi', 'capPhucHoi')}
       </div>
     </div>
   </section>

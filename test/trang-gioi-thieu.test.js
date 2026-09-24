@@ -116,6 +116,47 @@ test('phông chữ nạp từ chính web, không gọi Google Fonts', () => {
   }
 });
 
+// ─── Màn THẬT của app (scripts/chup-man-that.mjs), không vẽ tay — người dùng đòi giống 100% ───
+const MAN = ['tro-ly', 'quy-tac', 'khan-cap', 'phuc-hoi'];
+const THU_MUC_MAN = path.join(__dirname, '..', 'backend', 'src', 'man-that');
+const CHU_MAN = {
+  vi: { 'tro-ly': 'Bác khoan', 'quy-tac': 'Quy tắc nhà mình', 'khan-cap': 'Để tôi hỏi con rồi gọi lại', 'phuc-hoi': 'Giờ vàng' },
+  en: { 'tro-ly': 'Please hold off', 'quy-tac': 'Your family rule', 'khan-cap': 'Let me ask my family', 'phuc-hoi': 'Golden window' },
+};
+
+test('trang nhúng đủ bốn màn thật, đúng ngôn ngữ, không cho chạy script', () => {
+  for (const [lang, html] of [['vi', vi], ['en', en]]) {
+    for (const m of MAN) {
+      const khung = html.match(new RegExp(`<iframe[^>]*src="/man-that/${m}\\.${lang}\\.html"[^>]*>`));
+      assert.ok(khung, `${lang}: thiếu màn ${m}`);
+      assert.match(khung[0], /sandbox="allow-same-origin"/, 'sandbox không có allow-scripts');
+      assert.match(khung[0], /aria-hidden="true"/);
+    }
+  }
+});
+
+test('tệp màn thật: đủ 8 tệp, đúng trạng thái đã chụp, không script, không link bấm được', () => {
+  for (const lang of ['vi', 'en']) {
+    for (const m of MAN) {
+      const h = fs.readFileSync(path.join(THU_MUC_MAN, `${m}.${lang}.html`), 'utf8');
+      assert.doesNotMatch(h, /<script/i, `${m}.${lang}: có script`);
+      assert.strictEqual((h.match(/\shref=/g) || []).length, 1, `${m}.${lang}: chỉ được có link tới app.css`);
+      assert.ok(h.includes(CHU_MAN[lang][m]), `${m}.${lang}: không thấy "${CHU_MAN[lang][m]}" — chụp sai màn?`);
+      assert.doesNotMatch(h, /__ejoy|id="__/, `${m}.${lang}: còn thẻ của tiện ích trình duyệt`);
+    }
+  }
+});
+
+test('CSS của màn thật chỉ trỏ tới phông tự phục vụ còn tồn tại', () => {
+  const css = fs.readFileSync(path.join(THU_MUC_MAN, 'app.css'), 'utf8');
+  assert.doesNotMatch(css, /fonts\.googleapis|fonts\.gstatic/);
+  for (const m of css.matchAll(/url\((["']?)([^)"']+)\1\)/g)) {
+    const u = m[2];
+    if (u.startsWith('data:') || u.startsWith('#')) continue;
+    assert.ok(u.startsWith('/phong-chu/') && fs.existsSync(path.join(__dirname, '..', 'public', u)), `url chết: ${u}`);
+  }
+});
+
 test('trang giới thiệu không đòi đăng nhập, và máy chủ có route', () => {
   assert.strictEqual(canDangNhap('/gioi-thieu'), false);
   const sv = fs.readFileSync(path.join(__dirname, '..', 'backend', 'server.js'), 'utf8');

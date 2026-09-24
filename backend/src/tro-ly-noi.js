@@ -66,6 +66,20 @@ const CHI_THI = [
 ].join('\n');
 
 /**
+ * Giao diện tiếng Anh (24/9/2026). Trước đó `lang` không bao giờ tới model, nên
+ * người dùng bản tiếng Anh nhận lời đáp tiếng Việt — phát hiện khi chụp màn thật
+ * cho trang giới thiệu. Hàng rào `CAU_CAM` có thêm mẫu tiếng Anh cùng lúc: đổi
+ * ngôn ngữ đầu ra mà không đổi hàng rào là mở một cửa không ai canh.
+ */
+const CHI_THI_TIENG_ANH = [
+  'NGÔN NGỮ: người dùng đang dùng giao diện TIẾNG ANH.',
+  'Viết "loiDap" bằng tiếng Anh đơn giản, câu ngắn, gọi họ là "you", xưng "I".',
+  'Bỏ qua dòng "không tiếng Anh" ở trên; MỌI điều cấm khác giữ nguyên.',
+  'Không dùng các chữ "safe", "don\'t worry", "not a scam", không hứa lấy lại tiền.',
+  '"canKiem" vẫn chép nguyên văn lời người dùng, không dịch.',
+].join('\n');
+
+/**
  * ═════ HÀNG RÀO CUỐI — ĐỌC ĐẦU RA, KHÔNG TIN LỜI NHẮC ═════
  *
  * Lời nhắc là lời đề nghị, không phải ràng buộc. §11 liệt kê những câu KHÔNG
@@ -94,7 +108,10 @@ const CAU_CAM = [
    */
   { re: /(b\u00e1c|anh|ch\u1ecb|c\u00f4|ch\u00fa|m\u1eb9|b\u1ed1)\s*(c\u1ee9|h\u00e3y|n\u00ean|th\u1eed)\s*(chuy\u1ec3n|\u0111\u1ecdc|cung c\u1ea5p|b\u1ea5m|c\u00e0i|nh\u1eadp|g\u1eedi)/i, ma: 'XUI_LAM_VIEC_NGUY_HIEM' },
   { re: /(h\u00e3y|c\u1ee9)\s*(\u0111\u1ecdc|cung c\u1ea5p|nh\u1eadn)\s*(m\u00e3|otp)/i, ma: 'XUI_LAM_VIEC_NGUY_HIEM' },
-  { re: /\bsafe\b|\bdon'?t worry\b/i, ma: 'TRAN_AN' },
+  { re: /\bsafe\b|\bdon'?t worry\b|\bnot a scam\b|\bnothing to worry about\b/i, ma: 'TRAN_AN' },
+  // Tiếng Anh (24/9/2026) — cùng hai ý với mẫu tiếng Việt ở trên: hứa tiền, và XUI (không phải CAN).
+  { re: /\b(will|can|you'?ll|we'?ll)\s+(get|recover)\s+(your|the)\s+money\s+back\b|\brefund(ed)?\s+you\b/i, ma: 'HUA_LAY_LAI_TIEN' },
+  { re: /\b(go ahead and|just|please)\s+(transfer|send|read out|share|give|install|click|tap|enter)\b/i, ma: 'XUI_LAM_VIEC_NGUY_HIEM' },
 ];
 
 /** @returns {string|null} mã câu cấm đầu tiên bắt được, null nếu sạch. */
@@ -228,7 +245,7 @@ async function traLoiTroLy({
     }));
 
   const messages = [
-    { role: 'system', content: CHI_THI },
+    { role: 'system', content: lang === 'en' ? `${CHI_THI}\n\n${CHI_THI_TIENG_ANH}` : CHI_THI },
     ...mach,
     { role: 'user', content: `<loi_bac_noi>\n${cau}\n</loi_bac_noi>` },
   ];

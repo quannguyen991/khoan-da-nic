@@ -1822,6 +1822,24 @@ if (fs.existsSync(DUONG_APK) && process.env.KHOAN_DA_KHONG_PHAT_APK !== '1') {
  * /gioi-thieu — trang giới thiệu cho con cháu, dựng ở máy chủ, không cần JS
  * (cùng kiểu /transparency). `/` vẫn là app — đổi route chính là §12.
  */
+/**
+ * /man-that/* — DOM chụp từ màn THẬT của app (scripts/chup-man-that.mjs), nhúng
+ * vào /gioi-thieu bằng <iframe>. Chỉ phục vụ đúng các tệp trong danh sách, và cấm
+ * script bằng CSP: đây là ảnh tĩnh làm bằng HTML, không phải một bản app chạy được.
+ */
+const THU_MUC_MAN_THAT = path.join(__dirname, 'src', 'man-that');
+const TEP_MAN_THAT = /^(?:(?:tro-ly|quy-tac|khan-cap|phuc-hoi)\.(?:vi|en)\.html|app\.css)$/;
+app.get('/man-that/:ten', (req, res) => {
+  const ten = String(req.params.ten || '');
+  const duong = path.join(THU_MUC_MAN_THAT, ten);
+  if (!TEP_MAN_THAT.test(ten) || !fs.existsSync(duong)) return res.status(404).end();
+  res.setHeader('content-type', ten.endsWith('.css') ? 'text/css; charset=utf-8' : 'text/html; charset=utf-8');
+  res.setHeader('content-security-policy', "script-src 'none'; object-src 'none'; base-uri 'none'");
+  res.setHeader('x-robots-tag', 'noindex');
+  res.setHeader('cache-control', 'public, max-age=3600');
+  res.sendFile(duong);
+});
+
 app.get(['/gioi-thieu', '/gioi-thieu/'], (req, res) => {
   const ngonNgu = String(req.query.lang || '').toLowerCase() === 'en' ? 'en' : 'vi';
   const coApk = fs.existsSync(DUONG_APK) && process.env.KHOAN_DA_KHONG_PHAT_APK !== '1';

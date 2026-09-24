@@ -97,6 +97,30 @@ test('không có kiemLuat (gọi kiểu cũ) ⇒ hành vi cũ, không lưới an
   assert.strictEqual(kq.canKiem, null);
 });
 
+test('giao diện tiếng Anh ⇒ model được dặn trả lời tiếng Anh (trước 24/9 `lang` không tới model)', async () => {
+  let thuEn = null; let thuVi = null;
+  await traLoiTroLy({ loiNoi: 'hello', lang: 'en', goiChatFn: async (m) => { thuEn = m; return JSON.stringify({ loiDap: 'Tell me more.', canKiem: null }); } });
+  await traLoiTroLy({ loiNoi: 'chào', lang: 'vi', goiChatFn: async (m) => { thuVi = m; return JSON.stringify({ loiDap: 'Dạ.', canKiem: null }); } });
+  assert.match(thuEn[0].content, /TIẾNG ANH/);
+  assert.doesNotMatch(thuVi[0].content, /TIẾNG ANH/);
+});
+
+test('hàng rào §11 bằng tiếng Anh: cắt lời hứa và lời xúi, KHÔNG cắt lời can', () => {
+  assert.strictEqual(catCauCam('You will get your money back soon.'), 'HUA_LAY_LAI_TIEN');
+  assert.strictEqual(catCauCam('Just send the money and it will be fine.'), 'XUI_LAM_VIEC_NGUY_HIEM');
+  assert.strictEqual(catCauCam('Go ahead and read out the code.'), 'XUI_LAM_VIEC_NGUY_HIEM');
+  assert.strictEqual(catCauCam('This is not a scam.'), 'TRAN_AN');
+  assert.strictEqual(catCauCam('Please do not send any money. Who called you?'), null);
+  assert.strictEqual(catCauCam('No one can promise your money back. Call your bank now.'), null);
+});
+
+test('mọi câu cố định tiếng Anh của trợ lý tự qua được hàng rào', async () => {
+  for (const loiNoi of ['Someone asked me to read out the OTP code they just sent.', 'hello']) {
+    const kq = await hoi({ loiNoi, lang: 'en', goiChatFn: aiHong });
+    assert.strictEqual(catCauCam(kq.loiDap), null, kq.loiDap);
+  }
+});
+
 test('máy chủ trao bộ luật cho trợ lý — và route vẫn không trả nhãn', () => {
   const sv = require('node:fs').readFileSync(require('node:path').join(__dirname, '..', 'backend', 'server.js'), 'utf8');
   assert.match(sv, /traLoiTroLy\(\{ loiNoi, lichSu, lang, kiemLuat: kiemLuatChoTroLy \}\)/);
