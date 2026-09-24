@@ -14,7 +14,7 @@
 module.exports = {
   locale: 'en-US',
   language: 'en',
-  localePackVersion: 'en-US@1.0.0',
+  localePackVersion: 'en-US@1.1.0',   // 1.1.0 (25/9/2026): WEB_QR_TO_LOGIN_PAYMENT
   supportedCountryProfiles: ['US', 'GB', 'AU', 'SG', 'GLOBAL'],
 
   // { SIGNAL_ID: [ { pattern, scope } ] } — pattern là nguồn regex, khớp trên
@@ -369,6 +369,13 @@ module.exports = {
       { pattern: '\\b(please )?hold\\b', scope: 'any' },
       { pattern: '\\bstay on the (line|phone|call)\\b', scope: 'any' },
       { pattern: '\\bdo not hang up\\b', scope: 'any' },
+    ],
+    /**
+     * 25/9/2026 — mirror of the Vietnamese QR pattern (§6.10 parity): a QR code that
+     * leads to logging in, paying, or "claiming" money. On its own only 8 points.
+     */
+    WEB_QR_TO_LOGIN_PAYMENT: [
+      { pattern: '\\bscan\\b[^.]{0,24}\\b(qr|code)\\b[^.]{0,30}\\b(to|and|then)\\s+(log ?in|sign in|pay|confirm|verify|claim|receive|get)\\b', scope: 'action' },
     ],
     OFF_INVESTMENT_GUARANTEE: [
       { pattern: '\\bpre.?ipo\\b', scope: 'any' },

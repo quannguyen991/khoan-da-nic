@@ -15,7 +15,12 @@ module.exports = {
                                //   FIN_ACCOUNT_OPENING_FOR_OTHERS, CRED_ID_BIOMETRIC_DOCS,
                                //   DEV_SIM_SWAP_ESIM (người dùng duyệt)
                                // 1.2.0 (24/9/2026): 64 — thêm MAN_HEALTH_MIRACLE_CLAIM
-  RULE_VERSION: '1.6.0',       // cap nhóm + 26 cộng hưởng + 1 suy ra + 20/45/69, Phụ lục B
+  RULE_VERSION: '1.6.1',       // cap nhóm + 26 cộng hưởng + 1 suy ra + 20/45/69, Phụ lục B
+                               // 1.6.1 (25/9/2026): mẫu cố định cho tín hiệu AI "lúc có lúc
+                               //   không" (so 3 lượt AI, temperature 0 vẫn dao động): thanh
+                               //   toán vào TK/link/số tiền, bổ sung vốn, tiền mặt, đăng nhập
+                               //   qua [link], cập nhật số thẻ, đọc code, doạ khoá, lãi theo
+                               //   tháng, QR → đăng nhập/nhận tiền. vi-VN@1.2.0, en-US@1.1.0.
                                // 1.6.0 (25/9/2026): CO-01 mở rộng — đòi ĐƯA mã/PIN/thẻ
                                //   cho người khác tự nó là chốt chặn (vẫn 10 chốt chặn);
                                //   4 tổ hợp injection+action, qr+pressure, credential+offer,

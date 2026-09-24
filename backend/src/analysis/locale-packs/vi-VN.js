@@ -18,21 +18,22 @@
 module.exports = {
   locale: 'vi-VN',
   language: 'vi',
-  localePackVersion: 'vi-VN@1.1.0',
+  localePackVersion: 'vi-VN@1.2.0',   // 1.2.0 (25/9/2026): mẫu cố định cho tín hiệu AI hay bỏ
   supportedCountryProfiles: ['VN', 'GLOBAL'],
 
   directPatterns: {
     CRED_OTP_SHARE: [
       // 25/9/2026: "(?<!thông |cảnh )báo" — "THÔNG BÁO mã OTP của quý khách là…" là
       // tin của ngân hàng, không phải lời đòi. Lời đòi thật vẫn có "đọc/gửi/cho cháu".
-      { pattern: '(đọc|gửi|cung cấp|cho|nhắn|(?<!thông |cảnh )báo)\\b[^.]{0,30}\\b(mã otp|mã xác thực|mã xác minh|otp|mã vừa (gửi|nhận)|mã bảo mật)', scope: 'action' },
+      // 25/9/2026: + "mã xác nhận" — "Đăng nhập xong gửi mã xác nhận để hệ thống ghi nhận".
+      { pattern: '(đọc|gửi|cung cấp|cho|nhắn|(?<!thông |cảnh )báo)\\b[^.]{0,30}\\b(mã otp|mã xác thực|mã xác minh|mã xác nhận|otp|mã vừa (gửi|nhận)|mã bảo mật)', scope: 'action' },
       { pattern: '\\b(mã otp|otp)\\b[^.]{0,24}(cho (tôi|em|anh|chị|cháu|mình|con)|vừa (gửi|nhận))', scope: 'action' },
       /*
        * 25/9/2026 — "bác đọc MÃ cho cháu", "đọc mã đó", "đọc cho cháu mấy số": kẻ gian
        * không cần nói "OTP". Đo trên bộ luật 1.5.0: cả ba câu ra CHUA_THAY khi không
        * có AI. Loại "mã QR / mã vạch / mã giảm giá / mã đơn" — đọc những mã đó là việc thường.
        */
-      { pattern: '(đọc|nhắn|chụp|(?<!thông |cảnh )báo)\\s+((lại|giúp|nhanh|ngay|luôn)\\s+)*(cái\\s+)?mã(?![a-zà-ỹ])(?!\\s*(qr|vạch|giảm giá|khuyến mãi|đơn|vận đơn|bưu))', scope: 'action' },
+      { pattern: '(đọc|nhắn|chụp|(?<!thông |cảnh )báo)\\s+((lại|giúp|nhanh|ngay|luôn)\\s+)*(cái\\s+)?(mã|code)(?![a-zà-ỹ])(?!\\s*(qr|vạch|giảm giá|khuyến mãi|đơn|vận đơn|bưu))', scope: 'action' },
       { pattern: '(đọc|nhắn|gửi|(?<!thông |cảnh )báo)\\s+((lại|giúp|nhanh|ngay|luôn)\\s+)*cho\\s+(tôi|em|cháu|mình|anh|chị|con)\\s+((cái|dãy|mấy)\\s+)?(mã|code|số)(?![a-zà-ỹ])', scope: 'action' },
       /*
        * 24/9/2026 — "ma xac nhan vua gui do co, doc e 6 so ngay nha" (câu thật trong
@@ -64,7 +65,11 @@ module.exports = {
        * đứng TRƯỚC chữ "không", nên hàng rào phủ định (chỉ nhìn trước chỗ khớp)
        * không thấy, và câu cảnh báo ra NGHI_NGO.
        */
-      { pattern: '(cung cấp|đọc|gửi|nhập|điền|chụp)(?:(?!không|đừng|chớ|chẳng)[^.]){0,24}(thông tin thẻ|số thẻ|mã cvv|cvv|cvc|mã bảo mật (của )?thẻ|ba số (ở |mặt )?sau|ngày hết hạn (của )?thẻ|mặt sau (của )?thẻ)', scope: 'action' },
+      // 25/9/2026: + "cập nhật / xác nhận / xác minh" — "Vui lòng CẬP NHẬT số thẻ, ngày
+      // hết hạn và ba số ở mặt sau". Ngân hàng không bao giờ đòi cập nhật số thẻ qua tin nhắn.
+      // ⚠️ `(?![a-zà-ỹ])` ở cuối: được phép THIẾU dấu thanh nên "thẻ" khớp cả "the", và
+      // "cung cấp thông tin THEo mẫu" từng thành CRED_CARD_SECRET. Đo được 25/9/2026.
+      { pattern: '(cung cấp|đọc|gửi|nhập|điền|chụp|cập nhật|xác nhận|xác minh)(?:(?!không|đừng|chớ|chẳng)[^.]){0,24}(thông tin thẻ|số thẻ|mã cvv|cvv|cvc|mã bảo mật (của )?thẻ|ba số (ở |mặt )?sau|ngày hết hạn (của )?thẻ|mặt sau (của )?thẻ)(?![a-zà-ỹ])', scope: 'action' },
     ],
     /**
      * Đòi ảnh căn cước / chân dung / video khuôn mặt — xem `signal-registry.js`.
@@ -92,6 +97,15 @@ module.exports = {
       // 24/9/2026 — "cung cấp thông tin đăng nhập", "đăng nhập theo đường dẫn để hoàn tất".
       { pattern: '(cung cấp|gửi|đọc|báo)[^.]{0,20}(thông tin|tên)\\s*đăng nhập', scope: 'action' },
       { pattern: 'đăng nhập[^.]{0,20}(theo|qua|tại|vào)\\s*(đường dẫn|đường link|link)', scope: 'action' },
+      /*
+       * 25/9/2026 — liên kết trong tin thật hay bị che thành "[đường dẫn]" (mẫu trên
+       * không cho dấu "["), "Mở [link rút gọn] để đăng nhập", "nhấn vào link này
+       * nhập thông tin ngân hàng để hoàn tiền". Ngân hàng Việt Nam không gửi liên
+       * kết đăng nhập qua tin nhắn.
+       */
+      { pattern: 'đăng nhập[^.]{0,20}(theo|qua|tại|vào)\\s*\\[\\s*(đường dẫn|đường link|link|liên kết)', scope: 'action' },
+      { pattern: '(mở|vào|truy cập|bấm|nhấn)\\s*(vào\\s*)?\\[?\\s*(đường dẫn|đường link|link|liên kết)[^.]{0,30}(để\\s+)?đăng nhập', scope: 'action' },
+      { pattern: '(link|đường dẫn|liên kết)[^.]{0,20}(nhập|điền)[^.]{0,16}(thông tin\\s+(ngân hàng|tài khoản|thẻ)|tài khoản ngân hàng)', scope: 'action' },
     ],
     FIN_TRANSFER_REQUEST: [
       { pattern: 'chuyển\\b[^.]{0,40}(tiền|triệu|đồng|khoản|vào tài khoản|sang tài khoản)', scope: 'action' },
@@ -149,6 +163,24 @@ module.exports = {
       { pattern: '(chuyển|gửi|nạp|nộp)[^.]{0,26}(vào|qua|tới|đến)\\s*(stk|tk|số tài khoản|tài khoản)\\b', scope: 'action' },
       // 24/9/2026 — teencode "ck" = chuyển khoản: "bác ck gấp 20tr vào stk 0123…".
       { pattern: '\\bck\\b[^.]{0,30}(\\d|stk|tk|tiền|triệu)', scope: 'action' },
+      /*
+       * 25/9/2026 — những cách nói AI LÚC BẮT LÚC BỎ (so 3 lượt AI trên cùng mẫu),
+       * tầng luật chưa có. Temperature đã là 0 mà đầu ra vẫn dao động, và gọi AI
+       * nhiều lần rồi hợp lại là ensemble (§12 cấm) — nên đưa vào luật cố định:
+       *   "Thanh toán trước 17 giờ theo tài khoản được gửi"
+       *   "Em thanh toán hộ 13,5 triệu vào tài khoản này, lát anh gửi lại"
+       *   "Xem hình ảnh và thanh toán trước hạn tại [liên kết]"
+       *   "Mẹ thanh toán 1.500.000đ mua váy"            ·  "cần bổ sung vốn ngay"
+       *   "thanh toán khoản phí/hồ sơ trước khi nhận tiền"
+       * ⚠️ KHÔNG "thanh toán" trần: "nhớ thanh toán tiền điện trước ngày 25" là tin
+       * nhắc thật. Phải có TÀI KHOẢN, LIÊN KẾT, MỘT SỐ TIỀN, hoặc "phí … trước khi nhận".
+       * ⚠️ `(?<!học )(?<!viện )phí` — học phí, viện phí là tiếng Việt đời thường.
+       */
+      { pattern: 'thanh toán[^.]{0,30}(vào|theo|qua|sang|tới)\\s*\\[?\\s*(tài khoản|stk|số tài khoản)', scope: 'action' },
+      { pattern: 'thanh toán[^.]{0,24}(tại|qua|theo|vào)\\s*\\[?\\s*(đường dẫn|đường link|link|liên kết)', scope: 'action' },
+      { pattern: 'thanh toán\\s+((hộ|giúp|trước)\\s+)?\\d+([.,]\\d+)?\\s*(đ|k|tr|triệu|đồng|nghìn)(?![a-zà-ỹ])', scope: 'action' },
+      { pattern: 'bổ sung\\s+(thêm\\s+)?(vốn|tiền|số dư|ký quỹ)', scope: 'action' },
+      { pattern: '(thanh toán|nộp|đóng|chuyển)[^.]{0,20}(?<!học )(?<!viện )phí[^.]{0,40}trước khi\\s+(nhận|được|giải ngân|rút)', scope: 'action' },
     ],
     /**
      * "Chuyển nhầm" rồi đòi trả sang tài khoản KHÁC — xem `signal-registry.js`.
@@ -218,6 +250,10 @@ module.exports = {
     FIN_CASH_COURIER: [
       { pattern: '(tới|đến|qua)\\s+nhà[^.]{0,30}(nhận|lấy|thu)[^.]{0,16}tiền', scope: 'action' },
       { pattern: '(nhận|giao|thu)\\s+tiền mặt\\b', scope: 'action' },
+      // 25/9/2026 — "nhân viên pháp lý sẽ TỚI NHẬN 10 triệu TIỀN MẶT" (số tiền chen giữa),
+      // và tin trộn "Put 15,000,000đ in an envelope and hand the cash to the courier".
+      { pattern: '(tới|đến|qua|cử người)[^.]{0,24}(nhận|lấy|thu)[^.]{0,24}tiền mặt', scope: 'action' },
+      { pattern: '((put|bỏ)[^.]{0,30}(in an envelope|vào phong bì)|hand (the )?cash to|cash to the courier)', scope: 'action' },
     ],
     DEV_REMOTE_CONTROL_APP: [
       { pattern: '\\b(anydesk|teamviewer|ultraviewer|quicksupport)\\b', scope: 'action' },
@@ -513,6 +549,18 @@ module.exports = {
     MAN_FEAR_THREAT: [
       { pattern: '(bắt giữ|bị bắt|khởi tố|truy tố|phong toả|tạm giam)', scope: 'any' },
       { pattern: '\\b(rửa tiền|cắt trợ cấp|liên quan.{0,12}vụ án)\\b', scope: 'any' },
+      /*
+       * 25/9/2026 — doạ KHOÁ / NGẮT / TẠM NGỪNG nếu không làm theo; AI lúc bắt lúc bỏ:
+       *   "Hệ thống sẽ khóa nếu khách hàng không xác nhận tại [liên kết]"
+       *   "mã chỉ có hiệu lực 30 giây, hết hạn sẽ bị ngắt dịch vụ"
+       * ⚠️ Tin nhắc hoá đơn THẬT cũng viết "nếu không sẽ tạm ngừng cấp điện". Tín hiệu
+       * này một mình là 12 điểm, dưới ngưỡng 20 — nó chỉ nâng mức khi đi cùng liên
+       * kết giả, đòi tiền hay mạo danh. `khong_canh_bao`: bài cảnh báo không tính.
+       * ⚠️ KHÔNG "đình chỉ": "nếu không đóng học phí là cháu bị đình chỉ thi" là lời nhắc thật.
+       */
+      { pattern: '(sẽ|bị)\\s+(tạm\\s+)?(khóa|khoá|ngừng|ngắt|cắt|phong tỏa|thu hồi)[^.]{0,40}(nếu|khi)\\s+([^.,]{0,20}\\s)?(không|chưa)', scope: 'khong_canh_bao' },
+      { pattern: 'nếu\\s+(không|chưa)[^.]{0,40}(sẽ\\s+)?(bị\\s+)?(tạm\\s+)?(khóa|khoá|ngắt|cắt|ngừng|khởi kiện|truy cứu)', scope: 'khong_canh_bao' },
+      { pattern: '(hết hạn|quá hạn)[^.]{0,20}(sẽ\\s+)?bị\\s+(tạm\\s+)?(khóa|khoá|ngắt|cắt|ngừng)', scope: 'khong_canh_bao' },
     ],
     MAN_URGENCY: [
       { pattern: '\\b(ngay|gấp|lập tức|khẩn|trong vòng \\d+)\\b', scope: 'action' },
@@ -522,6 +570,23 @@ module.exports = {
     ],
     OFF_INVESTMENT_GUARANTEE: [
       { pattern: '(lợi nhuận|lãi)\\b[^.]{0,20}(cam kết|đảm bảo|chắc chắn)', scope: 'any' },
+      /*
+       * 25/9/2026 — "Lệnh vàng đang có cơ hội lợi nhuận cao", "nâng gói để nhận lợi
+       * nhuận cao hơn", "lãi 20%/tháng". ⚠️ KHÔNG "lãi suất hấp dẫn" / "lãi 6%/năm":
+       * đó là quảng cáo tiết kiệm thật — chỉ tính lãi theo NGÀY / TUẦN / THÁNG.
+       */
+      { pattern: '(lợi nhuận|lãi)\\s+(cao|khủng|gấp \\d|x\\d)', scope: 'khong_canh_bao' },
+      { pattern: '\\d+([.,]\\d+)?\\s*%\\s*(\\/|một|mỗi|trên)\\s*(ngày|tuần|tháng)', scope: 'khong_canh_bao' },
+    ],
+    /**
+     * QR DẪN TỚI ĐĂNG NHẬP / THANH TOÁN / NHẬN TIỀN — 25/9/2026. Trước đây tầng luật
+     * KHÔNG có mẫu tiếng Việt nào; AI lúc bắt lúc bỏ:
+     *   "Quét mã QR này rồi đăng nhập; mã chỉ còn hiệu lực hai phút"
+     *   "Quét mã để nhận tiền lì xì" · "quét mã để mở tài khoản…, xong được trả tiền công"
+     * Một mình chỉ 8 điểm: "anh quét mã QR này để thanh toán tiền cơm" vẫn là chưa thấy.
+     */
+    WEB_QR_TO_LOGIN_PAYMENT: [
+      { pattern: '(quét|scan)\\s*(mã|qr|mã qr)[^.]{0,30}(để|rồi|và|xong)\\s*(đăng nhập|thanh toán|xác nhận|xác thực|nhận\\s+(tiền|quà|thưởng|lì xì|hoàn tiền)|hoàn\\s+(tiền|lại)|mở tài khoản|đăng ký)', scope: 'action' },
     ],
     /**
      * OFF_ADVANCE_FEE và OFF_TASK_PREPAY TRƯỚC ĐÂY KHÔNG CÓ MẪU NÀO ở vi-VN —
