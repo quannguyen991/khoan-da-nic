@@ -7705,9 +7705,37 @@ export function WarningView({
                 </div>
               )}
               {!leoThang && timeLeft > 0 && (
-                <p className="text-[15px] font-bold text-white/85 text-center tabular-nums">
-                  {t('Còn {n} giây').replace('{n}', String(timeLeft))}
-                </p>
+                /*
+                  ══════ VÒNG ĐẾM NGƯỢC 60 GIÂY — thêm 24/9/2026 ══════
+                  Người dùng: "làm vòng tròn đếm 60 giây". Dòng chữ "Còn 58 giây" 15px
+                  nằm lọt thỏm giữa một khoảng trống lớn — khoảng dừng là thứ màn này
+                  bán, mà nó là chữ nhỏ nhất màn. Vòng cùng kiểu với vòng ở thẻ trung
+                  tâm (vàng #fcd34d trên nền đỏ) — đó là CÙNG `timeLeft`, không phải
+                  đồng hồ thứ hai.
+                  ⚠️ CỠ BÁM CHIỀU CAO MÀN (min 40vw · 22vh · 176px): trên máy 667px
+                  vòng không được đẩy "Xem thêm" / "Về trang chủ" ra khỏi màn.
+                  ⚠️ role="timer": TalkBack đọc nhãn khi bác chạm vào, KHÔNG đọc to
+                  mỗi giây — đọc mỗi giây là thêm tiếng ồn cho người đang hoảng.
+                */
+                <div
+                  role="timer"
+                  aria-label={t('Còn {n} giây').replace('{n}', String(timeLeft))}
+                  className="self-center relative mt-3 w-[min(40vw,22vh,176px)] aspect-square flex items-center justify-center"
+                >
+                  <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 120 120" aria-hidden="true">
+                    <circle cx="60" cy="60" r="52" fill="rgba(0,0,0,0.18)" stroke="rgba(255,255,255,0.22)" strokeWidth="8" />
+                    <circle
+                      cx="60" cy="60" r="52" fill="none" stroke="#fcd34d" strokeWidth="8" strokeLinecap="round"
+                      strokeDasharray={2 * Math.PI * 52}
+                      strokeDashoffset={2 * Math.PI * 52 * (1 - timeLeft / Math.max(initialTime, 1))}
+                      style={{ transition: 'stroke-dashoffset 1s linear', filter: 'drop-shadow(0 0 6px rgba(252,211,77,0.55))' }}
+                    />
+                  </svg>
+                  <div className="relative flex flex-col items-center" aria-hidden="true">
+                    <span className="text-[length:clamp(38px,6vh,52px)] font-black text-white leading-none tabular-nums">{timeLeft}</span>
+                    <span className="text-[15px] font-bold text-white/85 mt-1">{t('giây')}</span>
+                  </div>
+                </div>
               )}
               {/* Phần 3 — MỘT dòng, nói đúng điều máy chủ biết; không bao giờ "con đã thấy" (§11). */}
               {cauBaoDong && (
