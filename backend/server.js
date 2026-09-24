@@ -1827,7 +1827,15 @@ if (fs.existsSync(DUONG_APK) && process.env.KHOAN_DA_KHONG_PHAT_APK !== '1') {
  * vào /gioi-thieu bằng <iframe>. Chỉ phục vụ đúng các tệp trong danh sách, và cấm
  * script bằng CSP: đây là ảnh tĩnh làm bằng HTML, không phải một bản app chạy được.
  */
-const THU_MUC_MAN_THAT = path.join(__dirname, 'src', 'man-that');
+/*
+ * ⚠️ ĐI TỪ GỐC REPO (`__dirname/..`), KHÔNG từ `__dirname/src`. Bản chạy thật là
+ * `dist/server.cjs` do esbuild gộp — ở đó `__dirname` là `dist/`, không phải
+ * `backend/`. `path.join(__dirname, 'src', …)` chạy được ở máy (tsx) và 404 trên
+ * Render (đo 24/9/2026). `DUONG_APK` ở trên sống sót chỉ vì `dist/..` và
+ * `backend/..` tình cờ cùng là gốc repo — nên cả hai đều đi từ gốc.
+ */
+const GOC_REPO = path.join(__dirname, '..');
+const THU_MUC_MAN_THAT = path.join(GOC_REPO, 'backend', 'src', 'man-that');
 const TEP_MAN_THAT = /^(?:(?:tro-ly|quy-tac|khan-cap|phuc-hoi)\.(?:vi|en)\.html|app\.css)$/;
 app.get('/man-that/:ten', (req, res) => {
   const ten = String(req.params.ten || '');
@@ -1845,7 +1853,8 @@ app.get(['/gioi-thieu', '/gioi-thieu/'], (req, res) => {
   const coApk = fs.existsSync(DUONG_APK) && process.env.KHOAN_DA_KHONG_PHAT_APK !== '1';
   res.setHeader('content-type', 'text/html; charset=utf-8');
   res.setHeader('content-language', ngonNgu);
-  res.send(dungTrangGioiThieu(ngonNgu, { apk: coApk ? docThongTinApk(DUONG_APK) : null }));
+  const gradle = path.join(GOC_REPO, 'android', 'app', 'build.gradle');
+  res.send(dungTrangGioiThieu(ngonNgu, { apk: coApk ? docThongTinApk(DUONG_APK, gradle) : null }));
 });
 
 // §6.7 — mọi lỗi còn lại vẫn ra JSON có cấu trúc, không bao giờ trắng trang.

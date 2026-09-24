@@ -22,7 +22,6 @@
  * trang này không được dạy ngược điều app dạy.
  */
 const fs = require('node:fs');
-const path = require('node:path');
 const crypto = require('node:crypto');
 
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => (
@@ -311,7 +310,12 @@ const CHU = {
 
 /* ───────── APK: kích thước + mã băm, tính một lần cho mỗi phiên bản tệp ───────── */
 let boNhoApk = null;
-function docThongTinApk(duongApk, duongGradle = path.join(__dirname, '..', '..', 'android', 'app', 'build.gradle')) {
+/**
+ * ⚠️ `duongGradle` BẮT BUỘC, không mặc định theo `__dirname`: trên Render module này
+ * bị esbuild gộp vào dist/server.cjs và `__dirname` thành `dist/` — mặc định cũ trỏ
+ * ra ngoài repo, số phiên bản biến mất khỏi trang (đo 24/9/2026). Máy chủ truyền vào.
+ */
+function docThongTinApk(duongApk, duongGradle) {
   try {
     const st = fs.statSync(duongApk);
     const khoa = `${st.size}:${st.mtimeMs}`;
