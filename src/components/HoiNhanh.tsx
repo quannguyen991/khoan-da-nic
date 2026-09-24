@@ -163,7 +163,10 @@ type KetQua = {
  * bước dùng cùng một nền tím nhạt; màu mạnh chỉ còn ở chỗ mang ý nghĩa (nút đỏ,
  * khối kết quả).
  */
-const NEN_MAN = 'min-h-full w-full bg-gradient-to-b from-[#f9f7ff] via-[#f4eeff] to-[#ebe2ff] text-[color:var(--color-ink)] flex flex-col p-5 pb-24 overflow-y-auto';
+// ⚠️ KHÔNG TỰ TÔ NỀN — sửa 24/9/2026. Bản đầu tô dải loang xuống tới #ebe2ff, người
+// dùng thấy "tím đặc quá" ở màn câu hỏi Có/Không. Để trong suốt thì màn này dùng đúng
+// nền trắng-tím #f8f4ff và hai đốm sáng của khung app, y hệt trang chủ.
+const NEN_MAN = 'min-h-full w-full bg-transparent text-[color:var(--color-ink)] flex flex-col p-5 pb-24 overflow-y-auto';
 const NUT_TRON = 'grid place-items-center w-12 h-12 rounded-full bg-white border border-[#e9dcff] text-[color:var(--color-ink)] shadow-[0_6px_14px_-8px_rgba(90,30,160,0.45)] transition-transform duration-150 ease-out active:scale-95 motion-reduce:transition-none';
 
 export function HoiNhanhView({ setView, t, lang = 'vi', onTriggerEmergency, familyMembers, hoiConApi }: HoiNhanhProps) {
