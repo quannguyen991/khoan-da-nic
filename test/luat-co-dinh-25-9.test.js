@@ -40,6 +40,13 @@ const PHAI_BAT = [
   ['ngân hàng bảo chuyển tiền không tài khoản bị khóa', 'ID_BANK_IMPERSONATION'],
   ['ngân hàng bảo chuyển tiền không tài khoản bị khóa', 'MAN_FEAR_THREAT'],
   ['Bên ngân hàng yêu cầu bác nộp phí kẻo thẻ bị khóa.', 'MAN_FEAR_THREAT'],
+  // Cùng hai ý bằng tiếng Anh (en-US@1.1.1, 25/9/2026) — trợ lý bản tiếng Anh cần chúng.
+  ['The bank says transfer the money or my account gets locked.', 'ID_BANK_IMPERSONATION'],
+  ['The bank says transfer the money or my account gets locked.', 'MAN_FEAR_THREAT'],
+  ['Someone from the bank told me to transfer everything to a new account.', 'ID_BANK_IMPERSONATION'],
+  ['My bank asked me to urgently send the money today.', 'ID_BANK_IMPERSONATION'],
+  ['Pay the fee today or your account will be frozen.', 'MAN_FEAR_THREAT'],
+  ['Your SIM will be deactivated within 2 hours.', 'MAN_FEAR_THREAT'],
 ];
 
 const KHONG_DUOC_BAT = [
@@ -53,7 +60,18 @@ const KHONG_DUOC_BAT = [
   ['Ngân hàng không bao giờ yêu cầu khách chuyển tiền qua điện thoại.', 'ID_BANK_IMPERSONATION'],
   ['Cảnh báo: kẻ gian giả ngân hàng bảo chuyển tiền kẻo tài khoản bị khóa.', 'ID_BANK_IMPERSONATION'],
   ['Tài khoản của quý khách đã bị khóa do nhập sai mật khẩu 5 lần.', 'MAN_FEAR_THREAT'],
+  ['Banks never ask you to transfer money over the phone.', 'ID_BANK_IMPERSONATION'],
+  ['My bank has never asked me to transfer money.', 'ID_BANK_IMPERSONATION'],
+  ['The bank said my transfer went through.', 'ID_BANK_IMPERSONATION'],
+  ['Be careful: fraudsters say the bank told them to transfer money.', 'ID_BANK_IMPERSONATION'],
+  ['Warning: scammers claim your account will be locked unless you pay.', 'MAN_FEAR_THREAT'],
+  ['Your card was blocked after three wrong PIN attempts.', 'MAN_FEAR_THREAT'],
 ];
+
+test('câu kể lại tiếng Anh ngang câu tiếng Việt: cả hai ra "Nguy hiểm cao"', () => {
+  assert.strictEqual(tin('The bank says transfer the money or my account gets locked.').nhan, 'CAO');
+  assert.strictEqual(tin('ngân hàng bảo chuyển tiền không tài khoản bị khóa').nhan, 'CAO');
+});
 
 for (const [t, id] of PHAI_BAT) {
   test(`phải bắt ${id}: "${t.slice(0, 60)}"`, () => {

@@ -185,7 +185,7 @@ const CHU = {
     nutAndroid: 'Install the Android app for them',
     ghiNho: 'Free · No ads · Vietnamese and English',
 
-    capTroLy: 'The real Talk to me screen. The parent said: “Someone from the bank asked me to read out the OTP code they just sent.” The first sentence is added by the fixed rules the moment they see a signal; the rest is the AI conversation, different every time.',
+    capTroLy: 'The real Talk to me screen. The parent said: “The bank says transfer the money or my account gets locked.” The first sentence is added by the fixed rules the moment they see a signal; the rest is the AI conversation, different every time.',
 
     vdTieuDe: 'A person being scammed will not open an app on their own',
     vdDoan1: 'Phone scams win with two things: urgency and isolation. “Do it now.” “Don’t tell anyone.” Someone under that pressure does not go looking for an app to ask.',

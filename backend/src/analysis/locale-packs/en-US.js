@@ -14,7 +14,8 @@
 module.exports = {
   locale: 'en-US',
   language: 'en',
-  localePackVersion: 'en-US@1.1.0',   // 1.1.0 (25/9/2026): WEB_QR_TO_LOGIN_PAYMENT
+  localePackVersion: 'en-US@1.1.1',   // 1.1.1 (25/9/2026): lời kể lại "the bank says/told me to transfer", "or my account gets locked"
+                                      // 1.1.0 (25/9/2026): WEB_QR_TO_LOGIN_PAYMENT
   supportedCountryProfiles: ['US', 'GB', 'AU', 'SG', 'GLOBAL'],
 
   // { SIGNAL_ID: [ { pattern, scope } ] } — pattern là nguồn regex, khớp trên
@@ -300,6 +301,14 @@ module.exports = {
     ID_BANK_IMPERSONATION: [
       { pattern: '\\bbank (security|fraud) (team|department|officer)\\b', scope: 'any' },
       { pattern: '\\bthis is\\b[^.]{0,22}\\bbank\\b', scope: 'any' },
+      /*
+       * 1.1.1 (25/9/2026) — the victim RETELLING it, same idea as vi-VN@1.2.1
+       * ("ngân hàng bảo chuyển tiền"): "the bank says/told me to transfer…".
+       * The money verb must follow the instruction directly (at most "to" and one
+       * hurry adverb), so "the bank said my transfer went through" does not match;
+       * a negation in between ("has never asked me to transfer") blocks it too.
+       */
+      { pattern: '\\bbank\\b(?:(?!\\b(?:never|not|don.t|doesn.t|didn.t|won.t)\\b)[^.]){0,30}?\\b(?:says|said|told (?:me|us)|tells (?:me|us)|asked (?:me|us)|asks (?:me|us)|wants (?:me|us)|wanted (?:me|us)|is asking (?:me|us)|instructed (?:me|us)|requires? (?:me|us))\\s+(?:to\\s+)?(?:urgently\\s+|immediately\\s+|quickly\\s+|now\\s+)?(?:transfer|send|pay|deposit|move)\\b', scope: 'khong_canh_bao' },
     ],
     // §9.2 — mạo danh chính Khoan Đã. Tên thương hiệu giữ nguyên tiếng Việt ở
     // mọi locale (§4.1), nên cue cũng phải bắt được nó trong câu tiếng Anh.
@@ -360,6 +369,13 @@ module.exports = {
       { pattern: '\\b(will be|face|facing) arrest(ed)?\\b', scope: 'any' },
       { pattern: '\\b(money laundering|criminal charges?|arrest warrant|legal action)\\b', scope: 'any' },
       { pattern: '\\b(freeze|frozen|suspend|suspended)\\b[^.]{0,20}\\baccount\\b', scope: 'any' },
+      /*
+       * 1.1.1 (25/9/2026) — "…or my account gets locked", same idea as vi-VN@1.2.1
+       * ("không thì tài khoản bị khoá"). FUTURE / "or" only: a notice that a card
+       * WAS blocked after three wrong PINs is a real bank message, not a threat.
+       */
+      { pattern: '\\bor(?: else)?\\b[^.]{0,6}\\b(?:my|your|the)\\s+(?:bank\\s+)?(?:account|card|sim|number|phone line)s?\\b[^.]{0,16}\\b(?:will|would|gets?|is going to|could)\\b[^.]{0,10}\\b(?:locked|blocked|frozen|suspended|closed|cut off|deactivated)\\b', scope: 'khong_canh_bao' },
+      { pattern: '\\b(?:my|your)\\s+(?:bank\\s+)?(?:account|card|sim)s?\\b[^.]{0,16}\\bwill be\\b[^.]{0,6}\\b(?:locked|blocked|frozen|suspended|closed|deactivated)\\b', scope: 'khong_canh_bao' },
     ],
     MAN_URGENCY: [
       { pattern: '\\b(immediately|right away|urgent(ly)?|within \\d+ (minutes?|hours?))\\b', scope: 'action' },
