@@ -1519,6 +1519,7 @@ export default function App() {
                  * đường chấm là hai đường sẽ lệch nhau (§4.3).
                  */
                 onKiemTin={(noiDung) => handleAnalyze(noiDung)}
+                coThanhDuoi={sieuDonGian}
               />
             )}
             {view === 'search' && <SearchView setView={setView} t={t} lang={lang} onAnalyze={handleAnalyze} isAnalyzing={isAnalyzing} superBasic={sieuDonGian} />}
@@ -3153,7 +3154,7 @@ function VoiceView({
         <button aria-label={t("Quay lại")} onClick={() => { stopRecording(); setView('home'); }} className="w-12 h-12 rounded-full border border-white/80 bg-white/45 backdrop-blur-md flex items-center justify-center text-[#321379] shadow-[0_8px_22px_rgba(109,40,217,0.12)] active:scale-95 transition-transform shrink-0">
           <ArrowLeft size={24} />
         </button>
-        <div className="text-center text-[#321379] font-black text-[20px]">Bác kể đi</div>
+        <div className="text-center text-[#321379] font-black text-[20px]">{t('Bác kể đi')}</div>
         <button
           type="button"
           aria-label={t("Kích hoạt cảnh giác khẩn cấp")}
@@ -3314,13 +3315,18 @@ function VoiceView({
         chúng không khác nhau chỗ nào cả.
         Các lỗi KHÁC (chưa tải bộ nghe, lượt nghe hỏng) vẫn hiện bình thường.
       */}
-      <div className="w-full max-w-md mb-3 flex items-center justify-between gap-3 px-1">
+      {/*
+        24/9/2026 — người dùng: "cho ô chat ra giữa". Khung `max-w-md` thiếu `mx-auto`
+        nên trên máy tính bảng ô gõ dạt sang trái, lệch với quả cầu và các bong bóng
+        thoại đều đang nằm giữa. Nhãn và chữ gợi ý từng viết cứng tiếng Việt (§4.1).
+      */}
+      <div className="w-full max-w-md mx-auto mb-3 px-1">
         <input
-          aria-label="Gõ lời bác nói"
+          aria-label={t('Gõ lời bác nói')}
           value={currentDisplayText}
           onChange={(e) => { setTranscript(e.target.value); setInterimText(''); }}
-          placeholder="Gõ chữ..."
-          className="min-w-0 w-full rounded-full bg-white/70 border border-white px-4 py-2.5 text-[15px] text-[#311068] outline-none focus:border-[#c084fc]"
+          placeholder={t('Gõ chữ...')}
+          className="min-w-0 w-full min-h-[56px] rounded-full bg-white/80 border border-white shadow-[0_10px_26px_rgba(109,40,217,0.12)] px-5 text-center text-[17px] text-[#311068] placeholder:text-[#6b5b95] outline-none focus:border-[#c084fc]"
         />
       </div>
 

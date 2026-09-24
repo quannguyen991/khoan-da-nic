@@ -26,6 +26,7 @@ import { motion } from 'framer-motion';
 import { Mic, ArrowLeft, ShieldAlert, Loader2, Send, Image as ImageIcon } from 'lucide-react';
 import { api } from '../api-goc';
 import { docTo, dungDocTo } from '../native';
+import { QuaCauNoi } from './QuaCauNoi';
 
 type Luot = { vai: 'bac' | 'chau'; noiDung: string };
 
@@ -37,12 +38,19 @@ export function TroLyNoi({
   lang,
   onVeTrangChu,
   onKiemTin,
+  coThanhDuoi = false,
 }: {
   t: (s: string) => string;
   lang: 'vi' | 'en';
   onVeTrangChu: () => void;
   /** Đưa đoạn chữ (hoặc ảnh) qua đúng đường phân tích chung — màn này không tự chấm. */
   onKiemTin: (noiDung: string, anh?: string | null) => void;
+  /**
+   * Chế độ siêu đơn giản có thanh "Quay lại" nằm ĐÈ lên đáy màn (absolute, ~95px).
+   * Đo trên máy thật 24/9/2026: nó che mất cả hàng ô gõ chữ + gửi ảnh + gửi.
+   * Có thanh thì chừa đáy cho nó.
+   */
+  coThanhDuoi?: boolean;
 }) {
   const [trangThai, setTrangThai] = useState<TrangThai>('cho');
   const [lichSu, setLichSu] = useState<Luot[]>([]);
@@ -169,51 +177,100 @@ export function TroLyNoi({
     || (trangThai === 'nghi' ? t('Cháu đang nghĩ…') : null)
     || (luotCuoi?.vai === 'chau' ? luotCuoi.noiDung : t('Bác bấm nút tròn rồi kể cháu nghe.'));
 
+  const dangNghe = trangThai === 'nghe';
+  const dungNghe = () => { try { nhanRef.current?.stop(); } catch { /* đã dừng */ } };
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="flex-1 flex flex-col w-full relative z-10 px-5 pt-4 pb-6 overflow-y-auto"
+      /*
+        ═════ DỰNG LẠI 24/9/2026 — cùng một thế giới với màn "Bác kể đi" ═════
+        Người dùng: "trang này trông hơi nhàm chán, cho thêm cái bong bóng nổi
+        như ChatGPT… giống màn Bác kể đi". Bản trước là viền đen + bóng cứng,
+        một ô chữ và một nút tròn — hai màn cùng việc "kể cho cháu" mà trông như
+        hai app khác nhau. Nay dùng lại đúng quả cầu, nền và nút của màn đó.
+      */
+      className={`flex-1 flex flex-col w-full relative z-10 px-5 pt-3 overflow-y-auto bg-[radial-gradient(circle_at_50%_26%,rgba(196,181,253,0.5),transparent_42%),linear-gradient(180deg,#fbf9ff_0%,#f1eaff_100%)] ${coThanhDuoi ? 'pb-32' : 'pb-6'}`}
     >
-      <div className="flex items-center gap-3 mb-4 shrink-0">
+      <div className="w-full flex items-center justify-between gap-3 mb-1 shrink-0">
         <button
           type="button"
           aria-label={t('Quay lại')}
           onClick={onVeTrangChu}
-          className="w-[52px] h-[52px] rounded-2xl border-2 border-[#2e1065] bg-white flex items-center justify-center text-[#2e1065] shrink-0"
+          className="w-[52px] h-[52px] rounded-full border border-white/80 bg-white/60 backdrop-blur-md flex items-center justify-center text-[#321379] shadow-[0_8px_22px_rgba(109,40,217,0.14)] active:scale-95 transition-transform shrink-0"
         >
           <ArrowLeft size={24} />
         </button>
-        <span className="text-[20px] font-black text-[#2e1065]">{t('Nói cho cháu nghe')}</span>
+        <span className="text-center text-[20px] font-black text-[#321379] leading-snug">{t('Nói cho cháu nghe')}</span>
+        {/* Cân hai bên để tiêu đề nằm đúng giữa. */}
+        <span className="w-[52px] shrink-0" aria-hidden="true" />
       </div>
 
       {/*
-        CÂU ĐANG DIỄN RA — to nhất màn, vì đây là thứ duy nhất bác cần đọc.
-        `aria-live` để TalkBack đọc ra mỗi lần nó đổi.
+        Cả cụm (quả cầu → bong bóng → micro → ô gõ) nằm GIỮA màn theo chiều dọc
+        bằng `mt-auto` ở đây + `mb-auto` ở dòng cuối. Bản trước đẩy ô gõ xuống sát
+        đáy (một khoảng trống lớn ở giữa, và thanh "Quay lại" đè lên). Lề tự động
+        về 0 khi nội dung dài hơn màn, nên không bị cắt đầu như `justify-center`.
       */}
-      <div
-        aria-live="polite"
-        className="w-full rounded-3xl border-2 border-[#2e1065] bg-white shadow-[3px_3px_0_#2e1065] px-5 py-5 mb-5 shrink-0"
-      >
-        <p className="text-[22px] font-bold text-[#1e1b4b] leading-[1.35]">{cauHienTai}</p>
-      </div>
+      <div className="flex flex-col items-center w-full mt-auto pt-2">
+        {/*
+          QUẢ CẦU NỔI — cùng nhân vật với màn "Bác kể đi". Trôi nhẹ khi rảnh,
+          vòng sóng khi đang nghe, quầng sáng thở khi đang nghĩ, XÁM VÀ ĐỨNG IM
+          khi micro bị chặn (§4.3 — hỏng thì không được trông như đang chạy).
+        */}
+        <QuaCauNoi
+          dangNghe={dangNghe}
+          micHong={micHong}
+          dangNghi={trangThai === 'nghi'}
+          troiNoi
+          coDuoi={false}
+          className="w-[56vw] max-w-[260px] h-[24vh] min-h-[160px] max-h-[290px] mt-1"
+        />
 
-      <div className="flex flex-col items-center justify-center gap-4 flex-1">
+        {/*
+          CÂU ĐANG DIỄN RA — to nhất màn, vì đây là thứ duy nhất bác cần đọc.
+          Nay là BONG BÓNG THOẠI của chính quả cầu (đuôi chỉ lên), không phải một
+          tấm thẻ đứng riêng. `aria-live` để TalkBack đọc ra mỗi lần nó đổi.
+        */}
+        <div className="relative w-full max-w-md mt-3 mb-5">
+          <span
+            aria-hidden="true"
+            className={`absolute left-1/2 -top-2 -translate-x-1/2 w-5 h-5 rotate-45 rounded-[4px] border-l border-t ${
+              micHong || loi ? 'bg-[#fff7ed] border-[#fdba74]' : 'bg-white border-white'
+            }`}
+          />
+          <div
+            aria-live="polite"
+            className={`relative rounded-[28px] border px-5 py-4 shadow-[0_14px_36px_rgba(109,40,217,0.14)] ${
+              micHong || loi ? 'bg-[#fff7ed] border-[#fdba74]' : 'bg-white/90 border-white backdrop-blur-sm'
+            }`}
+          >
+            <p className={`text-center text-[21px] font-bold leading-[1.4] ${micHong || loi ? 'text-[#9a3412]' : 'text-[#321379]'}`}>
+              {cauHienTai}
+            </p>
+          </div>
+        </div>
+
+        {/* Nút micro — cùng hình với màn "Bác kể đi": đổi hình, không đổi chỗ. */}
         <button
           type="button"
           data-vai-tro="nut-chinh"
-          onClick={trangThai === 'nghe' ? () => { try { nhanRef.current?.stop(); } catch { /* đã dừng */ } } : batDauNghe}
+          onClick={dangNghe ? dungNghe : batDauNghe}
           disabled={trangThai === 'nghi' || !nheDuocGiongNoi}
-          aria-label={trangThai === 'nghe' ? t('Dừng nói') : t('Chạm để nói')}
-          className={`w-40 h-40 rounded-full border-2 border-[#2e1065] flex items-center justify-center text-white disabled:opacity-60 ${
-            trangThai === 'nghe'
-              ? 'bg-red-600 shadow-[6px_6px_0_#2e1065] animate-pulse'
-              : 'bg-[#7c3aed] shadow-[6px_6px_0_#2e1065]'
-          }`}
+          aria-label={dangNghe ? t('Dừng nói') : t('Chạm để nói')}
+          className="flex flex-col items-center gap-1.5 active:scale-95 transition-transform disabled:opacity-60"
         >
-          {trangThai === 'nghi'
-            ? <Loader2 size={56} className="animate-spin" />
-            : <Mic size={56} strokeWidth={2.5} />}
+          <span className={`w-[84px] h-[84px] rounded-full border border-white/90 shadow-[0_14px_34px_rgba(124,58,237,0.3)] flex items-center justify-center text-white ${
+            dangNghe ? 'bg-gradient-to-b from-[#8b5cf6] to-[#5b21b6]' : 'bg-gradient-to-b from-[#a78bfa] to-[#7c3aed]'
+          }`}>
+            {trangThai === 'nghi'
+              ? <Loader2 size={36} className="animate-spin" />
+              : dangNghe ? <span className="w-8 h-8 rounded-lg bg-white" /> : <Mic size={36} strokeWidth={2.5} />}
+          </span>
+          <span className="text-[#321379] font-black text-[16px] leading-snug">
+            {dangNghe ? t('Dừng nói') : t('Chạm để nói')}
+          </span>
         </button>
 
         {/*
@@ -225,7 +282,7 @@ export function TroLyNoi({
             type="button"
             data-vai-tro="nut-chinh"
             onClick={() => onKiemTin(canKiem)}
-            className="w-full min-h-[56px] rounded-[22px] bg-amber-400 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] text-[#2e1065] font-black text-[19px] flex items-center justify-center gap-2 px-4 leading-snug"
+            className="w-full max-w-md mt-4 min-h-[56px] rounded-full bg-amber-400 border border-amber-500 shadow-[0_12px_28px_rgba(217,119,6,0.28)] text-[#2e1065] font-black text-[19px] flex items-center justify-center gap-2 px-5 leading-snug active:scale-[0.98] transition-transform"
           >
             <ShieldAlert size={24} className="shrink-0" />
             <span>{t('Kiểm tin này ngay')}</span>
@@ -247,29 +304,31 @@ export function TroLyNoi({
         §4.3 — khi máy KHÔNG nghe được giọng nói, phần này vẫn là lối đi duy
         nhất còn lại, nên kèm theo một dòng nói rõ vì sao.
       */}
-      <div className="w-full mt-5 shrink-0">
+      <div className="w-full max-w-md mx-auto mt-6 shrink-0">
           {!nheDuocGiongNoi && (
-          <p className="text-[16px] font-bold text-[#6b3a05] leading-snug mb-2">
+          <p className="text-center text-[16px] font-bold text-[#6b3a05] leading-snug mb-2">
             {t('Máy của bác chưa nghe được giọng nói. Bác gõ giúp cháu vào ô dưới nhé.')}
           </p>
           )}
-          <p className="text-[15px] font-bold text-slate-700 leading-snug mb-2">
+          <p className="text-center text-[15px] font-bold text-[#4c3a78] leading-snug mb-2">
             {t('Hoặc gõ chữ, hoặc gửi ảnh chụp màn hình.')}
           </p>
-          <div className="flex gap-2">
+          {/* Một viên thuốc kính mờ chứa cả ba thứ — ô gõ, nút ảnh, nút gửi. */}
+          <div className="flex items-center gap-2 rounded-full bg-white/80 border border-white shadow-[0_12px_30px_rgba(109,40,217,0.14)] backdrop-blur-md p-1.5">
             <input
               value={dangGo}
               onChange={(e) => setDangGo(e.target.value)}
               onKeyDown={(e) => { if (e.key === 'Enter' && dangGo.trim()) { void gui(dangGo); setDangGo(''); } }}
               aria-label={t('Gõ điều bác muốn kể')}
-              className="flex-1 min-h-[56px] rounded-2xl border-2 border-[#2e1065] px-4 text-[17px] text-[#1e1b4b]"
+              placeholder={t('Gõ chữ...')}
+              className="flex-1 min-w-0 min-h-[56px] rounded-full bg-transparent px-4 text-[17px] text-[#1e1b4b] placeholder:text-[#6b5b95] outline-none focus-visible:ring-2 focus-visible:ring-[#a78bfa]"
             />
             <button
               type="button"
               data-vai-tro="nut-chinh"
               aria-label={t('Chọn ảnh tình huống')}
               onClick={() => oAnhRef.current?.click()}
-              className="w-14 h-14 rounded-2xl bg-white border-2 border-[#2e1065] text-[#2e1065] flex items-center justify-center shrink-0"
+              className="w-14 h-14 rounded-full bg-[#f3eeff] border border-[#ddd0fb] text-[#5b21b6] flex items-center justify-center shrink-0 active:scale-95 transition-transform"
             >
               <ImageIcon size={24} />
             </button>
@@ -278,9 +337,9 @@ export function TroLyNoi({
               data-vai-tro="nut-chinh"
               aria-label={t('Gửi')}
               onClick={() => { if (dangGo.trim()) { void gui(dangGo); setDangGo(''); } }}
-              className="w-14 h-14 rounded-2xl bg-[#7c3aed] border-2 border-[#2e1065] text-white flex items-center justify-center shrink-0"
+              className="w-14 h-14 rounded-full bg-gradient-to-b from-[#8b5cf6] to-[#6d28d9] text-white flex items-center justify-center shrink-0 shadow-[0_8px_20px_rgba(124,58,237,0.3)] active:scale-95 transition-transform"
             >
-              <Send size={24} />
+              <Send size={22} />
             </button>
           </div>
           {/*
@@ -310,7 +369,7 @@ export function TroLyNoi({
         "không gửi gì" ở mọi màn khác. Giấu chuyện này đi là một lời khai SAI,
         tệ hơn một lời khai thiếu. Cùng câu chữ với màn ghi âm.
       */}
-      <p className="text-[14px] font-semibold text-slate-700 leading-snug mt-5 shrink-0">
+      <p className="w-full max-w-md mx-auto text-center text-[14px] font-semibold text-slate-700 leading-snug mt-4 mb-auto shrink-0">
         {t('Tiếng nói của bác được gửi ra ngoài để đổi thành chữ.')}
       </p>
     </motion.div>

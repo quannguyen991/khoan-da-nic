@@ -14,6 +14,14 @@ type Props = {
   micHong?: boolean;
   /** Có đuôi bong bóng thoại ở trang chủ. */
   coDuoi?: boolean;
+  /**
+   * Trôi nổi nhẹ lên xuống — bong bóng "sống", như màn nói chuyện của ChatGPT.
+   * Người dùng xin 24/9/2026 cho màn "Nói cho cháu nghe". Đây là trang trí, không
+   * phải trạng thái: nó KHÔNG chạy khi `micHong` (quả cầu xám phải đứng im).
+   */
+  troiNoi?: boolean;
+  /** Đang chờ lời đáp: quầng sáng thở chậm. Khác hẳn vòng sóng "đang nghe". */
+  dangNghi?: boolean;
   className?: string;
 };
 
@@ -24,11 +32,25 @@ const HAT_SANG = [
   { cx: 146, cy: 120, r: 2.5 },
 ];
 
-export function QuaCauNoi({ dangNghe = false, micHong = false, coDuoi = true, className = '' }: Props) {
+export function QuaCauNoi({
+  dangNghe = false, micHong = false, coDuoi = true, troiNoi = false, dangNghi = false, className = '',
+}: Props) {
   const dangSong = dangNghe && !micHong;
+  const troi = troiNoi && !micHong;
 
   return (
-    <div className={`relative ${className}`} aria-hidden="true">
+    <div
+      className={`relative ${troi ? 'animate-[troiNoi_4.2s_ease-in-out_infinite] motion-reduce:animate-none' : ''} ${className}`}
+      aria-hidden="true"
+    >
+      {/* Bóng đổ mềm dưới đáy — co lại khi quả cầu nổi lên, cho cảm giác có khoảng trống bên dưới. */}
+      {troi && (
+        // Thân cầu kết thúc ở y=176/224 của viewBox (≈ 78%), nên bóng đặt ngay dưới đó.
+        <span className="absolute left-1/2 -translate-x-1/2 bottom-[13%] w-[44%] h-[6%] rounded-[50%] bg-[#6d28d9]/25 blur-md animate-[bongDuoi_4.2s_ease-in-out_infinite] motion-reduce:animate-none" />
+      )}
+      {dangNghi && !micHong && (
+        <span className="absolute inset-[6%] rounded-full bg-[#c4b5fd]/50 blur-xl animate-[thoCham_1.8s_ease-in-out_infinite] motion-reduce:animate-none" />
+      )}
       {dangSong && [0, 1, 2].map((i) => (
         <span
           key={i}
