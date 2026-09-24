@@ -6848,6 +6848,22 @@ function AddFamilyView({ setView, t, setFamilyMembers }: { setView: (v: ViewStat
 
 
 /**
+ * CÂU LỆNH MÀN GẤP — MỖI CÂU MỘT DÒNG. Thêm 24/9/2026.
+ *
+ * Người dùng: "Đừng chuyển tiền cho xuống hẳn dòng". Chữ 30px trong khung
+ * max-w-sm ngắt ở chỗ hết chỗ, không ở chỗ hết ý: "Cúp máy. Đừng chuyển / tiền."
+ * — chữ "tiền" mồ côi, và người đọc chậm đọc "Đừng chuyển" thành một lệnh riêng.
+ * Mọi câu lệnh ở đây là 1–2 câu ≤ 8 chữ (xem `CAU_LENH_NGAN`), nên tách theo
+ * dấu câu là tách đúng theo ý. `text-wrap: balance` lo phần còn lại khi một câu
+ * vẫn dài hơn một dòng (tiếng Anh, cỡ chữ lớn nhất).
+ * ⚠️ Chỉ đổi CÁCH HIỆN. Câu đọc to vẫn là nguyên chuỗi `t(cauLenh)`.
+ */
+function CauTungDong({ chu }: { chu: string }) {
+  const cau = (chu.match(/[^.!?]+[.!?]*/g) || [chu]).map((c) => c.trim()).filter(Boolean);
+  return <>{cau.map((c, i) => <span key={i} className="block [text-wrap:balance]">{c}</span>)}</>;
+}
+
+/**
  * MÀN KẾT QUẢ — §HĐ SỐNG HAY CHẾT Ở ĐÂY.
  *
  * Bốn luật của hợp đồng, không luật nào được bỏ:
@@ -7624,7 +7640,7 @@ export function WarningView({
         {heroGap ? (
           <>
             <p data-vai-tro="cau-lenh" className="text-[30px] leading-tight font-black text-white text-center mb-4 max-w-sm">
-              {t(cauLenh)}
+              <CauTungDong chu={t(cauLenh)} />
             </p>
             <div className="w-full flex flex-col gap-2 mb-3">
               {nutHanhDongGap}
