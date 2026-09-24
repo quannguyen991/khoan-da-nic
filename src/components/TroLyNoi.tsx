@@ -30,6 +30,8 @@ import { QuaCauNoi } from './QuaCauNoi';
 
 type Luot = { vai: 'bac' | 'chau'; noiDung: string };
 
+const KHOA_DA_BAO_GIONG = 'khoan_da_da_bao_giong_ra_ngoai';
+
 /** Ba trạng thái của cái vòng tròn to ở giữa. Không có trạng thái thứ tư. */
 type TrangThai = 'cho' | 'nghe' | 'nghi';
 
@@ -59,6 +61,16 @@ export function TroLyNoi({
   const [micHong, setMicHong] = useState(false);
   const [nheDuocGiongNoi, setNheDuocGiongNoi] = useState(true);
   const [dangGo, setDangGo] = useState('');
+  /**
+   * §6.9 — ĐÃ BÁO "GIỌNG NÓI ĐI RA NGOÀI" CHƯA. Người dùng chọn 24/9/2026: dòng báo
+   * thường trực ở đáy màn là thừa; chỉ báo tới lần ĐẦU bác bấm nói. §6.9 đòi nói rõ
+   * TRƯỚC khi gửi — dòng này hiện ngay dưới nút micro, nên bác đọc nó trước lần bấm
+   * đầu tiên. Cờ nhỏ trong localStorage (§6.9 cho phép "chỉ cờ nhỏ"), bị chặn thì
+   * coi như CHƯA báo — thà báo thêm một lần còn hơn không báo.
+   */
+  const [daBaoGiong, setDaBaoGiong] = useState(() => {
+    try { return localStorage.getItem(KHOA_DA_BAO_GIONG) === '1'; } catch { return false; }
+  });
 
   const nhanRef = useRef<any>(null);
   const oAnhRef = useRef<HTMLInputElement | null>(null);
@@ -138,6 +150,9 @@ export function TroLyNoi({
     dungDocTo();          // bác nói chen vào thì cháu im
     setLoi(null);
     setMicHong(false);
+    // Bác đã thấy dòng báo ngay dưới nút này trước khi bấm — từ nay không cần nhắc.
+    setDaBaoGiong(true);
+    try { localStorage.setItem(KHOA_DA_BAO_GIONG, '1'); } catch { /* bị chặn thì lần sau báo lại */ }
 
     try {
       const nhan = new SR();
@@ -274,6 +289,18 @@ export function TroLyNoi({
         </button>
 
         {/*
+          §6.9 — bộ nghe của trình duyệt gửi tiếng nói RA NGOÀI, và app khai "không
+          gửi gì" ở mọi màn khác. Giấu hẳn là một lời khai SAI. Nhưng một dòng thường
+          trực ở đáy màn thì người dùng thấy thừa (24/9/2026) — nên chỉ hiện NGAY DƯỚI
+          NÚT cho tới lần bấm đầu. Máy không nghe được giọng nói thì không có gì để báo.
+        */}
+        {nheDuocGiongNoi && !daBaoGiong && (
+          <p className="w-full max-w-xs mt-2 text-center text-[14px] font-semibold text-slate-700 leading-snug">
+            {t('Tiếng nói của bác được gửi ra ngoài để đổi thành chữ.')}
+          </p>
+        )}
+
+        {/*
           NÚT DUY NHẤT DẪN TỚI KẾT LUẬN. Nó không tự bấm: một màn đỏ nhảy ra giữa
           câu chuyện làm bác giật mình, mà giật mình là thứ kẻ lừa đảo đang bán.
         */}
@@ -364,14 +391,8 @@ export function TroLyNoi({
           />
         </div>
 
-      {/*
-        §6.9 — bộ nghe của trình duyệt gửi tiếng nói RA NGOÀI, và app khai
-        "không gửi gì" ở mọi màn khác. Giấu chuyện này đi là một lời khai SAI,
-        tệ hơn một lời khai thiếu. Cùng câu chữ với màn ghi âm.
-      */}
-      <p className="w-full max-w-md mx-auto text-center text-[14px] font-semibold text-slate-700 leading-snug mt-4 mb-auto shrink-0">
-        {t('Tiếng nói của bác được gửi ra ngoài để đổi thành chữ.')}
-      </p>
+      {/* Neo đáy cho cụm giữa (`mt-auto` ở trên + `mb-auto` ở đây). Dòng §6.9 đã dời lên dưới nút micro. */}
+      <div className="mb-auto" aria-hidden="true" />
     </motion.div>
   );
 }
