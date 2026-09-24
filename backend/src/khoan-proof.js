@@ -129,6 +129,16 @@ class LoiProof extends Error {
 /** Băm mã ghép trước khi lưu — §6.9: kho không giữ bí mật dạng đọc được. */
 const bam = (s) => crypto.createHash('sha256').update(String(s)).digest('hex');
 
+/**
+ * ⚠️ KHOÁ CỦA PHIÊN LÀ BẢN BĂM TOKEN, KHÔNG PHẢI TOKEN — sửa 24/9/2026.
+ * Chạy thử đầu-cuối Guardian: token phiên nằm THÔ ở cột khoá của `proof_phien`.
+ * Ai đọc được cơ sở dữ liệu (bản sao lưu, một câu SELECT lỡ tay, nhà cung cấp
+ * Postgres) là cầm được phiên của MỌI tài khoản trong 30 ngày. Cùng lý do mã
+ * ghép đã được băm. Token 32 byte ngẫu nhiên nên SHA-256 không muối là đủ —
+ * không có gì để dò ngược. Tiền tố `h:` để phân biệt với khoá thô đời cũ.
+ */
+const khoaPhien = (token) => `h:${bam(token)}`;
+
 // ─────────────────── Phiên ───────────────────
 
 /**
@@ -152,7 +162,7 @@ async function capPhienDemo(taiKhoanId, { bayGio = Date.now(), env = process.env
   }
   const phien = taoPhien({ thanhVienId: taiKhoanId.trim(), bayGio });
   const kho = await layKho();
-  await kho.luu(BANG.PHIEN, phien.token, {
+  await kho.luu(BANG.PHIEN, khoaPhien(phien.token), {
     thanhVienId: phien.thanhVienId, hetHanLuc: phien.hetHanLuc,
   });
   return { token: phien.token, hetHanLuc: phien.hetHanLuc };
@@ -173,7 +183,7 @@ async function capPhien(taiKhoanId, { bayGio = Date.now() } = {}) {
   }
   const phien = taoPhien({ thanhVienId: taiKhoanId.trim(), bayGio });
   const kho = await layKho();
-  await kho.luu(BANG.PHIEN, phien.token, {
+  await kho.luu(BANG.PHIEN, khoaPhien(phien.token), {
     thanhVienId: phien.thanhVienId, hetHanLuc: phien.hetHanLuc,
   });
   return { token: phien.token, hetHanLuc: phien.hetHanLuc };
@@ -185,7 +195,10 @@ async function huyPhien(header) {
   const m = /^Bearer\s+(\S+)$/i.exec(header.trim());
   if (!m) return false;
   const kho = await layKho();
-  return kho.xoa(BANG.PHIEN, m[1]);
+  const daXoa = await kho.xoa(BANG.PHIEN, khoaPhien(m[1]));
+  // Phiên đời cũ còn nằm dưới khoá thô: xoá luôn, đăng xuất không được để sót.
+  const daXoaCu = await kho.xoa(BANG.PHIEN, m[1]);
+  return daXoa || daXoaCu;
 }
 
 /** Kho dùng chung — `tai-khoan.js` phải ghi vào ĐÚNG kho này, không mở kho riêng. */
@@ -197,7 +210,22 @@ async function docPhien(header, { bayGio = Date.now() } = {}) {
   const m = /^Bearer\s+(\S+)$/i.exec(header.trim());
   if (!m) return null;
   const kho = await layKho();
-  const phien = await kho.doc(BANG.PHIEN, m[1]);
+  let phien = await kho.doc(BANG.PHIEN, khoaPhien(m[1]));
+  if (!phien) {
+    /*
+     * Phiên cấp TRƯỚC 24/9/2026 nằm dưới khoá thô. Còn hạn thì chuyển sang khoá
+     * băm rồi xoá bản thô — người dùng không bị đăng xuất, và kho sạch dần theo
+     * từng lần họ mở app. Hết hạn thì xoá luôn.
+     */
+    const cu = await kho.doc(BANG.PHIEN, m[1]);
+    if (cu) {
+      await kho.xoa(BANG.PHIEN, m[1]);
+      if (phienConHan(cu, bayGio)) {
+        await kho.luu(BANG.PHIEN, khoaPhien(m[1]), cu);
+        phien = cu;
+      }
+    }
+  }
   if (!phienConHan(phien, bayGio)) return null;
   return phien.thanhVienId;
 }
