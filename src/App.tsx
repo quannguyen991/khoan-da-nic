@@ -1970,9 +1970,15 @@ const SAC_NUT_GON = {
     nen: 'bg-gradient-to-r from-[#c81e1e] via-[#dc2626] to-[#c81e1e] text-white shadow-[0_14px_28px_-12px_rgba(220,38,38,0.7),inset_0_2px_0_rgba(255,255,255,0.25)]',
     bieuTuong: 'text-[#dc2626]',
   },
+  /*
+   * 24/9/2026 — người dùng: "không thích màu này" (tím than #3d1d8f). Đổi sang xanh
+   * dương — màu người ta gắn với cuộc gọi, và khác hẳn tím / xanh lá / đỏ của ba
+   * nút kia. KHÔNG cam / vàng: trong app đó là màu của mức "Nghi ngờ".
+   * Chữ trắng: #2563eb 5,2:1 · #1d4ed8 6,7:1 — qua sàn 4,5:1 ở mọi điểm gradient.
+   */
   cuocGoi: {
-    nen: 'bg-gradient-to-r from-[#3d1d8f] via-[#4a27a3] to-[#3d1d8f] text-white shadow-[0_14px_28px_-12px_rgba(46,16,101,0.7),inset_0_2px_0_rgba(255,255,255,0.2)]',
-    bieuTuong: 'text-[#4a27a3]',
+    nen: 'bg-gradient-to-r from-[#1d4ed8] via-[#2563eb] to-[#1d4ed8] text-white shadow-[0_14px_28px_-12px_rgba(37,99,235,0.7),inset_0_2px_0_rgba(255,255,255,0.25)]',
+    bieuTuong: 'text-[#2563eb]',
   },
 } as const;
 
@@ -7457,11 +7463,30 @@ export function WarningView({
   ) : null;
 
   /**
-   * NÚT CHÍNH CỦA MÀN GẤP. Có số người thân → gọi người thân. Chưa có → Cảnh sát
-   * 113 (số đã duyệt ở `so-khan-cap.ts`), KHÔNG mở biểu mẫu giữa lúc bị giục.
-   * 156 là tổng đài PHẢN ÁNH, không cứu được tiền lúc đó — nó nằm trong "Xem thêm".
+   * 113 LÀ NÚT PHỤ KHI ĐÃ CÓ SỐ NGƯỜI THÂN — thêm 24/9/2026.
+   * Người dùng: "khi thêm người thân rồi thì trong phần khẩn cấp hiện LUÔN CẢ phần
+   * gọi cho con cái". Trước đó hai nút THAY NHAU: có số con thì 113 biến mất khỏi
+   * màn gấp (chỉ còn trong "Xem thêm"). Nay gọi con vẫn là nút chính (vàng, to,
+   * đứng trước), 113 đứng ngay dưới, nhỏ hơn và không tô màu — người đang hoảng
+   * vẫn thấy rõ việc nào làm trước.
    */
-  const nutHanhDongGap = firstContact.phone || !soCongAn ? nutGoiChinh : (
+  const nut113Phu = soCongAn ? (
+    <a
+      href={`tel:${soCongAn.cleanPhone}`}
+      className="w-full min-h-[56px] py-3 px-4 rounded-[22px] font-black text-[17px] bg-white/15 text-white border-2 border-white/45 flex items-center justify-center gap-2 active:scale-98 transition-all"
+    >
+      <ShieldCheck size={22} className="shrink-0" />
+      <span>{t('Gọi')} {soCongAn.name}</span>
+    </a>
+  ) : null;
+
+  /**
+   * NÚT CHÍNH CỦA MÀN GẤP. Có số người thân → gọi người thân (+ 113 phụ ngay dưới).
+   * Chưa có → Cảnh sát 113 (số đã duyệt ở `so-khan-cap.ts`), KHÔNG mở biểu mẫu
+   * giữa lúc bị giục. 156 là tổng đài PHẢN ÁNH, không cứu được tiền lúc đó — nó
+   * nằm trong "Xem thêm".
+   */
+  const nutHanhDongGap = firstContact.phone || !soCongAn ? <>{nutGoiChinh}{firstContact.phone && nut113Phu}</> : (
     <a
       href={`tel:${soCongAn.cleanPhone}`}
       data-vai-tro="nut-chinh"
@@ -7736,7 +7761,11 @@ export function WarningView({
                 <div
                   role="timer"
                   aria-label={t('Còn {n} giây').replace('{n}', String(timeLeft))}
-                  className="self-center relative mt-3 w-[min(40vw,22vh,176px)] aspect-square flex items-center justify-center"
+                  // Có số người thân thì màn có THÊM nút 113 phụ (~64px) — vòng nhỏ lại
+                  // để "Về trang chủ" (lối ra §4.6) vẫn nằm trong màn không phải cuộn.
+                  className={`self-center relative mt-2 aspect-square flex items-center justify-center ${
+                    firstContact.phone ? 'w-[min(36vw,16vh,150px)]' : 'w-[min(40vw,22vh,176px)]'
+                  }`}
                 >
                   <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 120 120" aria-hidden="true">
                     <circle cx="60" cy="60" r="52" fill="rgba(0,0,0,0.18)" stroke="rgba(255,255,255,0.22)" strokeWidth="8" />
