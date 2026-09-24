@@ -118,9 +118,14 @@ const CHU = {
     sau2: 'Kẻ gian hay quay lại lần hai, kiểu “nộp phí để lấy lại tiền”. App nhắc ở các mốc 2, 24, 48 và 72 giờ. Bản Android nhắc cả khi app đã đóng.',
     sau3T: 'Nhớ vụ việc 14 ngày',
     sau3: 'Tin sau giống tin trước, app hỏi có phải cùng một người không. Phần nhớ này nằm trên máy.',
-    sauMoc: ['2 giờ', '24 giờ', '48 giờ', '72 giờ'],
-    sauMocNhan: 'Các mốc nhắc sau sự cố',
-    sauKhongHua: 'Khoan Đã không hứa đòi lại được tiền. App giúp làm đúng việc, sớm nhất có thể.',
+    sauManNhan: 'Minh hoạ màn sau khi bấm “Tôi đã lỡ chuyển tiền hoặc đọc mã rồi”',
+    sauTheoDoi: 'Đang theo dõi 72 giờ sau sự cố',
+    sauKhung: 'Những bước sau làm TĂNG khả năng xử lý — không ai hứa lấy lại được tiền',
+    sauBuoc: [
+      'Ngừng mọi liên lạc với bên kia — đừng nghe máy, đừng nhắn lại',
+      'Không chuyển thêm bất kỳ khoản nào nữa, dù họ nói lý do gì',
+      'Gọi ngay ngân hàng bằng số in trên thẻ hoặc mặt sau thẻ — không dùng số họ gửi',
+    ],
 
     qdTieuDe: 'AI chỉ trích dấu hiệu. Bộ luật cố định mới quyết mức rủi ro.',
     qdDoan: 'AI đọc tin và đánh dấu những gì nó thấy, như giả danh cơ quan, đòi chuyển tiền, đòi mã OTP. Mức rủi ro do một bộ luật viết sẵn tính ra, nên cùng một tin luôn cho cùng một kết luận, và đổi ngôn ngữ không làm đổi kết luận.',
@@ -159,12 +164,13 @@ const CHU = {
     caiCanhBaoTieuDe: 'Chỉ tải ở đúng trang này',
     caiCanhBao: 'Khoan Đã chưa có trên CH Play. Khoan Đã không bao giờ gửi link tải ứng dụng qua tin nhắn, Zalo hay cuộc gọi. Ai gửi cho bố mẹ bạn một link “Khoan Đã” là giả.',
     caiBuoc: [
-      'Trên điện thoại của bố mẹ, mở trang này bằng Chrome rồi bấm “Tải tệp APK” bên dưới.',
+      'Trên điện thoại của bố mẹ, mở trang này bằng Chrome rồi bấm “Tải tệp APK”.',
       'Mở tệp vừa tải. Máy hỏi có cho Chrome cài ứng dụng không: bấm cho phép.',
       'Cài xong, tắt lại quyền đó: Cài đặt → Ứng dụng → Chrome → Cài ứng dụng không rõ nguồn. Tên mục có thể khác tuỳ máy.',
       'Mở Khoan Đã, chọn “Bác / bố mẹ”, rồi lưu số của bạn.',
       'Muốn app tự xem tin nhắn đến: Android 13 trở lên có thể báo “cài đặt bị hạn chế”. Vào Thông tin ứng dụng của Khoan Đã, bấm dấu ba chấm ở góc trên, chọn cho phép cài đặt bị hạn chế, rồi bật lại. Bạn làm giúp bố mẹ bước này, đừng hướng dẫn bố mẹ tự làm với ứng dụng khác.',
     ],
+    caiDiaChiNhan: 'Đang đọc trên máy tính? Gõ địa chỉ này vào Chrome trên điện thoại của bố mẹ:',
     caiNut: 'Tải tệp APK',
     caiPhienBan: 'Khoan Đã {v} · {kt}',
     caiMayCu: 'Máy đã cài bản thử trước đây thì gỡ bản cũ ra rồi mới cài bản này.',
@@ -186,6 +192,7 @@ const CHU = {
 
     dongTieuDe: 'Khoan Đã đang trong giai đoạn thử nghiệm',
     dongDoan: 'Dự án dự thi NextGen 2026. Chúng tôi chưa thử rộng với người cao tuổi ngoài gia đình. Nếu nhà bạn muốn dùng thử và góp ý, hãy viết cho chúng tôi.',
+    dongNutThu: 'Viết thư góp ý',
     chanSoDo: 'Số đo công khai',
     chanRiengTu: 'Chính sách quyền riêng tư',
     chanMoApp: 'Mở ứng dụng',
@@ -275,9 +282,14 @@ const CHU = {
     sau2: 'Scammers often come back a second time, as in “pay a fee to get your money back”. The app reminds at 2, 24, 48 and 72 hours. The Android app reminds even when closed.',
     sau3T: 'Case memory for 14 days',
     sau3: 'When a new message looks like an earlier one, the app asks whether it is the same person. This memory stays on the phone.',
-    sauMoc: ['2 hours', '24 hours', '48 hours', '72 hours'],
-    sauMocNhan: 'Reminder points after an incident',
-    sauKhongHua: 'Khoan Đã does not promise the money comes back. It helps do the right things, as early as possible.',
+    sauManNhan: 'Illustration of the screen after tapping “I already sent money or read out a code”',
+    sauTheoDoi: 'Watching the 72 hours after the incident',
+    sauKhung: 'These steps increase the chance of a resolution — no one can promise your money back',
+    sauBuoc: [
+      'Stop all contact with them — do not answer calls or reply to messages',
+      'Do not send any more money, no matter what reason they give',
+      'Call your bank now using the number printed on your card — not a number they sent you',
+    ],
 
     qdTieuDe: 'AI only extracts signals. Fixed rules decide the risk level.',
     qdDoan: 'The AI reads the message and marks what it sees, such as someone impersonating an agency or demanding a transfer or an OTP code. A pre-written rulebook computes the risk level, so the same message always gets the same result, and switching language cannot change it.',
@@ -316,12 +328,13 @@ const CHU = {
     caiCanhBaoTieuDe: 'Download only from this page',
     caiCanhBao: 'Khoan Đã is not on Google Play yet. Khoan Đã never sends app download links by message, Zalo or phone call. Anyone who sends your parents a “Khoan Đã” link is not us.',
     caiBuoc: [
-      'On your parent’s phone, open this page in Chrome and tap “Download the APK” below.',
+      'On your parent’s phone, open this page in Chrome and tap “Download the APK”.',
       'Open the downloaded file. When the phone asks whether Chrome may install apps, allow it.',
       'After installing, switch that permission off again: Settings → Apps → Chrome → Install unknown apps. Menu names vary by phone.',
       'Open Khoan Đã, choose “Parent / grandparent”, then save your number.',
       'To screen incoming messages: Android 13 and later may say “restricted setting”. Open Khoan Đã’s App info, tap the three dots at the top, allow restricted settings, then switch it on again. Do this step for your parents; do not teach them to do it for other apps.',
     ],
+    caiDiaChiNhan: 'Reading this on a computer? Type this address into Chrome on your parent’s phone:',
     caiNut: 'Download the APK',
     caiPhienBan: 'Khoan Đã {v} · {kt}',
     caiMayCu: 'If a test version was installed before, uninstall it first.',
@@ -343,6 +356,7 @@ const CHU = {
 
     dongTieuDe: 'Khoan Đã is in its testing stage',
     dongDoan: 'A NextGen 2026 entry. We have not yet tested widely with older people outside our own families. If your family would like to try it and tell us what works, write to us.',
+    dongNutThu: 'Write to us',
     chanSoDo: 'Published measurements',
     chanRiengTu: 'Privacy policy',
     chanMoApp: 'Open the app',
@@ -409,7 +423,8 @@ ${PHONG_CHU}
   --ra:cubic-bezier(.16,1,.3,1);
 }
 *{box-sizing:border-box}
-html{font-size:18px;-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+html{font-size:18px;-webkit-text-size-adjust:100%}
+@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
 @media (max-width:480px){html{font-size:17px}}
 body{margin:0;font-family:"Quicksand",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-weight:500;color:var(--muc);line-height:1.6;
   background-color:var(--tim-nen);
@@ -422,7 +437,7 @@ a{color:var(--muc-dam);text-underline-offset:3px}
 .an{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:normal}
 .nhay{position:absolute;left:var(--le);top:-80px;z-index:10;background:var(--muc-dam);color:#fff;padding:12px 18px;border-radius:14px;min-height:var(--cham);display:inline-flex;align-items:center}
 .nhay:focus{top:12px}
-.khung{max-width:74rem;margin:0 auto;padding:0 var(--le)}
+.khung{max-width:72rem;margin:0 auto;padding-inline:clamp(16px,5vw,56px)}
 .bt{width:1.25em;height:1.25em;flex:none;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
 
 /* đầu trang */
@@ -431,15 +446,16 @@ a{color:var(--muc-dam);text-underline-offset:3px}
 .thuong-hieu{display:inline-flex;align-items:center;gap:10px;min-height:var(--cham);text-decoration:none;font-weight:700;font-size:1.15rem;color:var(--muc-dam)}
 .thuong-hieu img{border-radius:12px}
 .khau-hieu{color:var(--muc-phu);font-size:.9rem;flex:1 1 auto}
-.nut-nho{display:inline-flex;align-items:center;min-height:var(--cham);padding:0 20px;border-radius:999px;border:2px solid var(--tim-vien);background:var(--giay);font-weight:700;text-decoration:none}
+.nut-nho{display:inline-flex;align-items:center;min-height:var(--cham);padding:0 20px;border-radius:999px;border:2px solid var(--tim-1);background:var(--giay);font-weight:700;text-decoration:none}
+@media (max-width:600px){.nut-nho{margin-left:auto}.khau-hieu{order:3;flex-basis:100%}}
 
 /* nút */
 .nut{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:var(--cham-chinh);padding:14px 28px;border-radius:999px;font-weight:700;font-size:1.05rem;line-height:1.3;text-decoration:none;text-align:center;transition:transform .2s var(--ra),box-shadow .2s var(--ra)}
 .nut:hover{transform:translateY(-2px)}
 .nut:active{transform:translateY(0) scale(.98)}
 .nut-chinh{color:var(--muc);background:linear-gradient(135deg,var(--tim-1),var(--tim-2));box-shadow:0 14px 30px -12px rgba(109,40,217,.55)}
-.nut-phu{color:var(--muc);background:var(--giay);border:2px solid var(--tim-vien)}
-.nut-vang{color:var(--muc);background:var(--vang);box-shadow:0 14px 30px -14px rgba(180,83,9,.6)}
+.nut-phu{color:var(--muc);background:var(--giay);border:2px solid var(--tim-1)}
+.nut-dac{color:#fff;background:var(--muc-dam);box-shadow:0 14px 30px -14px rgba(30,27,75,.7)}
 
 /* mở đầu */
 .mo-dau{padding:28px 0 72px}
@@ -452,7 +468,11 @@ a{color:var(--muc-dam);text-underline-offset:3px}
 
 /* điện thoại minh hoạ */
 .dien-thoai{margin:0;justify-self:center;width:min(100%,360px)}
-.may{position:relative;border-radius:44px;border:10px solid var(--muc);background:radial-gradient(circle at 50% 22%,rgba(196,181,253,.6),transparent 46%),var(--tim-nen);padding:26px 18px 28px;box-shadow:var(--bong);display:flex;flex-direction:column;gap:14px;min-height:540px}
+.may{position:relative;border-radius:44px;border:10px solid var(--muc);background:radial-gradient(circle at 50% 22%,rgba(196,181,253,.6),transparent 46%),var(--tim-nen);padding:26px 18px 28px;box-shadow:var(--bong);display:flex;flex-direction:column;gap:14px;min-height:540px;pointer-events:none;color:var(--muc)}
+.may-toi{border-color:var(--tim-1);box-shadow:0 30px 60px -24px rgba(0,0,0,.55)}
+.may-toi::before{background:var(--tim-1)}
+.may-sau{min-height:0}
+.hoi-trong .chu-thich{color:var(--dem-phu)}
 .may::before{content:"";position:absolute;top:8px;left:50%;width:84px;height:8px;border-radius:99px;background:var(--muc);transform:translateX(-50%);opacity:.9}
 .may-tieu-de{text-align:center;font-weight:700;color:var(--muc-dam);margin-top:6px}
 .qua-cau{width:112px;height:112px;margin:6px auto 4px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff 0,#e9dcff 18%,var(--tim-2) 52%,var(--tim) 100%);box-shadow:0 20px 40px -16px rgba(109,40,217,.6),inset 0 -8px 18px rgba(46,16,101,.25)}
@@ -491,13 +511,13 @@ a{color:var(--muc-dam);text-underline-offset:3px}
 .the-android{display:inline-flex;align-items:center;min-height:30px;padding:2px 12px;border-radius:999px;font-size:.85rem;font-weight:700;background:var(--tim-nhat);color:var(--muc-dam)}
 
 /* hồi Trước: tờ quy tắc */
-.to-quy-tac{background:#fffdf4;border-radius:var(--bo-vua);padding:26px 24px 22px;box-shadow:var(--bong);transform:rotate(-1.2deg);border:1px solid #efe3b5;max-width:420px;justify-self:center;width:100%}
+.to-quy-tac{background:var(--giay);border-radius:var(--bo);padding:26px 24px 22px;box-shadow:var(--bong);border:1px solid var(--tim-vien);max-width:420px;justify-self:center;width:100%}
 .to-quy-tac h3{font-size:1.2rem;color:var(--muc-dam)}
 .to-quy-tac ul{list-style:none;padding:0;margin:16px 0 0;display:grid;gap:12px}
 .to-quy-tac li{display:flex;gap:10px;align-items:flex-start;font-size:1.02rem}
 .to-quy-tac li .bt{color:var(--tim);margin-top:3px}
 .vi-du{margin-top:16px;font-size:.85rem;color:var(--muc-phu)}
-.ma-noi{margin-top:22px;padding-top:18px;border-top:1px dashed #e2d3a0}
+.ma-noi{margin-top:22px;padding-top:18px;border-top:1px dashed var(--tim-vien)}
 .ma-noi p{font-size:.9rem;color:var(--muc-phu)}
 .o-ma{display:flex;gap:8px;margin-top:8px}
 .o-ma span{display:grid;place-items:center;width:42px;height:52px;border-radius:12px;background:var(--giay);border:2px solid var(--tim-vien);font-weight:700;font-size:1.3rem;color:var(--muc-dam)}
@@ -508,7 +528,7 @@ a{color:var(--muc-dam);text-underline-offset:3px}
 .hoi-trong .ten-hoi{color:var(--tim-2)}
 .hoi-trong .viec p{color:var(--dem-phu)}
 .hoi-trong .the-android{background:rgba(255,255,255,.14);color:#fff}
-.man-dung{background:var(--tim-nen);color:var(--muc);border-radius:36px;padding:30px 22px 22px;box-shadow:0 30px 60px -24px rgba(0,0,0,.55);max-width:380px;width:100%;justify-self:center;text-align:center}
+.man-dung{text-align:center;gap:10px;padding-top:34px}
 .vong{width:176px;height:176px;margin:0 auto;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--vang) 0 100%);position:relative;box-shadow:0 16px 34px -16px rgba(180,83,9,.55)}
 .vong::after{content:"";position:absolute;inset:14px;border-radius:50%;background:var(--tim-nen)}
 .vong span{position:relative;z-index:1;font-weight:700;font-size:3rem;line-height:1.1;color:var(--muc-dam)}
@@ -522,13 +542,12 @@ a{color:var(--muc-dam);text-underline-offset:3px}
 .gia-vang{background:var(--vang);color:var(--muc)}
 .toi-on{display:block;margin-top:14px;color:var(--muc-phu);text-decoration:underline;text-underline-offset:3px;min-height:var(--cham);line-height:var(--cham)}
 
-/* hồi Sau: mốc 72 giờ */
-.moc{background:var(--giay);border-radius:var(--bo);padding:28px 24px;box-shadow:var(--bong);border:1px solid var(--tim-vien)}
-.moc ol{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,1fr);position:relative}
-.moc ol::before{content:"";position:absolute;left:12.5%;right:12.5%;top:13px;height:3px;background:linear-gradient(90deg,var(--tim-1),var(--tim-2));border-radius:3px}
-.moc li{display:flex;flex-direction:column;align-items:center;gap:10px;font-weight:700;color:var(--muc-dam);text-align:center;font-size:.95rem}
-.moc li::before{content:"";width:28px;height:28px;border-radius:50%;background:var(--giay);border:4px solid var(--tim);position:relative;z-index:1}
-.khong-hua{margin-top:22px;padding:16px 18px;border-radius:18px;background:var(--tim-nhat);color:var(--muc);font-weight:700}
+/* hồi Sau: màn phục hồi trong khung điện thoại */
+.the-theo-doi{align-self:center;margin-top:10px;padding:8px 16px;border-radius:999px;background:var(--muc-dam);color:#fff;font-weight:700;font-size:.9rem;text-align:center}
+.may-khung{font-weight:700;color:var(--muc-dam);line-height:1.45}
+.buoc-may{list-style:none;counter-reset:m;padding:0;margin:0;display:grid;gap:10px}
+.buoc-may li{counter-increment:m;display:grid;grid-template-columns:32px 1fr;gap:10px;align-items:start;background:var(--giay);border:1px solid var(--tim-vien);border-radius:16px;padding:12px;font-size:.95rem;line-height:1.45}
+.buoc-may li::before{content:counter(m);display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:var(--tim-nhat);color:var(--muc-dam);font-weight:700}
 
 /* cách quyết định */
 .quyet{padding:88px 0;background:var(--giay);border-block:1px solid var(--tim-vien)}
@@ -560,14 +579,14 @@ a{color:var(--muc-dam);text-underline-offset:3px}
 .so-sanh{padding:88px 0}
 .so-sanh h2{font-size:clamp(1.6rem,3.4vw,2.4rem);color:var(--muc-dam)}
 .so-sanh .doan{margin-top:14px;color:var(--muc-phu);max-width:60ch}
-.bang-vo{margin-top:28px;overflow-x:auto;border-radius:var(--bo-vua);border:1px solid var(--tim-vien);background:var(--giay)}
+.bang-vo{margin-top:28px;max-width:48rem;overflow-x:auto;border-radius:var(--bo-vua);border:1px solid var(--tim-vien);background:var(--giay)}
 table{width:100%;border-collapse:collapse}
 th,td{padding:14px 16px;text-align:left;border-bottom:1px solid var(--tim-nhat);vertical-align:middle}
 thead th{font-size:.9rem;color:var(--muc-phu);background:var(--tim-nen)}
 td.o,th.o{text-align:center;width:6.5rem}
 @media (max-width:560px){th,td{padding:12px 10px}td.o,th.o{width:4.2rem}}
 td.o .bt{color:var(--tim);width:1.5em;height:1.5em}
-td.o.khong .bt{color:#9a90b8}
+td.o.khong .bt{color:#857aa6}
 tbody tr:last-child td{border-bottom:0}
 
 /* cài đặt */
@@ -585,6 +604,9 @@ tbody tr:last-child td{border-bottom:0}
 .buoc li p{padding-top:9px}
 .hop-tai{background:var(--giay);border-radius:var(--bo);padding:26px 24px;box-shadow:var(--bong)}
 .hop-tai .nut{width:100%}
+.dia-chi{margin-bottom:20px;padding-bottom:18px;border-bottom:1px solid var(--tim-nhat)}
+.dia-chi p{color:var(--muc-phu);font-size:.95rem}
+.dia-chi .dia-chi-lon{margin-top:6px;font-size:1.3rem;font-weight:700;color:var(--muc-dam);overflow-wrap:anywhere}
 .hop-tai .phien-ban{margin-top:12px;text-align:center;font-weight:700;color:var(--muc-phu)}
 .hop-tai .phu{margin-top:16px;color:var(--muc-phu);font-size:.95rem}
 details{margin-top:18px;border-top:1px solid var(--tim-nhat);padding-top:12px}
@@ -605,7 +627,7 @@ summary{cursor:pointer;min-height:var(--cham);display:flex;align-items:center;fo
 .dong h2{font-size:clamp(1.8rem,4vw,2.8rem);color:var(--muc);max-width:22ch}
 .dong p{margin-top:16px;font-size:1.12rem;max-width:56ch}
 .dong .hang-nut{margin-top:28px}
-.dong .nut-phu{border-color:rgba(30,27,75,.25)}
+.dong .nut-phu{border-color:var(--muc)}
 
 .chan{padding:32px 0 48px;color:var(--muc-phu);font-size:.9rem}
 .chan-trong{display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center}
@@ -632,6 +654,7 @@ function dungTrangGioiThieu(ngonNgu = 'vi', { apk = null } = {}) {
 
   const hopTai = apk ? `
         <div class="hop-tai">
+          <div class="dia-chi"><p>${t('caiDiaChiNhan')}</p><p class="dia-chi-lon">khoan-da.onrender.com/gioi-thieu</p></div>
           <a class="nut nut-chinh" href="/khoan-da.apk" download>${BT.tai}<span>${t('caiNut')}</span></a>
           <p class="phien-ban">${esc(c.caiPhienBan.replace('{v}', apk.phienBan || '').replace('{kt}', dinhDangMb(apk.kichThuocByte, l)))}</p>
           <p class="phu">${t('caiMayCu')}</p>
@@ -723,7 +746,7 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
 
   <section class="hoi" aria-labelledby="h-truoc">
     <div class="khung">
-      <div class="hoi-dau"><h2 id="h-truoc"><span class="ten-hoi">${t('truocTen')}</span>${t('truocTieuDe')}</h2></div>
+      <div class="hoi-dau"><h2 id="h-truoc"><span class="ten-hoi">${t('truocTen')}</span> ${t('truocTieuDe')}</h2></div>
       <div class="hoi-luoi">
         <div>
           <p class="dan-hoi">${t('truocDan')}</p>
@@ -748,23 +771,26 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
 
   <section class="hoi hoi-trong hoi-dao" aria-labelledby="h-trong">
     <div class="khung">
-      <div class="hoi-dau"><h2 id="h-trong"><span class="ten-hoi">${t('trongTen')}</span>${t('trongTieuDe')}</h2></div>
+      <div class="hoi-dau"><h2 id="h-trong"><span class="ten-hoi">${t('trongTen')}</span> ${t('trongTieuDe')}</h2></div>
       <div class="hoi-luoi">
         <div>
           <ul class="viec">${viec([['trong1'], ['trong2'], ['trong3'], ['trong4'], ['trong5', true], ['trong6', true], ['trong7', true]])}
           </ul>
         </div>
-        <figure class="man-dung hinh" role="group" aria-label="${t('manDungNhan')}">
-          <div class="vong" aria-hidden="true"><span>60<small>${t('giay')}</small></span></div>
-          <h3>${t('dungTieuDe')}</h3>
-          <ul class="ba-viec">
-            <li>${BT.cam}<span>${t('dung1')}</span></li>
-            <li>${BT.cam}<span>${t('dung2')}</span></li>
-            <li>${BT.cam}<span>${t('dung3')}</span></li>
-          </ul>
-          <span class="gia-nut gia-xanh">${t('dungGoiCon')}</span>
-          <span class="gia-nut gia-vang">${t('dungGoi113')}</span>
-          <span class="toi-on">${t('dungToiOn')}</span>
+        <figure class="dien-thoai hinh">
+          <div class="may may-toi man-dung">
+            <div class="vong" aria-hidden="true"><span>60<small>${t('giay')}</small></span></div>
+            <p class="may-tieu-de">${t('dungTieuDe')}</p>
+            <ul class="ba-viec">
+              <li>${BT.cam}<span>${t('dung1')}</span></li>
+              <li>${BT.cam}<span>${t('dung2')}</span></li>
+              <li>${BT.cam}<span>${t('dung3')}</span></li>
+            </ul>
+            <span class="gia-nut gia-xanh">${t('dungGoiCon')}</span>
+            <span class="gia-nut gia-vang">${t('dungGoi113')}</span>
+            <span class="toi-on">${t('dungToiOn')}</span>
+          </div>
+          <figcaption class="chu-thich">${t('manDungNhan')}</figcaption>
         </figure>
       </div>
     </div>
@@ -772,16 +798,18 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
 
   <section class="hoi" aria-labelledby="h-sau">
     <div class="khung">
-      <div class="hoi-dau"><h2 id="h-sau"><span class="ten-hoi">${t('sauTen')}</span>${t('sauTieuDe')}</h2></div>
+      <div class="hoi-dau"><h2 id="h-sau"><span class="ten-hoi">${t('sauTen')}</span> ${t('sauTieuDe')}</h2></div>
       <div class="hoi-luoi">
         <ul class="viec">${viec([['sau1'], ['sau2'], ['sau3']])}
         </ul>
-        <div class="hinh">
-          <div class="moc">
-            <ol aria-label="${t('sauMocNhan')}">${c.sauMoc.map((m) => `<li>${esc(m)}</li>`).join('')}</ol>
+        <figure class="dien-thoai hinh">
+          <div class="may may-sau">
+            <p class="the-theo-doi">${t('sauTheoDoi')}</p>
+            <p class="may-khung">${t('sauKhung')}</p>
+            <ol class="buoc-may">${c.sauBuoc.map((b) => `<li><span>${esc(b)}</span></li>`).join('')}</ol>
           </div>
-          <p class="khong-hua">${t('sauKhongHua')}</p>
-        </div>
+          <figcaption class="chu-thich">${t('sauManNhan')}</figcaption>
+        </figure>
       </div>
     </div>
   </section>
@@ -842,8 +870,8 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
       <h2 id="h-dong">${t('dongTieuDe')}</h2>
       <p>${t('dongDoan')}</p>
       <div class="hang-nut">
-        <a class="nut nut-vang" href="mailto:${EMAIL_LIEN_HE}">${esc(EMAIL_LIEN_HE)}</a>
-        <a class="nut nut-phu" href="/">${t('nutWeb')}</a>
+        <a class="nut nut-dac" href="/">${t('nutWeb')}</a>
+        <a class="nut nut-phu" href="mailto:${EMAIL_LIEN_HE}">${t('dongNutThu')}</a>
       </div>
     </div>
   </section>
