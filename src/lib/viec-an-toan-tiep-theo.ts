@@ -96,18 +96,26 @@ export const CAU_VIEC_AN_TOAN: Record<ViecAnToan, string> = {
  * ⚠️ CHƯA CÓ SỐ NGƯỜI THÂN THÌ KHÔNG BẢO "GỌI CON CHÁU". Nút chính lúc đó là
  * Cảnh sát 113; câu lệnh bảo gọi một người không có số là sai với nút ngay dưới.
  */
+/*
+ * ⚠️ 24/9/2026 — người dùng xem màn khẩn cấp: "bỏ [Gọi con cháu ngay], bỏ chữ cúp
+ * máy luôn". Hai lý do đúng:
+ *   · "Gọi con cháu ngay" đứng NGAY TRÊN nút vàng "GỌI NGAY CHO CON CHÁU" — cùng một
+ *     câu nói hai lần, câu trên lại to hơn nút.
+ *   · "Cúp máy" không làm được trên màn này: bác đang nhìn app, không nhìn cuộc gọi.
+ *     Câu để thoát cuộc gọi đã có sẵn, lịch sự hơn: "Để tôi hỏi con rồi gọi lại."
+ * Nên câu mặc định còn đúng MỘT việc app không nói bằng nút: đừng chuyển tiền.
+ */
 export const CAU_LENH_NGAN: Record<ViecAnToan, string> = {
   goi_ngan_hang_phuc_hoi: 'Gọi ngay số in sau thẻ ngân hàng.',
   khong_cai_gui_nguoi_than: 'Đừng cài gì. Gọi con cháu.',
   goi_so_cu_nguoi_than: 'Gọi lại số cũ của người thân.',
-  goi_so_sau_the: 'Cúp máy. Gọi số sau thẻ.',
+  goi_so_sau_the: 'Gọi số in sau thẻ ngân hàng.',
   khong_doc_ma: 'Đừng đọc mã cho ai.',
-  cup_may_goi_nguoi_than: 'Cúp máy. Gọi con cháu ngay.',
+  cup_may_goi_nguoi_than: 'Đừng chuyển tiền.',
 };
 
 export const CAU_LENH_KHI_CHUA_CO_SO: Partial<Record<ViecAnToan, string>> = {
-  khong_cai_gui_nguoi_than: 'Đừng cài gì. Cúp máy ngay.',
-  cup_may_goi_nguoi_than: 'Cúp máy. Đừng chuyển tiền.',
+  khong_cai_gui_nguoi_than: 'Đừng cài gì.',
 };
 
 /**
@@ -117,7 +125,7 @@ export const CAU_LENH_KHI_CHUA_CO_SO: Partial<Record<ViecAnToan, string>> = {
  */
 export const CAU_LENH_TU_BAT = Object.freeze({
   otp_trong_cuoc_goi: 'Ai gọi mà xin mã là lừa đảo.',
-  cai_app_trong_cuoc_goi: 'Đừng cài gì. Cúp máy ngay.',
+  cai_app_trong_cuoc_goi: 'Đừng cài gì.',
   tien_ra_trong_cuoc_goi: 'Tiền vừa ra. Gọi con ngay.',
 });
 

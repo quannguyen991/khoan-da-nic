@@ -7466,14 +7466,14 @@ export function WarningView({
    * 113 LÀ NÚT PHỤ KHI ĐÃ CÓ SỐ NGƯỜI THÂN — thêm 24/9/2026.
    * Người dùng: "khi thêm người thân rồi thì trong phần khẩn cấp hiện LUÔN CẢ phần
    * gọi cho con cái". Trước đó hai nút THAY NHAU: có số con thì 113 biến mất khỏi
-   * màn gấp (chỉ còn trong "Xem thêm"). Nay gọi con vẫn là nút chính (vàng, to,
-   * đứng trước), 113 đứng ngay dưới, nhỏ hơn và không tô màu — người đang hoảng
-   * vẫn thấy rõ việc nào làm trước.
+   * màn gấp (chỉ còn trong "Xem thêm"). Nay gọi con vẫn đứng trước và to hơn, 113
+   * ngay dưới. Cùng ngày người dùng xin "cho gọi cảnh sát 113 cũng màu vàng": hai
+   * nút GỌI cùng một màu — màu vàng trên màn này nghĩa là "bấm để gọi".
    */
   const nut113Phu = soCongAn ? (
     <a
       href={`tel:${soCongAn.cleanPhone}`}
-      className="w-full min-h-[56px] py-3 px-4 rounded-[22px] font-black text-[17px] bg-white/15 text-white border-2 border-white/45 flex items-center justify-center gap-2 active:scale-98 transition-all"
+      className="w-full min-h-[64px] py-3 px-4 rounded-[22px] font-black text-[18px] bg-amber-300 text-amber-950 border-2 border-amber-200 shadow-[0_10px_28px_rgba(245,158,11,0.3)] flex items-center justify-center gap-2 active:scale-98 transition-all"
     >
       <ShieldCheck size={22} className="shrink-0" />
       <span>{t('Gọi')} {soCongAn.name}</span>
