@@ -928,18 +928,34 @@ app.post('/api/tai-khoan/gia-han', chanProof, canPhien, async (req, res) => {
  */
 const BDG = require('./src/bao-dong-gia-dinh');
 const { guiThatWebPush } = require('./src/gui-web-push');
-const khoSuKienGiaDinh = BDG.taoKhoSuKien();
 
-async function lopBaoDong(req) {
+/*
+ * Sự kiện báo động / "hỏi con" nằm trong KHO CHUNG (Postgres trên Render), không
+ * trong RAM nữa — sửa 24/9/2026, xem `taoKhoSuKien` trong bao-dong-gia-dinh.js.
+ */
+async function lopBaoDong(req, { guiThat, henGio } = {}) {
   const kho = await KP.khoChung();
   return BDG.taoBaoDong({
     kho,
-    khoSuKien: khoSuKienGiaDinh,
+    khoSuKien: BDG.taoKhoSuKien({ kho }),
     capGhep: (id) => KP.capGhepCuaToi(id),
     layHoSo: TK.layHoSo,
-    guiThat: req.app.get('guiPushThay') || guiThatWebPush,
-    henGio: req.app.get('henGioThay') || ((fn, ms) => setTimeout(fn, ms)),
+    guiThat: guiThat || req?.app.get('guiPushThay') || guiThatWebPush,
+    henGio: henGio || req?.app.get('henGioThay') || ((fn, ms) => setTimeout(fn, ms)),
   });
+}
+
+/**
+ * Khởi động xong ⇒ hẹn lại leo thang cho báo động chưa ai phản ứng. Lỗi ở đây KHÔNG
+ * được làm sập máy chủ — mất một lời nhắc lần hai còn hơn mất cả app.
+ */
+async function khoiPhucLeoThang() {
+  try {
+    const so = await (await lopBaoDong(null, { guiThat: app.get('guiPushThay') || guiThatWebPush })).khoiPhucHenGio();
+    if (so > 0) console.log(`[bao-dong] hẹn lại ${so} lượt leo thang sau khi khởi động`);
+  } catch (e) {
+    console.error('[bao-dong] không khôi phục được hẹn giờ leo thang:', e?.message);
+  }
 }
 
 const baoDongRoute = (fn) => async (req, res) => {
@@ -1782,9 +1798,17 @@ app.use((err, req, res, next) => {   // eslint-disable-line no-unused-vars
 });
 
 function taoServer(cong = CONG) {
-  return app.listen(cong, () => console.log(`Khoan Đã — máy chủ chạy ở cổng ${cong}`));
+  return app.listen(cong, () => {
+    console.log(`Khoan Đã — máy chủ chạy ở cổng ${cong}`);
+    void khoiPhucLeoThang();
+  });
 }
 
 if (require.main === module) taoServer();
 
-module.exports = { app, taoServer, CONG };
+/*
+ * ⚠️ BẢN CHẠY THẬT KHÔNG ĐI QUA `taoServer`: `server.ts` (đóng gói thành
+ * dist/server.cjs, lệnh `npm start` trên Render) gắn `app` này vào một app ngoài
+ * rồi tự `listen`. Nên `khoiPhucLeoThang` phải được xuất ra để nó gọi.
+ */
+module.exports = { app, taoServer, CONG, khoiPhucLeoThang };

@@ -31,6 +31,14 @@ const TOI_DA_MAY = 5;
 const GOP_MS = 30 * 1000;
 const LEO_THANG_MS = 60 * 1000;
 const GIU_SU_KIEN_MS = 24 * 60 * 60 * 1000;
+/** Bảng sự kiện trong kho chung — báo động, câu hỏi "hỏi con". */
+const BANG_SU_KIEN = 'gia_dinh_su_kien';
+/**
+ * Khởi động lại mà có báo động CHƯA AI PHẢN ỨNG: hẹn leo thang lại nếu nó chưa cũ
+ * quá 10 phút. Cũ hơn thì một lời "chưa ai gọi cho bác" tới muộn là lời nhắc sai
+ * thời điểm — con đọc sẽ tưởng chuyện vừa xảy ra.
+ */
+const KHOI_PHUC_TOI_DA_MS = 10 * 60 * 1000;
 /** "Có phải con đang gọi không?" — 5 phút: đủ để con cầm máy lên, cuộc gọi kia vẫn còn. */
 const HAN_HOI_MS = 5 * 60 * 1000;
 const TRA_LOI_HOI = Object.freeze(['CO', 'KHONG']);
@@ -175,22 +183,50 @@ async function tatNhan(kho, taiKhoanId, endpoint) {
   return { daTat: true };
 }
 
-// ─────────────────── Sự kiện (bộ nhớ) ───────────────────
+// ─────────────────── Sự kiện ───────────────────
 
-function taoKhoSuKien() {
-  const ds = new Map();
-  return {
-    tao(ev) { ds.set(ev.id, ev); return ev; },
-    lay(id) { return ds.get(id) || null; },
-    liet() { return [...ds.values()]; },
-    ganDay(boMeId, loai, bayGio) {
-      for (const [id, ev] of ds) {
-        if (bayGio - ev.luc > GIU_SU_KIEN_MS) { ds.delete(id); continue; }
-        if (ev.boMeId === boMeId && ev.loaiSuKien === loai && bayGio - ev.luc < GOP_MS) return ev;
-      }
-      return null;
-    },
+/**
+ * ⚠️ SỰ KIỆN NẰM TRONG KHO CHUNG (Postgres trên Render) — sửa 24/9/2026.
+ *
+ * Bản trước là một `Map` trong RAM. Chạy thử đầu-cuối: máy chủ khởi động lại (mỗi
+ * lần deploy, mỗi lần Render đánh thức máy chủ đang ngủ) là MẤT HẾT — báo động
+ * đang chờ con phản ứng, câu hỏi "có phải con đang gọi?", và hẹn giờ leo thang
+ * 60 giây. Con bấm vào thông báo thì nhận 404 "không có sự kiện", bác hỏi con thì
+ * câu trả lời rơi vào hư không.
+ *
+ * Không truyền `kho` ⇒ vẫn là bộ nhớ (cho test đơn vị). MỌI hàm đều async ở cả hai
+ * bản, nên lõi chỉ có MỘT cách gọi. Đổi một sự kiện xong phải `luu(ev)` — sửa đối
+ * tượng trong tay không còn tự ghi xuống đâu cả.
+ */
+function taoKhoSuKien({ kho } = {}) {
+  let co;
+  if (!kho) {
+    const ds = new Map();
+    co = {
+      async tao(ev) { ds.set(ev.id, ev); return ev; },
+      async lay(id) { return ds.get(id) || null; },
+      async luu(ev) { ds.set(ev.id, ev); return ev; },
+      async liet() { return [...ds.values()]; },
+      async xoa(id) { ds.delete(id); },
+    };
+  } else {
+    co = {
+      async tao(ev) { await kho.luu(BANG_SU_KIEN, ev.id, ev); return ev; },
+      async lay(id) { return typeof id === 'string' && id ? kho.doc(BANG_SU_KIEN, id) : null; },
+      async luu(ev) { await kho.luu(BANG_SU_KIEN, ev.id, ev); return ev; },
+      async liet() { return kho.liet(BANG_SU_KIEN); },
+      async xoa(id) { await kho.xoa(BANG_SU_KIEN, id); },
+    };
+  }
+  /** Sự kiện cùng loại trong 30 giây gần đây (để gộp); tiện tay dọn bản quá 24 giờ. */
+  co.ganDay = async (boMeId, loai, bayGio) => {
+    for (const ev of await co.liet()) {
+      if (bayGio - ev.luc > GIU_SU_KIEN_MS) { await co.xoa(ev.id); continue; }
+      if (ev.boMeId === boMeId && ev.loaiSuKien === loai && bayGio - ev.luc < GOP_MS) return ev;
+    }
+    return null;
   };
+  return co;
 }
 
 // ─────────────────── Lõi ───────────────────
@@ -242,10 +278,10 @@ function taoBaoDong({
     if (!duocBao) return { gui: false, lyDo: 'CHUA_BAT_QUY_TAC' };
 
     const bayGioLuc = bayGio();
-    const cu = khoSuKien.ganDay(boMeId, loaiSuKien, bayGioLuc);
+    const cu = await khoSuKien.ganDay(boMeId, loaiSuKien, bayGioLuc);
     if (cu) return { gui: false, lyDo: 'DA_GOP', suKienId: cu.id };
 
-    const ev = khoSuKien.tao({
+    const ev = await khoSuKien.tao({
       id: crypto.randomUUID(), boMeId, loaiSuKien, nhan, hoKichBan, luc: bayGioLuc,
       hanhDong: [], conDaGoi: false, daLeoThang: false,
     });
@@ -256,9 +292,12 @@ function taoBaoDong({
   }
 
   async function leoThang(suKienId) {
-    const ev = khoSuKien.lay(suKienId);
+    const ev = await khoSuKien.lay(suKienId);
     if (!ev || ev.daLeoThang || ev.conDaGoi || ev.hanhDong.length > 0) return false;
     ev.daLeoThang = true;
+    // Ghi TRƯỚC khi gửi: hẹn giờ cũ và hẹn giờ khôi phục sau khởi động có thể cùng
+    // nổ — ghi trước thì lượt thứ hai thấy `daLeoThang` và dừng, con không bị báo đôi.
+    await khoSuKien.luu(ev);
     const tenBoMe = await tenCua(ev.boMeId);
     await guiChoThanhVien(ev.boMeId, (lang) => soanLeoThang({ tenBoMe, lang, suKienId: ev.id }));
     return true;
@@ -266,10 +305,11 @@ function taoBaoDong({
 
   async function capNhat(boMeId, suKienId, hanhDong) {
     if (!HANH_DONG.includes(hanhDong)) throw new LoiBaoDong('HANH_DONG_KHONG_HOP_LE');
-    const ev = khoSuKien.lay(suKienId);
+    const ev = await khoSuKien.lay(suKienId);
     if (!ev) throw new LoiBaoDong('KHONG_CO_SU_KIEN', 404);
     if (ev.boMeId !== boMeId) throw new LoiBaoDong('KHONG_PHAI_CUA_BAN', 403);
     ev.hanhDong.push({ ma: hanhDong, luc: bayGio() });
+    await khoSuKien.luu(ev);
     const tenBoMe = await tenCua(boMeId);
     await guiChoThanhVien(boMeId, (lang) => soanCapNhat({ tenBoMe, hanhDong, lang, suKienId: ev.id }));
     return { daGhi: true };
@@ -281,15 +321,16 @@ function taoBaoDong({
   }
 
   async function conDaGoi(taiKhoanId, suKienId) {
-    const ev = khoSuKien.lay(suKienId);
+    const ev = await khoSuKien.lay(suKienId);
     if (!ev) throw new LoiBaoDong('KHONG_CO_SU_KIEN', 404);
     if (!(await laThanhVien(taiKhoanId, ev.boMeId))) throw new LoiBaoDong('KHONG_THUOC_VONG_TRON', 403);
     ev.conDaGoi = true;
+    await khoSuKien.luu(ev);
     return { daGhi: true };
   }
 
   async function docSuKien(taiKhoanId, suKienId) {
-    const ev = khoSuKien.lay(suKienId);
+    const ev = await khoSuKien.lay(suKienId);
     if (!ev) throw new LoiBaoDong('KHONG_CO_SU_KIEN', 404);
     if (taiKhoanId !== ev.boMeId && !(await laThanhVien(taiKhoanId, ev.boMeId))) {
       throw new LoiBaoDong('KHONG_THUOC_VONG_TRON', 403);
@@ -343,7 +384,7 @@ function taoBaoDong({
    */
   async function hoiCon(boMeId) {
     const luc = bayGio();
-    const ev = khoSuKien.tao({
+    const ev = await khoSuKien.tao({
       id: crypto.randomUUID(), boMeId, loaiSuKien: 'hoi_goi', luc, hetHan: luc + HAN_HOI_MS, traLoi: [], guiToi: [],
     });
     const tenBoMe = await tenCua(boMeId);
@@ -356,27 +397,29 @@ function taoBaoDong({
       lang,
     }));
     ev.guiToi = ketQua.map(({ id, ten, trangThai }) => ({ id, ten, trangThai }));
+    await khoSuKien.luu(ev);
     return { hoiId: ev.id, hetHan: ev.hetHan, guiToi: ketQua.map(({ ten, trangThai }) => ({ ten, trangThai })) };
   }
 
-  function layHoi(hoiId) {
-    const ev = khoSuKien.lay(hoiId);
+  async function layHoi(hoiId) {
+    const ev = await khoSuKien.lay(hoiId);
     if (!ev || ev.loaiSuKien !== 'hoi_goi') throw new LoiBaoDong('KHONG_CO_CAU_HOI', 404);
     return ev;
   }
 
   async function traLoiHoi(taiKhoanId, hoiId, traLoi) {
     if (!TRA_LOI_HOI.includes(traLoi)) throw new LoiBaoDong('TRA_LOI_KHONG_HOP_LE');
-    const ev = layHoi(hoiId);
+    const ev = await layHoi(hoiId);
     if (!(await laThanhVien(taiKhoanId, ev.boMeId))) throw new LoiBaoDong('KHONG_THUOC_VONG_TRON', 403);
     if (bayGio() > ev.hetHan) throw new LoiBaoDong('CAU_HOI_DA_HET_HAN');
     ev.traLoi = ev.traLoi.filter((x) => x.id !== taiKhoanId);
     ev.traLoi.push({ id: taiKhoanId, traLoi, luc: bayGio() });
+    await khoSuKien.luu(ev);
     return { daGhi: true };
   }
 
   async function docHoi(taiKhoanId, hoiId) {
-    const ev = layHoi(hoiId);
+    const ev = await layHoi(hoiId);
     if (taiKhoanId !== ev.boMeId && !(await laThanhVien(taiKhoanId, ev.boMeId))) {
       throw new LoiBaoDong('KHONG_THUOC_VONG_TRON', 403);
     }
@@ -392,7 +435,7 @@ function taoBaoDong({
   async function hoiDangCho(taiKhoanId) {
     const luc = bayGio();
     const ra = [];
-    for (const ev of khoSuKien.liet()) {
+    for (const ev of await khoSuKien.liet()) {
       if (ev.loaiSuKien !== 'hoi_goi' || luc > ev.hetHan) continue;
       if (ev.traLoi.some((x) => x.id === taiKhoanId)) continue;
       if (!(await laThanhVien(taiKhoanId, ev.boMeId))) continue;
@@ -401,9 +444,30 @@ function taoBaoDong({
     return { hoi: ra };
   }
 
+  /**
+   * GỌI MỘT LẦN KHI MÁY CHỦ KHỞI ĐỘNG — hẹn lại leo thang cho báo động chưa ai phản
+   * ứng. Hẹn giờ là `setTimeout`, không sống qua lần khởi động lại; sự kiện thì
+   * có (nằm trong kho). Chưa đủ 60 giây: hẹn phần còn lại. Quá 60 giây mà chưa
+   * quá 10 phút: leo thang ngay. Cũ hơn: bỏ qua (xem `KHOI_PHUC_TOI_DA_MS`).
+   * @returns {Promise<number>} số hẹn giờ đã đặt lại
+   */
+  async function khoiPhucHenGio() {
+    const luc = bayGio();
+    let soHen = 0;
+    for (const ev of await khoSuKien.liet()) {
+      if (!ev || ev.loaiSuKien === 'hoi_goi' || !LOAI_SU_KIEN.includes(ev.loaiSuKien)) continue;
+      if (ev.daLeoThang || ev.conDaGoi || (ev.hanhDong || []).length > 0) continue;
+      const tuoi = luc - ev.luc;
+      if (!(tuoi >= 0) || tuoi >= KHOI_PHUC_TOI_DA_MS) continue;
+      henGio(() => leoThang(ev.id), Math.max(0, LEO_THANG_MS - tuoi));
+      soHen += 1;
+    }
+    return soHen;
+  }
+
   return {
     baoDong, leoThang, capNhat, conDaGoi, docSuKien, tinhTrang, baoXinXacNhan,
-    hoiCon, traLoiHoi, docHoi, hoiDangCho,
+    hoiCon, traLoiHoi, docHoi, hoiDangCho, khoiPhucHenGio,
   };
 }
 

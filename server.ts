@@ -33,6 +33,9 @@ async function startServer() {
 
   app.listen(PORT, "0.0.0.0", () => {
     console.log(`Server running on http://localhost:${PORT}`);
+    // Báo động chưa ai phản ứng từ trước lần khởi động này: hẹn lại leo thang
+    // (sự kiện nằm trong kho chung, hẹn giờ thì không sống qua khởi động lại).
+    void backendModule.khoiPhucLeoThang?.();
   });
 }
 
