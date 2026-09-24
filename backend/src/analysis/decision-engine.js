@@ -210,6 +210,78 @@ const SYNERGIES = Object.freeze([
     id: 'brandmismatch+pressure', bonus: 10,
     khop: (s) => co(s, 'WEB_BRAND_DOMAIN_MISMATCH') && coTienTo(s, 'MAN_'),
   },
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // BỐN TỔ HỢP THÊM 24/9/2026 — người dùng duyệt sau khi xem số đo ("ok").
+  //
+  // VÌ SAO: chạy bộ 157 mẫu ChatGPT (nguồn công an / ngân hàng / báo chí) qua
+  // hệ thống thật trên Render: chỉ 41/83 mẫu CAO ra CAO. Phần lớn KHÔNG phải do
+  // AI bỏ sót — tín hiệu đã được trích ĐÚNG, nhưng bảng cộng hưởng không đưa
+  // chúng qua 45:
+  //   "Nhóm VIP có chuyên gia… chuyển tiền vào tài khoản hệ thống"   38 điểm
+  //   "Tài khoản đang có lãi nhưng muốn rút cần nạp thêm…"            32 điểm
+  //   "Tôi gọi từ nhà trường, cháu bị thương… đóng tạm ứng viện phí"  40 điểm
+  //   "…phải chuyển tiền để kiểm tra và ở riêng trong lúc xác minh"   36 điểm
+  //
+  // MÔ PHỎNG trên tín hiệu đã nhận của từng mẫu (không gọi lại AI):
+  //   bộ cũ 571 mẫu (chi-tiet.jsonl): CAO 202 → 211/286 · lành vượt mức 20 → 20
+  //   bộ ChatGPT 157 (lượt Render 24/9): CAO 41 → 56/83 · lành vượt mức 4 → 4
+  //   (con số 56 gồm cả quy tắc suy ra `SUY_RA` bên dưới.)
+  //
+  // ⚠️ HAI ỨNG VIÊN ĐÃ BỊ LOẠI, GHI RA ĐỂ KHỎI THỬ LẠI:
+  //   · coi MỌI `OFF_ADVANCE_FEE` là đòi tiền → "mã giảm giá 50k" lên CAO.
+  //   · `ID_* + CRED_OTP/CARD` +5 → bài báo kể lại vụ lừa ("kẻ gian tự xưng ngân
+  //     hàng yêu cầu bà L. đọc OTP") từ NGHI_NGO lên CAO. Phải sửa khâu nhận ra
+  //     tường thuật trước.
+  //
+  // ⚠️ BỘ CHATGPT ĐÃ ĐƯỢC DÙNG ĐỂ TÌM LỖ NÊN KHÔNG CÒN LÀ BỘ KIỂM ĐỘC LẬP. Số
+  // độc lập phải đo trên bộ khác (bộ 173 dòng, hoặc mẫu thật).
+  //
+  // ⚠️ NGƯỠNG 20/45, CAP 69 VÀ SỐ LƯỢNG 10 CRITICAL OVERRIDE KHÔNG BỊ ĐỤNG TỚI.
+  // ══════════════════════════════════════════════════════════════════════════
+  {
+    // Việc nhẹ / nhiệm vụ / sàn đầu tư cam kết + nạp tiền: 14 + 10 + 14 = 38.
+    id: 'task-or-investment+transfer', bonus: 8,
+    khop: (s) => (co(s, 'OFF_TASK_PREPAY') || co(s, 'OFF_INVESTMENT_GUARANTEE'))
+      && coMotTrong(s, FIN_CHUYEN_MANH),
+  },
+  {
+    // "Muốn rút phải nạp thêm / đóng phí xác minh" + một lời mời chào: 20 + 12 = 32.
+    // +13 đưa lên ĐÚNG 45. Không nơi hợp pháp nào bắt nạp thêm mới cho rút tiền.
+    id: 'withdrawfee+offer', bonus: 13,
+    khop: (s) => co(s, 'FIN_RECOVERY_FEE') && coTienTo(s, 'OFF_'),
+  },
+  {
+    // Người thứ ba báo người nhà gặp nạn + đòi chuyển tiền: 14 + 12 + 14 = 40.
+    id: 'thirdpartyemergency+transfer', bonus: 6,
+    khop: (s) => co(s, 'ID_FAMILY_EMERGENCY_THIRD_PARTY') && coMotTrong(s, FIN_CHUYEN_MANH),
+  },
+  {
+    // "Bắt cóc online": doạ + cô lập + đòi tiền: 14 + (12 + 10) = 36.
+    id: 'fear+isolation+transfer', bonus: 12,
+    khop: (s) => co(s, 'MAN_FEAR_THREAT') && co(s, 'MAN_ISOLATION')
+      && coMotTrong(s, FIN_CHUYEN_MANH),
+  },
+]);
+
+/**
+ * ══════ TÍN HIỆU SUY RA — THÊM 24/9/2026 (người dùng duyệt) ══════
+ *
+ * Có những cặp tín hiệu mà bản thân chúng ĐÃ LÀ một yêu cầu trả tiền, dù người
+ * trích (luật hay AI) không gắn thêm `FIN_TRANSFER_REQUEST`:
+ *   "Chúc mừng bạn trúng phần quà. Để nhận thưởng, vui lòng chuyển phí làm hồ
+ *    sơ trước."   → OFF_ADVANCE_FEE + OFF_PRIZE_GIFT = 12 điểm → CHUA_THAY
+ * Phí phải trả TRƯỚC để nhận GIẢI THƯỞNG chính là đòi chuyển tiền.
+ *
+ * ⚠️ CHỈ CẶP ĐÓ. Suy ra từ `OFF_ADVANCE_FEE` một mình đã đo: "mã giảm giá 50k"
+ * lên CAO. Suy ra chỉ LÀM TĂNG cảnh giác (§4.2), và KHÔNG chạm critical override
+ * — override được tính ở `pipeline.js` trên tín hiệu gốc, không trên tập này.
+ */
+const SUY_RA = Object.freeze([
+  {
+    id: 'prize+advancefee→transfer', them: 'FIN_TRANSFER_REQUEST',
+    khi: (s) => co(s, 'OFF_ADVANCE_FEE') && co(s, 'OFF_PRIZE_GIFT') && !coMotTrong(s, FIN_CHUYEN_MANH),
+  },
 ]);
 
 /**
@@ -253,6 +325,12 @@ function decide(tinHieu = []) {
     nhan.add(s.id);
   }
 
+  // Tín hiệu suy ra — xem `SUY_RA`. Chỉ thêm, không bớt.
+  const tinHieuSuyRa = [];
+  for (const q of SUY_RA) {
+    if (q.khi(nhan) && !nhan.has(q.them)) { nhan.add(q.them); tinHieuSuyRa.push({ id: q.id, them: q.them }); }
+  }
+
   const theoNhom = {};
   for (const g of GROUP_IDS) theoNhom[g] = [];
   for (const id of nhan) theoNhom[SIGNALS[id].group].push(SIGNALS[id].weight);
@@ -281,10 +359,10 @@ function decide(tinHieu = []) {
     (a, b) => SIGNALS[b].weight - SIGNALS[a].weight || a.localeCompare(b),
   );
 
-  return { score, baseScore, riskLabel, groupScores, appliedSynergies, maLyDo };
+  return { score, baseScore, riskLabel, groupScores, appliedSynergies, maLyDo, tinHieuSuyRa };
 }
 
 module.exports = {
-  decide, diemNhom, SYNERGIES,
+  decide, diemNhom, SYNERGIES, SUY_RA,
   SCORE_CAP, THRESHOLD_SUSPICIOUS, THRESHOLD_HIGH,
 };

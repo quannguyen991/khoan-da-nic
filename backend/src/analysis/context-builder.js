@@ -82,6 +82,45 @@ function goCheChu(t) {
   return t.replace(/(?:\p{L}[-._·•]){3,}\p{L}/gu, (m) => m.replace(/[-._·•]/g, ''));
 }
 
+/**
+ * ══════ GỠ CHE CẤP KÝ TỰ, GIỮ NGUYÊN DẤU TIẾNG VIỆT — THÊM 24/9/2026 ══════
+ *
+ * Đo trên tầng luật cùng ngày — năm mẹo viết rẻ nhất đều ra "Chưa thấy dấu hiệu":
+ *   "đọc cho em m.ã O T P vừa gửi, rồi c.h.u.y.ể.n k.h.o.ả.n…"   (chen chấm, cách chữ)
+ *   "đọc cho em mã 0TP vừa gửi rồi chuyển khoản…"                 (số 0 thay chữ O)
+ *   "mã O​T​P … tài khoản an​ toàn"                                (ký tự vô hình)
+ *   "mã ОТР … tài khoản аn toàn"                                  (chữ Kirin trông như Latin)
+ *
+ * Nhánh OCR (`bienTheOcr`) đã có 0→o, nhưng nó chạy trên bản BỎ DẤU, và
+ * `directPrecheck` chặn mọi lượt khớp bỏ dấu đè lên chữ có dấu (để "gặp" không
+ * thành "gấp"). Nên câu nào còn một chữ có dấu trong vùng khớp là nhánh đó vô dụng.
+ * Hàm này gỡ che mà GIỮ dấu, để khớp bằng mẫu CÓ DẤU.
+ *
+ * ⚠️ CHỈ LÀ BIẾN THỂ, KHÔNG THAY BẢN GỐC (§4.2 — chỉ thêm khả năng khớp). Bản
+ * chuẩn hoá gốc vẫn khớp trước; xem khối cảnh báo của `goCheChu` về lý do.
+ */
+const KY_TU_AN = /[­͏؜ᅟᅠ឴឵᠎​-‏‪-‮⁠-⁤⁪-⁯﻿]/g;
+const DONG_HINH = {
+  // Kirin
+  'а': 'a', 'в': 'b', 'е': 'e', 'ё': 'e', 'к': 'k', 'м': 'm', 'н': 'h', 'о': 'o', 'р': 'p',
+  'с': 'c', 'т': 't', 'у': 'y', 'х': 'x', 'і': 'i', 'ј': 'j', 'ѕ': 's', 'ԁ': 'd', 'ԛ': 'q', 'ԝ': 'w',
+  // Hy Lạp
+  'α': 'a', 'β': 'b', 'ε': 'e', 'ι': 'i', 'κ': 'k', 'ν': 'v', 'ο': 'o', 'ρ': 'p', 'τ': 't', 'υ': 'u', 'χ': 'x',
+};
+const RE_DONG_HINH = new RegExp(`[${Object.keys(DONG_HINH).join('')}]`, 'g');
+
+function goCheKyTu(s) {
+  let t = String(s).normalize('NFKC').replace(KY_TU_AN, '').toLowerCase();
+  t = t.replace(RE_DONG_HINH, (c) => DONG_HINH[c]);
+  // "0tp" / "o t p" / "0 t p" → "otp"
+  t = t.replace(/(^|[^\p{L}\p{N}])[0o][\s.·•_-]*t[\s.·•_-]*p(?![\p{L}\p{N}])/gu, '$1otp');
+  // Chen dấu giữa hai chữ cái: "m.ã", "x.á.c", "c-h-u-y-ể-n" → bỏ dấu chen.
+  t = t.replace(/(\p{L})[.·•_-](?=\p{L})/gu, '$1');
+  // Cách từng chữ một: "c h u y ể n" — từ 3 chữ đơn liền nhau trở lên thì ghép.
+  t = t.replace(/(?<![\p{L}\p{N}])\p{L}(?:\s\p{L}(?![\p{L}\p{N}])){2,}/gu, (m) => m.replace(/\s/g, ''));
+  return t.normalize('NFC').replace(/[ \t]+/g, ' ').trim();
+}
+
 /** Case-fold để khớp, GIỮ ranh giới câu và dấu câu tới khi phủ định/scope giải xong. */
 /**
  * DẤU NGĂN HÀNG NGHÌN GIỮA HAI CHỮ SỐ — bỏ đi.
@@ -282,6 +321,15 @@ function laRanhGioi(s, i) {
   if (c === '\n') return true;
   if (!'.!?;'.includes(c)) return false;
   if (c === '.' && /\d/.test(s[i - 1] || '') && /\d/.test(s[i + 1] || '')) return false;
+  /*
+   * ⚠️ CHẤM CHEN GIỮA CÁC CHỮ ĐƠN — 24/9/2026. "c.h.u.y.ể.n k.h.o.ả.n" là mẹo né
+   * lọc; trước đây mỗi dấu chấm ở đó cắt thành một "câu", tin vỡ 16 mảnh và không
+   * mẫu nào khớp được. Chỉ bỏ qua khi chữ TRƯỚC dấu chấm là một chữ ĐƠN LẺ (trước
+   * nó không phải chữ) và ngay SAU là chữ cái: "xong.Tôi" (thiếu dấu cách) vẫn là
+   * hai câu như cũ, "TP.HCM" cũng không đổi.
+   */
+  if (c === '.' && /\p{L}/u.test(s[i + 1] || '') && /\p{L}/u.test(s[i - 1] || '')
+    && !/[\p{L}\p{N}]/u.test(s[i - 2] || '')) return false;
   return true;
 }
 
@@ -367,8 +415,41 @@ const KHUNG_GIAO_DUC = new RegExp([
    *
    * ⚠️ KHÔNG đặt `\b` cạnh chữ có dấu — test/ranh-gioi-tu-unicode.test.js chặn.
    */
-  'không bao giờ\\s+(yêu cầu|hỏi|đòi|gọi|nhắn|cử)',
+  'không bao giờ\\s+(chủ động\\s+)?(yêu cầu|hỏi|đòi|gọi|nhắn|cử|xin)',
   'không có[^.]{0,30}nào[^.]{0,20}(yêu cầu|đòi|hỏi)',
+  /**
+   * ── "KHÔNG YÊU CẦU" KHÔNG CÓ "BAO GIỜ" — THÊM 24/9/2026 ──
+   *
+   * Đo trên bộ 157 mẫu ChatGPT (nguồn công khai): câu thông báo thật
+   *   "Thông tin … được công bố công khai; không phải yêu cầu chuyển tiền hay
+   *    cung cấp OTP."                                  → CAO · PROTECTED_CRITICAL
+   *   "Chúng tôi không yêu cầu chuyển tiền, không yêu cầu cung cấp OTP."
+   *                                                    → CAO · PROTECTED_CRITICAL
+   * Khung cũ chỉ nhận "không BAO GIỜ yêu cầu". Bỏ chữ "bao giờ" — cách viết
+   * thường gặp nhất của ngân hàng và cơ quan — là câu dặn dò thành lệnh CO-01.
+   *
+   * ⚠️ ĐÒI CHỦ NGỮ LÀ TỔ CHỨC, HOẶC ĐỨNG ĐẦU VẾ, HOẶC "KHÔNG PHẢI (LÀ) YÊU CẦU".
+   * "không yêu cầu" trần giữa câu thì không — "bác không yêu cầu hoàn tiền thì
+   * mất" là câu khác hẳn. Lối thoát cũ vẫn áp: lệnh trực tiếp sau dấu phẩy, từ
+   * nối "nhưng", động từ rủi ro đứng trước khung (test/khung-canh-bao-24-9.test.js
+   * canh chiều kẻ gian lợi dụng).
+   */
+  '(chúng tôi|ngân hàng|công an|cơ quan|nhà mạng|điện lực|nhà trường|bệnh viện|khoan đã|bảo hiểm xã hội|bhxh|bên (em|tôi|mình))'
+    + '\\s+(tuyệt đối\\s+|sẽ\\s+)?không\\s+(yêu cầu|đề nghị|đòi|hỏi|xin)',
+  'không\\s+phải\\s+(là\\s+)?(một\\s+)?(yêu cầu|đề nghị|lời mời)',
+  '(^|[,;:])\\s*(tuyệt đối\\s+)?không\\s+(yêu cầu|đề nghị|đòi|hỏi xin)',
+  // "ngân hàng không cử ai đến nhà lấy tiền mặt bao giờ"
+  'không\\s+(bao giờ\\s+)?(cử|gửi)\\s+(ai|người|nhân viên)[^.]{0,30}(đến|tới)\\s+nhà',
+  // "Cảnh giác cuộc gọi tự xưng nhân viên điện lực yêu cầu cài ứng dụng…"
+  '(cảnh giác|đề phòng|coi chừng|cẩn thận|cẩn trọng)[^.]{0,30}(cuộc gọi|tin nhắn|người|đối tượng|số lạ|trường hợp|trang|đường link)'
+    + '[^.]{0,30}(tự xưng|giả danh|mạo danh|xưng là|lạ|giả)',
+  // "Bài học 3: Nhận biết yêu cầu chia sẻ màn hình khi đang đăng nhập ngân hàng."
+  '(nhận biết|nhận diện|cách nhận ra|cách phòng tránh|phòng tránh)[^.]{0,40}(yêu cầu|thủ đoạn|chiêu|tin nhắn|cuộc gọi|lừa)',
+  // "Ví dụ về tin nhắn lừa đảo: …"
+  '(ví dụ|mẫu)\\s+(về\\s+)?(một\\s+)?(tin nhắn|cuộc gọi|kịch bản|chiêu|thủ đoạn)[^.]{0,20}(lừa|giả)',
+  // Lời khuyên SAU KHI đã bị lừa: "Nếu đã nhập thông tin thẻ vào website giả mạo,
+  // khách hàng cần khoá thẻ…". Lệnh sau dấu phẩy ("…, bác đọc mã cho em") vẫn thoát.
+  '^\\s*nếu\\s+(bác\\s+|anh\\s+|chị\\s+|bạn\\s+|khách hàng\\s+|quý khách\\s+|người dân\\s+)?(đã|lỡ|trót|chẳng may)\\s',
   'kẻ (lừa đảo|gian)', 'lừa đảo thường',
   /**
    * ⚠️ MỞ ĐẦU BẰNG "THÔNG BÁO/CẢNH BÁO/LƯU Ý" **KHÔNG** TỰ NÓ LÀ KHUNG GIÁO DỤC.
@@ -665,11 +746,17 @@ function viTriTuDoiLap(n) {
  *
  * ⚠️ KHÔNG DÙNG `\b` — `test/ranh-gioi-tu-unicode.test.js` chặn `\b` cạnh chữ có dấu.
  */
+/*
+ * ⚠️ "CHỈ CẦN BÁC ĐỌC MÃ" — THÊM 24/9/2026, cùng lúc mở khung "không yêu cầu".
+ * Khung mới cho phép "Chúng tôi không yêu cầu mật khẩu" làm vỏ bọc, nên vế sau
+ * phải thoát được dù trạng ngữ đứng TRƯỚC người được gọi: ", chỉ cần bác đọc mã
+ * vừa gửi" / ", giờ bác chuyển…". Thiếu dòng này là vừa mở một câu thần chú.
+ */
 const LENH_TRUC_TIEP = new RegExp(
-  '(^|[,:;]|\\s(nên|thì))\\s*(xin\\s+)?'
+  '(^|[,:;]|\\s(nên|thì))\\s*(xin\\s+)?(chỉ cần\\s+|chỉ việc\\s+|giờ\\s+|bây giờ\\s+|lần này\\s+)?'
   + '((bác|anh|chị|ông|bà|cô|chú|em|con|cháu|bạn|quý khách)\\s+'
-  + '(hãy\\s+|vui lòng\\s+|cần\\s+|chỉ cần\\s+|phải\\s+|nhớ\\s+|mau\\s+)?'
-  + '|(hãy|vui lòng)\\s+)'
+  + '(hãy\\s+|vui lòng\\s+|cần\\s+|chỉ cần\\s+|chỉ việc\\s+|phải\\s+|nhớ\\s+|mau\\s+)?'
+  + '|(hãy|vui lòng|chỉ cần|chỉ việc)\\s+)'
   + '(chuyển|gửi|đọc|cài|tải|bấm|nhấn|nộp|cung cấp|đăng nhập|truy cập)',
   'g',
 );
@@ -783,6 +870,8 @@ function buildContext(raw = '', opts = {}) {
       end: d.end,
       normalized: n,
       folded: boDau(n),
+      // Bản gỡ che GIỮ DẤU — `null` khi không có gì để gỡ (đa số tin nhắn).
+      goChe: (() => { const g = chuanHoa(goCheKyTu(d.text)); return g === n ? null : g; })(),
       ocrVariants: bienTheOcr(boDau(n), goCheChu(n)),
       speechAct,
       direction: huong(n),
@@ -802,9 +891,23 @@ function buildContext(raw = '', opts = {}) {
   };
 }
 
+/**
+ * Đoạn là LỜI CẢNH BÁO / TƯỜNG THUẬT VỀ THỦ ĐOẠN — thêm 24/9/2026.
+ *
+ * Một số mẫu phải khớp ở CẢ câu không mệnh lệnh ("cai file apk toi vua gui qua
+ * zalo" bị xếp `unknown`), nên chúng dùng scope `any`. Nhưng `any` cũng khớp cả
+ * câu cảnh báo. Đo được trên bộ cũ:
+ *   "Cơ quan điều tra khuyến cáo người dân không cài … các tệp APK gửi qua tin
+ *    nhắn."                                          → CAO · PROTECTED_CRITICAL
+ * Scope `khong_canh_bao` = mọi đoạn TRỪ đoạn đã nhận ra là cảnh báo / tường
+ * thuật. `unknown` VẪN được khớp — không nhận ra thì không được im.
+ */
+const DOAN_CANH_BAO = new Set(['warning_education', 'quoted_report']);
+
 /** C.2 — với scope "any" / "context" thì lấy TẤT CẢ đoạn; scope khác mới lọc. */
 function segmentsForScope(ctx, scope = 'action') {
   if (scope === 'any' || scope === 'context') return ctx.segments;
+  if (scope === 'khong_canh_bao') return ctx.segments.filter((s) => !DOAN_CANH_BAO.has(s.speechAct));
   return ctx.segments.filter((s) => s.actionable);
 }
 
@@ -812,6 +915,6 @@ module.exports = {
   boThanh,
   chuanDauThanh,
   buildContext, detectLanguage, segmentsForScope,
-  chuanHoa, boDau, bienTheOcr, catCau, goCheChu,
+  chuanHoa, boDau, bienTheOcr, catCau, goCheChu, goCheKyTu,
   SPEECH_ACTS, NON_ACTIONABLE_ACTS,
 };

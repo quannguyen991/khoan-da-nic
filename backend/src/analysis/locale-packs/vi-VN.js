@@ -25,9 +25,42 @@ module.exports = {
     CRED_OTP_SHARE: [
       { pattern: '(đọc|gửi|cung cấp|cho|nhắn|báo)\\b[^.]{0,30}\\b(mã otp|mã xác thực|mã xác minh|otp|mã vừa (gửi|nhận)|mã bảo mật)', scope: 'action' },
       { pattern: '\\b(mã otp|otp)\\b[^.]{0,24}(cho (tôi|em|anh|chị)|vừa (gửi|nhận))', scope: 'action' },
+      /*
+       * 24/9/2026 — "ma xac nhan vua gui do co, doc e 6 so ngay nha" (câu thật trong
+       * khối ghi chú `credential+manipulation` của decision-engine) — tầng luật
+       * chỉ bắt được MAN_URGENCY. Kẻ gian nói "6 số", không nói "mã OTP".
+       */
+      { pattern: '(đọc|gửi|nhắn|báo)[^.]{0,16}(6|sáu|4|bốn)\\s*(số|chữ số)(?![a-zà-ỹ])', scope: 'action' },
+      { pattern: 'mã\\s*(xác nhận|xác thực|kích hoạt|giao dịch)[^.]{0,30}(đọc|gửi lại|báo|cho (tôi|em|anh|chị))', scope: 'action' },
     ],
     CRED_PASSWORD_PIN: [
       { pattern: '(cung cấp|đọc|gửi|cho)\\b[^.]{0,26}\\b(mật khẩu|mã pin)\\b', scope: 'action' },
+    ],
+    /**
+     * ══ THÊM 24/9/2026 — các lỗ đo trên bộ 157 mẫu ChatGPT (nguồn công an/ngân hàng) ══
+     *
+     * `CRED_CARD_SECRET` trước đây CHỈ có mẫu tiếng Anh (được chấp nhận lệch trong
+     * test §6.10). "Anh/chị đọc thông tin thẻ…", "cung cấp thông tin thẻ để làm thủ
+     * tục" — kịch bản "miễn phí thường niên / nâng hạng thẻ" — tầng luật câm.
+     */
+    CRED_CARD_SECRET: [
+      /*
+       * ⚠️ KHÔNG `báo` trong nhóm động từ, và không cho trườn qua từ phủ định. Đo:
+       * "Vietcombank cảnh BÁO không cung cấp thông tin thẻ" — "báo" của "cảnh báo"
+       * đứng TRƯỚC chữ "không", nên hàng rào phủ định (chỉ nhìn trước chỗ khớp)
+       * không thấy, và câu cảnh báo ra NGHI_NGO.
+       */
+      { pattern: '(cung cấp|đọc|gửi|nhập|điền|chụp)(?:(?!không|đừng|chớ|chẳng)[^.]){0,24}(thông tin thẻ|số thẻ|mã cvv|cvv|cvc|mã bảo mật (của )?thẻ|ba số (ở |mặt )?sau|ngày hết hạn (của )?thẻ|mặt sau (của )?thẻ)', scope: 'action' },
+    ],
+    /**
+     * Đòi ảnh căn cước / chân dung / video khuôn mặt — xem `signal-registry.js`.
+     * ⚠️ Đòi động từ GỬI / CHỤP / QUAY hoặc "xác thực … qua link/Zalo/video":
+     * "xác thực khuôn mặt trên ứng dụng ngân hàng" trần là việc thật.
+     */
+    CRED_ID_BIOMETRIC_DOCS: [
+      { pattern: '(gửi|chụp|quay|cung cấp|chuyển)(?:(?!không|đừng|chớ|chẳng)[^.]){0,24}(ảnh|hình|video|clip)[^.]{0,16}(cccd|căn cước|chứng minh|cmnd|chân dung|khuôn mặt|giấy tờ tùy thân|giấy tờ tuỳ thân)', scope: 'action' },
+      { pattern: '(xác thực|cập nhật|đăng ký|quét)\\s*(khuôn mặt|sinh trắc)[^.]{0,30}(qua|theo|trên|tại|bằng)\\s*(link|đường dẫn|zalo|cuộc gọi video|ứng dụng (tôi|em|được) gửi)', scope: 'action' },
+      { pattern: '(quay|gọi)\\s*video[^.]{0,24}(khuôn mặt|xoay mặt|nháy mắt|quay mặt)', scope: 'action' },
     ],
     CRED_BANK_LOGIN: [
       { pattern: 'đăng nhập\\b[^.]{0,30}(ngân hàng|internet banking|tài khoản|app ngân hàng)', scope: 'action' },
@@ -42,6 +75,9 @@ module.exports = {
        */
       { pattern: '(nhập|điền|cung cấp)[^.]{0,24}(mật khẩu|password|mã pin|số thẻ)', scope: 'action' },
       { pattern: '(đăng nhập|truy cập)[^.]{0,40}(xác minh|xác thực|mở khoá|mở khóa|cập nhật)[^.]{0,24}(tài khoản|mật khẩu)', scope: 'action' },
+      // 24/9/2026 — "cung cấp thông tin đăng nhập", "đăng nhập theo đường dẫn để hoàn tất".
+      { pattern: '(cung cấp|gửi|đọc|báo)[^.]{0,20}(thông tin|tên)\\s*đăng nhập', scope: 'action' },
+      { pattern: 'đăng nhập[^.]{0,20}(theo|qua|tại|vào)\\s*(đường dẫn|đường link|link)', scope: 'action' },
     ],
     FIN_TRANSFER_REQUEST: [
       { pattern: 'chuyển\\b[^.]{0,40}(tiền|triệu|đồng|khoản|vào tài khoản|sang tài khoản)', scope: 'action' },
@@ -97,6 +133,41 @@ module.exports = {
        * cụm "vào tài khoản" viết đủ; tin nhắn thật viết tắt "stk", "tk".
        */
       { pattern: '(chuyển|gửi|nạp|nộp)[^.]{0,26}(vào|qua|tới|đến)\\s*(stk|tk|số tài khoản|tài khoản)\\b', scope: 'action' },
+      // 24/9/2026 — teencode "ck" = chuyển khoản: "bác ck gấp 20tr vào stk 0123…".
+      { pattern: '\\bck\\b[^.]{0,30}(\\d|stk|tk|tiền|triệu)', scope: 'action' },
+    ],
+    /**
+     * "Chuyển nhầm" rồi đòi trả sang tài khoản KHÁC — xem `signal-registry.js`.
+     * `any` cho mẫu đầu: câu "tôi chuyển nhầm" là tường thuật, không phải mệnh lệnh.
+     */
+    FIN_MISTAKEN_TRANSFER_REDIRECT: [
+      /*
+       * ⚠️ ĐÒI NƠI NHẬN LÀ MỘT TÀI KHOẢN KHÁC ("khác", "này", "được chỉ định", "bên
+       * thu hồi", "công ty"). "Em chuyển nhầm 500k vào tài khoản anh, anh trả lại
+       * giúp em" là chuyện thật — trả về chính người đã gửi. Đo 24/9: mẫu rộng hơn
+       * (chỉ cần "chuyển nhầm … trả lại") đẩy đúng câu đó lên NGHI_NGO.
+       */
+      { pattern: '(chuyển trả|trả lại|hoàn lại|chuyển lại)[^.]{0,40}(sang|vào|qua|tới)\\s*\\[?\\s*(tài khoản|stk|tk|số tài khoản)\\s*\\]?\\s*(khác|này|được chỉ định|chỉ định|bên thu hồi|của công ty|công ty)', scope: 'action' },
+      { pattern: '(khoản tiền|số tiền)\\s*(vừa nhận|không phải của)[^.]{0,60}(chuyển trả|trả lại|hoàn lại)', scope: 'action' },
+    ],
+    /**
+     * Mở ví / thẻ / tài khoản hộ để lấy hoa hồng, hoặc cho thuê tài khoản.
+     * ⚠️ KHÔNG khớp "nhận lương / nhận tiền": công ty bảo mở tài khoản nhận lương là
+     * chuyện thật. Chỉ HOA HỒNG / TIỀN CÔNG / THUÊ / BÁN.
+     */
+    FIN_ACCOUNT_OPENING_FOR_OTHERS: [
+      { pattern: '(mở|đăng ký|làm)[^.]{0,20}(ví điện tử|ví|tài khoản ngân hàng|tài khoản|thẻ tín dụng|thẻ)[^.]{0,40}(hoa hồng|tiền công|trả công)', scope: 'khong_canh_bao' },
+      { pattern: '(cho thuê|bán|mua lại|cho mượn)[^.]{0,12}(tài khoản ngân hàng|tài khoản|thẻ ngân hàng|ví điện tử)', scope: 'khong_canh_bao' },
+      { pattern: '(mở|kích hoạt)\\s*hạn mức[^.]{0,30}(ví|thẻ)', scope: 'action' },
+    ],
+    /**
+     * Tổ chức tự xưng nhưng đòi chuyển vào TÀI KHOẢN CÁ NHÂN. Trước 24/9/2026 tín
+     * hiệu này không có mẫu ở ngôn ngữ nào — chỉ AI bắt được.
+     * ⚠️ Không khớp khi chủ tài khoản là NGƯỜI ĐỌC ("vào tài khoản cá nhân của anh"
+     * — công ty trả lương là chuyện thật).
+     */
+    FIN_ORG_CLAIM_PERSONAL_ACCOUNT: [
+      { pattern: '(điện lực|evn|ngân hàng|công an|thuế|bảo hiểm|công ty|nhà mạng|bưu điện|hải quan|nhà trường|bệnh viện|cơ quan)[^.]{0,80}(chuyển|nộp|thanh toán|đóng)[^.]{0,40}(vào|sang|qua)\\s*(tài khoản|stk|tk)\\s*(cá nhân|riêng)(?!\\s*(của\\s*)?(anh|chị|bạn|bác|em|con|quý khách|mình|ông|bà|cô|chú))', scope: 'khong_canh_bao' },
     ],
     FIN_SAFE_ACCOUNT: [
       { pattern: '(tài khoản|ví)\\s+(an toàn|bảo đảm|tạm giữ|phong toả)', scope: 'action' },
@@ -115,6 +186,13 @@ module.exports = {
       // ⚠️ KHÔNG `phí\b` — `í` không phải ký tự chữ trong JavaScript nên mẫu đó
       // CHƯA BAO GIỜ khớp. Hàng rào test/ranh-gioi-tu-unicode.test.js tìm ra.
       { pattern: '(đóng|nộp) phí[^.]{0,44}(lấy lại|hoàn|nhận lại)', scope: 'action' },
+      /*
+       * 24/9/2026 — "muốn rút cần nạp thêm", "muốn rút lợi nhuận… nộp thêm khoản xác
+       * minh": phí để LẤY RA tiền của chính mình — dấu hiệu định nghĩa của sàn đầu
+       * tư / nhiệm vụ giả. Đi kèm lời mời chào thì tổ hợp `withdrawfee+offer` nổ.
+       */
+      { pattern: '(muốn|để|mới|được)\\s*rút[^.]{0,40}(phải|cần|thì)\\s*(nạp|nộp|đóng|chuyển)\\s*(thêm|phí|tiền|khoản)', scope: 'action' },
+      { pattern: 'rút\\s*(tiền|lợi nhuận|lãi|vốn|hoa hồng)[^.]{0,30}(nạp thêm|nộp thêm|đóng thêm|phí rút|phí xác minh|thuế thu nhập)', scope: 'action' },
     ],
     FIN_GIFT_CARD_PAYMENT: [
       { pattern: 'thẻ\\s+(quà tặng|cào|game|điện thoại)', scope: 'action' },
@@ -136,7 +214,8 @@ module.exports = {
        * nhưng người ta viết "Ultraview" (thiếu "er"), và "hỗ trợ từ xa" thì
        * chưa có mẫu. Kẻ lừa đảo không đọc chính tả tên phần mềm.
        */
-      { pattern: '\\b(ultraview|teamview|any ?desk|quick ?support|rustdesk)\\w*\\b', scope: 'any' },
+      // `khong_canh_bao` (24/9/2026): câu khuyến cáo "đừng cài AnyDesk" không được nổ CO-02.
+      { pattern: '\\b(ultraview|teamview|any ?desk|quick ?support|rustdesk)\\w*\\b', scope: 'khong_canh_bao' },
       { pattern: '(hỗ trợ|thao tác|làm giúp|cài giúp)[^.]{0,16}từ xa', scope: 'action' },
       { pattern: '(cho|đọc|gửi)[^.]{0,14}(mã|id)[^.]{0,20}(để|cho)[^.]{0,14}(tôi|em|anh|mình)[^.]{0,20}(vào|truy cập|hỗ trợ|điều khiển)', scope: 'action' },
     ],
@@ -171,8 +250,30 @@ module.exports = {
        * đường dẫn gửi qua ứng dụng nhắn tin. Hai thứ này không xuất hiện trong
        * hội thoại bình thường của người cao tuổi.
        */
-      { pattern: '\\b(file\\s*)?apk\\b', scope: 'any' },
-      { pattern: '(cài|tải)[^.]{0,30}(tôi|em|anh|mình)\\s*(vừa\\s*)?gửi[^.]{0,20}(qua|trên)\\s*(zalo|messenger|viber|telegram|tin nhắn)', scope: 'any' },
+      /*
+       * ⚠️ `khong_canh_bao`, KHÔNG PHẢI `any` — sửa 24/9/2026. `any` khớp cả câu
+       * khuyến cáo: "Cơ quan điều tra khuyến cáo người dân không cài … các tệp APK
+       * gửi qua tin nhắn" từng ra CAO · PROTECTED_CRITICAL. Câu `unknown` vẫn khớp.
+       */
+      { pattern: '\\b(file\\s*)?apk\\b', scope: 'khong_canh_bao' },
+      { pattern: '(cài|tải)[^.]{0,30}(tôi|em|anh|mình)\\s*(vừa\\s*)?gửi[^.]{0,20}(qua|trên)\\s*(zalo|messenger|viber|telegram|tin nhắn)', scope: 'khong_canh_bao' },
+      /*
+       * ── "CÀI ỨNG DỤNG THEO FILE/LINK TÔI GỬI" — THÊM 24/9/2026 ──
+       * Bộ 157 mẫu ChatGPT (nguồn công an/ngân hàng): "Anh/chị cài ứng dụng VNeID
+       * theo file/link tôi gửi", "Bác cài ứng dụng theo hướng dẫn để đồng bộ",
+       * "Mở file ứng dụng tôi gửi và cấp quyền" — tầng luật KHÔNG bật gì, AI cũng
+       * không. Hình chung: cài/mở một ỨNG DỤNG mà NGƯỜI NHẮN GỬI TỚI (file, link
+       * "tôi gửi", "được gửi"), không phải từ kho chính thức.
+       *
+       * ⚠️ HẸP CÓ CHỦ Ý — tín hiệu này nổ THẲNG CO-02 (màn khẩn cấp). KHÔNG khớp
+       * "cài ứng dụng theo hướng dẫn" trần: "con cài VNeID theo hướng dẫn của công
+       * an phường" là câu thật. Phải có vế "file/link/ứng dụng … (tôi|em…|được) gửi".
+       * KHÔNG có "con/cháu" trong chủ ngữ: con cài app giúp bố mẹ là chuyện thường.
+       */
+      // "(file|link)(/link)?" — tin thật viết "theo file/link tôi gửi".
+      { pattern: '(cài|tải|mở)\\s*(đặt\\s*)?[^.]{0,24}(ứng dụng|app|phần mềm)[^.]{0,24}(theo|qua|từ|trong|ở)\\s*(file|tệp|link|đường link|đường dẫn)(\\s*/\\s*(file|tệp|link|đường dẫn))?\\s*(mà\\s*)?(tôi|em|anh|chị|bên (tôi|em)|được)\\s*(vừa\\s*)?(gửi|cung cấp)', scope: 'action' },
+      { pattern: '(mở|cài)[^.]{0,12}(file|tệp)\\s*(ứng dụng|cài đặt|cài)[^.]{0,30}(gửi|cung cấp)', scope: 'khong_canh_bao' },
+      { pattern: '(cài|mở|tải)[^.]{0,20}(ứng dụng|app|phần mềm)\\s*(được|mà\\s*(tôi|em|anh|chị)|tôi|em|bên (tôi|em))\\s*(vừa\\s*)?(gửi|cung cấp)', scope: 'action' },
     ],
     DEV_SCREEN_SHARE_BANKING: [
       { pattern: '(chia sẻ|bật)\\b[^.]{0,16}màn hình\\b[^.]{0,48}(ngân hàng|banking|tài khoản)', scope: 'action' },
@@ -198,6 +299,16 @@ module.exports = {
      * `scope: 'any'` — không đòi câu phải ở thể mệnh lệnh. Một tin nhắn chỉ
      * chứa trần trụi dãy mã cũng phải bị bắt.
      */
+    /**
+     * Đổi eSIM / cấp lại SIM qua link, mã QR; đọc serial / PUK — xem registry.
+     * ⚠️ Đòi KÊNH LẠ (link, QR, Zalo, "mã"): "chuyển eSIM tại cửa hàng / trên ứng
+     * dụng nhà mạng" là việc thật.
+     */
+    DEV_SIM_SWAP_ESIM: [
+      { pattern: '(chuyển|đổi|nâng cấp|kích hoạt|cấp lại)\\s*(sang\\s*)?(esim|e-sim|sim)[^.]{0,40}(qua|theo|tại|bằng)\\s*(link|đường dẫn|mã qr|qr|zalo)', scope: 'action' },
+      { pattern: '(quét|scan)\\s*(mã\\s*)?qr[^.]{0,30}(esim|e-sim|sim)', scope: 'action' },
+      { pattern: '(đọc|gửi|cung cấp|báo)[^.]{0,20}(mã|số)\\s*(serial|seri|imei|puk)', scope: 'action' },
+    ],
     DEV_CALL_FORWARD: [
       { pattern: '\\*{1,2}\\s*(21|61|62|67)\\s*\\*\\s*[+0-9][0-9\\s.-]{6,}#', scope: 'any' },
       { pattern: '(bấm|nhấn|gõ|nhập)\\b[^.]{0,30}(\\*{1,2}\\s*(21|61|62|67)\\s*\\*|##\\s*(21|61|62|67))', scope: 'any' },
@@ -260,6 +371,28 @@ module.exports = {
     ID_BANK_IMPERSONATION: [
       { pattern: '(tôi là|đây là)[^.]{0,26}(nhân viên|cán bộ)[^.]{0,16}ngân hàng', scope: 'any' },
       { pattern: '(vietcombank|bidv|vietinbank|techcombank|agribank)\\b[^.]{0,26}(thông báo|yêu cầu)', scope: 'any' },
+    ],
+    /**
+     * ══ HAI MÃ DANH TÍNH CHƯA TỪNG CÓ MẪU Ở NGÔN NGỮ NÀO — thêm 24/9/2026 ══
+     *
+     * `ID_FAMILY_EMERGENCY_THIRD_PARTY`: người LẠ (giáo viên, bác sĩ, nhà trường)
+     * báo người nhà gặp nạn. Bộ 157: "Tôi là giáo viên của cháu. Cháu vừa gặp tai
+     * nạn, gia đình chuyển tiền viện phí gấp" — tầng luật chỉ thấy FIN + URGENCY.
+     * ⚠️ Đòi dấu hiệu NGƯỜI THỨ BA ("tôi là giáo viên", "con anh/chị", "người nhà
+     * của bác"). Con gái tự nhắn "bà vừa nhập viện" là tin thật — không khớp.
+     */
+    ID_FAMILY_EMERGENCY_THIRD_PARTY: [
+      { pattern: '(tôi|em|chúng tôi)\\s*(là|gọi từ|gọi điện từ|bên|ở)\\s*[^.]{0,20}(giáo viên|cô giáo|thầy giáo|chủ nhiệm|nhà trường|bác sĩ|y tá|bệnh viện|phòng khám|trạm y tế)', scope: 'any' },
+      { pattern: '(con|cháu)\\s*(nhà\\s*)?(của\\s*)?(anh|chị|bác|cô|chú|ông|bà)(?![a-zà-ỹ])[^.]{0,30}(bị tai nạn|gặp tai nạn|đang cấp cứu|đi cấp cứu|được đưa đi cấp cứu|nhập viện|bị thương|đang mổ|bị bắt)', scope: 'any' },
+      { pattern: '(người nhà|người thân)\\s*(của\\s*)?(anh|chị|bác|cô|chú|ông|bà)(?![a-zà-ỹ])[^.]{0,30}(cấp cứu|nhập viện|tai nạn|bị thương|bị bắt)', scope: 'any' },
+    ],
+    /**
+     * `ID_RECOVERY_SUPPORT_IMPERSONATION`: "bên tôi hỗ trợ lấy lại số tiền đã bị
+     * lừa". `khong_canh_bao` — khuyến cáo "đừng tin dịch vụ lấy lại tiền" không được
+     * tính. Đi cùng phí xử lý thì `recoverysupport+recoveryfee` (+15) nổ.
+     */
+    ID_RECOVERY_SUPPORT_IMPERSONATION: [
+      { pattern: '(hỗ trợ|giúp|dịch vụ|đơn vị|văn phòng|luật sư|có thể|có khả năng)[^.]{0,30}(lấy lại|thu hồi|truy hồi|đòi lại)\\s*(số\\s*|khoản\\s*)?(tiền|tài sản)', scope: 'khong_canh_bao' },
     ],
     ID_TECH_SUPPORT_IMPERSONATION: [
       { pattern: '(hỗ trợ|kỹ thuật viên)\\s+(kỹ thuật|viễn thông)', scope: 'any' },

@@ -27,6 +27,20 @@ const BANG = {
     ['FIN_REPEATED_TRANSFER_PRESSURE', 10, 'context', null],
     ['FIN_TRANSFER_MEMO_MISMATCH', 8, 'context', null],
     ['FIN_NEW_RECIPIENT', 6, 'context', null],
+    /**
+     * ══ HAI TÍN HIỆU TIỀN THÊM 24/9/2026 — người dùng duyệt ("ok") ══
+     * Nguồn: bộ 157 mẫu ChatGPT (Bộ Công an 07/2025–09/2026, công an tỉnh). Cả
+     * hai thủ đoạn KHÔNG có mã nào trong Phụ lục A, nên cả luật lẫn AI không có
+     * chỗ để gắn — chúng rơi về FIN_TRANSFER_REQUEST 14 điểm, tức "Chưa thấy".
+     *
+     * `FIN_MISTAKEN_TRANSFER_REDIRECT` — "chuyển nhầm" rồi đòi TRẢ SANG MỘT TÀI
+     *   KHOẢN KHÁC. Tiền trả đúng phải đi ngược về tài khoản đã gửi, qua ngân hàng.
+     * `FIN_ACCOUNT_OPENING_FOR_OTHERS` — mở ví / thẻ / tài khoản hộ người khác để
+     *   lấy hoa hồng, hoặc cho thuê tài khoản: nạn nhân thành "tài khoản rác".
+     * `legacyKey` null: không có trong Phụ lục A, nên con số 22 KHÔNG đổi.
+     */
+    ['FIN_MISTAKEN_TRANSFER_REDIRECT', 20, 'hybrid', null],
+    ['FIN_ACCOUNT_OPENING_FOR_OTHERS', 18, 'hybrid', null],
   ],
   // ── A.2 CREDENTIAL — cap 25 ───────────────────────────────────────────
   credential: [
@@ -34,6 +48,14 @@ const BANG = {
     ['CRED_PASSWORD_PIN', 25, 'hybrid', null],
     ['CRED_CARD_SECRET', 22, 'hybrid', null],
     ['CRED_BANK_LOGIN', 20, 'hybrid', null],
+    /**
+     * ══ THÊM 24/9/2026 — người dùng duyệt ══
+     * Đòi ẢNH CĂN CƯỚC / ẢNH CHÂN DUNG / VIDEO KHUÔN MẶT, hoặc "xác thực khuôn mặt"
+     * qua link / Zalo / cuộc gọi video. Từ khi ngân hàng bắt buộc sinh trắc học
+     * (7/2024), đây là thứ kẻ gian cần nhất để mở khoá tài khoản nạn nhân — và
+     * Phụ lục A không có mã nào cho nó (Vietcombank cảnh báo 03/2026).
+     */
+    ['CRED_ID_BIOMETRIC_DOCS', 22, 'hybrid', null],
   ],
   // ── A.3 DEVICE — cap 30 ───────────────────────────────────────────────
   device: [
@@ -42,6 +64,13 @@ const BANG = {
     ['DEV_ACCESSIBILITY_PERMISSION', 28, 'hybrid', null],
     ['DEV_INSTALL_APK_UNKNOWN', 22, 'direct+llm', 'cai_app_dich_vu_cong_gia'],
     ['DEV_CALL_FORWARD', 18, 'hybrid', null],
+    /**
+     * ══ THÊM 24/9/2026 — người dùng duyệt ══
+     * Đổi eSIM / cấp lại SIM qua link hoặc mã QR, đọc số serial / PUK: kẻ gian
+     * lấy SIM là lấy luôn mọi mã OTP gửi qua tin nhắn. Công an Phú Thọ 05/2026 —
+     * "chuẩn hoá thuê bao" là cớ mở đầu. Không bắt buộc qua CO nào (§6.3 giữ 10).
+     */
+    ['DEV_SIM_SWAP_ESIM', 20, 'hybrid', null],
   ],
   // ── A.4 MANIPULATION — cap 24 ─────────────────────────────────────────
   manipulation: [

@@ -31,9 +31,9 @@
   ],
   "phienBan": {
     "analysis": "1.0.0",
-    "registry": "1.0.0",
-    "rule": "1.3.0",
-    "prompt": "1.1.0"
+    "registry": "1.1.0",
+    "rule": "1.4.0",
+    "prompt": "1.2.0"
   },
   "truongHopDong": [
     "nhan",
@@ -78,15 +78,19 @@
     "FIN_REPEATED_TRANSFER_PRESSURE",
     "FIN_TRANSFER_MEMO_MISMATCH",
     "FIN_NEW_RECIPIENT",
+    "FIN_MISTAKEN_TRANSFER_REDIRECT",
+    "FIN_ACCOUNT_OPENING_FOR_OTHERS",
     "CRED_OTP_SHARE",
     "CRED_PASSWORD_PIN",
     "CRED_CARD_SECRET",
     "CRED_BANK_LOGIN",
+    "CRED_ID_BIOMETRIC_DOCS",
     "DEV_SCREEN_SHARE_BANKING",
     "DEV_REMOTE_CONTROL_APP",
     "DEV_ACCESSIBILITY_PERMISSION",
     "DEV_INSTALL_APK_UNKNOWN",
     "DEV_CALL_FORWARD",
+    "DEV_SIM_SWAP_ESIM",
     "MAN_EXTORTION_MEDIA_THREAT",
     "MAN_ANALYZER_INJECTION",
     "MAN_FEAR_THREAT",
@@ -227,7 +231,11 @@
     "extortion+transfer",
     "keepcall+fear+transfer",
     "secrecy+isolation+transfer",
-    "brandmismatch+pressure"
+    "brandmismatch+pressure",
+    "task-or-investment+transfer",
+    "withdrawfee+offer",
+    "thirdpartyemergency+transfer",
+    "fear+isolation+transfer"
   ],
   "giaiDoanVuViec": [
     "tiep_can",

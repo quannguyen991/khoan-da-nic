@@ -159,7 +159,7 @@ export const CAU_HOI_NHANH_KHUNG: Record<string, Cap> = {
   ),
 };
 
-// ═══════════════ maLyDo — 59 tín hiệu ═══════════════
+// ═══════════════ maLyDo — 63 tín hiệu (4 thêm 24/9/2026) ═══════════════
 //
 // ⚠️ Câu mô tả HÀNH VI TRONG NỘI DUNG, không phán xét con người.
 // "Yêu cầu chuyển tiền" chứ không phải "Kẻ lừa đảo đòi tiền".
@@ -178,12 +178,15 @@ export const MA_LY_DO: Record<string, Cap> = {
   FIN_REPEATED_TRANSFER_PRESSURE: c('Thúc chuyển thêm lần nữa', 'Pushes for another transfer'),
   FIN_TRANSFER_MEMO_MISMATCH: c('Nội dung chuyển khoản không khớp', 'Transfer memo does not match'),
   FIN_NEW_RECIPIENT: c('Người nhận lần đầu xuất hiện', 'Recipient appears for the first time'),
+  FIN_MISTAKEN_TRANSFER_REDIRECT: c('Báo “chuyển nhầm” rồi đòi trả sang tài khoản khác', 'Claims a mistaken transfer and asks you to send it to a different account'),
+  FIN_ACCOUNT_OPENING_FOR_OTHERS: c('Nhờ mở ví, thẻ hoặc tài khoản để lấy hoa hồng', 'Asks you to open a wallet, card or account for a commission'),
 
   // thông tin bí mật
   CRED_OTP_SHARE: c('Đòi mã OTP', 'Asks for an OTP'),
   CRED_PASSWORD_PIN: c('Đòi mật khẩu hoặc mã PIN', 'Asks for a password or PIN'),
   CRED_CARD_SECRET: c('Đòi số thẻ và ba số mặt sau', 'Asks for card number and CVV'),
   CRED_BANK_LOGIN: c('Đòi đăng nhập ngân hàng', 'Asks you to log in to your bank'),
+  CRED_ID_BIOMETRIC_DOCS: c('Đòi ảnh căn cước hoặc video khuôn mặt', 'Asks for ID photos or a video of your face'),
 
   // thiết bị
   DEV_SCREEN_SHARE_BANKING: c('Đòi chia sẻ màn hình khi mở app ngân hàng', 'Asks to share your screen while banking'),
@@ -191,6 +194,7 @@ export const MA_LY_DO: Record<string, Cap> = {
   DEV_ACCESSIBILITY_PERMISSION: c('Đòi quyền trợ năng của máy', 'Asks for accessibility permissions'),
   DEV_INSTALL_APK_UNKNOWN: c('Đòi cài ứng dụng ngoài kho chính thức', 'Asks to install an app from outside the official store'),
   DEV_CALL_FORWARD: c('Đòi bật chuyển tiếp cuộc gọi', 'Asks to set up call forwarding'),
+  DEV_SIM_SWAP_ESIM: c('Đòi đổi eSIM hoặc cấp lại SIM qua link, mã QR', 'Asks to switch to eSIM or replace your SIM via a link or QR code'),
 
   // sức ép
   MAN_EXTORTION_MEDIA_THREAT: c('Doạ phát tán hình ảnh, video', 'Threatens to release photos or video'),

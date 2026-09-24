@@ -78,6 +78,14 @@ function laPhuDinh(text, viTri) {
 
   const m = PHU_DINH.exec(truoc);
   if (!m) return false;
+  /*
+   * ⚠️ "NẾU KHÔNG …" LÀ LỜI DOẠ, KHÔNG PHẢI PHỦ ĐỊNH — 24/9/2026.
+   * "sẽ cắt điện trong 2 giờ NẾU KHÔNG chuyển khoản 1.850.000đ vào tài khoản cá
+   * nhân" từng mất FIN_TRANSFER_REQUEST và ra "Chưa thấy dấu hiệu". Câu điều kiện
+   * "nếu không / không thì / kẻo" đang ĐÒI việc đó, không phải cấm nó. Cùng hướng
+   * sai an toàn đã ghi ở trên: thà bỏ sót một phủ định thật còn hơn vứt tín hiệu.
+   */
+  if (/\bneu\s+(khong|chua|ko)\s*$/.test(truoc.slice(0, m.index + m[0].length))) return false;
   // Chỉ xét đoạn GIỮA từ phủ định và cụm. Dấu phẩy đứng TRƯỚC từ phủ định là
   // chuyện khác: "Bác cứ bình tĩnh, không cần gấp đâu." vẫn là phủ định thật.
   return !KHONG_PHAI_PHU_DINH.test(truoc.slice(m.index));
@@ -269,6 +277,16 @@ function directPrecheck(ctx, opts = {}) {
             { chuoi: chuanDauThanh(doan.normalized), re: reDauChuan, boDauRoi: false },
             ...(reKhongDau ? [{ chuoi: doan.folded, re: reKhongDau, boDauRoi: true }] : []),
             ...doan.ocrVariants.map((c) => ({ chuoi: c, re: reKhongDau || re, boDauRoi: true })),
+            /*
+             * Bản GỠ CHE GIỮ DẤU (24/9/2026) — xem `goCheKyTu`. Khớp bằng mẫu CÓ
+             * DẤU nên không cần chặn "bỏ dấu đè lên chữ có dấu". Bản gỡ che mà
+             * không còn chữ có dấu nào thì mới thử thêm mẫu không dấu.
+             */
+            ...(doan.goChe ? [
+              { chuoi: doan.goChe, re, boDauRoi: false },
+              { chuoi: chuanDauThanh(doan.goChe), re: reDauChuan, boDauRoi: false },
+              ...(reKhongDau && boDau(doan.goChe) === doan.goChe ? [{ chuoi: doan.goChe, re: reKhongDau, boDauRoi: false }] : []),
+            ] : []),
           ];
           for (const { chuoi, re: reDung, boDauRoi } of ungVien) {
             const m = timKhop(chuoi, reDung, (k) => {

@@ -777,7 +777,9 @@ test('§6.10 · hai pack ngôn ngữ phủ cùng một tập tín hiệu', () =>
    * ngôn ngữ bắt được còn ngôn ngữ kia thì không — tức một nửa người dùng
    * không được bảo vệ. Thêm mã vào đây là hợp thức hoá một lỗ.
    */
-  const CHAP_NHAN_LECH = ['CRED_CARD_SECRET', 'DEV_ACCESSIBILITY_PERMISSION'];
+  // 24/9/2026: vi-VN có mẫu CRED_CARD_SECRET; DEV_ACCESSIBILITY_PERMISSION đã có ở cả
+  // hai pack từ trước. Danh sách về RỖNG — đừng thêm lại.
+  const CHAP_NHAN_LECH = [];
 
   assert.deepEqual(thieuEn.filter((k) => !CHAP_NHAN_LECH.includes(k)), [],
     `tín hiệu có mẫu ở vi-VN nhưng THIẾU ở en-US: ${thieuEn.join(', ')}`);

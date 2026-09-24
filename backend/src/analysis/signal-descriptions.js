@@ -27,19 +27,28 @@ module.exports = Object.freeze({
   FIN_REPEATED_TRANSFER_PRESSURE: 'thúc chuyển thêm lần nữa sau khi đã chuyển một lần',
   FIN_TRANSFER_MEMO_MISMATCH: 'nội dung chuyển khoản được dặn ghi khác với lý do thật',
   FIN_NEW_RECIPIENT: 'người nhận tiền là người mới, chưa từng giao dịch',
+  FIN_MISTAKEN_TRANSFER_REDIRECT: 'báo đã "chuyển nhầm" tiền vào tài khoản người dùng rồi đòi chuyển trả sang '
+    + 'một tài khoản KHÁC (không phải tài khoản đã gửi), hoặc "bên thu hồi nợ" đòi trả khoản tiền vừa nhận',
+  FIN_ACCOUNT_OPENING_FOR_OTHERS: 'nhờ mở ví điện tử, thẻ, tài khoản ngân hàng hoặc mở hạn mức theo hướng dẫn '
+    + 'để nhận hoa hồng / tiền công, hoặc hỏi thuê / mua lại tài khoản ngân hàng',
 
   // ── CREDENTIAL ──
   CRED_OTP_SHARE: 'đòi đọc / gửi mã OTP, mã xác thực, mã sáu số vừa nhận',
   CRED_PASSWORD_PIN: 'đòi mật khẩu hoặc mã PIN',
   CRED_CARD_SECRET: 'đòi số thẻ đầy đủ, CVV, ngày hết hạn',
   CRED_BANK_LOGIN: 'đòi tên đăng nhập / thông tin đăng nhập ngân hàng, hoặc bảo đăng nhập trong lúc họ xem',
+  CRED_ID_BIOMETRIC_DOCS: 'đòi gửi ảnh căn cước / CCCD, ảnh chân dung, quay video khuôn mặt, hoặc bảo '
+    + '"xác thực khuôn mặt / sinh trắc học" qua link, Zalo hay cuộc gọi video',
 
   // ── DEVICE ──
   DEV_SCREEN_SHARE_BANKING: 'đòi chia sẻ màn hình trong lúc người dùng mở ứng dụng ngân hàng',
   DEV_REMOTE_CONTROL_APP: 'đòi cài phần mềm điều khiển từ xa (AnyDesk, TeamViewer, UltraViewer…)',
   DEV_ACCESSIBILITY_PERMISSION: 'đòi bật quyền trợ năng / accessibility cho một ứng dụng',
-  DEV_INSTALL_APK_UNKNOWN: 'đòi cài ứng dụng từ đường link gửi tới, file APK, hoặc nguồn ngoài kho chính thức',
   DEV_CALL_FORWARD: 'đòi bật chuyển hướng cuộc gọi, hoặc bấm mã chuyển tiếp',
+  DEV_SIM_SWAP_ESIM: 'đòi chuyển sang eSIM / cấp lại / nâng cấp SIM qua link hay mã QR, hoặc đọc số '
+    + 'serial, mã PUK của SIM',
+  DEV_INSTALL_APK_UNKNOWN: 'đòi cài ứng dụng từ đường link gửi tới, file APK, "ứng dụng tôi gửi", '
+    + 'hoặc nguồn ngoài kho chính thức — kể cả khi gọi đó là ứng dụng VNeID, EVN, ngân hàng, thuế',
 
   // ── MANIPULATION ──
   MAN_EXTORTION_MEDIA_THREAT: 'doạ phát tán ảnh, video riêng tư để ép làm theo',

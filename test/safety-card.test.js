@@ -102,12 +102,14 @@ test('Sự thật kiến trúc khớp code, không phải số chép tay', () =>
   // 59 từ 5/9/2026: thêm `MAN_ANALYZER_INJECTION`. Phụ lục A vẫn ghi 58 —
   // mâu thuẫn đã ghi lại trong `test/signal-registry.test.js`, đừng xoá tín
   // hiệu để khớp lại con số.
-  assert.strictEqual(k.soTinHieu, 59);
+  // 63 từ 24/9/2026: thêm 4 tín hiệu (registry 1.1.0) — xem test/signal-registry.test.js.
+  assert.strictEqual(k.soTinHieu, 63);
   assert.strictEqual(k.soCriticalOverride, 10);
   // 10 tổ hợp gốc Phụ lục B.2 + 3 tổ hợp thêm 15/8/2026 (rule 1.1.0)
   // + credential+manipulation (rule 1.2.0, xem B.5)
-  // + 4 tổ hợp nhắm mẫu hình tiếng Việt còn trượt (rule 1.3.0, xem B.6).
-  assert.strictEqual(k.soToHopCongHuong, 18);
+  // + 4 tổ hợp nhắm mẫu hình tiếng Việt còn trượt (rule 1.3.0, xem B.6)
+  // + 4 tổ hợp ngày 24/9/2026 (rule 1.4.0, xem B.7).
+  assert.strictEqual(k.soToHopCongHuong, 22);
   assert.strictEqual(k.thangDiem, '0–69');
   assert.strictEqual(k.nguong, '20/45');
   assert.strictEqual(k.aiQuyetDinhMuc, false);

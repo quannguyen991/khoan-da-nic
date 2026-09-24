@@ -36,6 +36,36 @@ module.exports = {
     CRED_PASSWORD_PIN: [
       { pattern: '(send|give|tell|share|provide|confirm)\\b[^.]{0,26}\\b(password|pin|passcode)\\b', scope: 'action' },
     ],
+    /**
+     * ══ 24/9/2026 — mirror of the Vietnamese additions (§6.10 parity) ══
+     * Same scam, two languages, same detection. See vi-VN.js for the measurements.
+     */
+    CRED_ID_BIOMETRIC_DOCS: [
+      { pattern: '\\b(send|upload|take|record|provide)\\b[^.]{0,24}\\b(photo|picture|selfie|video|scan)\\b[^.]{0,20}\\b(id card|identity card|passport|driver.?s licen[cs]e|your face|face)\\b', scope: 'action' },
+      { pattern: '\\b(verify|confirm|update)\\b[^.]{0,12}\\b(face|facial|biometric)\\b[^.]{0,30}\\b(via|through|on|using)\\b[^.]{0,12}\\b(link|video call|whatsapp|zalo)\\b', scope: 'action' },
+    ],
+    FIN_MISTAKEN_TRANSFER_REDIRECT: [
+      { pattern: '\\b(send|return|transfer|pay)\\b[^.]{0,20}\\b(it|the money|the funds)?\\s*back\\b[^.]{0,30}\\b(to|into)\\b[^.]{0,12}\\b(this|another|a different|the following|our collection)\\s*account\\b', scope: 'action' },
+      { pattern: '\\b(sent|transferred|paid)\\b[^.]{0,20}\\b(by mistake|by accident|in error)\\b[^.]{0,80}\\b(return|send back|refund)\\b[^.]{0,30}\\b(this|another|a different)\\s*account\\b', scope: 'khong_canh_bao' },
+    ],
+    FIN_ACCOUNT_OPENING_FOR_OTHERS: [
+      { pattern: '\\b(open|register|set up)\\b[^.]{0,20}\\b(account|wallet|card)\\b[^.]{0,40}\\b(commission|we pay you|paid per account|fee for you)\\b', scope: 'khong_canh_bao' },
+      { pattern: '\\b(rent|sell|lend|buy)\\b[^.]{0,12}\\b(your )?(bank account|account|debit card|e-?wallet)\\b', scope: 'khong_canh_bao' },
+    ],
+    FIN_ORG_CLAIM_PERSONAL_ACCOUNT: [
+      { pattern: '\\b(bank|police|tax|hmrc|irs|company|utility|electric|post office|customs|hospital|school)\\b[^.]{0,80}\\b(pay|transfer|send)\\b[^.]{0,40}\\b(to|into)\\b[^.]{0,6}\\b(a |my |the )?(personal|private)\\s+account\\b', scope: 'khong_canh_bao' },
+    ],
+    DEV_SIM_SWAP_ESIM: [
+      { pattern: '\\b(switch|convert|upgrade|activate|replace)\\b[^.]{0,16}\\b(to )?(e-?sim|sim)\\b[^.]{0,40}\\b(via|through|using|with|scan)\\b[^.]{0,12}\\b(link|qr)\\b', scope: 'action' },
+      { pattern: '\\b(read|send|give|tell)\\b[^.]{0,20}\\b(sim )?(serial|puk|iccid)\\b', scope: 'action' },
+    ],
+    ID_FAMILY_EMERGENCY_THIRD_PARTY: [
+      { pattern: '\\b(i am|i\'m|this is|calling from)\\b[^.]{0,20}\\b(teacher|school|doctor|nurse|hospital|clinic)\\b', scope: 'any' },
+      { pattern: '\\byour (son|daughter|grandson|granddaughter|husband|wife|child|grandchild)\\b[^.]{0,30}\\b(accident|hospital|emergency|injured|arrested|surgery)\\b', scope: 'any' },
+    ],
+    ID_RECOVERY_SUPPORT_IMPERSONATION: [
+      { pattern: '\\b(help|we can|able to|service|lawyer|agency)\\b[^.]{0,30}\\b(recover|get back|retrieve|reclaim)\\b[^.]{0,20}\\b(your )?(money|funds|losses)\\b', scope: 'khong_canh_bao' },
+    ],
     CRED_CARD_SECRET: [
       { pattern: '\\b(confirm|verify|update|provide|give)\\b[^.]{0,26}\\b(card|bank|account|payment) details\\b', scope: 'any' },
       { pattern: '\\b(card|account) (number|details)\\b[^.]{0,30}\\b(to|so we can|for)\\b[^.]{0,26}\\b(receive|release|process|confirm)\\b', scope: 'any' },

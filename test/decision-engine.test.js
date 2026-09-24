@@ -127,8 +127,8 @@ test('Dedup — cùng SIGNAL_ID gửi hai lần không cộng hai lần', () => 
 
 // ─────────────── B.2 — mười tổ hợp cộng hưởng ───────────────
 
-test('B.2 — đúng mười tám tổ hợp, không thừa không thiếu', () => {
-  assert.strictEqual(SYNERGIES.length, 18);
+test('B.2 — đúng hai mươi hai tổ hợp, không thừa không thiếu', () => {
+  assert.strictEqual(SYNERGIES.length, 22);
   const mong = {
     'secrecy+fear+transfer': 15,
     'recoverysupport+recoveryfee': 15,
@@ -152,6 +152,11 @@ test('B.2 — đúng mười tám tổ hợp, không thừa không thiếu', () 
     'keepcall+fear+transfer': 12,
     'secrecy+isolation+transfer': 12,
     'brandmismatch+pressure': 10,
+    // Thêm 24/9/2026, người dùng duyệt sau khi xem số đo trên bộ 571 + 157. Xem B.7.
+    'task-or-investment+transfer': 8,
+    'withdrawfee+offer': 13,
+    'thirdpartyemergency+transfer': 6,
+    'fear+isolation+transfer': 12,
   };
   for (const s of SYNERGIES) {
     assert.strictEqual(s.bonus, mong[s.id], `bonus ${s.id}`);
@@ -401,4 +406,57 @@ test('Tín hiệu state "unknown" KHÔNG được tính điểm', () => {
 
 test('Tín hiệu lạ không có trong registry bị bỏ qua, không làm sập', () => {
   assert.strictEqual(decide(tinHieu('KHONG_CO_TRONG_REGISTRY')).score, 0);
+});
+
+// ─────────────── B.7 — bốn tổ hợp + một tín hiệu suy ra, 24/9/2026 ───────────────
+// Người dùng duyệt sau khi xem số đo. Số đo và hai ứng viên BỊ LOẠI ghi ở khối
+// ghi chú trong decision-engine.js. Mỗi ca dưới là một câu thật trong bộ 157 mẫu
+// ChatGPT (nguồn công an / ngân hàng) mà tín hiệu đã trích ĐÚNG nhưng điểm dưới 45.
+
+test('B.7 — bốn họ kịch bản đang kẹt dưới 45 nay chạm ngưỡng CAO', () => {
+  const ca = [
+    ['việc nhẹ / nhiệm vụ + nạp tiền', ['FIN_TRANSFER_REQUEST', 'OFF_TASK_PREPAY'], 'task-or-investment+transfer'],
+    ['sàn đầu tư cam kết + nạp tiền', ['FIN_TRANSFER_REQUEST', 'OFF_INVESTMENT_GUARANTEE'], 'task-or-investment+transfer'],
+    ['muốn rút phải nạp thêm', ['FIN_RECOVERY_FEE', 'OFF_ADVANCE_FEE'], 'withdrawfee+offer'],
+    ['nhà trường báo cháu tai nạn + đóng tiền', ['FIN_TRANSFER_REQUEST', 'ID_FAMILY_EMERGENCY_THIRD_PARTY'], 'thirdpartyemergency+transfer'],
+    ['bắt cóc online', ['FIN_TRANSFER_REQUEST', 'MAN_FEAR_THREAT', 'MAN_ISOLATION'], 'fear+isolation+transfer'],
+  ];
+  for (const [ten, ids, toHop] of ca) {
+    const kq = decide(tinHieu(...ids));
+    assert.ok(kq.appliedSynergies.some((s) => s.id === toHop), `${ten}: thiếu tổ hợp ${toHop}`);
+    assert.strictEqual(kq.riskLabel, 'HIGH', `${ten}: ${kq.score} điểm, chưa tới 45`);
+  }
+});
+
+test('B.7 — tổ hợp mới KHÔNG nổ khi thiếu vế đòi tiền', () => {
+  const moi = ['task-or-investment+transfer', 'thirdpartyemergency+transfer', 'fear+isolation+transfer'];
+  for (const bo of [
+    ['OFF_TASK_PREPAY'], ['OFF_INVESTMENT_GUARANTEE'], ['ID_FAMILY_EMERGENCY_THIRD_PARTY'],
+    ['MAN_FEAR_THREAT', 'MAN_ISOLATION'],
+  ]) {
+    const kq = decide(tinHieu(...bo));
+    assert.ok(!kq.appliedSynergies.some((s) => moi.includes(s.id)), `${bo.join('+')} không đòi tiền mà vẫn nổ`);
+  }
+  // Rút phải nạp thêm cần LỜI MỜI CHÀO đi kèm — phí lấy lại tiền đứng một mình thì không.
+  assert.ok(!decide(tinHieu('FIN_RECOVERY_FEE')).appliedSynergies.some((s) => s.id === 'withdrawfee+offer'));
+});
+
+test('B.7 — phí trả trước để nhận QUÀ THƯỞNG được suy ra là đòi chuyển tiền', () => {
+  const kq = decide(tinHieu('OFF_ADVANCE_FEE', 'OFF_PRIZE_GIFT'));
+  assert.ok(kq.maLyDo.includes('FIN_TRANSFER_REQUEST'));
+  assert.deepStrictEqual(kq.tinHieuSuyRa.map((x) => x.them), ['FIN_TRANSFER_REQUEST']);
+  assert.strictEqual(kq.riskLabel, 'HIGH', `trúng thưởng đòi phí trước: ${kq.score} điểm`);
+});
+
+test('B.7 — ứng viên ĐÃ LOẠI: phí ứng trước MỘT MÌNH không được suy ra là đòi tiền', () => {
+  // Đo được: "Anh gửi em mã giảm giá 50k nhé" bị AI gắn OFF_ADVANCE_FEE; suy ra
+  // từ nó một mình là đẩy tin lành lên CAO.
+  const kq = decide(tinHieu('OFF_ADVANCE_FEE'));
+  assert.ok(!kq.maLyDo.includes('FIN_TRANSFER_REQUEST'));
+  assert.notStrictEqual(kq.riskLabel, 'HIGH');
+});
+
+test('B.7 — ứng viên ĐÃ LOẠI: giả danh + đòi OTP KHÔNG được cộng thêm (tường thuật vụ lừa lên CAO)', () => {
+  // "Kẻ gian tự xưng ngân hàng yêu cầu bà L. đọc mã OTP" — tin cảnh báo. Giữ nguyên 43.
+  assert.strictEqual(diem('ID_BANK_IMPERSONATION', 'CRED_OTP_SHARE'), 43);
 });
