@@ -41,8 +41,9 @@ const CONG_DONG = require('./src/cong-dong-canh-giac');
 const { moKho } = require('./src/vault-store');
 const { canDangNhap } = require('./src/auth');
 const {
-  layCauHinhVapid, chuanHoaDangKy, chuanHoaDangKyNative, LOAI_DANG_KY,
+  layCauHinhVapid, layCauHinhFcm, chuanHoaDangKy, chuanHoaDangKyNative, LOAI_DANG_KY,
 } = require('./src/push');
+const { guiThatFcmV1 } = require('./src/gui-fcm');
 const { docToMayChu, chuanHoaYeuCau, LoiDocTo } = require('./src/doc-to-may-chu');
 
 const CONG = Number(process.env.PORT) || 8089;
@@ -941,6 +942,8 @@ async function lopBaoDong(req, { guiThat, henGio } = {}) {
     capGhep: (id) => KP.capGhepCuaToi(id),
     layHoSo: TK.layHoSo,
     guiThat: guiThat || req?.app.get('guiPushThay') || guiThatWebPush,
+    // Máy con dùng APK — FCM HTTP v1. Test tiêm bộ gửi giả qua `app.set('guiNativeThay')`.
+    guiThatNative: req?.app.get('guiNativeThay') || app.get('guiNativeThay') || guiThatFcmV1,
     henGio: henGio || req?.app.get('henGioThay') || ((fn, ms) => setTimeout(fn, ms)),
   });
 }
@@ -1622,7 +1625,7 @@ app.get('/api/suc-khoe', async (req, res) => {
        'LLM_API_BASE2', 'LLM_API_KEY2', 'RISK_LLM_MODEL2',
        'GEMINI_API_KEY', 'LLM_DU_PHONG_BASE', 'LLM_DU_PHONG_MODEL',
        'LLM_TIMEOUT_MS', 'NODE_ENV', 'DATABASE_URL',
-       'VAPID_PUBLIC_KEY', 'VAPID_PRIVATE_KEY', 'VAPID_SUBJECT']
+       'VAPID_PUBLIC_KEY', 'VAPID_PRIVATE_KEY', 'VAPID_SUBJECT', 'FCM_SERVICE_ACCOUNT']
         .map((k) => [k, Boolean(process.env[k])]),
     ),
     /*
@@ -1671,6 +1674,8 @@ app.get('/api/suc-khoe', async (req, res) => {
      * Chỉ có/không — không lộ khoá.
      */
     pushCauHinh: layCauHinhVapid().daCauHinh,
+    /** 24/9/2026 — đường báo động tới máy con dùng APK (FCM HTTP v1). Chỉ có/không. */
+    fcmCauHinh: layCauHinhFcm().daCauHinh,
     /**
      * 23/9/2026 — máy không có giọng Việt thì nút "Đọc to" nhờ máy chủ đọc, và
      * CHỮ ĐEM ĐỌC đi sang Google. Chỉ báo có/không; `false` ⇒ máy thiếu giọng

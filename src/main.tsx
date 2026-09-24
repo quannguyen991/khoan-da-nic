@@ -3,6 +3,7 @@ import {createRoot} from 'react-dom/client';
 import App from './App.tsx';
 import {dungKhungDienThoai} from './khung-dien-thoai.ts';
 import {ManTrinhDien, MayTrinhDien} from './components/TrinhDien.tsx';
+import {langNgheThongBaoApk} from './lib/nhan-canh-bao.ts';
 import './index.css';
 
 /**
@@ -42,6 +43,12 @@ if (vaiTrinhDien === '1') {
       <App />
     </StrictMode>,
   );
+  /*
+   * APK (24/9/2026): bấm thông báo báo động của bố mẹ ⇒ mở thẳng thẻ báo động.
+   * Đăng ký ngay lúc khởi động — app đang tắt mà được mở TỪ thông báo thì sự kiện
+   * bấm tới rất sớm. Trên web hàm này không làm gì (service worker lo phần đó).
+   */
+  langNgheThongBaoApk();
 }
 
 /**

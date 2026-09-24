@@ -26,7 +26,13 @@ const assert = require('node:assert');
 const P = require('../backend/src/push');
 
 const TOKEN = 'fVx9K2mQ:APA91bH-token-gia-lap-cho-kiem-thu_0123456789';
-const ENV_FCM = { FCM_SERVER_KEY: 'khoa-may-chu-gia-lap' };
+// 24/9/2026: FCM HTTP v1 — khoá tài khoản dịch vụ, không còn `FCM_SERVER_KEY` (API cũ Google đã tắt 6/2024).
+const ENV_FCM = {
+  FCM_SERVICE_ACCOUNT: JSON.stringify({
+    project_id: 'khoan-da-thu', client_email: 'fcm@khoan-da-thu.iam.gserviceaccount.com',
+    private_key: '-----BEGIN PRIVATE KEY-----\nkhoa-gia-lap\n-----END PRIVATE KEY-----\n',
+  }),
+};
 
 // ═══════════ Lỗ đã gây ra bản vá này ═══════════
 

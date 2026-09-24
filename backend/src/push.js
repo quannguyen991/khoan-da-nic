@@ -90,10 +90,28 @@ function layCauHinhVapid(env = process.env) {
   return { congKhai, riengTu, lienHe, daCauHinh: Boolean(congKhai && riengTu && lienHe) };
 }
 
-/** Cấu hình FCM cho đường APK. Đường này KHÔNG dùng VAPID. */
+/**
+ * Cấu hình FCM cho đường APK — FCM HTTP v1, xác thực bằng KHOÁ TÀI KHOẢN DỊCH VỤ.
+ * Đường này KHÔNG dùng VAPID.
+ *
+ * ⚠️ ĐỔI 24/9/2026: bản trước đọc `FCM_SERVER_KEY` — khoá của API FCM ĐỜI CŨ, mà
+ * Google đã TẮT từ 6/2024. Có khoá đó thì `daCauHinh` vẫn `true` mà không gửi được
+ * thông báo nào: đúng kiểu hỏng im lặng §9.4 cấm. Nay đọc `FCM_SERVICE_ACCOUNT`:
+ * NGUYÊN nội dung tệp JSON tải ở Firebase Console → Project settings → Service
+ * accounts → Generate new private key (nhận cả dạng base64 của tệp đó).
+ * Thiếu một trong ba trường cần thiết ⇒ CHƯA cấu hình.
+ */
 function layCauHinhFcm(env = process.env) {
-  const khoaMayChu = env.FCM_SERVER_KEY;
-  return { khoaMayChu, daCauHinh: Boolean(khoaMayChu) };
+  const tho = typeof env.FCM_SERVICE_ACCOUNT === 'string' ? env.FCM_SERVICE_ACCOUNT.trim() : '';
+  let tk = null;
+  if (tho) {
+    try { tk = JSON.parse(tho.startsWith('{') ? tho : Buffer.from(tho, 'base64').toString('utf8')); } catch { tk = null; }
+  }
+  const projectId = typeof tk?.project_id === 'string' ? tk.project_id : undefined;
+  const clientEmail = typeof tk?.client_email === 'string' ? tk.client_email : undefined;
+  // Dán qua ô nhập một dòng hay biến `\n` thành hai ký tự — khôi phục lại xuống dòng thật.
+  const privateKey = typeof tk?.private_key === 'string' ? tk.private_key.replace(/\\n/g, '\n') : undefined;
+  return { projectId, clientEmail, privateKey, daCauHinh: Boolean(projectId && clientEmail && privateKey) };
 }
 
 /** Nhà cung cấp nào cũng chỉ có ba kết cục. Gom lại để hai đường không lệch nhau. */

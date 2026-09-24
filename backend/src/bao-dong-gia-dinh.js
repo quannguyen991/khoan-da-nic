@@ -22,7 +22,12 @@
  *   chờ. Đó là giới hạn thật, ghi trong spec §9 — đừng gọi nó là bền.
  */
 const crypto = require('node:crypto');
-const { guiCanhBao, chuanHoaDangKy, TRANG_THAI_GUI } = require('./push');
+const {
+  guiCanhBao, chuanHoaDangKy, chuanHoaDangKyNative, LOAI_DANG_KY, TRANG_THAI_GUI,
+} = require('./push');
+
+/** Khoá phân biệt một máy nhận: endpoint (Web Push) hoặc token (APK/FCM). */
+const khoaMay = (dk) => (dk?.loai === LOAI_DANG_KY.native ? `fcm:${dk.token}` : dk?.endpoint);
 const QT = require('./quy-tac-bao');
 const { TEN_HO } = require('./cong-dong-canh-giac');
 
@@ -165,19 +170,29 @@ async function docDsNhan(kho, taiKhoanId) {
   return Array.isArray(b?.ds) ? b.ds : [];
 }
 
+/**
+ * ⚠️ HAI HÌNH DẠNG ĐĂNG KÝ — sửa 24/9/2026. Trình duyệt gửi Web Push
+ * `{endpoint, keys}`; bản APK gửi `{loai:'native', token}` (token FCM). Bản trước
+ * ép cả hai qua khuôn Web Push nên máy con dùng APK nhận 400 `ENDPOINT_PHAI_LA_HTTPS`
+ * và KHÔNG BAO GIỜ bật được nhận báo động.
+ */
 async function dangKyNhan(kho, taiKhoanId, dangKyTho, lang, bayGio = Date.now()) {
   let dk;
-  try { dk = chuanHoaDangKy(dangKyTho); } catch (e) { throw new LoiBaoDong(e?.ma || 'DANG_KY_KHONG_HOP_LE'); }
-  const ds = (await docDsNhan(kho, taiKhoanId)).filter((x) => x?.dangKy?.endpoint !== dk.endpoint);
+  try {
+    dk = dangKyTho?.loai === LOAI_DANG_KY.native ? chuanHoaDangKyNative(dangKyTho) : chuanHoaDangKy(dangKyTho);
+  } catch (e) { throw new LoiBaoDong(e?.ma || 'DANG_KY_KHONG_HOP_LE'); }
+  const ds = (await docDsNhan(kho, taiKhoanId)).filter((x) => khoaMay(x?.dangKy) !== khoaMay(dk));
   ds.push({ dangKy: dk, lang: chuanLang(lang), luc: bayGio });
   const giu = ds.slice(-TOI_DA_MAY);
   await kho.luu(BANG_NHAN, taiKhoanId, { ds: giu });
   return { daBat: true, soMay: giu.length };
 }
 
+/** `endpoint`: endpoint Web Push HOẶC token FCM của máy cần tắt. Bỏ trống = tắt mọi máy. */
 async function tatNhan(kho, taiKhoanId, endpoint) {
   const ds = typeof endpoint === 'string' && endpoint
-    ? (await docDsNhan(kho, taiKhoanId)).filter((x) => x?.dangKy?.endpoint !== endpoint)
+    ? (await docDsNhan(kho, taiKhoanId))
+      .filter((x) => x?.dangKy?.endpoint !== endpoint && x?.dangKy?.token !== endpoint)
     : [];
   await kho.luu(BANG_NHAN, taiKhoanId, { ds });
   return { daTat: true };
@@ -232,7 +247,7 @@ function taoKhoSuKien({ kho } = {}) {
 // ─────────────────── Lõi ───────────────────
 
 function taoBaoDong({
-  kho, khoSuKien, capGhep, layHoSo, env = process.env, guiThat,
+  kho, khoSuKien, capGhep, layHoSo, env = process.env, guiThat, guiThatNative,
   henGio = (fn, ms) => setTimeout(fn, ms), bayGio = () => Date.now(),
 }) {
   const tenCua = async (id) => (await layHoSo(kho, id))?.ten || '';
@@ -248,7 +263,7 @@ function taoBaoDong({
       let tot = null;
       const conSong = [];
       for (const may of ds) {
-        const r = await guiCanhBao({ dangKy: may.dangKy, payload: soan(chuanLang(may.lang)), env, guiThat });
+        const r = await guiCanhBao({ dangKy: may.dangKy, payload: soan(chuanLang(may.lang)), env, guiThat, guiThatNative });
         if (r.trangThai !== TRANG_THAI_GUI.het_han_dang_ky) conSong.push(may);
         if (tot === null || THU_HANG.indexOf(r.trangThai) < THU_HANG.indexOf(tot)) tot = r.trangThai;
       }

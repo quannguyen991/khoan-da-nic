@@ -80,3 +80,11 @@ eval/cache/
 # Dựng lại bằng `scripts/dung-apk.ps1`. Muốn phát cho giám khảo tải thì đính kèm
 # vào hồ sơ dự thi hoặc GitHub Release, đừng nhét vào lịch sử git.
 khoan-da.apk
+
+# Firebase (24/9/2026) — repo công khai.
+# google-services.json: cấu hình app Android, nằm trong APK nên không bí mật hẳn,
+# nhưng không cần đưa lên GitHub. Tệp khoá tài khoản dịch vụ (…-firebase-adminsdk-….json)
+# là BÍ MẬT THẬT: chỉ dán nội dung vào biến FCM_SERVICE_ACCOUNT trên Render.
+android/app/google-services.json
+*firebase-adminsdk*.json
+*service-account*.json

@@ -39,7 +39,9 @@ import { TrangThaiBaoVeBoMeView } from './TrangThaiBaoVeBoMe';
 const CAU_BAT_NHAN: Record<string, string> = {
   KHONG_HO_TRO: 'Máy hoặc trình duyệt này không nhận được thông báo. Mở Khoan Đã bằng Chrome để bật.',
   CHI_CO_BAN_DUNG: 'Bản chạy thử trên máy tính chưa bật được. Hãy dùng bản web đã đưa lên mạng.',
-  BI_TU_CHOI: 'Thông báo đang bị chặn. Mở cài đặt trình duyệt để cho phép.',
+  // 24/9/2026: bản APK cũng xin quyền thông báo — "cài đặt trình duyệt" sai với APK.
+  BI_TU_CHOI: 'Thông báo đang bị chặn. Mở cài đặt của máy hoặc trình duyệt để cho phép.',
+  CHUA_CAI_FIREBASE: 'Bản cài này chưa nhận được thông báo. Cài bản Khoan Đã mới nhất rồi bật lại.',
   MAY_CHU_CHUA_CAU_HINH: 'Máy chủ chưa bật gửi cảnh báo.',
   CHUA_DANG_NHAP: 'Anh/chị cần đăng nhập lại.',
   LOI_DANG_KY: 'Chưa bật được. Thử lại sau nhé.',
@@ -401,7 +403,8 @@ export function GuardianView({
   const [maBatNhan, setMaBatNhan] = useState<MaBatNhan | 'OK' | null>(null);
   useEffect(() => { void dangNhanTrenMayNay().then(setDangNhan); }, []);
   const batNhan = async () => {
-    const kq = await batNhanCanhBao(lang);
+    // Tên kênh hiện trong Cài đặt → Thông báo của Android — cũng phải qua catalog (§4.1).
+    const kq = await batNhanCanhBao(lang, tr('Cảnh báo từ bố mẹ'));
     setMaBatNhan(kq.ok ? 'OK' : kq.ma);
     if (kq.ok) setDangNhan(true);
   };
