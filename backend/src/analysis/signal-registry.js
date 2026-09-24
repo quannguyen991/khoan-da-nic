@@ -108,6 +108,18 @@ const BANG = {
     ['MAN_KEEP_CALL_ACTIVE', 6, 'llm+lexicon', null],
     ['MAN_LOVE_BOMBING', 6, 'llm', null],
     ['MAN_SCARCITY_PRESSURE', 5, 'llm+lexicon', 'ep_ky_hop_dong_ngay_tai_cho_giam_gia_soc'],
+    /**
+     * ══ THÊM 24/9/2026 — người dùng duyệt ("làm hết") ══
+     * Lời quảng cáo sức khoẻ THẦN KỲ: chữa bách bệnh, thần dược, khỏi hẳn tiểu đường
+     * / ung thư, bỏ thuốc bác sĩ. Công an Hưng Yên 04/2026: hội thảo "tư vấn sức khoẻ"
+     * tặng quà rồi bán thực phẩm chức năng cho người cao tuổi.
+     *
+     * VÌ SAO NHÓM THAO TÚNG, KHÔNG PHẢI OFFER: nhóm offer lấy MAX với trần 12 — một
+     * mình không bao giờ chạm ngưỡng 20, tức lời "chữa bách bệnh" luôn ra "Chưa thấy".
+     * Đây là lừa bằng niềm tin vào sức khoẻ, nên đặt ở thao túng; 20 điểm = NGHI_NGO,
+     * màn "hỏi người thân trước". Không đụng ngưỡng, cap nhóm hay critical override.
+     */
+    ['MAN_HEALTH_MIRACLE_CLAIM', 20, 'hybrid', null],
   ],
   // ── A.5 IDENTITY — cap 16 ─────────────────────────────────────────────
   identity: [

@@ -23,7 +23,10 @@ const { kiemModelSong } = require('./src/ai/kiem-model-song');
 const { dungSafetyCard } = require('./src/safety-card');
 const { dungTrang } = require('./src/safety-card-page');
 const { layKeHoachPhucHoi } = require('./src/analysis/recovery-adapters');
-const { taoSuKien, timHoSoCoTheGop, dungCauHoiGop, tinHieuCase, baLop, GIAI_DOAN } = require('./src/journey-engine');
+const {
+  taoSuKien, timHoSoCoTheGop, dungCauHoiGop, tinHieuCase, baLop, GIAI_DOAN, tinHieuMangTheo, locHoSo,
+} = require('./src/journey-engine');
+const { laTinHieu } = require('./src/analysis/signal-registry');
 const { buocTiepTheo } = require('./src/kich-ban-di-tiep');
 const { tinLuaDao } = require('./src/tin-lua-dao');
 const { traLoiTroLy } = require('./src/tro-ly-noi');
@@ -1148,19 +1151,30 @@ app.get('/api/tin-lua-dao', chanDoc, async (req, res) => {
  *
  * ⚠️ §6.11 — route này KHÔNG TỰ GỘP. Nó trả về CÂU HỎI để người dùng quyết.
  */
+/** Mã lý do do máy gửi lên (kết quả lượt /api/analyze vừa xong) — chỉ nhận mã có trong registry. */
+const locMaLyDo = (ds) => (Array.isArray(ds) ? ds : [])
+  .filter((m) => typeof m === 'string' && laTinHieu(m)).slice(0, 40);
+
 app.post('/api/vu-viec/ung-vien', chanVuViec, async (req, res) => {
-  const { vanBan, kenh, thoiDiem, hoSoDangMo } = req.body || {};
+  const { vanBan, kenh, thoiDiem, hoSoDangMo, maLyDo } = req.body || {};
   if (typeof vanBan !== 'string' || !vanBan.trim()) {
     return res.status(400).json({ maLoi: 'THIEU_DAU_VAO' });
   }
   const moc = Number.isFinite(thoiDiem) ? thoiDiem : Date.now();
   const env = analyze({ vanBan });
-  const sk = taoSuKien({ vanBan, envelope: env, kenh, thoiDiem: moc });
-  const ungVien = timHoSoCoTheGop(sk, Array.isArray(hoSoDangMo) ? hoSoDangMo : [], moc);
+  /*
+   * Giai đoạn của sự kiện lấy từ kết quả ĐẦY ĐỦ vừa trả cho máy (có AI) nếu máy
+   * gửi kèm — tầng luật một mình hay thấy thiếu. Chỉ HỢP thêm mã, không bớt.
+   */
+  const maDayDu = [...new Set([...(env.maLyDo || []), ...locMaLyDo(maLyDo)])];
+  const sk = taoSuKien({ vanBan, envelope: { ...env, maLyDo: maDayDu }, kenh, thoiDiem: moc });
+  const hoSoSach = (Array.isArray(hoSoDangMo) ? hoSoDangMo : []).slice(0, 20)
+    .map((h) => locHoSo(h, laTinHieu)).filter(Boolean);
+  const ungVien = timHoSoCoTheGop(sk, hoSoSach, moc);
 
   return res.json({
     // Thực thể đã trích — KHÔNG có nội dung thô ở đây.
-    suKien: { kenh: sk.kenh ?? null, giaiDoan: sk.giaiDoan, thucThe: sk.thucThe },
+    suKien: { kenh: sk.kenh ?? null, giaiDoan: sk.giaiDoan, thucThe: sk.thucThe, maLyDo: sk.maLyDo, thoiDiem: moc },
     cauHoiGop: dungCauHoiGop(ungVien),
     baLop: baLop(ungVien?.hoSo ?? null, env),
   });
@@ -1171,7 +1185,7 @@ app.post('/api/vu-viec/ung-vien', chanVuViec, async (req, res) => {
  * Nên đây là route RIÊNG, và nó đòi cờ xác nhận rõ ràng.
  */
 app.post('/api/vu-viec/gop', chanVuViec, async (req, res) => {
-  const { vanBan, kenh, thoiDiem, hoSo, daXacNhanGop } = req.body || {};
+  const { vanBan, kenh, thoiDiem, hoSo: hoSoTho, daXacNhanGop, maLyDo } = req.body || {};
   if (daXacNhanGop !== true) {
     return res.status(400).json({ maLoi: 'CHUA_XAC_NHAN_GOP' });
   }
@@ -1179,13 +1193,26 @@ app.post('/api/vu-viec/gop', chanVuViec, async (req, res) => {
     return res.status(400).json({ maLoi: 'THIEU_DAU_VAO' });
   }
   const moc = Number.isFinite(thoiDiem) ? thoiDiem : Date.now();
+  const hoSo = locHoSo(hoSoTho, laTinHieu);
+  const maHienTai = locMaLyDo(maLyDo);
   const env0 = analyze({ vanBan });
-  const sk = taoSuKien({ vanBan, envelope: env0, kenh, thoiDiem: moc });
+  const maDayDu = [...new Set([...(env0.maLyDo || []), ...maHienTai])];
+  const sk = taoSuKien({ vanBan, envelope: { ...env0, maLyDo: maDayDu }, kenh, thoiDiem: moc });
   const tinHieu = tinHieuCase(hoSo, sk, { daXacNhanGop: true });
+  const mangTheo = tinHieuMangTheo(hoSo, maHienTai, { daXacNhanGop: true });
 
-  // Tín hiệu CASE_* đi qua ĐÚNG bộ luật như mọi tín hiệu khác.
-  const env = analyze({ vanBan, llmSignals: tinHieu });
-  return res.json({ ...toHopDong(env), tinHieuVuViec: tinHieu.map((t) => t.id) });
+  /*
+   * ⚠️ KÊNH `tinHieuVuViec`, KHÔNG PHẢI `llmSignals` — xem khối ghi chú trong
+   * pipeline.js. Lượt này KHÔNG gọi AI, nên `aiDaChay` trả về false là SỰ THẬT;
+   * máy giữ `aiDaChay` của lượt /api/analyze gốc khi ghép hai kết quả.
+   */
+  const env = analyze({ vanBan, tinHieuVuViec: [...tinHieu, ...mangTheo] });
+  return res.json({
+    ...toHopDong(env),
+    tinHieuVuViec: tinHieu.map((t) => t.id),
+    tinHieuMangTheo: mangTheo.map((t) => t.id),
+    suKien: { kenh: sk.kenh ?? null, giaiDoan: sk.giaiDoan, thucThe: sk.thucThe, maLyDo: sk.maLyDo, thoiDiem: moc },
+  });
 });
 
 /**

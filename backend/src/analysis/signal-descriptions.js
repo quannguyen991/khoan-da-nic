@@ -62,6 +62,8 @@ module.exports = Object.freeze({
   MAN_KEEP_CALL_ACTIVE: 'bảo giữ máy, đừng tắt, đừng cúp, ở lại đầu dây',
   MAN_LOVE_BOMBING: 'tán tỉnh dồn dập, tỏ tình nhanh bất thường, gọi bằng những lời thân mật quá mức',
   MAN_SCARCITY_PRESSURE: 'ép ký / mua ngay tại chỗ vì giảm giá sốc, suất cuối, hết hôm nay',
+  MAN_HEALTH_MIRACLE_CLAIM: 'quảng cáo sản phẩm sức khoẻ thần kỳ: chữa được nhiều / mọi bệnh, "thần dược", '
+    + 'khỏi hẳn tiểu đường / ung thư / xương khớp, hoặc bảo bỏ thuốc bác sĩ kê',
 
   // ── IDENTITY ──
   ID_FAMILY_EMERGENCY_THIRD_PARTY: 'người lạ báo tin người thân gặp nạn, tai nạn, bị bắt',

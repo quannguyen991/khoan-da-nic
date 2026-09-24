@@ -123,6 +123,55 @@ function tinHieuCase(hoSo, suKienMoi, { daXacNhanGop } = {}) {
   return ra;
 }
 
+/**
+ * ══════ MANG THEO DẤU HIỆU CỦA CÁC TIN TRƯỚC — thêm 24/9/2026 ══════
+ *
+ * CASE_* chỉ nói "vụ này đang leo thang" — tối đa 12 điểm, cộng tổ hợp 8. Không
+ * đủ cho đúng ca mà bộ nhớ vụ việc sinh ra để bắt:
+ *   hôm qua  "Tôi là công an, bác liên quan vụ án rửa tiền"   → ID + doạ, 22 điểm
+ *   hôm nay  "Bác chuyển 50 triệu vào tài khoản này"          → 14 điểm, CHƯA THẤY
+ * Tách riêng từng tin thì không tin nào đủ; gộp lại là kịch bản giả danh công an
+ * trọn vẹn. Nên khi người dùng ĐÃ XÁC NHẬN hai tin là một vụ, dấu hiệu của các tin
+ * trước được xét cùng tin này — đi qua ĐÚNG bộ luật, không cộng điểm riêng.
+ *
+ * ⚠️ CHỈ MÃ, KHÔNG NỘI DUNG (§6.9). Hồ sơ nằm trên máy người dùng; máy chủ chỉ
+ * thấy mã tín hiệu và thực thể đã trích, không lưu lại.
+ * ⚠️ KHÔNG mang theo CASE_* của tin trước — chúng được tính lại cho tin này.
+ */
+function tinHieuMangTheo(hoSo, maHienTai = [], { daXacNhanGop } = {}) {
+  if (!daXacNhanGop) return [];
+  const ma = new Set(maHienTai);
+  for (const s of (hoSo?.suKien || [])) for (const m of (s.maLyDo || [])) ma.add(m);
+  return [...ma]
+    .filter((m) => typeof m === 'string' && !m.startsWith('CASE_'))
+    .map((m) => ({
+      id: m, state: 'present', source: 'case_memory', confidence: 1.0,
+      evidence: [{ quote: `tin_truoc:${m}`, start: 0, end: 0, sourceId: 'ho_so_vu_viec' }],
+    }));
+}
+
+/**
+ * Hồ sơ do MÁY NGƯỜI DÙNG gửi lên — không tin, lọc lại. Chỉ giữ trường cần cho
+ * phép so khớp và giai đoạn; mã lạ bị bỏ; giới hạn kích thước để một hồ sơ phình
+ * to không thành đường làm chậm máy chủ.
+ */
+function locHoSo(hoSo, laMaHopLe = () => true) {
+  if (!hoSo || typeof hoSo !== 'object') return null;
+  const suKien = (Array.isArray(hoSo.suKien) ? hoSo.suKien : []).slice(-30).map((s) => ({
+    thoiDiem: Number.isFinite(s?.thoiDiem) ? s.thoiDiem : 0,
+    kenh: typeof s?.kenh === 'string' ? s.kenh.slice(0, 20) : null,
+    giaiDoan: GIAI_DOAN.includes(s?.giaiDoan) ? s.giaiDoan : 'tiep_can',
+    maLyDo: (Array.isArray(s?.maLyDo) ? s.maLyDo : []).filter((m) => typeof m === 'string' && laMaHopLe(m)).slice(0, 40),
+  }));
+  return {
+    id: typeof hoSo.id === 'string' ? hoSo.id.slice(0, 64) : null,
+    capNhatLuc: Number.isFinite(hoSo.capNhatLuc) ? hoSo.capNhatLuc : 0,
+    thucThe: hoSo.thucThe && typeof hoSo.thucThe === 'object' ? hoSo.thucThe : {},
+    dong: hoSo.dong === true,
+    suKien,
+  };
+}
+
 /** Sự kiện mới từ một lượt phân tích. `thoiDiem` truyền vào, không tự đọc đồng hồ. */
 function taoSuKien({ vanBan, envelope, kenh = null, thoiDiem, daMatTien = false }) {
   return {
@@ -154,4 +203,5 @@ function baLop(hoSo, envelope) {
 module.exports = {
   GIAI_DOAN, CUA_SO_GOP_MS,
   suyGiaiDoan, timHoSoCoTheGop, dungCauHoiGop, tinHieuCase, taoSuKien, baLop,
+  tinHieuMangTheo, locHoSo,
 };

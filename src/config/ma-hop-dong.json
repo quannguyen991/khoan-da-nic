@@ -31,9 +31,9 @@
   ],
   "phienBan": {
     "analysis": "1.0.0",
-    "registry": "1.1.0",
-    "rule": "1.4.0",
-    "prompt": "1.2.0"
+    "registry": "1.2.0",
+    "rule": "1.5.0",
+    "prompt": "1.3.0"
   },
   "truongHopDong": [
     "nhan",
@@ -101,6 +101,7 @@
     "MAN_KEEP_CALL_ACTIVE",
     "MAN_LOVE_BOMBING",
     "MAN_SCARCITY_PRESSURE",
+    "MAN_HEALTH_MIRACLE_CLAIM",
     "ID_FAMILY_EMERGENCY_THIRD_PARTY",
     "ID_RECOVERY_SUPPORT_IMPERSONATION",
     "ID_KHOAN_DA_IMPERSONATION",

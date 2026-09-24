@@ -159,7 +159,7 @@ export const CAU_HOI_NHANH_KHUNG: Record<string, Cap> = {
   ),
 };
 
-// ═══════════════ maLyDo — 63 tín hiệu (4 thêm 24/9/2026) ═══════════════
+// ═══════════════ maLyDo — 64 tín hiệu (5 thêm 24/9/2026) ═══════════════
 //
 // ⚠️ Câu mô tả HÀNH VI TRONG NỘI DUNG, không phán xét con người.
 // "Yêu cầu chuyển tiền" chứ không phải "Kẻ lừa đảo đòi tiền".
@@ -217,6 +217,7 @@ export const MA_LY_DO: Record<string, Cap> = {
   MAN_KEEP_CALL_ACTIVE: c('Bắt giữ máy, không cho tắt', 'Insists you stay on the line'),
   MAN_LOVE_BOMBING: c('Dồn dập lời yêu thương', 'Overwhelming affection'),
   MAN_SCARCITY_PRESSURE: c('Doạ hết suất, hết hạn', 'Claims the offer is about to run out'),
+  MAN_HEALTH_MIRACLE_CLAIM: c('Quảng cáo thuốc chữa bách bệnh, thần dược', 'Advertises a miracle cure for many diseases'),
 
   // danh tính
   ID_FAMILY_EMERGENCY_THIRD_PARTY: c('Người lạ báo tin người thân gặp nạn', 'A stranger reports a family emergency'),

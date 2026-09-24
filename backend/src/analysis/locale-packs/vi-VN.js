@@ -234,7 +234,13 @@ module.exports = {
        * Người Việt nói "tải tại link", "tải ở link", "tải theo đường link",
        * "vào link tải" — `qua` chỉ là một trong nhiều giới từ.
        */
-      { pattern: '(cài|tải)\\b[^.]{0,44}(dịch vụ công|(qua|tại|từ|theo|ở|vào)\\s*(đường\\s*)?link|đường link|link\\s*(bên )?dưới|file apk|\\bapk\\b|đường dẫn (tôi|em|anh) gửi)', scope: 'action' },
+      /*
+       * ⚠️ `(?!…cổng|trang|…)` — "TẠI CỔNG dịch vụ công" viết không dấu là "tai cong
+       * dich vu cong", trùng mặt chữ với "TẢI … dịch vụ công". Đo 24/9/2026: thông
+       * báo BHXH thật "Tra cuu tai cong dich vu cong" ra CAO · PROTECTED_CRITICAL.
+       * "tải/tại" + cổng / trang / website / trụ sở / quầy là CHỖ, không phải việc tải.
+       */
+      { pattern: '(cài|tải)(?!\\s*(cổng|trang|website|web|địa chỉ|trụ sở|quầy|văn phòng|điểm giao dịch))\\b[^.]{0,44}(dịch vụ công|(qua|tại|từ|theo|ở|vào)\\s*(đường\\s*)?link|đường link|link\\s*(bên )?dưới|file apk|\\bapk\\b|đường dẫn (tôi|em|anh) gửi)', scope: 'action' },
       /**
        * Ngược lại: "vào link … tải/cài" — động từ đứng SAU. Không có mẫu này
        * thì nửa số cách đặt câu vẫn lọt.
@@ -388,11 +394,14 @@ module.exports = {
     ],
     /**
      * `ID_RECOVERY_SUPPORT_IMPERSONATION`: "bên tôi hỗ trợ lấy lại số tiền đã bị
-     * lừa". `khong_canh_bao` — khuyến cáo "đừng tin dịch vụ lấy lại tiền" không được
-     * tính. Đi cùng phí xử lý thì `recoverysupport+recoveryfee` (+15) nổ.
+     * lừa". Đi cùng phí xử lý thì `recoverysupport+recoveryfee` (+15) nổ.
+     * ⚠️ `any`, KHÔNG `khong_canh_bao` — câu của kẻ lừa loại này TỰ NÓ nghe như
+     * tường thuật ("số tiền đã bị lừa / bị chiếm đoạt"), nên dễ bị xếp là cảnh báo.
+     * Một mình 12 điểm: câu khuyến cáo có nhắc tới cũng không vượt ngưỡng; còn phí
+     * (FIN_RECOVERY_FEE, scope action) trong câu cảnh báo vẫn bị lọc như cũ.
      */
     ID_RECOVERY_SUPPORT_IMPERSONATION: [
-      { pattern: '(hỗ trợ|giúp|dịch vụ|đơn vị|văn phòng|luật sư|có thể|có khả năng)[^.]{0,30}(lấy lại|thu hồi|truy hồi|đòi lại)\\s*(số\\s*|khoản\\s*)?(tiền|tài sản)', scope: 'khong_canh_bao' },
+      { pattern: '(hỗ trợ|giúp|dịch vụ|đơn vị|văn phòng|luật sư|có thể|có khả năng)[^.]{0,30}(lấy lại|thu hồi|truy hồi|đòi lại)\\s*(số\\s*|khoản\\s*)?(tiền|tài sản)', scope: 'any' },
     ],
     ID_TECH_SUPPORT_IMPERSONATION: [
       { pattern: '(hỗ trợ|kỹ thuật viên)\\s+(kỹ thuật|viễn thông)', scope: 'any' },
@@ -449,7 +458,8 @@ module.exports = {
       { pattern: '(con|cháu|em|anh|chị|bố|mẹ)[^.]{0,26}(nước ngoài|bên kia|du học|xuất khẩu lao động|đi làm xa|ở xa)', scope: 'any' },
     ],
     MAN_SECRECY: [
-      { pattern: '(đừng|không)\\s+(nói|kể|báo|tiết lộ)[^.]{0,28}(với ai|cho ai|người thân|gia đình|vợ|chồng|con)', scope: 'action' },
+      // 24/9/2026 — "(không) ĐƯỢC nói với ai": chữ "được" chen giữa từng làm mẫu trượt.
+      { pattern: '(đừng|không)\\s+(được\\s+)?(nói|kể|báo|tiết lộ)[^.]{0,28}(với ai|cho ai|người thân|gia đình|vợ|chồng|con)', scope: 'action' },
       /*
        * Danh sách trên thiếu đúng những người hay được nêu tên nhất. Đo 19/9/2026:
        * "bà đừng nói với bố cháu bà nhé" — câu kinh điển của kịch bản giả danh cháu
@@ -615,6 +625,16 @@ module.exports = {
        * cuộc thi phải nạp tiền mới được dự là hình của cả họ kịch bản "mẫu nhí".
        */
       { pattern: '(giải thưởng|hợp đồng|phần thưởng|giải nhất|top\\s*1)[^.]{0,24}\\d+\\s*(triệu|tỷ|tỉ)', scope: 'any' },
+    ],
+    /**
+     * Quảng cáo sức khoẻ thần kỳ — xem registry. `(?<!nào\s)`: "không có thuốc
+     * NÀO chữa được mọi bệnh" là lời khuyên, không phải lời quảng cáo.
+     */
+    MAN_HEALTH_MIRACLE_CLAIM: [
+      { pattern: '(?<!nào\\s)(chữa|trị)\\s*(khỏi|dứt điểm|tận gốc|được)?\\s*(mọi|nhiều|bách|hàng chục|trăm|các loại|đủ loại)\\s*(bệnh|loại bệnh|chứng)', scope: 'action' },
+      { pattern: '(thần dược|tiên dược|thuốc thần|thuốc tiên)', scope: 'action' },
+      { pattern: '(khỏi|dứt|hết)\\s*(hẳn|hoàn toàn|dứt điểm|vĩnh viễn)\\s*(bệnh\\s*)?(tiểu đường|ung thư|xương khớp|huyết áp|tai biến|gout|gút|thoái hoá|thoái hóa)', scope: 'action' },
+      { pattern: '(không cần|bỏ|ngừng|thay)\\s*(uống\\s*)?(thuốc tây|thuốc bác sĩ|thuốc bệnh viện|thuốc điều trị)', scope: 'action' },
     ],
     MAN_SCARCITY_PRESSURE: [
       { pattern: '(chỉ còn|còn duy nhất|số lượng có hạn|suất cuối)[^.]{0,30}(hôm nay|trong ngày|tối nay|\\d+\\s*(suất|phút|giờ))', scope: 'any' },

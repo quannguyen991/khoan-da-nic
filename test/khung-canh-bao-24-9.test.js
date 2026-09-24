@@ -141,3 +141,44 @@ test('④ tin LÀNH gần giống KHÔNG bật tín hiệu mới', () => {
     assert.ok(BAC[r.nhan] < BAC.CAO, `tin lành lên CAO: ${cau}`);
   }
 });
+
+// ── ⑤ Lượt 2 (rule 1.5.0): tường thuật, "tại cổng", sức khoẻ thần kỳ ─────────
+
+test('⑤ bài tường thuật viết tắt tên ("bà L.") và từ vựng biên bản KHÔNG thành lệnh', () => {
+  for (const cau of [
+    'Kẻ gian gọi điện tự xưng nhân viên ngân hàng, yêu cầu bà L. đọc mã OTP để "xác minh giao dịch".',
+    'Ke gian goi dien tu xung nhan vien ngan hang, yeu cau ba L. doc ma OTP de "xac minh giao dich".',
+    'Đối tượng tự xưng là công an, yêu cầu nạn nhân chuyển tiền vào tài khoản an toàn và chiếm đoạt 300 triệu đồng.',
+  ]) {
+    assert.strictEqual(cham(cau).nhan, 'CHUA_THAY', cau);
+  }
+  // Vỏ bọc bằng từ "đối tượng" + lệnh trực tiếp vẫn bị bắt.
+  assert.strictEqual(cham('Đối tượng bên em yêu cầu, bác chuyển tiền vào tài khoản an toàn ngay.').nhan, 'CAO');
+  // Kẻ lừa "lấy lại tiền" nói "số tiền đã bị lừa" — không được bị xếp là tường thuật rồi lọt.
+  const r = cham('Bên tôi có thể hỗ trợ lấy lại số tiền anh/chị đã bị lừa. Cần nộp trước phí xử lý hồ sơ.');
+  assert.ok(r.maLyDo.includes('ID_RECOVERY_SUPPORT_IMPERSONATION'), `[${r.maLyDo}]`);
+});
+
+test('⑤ "tại cổng dịch vụ công" (không dấu) KHÔNG phải "tải"; "tải ứng dụng … qua link" vẫn CAO', () => {
+  const lanh = cham('Bao hiem xa hoi thong bao: So BHXH cua ban da duoc cap nhat. Tra cuu tai cong dich vu cong.');
+  assert.notStrictEqual(lanh.canThiep, 'PROTECTED_CRITICAL');
+  assert.ok(!lanh.maLyDo.includes('DEV_INSTALL_APK_UNKNOWN'));
+  assert.strictEqual(cham('Bac tai ung dung dich vu cong qua link nay de cap nhat.').nhan, 'CAO');
+});
+
+test('⑤ quảng cáo sức khoẻ thần kỳ ra NGHI_NGO; lời khuyên phủ định / cảnh giác thì không', () => {
+  for (const cau of [
+    'Sản phẩm nhập khẩu cao cấp chữa được mọi bệnh, bác dùng là khỏi hẳn tiểu đường.',
+    'Thần dược đông y, uống một liệu trình là bỏ được thuốc tây.',
+  ]) {
+    const r = cham(cau);
+    assert.ok(r.maLyDo.includes('MAN_HEALTH_MIRACLE_CLAIM'), cau);
+    assert.strictEqual(r.nhan, 'NGHI_NGO', cau);
+  }
+  for (const cau of [
+    'Không có thuốc nào chữa được mọi bệnh, bác nhé.',
+    'Cảnh giác quảng cáo thuốc chữa bách bệnh ở các buổi hội thảo tặng quà.',
+  ]) {
+    assert.ok(!cham(cau).maLyDo.includes('MAN_HEALTH_MIRACLE_CLAIM'), `bật oan: ${cau}`);
+  }
+});

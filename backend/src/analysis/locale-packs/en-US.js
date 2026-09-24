@@ -66,6 +66,11 @@ module.exports = {
     ID_RECOVERY_SUPPORT_IMPERSONATION: [
       { pattern: '\\b(help|we can|able to|service|lawyer|agency)\\b[^.]{0,30}\\b(recover|get back|retrieve|reclaim)\\b[^.]{0,20}\\b(your )?(money|funds|losses)\\b', scope: 'khong_canh_bao' },
     ],
+    MAN_HEALTH_MIRACLE_CLAIM: [
+      { pattern: '\\b(cures?|heals?|treats?)\\b[^.]{0,12}\\b(all|every|many|hundreds of)\\b[^.]{0,8}\\b(diseases?|illness(es)?|conditions)\\b', scope: 'action' },
+      { pattern: '\\b(miracle (cure|drug|medicine)|wonder drug)\\b', scope: 'action' },
+      { pattern: '\\b(stop|quit|no need for)\\b[^.]{0,12}\\b(your )?(prescription|doctor.?s) (medicine|medication|pills)\\b', scope: 'action' },
+    ],
     CRED_CARD_SECRET: [
       { pattern: '\\b(confirm|verify|update|provide|give)\\b[^.]{0,26}\\b(card|bank|account|payment) details\\b', scope: 'any' },
       { pattern: '\\b(card|account) (number|details)\\b[^.]{0,30}\\b(to|so we can|for)\\b[^.]{0,26}\\b(receive|release|process|confirm)\\b', scope: 'any' },

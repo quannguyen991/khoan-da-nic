@@ -26,6 +26,24 @@ const soCo = (ten, macDinh) => {
 const gioiHan = soCo('--gioi-han', null);
 
 /**
+ * `--bo doi-chung` · `--bo mau-that` — chạy MỘT BỘ RIÊNG, không trộn vào bộ chính.
+ *
+ * ⚠️ Bộ đối chứng (157 mẫu ChatGPT 24/9/2026) ĐÃ DÙNG ĐỂ CHỈNH bộ luật 1.4.0–1.5.0.
+ * Số trên bộ đó là số HỒI QUY (sửa luật có làm tụt lại không), KHÔNG phải số
+ * độc lập. Trộn vào bộ chính là tự chấm bài mình vừa chép đáp án.
+ * Nên `--ghi` với bộ riêng ghi ra `eval/results/<bo>.json`, không bao giờ
+ * ghi đè `latest.json` — tệp mà /transparency đọc.
+ */
+const BO_RIENG = { 'doi-chung': 'doi-chung', 'mau-that': 'mau-that' };
+const iBo = process.argv.indexOf('--bo');
+const tenBo = iBo > 0 ? process.argv[iBo + 1] : null;
+if (tenBo && !BO_RIENG[tenBo]) {
+  console.log(`\n✖ Không có bộ "${tenBo}". Chọn một trong: ${Object.keys(BO_RIENG).join(', ')}\n`);
+  process.exit(1);
+}
+const thuMucBo = tenBo ? require('node:path').join(__dirname, BO_RIENG[tenBo]) : undefined;
+
+/**
  * ⚠️ ĐO 15/8/2026 — SONG SONG CAO LÀM HỎNG PHÉP ĐO, KHÔNG PHẢI HỎNG SẢN PHẨM.
  *
  * Lời nhắc dài (6.055 ký tự) chạy song song 6 làm 19,1% lượt AI_TIMEOUT, và §4.3
@@ -64,15 +82,22 @@ const NGUONG = [
 ];
 
 (async () => {
-  const { mau: tatCa, loi } = B.napDataset();
+  const { mau: tatCa, loi } = B.napDataset(thuMucBo);
   if (loi.length) {
     console.log('\n✖ DỮ LIỆU HỎNG — không chạy:');
     loi.slice(0, 20).forEach((l) => console.log('  ', l));
     process.exit(1);
   }
+  if (tatCa.length === 0) {
+    console.log(`\n✖ Bộ "${tenBo || 'dataset'}" chưa có mẫu nào. Xem README trong thư mục đó.\n`);
+    process.exit(1);
+  }
   const mau = gioiHan ? tatCa.slice(0, gioiHan) : tatCa;
 
-  console.log(`\n📊 KHOAN ĐÃ — ĐÁNH GIÁ ${dungAi ? 'BỘ LUẬT + AI' : 'CHỈ BỘ LUẬT'}`);
+  console.log(`\n📊 KHOAN ĐÃ — ĐÁNH GIÁ ${dungAi ? 'BỘ LUẬT + AI' : 'CHỈ BỘ LUẬT'}${tenBo ? ` · BỘ RIÊNG "${tenBo}"` : ''}`);
+  if (tenBo === 'doi-chung') {
+    console.log('   ⚠️ Bộ này đã dùng để chỉnh luật 1.4.0–1.5.0 — số dưới đây là HỒI QUY, không phải số độc lập.');
+  }
   console.log(`   ${mau.length} mẫu${gioiHan ? ` (giới hạn ${gioiHan}/${tatCa.length})` : ''}\n`);
 
   const batDau = Date.now();
@@ -192,7 +217,7 @@ const NGUONG = [
   }
 
   if (ghi) {
-    const duong = B.ghiKetQua(bao);
+    const duong = B.ghiKetQua({ ...bao, bo: tenBo || 'chinh' }, tenBo ? `${tenBo}.json` : undefined);
     console.log(`\n  đã ghi ${duong}`);
   }
 

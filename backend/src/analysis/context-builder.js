@@ -330,6 +330,15 @@ function laRanhGioi(s, i) {
    */
   if (c === '.' && /\p{L}/u.test(s[i + 1] || '') && /\p{L}/u.test(s[i - 1] || '')
     && !/[\p{L}\p{N}]/u.test(s[i - 2] || '')) return false;
+  /*
+   * ⚠️ CHỮ VIẾT TẮT TÊN NGƯỜI: "yêu cầu bà L. đọc mã OTP" — 24/9/2026. Báo chí và
+   * công an viết tắt tên nạn nhân như vậy. Trước đây dấu chấm sau "L" cắt câu, nửa
+   * sau "đọc mã OTP…" mất khung "kẻ gian…" đứng đầu câu, nên bài tường thuật thành
+   * lệnh và tin cảnh báo ra NGHI_NGO. Chữ HOA đơn lẻ + chấm + cách + chữ THƯỜNG ⇒
+   * câu còn tiếp. "…của ông A. Sau đó…" (chữ hoa sau) vẫn là hai câu.
+   */
+  if (c === '.' && /\p{Lu}/u.test(s[i - 1] || '') && !/[\p{L}\p{N}]/u.test(s[i - 2] || '')
+    && s[i + 1] === ' ' && /\p{Ll}/u.test(s[i + 2] || '')) return false;
   return true;
 }
 
@@ -443,6 +452,8 @@ const KHUNG_GIAO_DUC = new RegExp([
   // "Cảnh giác cuộc gọi tự xưng nhân viên điện lực yêu cầu cài ứng dụng…"
   '(cảnh giác|đề phòng|coi chừng|cẩn thận|cẩn trọng)[^.]{0,30}(cuộc gọi|tin nhắn|người|đối tượng|số lạ|trường hợp|trang|đường link)'
     + '[^.]{0,30}(tự xưng|giả danh|mạo danh|xưng là|lạ|giả)',
+  // "Cảnh giác quảng cáo thuốc chữa bách bệnh" — khuyến cáo về MAN_HEALTH_MIRACLE_CLAIM.
+  '(cảnh giác|đề phòng|coi chừng|cẩn thận|đừng tin)[^.]{0,20}(quảng cáo|sản phẩm|thuốc|thực phẩm chức năng|hội thảo)',
   // "Bài học 3: Nhận biết yêu cầu chia sẻ màn hình khi đang đăng nhập ngân hàng."
   '(nhận biết|nhận diện|cách nhận ra|cách phòng tránh|phòng tránh)[^.]{0,40}(yêu cầu|thủ đoạn|chiêu|tin nhắn|cuộc gọi|lừa)',
   // "Ví dụ về tin nhắn lừa đảo: …"
@@ -512,6 +523,16 @@ const KHUNG_GIAO_DUC = new RegExp([
 
   // Khung TƯỜNG THUẬT về nạn nhân, hoặc về kẻ giả danh.
   '(nạn nhân|người bị hại)[^.]{0,30}(được|bị)\\s+(yêu cầu|dụ|lừa)',
+  /*
+   * ── TỪ VỰNG CỦA BIÊN BẢN / BÀI BÁO — thêm 24/9/2026 ──
+   * "Đối tượng tự xưng là công an, yêu cầu nạn nhân chuyển tiền…", "…chiếm đoạt
+   * 300 triệu đồng". Kẻ gian không gọi mình là "đối tượng", và không nói với người
+   * đang bị lừa rằng mình "chiếm đoạt". Lệnh trực tiếp sau dấu phẩy vẫn thoát.
+   */
+  '(các |những |nhóm )?đối tượng[^.]{0,40}(tự xưng|giả danh|mạo danh|yêu cầu|dụ dỗ|hướng dẫn|lừa)',
+  '(lừa đảo )?chiếm đoạt[^.]{0,20}(\\d|tiền|tài sản|số tiền)',
+  // ⚠️ KHÔNG có "đã bị lừa" / "bị lừa mất": kẻ lừa "lấy lại tiền" nói đúng câu đó —
+  // "hỗ trợ lấy lại số tiền anh chị ĐÃ BỊ LỪA". Đo 24/9: khung đó kéo ca này từ CAO xuống.
   'có người[^.]{0,20}(giả danh|mạo danh|xưng là)',
   /**
    * ⚠️ "THEO CƠ QUAN X" PHẢI ĐI KÈM MỘT ĐỘNG TỪ TƯỜNG THUẬT.

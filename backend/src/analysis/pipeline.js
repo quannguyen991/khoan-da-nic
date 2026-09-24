@@ -569,7 +569,25 @@ function analyze(input = {}, nguCanhTinCay = {}) {
     }
   }
 
-  const signals = ghepTinHieu([...direct, ...web, ...boHoiNhanh, ...kyTuChoi, ...trangThaiMay], llm);
+  /**
+   * ══════ §6.11 — TÍN HIỆU TỪ BỘ NHỚ VỤ VIỆC — kênh riêng, thêm 24/9/2026 ══════
+   *
+   * Trước đây `/api/vu-viec/gop` nhét tín hiệu CASE_* vào `llmSignals`, tức bắt
+   * chúng qua cổng "câu trích phải có trong văn bản". Câu trích của CASE_* là
+   * "tiep_can → doi_hanh_dong" — không bao giờ có trong tin — nên cổng VỨT HẾT.
+   * Đo: đường gộp vụ chưa từng cộng được một điểm vụ việc nào. Và vì `llmSignals`
+   * là mảng, lượt đó còn tự khai `aiDaChay: true` khi AI không hề chạy (§4.3).
+   *
+   * Nay đi kênh riêng như `device_state`: CHỈ nhận khi người dùng ĐÃ XÁC NHẬN gộp
+   * (route kiểm cờ đó), mã phải có trong registry, và chỉ LÀM TĂNG (§4.2).
+   */
+  const vuViec = Array.isArray(input.tinHieuVuViec)
+    ? input.tinHieuVuViec
+      .filter((s) => s && laTinHieu(s.id) && s.state === 'present')
+      .map((s) => ({ ...s, source: 'case_memory', confidence: 1.0 }))
+    : [];
+
+  const signals = ghepTinHieu([...direct, ...web, ...boHoiNhanh, ...kyTuChoi, ...trangThaiMay, ...vuViec], llm);
   const nhanDuoc = signals.filter((s) => s.state === 'present').map((s) => s.id);
 
   const kq = decide(signals);

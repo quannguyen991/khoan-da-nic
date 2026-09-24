@@ -98,6 +98,9 @@ import { CongDongCanhGiac } from './components/CongDongCanhGiac';
 import { ManGhepConChau } from './components/GhepConChau';
 import { ManConCaiGiup } from './components/ConCaiGiup';
 import { dongBoNhipBaoVe } from './lib/nhip-bao-ve';
+import {
+  kiemVuViec, gopVuViec, khongGopVuViec, ghepKetQuaVuViec, type CauHoiGopVuViec,
+} from './lib/vu-viec';
 import { ManChiaKhoa } from './components/ChiaKhoaThuHai';
 import { ManNganHangMoPhong } from './components/NganHangMoPhong';
 import { hopNhatNguoiThan } from './lib/hop-nhat-nguoi-than';
@@ -251,6 +254,11 @@ export interface KetQuaPhanTich {
   khongGoiDuocMayChu?: boolean;
   /** Bác tự bấm nút dừng, không phải một kết quả phân tích. */
   tuBamDung?: boolean;
+  /**
+   * §6.11 (24/9/2026) — bác đã xác nhận tin này cùng vụ với tin kiểm hôm trước, và
+   * kết quả đã xét CẢ VỤ. Giá trị là thời điểm của tin gần nhất trong vụ cũ.
+   */
+  daXetCaVu?: number;
   queryText?: string;
   queryImage?: string | null;
   /** Bác tự khai đã chuyển tiền / đọc mã — gửi lên máy chủ để BỘ LUẬT chọn màn. */
@@ -403,6 +411,17 @@ export default function App() {
     return 'intro';
   });
   const [analyzeResult, setAnalyzeResult] = useState<KetQuaPhanTich | null>(null);
+  /** §6.11 — câu hỏi "tin này có cùng vụ với tin hôm trước không?" (xem `lib/vu-viec.ts`). */
+  const [cauHoiVuViec, setCauHoiVuViec] = useState<CauHoiGopVuViec | null>(null);
+  const traLoiVuViec = async (dung: boolean) => {
+    const cau = cauHoiVuViec;
+    setCauHoiVuViec(null);
+    if (!cau) return;
+    if (!dung) { khongGopVuViec(cau); return; }
+    const gop = await gopVuViec(cau);
+    const ngayVuCu = Math.max(...cau.hoSo.suKien.map((s) => s.thoiDiem || 0), cau.hoSo.capNhatLuc || 0);
+    setAnalyzeResult((truoc) => (truoc ? ghepKetQuaVuViec(truoc, gop, ngayVuCu) : truoc));
+  };
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [buocDangLam, setBuocDangLam] = useState<null | 'doc_chu' | 'doc_anh'>(null);
   const [pinnedNotification, setPinnedNotification] = useState(() => localStorage.getItem('pinnedNotification') === 'true');
@@ -757,6 +776,7 @@ export default function App() {
   const handleAnalyze = async (text: string, image?: string | null, trangThaiNguoiDung?: 'da_chuyen_hoac_doc_ma') => {
     if (!text.trim() && !image) return;
     setIsAnalyzing(true);
+    setCauHoiVuViec(null);
     setBuocDangLam(image ? 'doc_anh' : 'doc_chu');
     let finalResult: any = null;
 
@@ -845,6 +865,15 @@ export default function App() {
       setBuocDangLam(null);
       if (finalResult) {
         setAnalyzeResult(finalResult);
+        /*
+         * §6.11 — BỘ NHỚ VỤ VIỆC (24/9/2026). Chạy SAU khi kết quả đã hiện: đây là
+         * phần THÊM, không được làm chậm hay chặn kết quả chính. Chỉ với tin chữ đã
+         * được máy chủ kiểm (không phải lượt mất mạng) — không có chữ thì không có
+         * số / tài khoản / tên miền để nhận ra lần sau.
+         */
+        if (text.trim() && !finalResult.khongGoiDuocMayChu && typeof finalResult.nhan === 'string') {
+          void kiemVuViec(text, finalResult).then((cau) => setCauHoiVuViec(cau));
+        }
         // Luồng hai phía ở bản web: chỉ gửi về dashboard Guardian một bản tóm
         // tắt, không lưu nguyên văn nội dung Bác đã nói hoặc ảnh đã quét.
         if (userRole === 'elder') {
@@ -1514,6 +1543,8 @@ export default function App() {
               <ManConCaiGiup t={t} setView={setView} onDangNhapXong={setHoSo} onDanhSachGhep={hopNhatDaGhep} onDienTap={triggerDienTap} />
             )}
             {view === 'warning' && <WarningView setView={setView} t={t} lang={lang} result={analyzeResult} familyMembers={familyMembers} noiChayAi={noiChayAi} mayCoUngDungLa={mayCoUngDungLa}
+              cauHoiVuViec={cauHoiVuViec}
+              onTraLoiVuViec={(dung) => { void traLoiVuViec(dung); }}
               onBaoDaChuyen={() => {
                 // Không có chữ hay ảnh (bác tự bấm "Khẩn cấp") thì không có gì để gửi lại —
                 // khối phục hồi phía trình duyệt vẫn đã hiện rồi.
@@ -6844,11 +6875,16 @@ export function WarningView({
   mayCoUngDungLa,
   onBaoDaChuyen,
   onHanhDongMoPhong,
+  cauHoiVuViec,
+  onTraLoiVuViec,
 }: {
   setView: (v: ViewState) => void,
   t: any,
   lang?: Lang,
   result?: KetQuaPhanTich | null,
+  /** §6.11 — tin này trùng số / tài khoản / trang web với một vụ bác kiểm trước đó. */
+  cauHoiVuViec?: CauHoiGopVuViec | null,
+  onTraLoiVuViec?: (dung: boolean) => void,
   familyMembers?: NguoiThan[],
   /**
    * Ứng dụng đang xem và bấm được thay bác — đọc thẳng từ Android.
@@ -7521,6 +7557,50 @@ export function WarningView({
                 ? t('Mình lo việc đã chuyển tiền trước')
                 : (nhanChu ?? t('Chưa có kết quả'))}
         </h1>
+        {/*
+          §6.11 — BỘ NHỚ VỤ VIỆC (24/9/2026). Kết quả này đã xét CẢ VỤ bác xác nhận
+          — nói ra, để bác hiểu vì sao tin ngắn này lại có mức đó.
+        */}
+        {result?.daXetCaVu && !laDienTap && (
+          <p className="text-[15px] font-bold text-white/95 text-center mb-2">
+            {t('Cháu đã xét cùng với tin bác kiểm ngày {ngay}.').replace('{ngay}', new Date(result.daXetCaVu).toLocaleDateString(lang === 'en' ? 'en-GB' : 'vi-VN'))}
+          </p>
+        )}
+        {/*
+          §6.11 — HỎI TRƯỚC KHI GỘP. Tin này trùng số / tài khoản / trang web với một
+          vụ bác đã kiểm. Bác bấm "Đúng" thì máy chủ xét cả vụ — CHỈ LÀM TĂNG (§4.2).
+          Không hỏi ở lượt diễn tập / mô phỏng, và không hỏi khi đã CAO (xem vu-viec.ts).
+        */}
+        {cauHoiVuViec && !laDienTap && !khongGoiDuoc && (
+          <div role="group" aria-labelledby="hoi-vu-viec" className="w-full mb-3 rounded-[24px] bg-white p-4 text-left shadow-[0_12px_28px_-14px_rgba(20,16,50,0.6)]">
+            <p id="hoi-vu-viec" className="text-[17px] font-bold text-[color:var(--color-ink)]">
+              {t('Tin này có cùng {gi} với tin bác kiểm ngày {ngay}. Có phải cùng một người không?')
+                .replace('{gi}', (() => {
+                  const v = cauHoiVuViec.viSao.find((x) => ['dienThoai', 'soTaiKhoan', 'tenMien'].includes(x.truong));
+                  if (!v) return t('thông tin');
+                  if (v.truong === 'tenMien') return `${t('trang web')} ${v.giaTri}`;
+                  return `${v.truong === 'dienThoai' ? t('số điện thoại') : t('số tài khoản')} …${v.giaTri.slice(-4)}`;
+                })())
+                .replace('{ngay}', new Date(Math.max(...cauHoiVuViec.hoSo.suKien.map((s) => s.thoiDiem || 0))).toLocaleDateString(lang === 'en' ? 'en-GB' : 'vi-VN'))}
+            </p>
+            <div className="mt-3 flex flex-col gap-2">
+              <button
+                type="button"
+                onClick={() => onTraLoiVuViec?.(true)}
+                className="w-full min-h-[56px] rounded-full bg-[#6d28d9] text-white font-bold text-[17px] px-4"
+              >
+                {t('Đúng, cùng người đó')}
+              </button>
+              <button
+                type="button"
+                onClick={() => onTraLoiVuViec?.(false)}
+                className="w-full min-h-[52px] rounded-full border-2 border-[#d9c6ff] bg-white text-[color:var(--color-ink)] font-bold text-[16px] px-4"
+              >
+                {t('Không phải')}
+              </button>
+            </div>
+          </div>
+        )}
         {/*
           ⚠️ LƯỢT BÁC TỰ BẤM "DỪNG 60 GIÂY" KHÔNG CÓ DÒNG NÀY — sửa 19/9/2026.
           Ở đó tiêu đề đã là "Bác dừng lại 60 giây đã" và khối ngay dưới đã nói

@@ -41,14 +41,14 @@ const {
  * ⚠️ 63 — THÊM BỐN TÍN HIỆU NGÀY 24/9/2026, người dùng duyệt ("ok") sau khi xem
  * số đo trên bộ 157 mẫu ChatGPT (nguồn công an / ngân hàng / báo chí 2024–2026):
  *   FIN_MISTAKEN_TRANSFER_REDIRECT · FIN_ACCOUNT_OPENING_FOR_OTHERS ·
- *   CRED_ID_BIOMETRIC_DOCS · DEV_SIM_SWAP_ESIM
+ *   CRED_ID_BIOMETRIC_DOCS · DEV_SIM_SWAP_ESIM · MAN_HEALTH_MIRACLE_CLAIM (registry 1.2.0)
  * Bốn thủ đoạn đó không có mã nào trong Phụ lục A. Cùng cách xử lý với tín hiệu
  * thứ 59: legacyKey `null`, con số 22 KHÔNG đổi, Phụ lục A cần cập nhật theo mã.
  */
-test('§6.2 — đúng 63 tín hiệu (58 Phụ lục A + 1 ngày 5/9 + 4 ngày 24/9/2026)', () => {
-  assert.strictEqual(SIGNAL_IDS.length, 63);
-  assert.strictEqual(Object.keys(SIGNALS).length, 63);
-  for (const id of ['FIN_MISTAKEN_TRANSFER_REDIRECT', 'FIN_ACCOUNT_OPENING_FOR_OTHERS', 'CRED_ID_BIOMETRIC_DOCS', 'DEV_SIM_SWAP_ESIM']) {
+test('§6.2 — đúng 64 tín hiệu (58 Phụ lục A + 1 ngày 5/9 + 5 ngày 24/9/2026)', () => {
+  assert.strictEqual(SIGNAL_IDS.length, 64);
+  assert.strictEqual(Object.keys(SIGNALS).length, 64);
+  for (const id of ['FIN_MISTAKEN_TRANSFER_REDIRECT', 'FIN_ACCOUNT_OPENING_FOR_OTHERS', 'CRED_ID_BIOMETRIC_DOCS', 'DEV_SIM_SWAP_ESIM', 'MAN_HEALTH_MIRACLE_CLAIM']) {
     assert.ok(SIGNALS[id], `thiếu ${id}`);
     assert.strictEqual(SIGNALS[id].legacyKey, null, `${id}: không có trong Phụ lục A nên không có legacyKey`);
   }
@@ -56,7 +56,7 @@ test('§6.2 — đúng 63 tín hiệu (58 Phụ lục A + 1 ngày 5/9 + 4 ngày 
 
 test('§6.2 — đúng 8 nhóm với số lượng đã chốt', () => {
   const mong = {
-    money: 14, identity: 12, manipulation: 10, offer: 7,
+    money: 14, identity: 12, manipulation: 11, offer: 7,
     web: 6, device: 6, credential: 5, case: 3,
   };
   assert.strictEqual(GROUP_IDS.length, 8);
@@ -64,7 +64,7 @@ test('§6.2 — đúng 8 nhóm với số lượng đã chốt', () => {
     assert.strictEqual(listByGroup(nhom).length, soLuong, `nhóm ${nhom}`);
   }
   const tong = Object.values(mong).reduce((a, b) => a + b, 0);
-  assert.strictEqual(tong, 63);
+  assert.strictEqual(tong, 64);
 });
 
 // ⚠️ MÂU THUẪN TÀI LIỆU ĐÃ GHI NHẬN (15/8/2026)

@@ -63,9 +63,12 @@ function sinh() {
   if (loi.length) throw new Error(`dữ liệu hỏng: ${loi[0]}`);
 
   // Chỉ lấy mẫu tiếng Việt CÓ DẤU — mẫu vốn đã không dấu thì bỏ dấu là vô nghĩa.
+  // Không lấy mẫu THẬT: bản sao bỏ dấu sẽ rơi vào eval/dataset/ (thư mục tự soạn)
+  // mà không có người duyệt, và mỗi mẫu thật thêm vào sẽ xáo lại cả tệp 10.
   const ungVien = mau.filter((m) => m.ngon_ngu === 'vi'
     && boDau(m.noi_dung) !== m.noi_dung
-    && !m.dan_xuat_tu);
+    && !m.dan_xuat_tu
+    && m.nguon !== 'that');
 
   const chon = chonTraiDeu(ungVien, SO_MAU);
 
