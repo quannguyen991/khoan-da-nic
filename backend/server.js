@@ -22,7 +22,7 @@ const { layCauHinh, goiChat, layCacDuong, locDuongThiGiac } = require('./src/ai/
 const { kiemModelSong } = require('./src/ai/kiem-model-song');
 const { dungSafetyCard } = require('./src/safety-card');
 const { dungTrang } = require('./src/safety-card-page');
-const { dungTrangGioiThieu, docThongTinApk } = require('./src/trang-gioi-thieu');
+const { dungTrangGioiThieu, docThongTinApk, ANH_AI } = require('./src/trang-gioi-thieu');
 const { layKeHoachPhucHoi } = require('./src/analysis/recovery-adapters');
 const {
   taoSuKien, timHoSoCoTheGop, dungCauHoiGop, tinHieuCase, baLop, GIAI_DOAN, tinHieuMangTheo, locHoSo,
@@ -1854,7 +1854,9 @@ app.get(['/gioi-thieu', '/gioi-thieu/'], (req, res) => {
   res.setHeader('content-type', 'text/html; charset=utf-8');
   res.setHeader('content-language', ngonNgu);
   const gradle = path.join(GOC_REPO, 'android', 'app', 'build.gradle');
-  res.send(dungTrangGioiThieu(ngonNgu, { apk: coApk ? docThongTinApk(DUONG_APK, gradle) : null }));
+  // Ảnh AI (scripts/tao-anh-gioi-thieu.py) — có tệp thì trang dùng, chưa có thì dùng linh vật.
+  const anh = ANH_AI.filter((ten) => fs.existsSync(path.join(GOC_REPO, 'public', 'anh-gioi-thieu', `${ten}.webp`)));
+  res.send(dungTrangGioiThieu(ngonNgu, { apk: coApk ? docThongTinApk(DUONG_APK, gradle) : null, anh }));
 });
 
 // §6.7 — mọi lỗi còn lại vẫn ra JSON có cấu trúc, không bao giờ trắng trang.

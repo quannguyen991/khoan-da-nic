@@ -89,7 +89,7 @@ const CHUP_DOM = `(() => {
   goc.querySelectorAll('input, textarea').forEach((e) => e.setAttribute('readonly', ''));
   goc.querySelector('head').innerHTML = '<meta charset="utf-8"><meta name="viewport" content="width=390">'
     + '<meta name="robots" content="noindex"><link rel="stylesheet" href="/man-that/app.css">'
-    + '<style>html,body{overflow:hidden!important}*,*::before,*::after{animation:none!important;transition:none!important;caret-color:transparent!important}</style>';
+    + '<style>html,body{overflow:hidden!important}*,*::before,*::after{animation:none!important;transition:none!important;caret-color:transparent!important}*{scrollbar-width:none!important}*::-webkit-scrollbar{display:none!important}</style>';
   return '<!doctype html>\\n' + goc.outerHTML;
 })()`;
 

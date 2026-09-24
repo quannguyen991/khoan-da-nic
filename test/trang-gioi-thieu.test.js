@@ -71,7 +71,8 @@ test('lối vào: web, mục cài đặt, số đo công khai, chính sách quy�
 });
 
 test('nút ở phần mở đầu dẫn xuống mục cài (có cảnh báo), không trỏ thẳng vào tệp .apk', () => {
-  const moDau = vi.slice(vi.indexOf('class="mo-dau"'), vi.indexOf('class="van-de"'));
+  const moDau = vi.slice(vi.indexOf('class="mo-dau"'), vi.indexOf('class="chay"'));
+  assert.ok(moDau.length > 200, 'không tìm thấy đoạn mở đầu');
   assert.doesNotMatch(moDau, /\.apk/);
   const cai = vi.slice(vi.indexOf('id="android"'));
   assert.ok(cai.indexOf('Khoan Đã không bao giờ gửi link') < cai.indexOf('href="/khoan-da.apk"'),
@@ -107,6 +108,19 @@ test('§4.4 — sàn chữ 14px ở gốc 17px, vùng chạm, cấm nowrap', () 
   for (const m of css.matchAll(/line-height:\s*([\d.]+)(?![\w%])/g)) {
     assert.ok(parseFloat(m[1]) >= 1.1, `line-height ${m[1]}`);
   }
+});
+
+test('kể chuyện khi cuộn: KHÔNG có JS (hay tắt chuyển động) vẫn đủ nội dung', () => {
+  const css = vi.match(/<style>([\s\S]*?)<\/style>/)[1].replace(/\/\*[\s\S]*?\*\//g, '');
+  // Mọi luật làm chữ mờ/ẩn phải nằm sau `.dong` — lớp chỉ script thêm, và chỉ khi không tắt chuyển động.
+  for (const m of css.matchAll(/([^{}]+)\{[^}]*opacity:\s*0?\.?\d*[;}]/g)) {
+    const bo = m[1].trim();
+    if (/opacity:\s*1\b/.test(m[0]) || bo.startsWith('@') || bo.startsWith('from') || bo.startsWith('to')) continue;
+    assert.ok(bo.split(',').every((s) => s.trim().startsWith('.dong')), `luật ẩn không nằm sau .dong: ${bo}`);
+  }
+  assert.match(vi, /prefers-reduced-motion: reduce/, 'script phải tôn trọng tắt chuyển động');
+  // Mọi câu của kịch bản cuộc gọi đều có trong HTML (không sinh bằng script).
+  for (const cau of CHU.vi.c1Loi) assert.ok(vi.includes(cau.replace(/"/g, '&quot;')), cau);
 });
 
 test('phông chữ nạp từ chính web, không gọi Google Fonts', () => {
