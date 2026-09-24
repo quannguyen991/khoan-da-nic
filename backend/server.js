@@ -72,6 +72,18 @@ let loiAiGanNhat = null;
 let chanDoanAiGanNhat = null;
 
 const app = express();
+
+/*
+ * ⚠️ SAU PROXY CỦA RENDER, `req.ip` LÀ IP CỦA PROXY — sửa 24/9/2026.
+ * Mọi giới hạn tần suất ở đây khoá theo `req.ip`. Không khai `trust proxy` thì
+ * trên Render mọi người dùng chung MỘT hạn mức (vd. 30 lượt phân tích / phút cho
+ * cả hệ thống): một người bấm nhiều là người khác bị 429. Chạy thử đầu-cuối
+ * Guardian đếm đúng 30 lượt "proof" của hai máy cộng lại.
+ * Tin ĐÚNG MỘT lớp proxy, và chỉ khi chạy sau proxy (Render tự đặt `RENDER`).
+ * Chạy thẳng ở máy thì không tin — tin `X-Forwarded-For` khi không có proxy là
+ * để ai cũng tự khai IP mình và lách giới hạn.
+ */
+if (process.env.RENDER || process.env.KHOAN_DA_SAU_PROXY === '1') app.set('trust proxy', 1);
 app.disable('x-powered-by');   // §6.8 — không rò phiên bản
 
 /**
@@ -1054,7 +1066,7 @@ app.post('/api/proof/yeu-cau/tao', chanProof, canPhien, proof(async (req) => {
 
 /** Cả hai đầu cùng hỏi trạng thái ở đây. Không có gì bí mật trong phản hồi. */
 app.get('/api/proof/yeu-cau/:yeuCauId', canPhien, chanGiaDinh,
-  proof((req) => KY.docYeuCau(req.params.yeuCauId)));
+  proof((req) => KY.docYeuCau(req.params.yeuCauId, { nguoiDoc: req.taiKhoanId })));
 
 /**
  * Người con ký — XÁC NHẬN hoặc TỪ CHỐI, cả hai đều được ký.

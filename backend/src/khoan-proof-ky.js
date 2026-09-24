@@ -204,11 +204,24 @@ async function taoYeuCau(yeuCau = {}, { bayGio = Date.now() } = {}) {
   return { yeuCauId, challenge: deBai, hetHan, tuyChon, ...payload };
 }
 
-/** Trạng thái yêu cầu, cho cả hai đầu hỏi. Không có gì bí mật ở đây. */
-async function docYeuCau(yeuCauId, { bayGio = Date.now() } = {}) {
+/**
+ * Trạng thái yêu cầu, cho cả hai đầu hỏi.
+ *
+ * ⚠️ SỬA 24/9/2026 — "không có gì bí mật" là SAI. Chạy thử đầu-cuối: người lạ, và cả
+ * người con ĐÃ BỊ THU HỒI, vẫn đọc được `chuTaiKhoanId`, `caseId`, `khoangTien` và cụm
+ * từ đối chiếu — chỉ cần biết `yeuCauId`. Nay chỉ CHỦ yêu cầu và người ĐANG trong
+ * vòng ghép của chủ được đọc. Người khác nhận 404 như yêu cầu không tồn tại: trả
+ * 403 là xác nhận cho họ rằng mã đó có thật. Cùng quy tắc với `tuyChonKy`.
+ * `nguoiDoc` bỏ trống = lời gọi nội bộ (test, luồng ký) — không kiểm.
+ */
+async function docYeuCau(yeuCauId, { bayGio = Date.now(), nguoiDoc } = {}) {
   const kho = await layKho();
   const ban = await kho.doc(BANG.YEU_CAU, yeuCauId);
   if (!ban) throw new LoiProof('KHONG_CO_YEU_CAU', { http: 404 });
+  if (nguoiDoc !== undefined && nguoiDoc !== ban.chuTaiKhoanId
+    && !(await danhSachDaGhep(ban.chuTaiKhoanId)).includes(nguoiDoc)) {
+    throw new LoiProof('KHONG_CO_YEU_CAU', { http: 404 });
+  }
 
   /**
    * ③ §4.3 — HẾT HẠN MÀ KHÔNG AI TRẢ LỜI.

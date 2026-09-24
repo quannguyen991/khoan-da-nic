@@ -32,7 +32,9 @@ test('câu trạng thái gửi: đúng bốn loại, không bao giờ "đã th�
   assert.strictEqual(C.cauTrangThaiBao([{ ten: 'Minh', trangThai: 'CHUA_CAU_HINH_PUSH' }], t), 'Máy chủ chưa bật gửi cảnh báo');
   const hon = C.cauTrangThaiBao([{ ten: 'Minh', trangThai: 'DA_DAY_DI' }, { ten: 'Hoa', trangThai: 'CHUA_BAT_NHAN' }], t);
   assert.strictEqual(hon, 'Đã gửi tới máy Minh · Hoa chưa bật nhận cảnh báo');
-  assert.strictEqual(C.cauTrangThaiBao([], t), '');
+  // §4.3 — đổi 24/9/2026: bật quy tắc báo mà chưa nối máy với ai thì PHẢI nói ra.
+  // Chuỗi rỗng ở đây từng làm màn khẩn cấp im lặng, bác tưởng con đã được báo.
+  assert.strictEqual(C.cauTrangThaiBao([], t), 'Chưa nối máy với con cháu nào nên chưa báo được cho ai.');
   for (const cau of Object.values(C.CAU_TRANG_THAI)) assert.ok(!/đã thấy|đã đọc|an toàn/i.test(cau), `§11: "${cau}"`);
 });
 

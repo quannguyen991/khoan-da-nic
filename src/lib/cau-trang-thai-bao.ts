@@ -20,6 +20,12 @@ export const CAU_TRANG_THAI = Object.freeze({
 type Dong = { ten: string; trangThai: string };
 
 export function cauTrangThaiBao(ketQua: Dong[], t: (s: string) => string): string {
+  /*
+   * §4.3 — THÊM 24/9/2026. Bố mẹ đã bật quy tắc báo nhưng CHƯA NỐI MÁY với ai: máy
+   * chủ trả `gui: true, ketQua: []`, và bản trước ghép ra chuỗi rỗng — màn khẩn cấp
+   * im lặng, bác tưởng con đã được báo. Không ai nhận thì phải NÓI là không ai nhận.
+   */
+  if (ketQua.length === 0) return t('Chưa nối máy với con cháu nào nên chưa báo được cho ai.');
   const nhom: Record<keyof typeof CAU_TRANG_THAI, string[]> = {
     DA_DAY_DI: [], PUSH_DELIVERY_UNKNOWN: [], CHUA_BAT_NHAN: [], CHUA_CAU_HINH_PUSH: [],
   };

@@ -38,6 +38,8 @@ const TRA_LOI_HOI = Object.freeze(['CO', 'KHONG']);
 const LOAI_SU_KIEN = Object.freeze(['ket_qua_kiem', 'otp_trong_cuoc_goi', 'cai_app_trong_cuoc_goi', 'tien_ra_trong_cuoc_goi']);
 const HANH_DONG = Object.freeze(['bam_goi_nguoi_than', 'toi_on', 'da_lo_chuyen', 'con_bao_lua_dao', 'con_bao_khong_sao', 've_trang_chu']);
 const MA_HO = /^[a-z_]{1,60}$/;
+/** Ba nhãn của hợp đồng (§HĐ) — thứ DUY NHẤT được đi kèm một báo động. */
+const NHAN_HOP_LE = Object.freeze(['CAO', 'NGHI_NGO', 'CHUA_THAY']);
 
 /** Trạng thái mà giao diện nhận được. Thêm `CHUA_BAT_NHAN` cho người chưa có máy nào đăng ký. */
 const CHUA_BAT_NHAN = 'CHUA_BAT_NHAN';
@@ -223,7 +225,14 @@ function taoBaoDong({
   async function baoDong(boMeId, vao) {
     const loaiSuKien = vao?.loaiSuKien;
     if (!LOAI_SU_KIEN.includes(loaiSuKien)) throw new LoiBaoDong('LOAI_SU_KIEN_KHONG_HOP_LE');
-    const nhan = typeof vao?.nhan === 'string' ? vao.nhan : null;
+    /*
+     * ⚠️ SỬA 24/9/2026 — `nhan` là MÃ, không phải chữ (§HĐ luật 1, §6.9). Bản trước nhận
+     * MỌI chuỗi khi loại sự kiện không phải `ket_qua_kiem`, lưu lại và trả nguyên văn
+     * cho máy con: chạy thử gửi `nhan: "Mã OTP 482913 chuyển vào STK 0123456789"` và máy
+     * con đọc được đúng câu đó. App chỉ gửi 'CAO' hoặc bỏ trống, nhưng luật "không nội
+     * dung tin nhắn rời máy bố mẹ" phải được ép ở MÁY CHỦ, không trông vào client.
+     */
+    const nhan = NHAN_HOP_LE.includes(vao?.nhan) ? vao.nhan : null;
     const hoKichBan = typeof vao?.hoKichBan === 'string' && MA_HO.test(vao.hoKichBan) ? vao.hoKichBan : null;
     // Quy tắc 1 là "nguy hiểm CAO" — kết quả kiểm ở mức khác không báo.
     if (loaiSuKien === 'ket_qua_kiem' && nhan !== 'CAO') return { gui: false, lyDo: 'KHONG_PHAI_MUC_CAO' };
