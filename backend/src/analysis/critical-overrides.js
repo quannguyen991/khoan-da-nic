@@ -31,10 +31,26 @@ const laNguCanhPhucHoi = (ctx = {}) => ctx.recoveryContext === true
   || ctx.caseContext?.outcome === 'recovery';
 
 const CRITICAL_OVERRIDES = Object.freeze([
+  /**
+   * ⚠️ MỞ RỘNG 25/9/2026 — người dùng duyệt ("ok"), thay cho phương án thêm chốt
+   * chặn thứ 11. Số chốt chặn VẪN LÀ 10 (§12).
+   *
+   * Vế cũ: đòi OTP + đòi chuyển tiền. Vế mới: có tín hiệu OTP / PIN / thông tin
+   * thẻ VÀ ngữ cảnh báo `yeuCauDuaBiMat` — có một đoạn mệnh lệnh / chưa rõ loại
+   * đòi ĐƯA thứ đó cho người khác (xem `laDoanDoiBiMat`), hoặc người dùng tự xác
+   * nhận "họ xin mã". Không tổ chức hợp pháp nào bảo người dùng đọc mã cho mình.
+   *
+   * Đo trước khi làm (mô phỏng trên tín hiệu đã nhận, lượt 1.5.0 có AI):
+   *   bộ chính 571 : +15 mẫu CAO bắt đúng, 0 báo oan thêm
+   *   bộ ChatGPT 157: +4, 0 báo oan thêm
+   * ⚠️ Không có điều kiện "đòi đưa" thì tin OTP THẬT của ngân hàng ("Mã OTP của
+   * quý khách là 483920…") vào màn khẩn cấp — AI đang gắn CRED_OTP_SHARE cho nó.
+   */
   {
     id: 'CO-01',
-    mo: 'CRED_OTP_SHARE + FIN_TRANSFER_REQUEST',
-    test: (s) => s.has('CRED_OTP_SHARE') && s.has('FIN_TRANSFER_REQUEST'),
+    mo: '(CRED_OTP_SHARE + FIN_TRANSFER_REQUEST) OR (CRED_OTP_SHARE|CRED_PASSWORD_PIN|CRED_CARD_SECRET + lời đòi đưa cho người khác)',
+    test: (s, ctx = {}) => (s.has('CRED_OTP_SHARE') && s.has('FIN_TRANSFER_REQUEST'))
+      || (coMot(s, ['CRED_OTP_SHARE', 'CRED_PASSWORD_PIN', 'CRED_CARD_SECRET']) && ctx.yeuCauDuaBiMat === true),
   },
   {
     id: 'CO-02',

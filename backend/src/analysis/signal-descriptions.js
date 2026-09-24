@@ -33,7 +33,11 @@ module.exports = Object.freeze({
     + 'để nhận hoa hồng / tiền công, hoặc hỏi thuê / mua lại tài khoản ngân hàng',
 
   // ── CREDENTIAL ──
-  CRED_OTP_SHARE: 'đòi đọc / gửi mã OTP, mã xác thực, mã sáu số vừa nhận',
+  // 25/9/2026: AI từng gắn tín hiệu này cho chính tin OTP THẬT của ngân hàng
+  // ("Ma OTP cua quy khach la 483920. Khong cung cap ma nay…") — tin CHỨA mã
+  // không phải lời ĐÒI mã.
+  CRED_OTP_SHARE: 'có người đòi người dùng đọc / gửi / cung cấp mã OTP, mã xác thực, mã sáu số vừa nhận. '
+    + 'Tin nhắn chỉ CHỨA mã do ngân hàng hay dịch vụ gửi (kể cả kèm lời dặn không chia sẻ) KHÔNG phải tín hiệu này',
   CRED_PASSWORD_PIN: 'đòi mật khẩu hoặc mã PIN',
   CRED_CARD_SECRET: 'đòi số thẻ đầy đủ, CVV, ngày hết hạn',
   CRED_BANK_LOGIN: 'đòi tên đăng nhập / thông tin đăng nhập ngân hàng, hoặc bảo đăng nhập trong lúc họ xem',

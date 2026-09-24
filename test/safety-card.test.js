@@ -108,8 +108,9 @@ test('Sự thật kiến trúc khớp code, không phải số chép tay', () =>
   // 10 tổ hợp gốc Phụ lục B.2 + 3 tổ hợp thêm 15/8/2026 (rule 1.1.0)
   // + credential+manipulation (rule 1.2.0, xem B.5)
   // + 4 tổ hợp nhắm mẫu hình tiếng Việt còn trượt (rule 1.3.0, xem B.6)
-  // + 4 tổ hợp ngày 24/9/2026 (rule 1.4.0, xem B.7).
-  assert.strictEqual(k.soToHopCongHuong, 22);
+  // + 4 tổ hợp ngày 24/9/2026 (rule 1.4.0, xem B.7)
+  // + 4 tổ hợp ngày 25/9/2026 (rule 1.6.0, xem B.8).
+  assert.strictEqual(k.soToHopCongHuong, 26);
   assert.strictEqual(k.thangDiem, '0–69');
   assert.strictEqual(k.nguong, '20/45');
   assert.strictEqual(k.aiQuyetDinhMuc, false);

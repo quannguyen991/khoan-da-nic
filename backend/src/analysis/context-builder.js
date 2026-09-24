@@ -803,10 +803,90 @@ function viTriDongTuRuiRo(n) {
   return ra;
 }
 
+/**
+ * ══════ ĐOẠN ĐÒI ĐƯA BÍ MẬT CHO NGƯỜI KHÁC — điều kiện của CO-01 mở rộng (25/9/2026) ══════
+ *
+ * Một yêu cầu đọc / gửi mã OTP, PIN, thông tin thẻ cho người khác đứng MỘT MÌNH
+ * tối đa 25 điểm (cap nhóm credential), dưới ngưỡng 45. Đo trên lượt 1.5.0 có
+ * AI: "Bác đọc lại mã OTP vừa gửi về máy để nhân viên xác nhận" → NGHI_NGO.
+ * Người dùng duyệt (25/9/2026): mở rộng CO-01 thay vì thêm chốt chặn thứ 11.
+ *
+ * ⚠️ VÌ SAO KHÔNG CHỈ DỰA VÀO `request_command`: tin OTP THẬT cũng ra lệnh —
+ * "Quý khách vui lòng NHẬP mã OTP để hoàn tất giao dịch". Nhập mã vào app của
+ * chính mình là việc đúng. Nên điều kiện là động từ ĐƯA MÃ CHO NGƯỜI KHÁC (đọc,
+ * cung cấp, báo, chụp, phản hồi, gửi/nhắn CHO ai) — không có "nhập", không có
+ * "gửi" trần ("mã đã được GỬI tới số của quý khách" là ngân hàng gửi).
+ *
+ * ⚠️ XÉT THEO MỆNH ĐỀ (cắt ở , ; : ! ?): động từ và thứ bí mật phải cùng mệnh đề.
+ * "Đọc kỹ hướng dẫn, không chia sẻ mã OTP" — "đọc" và "mã" khác mệnh đề.
+ *
+ * ⚠️ PHỦ ĐỊNH chỉ tính khi cùng mệnh đề và cách động từ ≤ 4 từ ("không cung
+ * cấp", "never ask you to give"). "Đừng lo, đọc mã cho cháu" vẫn là yêu cầu —
+ * dấu phẩy cắt mệnh đề. Lệch về phía KHÔNG bật là có chủ ý: hàm này chỉ BẬT một
+ * điều kiện làm TĂNG mức (§4.2), không tắt tín hiệu nào; bỏ sót ở đây chỉ trả
+ * tin về đúng mức nó có trước 25/9, còn bật nhầm là đẩy tin lành vào màn khẩn cấp.
+ */
+const BI_MAT_CO_DAU = '(mã(?!\\s*(giảm giá|khuyến mãi|đơn|vận đơn|qr|bưu|vạch|số thuế))|otp|pin|mật khẩu|mật mã|số thẻ|thông tin thẻ|cvv|cvc|code|(6|sáu|4|bốn)\\s+(con\\s+|chữ\\s+)?số|password|passcode|card number|digits)';
+const BI_MAT_KHONG_DAU = '(ma\\s+(otp|xac nhan|xac thuc|xac minh|pin|so|bao mat|kich hoat|giao dich|code|dang nhap|do|nay|vua)|otp|pin|mat khau|mat ma|so the|thong tin the|cvv|cvc|code|(6|sau|4|bon)\\s+(con\\s+|chu\\s+)?so|password|passcode|card number|digits)';
+const NGUOI_NHAN = '(tôi|em|cháu|mình|anh|chị|con|chú|cô|bác|bên (em|mình)|chúng tôi|nhân viên|cán bộ|tổng đài viên|me|us)';
+const DONG_TU_DUA = '((?<!(thông|cảnh|nhắc|tin|thời)\\s)báo|đọc|cung cấp|chụp|phản hồi|trả lời|read|send|give|tell|share|provide|forward|reply)';
+const DONG_TU_CHO = `((gửi|nhắn|đọc|báo|chụp|cung cấp|send|read|give|text)\\s+((lại|giúp|ngay|nhanh|luôn|it|them|out)\\s+)*(cho|to|qua)\\s+${NGUOI_NHAN})`;
+
+const dungRe = (s, coDau) => new RegExp(coDau ? s : boDau(s), 'giu');
+// Dạng "cho <người nhận>": "cho em xin mã", và "mã OTP … cho tôi" (bí mật đứng trước).
+const choNguoi = (biMat) => `(cho\\s+${NGUOI_NHAN}\\s+(xin\\s+)?${biMat}|${biMat}[^,;:!?]{0,30}cho\\s+${NGUOI_NHAN}(?![\\p{L}]))`;
+const LENH_DUA_CO_DAU = [dungRe(DONG_TU_DUA, true), dungRe(DONG_TU_CHO, true), dungRe(choNguoi(BI_MAT_CO_DAU), true)];
+const LENH_DUA_KHONG_DAU = [dungRe(DONG_TU_DUA, false), dungRe(DONG_TU_CHO, false), dungRe(choNguoi(BI_MAT_KHONG_DAU), false)];
+const BI_MAT_RE = { true: new RegExp(BI_MAT_CO_DAU, 'iu'), false: new RegExp(BI_MAT_KHONG_DAU, 'iu') };
+// Phủ định trong CÙNG mệnh đề, cách động từ tối đa 4 từ: "never ask you to give",
+// "không bao giờ yêu cầu bác đọc". Dấu phẩy đã cắt mệnh đề, nên "Đừng lo, đọc mã
+// cho cháu" không bị tính là phủ định.
+const PHU_DINH_TRUOC = /(^|[^\p{L}])(không|đừng|chớ|chẳng|khong|dung|chang|never|not|n't)(?![\p{L}])(\s+[^\s]+){0,4}\s*$/iu;
+const CHU = /[\p{L}\p{N}]/u;
+
+function menhDeDoiBiMat(md) {
+  const coDau = CO_DAU.test(md);
+  const [dua, cho, choXin] = coDau ? LENH_DUA_CO_DAU : LENH_DUA_KHONG_DAU;
+  const khongPhuDinh = (i) => !PHU_DINH_TRUOC.test(md.slice(0, i));
+  const tachRoi = (m) => !CHU.test(md[m.index - 1] || '') && !CHU.test(md[m.index + m[0].length] || '');
+  const coKhop = (re, dieuKien) => {
+    re.lastIndex = 0;
+    let m = re.exec(md);
+    while (m) {
+      if (tachRoi(m) && khongPhuDinh(m.index) && dieuKien(m)) return true;
+      m = re.exec(md);
+    }
+    return false;
+  };
+  // "đọc cho cháu", "send it to me" — người nhận đã rõ, bí mật có thể ở mệnh đề khác.
+  if (coKhop(cho, () => true) || coKhop(choXin, () => true)) return true;
+  // động từ đưa + thứ bí mật trong CÙNG mệnh đề.
+  return BI_MAT_RE[coDau].test(md) && coKhop(dua, () => true);
+}
+
+/**
+ * Đoạn này có phải lời ĐÒI đưa mã / PIN / thông tin thẻ cho người khác không?
+ * Chỉ xét đoạn mệnh lệnh hoặc chưa rõ loại — đoạn cảnh báo, tường thuật, thông
+ * báo, quá khứ không bao giờ tính.
+ */
+function laDoanDoiBiMat(doan) {
+  if (!doan || !['request_command', 'unknown'].includes(doan.speechAct)) return false;
+  const banThu = [doan.normalized, doan.goChe, ...(doan.ocrVariants || [])].filter(Boolean);
+  return banThu.some((t) => t.split(/[,;:!?]|\s-\s/).some((md) => menhDeDoiBiMat(md.trim())));
+}
+
 function phanLoai(n) {
   // Thông báo được kiểm TRƯỚC khung giáo dục: "Không cung cấp mã này cho bất kỳ ai."
   // là đuôi của một SMS ngân hàng thật, không phải bài giáo dục.
-  if (KHUNG_THONG_BAO.test(n)) return 'notification';
+  /**
+   * ⚠️ LỐI THOÁT CHO KHUNG THÔNG BÁO — thêm 25/9/2026. Đo được trên bộ luật 1.5.0:
+   *   "Không cung cấp mã này cho bất kỳ ai, trừ cán bộ đang gọi cho bác, bác đọc
+   *    mã cho cháu ngay nhé."                                    → CHUA_THAY
+   * Khung thông báo nuốt cả câu, nên câu dặn của ngân hàng thành vỏ bọc. Cùng lối
+   * thoát với khung giáo dục: có LỆNH TRỰC TIẾP đứng SAU khung thì câu là tin nhắn.
+   */
+  const mThongBao = KHUNG_THONG_BAO.exec(n);
+  if (mThongBao && !viTriLenhTrucTiep(n).some((v) => v > mThongBao.index)) return 'notification';
 
   const viTriEdu = viTriKhungGiaoDuc(n);
   const viTriRuiRo = viTriDongTuRuiRo(n);
@@ -935,7 +1015,7 @@ function segmentsForScope(ctx, scope = 'action') {
 module.exports = {
   boThanh,
   chuanDauThanh,
-  buildContext, detectLanguage, segmentsForScope,
+  buildContext, detectLanguage, segmentsForScope, laDoanDoiBiMat, viTriLenhTrucTiep,
   chuanHoa, boDau, bienTheOcr, catCau, goCheChu, goCheKyTu,
   SPEECH_ACTS, NON_ACTIONABLE_ACTS,
 };

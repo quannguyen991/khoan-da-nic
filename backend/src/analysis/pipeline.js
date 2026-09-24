@@ -8,7 +8,7 @@
  * §5.4: file này không import provider SDK.
  */
 
-const { buildContext } = require('./context-builder');
+const { buildContext, laDoanDoiBiMat } = require('./context-builder');
 const { directPrecheck } = require('./direct-precheck');
 const { decide } = require('./decision-engine');
 const { evaluateOverrides } = require('./critical-overrides');
@@ -72,6 +72,9 @@ const MA_LOI_GHI_AM = Object.freeze({
  *
  * ⚠️ THÊM NGUỒN ĐẦU VÀO MỚI NÀO (video, ghi âm, tệp khác) THÌ THÊM CA VÀO ĐÂY.
  */
+/** Ba tín hiệu "bí mật" của CO-01 mở rộng — xem `laDoanDoiBiMat` trong context-builder. */
+const TIN_HIEU_BI_MAT = new Set(['CRED_OTP_SHARE', 'CRED_PASSWORD_PIN', 'CRED_CARD_SECRET']);
+
 function unreadableInputFloor(input = {}) {
   const daKiem = [];
   const chuaKiem = [];
@@ -591,9 +594,21 @@ function analyze(input = {}, nguCanhTinCay = {}) {
   const nhanDuoc = signals.filter((s) => s.state === 'present').map((s) => s.id);
 
   const kq = decide(signals);
+  /**
+   * CO-01 mở rộng (25/9/2026) — cờ "có lời đòi đưa mã / PIN / thẻ cho người khác".
+   * Chốt chặn chỉ được nhận tín hiệu + ngữ cảnh đã làm sạch (§6.3), nên cờ tính
+   * Ở ĐÂY, thành một boolean. Tín hiệu do người dùng tự xác nhận qua bộ hỏi nhanh
+   * ("họ xin mã trong tin nhắn") đã chính là lời đòi — không cần tìm động từ.
+   */
+  const coBiMat = signals.some((s) => s.state === 'present' && TIN_HIEU_BI_MAT.has(s.id));
+  const yeuCauDuaBiMat = coBiMat && (
+    signals.some((s) => s.state === 'present' && TIN_HIEU_BI_MAT.has(s.id) && s.source === 'user_confirmed')
+    || ctx.segments.some(laDoanDoiBiMat)
+  );
   const overrides = evaluateOverrides(nhanDuoc, {
     caseContext: input.caseContext,
     recoveryContext: input.recoveryContext,
+    yeuCauDuaBiMat,
   });
 
   // §4.3 — sàn: KHÔNG nguồn nào đọc được thì nhãn KHÔNG được là "chưa thấy".

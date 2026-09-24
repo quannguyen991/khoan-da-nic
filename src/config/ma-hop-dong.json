@@ -32,8 +32,8 @@
   "phienBan": {
     "analysis": "1.0.0",
     "registry": "1.2.0",
-    "rule": "1.5.0",
-    "prompt": "1.3.0"
+    "rule": "1.6.0",
+    "prompt": "1.4.0"
   },
   "truongHopDong": [
     "nhan",
@@ -236,7 +236,11 @@
     "task-or-investment+transfer",
     "withdrawfee+offer",
     "thirdpartyemergency+transfer",
-    "fear+isolation+transfer"
+    "fear+isolation+transfer",
+    "injection+action",
+    "qr+pressure",
+    "credential+offer",
+    "mistakenredirect+transfer"
   ],
   "giaiDoanVuViec": [
     "tiep_can",

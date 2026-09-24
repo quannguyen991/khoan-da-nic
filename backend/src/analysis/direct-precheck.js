@@ -9,7 +9,9 @@
  * Hàm thuần. Không mạng, không AI.
  */
 
-const { segmentsForScope, boDau, chuanDauThanh, boThanh } = require('./context-builder');
+const {
+  segmentsForScope, boDau, chuanDauThanh, boThanh, laDoanDoiBiMat, viTriLenhTrucTiep,
+} = require('./context-builder');
 const { layPack } = require('./locale-pack-registry');
 const { laTinHieu } = require('./signal-registry');
 
@@ -215,10 +217,30 @@ function timKhop(chuoi, re, hopLe) {
 }
 
 /** C.5 — danh sách tắt vô điều kiện, so trên bản KHÔNG DẤU. */
-function biTatVoDieuKien(pack, signalId, folded) {
+/**
+ * ⚠️ LỐI THOÁT THÊM 25/9/2026 — cụm tắt KHÔNG còn "vô điều kiện" trong cả đoạn.
+ *
+ * Đo trên bộ luật 1.5.0, chỉ bộ luật:
+ *   "Không cung cấp mã này cho bất kỳ ai, trừ cán bộ đang gọi cho bác, bác đọc
+ *    mã cho cháu ngay nhé."                         → CHUA_THAY
+ * Cụm "khong cung cap ma" tắt CRED_OTP_SHARE cho CẢ câu, nên mở câu bằng lời dặn
+ * của ngân hàng là tín hiệu biến mất — đúng thứ §12 gọi là câu thần chú. Cùng
+ * hình dạng: "Giao dịch thành công rồi, bác chuyển thêm 5 triệu…".
+ *
+ * Cụm tắt mất hiệu lực khi SAU nó có lệnh trực tiếp tới người đọc
+ * (`viTriLenhTrucTiep`), hoặc — với tín hiệu CRED_* — đoạn có lời đòi đưa mã cho
+ * người khác (`laDoanDoiBiMat`). Chỉ làm TĂNG cảnh giác (§4.2): tin OTP thật
+ * ("…Khong cung cap ma nay cho bat ky ai, ke ca nhan vien ngan hang") vẫn tắt.
+ */
+function biTatVoDieuKien(pack, signalId, doan) {
   const cum = pack.suppressors?.[signalId];
   if (!cum) return false;
-  return cum.some((c) => folded.includes(c));
+  const viTri = cum.map((c) => doan.folded.indexOf(c)).filter((i) => i >= 0);
+  if (viTri.length === 0) return false;
+  const dau = Math.min(...viTri);
+  if (viTriLenhTrucTiep(doan.normalized).some((v) => v > dau)) return false;
+  if (signalId.startsWith('CRED_') && laDoanDoiBiMat(doan)) return false;
+  return true;
 }
 
 /** C.4 — hai cơ chế tắt CÓ ĐIỀU KIỆN. Khác hẳn danh sách trên. */
@@ -269,7 +291,7 @@ function directPrecheck(ctx, opts = {}) {
 
         let batDuoc = null;
         for (const doan of doanList) {
-          if (biTatVoDieuKien(pack, signalId, doan.folded)) continue;
+          if (biTatVoDieuKien(pack, signalId, doan)) continue;
 
           // Khớp trên bản chuẩn hoá trước; nếu trượt thì thử các biến thể OCR.
           const ungVien = [

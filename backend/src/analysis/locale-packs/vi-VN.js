@@ -23,18 +23,32 @@ module.exports = {
 
   directPatterns: {
     CRED_OTP_SHARE: [
-      { pattern: '(đọc|gửi|cung cấp|cho|nhắn|báo)\\b[^.]{0,30}\\b(mã otp|mã xác thực|mã xác minh|otp|mã vừa (gửi|nhận)|mã bảo mật)', scope: 'action' },
-      { pattern: '\\b(mã otp|otp)\\b[^.]{0,24}(cho (tôi|em|anh|chị)|vừa (gửi|nhận))', scope: 'action' },
+      // 25/9/2026: "(?<!thông |cảnh )báo" — "THÔNG BÁO mã OTP của quý khách là…" là
+      // tin của ngân hàng, không phải lời đòi. Lời đòi thật vẫn có "đọc/gửi/cho cháu".
+      { pattern: '(đọc|gửi|cung cấp|cho|nhắn|(?<!thông |cảnh )báo)\\b[^.]{0,30}\\b(mã otp|mã xác thực|mã xác minh|otp|mã vừa (gửi|nhận)|mã bảo mật)', scope: 'action' },
+      { pattern: '\\b(mã otp|otp)\\b[^.]{0,24}(cho (tôi|em|anh|chị|cháu|mình|con)|vừa (gửi|nhận))', scope: 'action' },
+      /*
+       * 25/9/2026 — "bác đọc MÃ cho cháu", "đọc mã đó", "đọc cho cháu mấy số": kẻ gian
+       * không cần nói "OTP". Đo trên bộ luật 1.5.0: cả ba câu ra CHUA_THAY khi không
+       * có AI. Loại "mã QR / mã vạch / mã giảm giá / mã đơn" — đọc những mã đó là việc thường.
+       */
+      { pattern: '(đọc|nhắn|chụp|(?<!thông |cảnh )báo)\\s+((lại|giúp|nhanh|ngay|luôn)\\s+)*(cái\\s+)?mã(?![a-zà-ỹ])(?!\\s*(qr|vạch|giảm giá|khuyến mãi|đơn|vận đơn|bưu))', scope: 'action' },
+      { pattern: '(đọc|nhắn|gửi|(?<!thông |cảnh )báo)\\s+((lại|giúp|nhanh|ngay|luôn)\\s+)*cho\\s+(tôi|em|cháu|mình|anh|chị|con)\\s+((cái|dãy|mấy)\\s+)?(mã|code|số)(?![a-zà-ỹ])', scope: 'action' },
       /*
        * 24/9/2026 — "ma xac nhan vua gui do co, doc e 6 so ngay nha" (câu thật trong
        * khối ghi chú `credential+manipulation` của decision-engine) — tầng luật
        * chỉ bắt được MAN_URGENCY. Kẻ gian nói "6 số", không nói "mã OTP".
        */
-      { pattern: '(đọc|gửi|nhắn|báo)[^.]{0,16}(6|sáu|4|bốn)\\s*(số|chữ số)(?![a-zà-ỹ])', scope: 'action' },
+      // 25/9/2026: "cô READ sáu CON số cho tôi" — tin trộn Việt–Anh, và "con số".
+      { pattern: '(đọc|gửi|nhắn|báo|read)[^.]{0,16}(6|sáu|4|bốn)\\s*(con\\s*)?(số|chữ số)(?![a-zà-ỹ])', scope: 'action' },
+      // 25/9/2026: "mã xác minh tới rồi chú ĐỌC nhanh CHO CHÁU" — mã đứng trước động từ.
+      { pattern: 'mã(?![a-zà-ỹ])[^.]{0,30}(đọc|nhắn|(?<!thông |cảnh )báo)\\s+((lại|giúp|nhanh|ngay|luôn)\\s+)*cho\\s+(tôi|em|cháu|mình|anh|chị|con)(?![a-zà-ỹ])', scope: 'action' },
       { pattern: 'mã\\s*(xác nhận|xác thực|kích hoạt|giao dịch)[^.]{0,30}(đọc|gửi lại|báo|cho (tôi|em|anh|chị))', scope: 'action' },
     ],
     CRED_PASSWORD_PIN: [
       { pattern: '(cung cấp|đọc|gửi|cho)\\b[^.]{0,26}\\b(mật khẩu|mã pin)\\b', scope: 'action' },
+      // 25/9/2026 — "vui lòng phản hồi email này bằng mã PIN hiện tại của thẻ".
+      { pattern: '(phản hồi|trả lời)[^.]{0,30}bằng\\s+(mã pin|mật khẩu|pin)(?![a-zà-ỹ])', scope: 'action' },
     ],
     /**
      * ══ THÊM 24/9/2026 — các lỗ đo trên bộ 157 mẫu ChatGPT (nguồn công an/ngân hàng) ══

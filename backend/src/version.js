@@ -15,7 +15,13 @@ module.exports = {
                                //   FIN_ACCOUNT_OPENING_FOR_OTHERS, CRED_ID_BIOMETRIC_DOCS,
                                //   DEV_SIM_SWAP_ESIM (người dùng duyệt)
                                // 1.2.0 (24/9/2026): 64 — thêm MAN_HEALTH_MIRACLE_CLAIM
-  RULE_VERSION: '1.5.0',       // cap nhóm + 22 cộng hưởng + 1 suy ra + 20/45/69, Phụ lục B
+  RULE_VERSION: '1.6.0',       // cap nhóm + 26 cộng hưởng + 1 suy ra + 20/45/69, Phụ lục B
+                               // 1.6.0 (25/9/2026): CO-01 mở rộng — đòi ĐƯA mã/PIN/thẻ
+                               //   cho người khác tự nó là chốt chặn (vẫn 10 chốt chặn);
+                               //   4 tổ hợp injection+action, qr+pressure, credential+offer,
+                               //   mistakenredirect+transfer; thẻ quà tặng vào FIN_CHUYEN_MANH;
+                               //   khung thông báo và cụm tắt (suppressors) có lối thoát khi
+                               //   có lệnh trực tiếp phía sau.
                                // 1.4.0 (24/9/2026): thêm task-or-investment+transfer,
                                //   withdrawfee+offer, thirdpartyemergency+transfer,
                                //   fear+isolation+transfer; suy ra prize+advancefee→transfer.
@@ -31,7 +37,9 @@ module.exports = {
                                // 1.3.0 (2/9/2026): thêm extortion+transfer,
                                //   keepcall+fear+transfer, secrecy+isolation+transfer,
                                //   brandmismatch+pressure; coverstory+transfer 10->12
-  PROMPT_VERSION: '1.3.0',     // lời nhắc trong llm-extractor.js
+  PROMPT_VERSION: '1.4.0',     // lời nhắc trong llm-extractor.js
+                               // 1.4.0 (25/9/2026): CRED_OTP_SHARE — tin CHỨA mã do
+                               //   ngân hàng gửi không phải lời ĐÒI mã.
                                // 1.2.0 (24/9/2026): mô tả 4 tín hiệu mới; viết lại
                                //   DEV_INSTALL_APK_UNKNOWN — "cài ứng dụng tôi gửi" /
                                //   "app VNeID, EVN theo link" AI cũng từng bỏ qua.
