@@ -20,7 +20,7 @@ Tiếng Anh, dùng ngay ở slide đầu:
 Saving has two halves: what you put in, and what you get to keep.
 Vietnam built the first half — 232 million payment accounts, 89% of adults banked.
 The second half has no product for the people with the most to lose.
-No savings account pays 100% in sixty seconds. Not losing does.
+No savings account pays 100% in one phone call. Not losing does.
 ```
 
 Câu cuối là câu đáng nhớ nhất: **lãi suất tiết kiệm ~5%/năm, còn một cuộc gọi lừa đảo lấy
@@ -31,7 +31,7 @@ Câu cuối là câu đáng nhớ nhất: **lãi suất tiết kiệm ~5%/năm, 
 | Tiết kiệm cái gì | Con số | Nguồn |
 |---|---|---|
 | **Tiền đã tích luỹ** — thứ mất là tiền để dành cả đời, không phải thu nhập tháng này | hơn **6.000 tỷ đồng** mất vì lừa đảo trực tuyến trong 11 tháng đầu 2025, **chỉ tính vụ đã trình báo**; chỉ ~32% nạn nhân đi trình báo | Bộ Công an; NCA khảo sát 60.300 người, 12/2025 |
-| **60 giây** — đơn vị thật của sản phẩm không phải tiền, mà là thời gian | kẻ gian cần khoảng một phút ép liên tục trước khi nạn nhân bấm chuyển | mô tả kịch bản bốn bước, xem mục 2 tài liệu tóm tắt |
+| **Khoảnh khắc quyết định** — thứ sản phẩm giữ lại được không phải tiền, mà là lúc bác còn kịp đổi ý | một khoảng dừng có đúng một việc để làm, và một người thân được mời vào. **Chưa đo** được nó giữ lại bao nhiêu — buổi thử với người cao tuổi đo đúng chuyện này. ⚠️ Đừng nói "kẻ gian cần một phút" hay "60 giây là đủ": chưa có nguồn nào | `6-CAN-THIEP-LAM-NGAY-VA-CHI-SO.md` |
 | **Điện toán** — cách dựng sản phẩm cũng là một dạng tiết kiệm | token mỗi lượt gọi **1.796 → 427 (−76%)**, thời gian **23,5s → 6,7s**, mà độ nhạy **tăng** 62,5% → 71,9%; tầng luật trả lời <50ms và **không gọi AI lượt nào** khi tín hiệu đã rõ; **không huấn luyện mô hình mới** | đo trong repo, mục "Tiêu thụ năng lượng" của README |
 
 ### Vì sao đây không phải gắn chủ đề cho có
@@ -40,8 +40,9 @@ Ba lập luận, dùng cái nào cũng được, đừng dùng cả ba trong m�
 
 1. **Nửa giữ lại được là hạ tầng còn thiếu.** Quyết định 2345 của Ngân hàng Nhà nước bắt
    xác thực khuôn mặt cho giao dịch lớn — tức là ngành ngân hàng đã trả lời câu *"có đúng
-   chủ tài khoản không"*. **Chưa ai trả lời câu "chủ tài khoản có đang bị ép không".**
-   Khoan Đã làm đúng lớp đó. (Sau 2345, NHNN công bố số vụ gian lận giảm ~50%, tài khoản
+   chủ tài khoản không"*. Câu **"chủ tài khoản có đang bị ép không"** thì ở Việt Nam chưa ai
+   trả lời; ở nước ngoài mới bắt đầu, và đều là lớp của ngân hàng hay hệ điều hành (Google,
+   ngân hàng Hồng Kông, CPF Singapore). Khoan Đã làm lớp đó cho gia đình. (Sau 2345, NHNN công bố số vụ gian lận giảm ~50%, tài khoản
    liên quan giảm ~72% — tín hiệu cho thấy can thiệp đúng lớp thì có tác dụng.)
 2. **Tiết kiệm bị phá không chỉ mất tiền, mà mất cả người gửi tiền.** Người cao tuổi bị
    lừa một lần thường rút khỏi ngân hàng số, quay về tiền mặt. Mỗi vụ lừa đẩy lùi chính
@@ -57,7 +58,8 @@ chính xác bằng cách BỚT quyền cho mô hình, không phải bằng cách
 ### Cho giám khảo THẤY ngay từ lần đầu (câu hỏi ở ảnh 1)
 
 - **Slide 1, một dòng, không biểu đồ:** *"Mỗi năm, hơn 6.000 tỷ đồng tiền để dành rời khỏi
-  các gia đình Việt Nam trong vài phút. Bọn em bán lại một phút đó."*
+  các gia đình Việt Nam trong vài phút. Bọn em chen vào đúng vài phút đó — một việc để làm, một
+  người để hỏi."*
 - **Demo 10 giây đầu:** đừng mở app. Mở **màn hình điện thoại**, để tin nhắn giả danh công
   an hiện ra, rồi để máy tự hỏi *"Bác có muốn kiểm tin nhắn này không?"*. Giám khảo thấy
   ngay thứ được tiết kiệm là **thao tác và thời gian**, trước khi thấy tính năng nào.
@@ -71,14 +73,16 @@ chính xác bằng cách BỚT quyền cho mô hình, không phải bằng cách
 
 > *"Chủ đề là tiết kiệm cho tương lai. Với một người 70 tuổi, rủi ro lớn nhất với khoản
 > tiết kiệm của họ không phải lạm phát hay lãi suất — mà là một cuộc gọi kéo dài ba mươi
-> phút. Lãi suất trả 5% một năm; không mất trả 100% trong sáu mươi giây. Bọn em làm nửa
+> phút. Lãi suất trả 5% một năm; không mất trả 100% chỉ trong một cuộc gọi. Bọn em làm nửa
 > còn lại của chữ tiết kiệm: phần giữ lại được."*
 
 ### Giới hạn phải tự nói
 
 - Bọn em **không đo được số tiền đã cứu**. App không biết bác có chuyển hay không; nói
-  "đã cứu X tỷ" là bịa. Thứ đo được là: có cảnh báo hay không (90,2% trên tin nguy hiểm),
-  và im lặng bao nhiêu (9,8%) — đo ngày 16/9/2026 trên 571 mẫu tự soạn.
+  "đã cứu X tỷ" là bịa. Thứ đo được là: có cảnh báo hay không (92,1% trên tin nguy hiểm),
+  và im lặng bao nhiêu (7,9%) — đo ngày 24/9/2026 trên 571 mẫu tự soạn. Cách nói đúng cho
+  phần tiền là **chi phí tránh được** (cost avoidance), và chỉ ở dạng công thức cho tới khi có
+  số đo hành vi — xem mục 3.3 của `6-CAN-THIEP-LAM-NGAY-VA-CHI-SO.md`.
 - Chưa có mẫu tin nhắn thật từ nạn nhân (0 trên mục tiêu 25).
 
 ---

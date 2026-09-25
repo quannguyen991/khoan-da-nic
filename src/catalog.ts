@@ -1043,23 +1043,30 @@ export const MA_LOI: Record<string, Cap> = {
 // hệ thống ("bác phải…"). Cả tính năng này sống hay chết ở chỗ đó: lúc bị thúc
 // ép, câu có sức nặng là câu người nhà đã cùng nhau đặt ra, không phải câu máy
 // đọc lên.
+//
+// ⚠️ DẠNG "NẾU… THÌ LÀM…", KHÔNG PHẢI "KHÔNG ĐƯỢC…" — đổi 25/9/2026. Kế hoạch đặt
+// trước chỉ mạnh khi nó nói rõ LÚC NÀO và LÀM GÌ (Sheeran và cộng sự 2024, 642
+// phép kiểm). Dạng phủ định "nếu X thì tôi sẽ không Y" còn có nghiên cứu thấy
+// phản tác dụng, làm thói quen cũ bật lại (Adriaanse và cộng sự 2011, PSPB). Nên
+// mỗi câu có một TÌNH HUỐNG và một VIỆC ĐỂ LÀM — gọi cho nhau, gửi cho nhau xem.
+// Mã (`KHONG_…`) giữ nguyên: nó là khoá lưu trong máy, không phải câu hiển thị.
 
 export const QUY_TAC_MAU: Record<string, Cap> = {
   KHONG_CHUYEN_KHI_DANG_NGHE_MAY: c(
-    'Nhà mình không chuyển tiền khi đang nghe điện thoại.',
-    'Our family never transfers money while still on a phone call.',
+    'Đang nghe máy mà bị bảo chuyển tiền, nhà mình cúp máy rồi gọi cho nhau.',
+    'If someone on a call tells us to send money, we hang up and call each other.',
   ),
   KHONG_DOC_MA_OTP: c(
-    'Nhà mình không đọc mã trong tin nhắn cho bất kỳ ai.',
-    'Our family never reads out a code from a text message to anyone.',
+    'Ai hỏi mã trong tin nhắn, nhà mình giữ mã lại rồi gọi cho nhau.',
+    'If anyone asks for a code from a text, we keep it to ourselves and call each other.',
   ),
   GOI_LAI_TRUOC_KHI_CHUYEN: c(
     'Trước khi chuyển tiền, nhà mình gọi lại cho nhau đã.',
     'Before sending money, we call each other back first.',
   ),
   KHONG_CAI_UNG_DUNG_LA: c(
-    'Nhà mình không cài ứng dụng do người lạ chỉ.',
-    'Our family never installs an app a stranger tells us to install.',
+    'Người lạ bảo cài ứng dụng, nhà mình gửi cho nhau xem trước đã.',
+    'If a stranger tells us to install an app, we send it to each other to check first.',
   ),
   TUY_CHINH: c(
     'Tự viết một câu cho nhà mình',
@@ -1205,6 +1212,42 @@ export const MAN_DONG_HO: Record<string, Cap> = {
   CHUA_DO: c(
     'Chưa đo lần nào. Con số sẽ xuất hiện sau lần đầu bác bấm gọi từ màn cảnh báo.',
     'Not measured yet. A number appears after the first time a call is started from a warning screen.',
+  ),
+};
+
+/**
+ * Số đo trên máy này — thêm 25/9/2026, đọc `src/lib/so-do-tren-may.ts`.
+ *
+ * ⚠️ §11 — "bấm gọi" không phải "đã gọi được"; "Con bảo không sao" là lời người thân
+ * nói, không phải app xác nhận. Không câu nào ở đây có chữ "an toàn".
+ * ⚠️ Đây là SỐ LẦN BẤM, không phải số vụ, và không có tỉ lệ nào — xem module.
+ */
+export const MAN_SO_DO: Record<string, Cap> = {
+  TIEU_DE: c('Số đo trên máy này', 'Measurements on this phone'),
+  bam_goi_nguoi_than: c('Bấm gọi người thân', 'Tapped “call family”'),
+  con_bao_lua_dao: c('Bấm “Con bảo là lừa đảo”', 'Tapped “They said it’s a scam”'),
+  con_bao_khong_sao: c('Bấm “Con bảo không sao”', 'Tapped “They said it’s fine”'),
+  toi_on: c('Bấm “Tôi ổn”', 'Tapped “I’m fine”'),
+  da_lo_chuyen: c('Báo đã lỡ chuyển tiền', 'Said money was already sent'),
+  ve_trang_chu: c('Rời màn, không chọn gì', 'Left without choosing'),
+  SO_LAN: c('{so} lần', '{so} times'),
+  CHUA_CO: c(
+    'Chưa có lần nào. Số sẽ hiện sau lần đầu bác chọn một việc ở màn cảnh báo.',
+    'Nothing yet. Numbers appear after the first time an action is chosen on a warning screen.',
+  ),
+  GIOI_HAN: c(
+    'Mỗi dòng là số lần bấm, không phải số vụ. Máy chỉ ghi mã và giờ, không ghi nội dung tin. Số này nằm trên máy, chỉ rời máy khi bác bấm sao chép.',
+    'Each line counts taps, not incidents. Only codes and times are kept, never message content. These numbers stay on this phone and leave it only when you tap copy.',
+  ),
+  NUT_CHEP: c('Sao chép số đo', 'Copy the measurements'),
+  DA_CHEP: c('Đã chép. Chỉ có mã và giờ, không có nội dung tin.', 'Copied. Only codes and times, no message content.'),
+  BI_CHAN: c(
+    'Có bản ghi không đúng dạng nên chưa chép gì cả.',
+    'Some records were not in the expected form, so nothing was copied.',
+  ),
+  KHONG_CHEP_DUOC: c(
+    'Máy không cho chép tự động. Bác chọn chữ bên dưới rồi chép tay.',
+    'This device blocked automatic copying. Select the text below and copy it manually.',
   ),
 };
 

@@ -1,5 +1,7 @@
 # KHOAN ĐÃ — GIẢI THÍCH ĐỂ TRẢ LỜI GIÁM KHẢO
 
+> ⚠️ Số liệu trong tài liệu này đã cập nhật ngày 25/9/2026 theo `eval/results/latest.json` (đo 24/9/2026). Số mới nhất luôn ở trang `/transparency`.
+
 *Bản dành cho người thuyết trình. Mọi con số ở đây đều đã đo, không có số nào ước lượng.*
 
 ---
@@ -27,7 +29,7 @@ Bác gõ *"nộp 20tr cho cục thuế"* vào ô trên trang chủ. Sáu bước
    thúc gấp · doạ dẫm · bắt giữ bí mật
    → ra ngay một mức sơ bộ, hiện lên màn hình để bác không nhìn màn trống
 
-③ TẦNG AI ĐỌC SONG SONG      (~30 giây)
+③ TẦNG AI ĐỌC SONG SONG      (trung vị 2,0 giây, p90 3,2 giây — máy chủ thật, đo 25/9/2026)
    AI trả về DANH SÁCH TÍN HIỆU kèm trích dẫn, mỗi tín hiệu là
    "có" hoặc "chưa rõ" — KHÔNG có "không có"
    AI KHÔNG được trả điểm số, KHÔNG được trả mức rủi ro
@@ -131,19 +133,25 @@ Câu trả lời gọn cho giám khảo:
 
 ## 5. Con số đã đo
 
-Trên **445 mẫu** (tiếng Việt có dấu, không dấu, và tiếng Anh):
+Đo 24/9/2026, có AI chạy, trên **571 mẫu** (531 mẫu chấm được + 40 bản bỏ dấu;
+tiếng Việt có dấu, không dấu, tiếng Anh và trộn):
 
 | Chỉ số | Giá trị | Nghĩa là |
 |---|---|---|
-| Recall | **73,7 %** | bắt được 73,7% số vụ lừa đảo thật |
-| Báo động giả mức cao | **6,1 %** | trong 100 tin nhắn bình thường, ~6 tin bị gắn nhãn cao |
-| Pass | **67,4 %** | tỉ lệ mẫu ra đúng hoàn toàn |
+| Recall | **82,6 %** | 219/265 tin nguy hiểm trong bộ mẫu ra đúng mức Nguy hiểm cao |
+| Được cảnh báo | **92,1 %** | 244/265 tin nguy hiểm được gắn Nguy hiểm cao hoặc Nghi ngờ; 21 tin (7,9%) không được cảnh báo |
+| Báo động giả mức cao | **1,8 %** | 3/169 tin nhắn bình thường bị gắn nhãn cao |
+| Pass | **75,0 %** | 398/531 mẫu ra đúng mức |
+
+Bộ mẫu do đội soạn và chuyển biên — **chưa có tin nhắn nào của nạn nhân thật**
+(0 mẫu).
 
 Riêng tầng luật (không có AI), trên 485 mẫu: **báo oan 12/164 · bỏ sót
-250/321**. Con số bỏ sót cao là bình thường — tầng luật cố ý chỉ bắt những mẫu
-chắc chắn, phần còn lại là việc của AI.
+250/321** (số đo cũ, chưa chạy lại trên bộ 571 mẫu). Con số bỏ sót cao là bình
+thường — tầng luật cố ý chỉ bắt những mẫu chắc chắn, phần còn lại là việc của AI.
 
-**Có 736 bài test ở backend và 55 bài ở giao diện.** Phần lớn không phải test
+**Có 1.622 bài test tự động, một bộ duy nhất (`npm test`), xanh hết khi chạy
+25/9/2026.** Phần lớn không phải test
 chức năng — chúng là **hàng rào chặn những lỗi đã từng xảy ra**, mỗi bài kèm
 ngày tháng và số đo.
 
@@ -257,8 +265,8 @@ Nói ra trước còn hơn để giám khảo tìm thấy:
 |---|---|
 | **Popup đè màn hình** khi mức cao | **Đã nối xong.** Gọi từ một chỗ duy nhất trong `App.tsx`, có cờ chặn `nhan !== 'CAO'`, chữ lấy từ catalog. Có test chặn. |
 | **Thông báo lên đầu danh sách** | Kênh `IMPORTANCE_HIGH` đã dựng và biên dịch được, **chưa có chỗ nào gọi** khi kết quả là mức cao. |
-| Chênh lệch Việt ↔ Anh | 16,6 điểm, mục tiêu ≤3,0 — **chưa đạt** |
-| Nội dung DẠY về lừa đảo bị nhận nhầm | 12/164 mẫu |
+| Chênh lệch Việt ↔ Anh | 11,1 điểm (đo 24/9/2026) — tiếng Anh **cao hơn** (91,2% so với 80,1%), nhưng lát tiếng Anh nhỏ: 34 mẫu nguy hiểm, **0 mẫu lành**, nên báo nhầm tiếng Anh chưa đo được. Mục tiêu ≤3,0 — **chưa đạt** |
+| Nội dung DẠY về lừa đảo bị nhận nhầm | 12/164 mẫu (số đo cũ chỉ tầng luật; đo lại 24/9/2026 có AI: 4/125 tin lành khó vẫn bị cảnh báo, 3,2%) |
 | Câu chuyển tiền trần trụi | *"chuyển 50 triệu cho tài khoản này"* được 14 điểm, dưới ngưỡng 20 — cần thêm tín hiệu "số tiền lớn + tài khoản vô danh" |
 | Chạy thử trên điện thoại thật | Đường micro chỉ kiểm được trên máy thật |
 

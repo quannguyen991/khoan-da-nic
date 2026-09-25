@@ -1,5 +1,7 @@
 # KHOAN ĐÃ — BẢN TÓM TẮT ĐỂ TRẢ LỜI BAN GIÁM KHẢO
 
+> ⚠️ Số liệu trong tài liệu này đã cập nhật ngày 25/9/2026 theo `eval/results/latest.json` (đo 24/9/2026). Số mới nhất luôn ở trang `/transparency`.
+
 > In ra giấy. Đọc lại một lượt trước khi lên.
 > Nguyên tắc chung: **nói đúng cái đã đo. Không biết thì nói chưa đo.**
 > Một câu trung thực về giới hạn mạnh hơn ba câu khoe.
@@ -83,7 +85,7 @@ Và nguyên tắc đi kèm, **đây là điểm khác biệt kỹ thuật đáng
 
 ```
 src/analysis/
-  signal-registry.js       58 tín hiệu, 8 nhóm, trọng số
+  signal-registry.js       64 tín hiệu, 8 nhóm, trọng số
   context-builder.js       cắt câu · speech act · phủ định · phạm vi
   direct-precheck.js       mẫu xác định, chạy khi mất AI
   llm-extractor.js         gọi AI, lược đồ chặt, KHÔNG import ngưỡng
@@ -94,7 +96,7 @@ src/analysis/
   trust-receipt-v2.js      phiếu tin cậy từ bảng ánh xạ TĨNH
 
 public/                    giao diện: 1 trang, điều hướng bằng hash
-eval/dataset/              445 mẫu, 8 tệp
+eval/dataset/              571 mẫu (531 chấm được), 12 tệp
 ```
 
 **Hai luật kiến trúc để nói khi bị hỏi sâu:**
@@ -107,19 +109,22 @@ eval/dataset/              445 mẫu, 8 tệp
 
 ## E · CON SỐ — được nói gì, không được nói gì
 
-### Bộ dữ liệu đánh giá: 445 mẫu
+### Bộ dữ liệu đánh giá: 571 mẫu (đo 24/9/2026)
 
-| Nhóm | Mẫu | Nói thế nào |
+531 mẫu chấm được + 40 bản bỏ dấu dẫn xuất từ mẫu gốc.
+
+| Nhóm (trong 531 mẫu chấm được) | Mẫu | Nói thế nào |
 |---|---:|---|
-| Lừa đảo tiếng Việt (9 họ) | 120 | "tự soạn theo thủ đoạn đã công bố" |
-| Tiếng Anh + trộn Việt–Anh | 95 | tự soạn |
-| **Tin lành trông đáng ngờ** | **110** | ← **nói kỹ cái này** |
-| Cảnh báo · giáo dục · kể chuyện cũ | 35 | |
-| Cố ý đánh lừa AI | 25 | |
-| **Chuyển biên từ nguồn công khai** | **60** | **"58/60 link nguồn còn truy được"** |
+| Tin nguy hiểm (mức đúng: Nguy hiểm cao) | 265 | "tự soạn theo thủ đoạn đã công bố" |
+| Tin nghi ngờ (mức đúng: Nghi ngờ) | 97 | tự soạn |
+| **Tin lành** (mức đúng: Chưa thấy dấu hiệu rủi ro) | **169** | ← **nói kỹ cái này** |
+| **Chuyển biên từ nguồn công khai** (nằm trong các nhóm trên) | **60** | **"58/60 link nguồn còn truy được"** |
+
+Theo ngôn ngữ: 430 tiếng Việt · 49 tiếng Anh · 52 trộn Việt–Anh.
+**Tin nhắn của nạn nhân thật: 0 mẫu.**
 
 **Câu nên dùng:**
-> *"445 mẫu, trong đó 60 mẫu chuyển biên từ báo chí và cảnh báo của công an —
+> *"571 mẫu, trong đó 60 mẫu chuyển biên từ báo chí và cảnh báo của công an —
 > chúng em dẫn được 58 nguồn còn truy cập được."*
 
 **Câu KHÔNG được dùng:**
@@ -134,6 +139,9 @@ eval/dataset/              445 mẫu, 8 tệp
 > học được rằng app hay kêu bậy, rồi lần thật sự nguy hiểm bác bỏ qua luôn."*
 
 Phát hiện được thì đội nào cũng khoe. **Không kêu bậy thì phải làm mới có.**
+
+Đo 24/9/2026 trên toàn bộ 169 tin lành: **3 tin bị gắn Nguy hiểm cao (1,8%)**.
+Trong 125 tin lành mà mọi cảnh báo đều là sai, **4 tin vẫn bị cảnh báo (3,2%)**.
 
 ### Quy tắc bất di bất dịch khi đọc số
 

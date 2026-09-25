@@ -438,10 +438,14 @@ export function GuardianView({
   });
 
   // Protection Toggles
+  /*
+   * ⚠️ MẶC ĐỊNH TẮT — 25/9/2026. Hai công tắc này CHƯA NỐI với máy bố mẹ (xem dòng
+   * thừa nhận bên dưới). Để mặc định BẬT thì màu xanh nói "đang chạy" trong khi không
+   * có gì chạy — §4.3: "chưa làm" trông y hệt "đang bảo vệ". Tắt thì hình khớp với thật.
+   */
   const [rules, setRules] = useState({
-    blockUnknown: true,
-    monitorTransfer: true,
-    pinNotification: true,
+    blockUnknown: false,
+    pinNotification: false,
   });
 
   // Fast AI Situation Check Input
@@ -780,7 +784,7 @@ export function GuardianView({
           {/* Quick Action Buttons */}
           {/*
             ⚠️ XẾP DỌC, KHÔNG XẾP BA CỘT.
-            Ở khổ 390px, lưới 3 cột cho mỗi ô ~110px — "Gửi nhắc an toàn" dịch ra
+            Ở khổ 390px, lưới 3 cột cho mỗi ô ~110px — "Gửi nhắc an toàn" (nay là "Gửi lời nhắc") dịch ra
             "Send Safety Reminder" vỡ thành BA dòng, "SOS Alarm" hai dòng, thấy
             trong ảnh người dùng gửi 20/8/2026. Tiếng Việt dài hơn tiếng Anh ~30%
             (§4.5) nên ô hẹp là hỏng ở cả hai thứ tiếng, chỉ khác chỗ vỡ.
@@ -801,7 +805,8 @@ export function GuardianView({
               className="min-h-[48px] py-2.5 px-3 bg-sky-50 hover:bg-sky-100 active:scale-95 text-sky-800 border border-sky-200 rounded-2xl font-bold text-[14px] flex items-center justify-center gap-1.5 transition-transform"
             >
               <MessageSquare size={14} />
-              {tr("Gửi nhắc an toàn")}
+              {/* 25/9/2026: bỏ chữ "an toàn" (§4.1/§11) — nút gửi một lời nhắc, không hứa gì. */}
+              {tr("Gửi lời nhắc")}
             </button>
 
             <button
@@ -853,18 +858,19 @@ export function GuardianView({
                 </div>
               </div>
 
-              {/* Toggle 2: Large Transfer Alert */}
-              <div 
-                onClick={() => toggleRule('monitorTransfer')}
-                className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 hover:bg-slate-100/80 cursor-pointer transition-colors border border-slate-100"
-              >
-                <div>
-                  <h4 className="font-bold text-slate-900 text-[14px] sm:text-sm">{tr("Cảnh báo chuyển khoản > 5 triệu")}</h4>
-                  <p className="text-[14px] text-slate-500">{tr("Nhắc dừng 60s trước khi xác nhận")}</p>
-                </div>
-                <div className={`w-11 h-6 rounded-full transition-colors relative p-0.5 shrink-0 ${rules.monitorTransfer ? 'bg-sky-600' : 'bg-slate-300'}`}>
-                  <div className={`w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${rules.monitorTransfer ? 'translate-x-5' : 'translate-x-0'}`} />
-                </div>
+              {/*
+                ⚠️ 25/9/2026 — BỎ CÔNG TẮC "Cảnh báo chuyển khoản > 5 triệu — Nhắc dừng 60s
+                trước khi xác nhận". Nó chưa nối vào đâu, mà kể cả là "dự định" nó vẫn sai
+                hai chỗ: (1) quy tắc TIỀN BẠC đặt từ phía CON — đúng kiểu áp đặt làm bố mẹ
+                tự ái rồi gỡ app; quy tắc tiền phải do chính bố mẹ bật (§12, `quy-tac-bao.js`);
+                (2) "trước khi xác nhận" ngụ ý app đứng trước nút chuyển của ngân hàng — app
+                không nằm ở đó và không chặn được giao dịch (§12).
+                Tính năng THẬT cho việc này là Chìa khoá thứ hai, bố mẹ tự bật trên máy mình.
+                Dòng này chỉ nói ra điều đó; nó không có công tắc vì con không có quyền bật.
+              */}
+              <div className="p-3 rounded-2xl bg-slate-50 border border-slate-100">
+                <h4 className="font-bold text-slate-900 text-[14px] sm:text-sm">{tr("Chuyển khoản lớn: bố mẹ tự bật Chìa khoá thứ hai")}</h4>
+                <p className="text-[14px] text-slate-600">{tr("Trên máy bố mẹ, trong Chìa khoá thứ hai: bố mẹ tự bật, tự chọn mức tiền. Con không bật thay được.")}</p>
               </div>
 
               {/* Toggle 3: Pinned Lockscreen Alert */}
@@ -889,7 +895,7 @@ export function GuardianView({
             để con cháu tin rằng bố mẹ đang được bảo vệ bởi thứ chưa tồn tại.
           */}
           <p className="text-[14px] text-slate-600 font-medium text-center mt-3 bg-slate-100 border border-slate-300 rounded-2xl px-3 py-2">
-            {tr("Ba công tắc trên chưa nối được với máy của bố mẹ — chúng cho thấy dự định, không phải trạng thái đang chạy.")}
+            {tr("Hai công tắc trên chưa nối được với máy của bố mẹ — chúng cho thấy dự định, không phải trạng thái đang chạy.")}
           </p>
         </div>
 

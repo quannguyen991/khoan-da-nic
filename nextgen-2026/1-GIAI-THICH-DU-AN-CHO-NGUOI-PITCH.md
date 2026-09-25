@@ -32,30 +32,29 @@
 
 ## 1.1 Bản 30 giây — học thuộc
 
-> Mỗi năm người Việt mất hàng nghìn tỷ đồng vì lừa đảo qua điện thoại, và người cao tuổi là nhóm
-> bị nhắm nhiều nhất. Họ không thiếu hiểu biết — phần lớn đã nghe nói về lừa đảo trên tivi. Cái họ
-> thiếu là **một phút để dừng lại** và **một người thân để hỏi**, đúng vào lúc có kẻ đang ép họ
-> chuyển tiền và cấm họ gọi cho con cái.
+> Mỗi năm người Việt mất hàng nghìn tỷ đồng vì lừa đảo qua điện thoại. Người cao tuổi không thiếu
+> hiểu biết — phần lớn đã nghe nói về lừa đảo trên tivi. Cái họ thiếu là **một khoảng dừng có đúng
+> một việc để làm** và **một người thân để hỏi**, đúng vào lúc có kẻ đang ép họ chuyển tiền và cấm
+> họ gọi cho con cái.
 >
-> Khoan Đã là ứng dụng miễn phí. Người cao tuổi dán tin nhắn, ảnh chụp màn hình hoặc đường link
-> đáng ngờ vào; ứng dụng chỉ ra các dấu hiệu lừa đảo, bắt dừng 60 giây, rồi đưa ra một nút lớn:
-> gọi cho người thân. Con cái có bảng điều khiển riêng trên máy tính để kiểm hộ bố mẹ.
+> Khoan Đã là ứng dụng miễn phí. Người cao tuổi dán tin nhắn hoặc đường link đáng ngờ vào, hoặc kể
+> lại bằng giọng nói; ứng dụng chỉ ra các dấu hiệu lừa đảo, rồi đưa ra đúng một việc cần làm và một
+> nút lớn: gọi cho người thân. Con cái có bảng điều khiển riêng trên máy tính để kiểm hộ bố mẹ.
 >
 > Dự án vừa đoạt **Grand Prix tại AI-JAM US 2026** — điểm tổng cao nhất trong 840 đội đến từ 41
 > quốc gia.
 
 **🇬🇧**
 
-> Every year, Vietnamese families lose thousands of billions of đồng to phone scams, and older
-> people are the main target. They are not uninformed — most of them have heard about scams on
-> television. What they lack is **one minute to stop** and **one family member to ask**, at the
-> exact moment someone is pressuring them to transfer money and telling them not to call their
-> children.
+> Every year, Vietnamese families lose thousands of billions of đồng to phone scams. Older people
+> are not uninformed — most of them have heard about scams on television. What they lack is **a
+> pause with one clear thing to do** and **one family member to ask**, at the exact moment someone
+> is pressuring them to transfer money and telling them not to call their children.
 >
-> Khoan Đã is a free app. An older person pastes in the suspicious message, screenshot or link;
-> the app shows the scam signals it found, forces a 60-second pause, and then gives one large
-> button: call your family. Adult children get their own dashboard to check messages on their
-> parents' behalf.
+> Khoan Đã is a free app. An older person pastes in the suspicious message or link, or simply
+> describes what happened by voice; the app shows the scam signals it found, then gives one next
+> step and one large button: call your family. Adult children get their own dashboard to check
+> messages on their parents' behalf.
 >
 > The project just won the **Grand Prix at AI-JAM US 2026** — the highest total score among 840
 > teams from 41 countries.
@@ -68,9 +67,9 @@ Nói hết bản 30 giây, rồi nói tiếp:
 > lớp cảnh báo ngay trước nút xác nhận chuyển tiền — và các gia đình mua gói cho bố mẹ. Người đang
 > gặp nguy không bao giờ phải trả tiền.
 >
-> Về bằng chứng: trên bộ 571 tin nhắn đã gán nhãn, ứng dụng cảnh báo được **90,2%** tin lừa đảo và
-> báo nhầm mức cao ở **4,1%** tin bình thường. Bộ này do chính đội em soạn, **chưa có tin nhắn thật
-> từ nạn nhân** — và đó là việc tiếp theo bọn em phải làm.
+> Về bằng chứng: trên bộ 571 tin nhắn đã gán nhãn (đo 24/9/2026), ứng dụng cảnh báo được **92,1%**
+> tin lừa đảo và báo nhầm mức cao ở **1,8%** tin bình thường. Bộ này do chính đội em soạn, **chưa có
+> tin nhắn thật từ nạn nhân** — và đó là việc tiếp theo bọn em phải làm.
 >
 > Và đây không phải vấn đề riêng của Việt Nam. Năm 2025, Liên minh Chống lừa đảo Toàn cầu khảo sát
 > 46.000 người ở 42 quốc gia và ước tính thiệt hại **442 tỷ đô la**; **57%** người trưởng thành gặp
@@ -83,9 +82,10 @@ Nói hết bản 30 giây, rồi nói tiếp:
 > embed our warning layer right before the transfer confirmation button — and families who buy a
 > plan for their parents. The person in danger never pays.
 >
-> On evidence: on a labelled test set of 571 messages, the app raises a warning on **90.2%** of
-> scam messages, and wrongly flags **4.1%** of harmless ones as high risk. We wrote that test set
-> ourselves — it contains **no real victim messages yet**, and fixing that is our next step.
+> On evidence: on a labelled test set of 571 messages (measured 24 September 2026), the app raises a
+> warning on **92.1%** of scam messages, and wrongly flags **1.8%** of harmless ones as high risk. We
+> wrote that test set ourselves — it contains **no real victim messages yet**, and fixing that is our
+> next step.
 >
 > And this is not a Vietnamese problem. In 2025 the Global Anti-Scam Alliance surveyed 46,000 people
 > across 42 countries and estimated **442 billion dollars** lost to scams, with **57%** of adults
@@ -117,8 +117,12 @@ Kịch bản phổ biến nhất ở Việt Nam là **giả danh công an**. B�
 | **3. Cô lập** | "Không được cúp máy. Không được kể cho con cháu. Đây là bí mật điều tra" | **Mất người để hỏi — đây là bước ăn tiền** |
 | **4. Rút tiền** | "Chuyển vào tài khoản an toàn để xác minh, xác minh xong sẽ trả lại" | Mất tiền |
 
-Điểm cần nhấn với giám khảo: nếu nạn nhân gọi được cho một người thân ở bước 3, vụ lừa gần như
-luôn dừng lại. **Khoan Đã tấn công đúng bước 3.**
+Điểm cần nhấn với giám khảo: bước 3 là lúc kẻ gian cần nạn nhân ở một mình. FTC (Mỹ) mô tả đúng
+chiêu này — giữ nạn nhân trên máy để họ không kiểm chứng được câu chuyện — và khuyên dừng lại, kể
+với một người mình tin trước khi làm gì. **Khoan Đã tấn công đúng bước 3.**
+
+⚠️ Đừng nói "gọi được người thân thì vụ lừa gần như luôn dừng". Chưa có số nào đỡ câu đó — bọn em
+đang đo, xem `5-KICH-BAN-THU-VOI-NGUOI-CAO-TUOI.md` và `6-CAN-THIEP-LAM-NGAY-VA-CHI-SO.md`.
 
 **🇬🇧**
 
@@ -130,28 +134,36 @@ luôn dừng lại. **Khoan Đã tấn công đúng bước 3.**
 > confidential investigation. Fourth, they extract: transfer the money to a "safe account" for
 > verification and we will return it.
 >
-> If the victim manages to call one family member during step three, the scam almost always stops.
-> **Khoan Đã attacks step three.**
+> Step three is where the scammer needs the victim alone. The US Federal Trade Commission describes
+> the same move — keeping you on the line so you cannot check their story — and advises stopping to
+> talk to someone you trust first. **Khoan Đã attacks step three.** We have not yet measured how
+> often a call to family ends the scam; that is what our user test is for.
 
 ## 2.2 Vì sao các cách hiện nay chưa đủ
 
 | Cách đang có | Nó giải được gì | Chỗ còn hở |
 |---|---|---|
 | Tuyên truyền trên tivi, báo, loa phường | Người dân **biết** là có lừa đảo | Biết không bằng làm được, khi đang bị dọa và bị giữ trên máy |
-| Ứng dụng nhận diện số gọi (Truecaller, nTrust, Whoscall) | Cho biết **"số này là ai"** | Không trả lời **"bây giờ tôi phải làm gì"**. Kẻ lừa đảo đổi số liên tục |
+| Ứng dụng nhận diện số gọi (Truecaller, nTrust, Whoscall) | Cho biết **"số này là ai"** | Mạnh ở nhận diện, yếu ở **"bây giờ tôi phải làm gì"**. Kẻ lừa đảo đổi số liên tục |
 | Trang cảnh báo (chongluadao.vn) | Tra được website xấu | Phải chủ động vào tra; lúc hoảng thì không ai vào |
 | Xác thực khuôn mặt khi chuyển tiền (Quyết định 2345) | Kiểm **đúng chủ tài khoản** đang chuyển | Người bị lừa **vẫn tự quét mặt, vẫn tự bấm chuyển** |
+| ScamShield (Singapore) | Kiểm số, tin, link; chặn lọc; đường dây 1799; khẩu hiệu *Add – Check – Tell* | Đã có cả phần "làm gì" — nhưng do nhà nước Singapore vận hành, **không có ở Việt Nam** |
+| CPF Singapore, ngân hàng Hồng Kông, Google (Android) | CPF: khoá rút tiền, chờ 12 giờ khi nâng hạn mức, **báo cho người liên hệ tin cậy** (từ 2/2026). Hồng Kông: cảnh báo khi tài khoản nhận nằm trong dữ liệu Scameter. Google: đang thử cảnh báo khi mở app ngân hàng lúc chia sẻ màn hình với người lạ | Đều là lớp của **ngân hàng, hệ điều hành hoặc nhà nước**. Chưa có lớp nào do chính **gia đình** dựng, cho người Việt |
 
 **Câu chốt của cả phần này:**
 
-> "Ngân hàng đã kiểm 'có đúng chủ tài khoản không'. Chưa ai kiểm 'chủ tài khoản có đang bị ép
-> không'. Bọn em làm đúng lớp đó."
+> "Ngân hàng Việt Nam đã kiểm 'có đúng chủ tài khoản không'. Câu 'chủ tài khoản có đang bị ép không'
+> thì ở nước ngoài mới bắt đầu có người làm — Google, ngân hàng Hồng Kông, quỹ hưu trí Singapore —
+> và đều là lớp của ngân hàng hay hệ điều hành. Bọn em làm lớp đó cho gia đình Việt, không phải chờ
+> ngân hàng nào."
 
 **🇬🇧**
 
-> "Banks already verify *whether it is really the account owner* pressing the button — with face
-> recognition. Nobody verifies *whether that account owner is being coerced right now*. That is the
-> layer we built."
+> "Vietnamese banks already verify *whether it is really the account owner* pressing the button —
+> with face recognition. Checking *whether that owner is being coerced right now* has only just
+> started abroad — Google on Android, Hong Kong banks, Singapore's pension fund — and always as a
+> bank or operating-system layer. We built that layer for Vietnamese families, without waiting for a
+> bank."
 
 ## 2.3 Số liệu — nói cho rõ, đừng để giám khảo tự suy diễn
 
@@ -261,8 +273,10 @@ Ba lý do, nói ngắn:
    em mô tả **hành vi**, không mô tả từ ngữ của riêng một nước.
 2. **Kiến trúc đã tách sẵn.** Bộ quy tắc quyết định **dùng chung cho mọi ngôn ngữ**; chỉ phần từ ngữ
    là riêng theo từng nước. Máy chủ trả về **mã**, giao diện mới tra ra chữ — nên thêm một ngôn ngữ
-   là thêm một bảng từ, không phải viết lại hệ thống. Hiện đã có tiếng Việt và tiếng Anh, chênh lệch
-   đo được giữa hai ngôn ngữ là **0,2 điểm phần trăm**.
+   là thêm một bảng từ, không phải viết lại hệ thống. Hiện đã có tiếng Việt và tiếng Anh. Đo
+   24/9/2026, tỉ lệ ra đúng mức Cao lệch **11,1 điểm** giữa hai ngôn ngữ — tiếng Anh lại cao hơn —
+   nhưng lát tiếng Anh chỉ có 34 tin nguy hiểm và chưa có tin lành nào, nên con số này chưa nói
+   được nhiều.
 3. **Ràng buộc an toàn không phụ thuộc văn hoá.** "Không bao giờ nói an toàn" và "AI không được kết
    luận" đúng ở mọi thị trường.
 
@@ -278,7 +292,9 @@ Ba lý do, nói ngắn:
 > not one country's vocabulary. Second, **the architecture is already separated**: the decision engine
 > is shared across languages and only the lexicon is country-specific; the server returns **codes** and
 > the interface renders the words, so adding a language means adding a word list, not rewriting the
-> system. We measure a **0.2 percentage point** gap between Vietnamese and English today. Third, the
+> system. On 24 September 2026 the high-risk catch rate differed by **11.1 points** between the two
+> languages — English was higher — but the English slice has only 34 dangerous and no harmless
+> messages, so that gap says little yet. Third, the
 > safety constraints — never say 'safe', never let the model decide — are not culture-specific.
 >
 > The honest limit: our English slice is only **49 samples** against a target of 90. We have
@@ -360,11 +376,12 @@ Cách đội xử lý, nói đúng theo thứ tự này:
 
 | Tính năng | Tình trạng | Tên tiếng Anh dùng khi pitch | Mô tả |
 |---|---|---|---|
-| Dán chữ / chụp ảnh / gửi link để kiểm | ✅ | Check a message, screenshot or link | Một ô nhập, một nút kiểm tra |
+| Dán chữ / gửi link để kiểm | ✅ | Check a message or link | Một ô nhập, một nút kiểm tra |
+| Gửi ảnh chụp màn hình | ⚠️ | — | App nhận ảnh, nhưng máy chủ đang chạy **chưa đọc được ảnh** (kiểm 25/9/2026: `coThiGiac: false`). App nói thẳng là chưa đọc được, không kết luận thay. Đừng giới thiệu là tính năng đang chạy |
 | Nói bằng giọng thay vì gõ | ✅ | Voice input | Hiện lại chữ đã nghe để sửa, không tự đoán |
 | Ba mức kết quả kèm dấu hiệu tìm thấy | ✅ | Three risk levels | *Nguy hiểm cao · Nghi ngờ · Chưa thấy dấu hiệu rủi ro* |
 | Khối "Những thứ chưa kiểm được" | ✅ | "What we could not check" block | Hiện cùng cỡ chữ với dòng kết quả |
-| Màn dừng 60 giây | ✅ | 60-second pause | Hiện khi hệ thống quyết định, hoặc khi bác tự bấm |
+| Màn dừng 60 giây | ✅ | Pause for 60 Seconds | Hiện khi hệ thống quyết định, hoặc khi bác tự bấm. Đồng hồ không khoá gì; hết 60 giây mà bác chưa gọi ai thì màn mời người thân vào |
 | Chế độ "Bác đang được bảo vệ" | ✅ | Protected Mode | Bỏ bớt điều hướng; luôn có dòng "Tôi ổn, không có gì nguy hiểm" |
 | Bảo vệ 72 giờ sau khi mất tiền | ✅ | 72-Hour Recovery Watch | Bốn bước: ngừng liên lạc → đừng chuyển thêm → gọi ngân hàng đúng số → yêu cầu tra soát |
 | **Hồ sơ vụ việc xuất ra được** | ✅ | Incident file | Một tệp văn bản cầm tới ngân hàng và công an: các lượt đã kiểm, lời khai của bác, và những thứ chưa kiểm được. **Không tự điền gì bác chưa khai, không chứa nội dung tin nhắn** |
@@ -702,54 +719,60 @@ Third, incorporate — we need a legal entity to publish on Zalo and to sign wit
 
 ## 9.2 Bộ kiểm thử tự động
 
-Chạy lại ngày 23/9/2026: **1.387 phép thử · pass 1.387 · fail 0**, trong **113 tệp**, hết khoảng **40 giây**.
+Chạy lại ngày 25/9/2026: **1.622 phép thử · pass 1.622 · fail 0**, trong **134 tệp**, hết khoảng **một phút**.
 
 > ⚠️ Số này đổi theo từng bản. Sáng hôm thi chạy lại `npm test` và đọc đúng số vừa chạy.
 
 > "Phép thử không chứng minh phần mềm không có lỗi — nó chứng minh những lỗi bọn em đã từng gặp thì
 > không quay lại."
 
-**🇬🇧** — *"1,387 automated tests, all passing, across 113 files. Tests don't prove the software is
+**🇬🇧** — *"1,622 automated tests, all passing, across 134 files. Tests don't prove the software is
 bug-free; they prove the bugs we already hit cannot come back."*
 
 ## 9.3 Bộ đánh giá độ chính xác
 
-Đội tự soạn **571 tin nhắn** đã gán nhãn. Lần đo 16/9/2026: gọi mới toàn bộ 571 lượt, 0 lượt dùng
-lại kết quả cũ, 0% lượt hỏng, chạy 430 giây, chấm được 531 mẫu.
+Đội tự soạn **571 tin nhắn** đã gán nhãn. Lần đo 24/9/2026 (bộ luật 1.6.1, có AI, model
+deepseek-v4-flash): 0% lượt hỏng, chấm được 531 mẫu. Số nằm ở `eval/results/latest.json` — trang
+`/transparency` đọc đúng tệp này, nên slide phải khớp với nó.
 
 **Kết quả trên 265 tin nguy hiểm:**
 
 | Ứng dụng xếp vào | Số tin | Ý nghĩa |
 |---|---|---|
-| Nguy hiểm cao | 186 | đúng mức |
-| Nghi ngờ | 53 | vẫn hiện cảnh báo và nút gọi người thân |
-| Chưa thấy dấu hiệu | 26 | **bỏ sót hoàn toàn** |
+| Nguy hiểm cao | 219 | đúng mức |
+| Nghi ngờ | 25 | vẫn hiện cảnh báo và nút gọi người thân |
+| Chưa thấy dấu hiệu | 21 | **bỏ sót hoàn toàn** |
 
-→ **90,2%** tin lừa đảo được cảnh báo · **9,8%** bị im lặng.
-Trên 169 tin bình thường: **4,1%** bị báo nhầm mức cao.
-Trên 125 tin bình thường viết cố tình giống lừa đảo: **12,0%** báo động.
+→ **92,1%** tin lừa đảo được cảnh báo · **7,9%** bị im lặng.
+Trên 169 tin bình thường: **1,8%** bị báo nhầm mức cao.
+Trên 125 tin bình thường thuộc lát khó (không được phép cảnh báo): **3,2%** bị cảnh báo.
 Trên 40 tin viết không dấu: bắt được **76,2%**.
-Chênh lệch tiếng Việt và tiếng Anh: **0,2 điểm phần trăm**.
+Tỉ lệ ra đúng mức Cao lệch **11,1 điểm** giữa tiếng Việt (80,1%) và tiếng Anh (91,2%); lát tiếng
+Anh chỉ có 34 tin nguy hiểm, chưa có tin lành nào.
 
 **🇬🇧**
 
-> "Our test set has 571 labelled messages; 531 were scored in the last run. Of 265 dangerous
-> messages, 186 were rated High, 53 Suspicious, and 26 were missed entirely — so **90.2% produce a
-> warning the user actually sees**, and **9.8% are silent**. On harmless messages, 4.1% were wrongly
-> rated High. On the hard slice — 125 harmless messages deliberately written to look like scams —
-> 12.0% triggered an alarm. On 40 messages written without Vietnamese diacritics we caught 76.2%. The
-> gap between Vietnamese and English is 0.2 percentage points."
+> "Our test set has 571 labelled messages; 531 were scored in the last run, on 24 September. Of 265
+> dangerous messages, 219 were rated High, 25 Suspicious, and 21 were missed entirely — so **92.1%
+> produce a warning the user actually sees**, and **7.9% are silent**. On harmless messages, 1.8%
+> were wrongly rated High. On the hard slice — 125 harmless messages that must not raise any warning
+> — 3.2% did. On 40 messages written without Vietnamese diacritics we caught 76.2%. The high-risk
+> catch rate differs by 11.1 points between Vietnamese and English, but the English slice is still
+> too small to mean much."
 
 ## 9.4 Phải nói kèm giới hạn
 
-> "Bộ 571 tin này do chính bọn em soạn. **Chưa có tin nhắn lừa đảo thật nào từ nạn nhân.** Lát tiếng
-> Anh mới 49 mẫu so với mục tiêu 90. Và khi bọn em siết luật để bắt được nhiều hơn, báo nhầm trên
-> lát khó **tăng từ 8,0% lên 12,0%** — đánh đổi này không miễn phí."
+> "Bộ 571 tin này do chính bọn em soạn, và bộ luật đã được chỉnh trên chính bộ này — nên con số trên
+> nó đẹp hơn ngoài đời. **Chưa có tin nhắn lừa đảo thật nào từ nạn nhân.** Lát tiếng Anh mới 49 mẫu
+> so với mục tiêu 90, chưa có tin lành tiếng Anh nào. Và **chưa có số đo nào về hành vi**: bọn em
+> chưa chứng minh được người dùng làm khác đi nhờ app — buổi thử với người cao tuổi là để đo đúng
+> chuyện đó."
 
-**🇬🇧** — *"We wrote that test set ourselves. It contains **no real victim messages**. Our English
-slice is only 49 samples against a target of 90. And when we tightened the rules to catch more
-scams, false alarms on the hard slice rose from 8.0% to 12.0% — that trade-off is not free, because
-a wrongly alarmed user uninstalls the app."*
+**🇬🇧** — *"We wrote that test set ourselves, and we tuned the rules on it — so the numbers on it look
+better than real life. It contains **no real victim messages**. Our English slice is only 49 samples
+against a target of 90, with no harmless English messages yet. And we have **no behavioural
+measurement yet**: we have not shown that people act differently because of the app. Our user test
+with older adults is there to measure exactly that."*
 
 ## 9.5 Giải thưởng
 
@@ -847,8 +870,8 @@ dừng.
 > và chi phí tổng đài cho những cuộc gọi hoảng loạn. Khoản thứ ba đo được ngay. Nguồn thứ hai là gói
 > gia đình bán cho con cái.
 >
-> Về bằng chứng: trên bộ 571 tin nhắn, ứng dụng cảnh báo 90,2% tin lừa đảo, báo nhầm 4,1% tin bình
-> thường, và có 1.387 phép thử tự động đang chạy xanh. Bộ 571 tin này bọn em tự soạn, chưa có tin
+> Về bằng chứng: trên bộ 571 tin nhắn, ứng dụng cảnh báo 92,1% tin lừa đảo, báo nhầm 1,8% tin bình
+> thường, và có 1.622 phép thử tự động đang chạy xanh. Bộ 571 tin này bọn em tự soạn, chưa có tin
 > thật — đó là việc đầu tiên bọn em làm tiếp.
 >
 > Và bọn em không chỉ nhìn thị trường Việt Nam. Năm 2025 thế giới mất khoảng 442 tỷ đô la vì lừa
@@ -893,8 +916,8 @@ dừng.
 > third one is measurable from day one, using data banks already have. Our second line is a family
 > plan sold to adult children.
 >
-> On evidence: on 571 labelled messages, the app warns on 90.2% of scams and wrongly flags 4.1% of
-> harmless messages, and we have 1,387 automated tests passing. We wrote that test set ourselves —
+> On evidence: on 571 labelled messages, the app warns on 92.1% of scams and wrongly flags 1.8% of
+> harmless messages, and we have 1,622 automated tests passing. We wrote that test set ourselves —
 > it has no real victim messages yet, and that is the first thing we fix next.
 >
 > And we are not only looking at Vietnam. Globally, an estimated 442 billion dollars was lost to
@@ -946,7 +969,7 @@ Nói một câu, chuyển ngay, **không sửa máy trên sân khấu**.
 
 - [ ] **Bấm thử toàn bộ** tính năng đánh dấu ✅ ở Phần 4; cái nào không thấy thì chuyển sang ⚠️
 - [ ] **Kiểm mô hình AI đang chạy** (xem tài liệu kỹ thuật, mục rủi ro mô hình). Nếu mô hình đã đổi
-      thì không được đọc 90,2% / 4,1% như số của bản đang chạy
+      thì không được đọc 92,1% / 1,8% như số của bản đang chạy
 - [ ] Điền hết `[ĐIỀN: ...]`: giá gói, doanh thu 3 năm, số tiền xin, tên và vai trò từng người
 - [ ] **Đưa ba câu chữ trên ứng dụng cho ba người trên 60 tuổi đọc**, hỏi *"Đọc xong bác sẽ làm gì?"*,
       ghi nguyên văn câu trả lời
@@ -962,7 +985,7 @@ Nói một câu, chuyển ngay, **không sửa máy trên sân khấu**.
 | ❌ Cấm nói | ✅ Nói thay bằng | 🇬🇧 |
 |---|---|---|
 | "An toàn" | "Chưa thấy dấu hiệu rủi ro" | "No clear risk signals found" |
-| "Chính xác 88%" | "Cảnh báo được 90,2% tin lừa đảo trong bộ 571 mẫu tự soạn" | "90.2% of scams in our own 571-message set produce a warning" |
+| "Chính xác 88%" | "Cảnh báo được 92,1% tin lừa đảo trong bộ 571 mẫu tự soạn" | "92.1% of scams in our own 571-message set produce a warning" |
 | "Bọn em lấy lại tiền cho bác" | "Các bước làm tăng khả năng xử lý" | "Steps that improve the chance of recovery" |
 | "Hoàn thiện 100%" | "Các luồng chính chạy được; phần còn lại trong lộ trình" | "The main flows work; the rest is on the roadmap" |
 | "Chặn được cuộc gọi lừa đảo" | "Bọn em tạo khoảng dừng trước quyết định" | "We create a pause before the decision" |
@@ -972,7 +995,11 @@ Nói một câu, chuyển ngay, **không sửa máy trên sân khấu**.
 | "Dữ liệu không đi đâu cả" | "Mặc định không lưu trên máy chủ, nhưng có gửi tới dịch vụ AI để phân tích" | "Not stored on our servers by default, but content is sent to the AI service for analysis" |
 | "Đã tối ưu cho người cao tuổi" (nếu chưa thử người thật) | "Đạt các ngưỡng đo được: nút 52px, chữ từ 14px, tương phản 4,5:1" | "We meet measurable accessibility floors: 52px targets, 14px minimum text, 4.5:1 contrast" |
 | "Cách mạng / đột phá" | Nói thẳng cái làm được, kèm bằng chứng | State what it does, with evidence |
-| "Không đối thủ nào làm được" | "Họ trả lời *số này là ai*; bọn em trả lời *giờ phải làm gì*" | "They answer *who is calling*; we answer *what to do now*" |
+| "Không đối thủ nào làm được" / "Chưa ai làm" | "Họ mạnh ở nhận diện; bọn em làm lớp *giờ phải làm gì*, cho cả nhà" | "They are strong at detection; we build the *what to do now* layer, for the whole family" |
+| "60 giây là con số khoa học" | "60 giây là tham số thiết kế: mốc mời người thân vào, đang được thử" | "Sixty seconds is a design parameter — the point where family is invited in — and we are testing it" |
+| "Gọi được người thân thì vụ lừa dừng" | "Bọn em đưa người thân vào đúng lúc; hiệu quả đang đo" | "We bring family in at the right moment; the effect is being measured" |
+| "Người cao tuổi bị lừa nhiều nhất" | "Ở Singapore năm 2025, người trên 65 không phải nhóm bị lừa nhiều nhất, nhưng mất trung bình nhiều nhất mỗi vụ" | "In Singapore in 2025, people over 65 were not the most frequent victims, but lost the most per case" |
+| "Kiểm được ảnh chụp màn hình" | "Dán chữ hoặc link; ảnh thì máy chủ hiện chưa đọc được" | "Paste the text or link; the server cannot read images yet" |
 
 ---
 
@@ -980,17 +1007,19 @@ Nói một câu, chuyển ngay, **không sửa máy trên sân khấu**.
 
 | Số | Ý nghĩa | 🇬🇧 |
 |---|---|---|
+| **24/9/2026** | ngày đo các số dưới đây (bộ luật 1.6.1, `eval/results/latest.json`) | measurement date |
 | **571 / 531** | mẫu trong bộ đánh giá / số chấm được | labelled test set / scored |
-| **90,2%** | tin lừa đảo được cảnh báo | scams that produce a warning |
-| **9,8%** | tin lừa đảo bị bỏ sót hoàn toàn | scams missed silently |
-| **70,2%** | khớp đúng mức (chỉ nói khi bị hỏi) | exact-level match |
-| **4,1%** | tin bình thường bị báo nhầm mức cao | false high-risk rate |
-| **12,0%** | báo động trên 125 tin bình thường viết giống lừa đảo | alarms on the hard benign slice |
+| **92,1%** | tin lừa đảo được cảnh báo | scams that produce a warning |
+| **7,9%** | tin lừa đảo bị bỏ sót hoàn toàn — "trấn an nhầm" | scams missed silently — "false reassurance" |
+| **82,6%** | tin nguy hiểm ra đúng mức Cao, 219/265 (chỉ nói khi bị hỏi) | dangerous messages rated exactly High |
+| **1,8%** | tin bình thường bị báo nhầm mức cao | false high-risk rate |
+| **3,2%** | cảnh báo trên 125 tin bình thường thuộc lát khó | alarms on the hard benign slice |
 | **76,2%** | bắt được trên 40 tin viết không dấu | recall without diacritics |
-| **0,2 điểm %** | chênh lệch tiếng Việt / tiếng Anh | VI–EN parity gap |
+| **11,1 điểm** | chênh lệch Việt / Anh (tiếng Anh cao hơn; lát Anh còn nhỏ) | VI–EN gap (English higher; small English slice) |
 | **0** | tin nhắn thật trong bộ đánh giá | real victim messages |
-| **1.387 / 0 / 113** (23/9) | test pass / fail / số tệp | tests passing / failing / files |
-| **59 · 8 · 10** | dấu hiệu · nhóm · tổ hợp chốt chặn | signals · groups · hard overrides |
+| **1.622 / 0 / 134** (25/9) | test pass / fail / số tệp | tests passing / failing / files |
+| **2,0 giây** | trung vị thời gian trả lời có AI, máy chủ thật, 47 lượt (25/9) | median response time with AI, live server |
+| **64 · 8 · 10** | dấu hiệu · nhóm · tổ hợp chốt chặn | signals · groups · hard overrides |
 | **840 · 41 · 1.240** | đội · quốc gia · người ở AI-JAM US 2026 | teams · countries · participants |
 | **60 giây · 72 giờ · 14 ngày** | dừng · bảo vệ sau mất tiền · gom sự việc | pause · recovery watch · case window |
 | **52px · 56px · 14px · 4,5:1** | vùng chạm · nút chính · cỡ chữ · tương phản | touch target · primary button · min text · contrast |
@@ -1008,7 +1037,7 @@ Nói một câu, chuyển ngay, **không sửa máy trên sân khấu**.
 | dấu hiệu lừa đảo | scam signal |
 | ba mức rủi ro | three risk levels |
 | Nguy hiểm cao / Nghi ngờ / Chưa thấy dấu hiệu rủi ro | High risk / Suspicious / No clear risk signals found |
-| dừng 60 giây | 60-second pause |
+| dừng 60 giây | Pause for 60 Seconds |
 | chế độ bảo vệ | Protected Mode |
 | bảo vệ 72 giờ | 72-Hour Recovery Watch |
 | bộ quy tắc cố định | fixed rule engine |

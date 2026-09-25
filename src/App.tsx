@@ -1376,7 +1376,7 @@ export default function App() {
                   ? t("Chạm để mở App ngay") 
                   : pinnedActionType === 'danger' 
                     ? t("Chạm để vào Cảnh giác nguy hiểm") 
-                    : t("Luôn sẵn sàng vào App hoặc Cảnh giác 60s")}
+                    : t("Luôn sẵn sàng: mở app hoặc Dừng 60 giây")}
               </span>
             </div>
           </div>
@@ -5226,9 +5226,9 @@ function NotificationsView({
               {pinnedActionType === 'danger' && <div className="w-2 h-2 bg-white rounded-full"></div>}
             </div>
             <div className="flex-1">
-              <span className="font-extrabold text-[14px] text-[#1e1b4b] block">{t("Báo động & Cảnh giác khẩn cấp (Nguy hiểm 60s)")}</span>
+              <span className="font-extrabold text-[14px] text-[#1e1b4b] block">{t("Mở thẳng màn khẩn cấp (Dừng 60 giây)")}</span>
               <GiaiThich t={t}>
-                <p className="text-[14px] text-slate-600 mt-1 leading-snug">{t("Chạm vào thông báo sẽ mở ngay chế độ Cảnh báo Rủi ro cao 60 giây, dừng ngay chuyển tiền và hiện phím gọi người thân.")}</p>
+                <p className="text-[14px] text-slate-600 mt-1 leading-snug">{t("Chạm vào thông báo là mở ngay màn cảnh báo: nhắc bác đừng chuyển tiền và hiện nút gọi người thân. Khoan Đã không chặn được giao dịch.")}</p>
               </GiaiThich>
             </div>
           </div>
@@ -8212,11 +8212,15 @@ export function WarningView({
               <AlertTriangle size={20} className="text-rose-200 shrink-0 mt-0.5" />
               <h3 className="text-white font-black text-[17px] leading-snug">{KHUNG_PHUC_HOI[lang]}</h3>
             </div>
-            {typeof keHoachPhucHoi.gioVang === 'number' && (
-              <p className="text-rose-50 text-[14px] font-semibold px-4 pt-2">
-                {t('Giờ vàng còn tính:')} {keHoachPhucHoi.gioVang} {t('giờ đầu là lúc quan trọng nhất')}
-              </p>
-            )}
+            {/*
+              ⚠️ 25/9/2026 — BỎ DÒNG "Giờ vàng còn tính: 24 giờ đầu…". Ba lỗi cùng lúc:
+              số 24 là hằng số nhưng chữ nói "còn tính" (bản Anh: "remaining") như đang
+              đếm lùi; "giờ vàng" không có nguồn nào; và nó lệch với chính tên màn "Bảo vệ
+              72 giờ", dễ bị đọc thành "còn 72 giờ để lo". Việc đúng là bắt đầu NGAY.
+            */}
+            <p className="text-rose-50 text-[14px] font-semibold px-4 pt-2">
+              {t('Bắt đầu ngay, đừng chờ hết 72 giờ. Báo ngân hàng càng sớm càng dễ xử lý.')}
+            </p>
             {buocPhucHoiHien.length > 0 && (
               <div className={`mt-2 ${(hienHetBuocPhucHoi || soBuocPhucHoiConLai === 0) && canhBaoPhucHoi.length === 0 ? 'pb-2' : ''}`}>
                 {buocPhucHoiHien.map((cau, i) => (

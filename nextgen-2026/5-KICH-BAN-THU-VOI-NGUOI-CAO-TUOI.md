@@ -2,6 +2,11 @@
 
 > Mục tiêu: có **số đã đo** cho slide thay vì số mục tiêu. 5–10 người, **ngoài gia đình
 > đội thi** (người nhà đã quen app, số sẽ đẹp giả).
+>
+> ⚠️ **Gọi đúng tên: đây là THỬ KHẢ DỤNG** — xem người cao tuổi thật có tìm được nút, hiểu câu
+> lệnh, gọi được người thân, thoát được khi báo nhầm hay không. **Chưa phải bằng chứng app làm
+> giảm lừa đảo.** Với 5–10 người chỉ nói được "x/N" và trung vị, không nói được hiệu quả.
+> Định nghĩa từng chỉ số ở mục 3.2 của `6-CAN-THIEP-LAM-NGAY-VA-CHI-SO.md`.
 > Mỗi người ~15 phút. Một người dẫn, một người bấm giờ và ghi.
 
 ---
@@ -59,6 +64,20 @@ và **nói gì** (nguyên văn, không sửa).
 | 1 | | | | | | | | | |
 
 Quá 60 giây chưa bấm gọi thì ghi **"> 60"**, không ghi số đoán.
+
+## 5b. Đọc số từ chính máy thử
+
+App tự ghi trên máy (không gửi đi đâu) hai thứ: bác đã chọn gì sau mỗi màn cảnh báo, và bao
+nhiêu giây tới lúc chạm nút gọi. Đọc ở **Cài đặt › Ra-đa nhà mình › Số đo trên máy này**.
+
+- Hết mỗi người thử, bấm **"Sao chép số đo"** rồi dán vào tờ ghi. Gói chép chỉ có mã và giờ,
+  không có nội dung tin, không có tên. Máy không cho chép tự động thì app hiện chữ để chép tay.
+- Mỗi bản ghi có giờ, nên tách được từng người thử theo giờ bắt đầu — ghi giờ bắt đầu từng người
+  vào cột "Ghi chú".
+- Đồng hồ bấm tay **vẫn giữ**: số trên máy chỉ đo tới lúc chạm nút, đồng hồ tay thì thấy được cả
+  lúc người thử lúng túng trước khi màn đỏ hiện.
+- ⚠️ Đếm trên máy là **số lần bấm, không phải số người** (một người có thể bấm gọi rồi bấm "Con
+  bảo là lừa đảo"). Tỉ lệ thì tính từ tờ ghi, không chia các con đếm trên máy cho nhau.
 
 ## 6. Đưa lên slide thế nào
 

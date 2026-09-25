@@ -2,7 +2,7 @@
 
 > Chỉ dành cho Quân. Viết bằng lời thường, không so sánh với vật khác.
 > Mục đích: trả lời được mọi câu hỏi kỹ thuật của giám khảo, và biết chính xác chỗ nào nói được, chỗ nào không.
-> Số liệu đối chiếu với mã ngày 16/9/2026.
+> Số liệu đối chiếu với mã ngày 16/9/2026; các số đo ở mục 7 và 8 cập nhật ngày 25/9/2026 theo `eval/results/latest.json` (đo 24/9/2026).
 
 ---
 
@@ -253,7 +253,9 @@ Năm giá trị `canThiep`: `TRUST_RECEIPT` (phiếu kết quả) · `VERIFY_PAT
 | Ba nhãn | nằm trong `backend/src/risk-labels.js` và `src/catalog.ts`; bảng dịch không ghi đè được |
 
 Vì kết quả đi dưới dạng mã, cùng một tin nhắn cho cùng một mức dù người dùng chọn tiếng Việt hay tiếng Anh.
-Đo được: chênh lệch tỷ lệ bắt tin nguy hiểm giữa tiếng Việt và tiếng Anh là **0,2 điểm phần trăm**.
+Đo 24/9/2026: tỉ lệ tin nguy hiểm ra đúng mức Cao lệch **11,1 điểm** giữa tiếng Việt (80,1%) và tiếng Anh
+(91,2%) — tiếng Anh cao hơn. Lát tiếng Anh chỉ có 34 tin nguy hiểm và chưa có tin lành nào, nên chưa đo được
+báo nhầm tiếng Anh. (Ngày 16/9 con số này là 0,2 điểm; nó đổi mạnh giữa hai lượt đo vì lát tiếng Anh quá nhỏ.)
 
 ---
 
@@ -280,22 +282,22 @@ Lưu ý: gọi `npm run eval -- --bo-cache` qua npm từng bị lỗi mã 4 khô
 
 ### 7.3 Năm chỉ số, định nghĩa
 
-| Chỉ số | Cách tính | Kết quả 16/9/2026 |
+| Chỉ số | Cách tính | Kết quả 24/9/2026 (bộ luật 1.6.1) |
 |---|---|---|
-| **dangerous-case recall** | số tin nguy hiểm được xếp **đúng mức CAO** ÷ tổng tin nguy hiểm | 70,2% (265 tin) |
-| **high-risk false positive** | số tin bình thường bị xếp **CAO** ÷ tổng tin bình thường | 4,1% (169 tin) |
-| **FP trên lát khó** | báo động trên 125 tin bình thường viết giống lừa đảo, mức kỳ vọng là `CHUA_THAY` | 12,0% |
-| vượt trần | tin bị xếp cao hơn mức tối đa cho phép | 3,0% |
-| tụt dưới mức | tin bị xếp thấp hơn mức tối thiểu | 31,8% |
+| **dangerous-case recall** | số tin nguy hiểm được xếp **đúng mức CAO** ÷ tổng tin nguy hiểm | 82,6% (219/265) |
+| **high-risk false positive** | số tin bình thường bị xếp **CAO** ÷ tổng tin bình thường | 1,8% (3/169) |
+| **FP trên lát khó** | có cảnh báo trên 125 tin bình thường mức kỳ vọng tối đa là `CHUA_THAY` | 3,2% (4/125) |
+| vượt trần | tin bị xếp cao hơn mức tối đa cho phép | 2,6% |
+| tụt dưới mức | tin bị xếp thấp hơn mức tối thiểu | 22,4% |
 
-### 7.4 Con số "90,2% được cảnh báo" tính từ đâu
+### 7.4 Con số "92,1% được cảnh báo" tính từ đâu
 
 Từ ma trận nhầm lẫn của 265 tin nguy hiểm:
-- xếp `CAO`: 186 · xếp `NGHI_NGO`: 53 · xếp `CHUA_THAY`: 26
-- được cảnh báo = (186 + 53) ÷ 265 = **90,2%**
-- bị im lặng = 26 ÷ 265 = **9,8%**
+- xếp `CAO`: 219 · xếp `NGHI_NGO`: 25 · xếp `CHUA_THAY`: 21
+- được cảnh báo = (219 + 25) ÷ 265 = **92,1%**
+- bị im lặng = 21 ÷ 265 = **7,9%** — đây là chỉ số "trấn an nhầm", chỉ số an toàn quan trọng nhất
 
-Hai con số recall khác nhau vì: recall 70,2% chỉ tính mức `CAO` là đúng; con số 90,2% tính cả mức
+Hai con số recall khác nhau vì: recall 82,6% chỉ tính mức `CAO` là đúng; con số 92,1% tính cả mức
 `NGHI_NGO`, vì ở mức đó người dùng vẫn thấy cảnh báo và nút gọi người thân.
 
 ### 7.5 Thông tin phiên đo phải nói kèm
@@ -370,8 +372,8 @@ một model.
 ## 8 · KIỂM THỬ
 
 - Chạy: `npm test`
-- Đo lại ngày 23/9/2026: **1.387 phép thử · pass 1.387 · fail 0 · skip 0**, trong **113 tệp** trong
-  thư mục `test/`, chạy hết khoảng **40 giây**. Số này đổi theo từng bản — hôm thi chạy lại rồi đọc số mới.
+- Đo lại ngày 25/9/2026: **1.622 phép thử · pass 1.622 · fail 0 · skip 0**, trong **134 tệp** trong
+  thư mục `test/`, chạy hết khoảng **một phút**. Số này đổi theo từng bản — hôm thi chạy lại rồi đọc số mới.
 - Có phép thử bắt buộc phải gọi trình biên dịch TypeScript (commit `cc538fc`).
 - Một số phép thử quan trọng nên nhớ tên:
 
@@ -441,10 +443,11 @@ một model.
 > "Bọn em không có dữ liệu lừa đảo thật đủ lớn và đã xoá thông tin cá nhân để huấn luyện. Phần đọc hiểu
 > dùng mô hình có sẵn; phần quyết định là bộ quy tắc do đội tự viết và hiệu chỉnh."
 
-### "Recall 70,2% có thấp không?"
-> "Nếu tính riêng mức 'nguy hiểm cao' thì là 70,2%. Nhưng 90,2% tin lừa đảo vẫn được cảnh báo ở mức
-> nghi ngờ hoặc cao, và người dùng vẫn thấy nút gọi người thân. Điểm yếu thật là 9,8% tin bị bỏ sót, và
-> bộ kiểm tra chưa có tin thật."
+### "Recall 82,6% có thấp không?"
+> "Nếu tính riêng mức 'nguy hiểm cao' thì là 82,6%. Nhưng 92,1% tin lừa đảo vẫn được cảnh báo ở mức
+> nghi ngờ hoặc cao, và người dùng vẫn thấy nút gọi người thân. Điểm yếu thật là 7,9% tin bị bỏ sót,
+> bộ kiểm tra chưa có tin thật, và bộ luật đã được chỉnh trên chính bộ này — trên một bộ lạ do ChatGPT
+> soạn, lúc đầu chỉ 41/83 tin mức Cao ra Cao."
 
 ### "Tin tiếng Việt không dấu thì sao?"
 > "Có lát kiểm tra riêng 40 tin viết không dấu, bắt được 76,2% tin nguy hiểm."
@@ -463,7 +466,9 @@ một model.
 
 | ❌ | Vì sao |
 |---|---|
-| "Chính xác 88%" | 90,2% là tỷ lệ **được cảnh báo**, không phải độ chính xác |
+| "Chính xác 88%" | 92,1% là tỷ lệ **được cảnh báo**, không phải độ chính xác |
+| "60 giây là con số khoa học" | 60 giây là tham số thiết kế — mốc mời người thân vào — đang được thử |
+| "Độ trễ vài chục giây" | đo 25/9/2026 trên máy chủ thật: trung vị 2,0 giây, chậm nhất 3,7 giây (47 lượt có AI) |
 | "AI phát hiện lừa đảo" | AI trích tín hiệu; bộ quy tắc quyết định |
 | "Đạt chuẩn WCAG" | Chưa kiểm đủ tự động và thủ công — nói "mục tiêu WCAG 2.2 AA" |
 | "Không dữ liệu nào rời khỏi máy" | Khi AI chạy, nội dung được gửi tới dịch vụ AI |

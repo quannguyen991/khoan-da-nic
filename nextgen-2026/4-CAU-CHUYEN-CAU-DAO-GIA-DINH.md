@@ -118,10 +118,12 @@ Mở **`https://khoan-da.onrender.com/?trinhDien=1`** trên laptop (Chrome hoặ
 
 | Số | Nguồn | Ngày |
 |---|---|---|
-| 90,2% tin lừa đảo được cảnh báo (186 Cao + 53 Nghi ngờ trên 265) | `eval/results/latest.json` | lần đo mới nhất |
-| 4,1% tin bình thường bị báo nhầm mức Cao (7/169) | nt | nt |
-| Lệch recall Việt–Anh 0,2 điểm phần trăm | nt | nt |
-| Số giây từ màn đỏ tới lúc bấm gọi | **chưa đo** — xem `5-KICH-BAN-THU-VOI-NGUOI-CAO-TUOI.md` | — |
+| 92,1% tin lừa đảo được cảnh báo (219 Cao + 25 Nghi ngờ trên 265) | `eval/results/latest.json` | 24/9/2026 |
+| 7,9% tin lừa đảo ra "Chưa thấy dấu hiệu" — trấn an nhầm (21/265) | nt | nt |
+| 1,8% tin bình thường bị báo nhầm mức Cao (3/169) | nt | nt |
+| Lệch recall Việt–Anh 11,1 điểm, tiếng Anh cao hơn — lát Anh còn nhỏ, **chỉ nói khi bị hỏi** | nt | nt |
+| Trung vị 2,0 giây trả lời có AI trên máy chủ thật (47 lượt) | `eval/results/do-tre-render.json` | 25/9/2026 |
+| Số giây từ màn đỏ tới lúc bấm gọi | **chưa đo** — xem `5-KICH-BAN-THU-VOI-NGUOI-CAO-TUOI.md`; đọc số từ ô "Số đo trên máy này" | — |
 
 Số buổi thử chưa có thì slide ghi *"đang đo với N người cao tuổi"*, không ghi số dự đoán.
 

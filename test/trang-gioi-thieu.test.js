@@ -134,8 +134,9 @@ test('phông chữ nạp từ chính web, không gọi Google Fonts', () => {
 const MAN = ['tro-ly', 'quy-tac', 'khan-cap', 'phuc-hoi'];
 const THU_MUC_MAN = path.join(__dirname, '..', 'backend', 'src', 'man-that');
 const CHU_MAN = {
-  vi: { 'tro-ly': 'Bác khoan', 'quy-tac': 'Quy tắc nhà mình', 'khan-cap': 'Để tôi hỏi con rồi gọi lại', 'phuc-hoi': 'Giờ vàng' },
-  en: { 'tro-ly': 'Please hold off', 'quy-tac': 'Your family rule', 'khan-cap': 'Let me ask my family', 'phuc-hoi': 'Golden window' },
+  // 25/9/2026: màn phục hồi bỏ dòng "Giờ vàng còn tính" (không nguồn) — dấu nhận màn đổi theo.
+  vi: { 'tro-ly': 'Bác khoan', 'quy-tac': 'Quy tắc nhà mình', 'khan-cap': 'Để tôi hỏi con rồi gọi lại', 'phuc-hoi': 'Bắt đầu ngay' },
+  en: { 'tro-ly': 'Please hold off', 'quy-tac': 'Your family rule', 'khan-cap': 'Let me ask my family', 'phuc-hoi': 'Start now' },
 };
 
 test('trang nhúng đủ bốn màn thật, đúng ngôn ngữ, không cho chạy script', () => {

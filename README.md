@@ -1,5 +1,9 @@
 # Khoan Đã
 
+> ⚠️ Số liệu trong tài liệu này đã cập nhật ngày 25/9/2026 theo `eval/results/latest.json` (đo 24/9/2026). Số mới nhất luôn ở trang `/transparency`.
+>
+> ⚠️ Figures in this document were updated on 25 Sep 2026 from `eval/results/latest.json` (measured 24 Sep 2026). The latest figures are always on the `/transparency` page.
+
 **Trợ lý cảnh giác lừa đảo cho người cao tuổi Việt Nam.**
 Dừng lại trước, kiểm sau, rồi hãy làm.
 
@@ -96,7 +100,7 @@ layer degrades to rules-only without one.
 ```bash
 npm install
 npm run dev          # http://localhost:5173
-npm test             # 1,229 automated tests
+npm test             # 1,622 automated tests
 npm run build:apk    # Android bundle using the server address in .env.apk, then Capacitor sync
 ```
 
@@ -135,10 +139,10 @@ and are documented as binding constraints rather than generated defaults.
 
 ### Measured
 
-Last run recorded commit `972488e`, rule engine v1.3.0, model `deepseek-v4-flash-0731`,
-571 held-out samples with 571 fresh model calls and 0% failed calls. **90.2%** of dangerous
-messages produced a warning (70.2% at High risk); the system was silent on **9.8%**. False
-"High risk" on harmless messages: **4.1%**. The figures live in `eval/results/latest.json`,
+Last run (24 Sep 2026) recorded commit `4bd34a3`, rule engine v1.6.1, model `deepseek-v4-flash-0731`,
+571 held-out samples (531 scored) with 571 fresh model calls and 0% failed calls. **92.1%** of dangerous
+messages produced a warning (82.6% at High risk); the system was silent on **7.9%**. False
+"High risk" on harmless messages: **1.8%**. The figures live in `eval/results/latest.json`,
 which is also what the in-app transparency page reads.
 
 **No real-world samples are in the evaluation set** — 0 against a target of 25. Every
@@ -233,9 +237,10 @@ nhắn của kẻ lừa đảo dụ. Nên AI làm việc nó giỏi nhất — �
 thường, viết tắt, không dấu, lẫn tiếng lóng — còn quyết định cuối cùng đi qua một
 bộ luật **kiểm tra được, giải thích được, và không thể bị dụ bằng câu chữ**.
 
-**Và AI là không thể thiếu.** Đo trên bộ 445 mẫu: bỏ tầng AI đi, độ nhạy phát hiện
-rơi từ **67,6% xuống 3,8%**. Không luật nào hay biểu thức chính quy nào đọc được
-một câu người thật viết ra.
+**Và AI là không thể thiếu.** Đo trên bộ 445 mẫu cũ (trước khi bộ đo lên 571 mẫu):
+bỏ tầng AI đi, độ nhạy phát hiện rơi từ **67,6% xuống 3,8%** (đo lại 24/9/2026 có
+AI, trên 571 mẫu: 82,6% tin nguy hiểm ra đúng mức cao; phép đo bỏ AI chưa chạy lại).
+Không luật nào hay biểu thức chính quy nào đọc được một câu người thật viết ra.
 
 ### Bốn luật bất biến
 
@@ -302,7 +307,7 @@ có biểu tượng, chạy được khi mất mạng.
 | Giao diện | React 19 · TypeScript (strict) · Vite 6 · Tailwind 4 · PWA + service worker |
 | Máy chủ | Node · Express · bộ luật thuần, không phụ thuộc mạng |
 | AI | LLM qua giao thức OpenAI — chạy cục bộ (Ollama) hoặc qua gateway |
-| Đo lường | Bộ eval 571 mẫu giữ riêng, 1.229 test tự động |
+| Đo lường | Bộ eval 571 mẫu giữ riêng, 1.622 test tự động |
 
 ## Chạy thử
 

@@ -90,16 +90,20 @@
 > Bước ba, họ ra hai lệnh: **không được cúp máy** và **không được kể cho con cháu**. Bước bốn, họ yêu
 > cầu chuyển tiền vào 'tài khoản an toàn' để xác minh.
 >
-> Bước ba mới là bước ăn tiền. Nếu bác gọi được cho một người thân thì vụ lừa gần như luôn dừng lại
-> — và đó là bước Khoan Đã nhắm vào."
+> Bước ba mới là bước ăn tiền: kẻ gian cần bác ở một mình. FTC của Mỹ cũng mô tả đúng chiêu giữ máy
+> để nạn nhân không kiểm chứng được, và khuyên dừng lại, kể với một người mình tin trước khi làm gì.
+> Đó là bước Khoan Đã nhắm vào. Gọi được người thân thì vụ lừa dừng lại bao nhiêu phần — bọn em
+> đang đo, chưa có số."
 
 **🇬🇧**
 > "Police impersonation, and it follows four almost identical steps. One: they call, claim to be an
 > officer, and read back the victim's full name, date of birth and ID number **correctly**. Two: they
 > say the account is tied to a money-laundering ring and prosecution is imminent. Three: two orders —
 > **don't hang up**, and **don't tell your children**. Four: transfer the money to a 'safe account' for
-> verification. Step three is the step that takes the money. If the victim reaches one family member,
-> the scam almost always collapses — that's the step we target."
+> verification. Step three is the step that takes the money: the scammer needs the victim alone. The
+> US FTC describes the same move and advises stopping to talk to someone you trust first. That's the
+> step we target. How often reaching family ends the scam — we are measuring that; we have no number
+> yet."
 
 ### 1.5 "Sao lại chọn người cao tuổi làm nhóm đầu tiên?" — A
 
@@ -128,19 +132,23 @@
 
 ### 1.7 "Nhiều tổ chức đang làm chống lừa đảo rồi. Khoảng trống thật sự nằm ở đâu?" — B
 
-> "Ở chỗ chưa ai kiểm **trạng thái của người dùng** ạ.
+> "Ở chỗ ở Việt Nam chưa có ai kiểm **trạng thái của người dùng** ạ.
 >
 > Ứng dụng nhận diện số trả lời câu 'số này là ai'. Ngân hàng xác thực khuôn mặt để trả lời câu 'có
 > đúng chủ tài khoản đang bấm không'. Cả hai đều hữu ích, nhưng người đang bị lừa **vẫn tự quét mặt,
 > vẫn tự bấm chuyển** — vì họ tin là mình đang làm đúng.
 >
-> Chưa ai hỏi: **người này có đang bị ép không**. Đó là lớp bọn em làm."
+> Câu **'người này có đang bị ép không'** thì ở nước ngoài mới bắt đầu có người hỏi — Google trên
+> Android, ngân hàng Hồng Kông, quỹ hưu trí CPF của Singapore — và đều là lớp của ngân hàng hay hệ
+> điều hành. Bọn em làm lớp đó cho gia đình Việt, không phải chờ ngân hàng nào."
 
 **🇬🇧**
-> "The gap is that nobody checks the **state of the user**. Caller-ID apps answer *who is calling*.
+> "The gap is that nobody in Vietnam checks the **state of the user**. Caller-ID apps answer *who is calling*.
 > Banks use face verification to answer *is this really the account owner*. Both help — but a
 > defrauded person still passes the face check and still presses Transfer, because they believe they
-> are doing the right thing. Nobody asks **whether that person is being coerced**. That's our layer."
+> are doing the right thing. Asking **whether that person is being coerced** has only just started
+> abroad — Google on Android, Hong Kong banks, Singapore's CPF — always as a bank or operating-system
+> layer. We build that layer for Vietnamese families, without waiting for a bank."
 
 ### 1.8 "Đội có trải nghiệm cá nhân gì với vấn đề này không?" — A
 
@@ -253,12 +261,14 @@ Chưa thử thì nói thẳng, rồi chuyển sang cái đã đo được:
 
 ### 2.5 "Bác ấy không đọc được chữ nhỏ, không gõ được bàn phím thì sao?" — A
 
-> "Bác nói bằng giọng, hoặc chụp màn hình gửi lên, hoặc dán tin nhắn ạ. Kết quả được đọc thành tiếng.
+> "Bác nói bằng giọng, hoặc dán tin nhắn ạ. (Ảnh chụp màn hình thì máy chủ hiện chưa đọc được — app
+> nói thẳng là chưa đọc được, không kết luận thay.) Kết quả được đọc thành tiếng.
 > Và nếu ứng dụng nghe sai, nó **hiện lại chữ đã nghe để bác sửa** chứ không tự đoán rồi chạy tiếp —
 > vì đoán sai một chữ có thể làm đổi cả kết quả."
 
 **🇬🇧**
-> "They can speak instead of typing, send a screenshot, or paste the message. The result is read
+> "They can speak instead of typing, or paste the message (the server cannot read screenshots yet,
+> and the app says so rather than guessing). The result is read
 > aloud. And if speech recognition mishears, the app **shows the transcribed text for correction**
 > rather than guessing and moving on — because one wrong word can change the outcome."
 
@@ -380,14 +390,14 @@ Chưa thử thì nói thẳng, rồi chuyển sang cái đã đo được:
 
 ### 3.1 "Mô tả trong 20 giây ứng dụng làm gì." — A
 
-> "Người dùng dán tin nhắn, ảnh chụp màn hình hoặc đường link vào. Ứng dụng chỉ ra các dấu hiệu lừa
-> đảo tìm thấy, xếp vào một trong ba mức, bắt dừng 60 giây, rồi đưa ra một nút lớn gọi cho người
-> thân. Con cái có bảng điều khiển riêng để làm việc đó hộ bố mẹ."
+> "Người dùng dán tin nhắn hoặc đường link vào, hoặc kể bằng giọng nói. Ứng dụng chỉ ra các dấu hiệu
+> lừa đảo tìm thấy, xếp vào một trong ba mức, rồi đưa ra đúng một việc cần làm và một nút lớn gọi cho
+> người thân. Con cái có bảng điều khiển riêng để làm việc đó hộ bố mẹ."
 
 **🇬🇧**
-> "The user pastes in a message, screenshot or link. The app lists the scam signals it found, assigns
-> one of three risk levels, enforces a 60-second pause, and gives one large button to call a family
-> member. Adult children have their own dashboard to do this on their parents' behalf."
+> "The user pastes in a message or link, or describes it by voice. The app lists the scam signals it
+> found, assigns one of three risk levels, then gives one next step and one large button to call a
+> family member. Adult children have their own dashboard to do this on their parents' behalf."
 
 ### 3.2 "Ba mức rủi ro của các em là gì?" — A
 
@@ -430,7 +440,7 @@ Chưa thử thì nói thẳng, rồi chuyển sang cái đã đo được:
 >
 > Trong bộ kiểm tra có **125 tin nhắn bình thường viết cố tình giống lừa đảo** — ví dụ 'mẹ cài app
 > ngân hàng trên CH Play đi' hay 'chuyển tiền cho con, đừng nói với bà' — và tỉ lệ báo động trên lát
-> khó đó là **12,0%**. Trên toàn bộ 169 tin bình thường, tỉ lệ báo nhầm mức cao là **4,1%**.
+> khó đó là **3,2%** (đo 24/9/2026). Trên toàn bộ 169 tin bình thường, tỉ lệ báo nhầm mức cao là **1,8%**.
 >
 > Và trên mọi màn cảnh báo luôn có dòng **'Tôi ổn, không có gì nguy hiểm'** để bác thoát ra ngay."
 
@@ -438,7 +448,8 @@ Chưa thử thì nói thẳng, rồi chuyển sang cái đã đo được:
 > "We **measure false alarms separately**, not just detection. Our test set includes **125 harmless
 > messages written deliberately to look like scams** — things like *'Mum, install the bank app from the
 > Play Store'* or *'transfer the money, don't tell grandma'* — and our alarm rate on that hard slice is
-> **12.0%**. Across all 169 harmless messages, the false high-risk rate is **4.1%**. And every warning
+> **3.2%** (measured 24 September 2026). Across all 169 harmless messages, the false high-risk rate is
+> **1.8%**. And every warning
 > screen always carries an exit: **'I'm fine, nothing dangerous here.'**"
 
 ### 3.6 ⚠️ "Người dùng bấm 'Tôi ổn' nhiều lần thì app có tự giảm cảnh báo không?" — A
@@ -460,19 +471,27 @@ Chưa thử thì nói thẳng, rồi chuyển sang cái đã đo được:
 
 ### 3.7 "Dừng 60 giây để làm gì? Nếu người ta không chịu chờ thì sao?" — A
 
-> "Sáu mươi giây là để cắt đà ạ. Kẻ lừa đảo sống bằng việc không cho nạn nhân dừng lại — chúng nói
-> liên tục, đếm ngược, dọa nạt. Màn dừng của bọn em nhắc ba điều không được làm và đặt nút gọi người
-> thân ngay trên màn hình.
+> "Khoảng dừng để cắt đà ạ — kẻ lừa đảo sống bằng việc không cho nạn nhân dừng lại. Nhưng bản thân
+> đồng hồ không phải thứ cứu người; thứ cứu người là **việc làm trong lúc dừng**. Nên màn dừng chỉ
+> giao đúng một việc — ví dụ 'Gọi số in sau thẻ ngân hàng' — và đặt nút gọi người thân ngay trên
+> màn hình.
 >
-> Bọn em **không khoá máy**. Bác vẫn thoát ra được — vì đây là tiền của bác, và một ứng dụng giam
-> người dùng trong màn khẩn cấp sẽ bị gỡ ngay sau lần báo nhầm đầu tiên."
+> Còn 60 giây: em nói thẳng, đó là **tham số thiết kế, chưa phải con số khoa học**. Trong app nó là
+> mốc leo thang: hết 60 giây mà bác chưa gọi ai thì màn mời người thân vào. Bọn em sẽ so nó với bản
+> không có đồng hồ.
+>
+> Bọn em **không khoá máy**, đồng hồ cũng không khoá gì. Bác vẫn thoát ra được — vì đây là tiền của
+> bác, và một ứng dụng giam người dùng trong màn khẩn cấp sẽ bị gỡ ngay sau lần báo nhầm đầu tiên."
 
 **🇬🇧**
-> "Sixty seconds breaks the momentum. Scammers survive by never letting the victim stop — they keep
-> talking, counting down, threatening. Our pause screen states three things not to do and puts the
-> 'call family' button right there. We **do not lock the device**. The user can always exit — it's their
-> money, and an app that traps people in an emergency screen gets uninstalled after the first false
-> alarm."
+> "The pause breaks the momentum — scammers survive by never letting the victim stop. But the timer
+> itself doesn't save anyone; **what the person does during the pause** does. So the pause screen asks
+> for exactly one action — for example 'Call the number on the back of your bank card' — and puts the
+> 'call family' button right there. As for sixty seconds: it is a **design parameter, not a
+> scientific number**. In the app it is the escalation point — if nobody has been called after sixty
+> seconds, the screen invites family in. We will compare it with a version without a timer. We **do
+> not lock the device**, and the timer blocks nothing. The user can always exit — it's their money, and
+> an app that traps people in an emergency screen gets uninstalled after the first false alarm."
 
 ### 3.8 "Nếu bác vẫn quyết chuyển tiền thì app có chặn được không?" — A
 
@@ -490,14 +509,18 @@ Chưa thử thì nói thẳng, rồi chuyển sang cái đã đo được:
 
 ### 3.9 "Sao lại là 72 giờ mà không phải con số khác?" — A
 
-> "Vì ba ngày đầu là lúc còn cơ hội xử lý với ngân hàng, và cũng là lúc **kẻ lừa đảo hay quay lại lần
-> hai** với chiêu 'nộp phí để lấy lại tiền đã mất'. Người vừa mất tiền là người dễ tin chiêu đó nhất,
-> nên hệ thống bọn em có riêng một quy tắc chốt chặn cho tình huống đó."
+> "72 giờ **không phải một 'giờ vàng' đã được chứng minh** ạ — gọi ngân hàng thì phải làm **ngay**, và
+> màn phục hồi nói đúng như vậy: 'Bắt đầu ngay, đừng chờ hết 72 giờ.' 72 giờ là khoảng app tiếp tục
+> nhắc bác, vì đó cũng là lúc **kẻ lừa đảo hay quay lại lần hai** với chiêu 'nộp phí để lấy lại tiền
+> đã mất'. Người vừa mất tiền là người dễ tin chiêu đó nhất, nên hệ thống bọn em có riêng một quy
+> tắc chốt chặn cho tình huống đó."
 
 **🇬🇧**
-> "Because the first three days are when the bank can still act — and also when **scammers come back a
-> second time** with *'pay a fee and we'll recover your money'*. Someone who just lost money is the most
-> likely to fall for it, so we have a dedicated hard rule for exactly that pattern."
+> "Seventy-two hours is **not a proven 'golden window'** — calling the bank has to happen **now**, and
+> the recovery screen says exactly that: 'Start now — don't wait out the 72 hours.' The 72 hours is
+> how long the app keeps reminding the person, because it is also when **scammers come back a second
+> time** with *'pay a fee and we'll recover your money'*. Someone who just lost money is the most likely
+> to fall for it, so we have a dedicated hard rule for exactly that pattern."
 
 ### 3.10 "Mật khẩu gia đình là gì và nó giải quyết vấn đề gì?" — A
 
@@ -517,8 +540,11 @@ Chưa thử thì nói thẳng, rồi chuyển sang cái đã đo được:
 
 > "Có một thứ ạ: **quy tắc nhà mình**.
 >
-> Gia đình tự đặt tối đa ba câu lúc bình tĩnh — ví dụ *'Nhà mình không đọc mã trong tin nhắn cho bất
-> kỳ ai'*. Khi có cảnh báo, ứng dụng chọn đúng câu hợp với dấu hiệu vừa tìm thấy, đọc lại nguyên văn,
+> Gia đình tự đặt tối đa ba câu lúc bình tĩnh, dạng *'nếu… thì làm…'* — ví dụ *'Ai hỏi mã trong tin
+> nhắn, nhà mình giữ mã lại rồi gọi cho nhau'*. Dạng này có cơ sở: kế hoạch đặt trước kiểu "nếu X thì
+> làm Y" đã được kiểm trong 642 phép thử (Sheeran và cộng sự, 2024), và FTC của Mỹ cũng phát cho
+> người dân một tờ kế hoạch điền sẵn danh sách người tin cậy. Khi có cảnh báo, ứng dụng chọn đúng câu
+> hợp với dấu hiệu vừa tìm thấy, đọc lại nguyên văn,
 > kèm dòng *'Bác đặt ngày 16/9 cùng Lan'*, và một nút gọi thẳng cho Lan.
 >
 > Vì sao nó khác một câu cảnh báo thường: bác không phải cãi lại một cái máy. Bác nhớ ra lời đã hẹn
@@ -527,7 +553,9 @@ Chưa thử thì nói thẳng, rồi chuyển sang cái đã đo được:
 
 **🇬🇧**
 > "One thing: **the family's own rule**. A family writes up to three sentences while calm — for
-> example *'our family never reads out a code from a text message'*. When a warning fires, the app
+> example *'if anyone asks for a code from a text, we keep it to ourselves and call each other'*. If–then
+> plans like this are backed by a meta-analysis of 642 tests (Sheeran et al., 2024), and the US FTC hands
+> out a fill-in plan with a list of trusted people for the same reason. When a warning fires, the app
 > picks the rule matching the signals it found, shows it back word for word, adds *'you set this on
 > 16 September with Lan'*, and puts one button there that calls Lan.
 >
@@ -644,13 +672,17 @@ Chưa thử thì nói thẳng, rồi chuyển sang cái đã đo được:
 ### 3.19 "Ứng dụng có hỗ trợ tiếng Anh không? Kết quả có khác không?" — A
 
 > "Có tiếng Anh ạ, và kết quả **không khác**. Máy chủ trả về **mã**, còn chữ tiếng Việt hay tiếng Anh
-> chỉ là bảng tra ở giao diện — nên đổi ngôn ngữ **không thể** làm đổi kết luận. Đo thực tế thì chênh
-> lệch giữa hai ngôn ngữ là **0,2 điểm phần trăm**."
+> chỉ là bảng tra ở giao diện — nên đổi ngôn ngữ **giao diện không thể** làm đổi kết luận. Còn với
+> **tin nhắn viết bằng tiếng Anh**, đo 24/9/2026 thì tỉ lệ ra đúng mức Cao lệch **11,1 điểm** so với
+> tiếng Việt — tiếng Anh lại cao hơn — nhưng lát tiếng Anh mới có 34 tin nguy hiểm và chưa có tin lành
+> nào, nên em chưa dám kết luận gì."
 
 **🇬🇧**
 > "Yes, and the result **does not change**. The server returns **codes**; the Vietnamese and English text
-> is just a lookup table in the interface — so switching language **cannot** change the verdict.
-> Measured, the gap between the two languages is **0.2 percentage points**."
+> is just a lookup table in the interface — so switching the **interface** language **cannot** change the
+> verdict. For **messages written in English**, the high-risk catch rate measured on 24 September differs
+> from Vietnamese by **11.1 points** — English is higher — but the English slice has only 34 dangerous
+> and no harmless messages, so I won't draw a conclusion yet."
 
 ### 3.20 "Giao diện có gì đặc biệt cho người cao tuổi?" — A
 
@@ -800,7 +832,7 @@ Chưa thử thì nói thẳng, rồi chuyển sang cái đã đo được:
 
 ### 4.10 "Hệ thống của các em có bao nhiêu dấu hiệu, chia thế nào?" — A
 
-> "**59 dấu hiệu**, chia **8 nhóm** ạ: nhóm về tiền, nhóm về mã và mật khẩu, nhóm về cài ứng dụng lạ
+> "**64 dấu hiệu**, chia **8 nhóm** ạ: nhóm về tiền, nhóm về mã và mật khẩu, nhóm về cài ứng dụng lạ
 > và điều khiển máy từ xa, nhóm thao túng cảm xúc, nhóm giả danh, nhóm mời chào, nhóm về đường link
 > và website, và nhóm về diễn tiến của cả vụ việc.
 >
@@ -808,22 +840,22 @@ Chưa thử thì nói thẳng, rồi chuyển sang cái đã đo được:
 > dồn vô hạn."
 
 **🇬🇧**
-> "**59 signals in 8 groups**: money, credentials, device takeover, emotional manipulation, identity
+> "**64 signals in 8 groups**: money, credentials, device takeover, emotional manipulation, identity
 > impersonation, offers, web and links, and case escalation. Each group has its **own score cap**, so a
 > message repeating one type of signal can't inflate the score indefinitely."
 
 ### 4.11 "Các em có bao nhiêu kiểm thử tự động?" — A
 
-> "**1.387 phép thử, chạy xanh toàn bộ**, trong 113 tệp — bọn em vừa chạy lại hôm nay, hết khoảng 40
-> giây.
+> "**1.622 phép thử, chạy xanh toàn bộ**, trong 134 tệp — bọn em vừa chạy lại hôm nay, hết khoảng một
+> phút.
 >
 > Em xin nói rõ: phép thử **không chứng minh phần mềm không có lỗi**. Nó chứng minh những lỗi bọn em
 > đã từng gặp thì không quay lại được. Ví dụ từng có lỗi gõ chữ 'Thông báo:' ở đầu tin là tắt cả bộ
 > dò — giờ có phép thử chặn đúng ca đó."
 
 **🇬🇧**
-> "**1,387 automated tests, all passing**, across 113 files — we re-ran them today; it takes about 40
-> seconds. To be precise: tests **don't prove the software is bug-free**. They prove the bugs we already
+> "**1,622 automated tests, all passing**, across 134 files — we re-ran them today; it takes about a
+> minute. To be precise: tests **don't prove the software is bug-free**. They prove the bugs we already
 > hit cannot come back. For instance, typing *'Notice:'* at the start of a message once disabled our
 > whole detector — there's now a test pinned to that exact case."
 
@@ -859,12 +891,12 @@ Chưa thử thì nói thẳng, rồi chuyển sang cái đã đo được:
 ### 4.14 "Đổi sang model AI khác thì có phải làm lại từ đầu không?" — A
 
 > "Không phải làm lại từ đầu ạ, vì có một lớp nối cho phép thay nhà cung cấp. **Nhưng đổi model thì
-> phải chạy lại toàn bộ bộ đánh giá** — vì các con số 90,2% hay 4,1% là số đo trên một model cụ thể.
+> phải chạy lại toàn bộ bộ đánh giá** — vì các con số 92,1% hay 1,8% là số đo trên một model cụ thể.
 > Bọn em không gán số đo của model này cho model khác."
 
 **🇬🇧**
 > "No — there's an adapter layer so the provider can be swapped. **But changing the model means re-running
-> the entire evaluation**, because figures like 90.2% or 4.1% were measured on one specific model. We
+> the entire evaluation**, because figures like 92.1% or 1.8% were measured on one specific model. We
 > never attribute one model's numbers to another."
 
 ---
@@ -887,6 +919,25 @@ Chưa thử thì nói thẳng, rồi chuyển sang cái đã đo được:
 > should I do right now'** — for both the parent and the child. A police-impersonation call can come from
 > a completely clean, unreported number; a blocklist can't help there, but the content of the request
 > still shows its signals."
+
+### 5.1b 🔴 "Singapore có ScamShield rồi, cũng bảo người dân phải làm gì. Các em khác gì?" — B
+
+> "Dạ đúng, ScamShield đã có cả phần 'làm gì': kiểm số và link, chặn lọc, đường dây 1799, và khẩu
+> hiệu *Add – Check – Tell*. Quỹ hưu trí CPF của Singapore còn báo cho người liên hệ tin cậy từ
+> tháng 2/2026. Nên em không nói bọn em là người đầu tiên nghĩ ra.
+>
+> Khác ở hai chỗ. Một, đó là hệ thống của **nhà nước và ngân hàng Singapore** — Việt Nam chưa có
+> lớp tương đương cho gia đình. Hai, bọn em dựng quanh **khoảnh khắc bị ép**: một việc cụ thể theo
+> từng kịch bản, câu quy tắc chính gia đình đã đặt, và người thân được mời vào đúng lúc — tất cả chạy
+> được mà không cần ngân hàng nào tích hợp."
+
+**🇬🇧**
+> "Right — ScamShield already covers 'what to do': number and link checks, filtering, the 1799
+> helpline, and the *Add – Check – Tell* message. Singapore's CPF has notified trusted contacts since
+> February 2026. So I won't claim we invented this. The difference is twofold. One, those are
+> **Singapore government and bank systems** — Vietnam has no equivalent layer for families. Two, we
+> build around **the moment of pressure**: one concrete action per scenario, the family's own rule,
+> and family invited in at the right time — all without needing a bank to integrate."
 
 ### 5.2 "Sao không tích hợp luôn danh sách số xấu của họ cho mạnh?" — B
 
@@ -1322,41 +1373,43 @@ Chưa quyết:
 
 > "Bọn em đo trên bộ **571 tin nhắn** đã gán nhãn, chấm được 531 ạ.
 >
-> **90,2%** tin lừa đảo được cảnh báo — tức là người dùng nhìn thấy cảnh báo. **4,1%** tin bình thường
-> bị báo nhầm thành mức cao.
+> Đo 24/9/2026: **92,1%** tin lừa đảo được cảnh báo — tức là người dùng nhìn thấy cảnh báo. **1,8%**
+> tin bình thường bị báo nhầm thành mức cao.
 >
 > Và em xin nói luôn giới hạn: bộ này **do chính đội em soạn, chưa có tin nhắn thật từ nạn nhân**."
 
 **🇬🇧**
-> "We measure on a labelled set of **571 messages**, of which 531 were scored. **90.2%** of scam messages
-> produce a warning the user actually sees. **4.1%** of harmless messages are wrongly rated high risk. And
+> "We measure on a labelled set of **571 messages**, of which 531 were scored (24 September 2026). **92.1%**
+> of scam messages produce a warning the user actually sees. **1.8%** of harmless messages are wrongly
+> rated high risk. And
 > the limitation up front: **we wrote that set ourselves; it contains no real victim messages**."
 
-### 7.2 ⚠️ "Con số 90,2% tính ra từ đâu?" — B
+### 7.2 ⚠️ "Con số 92,1% tính ra từ đâu?" — B
 
-> "Từ 265 tin nguy hiểm trong bộ kiểm tra ạ: **186 tin** được xếp đúng mức 'Nguy hiểm cao', **53 tin**
-> xếp mức 'Nghi ngờ', và **26 tin bị bỏ sót hoàn toàn**.
+> "Từ 265 tin nguy hiểm trong bộ kiểm tra ạ: **219 tin** được xếp đúng mức 'Nguy hiểm cao', **25 tin**
+> xếp mức 'Nghi ngờ', và **21 tin bị bỏ sót hoàn toàn**.
 >
-> Cộng 186 với 53 rồi chia 265 được 90,2% — đó là tỉ lệ tin lừa đảo mà người dùng **nhìn thấy cảnh
+> Cộng 219 với 25 rồi chia 265 được 92,1% — đó là tỉ lệ tin lừa đảo mà người dùng **nhìn thấy cảnh
 > báo**, vì ở mức 'Nghi ngờ' màn hình vẫn hiện cảnh báo và nút gọi người thân."
 
 **🇬🇧**
-> "From the 265 dangerous messages in the set: **186** were rated High, **53** were rated Suspicious, and
-> **26 were missed entirely**. 186 plus 53, divided by 265, gives 90.2% — the share of scams where the
+> "From the 265 dangerous messages in the set: **219** were rated High, **25** were rated Suspicious, and
+> **21 were missed entirely**. 219 plus 25, divided by 265, gives 92.1% — the share of scams where the
 > user **sees a warning**, because the Suspicious level still shows the warning and the call-family
 > button."
 
 ### 7.3 ⚠️ "Vậy tỉ lệ khớp đúng mức là bao nhiêu?" — B
 
-> "**70,2%** ạ. Con số này thấp hơn vì một tin nguy hiểm mà hệ thống xếp 'Nghi ngờ' vẫn bị tính là
-> sai.
+> "Tính riêng tin nguy hiểm thì **82,6%** — 219 trên 265 tin ra đúng mức 'Nguy hiểm cao' ạ. Con số này
+> thấp hơn vì một tin nguy hiểm mà hệ thống xếp 'Nghi ngờ' vẫn bị tính là sai.
 >
-> Bọn em công bố cả hai con số. Nhưng con số bọn em quan tâm nhất là **9,8% tin bị bỏ sót hoàn
+> Bọn em công bố cả hai con số. Nhưng con số bọn em quan tâm nhất là **7,9% tin bị bỏ sót hoàn
 > toàn** — vì đó là lúc người dùng không thấy gì cả, và đó mới là lúc nguy hiểm thật."
 
 **🇬🇧**
-> "**70.2%**. It's lower because a dangerous message rated 'Suspicious' still counts as wrong. We publish
-> both numbers. But the one we care about most is the **9.8% that are missed silently** — because that's
+> "For dangerous messages, **82.6%** — 219 of 265 were rated exactly High. It's lower because a dangerous
+> message rated 'Suspicious' still counts as wrong. We publish
+> both numbers. But the one we care about most is the **7.9% that are missed silently** — because that's
 > when the user sees nothing at all, and that's the genuinely dangerous case."
 
 ### 7.4 "Vì sao chưa dùng tin nhắn thật để kiểm tra?" — B
@@ -1386,30 +1439,43 @@ Chưa quyết:
 
 ### 7.6 "Làm sao biết các em không chỉnh bộ mẫu cho số đẹp?" — B
 
-> "Ba thứ chống lại việc đó ạ. Một, bộ mẫu được **giữ tách khỏi quá trình hiệu chỉnh**. Hai, có một
-> lát riêng gồm **125 tin bình thường viết cố tình giống lừa đảo** — nếu bọn em nới luật cho dễ bắt
-> thì chính lát này sẽ báo động nhiều hơn và số xấu đi ngay. Ba, bọn em **công bố cả số xấu**: ví dụ
-> khi siết luật, báo nhầm trên lát khó tăng từ 8,0% lên 12,0%."
+> "Em nói thật: **bộ chính 571 mẫu đã được dùng để chỉnh luật**, nên số trên nó đẹp hơn ngoài đời.
+> Bọn em biết điều đó vì đã thử trên một bộ lạ: 157 tin do ChatGPT soạn từ nguồn công an, ngân hàng,
+> báo chí, chạy qua máy chủ thật. Lần đầu chỉ **41/83** tin mức Cao ra Cao — trong khi bộ chính báo
+> hơn 70%. Sau khi sửa luật, lên 56/83. Nhưng bộ đó cũng đã được dùng để tìm lỗ, nên giờ nó chỉ còn là
+> số hồi quy, không còn độc lập.
+>
+> Việc tiếp theo là một bộ kiểm **chạy đúng một lần, không chỉnh luật theo nó**, và mẫu thật từ người
+> dùng. Còn một thứ vẫn chống được việc nới luật: lát **125 tin bình thường không được phép cảnh
+> báo** — nới luật cho dễ bắt là lát này báo động nhiều hơn ngay."
 
 **🇬🇧**
-> "Three things work against that. One, the test set is **held out from tuning**. Two, there's a slice of
-> **125 harmless messages deliberately written to look like scams** — loosening the rules to catch more
-> makes that slice fire more, so the number degrades immediately. Three, we **publish the bad numbers
-> too**: when we tightened the rules, false alarms on the hard slice rose from 8.0% to 12.0%."
+> "Honestly: **our main 571-message set has been used to tune the rules**, so its numbers look better than
+> real life. We know because we tried an unfamiliar set — 157 messages written by ChatGPT from police,
+> bank and press sources, run through the live server. At first only **41 of 83** high-risk messages
+> came out High, while the main set said over 70%. After fixing the rules it reached 56 of 83. But that
+> set has now been used to find holes too, so it is only a regression check, not independent. Next is a
+> test set **run exactly once, with no tuning on it**, plus real user samples. One thing still guards
+> against loosening the rules: the slice of **125 harmless messages that must not raise any warning**."
 
 ### 7.7 "Có con số nào của các em xấu đi không?" — B
 
 **Chủ động nói ra là được điểm.**
 
-> "Có ạ. Khi bọn em siết luật để bắt được nhiều tin lừa đảo hơn, **báo nhầm trên lát khó tăng từ 8,0%
-> lên 12,0%**. Đánh đổi đó không miễn phí, vì người bị báo oan sẽ gỡ ứng dụng.
+> "Có ạ. Trên bộ lạ 157 tin do ChatGPT soạn, lúc đầu chỉ **41/83** tin mức Cao ra Cao — thấp hơn hẳn
+> bộ chính. Hồi 16/9, khi siết luật để bắt nhiều hơn, báo nhầm trên lát khó từng **tăng từ 8,0% lên
+> 12,0%** (sau đó đã kéo xuống 3,2% ở lần đo 24/9). Và **chưa có số đo nào về hành vi**: bọn em chưa
+> chứng minh được người dùng làm khác đi nhờ app.
 >
-> Ngoài ra lát tiếng Anh mới có 49 mẫu so với mục tiêu 90 — chưa đủ để nói chắc về tiếng Anh."
+> Ngoài ra lát tiếng Anh mới có 49 mẫu so với mục tiêu 90, chưa có tin lành nào — chưa đủ để nói chắc
+> về tiếng Anh."
 
 **🇬🇧**
-> "Yes. When we tightened the rules to catch more scams, **false alarms on the hard slice rose from 8.0%
-> to 12.0%**. That trade-off isn't free — a wrongly alarmed user uninstalls. Also, our English slice is
-> only 49 samples against a target of 90, which isn't enough to make strong English claims."
+> "Yes. On an unfamiliar set of 157 ChatGPT-written messages, only **41 of 83** high-risk messages came out
+> High at first — far below our main set. On 16 September, tightening the rules raised false alarms on
+> the hard slice **from 8.0% to 12.0%** (brought back down to 3.2% by 24 September). And we have **no
+> behavioural measurement yet**. Also, our English slice is only 49 samples against a target of 90, with
+> no harmless English messages, which isn't enough to make strong English claims."
 
 ### 7.8 "Tin nhắn tiếng Việt không dấu thì sao?" — B
 
@@ -1462,14 +1528,14 @@ Không có số:
 
 ### 7.12 "Bao nhiêu kiểm thử tự động, và nó chứng minh điều gì?" — B
 
-> "**1.387 phép thử, chạy xanh toàn bộ**, trên 113 tệp, chạy hết khoảng 40 giây — bọn em chạy lại hôm
+> "**1.622 phép thử, chạy xanh toàn bộ**, trên 134 tệp, chạy hết khoảng một phút — bọn em chạy lại hôm
 > nay.
 >
 > Nó **không chứng minh phần mềm không có lỗi**. Nó chứng minh những lỗi bọn em đã từng gặp thì không
 > quay lại được, và các ràng buộc an toàn không bị phá trong lúc sửa code."
 
 **🇬🇧**
-> "**1,387 automated tests, all green**, across 113 files, in about 40 seconds — we re-ran them today. They
+> "**1,622 automated tests, all green**, across 134 files, in about a minute — we re-ran them today. They
 > **don't prove the software is bug-free**. They prove the bugs we already hit can't return, and that our
 > safety constraints can't be broken by a later code change."
 
@@ -1617,13 +1683,14 @@ Không có số:
 > chọn xưng hô**: bác, cô, chú, ông, bà.
 >
 > Nguyên tắc của bọn em là không bao giờ ám chỉ nạn nhân kém hiểu biết. Câu bọn em hay nói với nhau
-> là: **lừa đảo không thắng vì nạn nhân dại, nó thắng vì nạn nhân không có 60 giây.**"
+> là: **lừa đảo không thắng vì nạn nhân dại, nó thắng vì nạn nhân không có lúc nào để dừng và
+> không có ai để hỏi.**"
 
 **🇬🇧**
 > "The opposite — *bác* is a **respectful** form of address in Vietnamese, and the app lets users **choose**
 > how they're addressed. Our principle is never to imply the victim was foolish. The line we use
-> internally: **scams don't win because the victim is naive; they win because the victim doesn't get 60
-> seconds.**"
+> internally: **scams don't win because the victim is naive; they win because the victim gets no moment
+> to stop and no one to ask.**"
 
 ### 8.9 "App có thay thế công an và ngân hàng không?" — A
 
@@ -1926,10 +1993,10 @@ Nói một câu, chuyển ngay, **không sửa máy trên sân khấu**, không 
 ### 10.11 Giám khảo tự thử và app ra kết quả sai
 
 > "Cảm ơn thầy cô ạ — đây đúng là ca bọn em còn sai, và bọn em ghi lại ngay để đưa vào bộ kiểm tra.
-> Tỉ lệ bỏ sót hiện tại của bọn em là 9,8%, và bọn em công bố con số đó chứ không giấu."
+> Tỉ lệ bỏ sót hiện tại của bọn em là 7,9% (đo 24/9/2026), và bọn em công bố con số đó chứ không giấu."
 
 **🇬🇧** — *"Thank you — that's a case we get wrong, and we'll add it to our test set. Our current miss
-rate is 9.8%, and we publish that number rather than hide it."*
+rate is 7.9% (measured 24 September 2026), and we publish that number rather than hide it."*
 
 **Tuyệt đối không cãi rằng máy đúng.**
 
@@ -2055,17 +2122,18 @@ rate is 9.8%, and we publish that number rather than hide it."*
 
 ### 11.4 ⚠️ "Các em đã có người dùng ở nước ngoài chưa?" — B
 
-> "Chưa ạ, em nói thẳng. Bọn em có **giao diện và bộ dò tiếng Anh đã chạy**, và chênh lệch kết quả
-> giữa tiếng Việt và tiếng Anh đo được là **0,2 điểm phần trăm** — tức là hệ thống không thiên vị một
-> ngôn ngữ.
+> "Chưa ạ, em nói thẳng. Bọn em có **giao diện và bộ dò tiếng Anh đã chạy**. Đo 24/9/2026, tỉ lệ ra
+> đúng mức Cao với tin tiếng Anh lệch **11,1 điểm** so với tiếng Việt — tiếng Anh lại cao hơn — nhưng
+> lát tiếng Anh còn quá nhỏ và chưa có tin lành nào, nên chưa đo được báo nhầm tiếng Anh.
 >
 > Nhưng lát tiếng Anh của bọn em mới có **49 mẫu** so với mục tiêu 90. Bọn em có **kiến trúc sẵn
 > sàng, chưa có bằng chứng sẵn sàng** — và em không muốn nói ngược lại."
 
 **🇬🇧**
-> "Not yet — I'll be direct. We have a working **English interface and English detection**, and the
-> measured gap between Vietnamese and English is **0.2 percentage points**, so the system isn't biased
-> toward one language. But our English test slice is only **49 samples** against a target of 90. We
+> "Not yet — I'll be direct. We have a working **English interface and English detection**. On 24
+> September the high-risk catch rate for English messages differed from Vietnamese by **11.1 points** —
+> English was higher — but the slice is too small and has no harmless messages, so English false alarms
+> are not measured yet. Our English test slice is only **49 samples** against a target of 90. We
 > have **architectural readiness, not evidential readiness** — and I won't claim otherwise."
 
 ### 11.5 "Nước nào các em nhắm tới sau Việt Nam, và vì sao?" — B
@@ -2200,18 +2268,21 @@ Nếu chưa chọn, nói tiêu chí thay vì nói bừa một nước:
 
 | Số | Ý nghĩa | English |
 |---|---|---|
+| **24/9/2026** | ngày đo các số dưới đây (bộ luật 1.6.1, `eval/results/latest.json`) | measurement date |
 | **571 / 531** | mẫu trong bộ đánh giá / số chấm được | labelled messages / scored |
-| **90,2%** | tin lừa đảo được cảnh báo | scams that produce a warning |
-| **9,8%** | tin lừa đảo bị bỏ sót hoàn toàn | scams missed silently |
-| **70,2%** | khớp đúng mức | exact-level match |
-| **186 / 53 / 26** | tin nguy hiểm xếp Cao / Nghi ngờ / bỏ sót | High / Suspicious / missed |
-| **4,1%** | tin bình thường bị báo nhầm mức cao | false high-risk rate |
-| **12,0%** | báo động trên 125 tin bình thường khó | alarms on the hard benign slice |
+| **92,1%** | tin lừa đảo được cảnh báo | scams that produce a warning |
+| **7,9%** | tin lừa đảo bị bỏ sót hoàn toàn — "trấn an nhầm" | scams missed silently — "false reassurance" |
+| **82,6%** | tin nguy hiểm ra đúng mức Cao (219/265) | dangerous messages rated exactly High |
+| **219 / 25 / 21** | tin nguy hiểm xếp Cao / Nghi ngờ / bỏ sót | High / Suspicious / missed |
+| **1,8%** | tin bình thường bị báo nhầm mức cao | false high-risk rate |
+| **3,2%** | cảnh báo trên 125 tin bình thường thuộc lát khó | alarms on the hard benign slice |
 | **76,2%** | bắt được trên 40 tin viết không dấu | recall without diacritics |
-| **0,2 điểm %** | chênh lệch tiếng Việt / tiếng Anh | VI–EN parity gap |
+| **11,1 điểm** | chênh lệch Việt / Anh (tiếng Anh cao hơn; lát Anh còn nhỏ) | VI–EN gap (English higher; small slice) |
+| **41 → 56 / 83** | bộ lạ 157 tin ChatGPT, tin mức Cao ra Cao, trước → sau sửa luật (máy chủ thật) | unfamiliar set, before → after rule fix |
 | **0** | tin nhắn thật trong bộ đánh giá | real victim messages |
-| **1.387 / 0 / 113** (23/9) | test pass / fail / số tệp | tests passing / failing / files |
-| **59 · 8 · 10** | dấu hiệu · nhóm · tổ hợp chốt chặn | signals · groups · hard overrides |
+| **1.622 / 0 / 134** (25/9) | test pass / fail / số tệp | tests passing / failing / files |
+| **2,0 giây** | trung vị thời gian trả lời có AI, máy chủ thật, 47 lượt (25/9) | median response time with AI, live server |
+| **64 · 8 · 10** | dấu hiệu · nhóm · tổ hợp chốt chặn | signals · groups · hard overrides |
 | **9** | dấu hiệu chạy không cần AI | signals that run without AI |
 | **840 · 41 · 1.240** | đội · quốc gia · người, AI-JAM US 2026 | teams · countries · participants |
 | **60 giây · 72 giờ · 14 ngày** | dừng · bảo vệ sau mất tiền · gom sự việc | pause · recovery watch · case window |

@@ -1,6 +1,8 @@
 # KHOAN ĐÃ — Q&A BAN GIÁM KHẢO
 ### Bản cập nhật theo cấu trúc mới · thay bản 10/8/2026
 
+> ⚠️ Số liệu trong tài liệu này đã cập nhật ngày 25/9/2026 theo `eval/results/latest.json` (đo 24/9/2026). Số mới nhất luôn ở trang `/transparency`.
+
 > Sửa 12 chỗ so với bản cũ. Chỗ nào đổi đều có dấu **🔄**.
 > Nguyên tắc không đổi: **trả lời ngắn, có bằng chứng, không nói quá.**
 
@@ -94,9 +96,9 @@ Nếu bị hỏi tiếp *"sao phải rắc rối thế?"*:
 
 ⚠️ **Câu dễ nói dối nhất cả buổi.**
 
-> "Bọn em **chưa công bố độ chính xác ngoài đời thực** ạ. Bộ đánh giá nội bộ của bọn em có **445 mẫu**, chia theo từng họ lừa đảo, và bọn em báo cáo **theo từng họ kèm số mẫu** — không báo một con số tổng.
+> "Bọn em **chưa công bố độ chính xác ngoài đời thực** ạ. Bộ đánh giá nội bộ của bọn em có **571 mẫu** (đo 24/9/2026: 531 mẫu chấm được + 40 bản viết không dấu), chia theo từng họ lừa đảo, và bọn em báo cáo **theo từng họ kèm số mẫu** — không chỉ một con số tổng. Trên 265 tin nguy hiểm, 92,1% có cảnh báo; trên 169 tin bình thường, 1,8% bị báo nhầm mức cao.
 >
-> Trong 445 mẫu đó có **60 mẫu chuyển biên từ báo chí và cảnh báo của công an**, bọn em **dẫn được 58 nguồn còn truy cập được**. Phần còn lại là mẫu do đội soạn theo thủ đoạn đã công bố.
+> Trong bộ đó có **60 mẫu chuyển biên từ báo chí và cảnh báo của công an**, bọn em **dẫn được 58 nguồn còn truy cập được**. Phần còn lại là mẫu do đội soạn theo thủ đoạn đã công bố — và bộ luật đã được chỉnh trên chính bộ này, nên số trên nó đẹp hơn ngoài đời.
 >
 > Nên em gọi đó là **kết quả kiểm thử**, không phải độ chính xác ngoài đời."
 
@@ -617,7 +619,7 @@ Ba khoản dễ bảo vệ nhất:
 - Giới hạn: **1.000 chữ** khi nhắn · **5.000 chữ** khi phân tích · ảnh **2 MB** · PDF **5 MB** · **60 lượt/phút mỗi IP**
 
 ### 🔄 Bộ đánh giá — con số nên nói
-- **445 mẫu**, chia theo **họ lừa đảo**
+- **571 mẫu** (đo 24/9/2026), chia theo **họ lừa đảo** — 92,1% tin nguy hiểm có cảnh báo, 1,8% tin lành bị báo nhầm mức cao, 0 mẫu thật từ nạn nhân
 - **110 mẫu tin lành trông đáng ngờ**, trong đó **74 mẫu báo động là sai hẳn** (ngưỡng 0%)
 - **60 mẫu chuyển biên từ nguồn công khai**, **dẫn được 58 nguồn còn truy cập được**
 - **25 mẫu cố ý đánh lừa AI** — ngưỡng 100%, không mẫu nào được hạ mức

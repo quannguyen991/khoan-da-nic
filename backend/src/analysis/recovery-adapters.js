@@ -56,15 +56,19 @@ const THEO_NUOC = Object.freeze({
        */
       'to_giac_qua_vneid_5_buoc',
     ]),
-    // Cửa sổ vàng: càng sớm càng dễ chặn lệnh. KHÔNG hứa chặn được.
-    gioVang: 24,
+    /*
+     * ⚠️ 25/9/2026 — BỎ `gioVang: 24`. Con số "24 giờ vàng" không có nguồn nào, mà
+     * màn phục hồi lại in nó thành "còn tính" như đang đếm lùi. Các cơ quan chống
+     * lừa đảo chỉ nói một điều: báo ngân hàng CÀNG SỚM càng tốt. Câu đó không cần
+     * số, và nó nằm thẳng ở màn (App.tsx), không đi qua đây.
+     */
   }),
-  GLOBAL: Object.freeze({ daDuyet: true, buocRieng: Object.freeze([]), gioVang: 24 }),
+  GLOBAL: Object.freeze({ daDuyet: true, buocRieng: Object.freeze([]) }),
 });
 
 /**
  * @param {string} countryCode
- * @returns {{maNuoc:string, daDuyet:boolean, buoc:string[], gioVang:number,
+ * @returns {{maNuoc:string, daDuyet:boolean, buoc:string[],
  *            hotline:Array, canhBao:string[]}}
  */
 function layKeHoachPhucHoi(countryCode = 'GLOBAL', duongDanhBa) {
@@ -93,7 +97,6 @@ function layKeHoachPhucHoi(countryCode = 'GLOBAL', duongDanhBa) {
     maNuoc: daDuyet ? ma : 'GLOBAL',
     daDuyet,
     buoc: [...BUOC_CHUNG, ...(cauHinh?.buocRieng || [])],
-    gioVang: cauHinh?.gioVang ?? 24,
     hotline: hotline.map((h) => ({
       id: h.id,
       canonicalName: h.canonicalName,

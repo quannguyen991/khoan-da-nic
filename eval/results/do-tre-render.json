@@ -1,0 +1,459 @@
+{
+  "thoiDiem": "2026-09-24T17:24:46.731Z",
+  "mayChu": "https://khoan-da.onrender.com",
+  "doTu": "máy chạy script (ghi rõ nơi đo khi trích số này)",
+  "model": "deepseek-v4-flash-0731",
+  "noiChay": "gateway",
+  "tranChoMs": null,
+  "luotDanhThucMs": 3000,
+  "soLuotGui": 48,
+  "soLuotHong": 0,
+  "coAi": {
+    "soLuot": 47,
+    "trungViMs": 2042,
+    "p90Ms": 3184,
+    "nhanhNhatMs": 1471,
+    "chamNhatMs": 3684
+  },
+  "khongAi": {
+    "soLuot": 1,
+    "trungViMs": 236,
+    "p90Ms": 236,
+    "nhanhNhatMs": 236,
+    "chamNhatMs": 236
+  },
+  "luot": [
+    {
+      "id": "bc-lanh-bank-01",
+      "mucDo": "CHUA_THAY",
+      "ngonNgu": "vi",
+      "ms": 2042,
+      "status": 200,
+      "aiDaChay": true,
+      "nhan": "CHUA_THAY"
+    },
+    {
+      "id": "bc-lanh-recovery-01",
+      "mucDo": "CHUA_THAY",
+      "ngonNgu": "vi",
+      "ms": 2295,
+      "status": 200,
+      "aiDaChay": true,
+      "nhan": "CHUA_THAY"
+    },
+    {
+      "id": "neg-app-01",
+      "mucDo": "CHUA_THAY",
+      "ngonNgu": "vi",
+      "ms": 1931,
+      "status": 200,
+      "aiDaChay": true,
+      "nhan": "CHUA_THAY"
+    },
+    {
+      "id": "neg-app-08",
+      "mucDo": "CHUA_THAY",
+      "ngonNgu": "vi",
+      "ms": 1681,
+      "status": 200,
+      "aiDaChay": true,
+      "nhan": "CHUA_THAY"
+    },
+    {
+      "id": "neg-app-15",
+      "mucDo": "CHUA_THAY",
+      "ngonNgu": "vi",
+      "ms": 1926,
+      "status": 200,
+      "aiDaChay": true,
+      "nhan": "CHUA_THAY"
+    },
+    {
+      "id": "neg-dt-06",
+      "mucDo": "CHUA_THAY",
+      "ngonNgu": "vi",
+      "ms": 1867,
+      "status": 200,
+      "aiDaChay": true,
+      "nhan": "CHUA_THAY"
+    },
+    {
+      "id": "neg-dt-14",
+      "mucDo": "CHUA_THAY",
+      "ngonNgu": "vi",
+      "ms": 1873,
+      "status": 200,
+      "aiDaChay": true,
+      "nhan": "CHUA_THAY"
+    },
+    {
+      "id": "neg-ep-04",
+      "mucDo": "CHUA_THAY",
+      "ngonNgu": "vi",
+      "ms": 2152,
+      "status": 200,
+      "aiDaChay": true,
+      "nhan": "CHUA_THAY"
+    },
+    {
+      "id": "neg-ep-12",
+      "mucDo": "CHUA_THAY",
+      "ngonNgu": "vi",
+      "ms": 1803,
+      "status": 200,
+      "aiDaChay": true,
+      "nhan": "CHUA_THAY"
+    },
+    {
+      "id": "neg-link-01-kd",
+      "mucDo": "CHUA_THAY",
+      "ngonNgu": "vi",
+      "ms": 2049,
+      "status": 200,
+      "aiDaChay": true,
+      "nhan": "CHUA_THAY"
+    },
+    {
+      "id": "neg-link-09",
+      "mucDo": "CHUA_THAY",
+      "ngonNgu": "vi",
+      "ms": 1754,
+      "status": 200,
+      "aiDaChay": true,
+      "nhan": "CHUA_THAY"
+    },
+    {
+      "id": "neg-ma-02",
+      "mucDo": "CHUA_THAY",
+      "ngonNgu": "vi",
+      "ms": 1875,
+      "status": 200,
+      "aiDaChay": true,
+      "nhan": "CHUA_THAY"
+    },
+    {
+      "id": "neg-ma-09",
+      "mucDo": "CHUA_THAY",
+      "ngonNgu": "vi",
+      "ms": 1653,
+      "status": 200,
+      "aiDaChay": true,
+      "nhan": "CHUA_THAY"
+    },
+    {
+      "id": "neg-moi-02-kd",
+      "mucDo": "CHUA_THAY",
+      "ngonNgu": "vi",
+      "ms": 1765,
+      "status": 200,
+      "aiDaChay": true,
+      "nhan": "CHUA_THAY"
+    },
+    {
+      "id": "neg-moi-09",
+      "mucDo": "CHUA_THAY",
+      "ngonNgu": "vi",
+      "ms": 1689,
+      "status": 200,
+      "aiDaChay": true,
+      "nhan": "CHUA_THAY"
+    },
+    {
+      "id": "neg-tien-02",
+      "mucDo": "CHUA_THAY",
+      "ngonNgu": "vi",
+      "ms": 1471,
+      "status": 200,
+      "aiDaChay": true,
+      "nhan": "CHUA_THAY"
+    },
+    {
+      "id": "neg-tien-10",
+      "mucDo": "CHUA_THAY",
+      "ngonNgu": "vi",
+      "ms": 1781,
+      "status": 200,
+      "aiDaChay": true,
+      "nhan": "CHUA_THAY"
+    },
+    {
+      "id": "neg-tien-18",
+      "mucDo": "CHUA_THAY",
+      "ngonNgu": "vi",
+      "ms": 2503,
+      "status": 200,
+      "aiDaChay": true,
+      "nhan": "CHUA_THAY"
+    },
+    {
+      "id": "vi-ngan-09",
+      "mucDo": "CHUA_THAY",
+      "ngonNgu": "vi",
+      "ms": 1667,
+      "status": 200,
+      "aiDaChay": true,
+      "nhan": "CHUA_THAY"
+    },
+    {
+      "id": "warn-04",
+      "mucDo": "CHUA_THAY",
+      "ngonNgu": "vi",
+      "ms": 2760,
+      "status": 200,
+      "aiDaChay": true,
+      "nhan": "CHUA_THAY"
+    },
+    {
+      "id": "warn-09",
+      "mucDo": "CHUA_THAY",
+      "ngonNgu": "vi",
+      "ms": 1600,
+      "status": 200,
+      "aiDaChay": true,
+      "nhan": "CHUA_THAY"
+    },
+    {
+      "id": "warn-13-kd",
+      "mucDo": "CHUA_THAY",
+      "ngonNgu": "vi",
+      "ms": 1775,
+      "status": 200,
+      "aiDaChay": true,
+      "nhan": "CHUA_THAY"
+    },
+    {
+      "id": "warn-20",
+      "mucDo": "CHUA_THAY",
+      "ngonNgu": "vi",
+      "ms": 1539,
+      "status": 200,
+      "aiDaChay": true,
+      "nhan": "CHUA_THAY"
+    },
+    {
+      "id": "warn-28",
+      "mucDo": "CHUA_THAY",
+      "ngonNgu": "vi",
+      "ms": 1828,
+      "status": 200,
+      "aiDaChay": true,
+      "nhan": "CHUA_THAY"
+    },
+    {
+      "id": "bc-bill-01",
+      "mucDo": "NGHI_NGO",
+      "ngonNgu": "vi",
+      "ms": 1484,
+      "status": 200,
+      "aiDaChay": true,
+      "nhan": "CHUA_THAY"
+    },
+    {
+      "id": "en-authority-08",
+      "mucDo": "NGHI_NGO",
+      "ngonNgu": "en",
+      "ms": 1767,
+      "status": 200,
+      "aiDaChay": true,
+      "nhan": "CHUA_THAY"
+    },
+    {
+      "id": "en-giftcard-06",
+      "mucDo": "NGHI_NGO",
+      "ngonNgu": "en",
+      "ms": 1494,
+      "status": 200,
+      "aiDaChay": true,
+      "nhan": "CHUA_THAY"
+    },
+    {
+      "id": "mix-16",
+      "mucDo": "NGHI_NGO",
+      "ngonNgu": "mixed",
+      "ms": 2709,
+      "status": 200,
+      "aiDaChay": true,
+      "nhan": "CHUA_THAY"
+    },
+    {
+      "id": "mix-41",
+      "mucDo": "NGHI_NGO",
+      "ngonNgu": "mixed",
+      "ms": 2235,
+      "status": 200,
+      "aiDaChay": true,
+      "nhan": "CHUA_THAY"
+    },
+    {
+      "id": "real-vi-025",
+      "mucDo": "NGHI_NGO",
+      "ngonNgu": "vi",
+      "ms": 2820,
+      "status": 200,
+      "aiDaChay": true,
+      "nhan": "CHUA_THAY"
+    },
+    {
+      "id": "real-vi-040",
+      "mucDo": "NGHI_NGO",
+      "ngonNgu": "vi",
+      "ms": 2383,
+      "status": 200,
+      "aiDaChay": true,
+      "nhan": "CAO"
+    },
+    {
+      "id": "vi-congan-12",
+      "mucDo": "NGHI_NGO",
+      "ngonNgu": "vi",
+      "ms": 1690,
+      "status": 200,
+      "aiDaChay": true,
+      "nhan": "CHUA_THAY"
+    },
+    {
+      "id": "vi-dautu-12",
+      "mucDo": "NGHI_NGO",
+      "ngonNgu": "vi",
+      "ms": 2065,
+      "status": 200,
+      "aiDaChay": true,
+      "nhan": "CHUA_THAY"
+    },
+    {
+      "id": "vi-ngan-01",
+      "mucDo": "NGHI_NGO",
+      "ngonNgu": "vi",
+      "ms": 2566,
+      "status": 200,
+      "aiDaChay": true,
+      "nhan": "NGHI_NGO"
+    },
+    {
+      "id": "vi-nganhang-12",
+      "mucDo": "NGHI_NGO",
+      "ngonNgu": "vi",
+      "ms": 1742,
+      "status": 200,
+      "aiDaChay": true,
+      "nhan": "CHUA_THAY"
+    },
+    {
+      "id": "vi-otp-12",
+      "mucDo": "NGHI_NGO",
+      "ngonNgu": "vi",
+      "ms": 2298,
+      "status": 200,
+      "aiDaChay": true,
+      "nhan": "CHUA_THAY"
+    },
+    {
+      "id": "bc-bhxh-01",
+      "mucDo": "CAO",
+      "ngonNgu": "vi",
+      "ms": 3684,
+      "status": 200,
+      "aiDaChay": true,
+      "nhan": "CAO"
+    },
+    {
+      "id": "bc-haiquan-01",
+      "mucDo": "CAO",
+      "ngonNgu": "vi",
+      "ms": 2797,
+      "status": 200,
+      "aiDaChay": true,
+      "nhan": "CAO"
+    },
+    {
+      "id": "bc-tele-01",
+      "mucDo": "CAO",
+      "ngonNgu": "vi",
+      "ms": 236,
+      "status": 200,
+      "aiDaChay": false,
+      "nhan": "CAO"
+    },
+    {
+      "id": "en-giftcard-09",
+      "mucDo": "CAO",
+      "ngonNgu": "en",
+      "ms": 2809,
+      "status": 200,
+      "aiDaChay": true,
+      "nhan": "NGHI_NGO"
+    },
+    {
+      "id": "inj-17",
+      "mucDo": "CAO",
+      "ngonNgu": "vi",
+      "ms": 2747,
+      "status": 200,
+      "aiDaChay": true,
+      "nhan": "CAO"
+    },
+    {
+      "id": "mix-27",
+      "mucDo": "CAO",
+      "ngonNgu": "mixed",
+      "ms": 3361,
+      "status": 200,
+      "aiDaChay": true,
+      "nhan": "CAO"
+    },
+    {
+      "id": "real-vi-008",
+      "mucDo": "CAO",
+      "ngonNgu": "vi",
+      "ms": 3608,
+      "status": 200,
+      "aiDaChay": true,
+      "nhan": "CHUA_THAY"
+    },
+    {
+      "id": "real-vi-036",
+      "mucDo": "CAO",
+      "ngonNgu": "vi",
+      "ms": 2468,
+      "status": 200,
+      "aiDaChay": true,
+      "nhan": "CAO"
+    },
+    {
+      "id": "real-vi-060",
+      "mucDo": "CAO",
+      "ngonNgu": "vi",
+      "ms": 3184,
+      "status": 200,
+      "aiDaChay": true,
+      "nhan": "CAO"
+    },
+    {
+      "id": "vi-dautu-02",
+      "mucDo": "CAO",
+      "ngonNgu": "vi",
+      "ms": 3094,
+      "status": 200,
+      "aiDaChay": true,
+      "nhan": "CAO"
+    },
+    {
+      "id": "vi-layloitien-10",
+      "mucDo": "CAO",
+      "ngonNgu": "vi",
+      "ms": 3474,
+      "status": 200,
+      "aiDaChay": true,
+      "nhan": "CAO"
+    },
+    {
+      "id": "vi-otp-03",
+      "mucDo": "CAO",
+      "ngonNgu": "vi",
+      "ms": 2131,
+      "status": 200,
+      "aiDaChay": true,
+      "nhan": "CAO"
+    }
+  ]
+}

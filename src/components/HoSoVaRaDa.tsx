@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { ChevronLeft, Copy, Download, Radar, FileText, Timer } from 'lucide-react';
+import { ChevronLeft, Copy, Download, Radar, FileText, Timer, ClipboardList } from 'lucide-react';
 import {
-  MAN_HO_SO, MAN_RA_DA, MAN_DONG_HO, HO_KICH_BAN, tra, type Lang,
+  MAN_HO_SO, MAN_RA_DA, MAN_DONG_HO, MAN_SO_DO, HO_KICH_BAN, tra, type Lang,
 } from '../catalog';
 import { dungHoSo, xuatVanBan, type KhaiBao } from '../lib/ho-so-vu-viec';
 import { tomTat, dungGoiChiaSe, kiemTraAnToanChiaSe } from '../lib/ra-da-nha-minh';
 import { thongKe } from '../lib/do-thoi-gian-toi-nguoi-that';
+import { CAC_HANH_DONG, demHanhVi, dungGoiSoDo, kiemTraGoiSoDo } from '../lib/so-do-tren-may';
 
 /**
  * HAI MÀN: hồ sơ vụ việc và ra-đa thủ đoạn.
@@ -174,6 +175,9 @@ export function ManRaDaThuDoan({
 }) {
   const [tt] = useState(() => tomTat(lichSu, Date.now()));
   const [tkDo] = useState(() => thongKe());
+  const [demHv] = useState(() => demHanhVi());
+  const [thongBaoSoDo, setThongBaoSoDo] = useState<string | null>(null);
+  const [banChuSoDo, setBanChuSoDo] = useState<string | null>(null);
   const [thongBao, setThongBao] = useState<string | null>(null);
   /** Bản chữ hiện ra khi máy không cho chép tự động, để bác chép tay. */
   const [banChu, setBanChu] = useState<string | null>(null);
@@ -210,6 +214,28 @@ export function ManRaDaThuDoan({
      */
     setBanChu(van);
     setThongBao(tra(MAN_RA_DA, 'KHONG_CHEP_DUOC', lang));
+  };
+
+  /*
+   * SỐ ĐO TRÊN MÁY NÀY — cùng quy tắc với `chiaSe` ở trên: KIỂM TRƯỚC, CHÉP SAU,
+   * và "máy không cho chép" là chuyện khác "dữ liệu bị chặn". Câu "Đã chép" chỉ
+   * hiện khi bộ nhớ tạm đã nhận thật (§11 — trạng thái thật, không trạng thái UI).
+   */
+  const chepSoDo = async () => {
+    const goi = dungGoiSoDo();
+    if (!kiemTraGoiSoDo(goi)) {
+      setBanChuSoDo(null);
+      setThongBaoSoDo(tra(MAN_SO_DO, 'BI_CHAN', lang));
+      return;
+    }
+    const van = JSON.stringify(goi, null, 1);
+    if (await chep(van)) {
+      setBanChuSoDo(null);
+      setThongBaoSoDo(tra(MAN_SO_DO, 'DA_CHEP', lang));
+      return;
+    }
+    setBanChuSoDo(van);
+    setThongBaoSoDo(tra(MAN_SO_DO, 'KHONG_CHEP_DUOC', lang));
   };
 
   return (
@@ -278,6 +304,49 @@ export function ManRaDaThuDoan({
         <p className="text-[14px] text-slate-600 mt-2 leading-snug">
           {tra(MAN_DONG_HO, 'GIOI_HAN', lang)}
         </p>
+      </div>
+
+      {/* ── Số đo trên máy này — việc bác đã chọn sau cảnh báo, và nút tự sao chép ── */}
+      <div className="mt-6 bg-white border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] rounded-[18px] px-4 py-4">
+        <h2 className="text-[16px] font-black text-[#1e1b4b] flex items-center gap-2 mb-2">
+          <ClipboardList size={20} aria-hidden="true" />
+          {tra(MAN_SO_DO, 'TIEU_DE', lang)}
+        </h2>
+        {demHv ? (
+          <ul className="flex flex-col">
+            {CAC_HANH_DONG.map((h, i) => (
+              <li
+                key={h}
+                className={`flex items-baseline justify-between gap-3 py-1.5 ${i > 0 ? 'border-t border-slate-200' : ''}`}
+              >
+                <span className="text-[15px] text-slate-800 leading-snug">{tra(MAN_SO_DO, h, lang)}</span>
+                <span className="text-[16px] font-black text-[#1e1b4b] tabular-nums shrink-0">
+                  {(tra(MAN_SO_DO, 'SO_LAN', lang) ?? '').replace('{so}', String(demHv.theoHanhDong[h]))}
+                </span>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-[15px] text-slate-700 leading-snug">{tra(MAN_SO_DO, 'CHUA_CO', lang)}</p>
+        )}
+        <p className="text-[14px] text-slate-600 mt-2 leading-snug">{tra(MAN_SO_DO, 'GIOI_HAN', lang)}</p>
+        <button
+          type="button"
+          onClick={chepSoDo}
+          disabled={!demHv && !tkDo}
+          className="mt-3 w-full min-h-[56px] rounded-[18px] bg-white border-2 border-[#2e1065] text-[#1e1b4b] font-black text-[16px] flex items-center justify-center gap-2 disabled:opacity-40"
+        >
+          <Copy size={18} aria-hidden="true" />
+          {tra(MAN_SO_DO, 'NUT_CHEP', lang)}
+        </button>
+        {thongBaoSoDo && (
+          <p role="status" className="text-[15px] font-bold text-[#1e1b4b] mt-2">{thongBaoSoDo}</p>
+        )}
+        {banChuSoDo && (
+          <pre className="mt-2 whitespace-pre-wrap break-words select-all bg-white border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] rounded-[18px] p-3 text-[14px] leading-relaxed text-[#1e1b4b]">
+            {banChuSoDo}
+          </pre>
+        )}
       </div>
 
       {/* ── Chia sẻ ── */}

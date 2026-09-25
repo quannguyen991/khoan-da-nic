@@ -104,10 +104,10 @@ const LAY_CSS = `(() => {
 
 const CHU = {
   vi: { troLy: 'Nói cho cháu nghe', gui: 'Gửi', xong: 'Kiểm tin này ngay', cau: 'Ngân hàng bảo chuyển tiền, không thì tài khoản bị khoá.',
-    day: 'Xem đầy đủ', caiDat: 'Cài đặt', quyTac: 'Quy tắc nhà mình', mau: 'Nhà mình không chuyển tiền khi đang nghe điện thoại.',
+    day: 'Xem đầy đủ', caiDat: 'Cài đặt', quyTac: 'Quy tắc nhà mình', mau: 'Đang nghe máy mà bị bảo chuyển tiền, nhà mình cúp máy rồi gọi cho nhau.',
     tiep: 'Tiếp tục', quayLai: 'Quay lại', khanCap: 'Khẩn cấp', them: 'Xem thêm', lo: 'Tôi đã lỡ chuyển tiền', tiepTheo: 'Xem việc tiếp theo' },
   en: { troLy: 'Talk to me', gui: 'Send', xong: 'Check this now', cau: 'The bank says transfer the money or my account gets locked.',
-    day: 'Show the full app', caiDat: 'Settings', quyTac: 'Your family rule', mau: 'Our family never transfers money while still on a phone call.',
+    day: 'Show the full app', caiDat: 'Settings', quyTac: 'Your family rule', mau: 'If someone on a call tells us to send money, we hang up and call each other.',
     tiep: 'Continue', quayLai: 'Back', khanCap: 'Emergency', them: 'See more', lo: 'I already sent money', tiepTheo: 'See what to do next' },
 };
 

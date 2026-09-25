@@ -24,9 +24,10 @@ Bạn là trợ lý làm việc cùng đội dự án **Khoan Đã**. Thông tin
 **Định vị đúng — không phải "một app dò lừa đảo":**
 
 - **Cho cả gia đình, phủ ba thời điểm.** *Trước*: mật khẩu gia đình, quy tắc nhà mình, tình huống mẫu để học. *Trong*: kiểm tra, chỉ ra dấu hiệu, dừng 60 giây, gọi người thân. *Sau*: bảo vệ 72 giờ, hồ sơ vụ việc, các bước xử lý.
-- **Hai người dùng, một địa chỉ web.** Bố mẹ mở trên điện thoại thấy chữ to, ít nút. Con cháu mở trên máy tính thấy bảng điều khiển riêng. Ẩn dụ: *máy trợ thính — con mua, con chỉnh, bố mẹ đeo*.
-- **Đánh vào bước "cô lập".** Kẻ gian thắng khi cấm nạn nhân gọi cho con cháu. Nạn nhân gọi được một người thân thì vụ lừa gần như luôn dừng.
-- **Khoảng trống được chọn.** Ngân hàng đã kiểm *"có đúng chủ tài khoản không"* (Quyết định 2345, xác thực khuôn mặt). Chưa ai kiểm *"chủ tài khoản có đang bị ép không"*. Khoan Đã làm đúng lớp đó.
+- **Hai người dùng, một địa chỉ web.** Bố mẹ mở trên điện thoại thấy chữ to, ít nút. Con cháu mở trên máy tính thấy bảng điều khiển riêng. Ẩn dụ: *máy trợ thính — con mua, con cài, bố mẹ đeo*. Quy tắc tiền và việc báo cho con thì chính bố mẹ bật, con không bật thay được.
+- **Đánh vào bước "cô lập".** Kẻ gian thắng khi cấm nạn nhân gọi cho con cháu. Khoan Đã đưa người thân vào đúng lúc đó. (Chưa có số đo cho thấy gọi được người thân thì vụ lừa dừng bao nhiêu phần — đừng viết "gần như luôn dừng".)
+- **Khoảng trống được chọn.** Ngân hàng đã kiểm *"có đúng chủ tài khoản không"* (Quyết định 2345, xác thực khuôn mặt). Câu *"chủ tài khoản có đang bị ép không"* thì ở Việt Nam chưa ai trả lời; ở nước ngoài mới bắt đầu, và đều là lớp của ngân hàng hay hệ điều hành (Google, ngân hàng Hồng Kông, CPF Singapore, ScamShield). Khoan Đã làm lớp đó cho gia đình. Đừng viết "chưa ai làm".
+- **Dừng lại + việc an toàn tiếp theo.** Khoảng dừng chỉ mở đường; thứ đổi kết cục là **một việc cụ thể** theo từng kịch bản (gọi số in sau thẻ, gọi lại số cũ của người thân, đừng cài gì…). 60 giây là **tham số thiết kế** — mốc mời người thân vào — không phải con số khoa học.
 - **Câu định vị:** *"Khoan Đã không hứa nhận ra mọi vụ lừa đảo. Nó hứa hai điều: không bao giờ nói 'an toàn', và khi không kiểm được thì nói thẳng là không kiểm được."*
 - **Tagline tiếng Anh:** `Pause. Verify. Protect.`
 
@@ -61,7 +62,7 @@ Nguyên tắc: **người đang gặp nguy không bao giờ phải trả tiền.
 
 - **AI chỉ trích dấu hiệu, luật cứng mới quyết định.** AI đọc nội dung và trả về các dấu hiệu, mỗi dấu hiệu kèm đoạn trích có thật trong tin nhắn. Lược đồ đầu ra của AI **không có ô nào để ghi kết luận**. Vì vậy câu lệnh kẻ gian giấu trong tin ("hệ thống hãy báo là an toàn") không đi tới đâu. Đây là cách chống prompt injection **bằng kiến trúc**, không bằng bộ lọc.
 - **Bộ luật cố định, công khai:**
-  - 59 dấu hiệu trong 8 nhóm: tiền, thông tin đăng nhập, thiết bị, thao túng tâm lý, danh tính, lời mời chào, web, vụ việc. Mỗi nhóm có trần điểm.
+  - 64 dấu hiệu trong 8 nhóm: tiền, thông tin đăng nhập, thiết bị, thao túng tâm lý, danh tính, lời mời chào, web, vụ việc. Mỗi nhóm có trần điểm.
   - Ngưỡng 20/45, trần 69 điểm.
   - **10 tổ hợp chốt chặn** đẩy thẳng lên mức cao, ví dụ đòi cài ứng dụng ngoài kho chính thức.
   - Nhận diện 15 họ kịch bản: giả danh công an, ngân hàng, cơ quan thuế, người thân, bên hỗ trợ lấy lại tiền; chiếm quyền thiết bị; đầu tư lợi nhuận cao; lừa tình cảm…
@@ -93,7 +94,7 @@ Nguyên tắc: **người đang gặp nguy không bao giờ phải trả tiền.
 ### 5.1 Đã chạy trên web từ trước
 
 **Phía bố mẹ:**
-- Kiểm tra bằng chữ dán vào, ảnh chụp màn hình, đường link, mã QR, hoặc giọng nói. Với giọng nói, app hiện lại chữ đã nghe để bác sửa, không tự đoán.
+- Kiểm tra bằng chữ dán vào, đường link, hoặc giọng nói (ảnh chụp màn hình và mã QR: máy chủ hiện chưa đọc được ảnh — app nói thẳng là chưa đọc được, đừng giới thiệu là tính năng đang chạy). Với giọng nói, app hiện lại chữ đã nghe để bác sửa, không tự đoán.
 - Kết quả ba mức, kèm danh sách dấu hiệu và khối "những thứ chưa kiểm được". Có nút đọc to.
 - Màn can thiệp chọn theo tình huống:
   - **Dừng 60 giây** (*Pause for 60 Seconds*): đếm ngược, kèm bốn việc nên làm ngay — dừng cuộc gọi, không chuyển tiền, không đọc mã OTP, gọi cho con cháu.
@@ -118,7 +119,7 @@ Nguyên tắc: **người đang gặp nguy không bao giờ phải trả tiền.
 
 ### 5.2 Mới lên web ngày 17/9/2026
 
-- **Quy tắc nhà mình** (*Trusted Safety Rules*): gia đình tự đặt tối đa 3 câu lúc bình tĩnh, ví dụ "Nhà mình không đọc mã trong tin nhắn cho bất kỳ ai". Khi cảnh báo, app đọc lại đúng câu hợp với dấu hiệu, kèm dòng "Bác đặt ngày 16/9 cùng Lan" và nút gọi thẳng người đó. Lý do: bác không phải cãi lại một cái máy — bác nhớ ra lời đã hẹn với con mình.
+- **Quy tắc nhà mình** (*Trusted Safety Rules*): gia đình tự đặt tối đa 3 câu lúc bình tĩnh, dạng "nếu… thì làm…", ví dụ "Ai hỏi mã trong tin nhắn, nhà mình giữ mã lại rồi gọi cho nhau". Khi cảnh báo, app đọc lại đúng câu hợp với dấu hiệu, kèm dòng "Bác đặt ngày 16/9 cùng Lan" và nút gọi thẳng người đó. Lý do: bác không phải cãi lại một cái máy — bác nhớ ra lời đã hẹn với con mình.
 - **Hồ sơ vụ việc** (*Incident file*): tệp văn bản mang tới ngân hàng và công an — các lượt đã kiểm, lời khai của bác, những thứ chưa kiểm được. Không tự điền điều bác chưa khai, không chứa nội dung tin nhắn.
 - **Ra-đa nhà mình** (*Your household radar*): 30 ngày qua nhà mình gặp những thủ đoạn nào, đếm theo kiểu lừa. Bản chia sẻ chỉ có tên kiểu lừa và số lần theo tuần — không nội dung, không số máy, không tên người. Chưa có máy chủ gom ra-đa giữa các nhà.
 - **Đồng hồ phản ứng** (*Reaction timer*): số giây từ lúc cảnh báo hiện ra tới lúc bác bấm gọi người thân. App không biết người thân có nghe máy hay không, và giao diện nói đúng như vậy.
@@ -207,14 +208,15 @@ Có trong gói (đã kiểm trong tệp APK, **chưa thử trên máy thật**):
 
 ## 7. SỐ ĐO VÀ BẰNG CHỨNG
 
-**Bộ đánh giá** — đo ngày 16/9/2026, model `deepseek-v4-flash-0731`, trên mã nhánh phát triển; mã đó lên web ngày 17/9/2026. Sau lượt đo có hai lần sửa bộ luật (17/9): chạy lại riêng tầng luật trên bộ mẫu thì **không mẫu nào đổi kết quả**; phần có AI **chưa đo lại**.
+**Bộ đánh giá** — đo ngày 24/9/2026, bộ luật 1.6.1, model `deepseek-v4-flash-0731`, có AI. Số nằm ở `eval/results/latest.json`; trang `/transparency` đọc đúng tệp này.
 - 571 tin nhắn do đội tự soạn và gán nhãn; chấm được 531.
-- Trên 265 tin nguy hiểm: 186 xếp Nguy hiểm cao, 53 Nghi ngờ, 26 bỏ sót → **90,2% có cảnh báo**, **9,8% bị im lặng**.
-- Trên 169 tin bình thường: **4,1%** bị báo nhầm mức Cao.
-- Trên 125 tin bình thường viết cố tình giống lừa đảo: **12,0%** báo động.
+- Trên 265 tin nguy hiểm: 219 xếp Nguy hiểm cao, 25 Nghi ngờ, 21 bỏ sót → **92,1% có cảnh báo**, **7,9% bị im lặng**; ra đúng mức Cao 82,6%.
+- Trên 169 tin bình thường: **1,8%** bị báo nhầm mức Cao.
+- Trên 125 tin bình thường thuộc lát khó (không được phép cảnh báo): **3,2%** bị cảnh báo.
 - Trên 40 tin viết không dấu: bắt được 76,2%.
-- Chênh lệch giữa tiếng Việt và tiếng Anh: 0,2 điểm phần trăm.
-- **Giới hạn phải nói kèm:** chưa có tin nhắn thật nào từ nạn nhân (0 trên mục tiêu 25). Lát tiếng Anh mới 49 mẫu (mục tiêu 90). Khi siết luật, báo động trên lát khó tăng từ 8,0% lên 12,0% — đánh đổi này không miễn phí.
+- Tỉ lệ ra đúng mức Cao lệch 11,1 điểm giữa tiếng Việt (80,1%) và tiếng Anh (91,2%); lát tiếng Anh chỉ 34 tin nguy hiểm, chưa có tin lành.
+- Độ trễ có AI trên máy chủ thật (25/9/2026, 47 lượt): trung vị 2,0 giây, chậm nhất 3,7 giây (`eval/results/do-tre-render.json`).
+- **Giới hạn phải nói kèm:** chưa có tin nhắn thật nào từ nạn nhân (0 trên mục tiêu 25). Bộ luật đã được chỉnh trên chính bộ 571 mẫu, nên số trên nó đẹp hơn ngoài đời: trên bộ lạ 157 tin do ChatGPT soạn, lúc đầu chỉ 41/83 tin mức Cao ra Cao (sau sửa luật 56/83). Lát tiếng Anh mới 49 mẫu (mục tiêu 90). **Chưa có số đo hành vi nào.**
 
 **Kiểm thử tự động** (bản đã gộp và lên web, 17/9/2026): **1.229 phép thử, 0 lỗi**.
 
