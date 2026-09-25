@@ -456,7 +456,6 @@ img{max-width:100%;height:auto;display:block}
 .loi-lua li{font-size:clamp(1.15rem,2.3vw,1.55rem);font-weight:700;line-height:1.4;color:#fff;padding:14px 20px;border-radius:18px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);max-width:30ch}
 .ket-loi{margin-top:28px;font-size:clamp(1.2rem,2.4vw,1.6rem);font-weight:700;color:var(--vang);max-width:26ch}
 .ghi-kich-ban{margin-top:14px;font-size:.85rem;color:var(--dem-phu)}
-@media (max-width:899px){.cuoc-goi .hinh-goi{order:2;width:min(70%,260px)}.linh-vat{width:min(80%,320px)}}
 
 /* ── 4. Khoan đã ── */
 .khoan{background:var(--tim-nen)}
@@ -547,7 +546,8 @@ img{max-width:100%;height:auto;display:block}
 .hop-tai .phu{margin-top:16px;font-size:.95rem}
 .dia-chi{margin-bottom:20px;padding-bottom:18px;border-bottom:1px solid var(--tim-nhat)}
 .dia-chi p{color:var(--muc-phu);font-size:.95rem}
-.dia-chi .dia-chi-lon{margin-top:6px;font-size:1.3rem;font-weight:700;color:var(--muc-dam);overflow-wrap:anywhere}
+.dia-chi .dia-chi-lon{margin-top:6px;font-size:1.3rem;font-weight:700;color:var(--muc-dam)}
+.dia-chi-lon span{display:inline-block}
 details{margin-top:18px;border-top:1px solid var(--tim-nhat);padding-top:12px}
 summary{cursor:pointer;min-height:var(--cham);display:flex;align-items:center;font-weight:700}
 .bam{font-family:ui-monospace,Consolas,monospace;font-size:.85rem;word-break:break-all;margin-top:4px;background:var(--tim-nen);padding:8px 10px;border-radius:10px}
@@ -571,6 +571,23 @@ summary{cursor:pointer;min-height:var(--cham);display:flex;align-items:center;fo
 .chan-trong{display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center}
 .chan a{display:inline-flex;align-items:center;min-height:var(--cham);font-weight:700}
 .chan strong{color:var(--muc-dam)}
+
+/* ── ĐIỆN THOẠI: ảnh nhỏ làm biểu tượng đầu chương, nút hết bề ngang, bớt khoảng trống ── */
+@media (max-width:899px){
+  .mo-dau{min-height:0;padding:8px 0 44px}
+  .mo-dau-luoi{gap:4px}
+  .linh-vat,.mo-dau .linh-vat,.cuoc-goi .hinh-goi,.dong-trang .linh-vat,.quyet .linh-vat,.biet-kip .linh-vat{order:-1;justify-self:start;width:168px;margin:0 0 -4px -12px}
+  .hang-nut{flex-direction:column;gap:12px}
+  .hang-nut .nut{width:100%}
+  .cuon{margin-top:28px}
+  .chuong{padding:56px 0}
+  .chuong-luoi{gap:28px}
+  .cuoc-goi .ghim{padding:56px 0}
+  .loi-lua{margin-top:24px}
+  .dien-thoai{--ti:.66}
+  .duong li span{min-height:56px}
+  .dia-chi .dia-chi-lon{font-size:1.1rem}
+}
 
 /* ═════ CHUYỂN ĐỘNG — chỉ khi script chạy và người dùng không tắt chuyển động ═════ */
 .dong [data-hien]{opacity:0;transform:translateY(32px);filter:blur(6px);transition:opacity 1s var(--ra),transform 1s var(--ra),filter 1s var(--ra)}
@@ -639,10 +656,16 @@ function dungTrangGioiThieu(ngonNgu = 'vi', { apk = null, anh = [] } = {}) {
     : `<img class="${lop}" src="/minh-hoa-${linhVat}.webp" alt="" width="768" height="512" loading="${tai}" decoding="async">`);
 
   /** Màn thật chụp sẵn: iframe tĩnh (CSP cấm script ở /man-that), chữ mô tả nằm ở figcaption. */
-  const manThat = (ten, khoaChu, hieu = '', tai = 'lazy') => `<figure class="dien-thoai"${hieu ? ` data-hien="${hieu}"` : ''}>
+  let daGhiMau = false;
+  const manThat = (ten, khoaChu, hieu = '', tai = 'lazy') => {
+    // "Chụp từ app thật, dữ liệu mẫu" ghi MỘT lần — lặp dưới cả bốn màn là chữ xám rườm rà.
+    const mau = daGhiMau ? '' : `<span>${t('duLieuMau')}</span>`;
+    daGhiMau = true;
+    return `<figure class="dien-thoai"${hieu ? ` data-hien="${hieu}"` : ''}>
           <div class="vo-may"><iframe class="man-that" src="/man-that/${ten}.${l}.html" title="${t(khoaChu)}" width="390" height="844" loading="${tai}" tabindex="-1" aria-hidden="true" sandbox="allow-same-origin"></iframe></div>
-          <figcaption class="chu-thich">${t(khoaChu)}<span>${t('duLieuMau')}</span></figcaption>
+          <figcaption class="chu-thich">${t(khoaChu)}${mau}</figcaption>
         </figure>`;
+  };
 
   const dayChay = c.chay.map((x) => `<span>${esc(x)}</span>`).join('');
   const webCo = c.ssHang.filter((h) => h[1]).map((h) => `<li>${BT.co}<span>${esc(h[0])}</span></li>`).join('');
@@ -650,7 +673,7 @@ function dungTrangGioiThieu(ngonNgu = 'vi', { apk = null, anh = [] } = {}) {
 
   const hopTai = apk ? `
         <div class="hop-tai" data-hien="phai">
-          <div class="dia-chi"><p>${t('caiDiaChiNhan')}</p><p class="dia-chi-lon">khoan-da.onrender.com/gioi-thieu</p></div>
+          <div class="dia-chi"><p>${t('caiDiaChiNhan')}</p><p class="dia-chi-lon"><span>khoan-da.onrender.com</span><span>/gioi-thieu</span></p></div>
           <a class="nut nut-chinh" href="/khoan-da.apk" download>${BT.tai}<span>${t('caiNut')}</span></a>
           <p class="phien-ban">${esc(c.caiPhienBan.replace('{v}', apk.phienBan || '').replace('{kt}', dinhDangMb(apk.kichThuocByte, l)))}</p>
           <p class="phu">${t('caiMayCu')}</p>
