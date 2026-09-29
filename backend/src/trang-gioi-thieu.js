@@ -38,6 +38,13 @@ const esc = (s) => String(s).replace(/[&<>"']/g, (c) => (
 const VAN_TAY_CHUNG_CHI = '6a5ee25c2572d4dad07fb0bfce5fb640b01ae43f39d06c107eb5f02270f2812f';
 const EMAIL_LIEN_HE = 'quannxm.sags@gmail.com';
 
+/**
+ * Linh vật sẵn có, CẮT SÁT viền trong suốt (public/linh-vat/N.webp, từ public/minh-hoa-N.webp).
+ * Ảnh gốc 768×512 chỉ dùng 31–47% khung, nên khi đặt vào cột linh vật trông bé và lạc lõng.
+ * [rộng, cao] thật của từng tệp — đặt vào width/height để không nhảy bố cục khi ảnh tải.
+ */
+const KICH_LINH_VAT = { 1: [407, 425], 2: [358, 440], 3: [323, 448], 4: [371, 405], 5: [494, 432] };
+
 /** Ảnh AI có thể có (public/anh-gioi-thieu/<ten>.webp). Máy chủ báo tệp nào đang có. */
 const ANH_AI = ['mo-dau', 'cuoc-goi', 'khoan-da', 'con-chau', 'truoc', 'sau'];
 
@@ -420,7 +427,8 @@ img{max-width:100%;height:auto;display:block}
 .mo-dau .dan{font-size:1.2rem;color:var(--muc-phu);margin-top:22px;max-width:36ch}
 .mo-dau .hang-nut{margin-top:30px}
 .ghi-nho{margin-top:16px;color:var(--muc-phu);font-size:.9rem}
-.linh-vat{justify-self:center;width:min(100%,500px)}
+.linh-vat{justify-self:center;width:min(100%,340px)}
+.linh-vat img{width:100%;height:auto}
 .cuon{display:inline-flex;align-items:center;gap:10px;margin-top:40px;color:var(--muc-phu);font-weight:700;min-height:var(--cham);text-decoration:none}
 .cuon .bt{color:var(--tim)}
 
@@ -443,6 +451,7 @@ img{max-width:100%;height:auto;display:block}
 
 /* màn THẬT (scripts/chup-man-that.mjs) trong vỏ máy */
 .dien-thoai{margin:0;justify-self:center;--ti:.74;width:calc(390px * var(--ti) + 20px)}
+@media (min-width:900px){.dien-thoai{--ti:.9}}
 @media (max-width:420px){.dien-thoai{--ti:.7}}
 .vo-may{position:relative;overflow:hidden;border-radius:46px;border:10px solid var(--muc);background:#f8f4ff;box-shadow:var(--bong);width:calc(390px * var(--ti) + 20px);height:calc(844px * var(--ti) + 20px)}
 .man-that{display:block;width:390px;height:844px;border:0;transform:scale(var(--ti));transform-origin:0 0;pointer-events:none}
@@ -451,7 +460,7 @@ img{max-width:100%;height:auto;display:block}
 .cuoc-goi{background:var(--dem);color:var(--dem-chu);background-image:linear-gradient(to right,rgba(255,255,255,.04) 1px,transparent 1px),linear-gradient(to bottom,rgba(255,255,255,.04) 1px,transparent 1px);background-size:26px 26px}
 .cuoc-goi .ghim{padding:clamp(72px,10vw,120px) 0}
 .cuoc-goi h2{font-size:clamp(1.8rem,4.4vw,3rem);color:#fff;max-width:18ch}
-.cuoc-goi .hinh-goi{justify-self:center;width:min(100%,420px);filter:drop-shadow(0 30px 50px rgba(0,0,0,.45))}
+.cuoc-goi .hinh-goi{justify-self:center;width:min(100%,380px);filter:drop-shadow(0 30px 50px rgba(0,0,0,.45))}
 .loi-lua{list-style:none;padding:0;margin:32px 0 0;display:grid;gap:14px}
 .loi-lua li{font-size:clamp(1.15rem,2.3vw,1.55rem);font-weight:700;line-height:1.4;color:#fff;padding:14px 20px;border-radius:18px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);max-width:30ch}
 .ket-loi{margin-top:28px;font-size:clamp(1.2rem,2.4vw,1.6rem);font-weight:700;color:var(--vang);max-width:26ch}
@@ -471,7 +480,7 @@ img{max-width:100%;height:auto;display:block}
 
 /* ── 6. bạn biết kịp ── */
 .biet-kip{background:var(--tim-nhat)}
-.biet-kip .linh-vat{width:min(100%,400px)}
+.biet-kip .linh-vat{width:min(100%,340px)}
 
 /* ── 7. chuẩn bị ── */
 .viec{list-style:none;margin:26px 0 0;padding:0;display:grid;gap:16px}
@@ -514,7 +523,7 @@ img{max-width:100%;height:auto;display:block}
 .ket-luan p{margin-top:12px;font-size:1.1rem;font-weight:700}
 .ket-luan p span{display:block;font-weight:500;color:var(--muc-phu)}
 .link-lon{display:inline-flex;align-items:center;gap:8px;margin-top:28px;min-height:var(--cham);font-weight:700}
-.quyet .linh-vat{width:min(100%,280px);justify-self:start}
+.quyet .linh-vat{width:min(100%,260px);justify-self:start}
 
 /* ── 10. web / Android ── */
 .hai-ban{display:grid;gap:20px;margin-top:32px}
@@ -565,7 +574,7 @@ summary{cursor:pointer;min-height:var(--cham);display:flex;align-items:center;fo
 .dong-trang p{margin-top:16px;font-size:1.12rem;max-width:52ch}
 .dong-trang .hang-nut{margin-top:28px}
 .dong-trang .nut-phu{border-color:var(--muc)}
-.dong-trang .linh-vat{width:min(100%,380px)}
+.dong-trang .linh-vat{width:min(100%,320px)}
 
 .chan{padding:32px 0 48px;color:var(--muc-phu);font-size:.9rem}
 .chan-trong{display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center}
@@ -576,7 +585,7 @@ summary{cursor:pointer;min-height:var(--cham);display:flex;align-items:center;fo
 @media (max-width:899px){
   .mo-dau{min-height:0;padding:8px 0 44px}
   .mo-dau-luoi{gap:4px}
-  .linh-vat,.mo-dau .linh-vat,.cuoc-goi .hinh-goi,.dong-trang .linh-vat,.quyet .linh-vat,.biet-kip .linh-vat{order:-1;justify-self:start;width:168px;margin:0 0 -4px -12px}
+  .linh-vat,.mo-dau .linh-vat,.cuoc-goi .hinh-goi,.dong-trang .linh-vat,.quyet .linh-vat,.biet-kip .linh-vat{order:-1;justify-self:start;width:150px;margin:0 0 -4px -6px}
   .hang-nut{flex-direction:column;gap:12px}
   .hang-nut .nut{width:100%}
   .cuon{margin-top:28px}
@@ -609,7 +618,17 @@ summary{cursor:pointer;min-height:var(--cham);display:flex;align-items:center;fo
 @keyframes troi{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
 @keyframes chay{to{transform:translateX(-50%)}}
 @keyframes nay{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
-@media (max-width:899px){.dong .cuoc-goi[data-ghim]{height:auto}.dong .cuoc-goi .ghim{position:static;min-height:0}}
+@media (max-width:899px){
+  .dong .cuoc-goi[data-ghim]{height:auto}.dong .cuoc-goi .ghim{position:static;min-height:0}
+  /*
+   * ⚠️ MÀN HẸP: CHỈ TRƯỢT LÊN, KHÔNG TRƯỢT NGANG (đo 29/9/2026). Phần tử chờ hiện đang bị đẩy
+   * translateX(48px) vẫn tính vào độ rộng cuộn được; hộp tải APK rộng 351px + lề 16px + 48px
+   * = 419px > màn 390px ⇒ trình duyệt điện thoại tự thu nhỏ CẢ TRANG để chứa, trông như
+   * chữ bé đi và lệch. Đặt SAU luật gốc (cùng độ ưu tiên thì luật sau thắng).
+   */
+  .dong [data-hien="trai"],.dong [data-hien="phai"]{transform:translateY(32px)}
+  .dong [data-hien="trai"].hien,.dong [data-hien="phai"].hien{transform:none}
+}
 `;
 
 /*
@@ -653,7 +672,7 @@ function dungTrangGioiThieu(ngonNgu = 'vi', { apk = null, anh = [] } = {}) {
   /** Ảnh AI nếu đã tạo, không thì linh vật (768×512, nền trong). Trang trí: alt rỗng. */
   const hinh = (tenAi, linhVat, lop = '', tai = 'lazy') => (coAnh.has(tenAi)
     ? `<img class="${lop} anh-ai" src="/anh-gioi-thieu/${tenAi}.webp" alt="" width="1400" height="933" loading="${tai}" decoding="async">`
-    : `<img class="${lop}" src="/minh-hoa-${linhVat}.webp" alt="" width="768" height="512" loading="${tai}" decoding="async">`);
+    : `<img class="${lop}" src="/linh-vat/${linhVat}.webp" alt="" width="${KICH_LINH_VAT[linhVat][0]}" height="${KICH_LINH_VAT[linhVat][1]}" loading="${tai}" decoding="async">`);
 
   /** Màn thật chụp sẵn: iframe tĩnh (CSP cấm script ở /man-that), chữ mô tả nằm ở figcaption. */
   let daGhiMau = false;

@@ -123,6 +123,16 @@ test('kể chuyện khi cuộn: KHÔNG có JS (hay tắt chuyển động) vẫn
   for (const cau of CHU.vi.c1Loi) assert.ok(vi.includes(cau.replace(/"/g, '&quot;')), cau);
 });
 
+test('màn hẹp: hiệu ứng hiện KHÔNG trượt ngang (lấn ra ngoài màn ⇒ điện thoại thu nhỏ cả trang)', () => {
+  const css = vi.match(/<style>([\s\S]*?)<\/style>/)[1].replace(/\/\*[\s\S]*?\*\//g, '');
+  const khoi = css.slice(css.indexOf('.dong .cuoc-goi[data-ghim]{height:auto}'));
+  assert.ok(khoi.length > 100, 'thiếu khối màn hẹp cho hiệu ứng');
+  assert.match(khoi, /\.dong \[data-hien="trai"\],\.dong \[data-hien="phai"\]\{transform:translateY\(/);
+  assert.match(khoi, /\.hien,\.dong \[data-hien="phai"\]\.hien\{transform:none\}/);
+  // khối đó phải nằm SAU luật trượt ngang gốc, nếu không luật gốc thắng.
+  assert.ok(css.indexOf('[data-hien="phai"]{transform:translateX(48px)}') < css.indexOf('[data-hien="trai"],.dong [data-hien="phai"]{transform:translateY('));
+});
+
 test('phông chữ nạp từ chính web, không gọi Google Fonts', () => {
   assert.doesNotMatch(vi, /fonts\.googleapis|fonts\.gstatic/);
   for (const m of vi.matchAll(/url\((\/phong-chu\/[^)]+)\)/g)) {
