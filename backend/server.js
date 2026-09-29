@@ -42,7 +42,7 @@ const CONG_DONG = require('./src/cong-dong-canh-giac');
 const { moKho } = require('./src/vault-store');
 const { canDangNhap } = require('./src/auth');
 const {
-  layCauHinhVapid, layCauHinhFcm, chuanHoaDangKy, chuanHoaDangKyNative, LOAI_DANG_KY,
+  layCauHinhVapid, layCauHinhFcm, chanDoanFcm, chuanHoaDangKy, chuanHoaDangKyNative, LOAI_DANG_KY,
 } = require('./src/push');
 const { guiThatFcmV1 } = require('./src/gui-fcm');
 const { docToMayChu, chuanHoaYeuCau, LoiDocTo } = require('./src/doc-to-may-chu');
@@ -1718,6 +1718,11 @@ app.get('/api/suc-khoe', async (req, res) => {
     pushCauHinh: layCauHinhVapid().daCauHinh,
     /** 24/9/2026 — đường báo động tới máy con dùng APK (FCM HTTP v1). Chỉ có/không. */
     fcmCauHinh: layCauHinhFcm().daCauHinh,
+    /**
+     * 29/9/2026 — VÌ SAO `fcmCauHinh` còn false: chỉ có/không và độ dài, KHÔNG một ký tự nào của khoá.
+     * Giá trị dán qua ô nhập của Render hay bị bọc dấu nháy hay mã hoá hai lần.
+     */
+    chanDoanFcm: chanDoanFcm(),
     /**
      * 23/9/2026 — máy không có giọng Việt thì nút "Đọc to" nhờ máy chủ đọc, và
      * CHỮ ĐEM ĐỌC đi sang Google. Chỉ báo có/không; `false` ⇒ máy thiếu giọng

@@ -159,3 +159,52 @@ test('trọn luồng: máy con APK đăng ký token → bố mẹ báo động �
     if (envCu === undefined) delete process.env.FCM_SERVICE_ACCOUNT; else process.env.FCM_SERVICE_ACCOUNT = envCu;
   }
 });
+
+// ═══ 29/9/2026 — giá trị dán qua ô nhập của bảng điều khiển hay bị biến dạng ═══
+const { layCauHinhFcm: docFcm, chanDoanFcm } = require('../backend/src/push');
+const KHOA_GIA = '-----BEGIN PRIVATE KEY-----\nQUJDREVGRw==\n-----END PRIVATE KEY-----\n';
+const TEP = { type: 'service_account', project_id: 'du-an-gia', client_email: 'a@du-an-gia.iam.gserviceaccount.com', private_key: KHOA_GIA };
+const nap = (v) => ({ FCM_SERVICE_ACCOUNT: v });
+
+test('FCM: nhận đủ các dạng dán hay gặp, đều ra cùng một cấu hình', () => {
+  const json = JSON.stringify(TEP);
+  const dang = {
+    'JSON thường': json,
+    'JSON nhiều dòng': JSON.stringify(TEP, null, 2),
+    'BOM ở đầu': '﻿' + json,
+    'bọc dấu nháy kép': '"' + json + '"',
+    'bọc dấu nháy đơn': "'" + json + "'",
+    'mã hoá hai lần': JSON.stringify(json),
+    'base64': Buffer.from(json).toString('base64'),
+    'khoảng trắng hai đầu': '  \n' + json + '\n  ',
+  };
+  for (const [ten, v] of Object.entries(dang)) {
+    const c = docFcm(nap(v));
+    assert.strictEqual(c.daCauHinh, true, `${ten}: không đọc được`);
+    assert.strictEqual(c.projectId, 'du-an-gia', ten);
+    assert.ok(c.privateKey.includes('\n'), `${ten}: khoá mất xuống dòng`);
+  }
+});
+
+test('FCM: KHÔNG nới độ chặt — thiếu một trong ba trường, hay rác, vẫn là chưa cấu hình', () => {
+  for (const thieu of ['project_id', 'client_email', 'private_key']) {
+    const { [thieu]: _bo, ...conLai } = TEP;
+    assert.strictEqual(docFcm(nap(JSON.stringify(conLai))).daCauHinh, false, `thiếu ${thieu}`);
+  }
+  for (const rac of ['', 'khong phai json', '{"a":', 'null', '12345', '[]', '"chuoi"']) {
+    assert.strictEqual(docFcm(nap(rac)).daCauHinh, false, `rác: ${rac}`);
+  }
+});
+
+test('chẩn đoán FCM: chỉ có/không và độ dài — KHÔNG lộ một ký tự nào của khoá', () => {
+  const json = JSON.stringify(TEP);
+  const d = chanDoanFcm(nap(json));
+  assert.deepStrictEqual(Object.keys(d).sort(), ['batDauBang', 'cachDoc', 'coBien', 'coClientEmail', 'coPrivateKey', 'coProjectId', 'doDai', 'privateKeyCoXuongDong', 'privateKeyDungDauDong']);
+  const tho = JSON.stringify(d);
+  assert.ok(!tho.includes('QUJDREVGRw'), 'lộ nội dung khoá');
+  assert.ok(!tho.includes('du-an-gia'), 'lộ project_id');
+  assert.ok(!tho.includes('BEGIN'), 'lộ đầu khoá');
+  assert.strictEqual(d.privateKeyDungDauDong, true);
+  assert.strictEqual(chanDoanFcm(nap('khong phai json')).cachDoc, 'khong_doc_duoc');
+  assert.strictEqual(chanDoanFcm({}).coBien, false);
+});

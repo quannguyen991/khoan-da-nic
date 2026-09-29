@@ -101,12 +101,58 @@ function layCauHinhVapid(env = process.env) {
  * accounts → Generate new private key (nhận cả dạng base64 của tệp đó).
  * Thiếu một trong ba trường cần thiết ⇒ CHƯA cấu hình.
  */
+/**
+ * ⚠️ NỚI CÁCH ĐỌC NGÀY 29/9/2026 — giá trị dán qua ô nhập của bảng điều khiển hay bị
+ * biến dạng, và lỗi ra là "chưa cấu hình" không kèm lý do: chính là kiểu hỏng im lặng
+ * §9.4 cấm. Nhận: dấu BOM ở đầu, bọc trong dấu nháy kép/đơn, JSON bị mã hoá hai lần
+ * (chuỗi chứa JSON), và base64. KHÔNG nới thứ gì về độ chặt: vẫn đòi đủ ba trường.
+ */
+function docTaiKhoanDichVu(tho) {
+  if (!tho) return { tk: null, cach: 'trong' };
+  let s = tho.replace(/^﻿/, '').trim();
+  const thu = (chuoi) => { try { return JSON.parse(chuoi); } catch { return undefined; } };
+  let v = s.startsWith('{') ? thu(s) : undefined;
+  let cach = 'json';
+  if (v === undefined && /^(["'`])[\s\S]*\1$/.test(s)) {
+    const trong = s.slice(1, -1).trim();
+    v = trong.startsWith('{') ? thu(trong) : undefined;         // bọc dấu nháy đơn giản: "{…}"
+    if (v !== undefined) cach = 'boc_dau_nhay';
+    if (v === undefined && s.startsWith('"')) {                 // JSON bị mã hoá hai lần: "{\"a\":1}"
+      const lop = thu(s);
+      if (typeof lop === 'string') { v = thu(lop.trim()); if (v !== undefined) cach = 'json_hai_lop'; }
+    }
+  }
+  if (v === undefined) {                                        // base64 của tệp
+    try { v = thu(Buffer.from(s, 'base64').toString('utf8')); cach = 'base64'; } catch { v = undefined; }
+  }
+  return { tk: v && typeof v === 'object' ? v : null, cach: v === undefined ? 'khong_doc_duoc' : cach };
+}
+
+/**
+ * Chẩn đoán KHÔNG LỘ KHOÁ: chỉ trả có/không và độ dài, không một ký tự nào của giá trị.
+ * Hiện ở /api/suc-khoe để biết vì sao `fcmCauHinh` còn `false` mà không phải hỏi ai chép lại khoá.
+ */
+function chanDoanFcm(env = process.env) {
+  const tho = typeof env.FCM_SERVICE_ACCOUNT === 'string' ? env.FCM_SERVICE_ACCOUNT : '';
+  const { tk, cach } = docTaiKhoanDichVu(tho.trim());
+  const pk = typeof tk?.private_key === 'string' ? tk.private_key.replace(/\\n/g, '\n') : '';
+  const batDau = tho.trim()[0];
+  return {
+    coBien: Boolean(tho.trim()),
+    doDai: tho.length,
+    batDauBang: !batDau ? 'trong' : batDau === '{' ? 'ngoac_nhon' : /["'`]/.test(batDau) ? 'dau_nhay' : 'khac',
+    cachDoc: cach,
+    coProjectId: typeof tk?.project_id === 'string',
+    coClientEmail: typeof tk?.client_email === 'string',
+    coPrivateKey: Boolean(pk),
+    privateKeyDungDauDong: pk.startsWith('-----BEGIN PRIVATE KEY-----') && pk.includes('-----END PRIVATE KEY-----'),
+    privateKeyCoXuongDong: pk.includes('\n'),
+  };
+}
+
 function layCauHinhFcm(env = process.env) {
   const tho = typeof env.FCM_SERVICE_ACCOUNT === 'string' ? env.FCM_SERVICE_ACCOUNT.trim() : '';
-  let tk = null;
-  if (tho) {
-    try { tk = JSON.parse(tho.startsWith('{') ? tho : Buffer.from(tho, 'base64').toString('utf8')); } catch { tk = null; }
-  }
+  const { tk } = docTaiKhoanDichVu(tho);
   const projectId = typeof tk?.project_id === 'string' ? tk.project_id : undefined;
   const clientEmail = typeof tk?.client_email === 'string' ? tk.client_email : undefined;
   // Dán qua ô nhập một dòng hay biến `\n` thành hai ký tự — khôi phục lại xuống dòng thật.
@@ -195,5 +241,5 @@ function maHienThi(trangThai, coSuKienMo = false) {
 
 module.exports = {
   guiCanhBao, chuanHoaDangKy, layCauHinhVapid, maHienThi, TRANG_THAI_GUI,
-  chuanHoaDangKyNative, layCauHinhFcm, LOAI_DANG_KY,
+  chuanHoaDangKyNative, layCauHinhFcm, chanDoanFcm, LOAI_DANG_KY,
 };
