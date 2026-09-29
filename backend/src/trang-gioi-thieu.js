@@ -421,7 +421,8 @@ img{max-width:100%;height:auto;display:block}
 /* ── 1. mở đầu: một màn hình, một câu ── */
 .mo-dau{min-height:calc(100svh - 80px);display:grid;align-items:center;padding:24px 0 56px}
 .mo-dau-luoi{display:grid;gap:32px;align-items:center}
-@media (min-width:900px){.mo-dau-luoi{grid-template-columns:1.25fr .75fr;gap:48px}}
+@media (min-width:720px){.mo-dau-luoi{grid-template-columns:1.25fr .75fr;gap:40px}}
+@media (min-width:900px){.mo-dau-luoi{gap:48px}}
 .mo-dau h1{font-size:clamp(2.3rem,6vw,4.4rem);color:var(--muc-dam)}
 .mo-dau h1 span{display:block}
 .mo-dau h1 .h1b{color:var(--tim)}
@@ -446,7 +447,8 @@ img{max-width:100%;height:auto;display:block}
 /* ── chương chung ── */
 .chuong{padding:clamp(64px,9vw,112px) 0}
 .chuong-luoi{display:grid;gap:48px;align-items:center}
-@media (min-width:900px){.chuong-luoi{grid-template-columns:1fr 1fr;gap:72px}.chuong-luoi.dao>:first-child{order:2}}
+@media (min-width:720px){.chuong-luoi{grid-template-columns:1fr 1fr;gap:40px}.chuong-luoi.dao>:first-child{order:2}}
+@media (min-width:900px){.chuong-luoi{gap:72px}}
 .to{font-size:clamp(2.4rem,7vw,5rem);color:var(--muc-dam)}
 .vua{font-size:clamp(1.8rem,4.4vw,3rem);color:var(--muc-dam);max-width:18ch}
 .lon{font-size:clamp(1.1rem,2vw,1.35rem);color:var(--muc);margin-top:22px;max-width:40ch}
@@ -455,9 +457,14 @@ img{max-width:100%;height:auto;display:block}
 .chu-thich span{display:block;margin-top:4px}
 
 /* màn THẬT (scripts/chup-man-that.mjs) trong vỏ máy */
-.dien-thoai{margin:0;justify-self:center;--ti:.74;width:calc(390px * var(--ti) + 20px)}
+.dien-thoai{margin:0;justify-self:center;--ti:.78;width:calc(390px * var(--ti) + 20px)}
+/* tỉ lệ theo bề ngang: khung + viền 20px phải lọt trong lề (lề = clamp(16px,5vw,56px)), và một cột khi từ 720px */
+@media (max-width:359px){.dien-thoai{--ti:.7}}
+@media (min-width:400px){.dien-thoai{--ti:.86}}
+@media (min-width:480px){.dien-thoai{--ti:.9}}
+@media (min-width:720px){.dien-thoai{--ti:.72}}
+@media (min-width:820px){.dien-thoai{--ti:.84}}
 @media (min-width:900px){.dien-thoai{--ti:.9}}
-@media (max-width:420px){.dien-thoai{--ti:.7}}
 .vo-may{position:relative;overflow:hidden;border-radius:46px;border:10px solid var(--muc);background:#f8f4ff;box-shadow:var(--bong);width:calc(390px * var(--ti) + 20px);height:calc(844px * var(--ti) + 20px)}
 .man-that{display:block;width:390px;height:844px;border:0;transform:scale(var(--ti));transform-origin:0 0;pointer-events:none}
 
@@ -508,20 +515,20 @@ img{max-width:100%;height:auto;display:block}
 /* ── 9. cách quyết định ── */
 .quyet{background:var(--tim-nen)}
 .duong{list-style:none;padding:0;margin:40px 0 0;display:grid;gap:10px}
-@media (min-width:760px){.duong{grid-template-columns:repeat(4,1fr);gap:0}}
+@media (min-width:720px){.duong{grid-template-columns:repeat(4,1fr);gap:0}}
 .duong li{display:flex;align-items:center;gap:10px;font-weight:700}
 .duong li span{flex:1;display:flex;align-items:center;min-height:72px;padding:14px 18px;border-radius:18px;background:var(--giay);border:1px solid var(--tim-vien);color:var(--muc-dam)}
 .duong li:nth-child(3) span{background:var(--muc-dam);color:#fff;border-color:var(--muc-dam)}
 .duong .bt{color:var(--tim);margin:0 6px}
 .duong li:last-child .bt{display:none}
-@media (max-width:759px){.duong li{flex-direction:column;align-items:stretch;gap:4px}.duong .bt{align-self:center;transform:rotate(90deg);margin:0}}
+@media (max-width:719px){.duong li{flex-direction:column;align-items:stretch;gap:4px}.duong .bt{align-self:center;transform:rotate(90deg);margin:0}}
 .chip-hang{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
 .chip{display:inline-flex;align-items:center;min-height:44px;padding:8px 18px;border-radius:999px;font-weight:700}
 .chip-cao{background:var(--do-nen);color:var(--do-chu)}
 .chip-nghi{background:var(--vang-nen);color:var(--vang-chu)}
 .chip-chua{background:var(--la-nen);color:var(--la-chu)}
 .ba-muc{margin-top:48px;display:grid;gap:28px}
-@media (min-width:900px){.ba-muc{grid-template-columns:1fr 1fr;gap:56px;align-items:start}}
+@media (min-width:720px){.ba-muc{grid-template-columns:1fr 1fr;gap:40px;align-items:start}}
 .ba-muc h3{font-size:1.1rem}
 .ket-luan{margin-top:14px;border-radius:var(--bo-vua);border:1px solid var(--tim-vien);background:var(--giay);padding:20px 22px}
 .ket-luan .chip{font-size:1.1rem}
@@ -532,7 +539,7 @@ img{max-width:100%;height:auto;display:block}
 
 /* ── 10. web / Android ── */
 .hai-ban{display:grid;gap:20px;margin-top:32px}
-@media (min-width:900px){.hai-ban{grid-template-columns:1fr 1fr;gap:28px}}
+@media (min-width:720px){.hai-ban{grid-template-columns:1fr 1fr;gap:24px}}
 .ban{background:var(--giay);border:1px solid var(--tim-vien);border-radius:var(--bo);padding:26px 24px}
 .ban-android{background:var(--muc-dam);color:var(--dem-chu);border-color:var(--muc-dam)}
 .ban h3{font-size:1.15rem}
@@ -569,7 +576,7 @@ summary{cursor:pointer;min-height:var(--cham);display:flex;align-items:center;fo
 
 /* ── 12. không làm ── */
 .khong-lam ul{list-style:none;padding:0;margin:28px 0 0;display:grid;gap:14px}
-@media (min-width:900px){.khong-lam ul{grid-template-columns:1fr 1fr;column-gap:48px}}
+@media (min-width:720px){.khong-lam ul{grid-template-columns:1fr 1fr;column-gap:40px}}
 .khong-lam li{display:flex;gap:12px;align-items:flex-start;font-size:1.05rem}
 .khong-lam li .bt{color:var(--tim);margin-top:4px}
 
@@ -586,11 +593,11 @@ summary{cursor:pointer;min-height:var(--cham);display:flex;align-items:center;fo
 .chan a{display:inline-flex;align-items:center;min-height:var(--cham);font-weight:700}
 .chan strong{color:var(--muc-dam)}
 
-/* ── ĐIỆN THOẠI: ảnh nhỏ làm biểu tượng đầu chương, nút hết bề ngang, bớt khoảng trống ── */
-@media (max-width:899px){
+/* ── ĐIỆN THOẠI (< 720px): ảnh nhỏ làm biểu tượng đầu chương, nút hết bề ngang, bớt khoảng trống ── */
+@media (max-width:719px){
   .mo-dau{min-height:0;padding:8px 0 44px}
   .mo-dau-luoi{gap:4px}
-  .anh-khung{order:-1;width:100%;margin:0}
+  .anh-khung{order:-1;width:min(100%,480px);margin:0}
   .anh-khung img{border-radius:22px}
   .linh-vat,.mo-dau .linh-vat,.cuoc-goi .hinh-goi,.dong-trang .linh-vat,.quyet .linh-vat,.biet-kip .linh-vat{order:-1;justify-self:start;width:150px;margin:0 0 -4px -6px}
   .hang-nut{flex-direction:column;gap:12px}
@@ -600,9 +607,25 @@ summary{cursor:pointer;min-height:var(--cham);display:flex;align-items:center;fo
   .chuong-luoi{gap:28px}
   .cuoc-goi .ghim{padding:56px 0}
   .loi-lua{margin-top:24px}
-  .dien-thoai{--ti:.66}
   .duong li span{min-height:56px}
   .dia-chi .dia-chi-lon{font-size:1.1rem}
+}
+/* điện thoại rộng / gập nửa (480–719px): nút xếp hàng, không dàn cả bề ngang; linh vật to hơn */
+@media (min-width:480px) and (max-width:719px){
+  .hang-nut{flex-direction:row;flex-wrap:wrap}
+  .hang-nut .nut{width:auto}
+  .linh-vat,.mo-dau .linh-vat,.cuoc-goi .hinh-goi,.dong-trang .linh-vat,.quyet .linh-vat,.biet-kip .linh-vat{width:190px}
+}
+/* máy tính bảng, điện thoại gập mở (720–899px): hai cột như máy tính nhưng gọn hơn, không kéo giãn bản điện thoại */
+@media (min-width:720px) and (max-width:899px){
+  .mo-dau{min-height:min(calc(100svh - 80px),720px)}
+  .mo-dau h1{font-size:clamp(2.2rem,5.4vw,3.2rem)}
+  .linh-vat{width:min(100%,260px)}
+  .anh-khung{width:100%}
+}
+@media (max-width:899px){
+  .cai-luoi{max-width:640px}
+  .hop-tai{max-width:520px}
 }
 
 /* ═════ CHUYỂN ĐỘNG — chỉ khi script chạy và người dùng không tắt chuyển động ═════ */
@@ -625,13 +648,17 @@ summary{cursor:pointer;min-height:var(--cham);display:flex;align-items:center;fo
 @keyframes troi{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
 @keyframes chay{to{transform:translateX(-50%)}}
 @keyframes nay{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
-@media (max-width:899px){
+/* ⚠️ GHIM CHỈ KHI ĐỦ RỘNG (hai cột) VÀ ĐỦ CAO: cột chữ ~700px, màn thấp (điện thoại nằm ngang) thì các câu cuối bị che dưới mép khi đang ghim. */
+@media (max-width:719px),(max-height:759px){
   .dong .cuoc-goi[data-ghim]{height:auto}.dong .cuoc-goi .ghim{position:static;min-height:0}
+}
+@media (max-width:1099px){
   /*
    * ⚠️ MÀN HẸP: CHỈ TRƯỢT LÊN, KHÔNG TRƯỢT NGANG (đo 29/9/2026). Phần tử chờ hiện đang bị đẩy
    * translateX(48px) vẫn tính vào độ rộng cuộn được; hộp tải APK rộng 351px + lề 16px + 48px
    * = 419px > màn 390px ⇒ trình duyệt điện thoại tự thu nhỏ CẢ TRANG để chứa, trông như
    * chữ bé đi và lệch. Đặt SAU luật gốc (cùng độ ưu tiên thì luật sau thắng).
+   * Nay áp tới 1099px, không chỉ điện thoại: hai cột từ 720px, lề chỉ 36–56px, mà độ dịch là 48px.
    */
   .dong [data-hien="trai"],.dong [data-hien="phai"]{transform:translateY(32px)}
   .dong [data-hien="trai"].hien,.dong [data-hien="phai"].hien{transform:none}

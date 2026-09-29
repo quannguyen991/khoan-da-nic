@@ -153,6 +153,31 @@ test('ảnh cảnh có người (AI Box): dùng khi có tệp, quay về linh v�
   }
 });
 
+test('ba nấc bố cục: điện thoại <720, máy tính bảng/điện thoại gập 720–899, máy tính ≥900', () => {
+  const css = vi.match(/<style>([\s\S]*?)<\/style>/)[1].replace(/\/\*[\s\S]*?\*\//g, '');
+  // Hai cột từ 720px — trước 29/9/2026 chỉ từ 900px nên máy tính bảng 800px nhận bản điện thoại kéo giãn.
+  assert.match(css, /@media \(min-width:720px\)\{\.chuong-luoi\{grid-template-columns:1fr 1fr/);
+  assert.match(css, /@media \(min-width:720px\)\{\.mo-dau-luoi\{grid-template-columns:/);
+  assert.match(css, /@media \(min-width:720px\) and \(max-width:899px\)\{/, 'thiếu nấc máy tính bảng');
+  assert.match(css, /@media \(min-width:480px\) and \(max-width:719px\)\{/, 'thiếu nấc điện thoại rộng');
+  // Không còn luật nào coi 899px là ranh giới "điện thoại" (trừ giới hạn độ rộng hộp cài đặt).
+  assert.doesNotMatch(css, /@media \(max-width:899px\)\{\s*\.mo-dau/);
+  // Khung điện thoại minh hoạ: tỉ lệ lớn dần theo bề ngang, và lọt trong lề ở mọi nấc.
+  const ti = [...css.matchAll(/@media \(min-width:(\d+)px\)\{\.dien-thoai\{--ti:([\d.]+)\}\}/g)].map((m) => [+m[1], +m[2]]);
+  assert.ok(ti.length >= 4, 'thiếu các nấc tỉ lệ khung điện thoại');
+  const le = (w) => Math.min(56, Math.max(16, w * 0.05));
+  for (const [rong, tiLe] of ti) {
+    const khung = 390 * tiLe + 20;
+    const noiDung = rong >= 720 ? (rong - 2 * le(rong) - (rong >= 900 ? 72 : 40)) / 2 : rong - 2 * le(rong);
+    assert.ok(khung <= noiDung + 3, `khung ${Math.round(khung)}px không lọt cột ${Math.round(noiDung)}px ở ${rong}px`);
+  }
+});
+
+test('ghim cuộc gọi chỉ khi đủ rộng và đủ cao (màn thấp bị che phần dưới khi ghim)', () => {
+  const css = vi.match(/<style>([\s\S]*?)<\/style>/)[1].replace(/\/\*[\s\S]*?\*\//g, '');
+  assert.match(css, /@media \(max-width:719px\),\(max-height:759px\)\{\s*\.dong \.cuoc-goi\[data-ghim\]\{height:auto\}/);
+});
+
 test('phông chữ nạp từ chính web, không gọi Google Fonts', () => {
   assert.doesNotMatch(vi, /fonts\.googleapis|fonts\.gstatic/);
   for (const m of vi.matchAll(/url\((\/phong-chu\/[^)]+)\)/g)) {
