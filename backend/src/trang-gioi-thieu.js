@@ -24,9 +24,10 @@
  * có cảnh báo "Khoan Đã không bao giờ gửi link tải app" và bước tắt lại quyền cài từ
  * nguồn không rõ — chính bộ luật của app chấm tin mời tải .apk là CAO.
  *
- * Ảnh: linh vật sẵn có (public/minh-hoa-*.webp). Ảnh AI tạo bằng
- * scripts/tao-anh-gioi-thieu.py nằm ở public/anh-gioi-thieu/ — có tệp thì trang tự
- * dùng (máy chủ truyền danh sách), chưa có thì dùng linh vật. Ảnh KHÔNG có chữ.
+ * Ảnh: linh vật sẵn có (public/linh-vat/, cắt từ public/minh-hoa-*.webp) làm ảnh thương hiệu;
+ * CẢNH CÓ NGƯỜI do AI Box vẽ (scripts/tao-anh-gioi-thieu.py → public/anh-gioi-thieu/):
+ * cuoc-goi, con-chau, truoc. Có tệp thì trang dùng (máy chủ truyền danh sách), chưa có thì
+ * quay về linh vật. Ảnh KHÔNG có chữ; linh vật KHÔNG vẽ lại bằng AI (sai nhận diện).
  */
 const fs = require('node:fs');
 const crypto = require('node:crypto');
@@ -46,7 +47,7 @@ const EMAIL_LIEN_HE = 'quannxm.sags@gmail.com';
 const KICH_LINH_VAT = { 1: [407, 425], 2: [358, 440], 3: [323, 448], 4: [371, 405], 5: [494, 432] };
 
 /** Ảnh AI có thể có (public/anh-gioi-thieu/<ten>.webp). Máy chủ báo tệp nào đang có. */
-const ANH_AI = ['mo-dau', 'cuoc-goi', 'khoan-da', 'con-chau', 'truoc', 'sau'];
+const ANH_AI = ['cuoc-goi', 'con-chau', 'truoc'];
 
 const CHU = {
   vi: {
@@ -429,6 +430,10 @@ img{max-width:100%;height:auto;display:block}
 .ghi-nho{margin-top:16px;color:var(--muc-phu);font-size:.9rem}
 .linh-vat{justify-self:center;width:min(100%,340px)}
 .linh-vat img{width:100%;height:auto}
+/* cảnh có người do AI vẽ: thẻ bo tròn, giữ tỉ lệ 3:2 */
+.anh-khung{justify-self:center;width:min(100%,540px)}
+.anh-khung img{width:100%;height:auto;aspect-ratio:3/2;object-fit:cover;border-radius:var(--bo);box-shadow:var(--bong)}
+.cuoc-goi .anh-khung img{box-shadow:0 30px 60px -20px rgba(0,0,0,.6)}
 .cuon{display:inline-flex;align-items:center;gap:10px;margin-top:40px;color:var(--muc-phu);font-weight:700;min-height:var(--cham);text-decoration:none}
 .cuon .bt{color:var(--tim)}
 
@@ -585,6 +590,8 @@ summary{cursor:pointer;min-height:var(--cham);display:flex;align-items:center;fo
 @media (max-width:899px){
   .mo-dau{min-height:0;padding:8px 0 44px}
   .mo-dau-luoi{gap:4px}
+  .anh-khung{order:-1;width:100%;margin:0}
+  .anh-khung img{border-radius:22px}
   .linh-vat,.mo-dau .linh-vat,.cuoc-goi .hinh-goi,.dong-trang .linh-vat,.quyet .linh-vat,.biet-kip .linh-vat{order:-1;justify-self:start;width:150px;margin:0 0 -4px -6px}
   .hang-nut{flex-direction:column;gap:12px}
   .hang-nut .nut{width:100%}
@@ -673,6 +680,9 @@ function dungTrangGioiThieu(ngonNgu = 'vi', { apk = null, anh = [] } = {}) {
   const hinh = (tenAi, linhVat, lop = '', tai = 'lazy') => (coAnh.has(tenAi)
     ? `<img class="${lop} anh-ai" src="/anh-gioi-thieu/${tenAi}.webp" alt="" width="1400" height="933" loading="${tai}" decoding="async">`
     : `<img class="${lop}" src="/linh-vat/${linhVat}.webp" alt="" width="${KICH_LINH_VAT[linhVat][0]}" height="${KICH_LINH_VAT[linhVat][1]}" loading="${tai}" decoding="async">`);
+
+  /** Khung cho một ảnh: cảnh AI ⇒ thẻ bo tròn `anh-khung`; không có ⇒ linh vật `lopLinhVat`. */
+  const khung = (tenAi, linhVat, lopLinhVat, hieu = '') => `<div class="${coAnh.has(tenAi) ? 'anh-khung' : lopLinhVat}"${hieu ? ` data-hien="${hieu}"` : ''}>${hinh(tenAi, linhVat)}</div>`;
 
   /** Màn thật chụp sẵn: iframe tĩnh (CSP cấm script ở /man-that), chữ mô tả nằm ở figcaption. */
   let daGhiMau = false;
@@ -773,7 +783,7 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
   <section class="van-de cuoc-goi" data-ghim aria-labelledby="h-cuoc-goi">
     <div class="ghim">
       <div class="khung chuong-luoi">
-        <div class="hinh-goi">${hinh('cuoc-goi', 5)}</div>
+        ${khung('cuoc-goi', 5, 'hinh-goi')}
         <div>
           <h2 id="h-cuoc-goi">${t('c1TieuDe')}</h2>
           <ol class="loi-lua">${c.c1Loi.map((x) => `<li data-buoc>${esc(x)}</li>`).join('')}</ol>
@@ -813,7 +823,7 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
         <p class="lon" data-hien data-tre="1">${t('c4Doan')}</p>
         <p class="phu" data-hien data-tre="2">${t('c4Phu')}</p>
       </div>
-      <div class="linh-vat" data-hien="phai">${hinh('con-chau', 4)}</div>
+      ${khung('con-chau', 4, 'linh-vat', 'phai')}
     </div>
   </section>
 
@@ -907,7 +917,7 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
           <a class="nut nut-phu" href="mailto:${EMAIL_LIEN_HE}">${t('dongNutThu')}</a>
         </div>
       </div>
-      <div class="linh-vat" data-hien="to">${hinh('sau', 3)}</div>
+      ${khung('truoc', 3, 'linh-vat', 'to')}
     </div>
   </section>
 </main>

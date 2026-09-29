@@ -133,6 +133,26 @@ test('màn hẹp: hiệu ứng hiện KHÔNG trượt ngang (lấn ra ngoài mà
   assert.ok(css.indexOf('[data-hien="phai"]{transform:translateX(48px)}') < css.indexOf('[data-hien="trai"],.dong [data-hien="phai"]{transform:translateY('));
 });
 
+test('ảnh cảnh có người (AI Box): dùng khi có tệp, quay về linh vật khi chưa có, tệp đủ nhẹ', () => {
+  const { ANH_AI } = require('../backend/src/trang-gioi-thieu');
+  assert.deepStrictEqual([...ANH_AI].sort(), ['con-chau', 'cuoc-goi', 'truoc'], 'chỉ cảnh có người — linh vật không vẽ lại bằng AI');
+  const co = dungTrangGioiThieu('vi', { apk: null, anh: ANH_AI });
+  const khong = dungTrangGioiThieu('vi', { apk: null, anh: [] });
+  for (const ten of ANH_AI) {
+    assert.match(co, new RegExp(`src="/anh-gioi-thieu/${ten}\\.webp"`), `thiếu ảnh ${ten} khi có tệp`);
+    assert.doesNotMatch(khong, new RegExp(`/anh-gioi-thieu/${ten}\\.webp`), `${ten}: vẫn trỏ ảnh AI khi chưa có tệp`);
+    const tep = path.join(__dirname, '..', 'public', 'anh-gioi-thieu', `${ten}.webp`);
+    assert.ok(fs.existsSync(tep), `chưa tạo ${ten}.webp — chạy scripts/tao-anh-gioi-thieu.py`);
+    assert.ok(fs.statSync(tep).size < 200 * 1024, `${ten}.webp quá nặng (>200KB)`);
+  }
+  assert.match(khong, /src="\/linh-vat\/\d\.webp"/, 'không có ảnh AI thì phải quay về linh vật');
+  // Ảnh trang trí: alt rỗng (chữ bên cạnh đã kể đủ), có kích thước để không nhảy bố cục.
+  for (const m of co.matchAll(/<img[^>]*\/anh-gioi-thieu\/[^>]*>/g)) {
+    assert.match(m[0], /alt=""/);
+    assert.match(m[0], /width="1400" height="933"/);
+  }
+});
+
 test('phông chữ nạp từ chính web, không gọi Google Fonts', () => {
   assert.doesNotMatch(vi, /fonts\.googleapis|fonts\.gstatic/);
   for (const m of vi.matchAll(/url\((\/phong-chu\/[^)]+)\)/g)) {
