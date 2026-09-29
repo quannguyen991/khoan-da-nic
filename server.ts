@@ -6,6 +6,12 @@ import backendModule from "./backend/server.js";
 async function startServer() {
   const app = express();
   /**
+   * ⚠️ TẮT Ở CẢ HAI TẦNG. `backend/server.js` đã `app.disable('x-powered-by')` (§6.8) nhưng
+   * nó chạy như ứng dụng CON được gắn vào đây — header do ứng dụng NGOÀI này đặt nên vẫn
+   * lộ "X-Powered-By: Express" ở bản chạy thật (đo 29/9/2026 trên dist/server.cjs).
+   */
+  app.disable('x-powered-by');
+  /**
    * ⚠️ ĐỌC `PORT` TỪ MÔI TRƯỜNG, ĐỪNG GHIM 3000.
    * Ghim một số cố định thì máy nào đang chạy thứ khác ở cổng đó là bản dựng
    * chết ngay lúc khởi động, kèm một dòng `EADDRINUSE` mà người không quen đọc

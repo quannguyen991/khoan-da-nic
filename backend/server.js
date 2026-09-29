@@ -248,6 +248,29 @@ app.use((req, res, next) => {
   return next();
 });
 
+/**
+ * /healthz — ĐỂ DỊCH VỤ NGOÀI "GÕ CỬA" GIỮ MÁY CHỦ KHÔNG NGỦ (29/9/2026).
+ *
+ * Gói free của Render tự ngủ sau 15 phút không có yêu cầu. Đo 29/9/2026: lượt đầu
+ * sau khi ngủ 16 phút mất 15,0 giây, các lượt sau 0,3–0,8 giây. Với người đang bị
+ * thúc chuyển tiền, 15 giây trước cả khi AI kịp đọc là quá dài. UptimeRobot hoặc
+ * cron-job.org gọi địa chỉ này mỗi 10 phút thì máy chủ không kịp ngủ.
+ *
+ * ⚠️ CỐ Ý KHÔNG LÀM GÌ NGOÀI TRẢ "ok": không chạm cơ sở dữ liệu, không gọi AI, không
+ *    đọc biến môi trường, không trả phiên bản. Địa chỉ này mở công khai và bị gọi
+ *    144 lần mỗi ngày — mỗi việc nó làm là một việc bị nhân 144. `/api/suc-khoe` thì
+ *    khác: nó hỏi kho lưu trữ và đánh thức cả Neon, dùng để XEM sức khoẻ chứ không
+ *    để gõ cửa.
+ * ⚠️ ĐẶT TRƯỚC `express.json` và mọi giới hạn tần suất: dịch vụ gõ cửa không được bị
+ *    429 (nó sẽ tưởng máy chủ hỏng và gửi thư báo), cũng không được đòi đăng nhập.
+ * ⚠️ `no-store`: kẻ đứng giữa mà nhớ đệm câu trả lời thì máy chủ vẫn ngủ mà dịch vụ
+ *    gõ cửa vẫn báo "sống".
+ * `app.get` tự nhận cả HEAD — UptimeRobot mặc định gọi HEAD.
+ */
+app.get('/healthz', (req, res) => {
+  res.set('cache-control', 'no-store').type('text/plain').send('ok');
+});
+
 app.use(express.json({ limit: '8mb' }));
 
 // §6.7 — JSON hỏng trả 400 có cấu trúc, KHÔNG 500 trắng trang.

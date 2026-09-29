@@ -52,6 +52,10 @@ services:
     plan: free
     buildCommand: npm ci && npm run build
     startCommand: npm start
+    # Render gọi địa chỉ này khi triển khai bản mới: chưa trả 200 thì chưa chuyển lưu lượng
+    # sang bản mới (không có khoảng "vừa đẩy xong mà trang trắng"). Cũng là địa chỉ để dịch
+    # vụ ngoài gõ cửa giữ máy chủ không ngủ — xem chú thích ở `/healthz` trong backend/server.js.
+    healthCheckPath: /healthz
     envVars:
       - key: NODE_ENV
         value: production

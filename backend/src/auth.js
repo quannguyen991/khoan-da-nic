@@ -22,6 +22,7 @@ const KHONG_CAN_DANG_NHAP = Object.freeze([
   '/api/safety-card',
   '/transparency',
   '/gioi-thieu',   // trang giới thiệu — người chưa có tài khoản là đúng người cần đọc nó
+  '/healthz',      // dịch vụ "gõ cửa" giữ máy chủ không ngủ — không có tài khoản nào để đăng nhập
 ]);
 
 /**
