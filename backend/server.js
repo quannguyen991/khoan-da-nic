@@ -1877,7 +1877,7 @@ app.get('/man-that/:ten', (req, res) => {
 });
 
 app.get(['/gioi-thieu', '/gioi-thieu/'], (req, res) => {
-  const ngonNgu = String(req.query.lang || '').toLowerCase() === 'en' ? 'en' : 'vi';
+  const ngonNgu = String(req.query.lang || '').toLowerCase() === 'vi' ? 'vi' : 'en';
   const coApk = fs.existsSync(DUONG_APK) && process.env.KHOAN_DA_KHONG_PHAT_APK !== '1';
   res.setHeader('content-type', 'text/html; charset=utf-8');
   res.setHeader('content-language', ngonNgu);

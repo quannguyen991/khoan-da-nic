@@ -648,6 +648,24 @@ summary{cursor:pointer;min-height:var(--cham);display:flex;align-items:center;fo
 @keyframes troi{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
 @keyframes chay{to{transform:translateX(-50%)}}
 @keyframes nay{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
+/* ═════ HOẠT HỌA BỔ SUNG (3/10/2026) — vẫn chỉ chạy dưới .dong, tức là khi người dùng không tắt chuyển động ═════ */
+.dong .mo-dau{position:relative;isolation:isolate}
+.dong .mo-dau::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(40% 50% at 20% 30%,rgba(167,139,250,.38),transparent 70%),radial-gradient(35% 45% at 80% 60%,rgba(244,114,182,.26),transparent 70%);filter:blur(36px);animation:cuc-quang 16s ease-in-out infinite alternate}
+@keyframes cuc-quang{from{transform:translate3d(-4%,-3%,0) scale(1)}to{transform:translate3d(5%,4%,0) scale(1.12)}}
+.dong .nut-chinh{position:relative;overflow:hidden}
+.dong .nut-chinh::after{content:"";position:absolute;top:0;bottom:0;left:-60%;width:40%;background:linear-gradient(105deg,transparent,rgba(255,255,255,.55),transparent);transform:skewX(-18deg);animation:quet 4.5s ease-in-out infinite}
+@keyframes quet{0%,55%{left:-60%}100%{left:130%}}
+.dong .vo-may,.dong .anh-khung{translate:0 calc(var(--par,0) * -26px);transition:transform .6s var(--ra),box-shadow .6s var(--ra)}
+.dong .vo-may:hover{transform:translateY(-8px) rotate(-.8deg)}
+.dong .viec li.tich .o-tich{animation:bat-ra .5s var(--ra)}
+.dong .moc li.sang::before{animation:vang 1s var(--ra)}
+@keyframes bat-ra{0%{transform:scale(.6)}60%{transform:scale(1.18)}100%{transform:scale(1)}}
+@keyframes vang{0%{box-shadow:0 0 0 0 rgba(139,92,246,.55)}100%{box-shadow:0 0 0 16px rgba(139,92,246,0)}}
+.dong .so-dem b{display:inline-block;animation:nhip 1s ease-in-out infinite}
+@keyframes nhip{0%,100%{transform:scale(1)}50%{transform:scale(1.035)}}
+.dong h2{background:linear-gradient(90deg,currentColor,currentColor) 0 100%/0 3px no-repeat;transition:background-size 1.2s var(--ra) .3s}
+.dong h2.hien-gach,.dong [data-hien].hien h2{background-size:56px 3px;padding-bottom:6px}
+
 /* ⚠️ GHIM CHỈ KHI ĐỦ RỘNG (hai cột) VÀ ĐỦ CAO: cột chữ ~700px, màn thấp (điện thoại nằm ngang) thì các câu cuối bị che dưới mép khi đang ghim. */
 @media (max-width:719px),(max-height:759px){
   .dong .cuoc-goi[data-ghim]{height:auto}.dong .cuoc-goi .ghim{position:static;min-height:0}
@@ -676,12 +694,13 @@ const JS = `(function(){
   var io=new IntersectionObserver(function(ds){ds.forEach(function(e){if(e.isIntersecting){e.target.classList.add('hien');io.unobserve(e.target);}});},{rootMargin:'0px 0px -10% 0px',threshold:0.12});
   document.querySelectorAll('[data-hien]').forEach(function(el){io.observe(el);});
   var tien=document.querySelector('.tien-do span'),ghim=document.querySelector('[data-ghim]'),dem=document.querySelector('[data-dem]'),
-      viec=document.querySelector('[data-viec]'),moc=document.querySelector('[data-moc]'),cho=false;
+      par=[].slice.call(document.querySelectorAll('.vo-may,.anh-khung')),viec=document.querySelector('[data-viec]'),moc=document.querySelector('[data-moc]'),cho=false;
   function kep(x){return x<0?0:x>1?1:x;}
   function tienTrinh(el){var r=el.getBoundingClientRect(),h=innerHeight;return kep((h*0.85-r.top)/(r.height+h*0.35));}
   function ve(){
     cho=false;var h=innerHeight,dai=d.scrollHeight-h;
     if(tien)tien.style.transform='scaleX('+(dai>0?kep(scrollY/dai):0)+')';
+    par.forEach(function(el){var r=el.getBoundingClientRect();el.style.setProperty('--par',(kep((r.top+r.height/2)/h)*2-1).toFixed(3));});
     if(ghim){var r=ghim.getBoundingClientRect(),p=r.height>h?kep(-r.top/(r.height-h)):tienTrinh(ghim),
       buoc=ghim.querySelectorAll('[data-buoc]'),n=Math.ceil(p*(buoc.length+0.6));
       buoc.forEach(function(el,i){el.classList.toggle('bat',i<n);});}
@@ -699,7 +718,7 @@ function dungTrangGioiThieu(ngonNgu = 'vi', { apk = null, anh = [] } = {}) {
   const t = (k) => esc(c[k]);
   const khac = l === 'vi' ? 'en' : 'vi';
   const goc = 'https://khoan-da.onrender.com';
-  const duongTrang = l === 'en' ? '/gioi-thieu?lang=en' : '/gioi-thieu';
+  const duongTrang = l === 'en' ? '/gioi-thieu' : '/gioi-thieu?lang=vi';
   const duongMinhBach = l === 'en' ? '/transparency?lang=en' : '/transparency';
   const coAnh = new Set(anh);
 
@@ -758,8 +777,8 @@ function dungTrangGioiThieu(ngonNgu = 'vi', { apk = null, anh = [] } = {}) {
 <meta name="theme-color" content="#9e76ea">
 <link rel="icon" href="/logo-192.png">
 <link rel="canonical" href="${goc}${duongTrang}">
-<link rel="alternate" hreflang="vi" href="${goc}/gioi-thieu">
-<link rel="alternate" hreflang="en" href="${goc}/gioi-thieu?lang=en">
+<link rel="alternate" hreflang="vi" href="${goc}/gioi-thieu?lang=vi">
+<link rel="alternate" hreflang="en" href="${goc}/gioi-thieu">
 <meta property="og:type" content="website">
 <meta property="og:title" content="${t('tieuDeTrang')}">
 <meta property="og:description" content="${t('moTa')}">
@@ -784,7 +803,7 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
   <div class="khung dau-trong">
     <a class="thuong-hieu" href="${duongTrang}" aria-label="${t('veDau')}"><img src="/logo-192.png" width="44" height="44" alt=""><span>Khoan Đã</span></a>
     <span class="khau-hieu">${t('khauHieu')}</span>
-    <a class="nut-nho" href="${khac === 'en' ? '/gioi-thieu?lang=en' : '/gioi-thieu'}" hreflang="${khac}" lang="${khac}" aria-label="${t('doiNgonNguNhan')}">${t('doiNgonNgu')}</a>
+    <a class="nut-nho" href="${khac === 'en' ? '/gioi-thieu' : '/gioi-thieu?lang=vi'}" hreflang="${khac}" lang="${khac}" aria-label="${t('doiNgonNguNhan')}">${t('doiNgonNgu')}</a>
   </div>
 </header>
 

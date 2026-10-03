@@ -5662,7 +5662,7 @@ function SettingsView({
         đường tương đối trên web. Mở ra ngoài như các link tin báo khác.
       */}
       <a
-        href={`${api('/gioi-thieu')}${lang === 'en' ? '?lang=en' : ''}`}
+        href={`${api('/gioi-thieu')}${lang === 'en' ? '' : '?lang=vi'}`}
         target="_blank"
         rel="noopener noreferrer"
         className="w-full max-w-[360px] bg-white rounded-3xl p-5 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] mb-6 flex items-center gap-3 text-left active:scale-[0.98] transition-transform"
