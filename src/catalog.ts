@@ -1450,6 +1450,7 @@ export const SO_NGAN_HANG: Record<string, Cap> = {
 
 export const CANH_BAO_CHINH_THUC: Record<string, Cap> = {
   TIEU_DE: c('Cơ quan nhà nước đã cảnh báo thủ đoạn tương tự', 'Authorities have warned about a similar tactic'),
+  XEM_NOI_DUNG: c('Xem cảnh báo', 'Read the warning'),
   CONG_BO: c('Công bố ngày {ngay}', 'Published {ngay}'),
   DOC_BAN_GOC: c('Đọc cảnh báo gốc trên {tenMien}', 'Read the original warning on {tenMien}'),
 };

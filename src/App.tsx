@@ -7215,7 +7215,7 @@ export function WarningView({
    * nên cắt ở đây không làm mất bước quan trọng nhất.
    */
   const [hienHetBuocPhucHoi, setHienHetBuocPhucHoi] = useState(false);
-  const SO_BUOC_PHUC_HOI_DAU = 4;
+  const SO_BUOC_PHUC_HOI_DAU = 3;
   const buocPhucHoiHien = hienHetBuocPhucHoi ? buocPhucHoi : buocPhucHoi.slice(0, SO_BUOC_PHUC_HOI_DAU);
   const soBuocPhucHoiConLai = Math.max(0, buocPhucHoi.length - SO_BUOC_PHUC_HOI_DAU);
 
@@ -7656,10 +7656,8 @@ export function WarningView({
           */}
           {khongGoiDuoc
             ? t('Chưa gửi đi kiểm được')
-            : tuBamDung
-              ? t('Bác dừng lại 60 giây đã')
-              : dangPhucHoi && !laCao
-                ? t('Mình lo việc đã chuyển tiền trước')
+            : (dangPhucHoi || canRecovery) && !laCao ? t('Gọi ngân hàng ngay')
+              : tuBamDung ? t('Bác dừng lại 60 giây đã')
                 : (nhanChu ?? t('Chưa có kết quả'))}
         </h1>
         {/*
@@ -8022,7 +8020,7 @@ export function WarningView({
           nhắc lại đúng câu lệnh đó. Khi không có hero (không gọi được ai, đang phục hồi)
           thì chúng vẫn hiện như cũ.
         */}
-        {canThiep === 'PAUSE_60S' && !heroGap && (
+        {canThiep === 'PAUSE_60S' && !heroGap && !canRecovery && (
           <div className="w-full bg-black/30 border border-white/20 rounded-[22px] px-4 py-3 mb-2 backdrop-blur-md">
             <p className="text-white font-semibold text-[17px] leading-snug text-center">
               {t('Cảm giác phải làm ngay là do họ tạo ra.')}
@@ -8041,7 +8039,7 @@ export function WarningView({
           một dòng chữ nữa là bắt bác đọc một thứ rồi mới thấy đúng thứ ấy dưới
           dạng nút.
         */}
-        {canThiep === 'PAUSE_60S' && !heroGap && (
+        {canThiep === 'PAUSE_60S' && !heroGap && !canRecovery && (
           <div className="w-full bg-white/12 border border-white/20 rounded-[22px] backdrop-blur-md mb-2 overflow-hidden">
             {[
               { icon: PhoneOff, text: t('Dừng cuộc gọi') },
@@ -8151,8 +8149,11 @@ export function WarningView({
         */}
         {canVerify && (
           <div className="w-full bg-black/30 border border-white/20 rounded-2xl p-4 backdrop-blur-md mb-2">
-            <p className="text-white font-semibold text-[15px] leading-relaxed mb-3">
-              {t('Đừng gọi lại đúng số vừa gọi cho bác. Bác tự bấm số đã lưu sẵn trong máy, hoặc số in ở mặt sau thẻ ngân hàng.')}
+            <p className="text-white font-black text-[20px] leading-snug">
+              {t('Đừng gọi lại số vừa gọi cho bác.')}
+            </p>
+            <p className="text-white/90 font-semibold text-[17px] leading-snug mt-1 mb-4">
+              {t('Dùng số đã lưu trong máy, hoặc số sau thẻ ngân hàng.')}
             </p>
             <button
               onClick={() => {
@@ -8248,7 +8249,7 @@ export function WarningView({
             className="w-full min-h-[56px] mb-2 px-4 py-3 rounded-[22px] bg-rose-950/55 border-2 border-rose-300/60 text-white font-bold text-[16px] leading-snug flex items-center justify-center gap-2"
           >
             <FileText size={18} className="shrink-0" />
-            <span>{t('Gọi ngân hàng xong rồi? Xem việc tiếp theo')}</span>
+            <span>{t('Xem việc tiếp theo')}</span>
           </button>
         )}
         {canRecovery && keHoachPhucHoi && moBuocPhucHoi && (
@@ -8263,15 +8264,12 @@ export function WarningView({
               đếm lùi; "giờ vàng" không có nguồn nào; và nó lệch với chính tên màn "Bảo vệ
               72 giờ", dễ bị đọc thành "còn 72 giờ để lo". Việc đúng là bắt đầu NGAY.
             */}
-            <p className="text-rose-50 text-[14px] font-semibold px-4 pt-2">
-              {t('Bắt đầu ngay, đừng chờ hết 72 giờ. Báo ngân hàng càng sớm càng dễ xử lý.')}
-            </p>
             {buocPhucHoiHien.length > 0 && (
               <div className={`mt-2 ${(hienHetBuocPhucHoi || soBuocPhucHoiConLai === 0) && canhBaoPhucHoi.length === 0 ? 'pb-2' : ''}`}>
                 {buocPhucHoiHien.map((cau, i) => (
                   <div key={cau} className={`flex items-center gap-3 px-4 py-2.5 ${i > 0 ? 'border-t border-white/15' : ''}`}>
                     <span className="w-7 h-7 rounded-full bg-white/20 text-white text-[14px] font-black flex items-center justify-center shrink-0">{i + 1}</span>
-                    <span className="text-white font-semibold text-[15px] leading-snug">{cau}</span>
+                    <span className="text-white font-bold text-[17px] leading-snug">{cau}</span>
                   </div>
                 ))}
               </div>

@@ -129,7 +129,7 @@ export function CanhBaoChinhThuc({
     <section className="w-full bg-black/30 border border-white/20 rounded-[22px] px-4 py-4 mb-2 backdrop-blur-md">
       <div className="flex items-start gap-2 mb-3">
         <Landmark size={20} className="text-white/90 shrink-0 mt-0.5" aria-hidden="true" />
-        <h3 className="text-white font-black text-[17px] leading-snug">
+        <h3 className="text-white font-black text-[19px] leading-snug">
           {tra(CANH_BAO_CHINH_THUC, 'TIEU_DE', lang)}
         </h3>
       </div>
@@ -140,25 +140,31 @@ export function CanhBaoChinhThuc({
           return (
             <div key={c.id} className={i > 0 ? 'pt-4 border-t border-white/20' : ''}>
               {/* Nguồn đứng TRƯỚC nội dung — §11: cảnh báo không có nguồn là cảnh báo không được viết. */}
-              <p className="text-white font-bold text-[15px] leading-snug">{c.coQuan}</p>
+              <p className="text-white font-bold text-[17px] leading-snug">{c.coQuan}</p>
               {ngay && (
-                <p className="text-white/85 text-[14px] leading-snug mt-0.5">
+                <p className="text-white/85 text-[15px] leading-snug mt-0.5">
                   {thay(tra(CANH_BAO_CHINH_THUC, 'CONG_BO', lang) ?? '', { ngay })}
                 </p>
               )}
-              <p className="text-white font-semibold text-[16px] leading-relaxed mt-2">{c.tomTat}</p>
-              <a
-                href={c.sourceUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-3 w-full min-h-[52px] px-4 py-2 rounded-2xl border-2 border-white/80 text-white font-bold text-[15px] leading-snug flex items-center justify-center gap-2 text-center active:scale-[0.98] transition-transform"
-              >
-                {/* Hiện tên miền để bác tự thấy đây là trang .gov.vn, không phải tin lời app. */}
-                <span className="[overflow-wrap:anywhere]">
-                  {thay(tra(CANH_BAO_CHINH_THUC, 'DOC_BAN_GOC', lang) ?? '', { tenMien: c.tenMien })}
-                </span>
-                <ExternalLink size={18} className="shrink-0" aria-hidden="true" />
-              </a>
+              {/* Nội dung dài gập lại: nguồn và ngày đã nằm trên, bác chạm khi muốn đọc. */}
+              <details className="mt-3">
+                <summary className="min-h-[52px] px-4 py-2 rounded-2xl bg-white/90 text-slate-900 font-extrabold text-[17px] leading-snug flex items-center justify-center text-center cursor-pointer">
+                  {tra(CANH_BAO_CHINH_THUC, 'XEM_NOI_DUNG', lang)}
+                </summary>
+                <p className="text-white font-semibold text-[18px] leading-relaxed mt-3">{c.tomTat}</p>
+                <a
+                  href={c.sourceUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-3 w-full min-h-[52px] px-4 py-2 rounded-2xl border-2 border-white/80 text-white font-bold text-[16px] leading-snug flex items-center justify-center gap-2 text-center active:scale-[0.98] transition-transform"
+                >
+                  {/* Hiện tên miền để bác tự thấy đây là trang .gov.vn, không phải tin lời app. */}
+                  <span className="[overflow-wrap:anywhere]">
+                    {thay(tra(CANH_BAO_CHINH_THUC, 'DOC_BAN_GOC', lang) ?? '', { tenMien: c.tenMien })}
+                  </span>
+                  <ExternalLink size={18} className="shrink-0" aria-hidden="true" />
+                </a>
+              </details>
             </div>
           );
         })}

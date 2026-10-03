@@ -19,7 +19,6 @@ test('màn phục hồi không in "giờ vàng": số 24 không nguồn, lại i
   assert.ok(!('gioVang' in R.layKeHoachPhucHoi('VN')), 'kế hoạch phục hồi còn trường gioVang');
   assert.doesNotMatch(boChuThich(doc('src', 'App.tsx')), /Giờ vàng|gioVang/);
   assert.doesNotMatch(boChuThich(doc('src', 'i18n.ts')), /Golden window|Giờ vàng/);
-  assert.match(doc('src', 'i18n.ts'), /"Bắt đầu ngay, đừng chờ hết 72 giờ\./, 'thiếu câu giục bắt đầu ngay');
 });
 
 test('không câu tiếng Anh nào hứa chặn chuyển tiền, và tên PAUSE_60S đúng §4.1', () => {
