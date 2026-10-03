@@ -48,7 +48,33 @@ const KHOI_PHUC_TOI_DA_MS = 10 * 60 * 1000;
 const HAN_HOI_MS = 5 * 60 * 1000;
 const TRA_LOI_HOI = Object.freeze(['CO', 'KHONG']);
 
-const LOAI_SU_KIEN = Object.freeze(['ket_qua_kiem', 'otp_trong_cuoc_goi', 'cai_app_trong_cuoc_goi', 'tien_ra_trong_cuoc_goi']);
+/*
+ * BA MỨC KẾT QUẢ (3/10/2026): `ket_qua_kiem` = nguy hiểm CAO (như cũ), `ket_qua_nghi_ngo` =
+ * có dấu hiệu đáng ngờ, `chua_kiem_duoc` = Khoan Đã chưa kiểm được một thứ bác gửi. Mỗi loại
+ * có công tắc RIÊNG của bố mẹ, mặc định TẮT (§12). Loại tách riêng (không dồn vào
+ * `ket_qua_kiem` kèm nhãn) để gộp 30 giây không nuốt mất một báo CAO đến sau báo Nghi ngờ.
+ */
+const LOAI_SU_KIEN = Object.freeze([
+  'ket_qua_kiem', 'ket_qua_nghi_ngo', 'chua_kiem_duoc',
+  'otp_trong_cuoc_goi', 'cai_app_trong_cuoc_goi', 'tien_ra_trong_cuoc_goi',
+]);
+/** Loại nào do công tắc nào của bố mẹ quyết định. */
+const QUY_TAC_THEO_LOAI = Object.freeze({
+  ket_qua_kiem: 'baoKhiCao',
+  ket_qua_nghi_ngo: 'baoKhiNghiNgo',
+  chua_kiem_duoc: 'baoKhiChuaKiem',
+  otp_trong_cuoc_goi: 'baoKhiOtpTrongCuocGoi',
+  cai_app_trong_cuoc_goi: 'baoKhiOtpTrongCuocGoi',
+  tien_ra_trong_cuoc_goi: 'baoKhiOtpTrongCuocGoi',
+});
+/** Loại kết quả đòi ĐÚNG một nhãn — máy chủ không tin client gắn nhãn tuỳ ý. */
+const NHAN_CAN_CHO_LOAI = Object.freeze({ ket_qua_kiem: 'CAO', ket_qua_nghi_ngo: 'NGHI_NGO' });
+/**
+ * Chỉ báo CAO và ba sự kiện trong cuộc gọi mới hẹn "chưa ai gọi" sau 60 giây. Nghi ngờ và
+ * "chưa kiểm được" không tự nhắc lần hai: nhắc dồn cho việc chưa chắc nguy hiểm là cách
+ * nhanh nhất để con tắt thông báo của Khoan Đã.
+ */
+const coLeoThang = (loai) => !['ket_qua_nghi_ngo', 'chua_kiem_duoc'].includes(loai);
 const HANH_DONG = Object.freeze(['bam_goi_nguoi_than', 'toi_on', 'da_lo_chuyen', 'con_bao_lua_dao', 'con_bao_khong_sao', 've_trang_chu']);
 const MA_HO = /^[a-z_]{1,60}$/;
 /** Ba nhãn của hợp đồng (§HĐ) — thứ DUY NHẤT được đi kèm một báo động. */
@@ -77,8 +103,13 @@ const TEN_HO_EN = Object.freeze({
 
 const CHU = Object.freeze({
   vi: {
-    tieuDe: 'Khoan Đã — {ten} đang cần con',
+    tieuDe: 'Khoan Đã — CẢNH BÁO GẤP: {ten} đang cần con',
     ket_qua_kiem: '{ten} đang gặp tình huống nguy hiểm cao{ho}. Gọi ngay.',
+    // 3/10/2026 — mức giữa: vẫn là cảnh báo gấp, nhưng không nói "nguy hiểm cao" vì chưa phải.
+    tieuDeNghiNgo: 'Khoan Đã — CẢNH BÁO GẤP: {ten}',
+    ket_qua_nghi_ngo: '{ten} vừa gặp một yêu cầu có dấu hiệu đáng ngờ{ho}. Gọi hỏi {ten} ngay.',
+    // Tin đơn giản: không khẩn, không "gọi ngay". Dùng `tieuDeCapNhat` làm tiêu đề.
+    chua_kiem_duoc: '{ten} vừa nhờ Khoan Đã kiểm một thứ nhưng chưa kiểm được. Hỏi thăm {ten} khi tiện.',
     otp_trong_cuoc_goi: 'Máy {ten} vừa nhận mã OTP trong lúc đang có cuộc gọi. Gọi ngay.',
     cai_app_trong_cuoc_goi: 'Máy {ten} vừa cài ứng dụng mới trong lúc đang có cuộc gọi. Gọi ngay.',
     tien_ra_trong_cuoc_goi: 'Tiền vừa ra khỏi tài khoản của {ten} trong lúc đang có cuộc gọi. Gọi ngay.',
@@ -96,8 +127,11 @@ const CHU = Object.freeze({
     hoi_goi: '{ten} đang nghe một cuộc gọi xưng là con. Có phải con đang gọi không? Mở để trả lời.',
   },
   en: {
-    tieuDe: 'Khoan Đã — {ten} needs you',
+    tieuDe: 'Khoan Đã — URGENT: {ten} needs you',
     ket_qua_kiem: '{ten} is in a high-risk situation{ho}. Call now.',
+    tieuDeNghiNgo: 'Khoan Đã — URGENT: {ten}',
+    ket_qua_nghi_ngo: '{ten} just received a request with suspicious signs{ho}. Call {ten} to ask right away.',
+    chua_kiem_duoc: '{ten} asked Khoan Đã to check something, but it could not be checked. Check in with {ten} when you can.',
     otp_trong_cuoc_goi: "{ten}'s phone just received a one-time code during a call. Call now.",
     cai_app_trong_cuoc_goi: "{ten}'s phone just installed a new app during a call. Call now.",
     tien_ra_trong_cuoc_goi: "Money just left {ten}'s account during a call. Call now.",
@@ -143,10 +177,13 @@ function duongMo(suKienId) { return `/?view=guardian&canhBao=${encodeURIComponen
 
 function soanCanhBao({ tenBoMe, loaiSuKien, hoKichBan, lang, suKienId }) {
   const c = CHU[lang];
+  const mauTieuDe = loaiSuKien === 'ket_qua_nghi_ngo' ? c.tieuDeNghiNgo
+    : loaiSuKien === 'chua_kiem_duoc' ? c.tieuDeCapNhat : c.tieuDe;
   return {
-    tieuDe: dien(c.tieuDe, { ten: tenBoMe }),
+    tieuDe: dien(mauTieuDe, { ten: tenBoMe }),
     noiDung: dien(c[loaiSuKien], { ten: tenBoMe, ho: tenHo(hoKichBan, lang) }),
-    khan: true,
+    // "Chưa kiểm được" là tin nhắn đơn giản — không kêu như báo động.
+    khan: loaiSuKien !== 'chua_kiem_duoc',
     ma: `bao-dong-${suKienId}`,
     duong: duongMo(suKienId),
     lang,
@@ -285,11 +322,15 @@ function taoBaoDong({
      */
     const nhan = NHAN_HOP_LE.includes(vao?.nhan) ? vao.nhan : null;
     const hoKichBan = typeof vao?.hoKichBan === 'string' && MA_HO.test(vao.hoKichBan) ? vao.hoKichBan : null;
-    // Quy tắc 1 là "nguy hiểm CAO" — kết quả kiểm ở mức khác không báo.
-    if (loaiSuKien === 'ket_qua_kiem' && nhan !== 'CAO') return { gui: false, lyDo: 'KHONG_PHAI_MUC_CAO' };
+    // Loại kết quả đòi đúng nhãn của nó: `ket_qua_kiem` chỉ nhận CAO, `ket_qua_nghi_ngo` chỉ nhận NGHI_NGO.
+    const nhanCan = NHAN_CAN_CHO_LOAI[loaiSuKien];
+    if (nhanCan && nhan !== nhanCan) {
+      return { gui: false, lyDo: nhanCan === 'CAO' ? 'KHONG_PHAI_MUC_CAO' : 'KHONG_PHAI_MUC_NGHI_NGO' };
+    }
 
+    // §12 — mỗi loại do ĐÚNG MỘT công tắc của bố mẹ quyết định; thiếu công tắc thì không gửi.
     const quyTac = await QT.docQuyTac(kho, boMeId);
-    const duocBao = loaiSuKien === 'ket_qua_kiem' ? quyTac.baoKhiCao : quyTac.baoKhiOtpTrongCuocGoi;
+    const duocBao = quyTac[QUY_TAC_THEO_LOAI[loaiSuKien]] === true;
     if (!duocBao) return { gui: false, lyDo: 'CHUA_BAT_QUY_TAC' };
 
     const bayGioLuc = bayGio();
@@ -302,13 +343,13 @@ function taoBaoDong({
     });
     const tenBoMe = await tenCua(boMeId);
     const ketQua = await guiChoThanhVien(boMeId, (lang) => soanCanhBao({ tenBoMe, loaiSuKien, hoKichBan, lang, suKienId: ev.id }));
-    henGio(() => leoThang(ev.id), LEO_THANG_MS);
+    if (coLeoThang(loaiSuKien)) henGio(() => leoThang(ev.id), LEO_THANG_MS);
     return { gui: true, suKienId: ev.id, ketQua: ketQua.map(({ ten, trangThai }) => ({ ten, trangThai })) };
   }
 
   async function leoThang(suKienId) {
     const ev = await khoSuKien.lay(suKienId);
-    if (!ev || ev.daLeoThang || ev.conDaGoi || ev.hanhDong.length > 0) return false;
+    if (!ev || !coLeoThang(ev.loaiSuKien) || ev.daLeoThang || ev.conDaGoi || ev.hanhDong.length > 0) return false;
     ev.daLeoThang = true;
     // Ghi TRƯỚC khi gửi: hẹn giờ cũ và hẹn giờ khôi phục sau khởi động có thể cùng
     // nổ — ghi trước thì lượt thứ hai thấy `daLeoThang` và dừng, con không bị báo đôi.
@@ -470,7 +511,7 @@ function taoBaoDong({
     const luc = bayGio();
     let soHen = 0;
     for (const ev of await khoSuKien.liet()) {
-      if (!ev || ev.loaiSuKien === 'hoi_goi' || !LOAI_SU_KIEN.includes(ev.loaiSuKien)) continue;
+      if (!ev || ev.loaiSuKien === 'hoi_goi' || !LOAI_SU_KIEN.includes(ev.loaiSuKien) || !coLeoThang(ev.loaiSuKien)) continue;
       if (ev.daLeoThang || ev.conDaGoi || (ev.hanhDong || []).length > 0) continue;
       const tuoi = luc - ev.luc;
       if (!(tuoi >= 0) || tuoi >= KHOI_PHUC_TOI_DA_MS) continue;
@@ -487,6 +528,6 @@ function taoBaoDong({
 }
 
 module.exports = {
-  BANG_NHAN, LOAI_SU_KIEN, HANH_DONG, CHUA_BAT_NHAN, LoiBaoDong, CHU, HAN_HOI_MS, TRA_LOI_HOI,
+  BANG_NHAN, LOAI_SU_KIEN, QUY_TAC_THEO_LOAI, HANH_DONG, CHUA_BAT_NHAN, LoiBaoDong, CHU, HAN_HOI_MS, TRA_LOI_HOI,
   dangKyNhan, tatNhan, taoKhoSuKien, taoBaoDong, soanCanhBao,
 };

@@ -74,7 +74,7 @@ import {
   quyenDocThongBao, xinQuyenDocThongBao, tinMoiNhat, xoaTinDaBat,
   trangThaiThuongTruc, trangThaiMay, tomTatChoMayChu, moCaiDatTroNang,
   napChuCuocGoi, trangThaiTheoDoiCuocGoi, datTheoDoiCuocGoi, docTo, dungDocTo, dayAppXuong,
-  goiDienThoai,
+  goiDienThoai, guiSms,
   batBongBong, tatBongBong, trangThaiBongBong,
   type QuyenNative, type TrangThaiMay,
 } from './native';
@@ -107,6 +107,9 @@ import { hopNhatNguoiThan } from './lib/hop-nhat-nguoi-than';
 import { useLoiNhanCon, usePhatMotLan } from './lib/loi-nhan-giong';
 import { batDauDo, ketThucDo, ghiLuot } from './lib/do-thoi-gian-toi-nguoi-that';
 import { ghiKetQua, type HanhDong } from './lib/ket-qua-can-thiep';
+import { chonLoaiBaoCon } from './lib/loai-bao-con';
+import { nhanSmsDuPhong, cauTrangThaiSms } from './lib/sms-bao-con';
+import { docQuyTacDem } from './lib/quy-tac-bao-dem';
 import { chonViecAnToan, CAU_VIEC_AN_TOAN, cauLenhNgan, CAU_LENH_TU_BAT } from './lib/viec-an-toan-tiep-theo';
 import { useDocToMotLan } from './lib/doc-to-mot-lan';
 import { HoiNhanhView } from './components/HoiNhanh';
@@ -7404,15 +7407,45 @@ export function WarningView({
    * ⚠️ Diễn tập và mất mạng không gửi.
    */
   const [baoDong, setBaoDong] = useState<PhanHoiBaoDong | null>(null);
+  /** Dòng nói máy đã nhắn SMS cho con hay chưa (3/10/2026) — chỉ có ở APK khi bác đã bật. */
+  const [cauSms, setCauSms] = useState<string | null>(null);
   const daGuiBaoDongRef = useRef(false);
   useEffect(() => {
-    // Phần 4: máy tự bật cũng báo — loại sự kiện riêng, máy chủ kiểm quy tắc thứ hai.
-    const loaiBaoDong = laCao ? 'ket_qua_kiem' : lyDoTuBat;
-    if (daGuiBaoDongRef.current || !loaiBaoDong || laDienTap || khongGoiDuoc || !docPhienTaiKhoan()) return;
+    /*
+     * 3/10/2026 — BA MỨC: nguy hiểm CAO, có dấu hiệu (NGHI_NGO), và "chưa kiểm được" một thứ
+     * bác gửi. Máy tự bật trong cuộc gọi (Phần 4) giữ nguyên. `chonLoaiBaoCon` chỉ chọn LOẠI;
+     * có gửi thật hay không là máy chủ quyết, theo ba công tắc RIÊNG của bố mẹ (§12).
+     */
+    const quyetDinh = chonLoaiBaoCon({ nhan, maLyDo: result?.maLyDo, chuaKiem: result?.chuaKiem, lyDoTuBat });
+    if (daGuiBaoDongRef.current || !quyetDinh || laDienTap || khongGoiDuoc || !docPhienTaiKhoan()) return;
     daGuiBaoDongRef.current = true;
-    void guiBaoDong({ loaiSuKien: loaiBaoDong, nhan: laCao ? 'CAO' : undefined, hoKichBan: hoKichBanHienTai })
-      .then((kq) => { suKienBaoDongRef.current = kq.suKienId ?? null; setBaoDong(kq); })
-      .catch(() => { /* không mạng / phiên hết: màn vẫn chạy, không hiện dòng trạng thái nào */ });
+    /*
+     * 3/10/2026 — SMS DỰ PHÒNG (phương án B). Chỉ chạy khi bác đã bật CẢ mức báo LẪN "nhắn SMS cho
+     * con" (§12), chỉ trên APK, và chỉ khi thông báo đẩy không tới được máy con nào. `phanHoi` là
+     * `null` khi không tới được máy chủ — lúc đó dùng bản sao quy tắc trên máy. Mọi nhánh nằm trong
+     * `lib/sms-bao-con.ts` và có test.
+     */
+    const nhanSms = (phanHoi: PhanHoiBaoDong | null) => {
+      void nhanSmsDuPhong({
+        loaiSuKien: quyetDinh.loaiSuKien,
+        tenBoMe: docPhienTaiKhoan()?.hoSo?.ten ?? '',
+        lang,
+        lienHe: [
+          ...dsGoi.map((n) => ({ ten: n.ten, dienThoai: n.dienThoai })),
+          ...(familyMembers ?? []).map((m) => ({ ten: m.name, phone: m.phone })),
+        ],
+        quyTac: docQuyTacDem(),
+        phanHoi,
+        guiSms,
+      }).then((kq) => setCauSms(cauTrangThaiSms(kq, lang))).catch(() => undefined);
+    };
+    void guiBaoDong({
+      loaiSuKien: quyetDinh.loaiSuKien,
+      nhan: quyetDinh.nhan,
+      hoKichBan: quyetDinh.loaiSuKien === 'chua_kiem_duoc' ? null : hoKichBanHienTai,
+    })
+      .then((kq) => { suKienBaoDongRef.current = kq.suKienId ?? null; setBaoDong(kq); nhanSms(kq); })
+      .catch(() => { nhanSms(null); /* không mạng / phiên hết: màn vẫn chạy; SMS dự phòng nếu bác đã bật */ });
   }, []);
   const cauBaoDong = baoDong?.gui && baoDong.ketQua ? cauTrangThaiBao(baoDong.ketQua, t) : '';
 
@@ -7811,9 +7844,13 @@ export function WarningView({
               {cauBaoDong && (
                 <p role="status" className="text-[15px] font-bold text-white/90 text-center leading-snug">{cauBaoDong}</p>
               )}
+              {cauSms && (
+                <p role="status" className="text-[15px] font-bold text-white/90 text-center leading-snug">{cauSms}</p>
+              )}
             </div>
           </>
         ) : !tuBamDung && (
+          <>
           <p className="text-[16px] font-semibold text-white/95 mb-4 text-center leading-snug max-w-sm">
             {khongGoiDuoc
               ? t('Mạng không đi được nên chưa có gì được kiểm cả.')
@@ -7827,6 +7864,14 @@ export function WarningView({
                     ? t('Chưa thấy dấu hiệu rõ ràng. Bác vẫn đừng đọc mã cho ai.')
                     : t('Bác thở một hơi. Không có gì gấp tới mức không chờ được một phút.')}
           </p>
+          {/* 3/10/2026 — mức Nghi ngờ / chưa kiểm được cũng có thể báo cho con; nói đúng điều máy chủ biết (§4.3, §11). */}
+          {cauBaoDong && (
+            <p role="status" className="text-[15px] font-bold text-white/90 mb-3 text-center leading-snug">{cauBaoDong}</p>
+          )}
+          {cauSms && (
+            <p role="status" className="text-[15px] font-bold text-white/90 mb-3 text-center leading-snug">{cauSms}</p>
+          )}
+          </>
         )}
 
         {/*

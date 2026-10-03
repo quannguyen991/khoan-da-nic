@@ -1251,6 +1251,49 @@ export const MAN_SO_DO: Record<string, Cap> = {
   ),
 };
 
+/**
+ * NHẮN SMS CHO CON — thêm 3/10/2026 (phương án B), xem `src/lib/sms-bao-con.ts`.
+ *
+ * ⚠️ Tin này RỜI MÁY bố mẹ và con đọc nó trên điện thoại: chỉ TÊN của bác và MỨC, KHÔNG nội
+ * dung tin nhắn bác nhận (§6.9). Không "an toàn", không "đã thấy", không buộc tội ai (§11).
+ * ⚠️ Mức gấp ghi "CẢNH BÁO GẤP"; "chưa kiểm được" là tin đơn giản, giọng hỏi thăm.
+ */
+export const SMS_BAO_CON: Record<string, Cap> = {
+  ket_qua_kiem: c(
+    'KHOAN ĐÃ - CẢNH BÁO GẤP: {ten} đang gặp tình huống nguy hiểm cao. Gọi ngay.',
+    'KHOAN ĐÃ - URGENT: {ten} is in a high-risk situation. Call now.',
+  ),
+  ket_qua_nghi_ngo: c(
+    'KHOAN ĐÃ - CẢNH BÁO GẤP: {ten} vừa gặp một yêu cầu có dấu hiệu đáng ngờ. Gọi hỏi ngay.',
+    'KHOAN ĐÃ - URGENT: {ten} just received a request with suspicious signs. Call to ask now.',
+  ),
+  chua_kiem_duoc: c(
+    'Khoan Đã: {ten} vừa nhờ kiểm một thứ nhưng chưa kiểm được. Hỏi thăm khi tiện.',
+    'Khoan Đã: {ten} asked for a check but it could not be checked. Check in when you can.',
+  ),
+  otp_trong_cuoc_goi: c(
+    'KHOAN ĐÃ - CẢNH BÁO GẤP: máy {ten} vừa nhận mã OTP lúc đang có cuộc gọi. Gọi ngay.',
+    'KHOAN ĐÃ - URGENT: {ten} just received a one-time code during a call. Call now.',
+  ),
+  cai_app_trong_cuoc_goi: c(
+    'KHOAN ĐÃ - CẢNH BÁO GẤP: máy {ten} vừa cài ứng dụng mới lúc đang có cuộc gọi. Gọi ngay.',
+    'KHOAN ĐÃ - URGENT: {ten} just installed a new app during a call. Call now.',
+  ),
+  tien_ra_trong_cuoc_goi: c(
+    'KHOAN ĐÃ - CẢNH BÁO GẤP: tiền vừa ra khỏi tài khoản của {ten} lúc đang có cuộc gọi. Gọi ngay.',
+    'KHOAN ĐÃ - URGENT: money just left {ten}\'s account during a call. Call now.',
+  ),
+};
+
+/** Dòng trạng thái trên máy bố mẹ sau khi thử nhắn SMS. "Máy đã gửi" ≠ "con đã đọc" (§11). */
+export const TRANG_THAI_SMS: Record<string, Cap> = {
+  DA_GUI: c('Máy đã gửi SMS tới {ten}.', 'The phone sent an SMS to {ten}.'),
+  LOI_GUI: c('Chưa nhắn được SMS tới {ten}.', 'Could not send an SMS to {ten}.'),
+  KHONG_XAC_NHAN: c('Chưa xác nhận được SMS tới {ten}.', 'Could not confirm the SMS to {ten}.'),
+  KHONG_CO_QUYEN: c('Chưa nhắn được SMS: máy chưa cho phép gửi tin nhắn.', 'No SMS sent: this phone has not allowed sending messages.'),
+  KHONG_CO_SO: c('Chưa có số của con trên máy này nên chưa nhắn SMS được.', 'There is no saved number for your family here, so no SMS was sent.'),
+};
+
 // ═══════════════ Cảnh báo chính thức trong Ra-đa ═══════════════
 
 /**

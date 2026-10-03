@@ -15,7 +15,21 @@ const BANG = 'quy_tac_bao';
  * Công tắc thứ ba (23/9/2026): cho con xem máy này còn được bảo vệ không — xem
  * `nhip-bao-ve.js`. Cũng mặc định TẮT, cũng chỉ chủ tài khoản bật được.
  */
-const MAC_DINH = Object.freeze({ baoKhiCao: false, baoKhiOtpTrongCuocGoi: false, choConXemBaoVe: false });
+/*
+ * Hai công tắc thêm 3/10/2026 (chủ dự án muốn con được báo ở ba mức): `baoKhiNghiNgo`
+ * (có dấu hiệu đáng ngờ → CẢNH BÁO GẤP) và `baoKhiChuaKiem` (Khoan Đã chưa kiểm được một
+ * thứ bác gửi → TIN NHẮN ĐƠN GIẢN). Mỗi mức là một công tắc RIÊNG, mặc định TẮT, chỉ
+ * chủ tài khoản bật được — bật mức này không kéo theo mức kia (§12).
+ */
+/*
+ * 3/10/2026 — `baoQuaSms`: máy bố mẹ (bản Android) được TỰ NHẮN SMS cho con khi thông báo đẩy
+ * không tới. Máy chủ chỉ LƯU cờ này để máy bố mẹ đọc lại; máy chủ không gửi SMS, không giữ số
+ * điện thoại của con. Mặc định TẮT, chỉ chủ tài khoản bật được (§12).
+ */
+const MAC_DINH = Object.freeze({
+  baoKhiCao: false, baoKhiNghiNgo: false, baoKhiChuaKiem: false, baoKhiOtpTrongCuocGoi: false,
+  baoQuaSms: false, choConXemBaoVe: false,
+});
 
 class LoiQuyTac extends Error {
   constructor(ma) { super(ma); this.name = 'LoiQuyTac'; this.ma = ma; }
@@ -36,6 +50,9 @@ async function docQuyTac(kho, taiKhoanId) {
   const ban = await kho.doc(BANG, taiKhoanId);
   return {
     baoKhiCao: ban?.baoKhiCao === true,
+    baoKhiNghiNgo: ban?.baoKhiNghiNgo === true,
+    baoKhiChuaKiem: ban?.baoKhiChuaKiem === true,
+    baoQuaSms: ban?.baoQuaSms === true,
     baoKhiOtpTrongCuocGoi: ban?.baoKhiOtpTrongCuocGoi === true,
     choConXemBaoVe: ban?.choConXemBaoVe === true,
   };

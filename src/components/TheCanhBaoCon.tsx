@@ -7,6 +7,8 @@ import { cauNoiVoiBoMe } from '../lib/cau-noi-voi-bo-me';
  */
 export const CAU_LOAI_SU_KIEN: Record<string, string> = {
   ket_qua_kiem: 'Khoan Đã thấy tình huống nguy hiểm cao trên máy {ten}.',
+  ket_qua_nghi_ngo: 'Khoan Đã thấy dấu hiệu đáng ngờ trên máy {ten}.',
+  chua_kiem_duoc: 'Khoan Đã chưa kiểm được một thứ vừa gửi từ máy {ten}.',
   otp_trong_cuoc_goi: 'Máy {ten} vừa nhận mã OTP trong lúc đang có cuộc gọi.',
   cai_app_trong_cuoc_goi: 'Máy {ten} vừa cài ứng dụng mới trong lúc đang có cuộc gọi.',
   tien_ra_trong_cuoc_goi: 'Tiền vừa ra khỏi tài khoản của {ten} trong lúc đang có cuộc gọi.',
@@ -41,10 +43,18 @@ export function TheCanhBaoCon({ t, lang, tenBoMe, loaiSuKien, hanhDong, soBoMe, 
   onGoiNgay: () => void;
   loiTai?: boolean;
 }) {
+  // "Chưa kiểm được" là TIN ĐƠN GIẢN: thẻ xám, không đỏ, không "đang cần" — đừng báo động khi chưa có gì nguy hiểm.
+  const donGian = loaiSuKien === 'chua_kiem_duoc';
   return (
-    <section role="alert" aria-labelledby="gd-can-con" className="rounded-[24px] bg-red-700 text-white p-5 flex flex-col gap-3 shadow-[0_14px_35px_rgba(185,28,28,0.35)]">
+    <section
+      role={donGian ? 'status' : 'alert'}
+      aria-labelledby="gd-can-con"
+      className={donGian
+        ? 'rounded-[24px] bg-slate-800 text-white p-5 flex flex-col gap-3'
+        : 'rounded-[24px] bg-red-700 text-white p-5 flex flex-col gap-3 shadow-[0_14px_35px_rgba(185,28,28,0.35)]'}
+    >
       <h2 id="gd-can-con" className="text-[22px] font-black leading-snug">
-        {t('{ten} đang cần anh/chị').split('{ten}').join(tenBoMe)}
+        {t(donGian ? '{ten} vừa nhờ kiểm một thứ' : '{ten} đang cần anh/chị').split('{ten}').join(tenBoMe)}
       </h2>
       {loaiSuKien && CAU_LOAI_SU_KIEN[loaiSuKien] && (
         <p className="text-[16px] font-semibold leading-snug">
@@ -58,7 +68,7 @@ export function TheCanhBaoCon({ t, lang, tenBoMe, loaiSuKien, hanhDong, soBoMe, 
           data-vai-tro="nut-chinh"
           className="w-full min-h-[64px] rounded-[18px] bg-amber-300 text-amber-950 font-black text-[20px] flex items-center justify-center gap-2 px-3 leading-snug"
         >
-          <Phone size={24} aria-hidden="true" /> {t('Gọi ngay')} ({soBoMe})
+          <Phone size={24} aria-hidden="true" /> {t(donGian ? 'Gọi hỏi thăm' : 'Gọi ngay')} ({soBoMe})
         </button>
       ) : (
         <p className="text-[15px] font-bold leading-snug">{t('Chưa có số của bố mẹ trên máy này.')}</p>

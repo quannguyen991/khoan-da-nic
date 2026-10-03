@@ -13,7 +13,7 @@
  * ⚠️ §11 — không câu nào khẳng định người gọi là tội phạm, không câu nào hứa lấy lại tiền.
  * ⚠️ Là KHOÁ CATALOG — Guardian dịch qua t(). Thêm loại sự kiện mới thì thêm bộ câu ở đây.
  */
-export type LoaiSuKien = 'ket_qua_kiem' | 'otp_trong_cuoc_goi' | 'cai_app_trong_cuoc_goi' | 'tien_ra_trong_cuoc_goi';
+export type LoaiSuKien = 'ket_qua_kiem' | 'ket_qua_nghi_ngo' | 'chua_kiem_duoc' | 'otp_trong_cuoc_goi' | 'cai_app_trong_cuoc_goi' | 'tien_ra_trong_cuoc_goi';
 
 const CAU_CUOI = 'Con ở đây rồi, không sao đâu.';
 
@@ -37,6 +37,18 @@ export const CAU_NOI_VOI_BO_ME: Record<LoaiSuKien, readonly [string, string, str
     'Bố/mẹ cúp máy đi, chưa chuyển gì nhé.',
     'Bọn này giả làm cơ quan rất giống, ai cũng dễ tin.',
     CAU_CUOI,
+  ],
+  // 3/10/2026 — mức giữa: chưa chắc là lừa đảo, nên KHÔNG khẳng định đó là thủ đoạn.
+  ket_qua_nghi_ngo: [
+    'Bố/mẹ khoan làm theo, chờ con xem cùng.',
+    'Tin kiểu này nhìn rất giống thật, ai cũng dễ nhầm.',
+    CAU_CUOI,
+  ],
+  // Chưa kiểm được ≠ có chuyện: giọng hỏi thăm, KHÔNG trấn an "không sao" về thứ chưa kiểm.
+  chua_kiem_duoc: [
+    'Con hỏi thăm thôi, bố/mẹ vừa nhận gì ạ?',
+    'Có gì lạ, bố/mẹ cứ gửi con xem trước nhé.',
+    'Chưa chắc có chuyện gì, mình cùng xem nhé.',
   ],
 };
 

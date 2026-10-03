@@ -38,14 +38,14 @@ test('câu trạng thái gửi: đúng bốn loại, không bao giờ "đã th�
   for (const cau of Object.values(C.CAU_TRANG_THAI)) assert.ok(!/đã thấy|đã đọc|an toàn/i.test(cau), `§11: "${cau}"`);
 });
 
-test('máy bố mẹ: gửi báo động đúng MỘT lần, chỉ mức CAO, không khi diễn tập hay mất mạng', () => {
+test('máy bố mẹ: gửi báo động đúng MỘT lần, không khi diễn tập hay mất mạng', () => {
   const APP = doc('src', 'App.tsx');
   const i = APP.indexOf('guiBaoDong({');
   assert.ok(i > 0, 'WarningView chưa gửi báo động');
   const khoi = APP.slice(APP.lastIndexOf('useEffect(() => {', i), i);
-  // Phần 4: loại sự kiện là "ket_qua_kiem" (chỉ khi nhãn CAO) hoặc sự kiện máy tự bật.
-  assert.match(khoi, /const loaiBaoDong = laCao \? 'ket_qua_kiem' : lyDoTuBat;/);
-  assert.match(khoi, /if \(daGuiBaoDongRef\.current \|\| !loaiBaoDong \|\| laDienTap \|\| khongGoiDuoc \|\| !docPhienTaiKhoan\(\)\) return;/);
+  // 3/10/2026: loại báo do `chonLoaiBaoCon` chọn (CAO, NGHI_NGO, chưa kiểm được, hoặc sự kiện máy tự bật).
+  assert.match(khoi, /const quyetDinh = chonLoaiBaoCon\(\{ nhan, maLyDo: result\?\.maLyDo, chuaKiem: result\?\.chuaKiem, lyDoTuBat \}\);/);
+  assert.match(khoi, /if \(daGuiBaoDongRef\.current \|\| !quyetDinh \|\| laDienTap \|\| khongGoiDuoc \|\| !docPhienTaiKhoan\(\)\) return;/);
   assert.match(khoi, /daGuiBaoDongRef\.current = true;/, 'StrictMode chạy effect hai lần — cờ ref chặn gửi đôi');
 });
 

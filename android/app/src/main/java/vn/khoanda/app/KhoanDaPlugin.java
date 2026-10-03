@@ -73,7 +73,12 @@ import org.json.JSONException;
                  * Phần 4 (23/9/2026) — gọi thẳng một chạm cho số bác ĐÃ LƯU, chỉ khi
                  * bác bấm. Xem chú thích `CALL_PHONE` trong AndroidManifest.xml.
                  */
-                @Permission(alias = "goiDien", strings = { Manifest.permission.CALL_PHONE })
+                @Permission(alias = "goiDien", strings = { Manifest.permission.CALL_PHONE }),
+                /*
+                 * 3/10/2026 — NHẮN SMS CHO CON khi thông báo đẩy không tới được. CHỈ GỬI, KHÔNG
+                 * ĐỌC (READ_SMS vẫn bị từ chối). Xem chú thích `SEND_SMS` trong AndroidManifest.xml.
+                 */
+                @Permission(alias = "guiSms", strings = { Manifest.permission.SEND_SMS })
         }
 )
 public class KhoanDaPlugin extends Plugin {
@@ -1148,5 +1153,129 @@ public class KhoanDaPlugin extends Plugin {
         }
         r.put("kenh", KENH_CANH_BAO);
         call.resolve(r);
+    }
+
+    // ─────────── Nhắn SMS cho con (3/10/2026) ───────────
+
+    @PluginMethod
+    public void trangThaiQuyenGuiSms(PluginCall call) {
+        JSObject r = new JSObject();
+        r.put("daCo", getPermissionState("guiSms") == PermissionState.GRANTED);
+        call.resolve(r);
+    }
+
+    @PluginMethod
+    public void xinQuyenGuiSms(PluginCall call) {
+        if (getPermissionState("guiSms") == PermissionState.GRANTED) {
+            JSObject r = new JSObject();
+            r.put("daCo", true);
+            call.resolve(r);
+            return;
+        }
+        requestPermissionForAlias("guiSms", call, "sauKhiXinGuiSms");
+    }
+
+    @PermissionCallback
+    private void sauKhiXinGuiSms(PluginCall call) {
+        // Từ chối là kết quả hợp lệ (§4.3): thông báo đẩy vẫn chạy, chỉ không có đường SMS dự phòng.
+        JSObject r = new JSObject();
+        r.put("daCo", getPermissionState("guiSms") == PermissionState.GRANTED);
+        call.resolve(r);
+    }
+
+    /**
+     * Gửi MỘT tin SMS tới số bác ĐÃ LƯU làm người thân. Chữ do tầng web soạn (đã qua catalog,
+     * chỉ có tên và mức, KHÔNG có nội dung tin nhắn bác nhận) — lớp này không soạn câu (§11).
+     *
+     * ⚠️ TRẢ LỜI THẬT, KHÔNG PHẢI LỜI HỨA (§4.3, §11):
+     *   da_gui         — modem báo RESULT_OK cho MỌI phần của tin. KHÔNG có nghĩa con đã đọc.
+     *   loi_gui        — có phần bị từ chối (hết tiền, không SIM, chế độ máy bay…).
+     *   khong_xac_nhan — hết 20 giây mà hệ điều hành chưa báo gì.
+     *   khong_co_quyen — chưa cho phép SEND_SMS.
+     * Một tin SMS "gửi xong" mà modem chưa xác nhận thì phải nói là chưa xác nhận.
+     *
+     * ⚠️ KHÔNG CÓ ĐƯỜNG NÀO TỰ GỬI NẾU TẦNG WEB KHÔNG GỌI. Tầng web chỉ gọi khi CHÍNH bác đã bật
+     * "nhắn SMS cho con" (mặc định tắt, §12), và có trần số tin mỗi giờ.
+     */
+    @PluginMethod
+    public void guiSms(final PluginCall call) {
+        String so = call.getString("so", "");
+        String sach = so == null ? "" : so.replaceAll("[^0-9+]", "");
+        String noiDung = call.getString("noiDung", "");
+        if (sach.length() < 8 || sach.length() > 16) { call.reject("SO_KHONG_HOP_LE"); return; }
+        if (noiDung == null || noiDung.trim().isEmpty() || noiDung.length() > 480) { call.reject("NOI_DUNG_KHONG_HOP_LE"); return; }
+        if (getPermissionState("guiSms") != PermissionState.GRANTED) {
+            JSObject r = new JSObject();
+            r.put("ketQua", "khong_co_quyen");
+            call.resolve(r);
+            return;
+        }
+
+        final android.content.Context ctx = getContext().getApplicationContext();
+        final String hanhDong = ctx.getPackageName() + ".SMS_DA_GUI." + System.nanoTime();
+        try {
+            final android.telephony.SmsManager sms = Build.VERSION.SDK_INT >= 31
+                    ? ctx.getSystemService(android.telephony.SmsManager.class)
+                    : android.telephony.SmsManager.getDefault();
+            final java.util.ArrayList<String> phan = sms.divideMessage(noiDung);
+            final int tong = phan.size();
+            final int[] daNhan = { 0 };
+            final boolean[] coLoi = { false };
+            final boolean[] xong = { false };
+            final android.os.Handler h = new android.os.Handler(android.os.Looper.getMainLooper());
+            final android.content.BroadcastReceiver[] nguoiNhan = { null };
+
+            final java.util.concurrent.atomic.AtomicReference<Runnable> hetGio = new java.util.concurrent.atomic.AtomicReference<>();
+
+            nguoiNhan[0] = new android.content.BroadcastReceiver() {
+                @Override public void onReceive(android.content.Context c, Intent i) {
+                    if (xong[0]) return;
+                    daNhan[0] += 1;
+                    if (getResultCode() != android.app.Activity.RESULT_OK) coLoi[0] = true;
+                    if (daNhan[0] >= tong || coLoi[0]) {
+                        xong[0] = true;
+                        h.removeCallbacks(hetGio.get());
+                        try { ctx.unregisterReceiver(nguoiNhan[0]); } catch (Exception ignored) { }
+                        JSObject r = new JSObject();
+                        r.put("ketQua", coLoi[0] ? "loi_gui" : "da_gui");
+                        call.resolve(r);
+                    }
+                }
+            };
+            hetGio.set(new Runnable() {
+                @Override public void run() {
+                    if (xong[0]) return;
+                    xong[0] = true;
+                    try { ctx.unregisterReceiver(nguoiNhan[0]); } catch (Exception ignored) { }
+                    JSObject r = new JSObject();
+                    r.put("ketQua", "khong_xac_nhan");
+                    call.resolve(r);
+                }
+            });
+
+            android.content.IntentFilter loc = new android.content.IntentFilter(hanhDong);
+            if (Build.VERSION.SDK_INT >= 33) {
+                ctx.registerReceiver(nguoiNhan[0], loc, android.content.Context.RECEIVER_NOT_EXPORTED);
+            } else {
+                ctx.registerReceiver(nguoiNhan[0], loc);
+            }
+
+            final int co = Build.VERSION.SDK_INT >= 23 ? android.app.PendingIntent.FLAG_IMMUTABLE : 0;
+            java.util.ArrayList<android.app.PendingIntent> daGui = new java.util.ArrayList<>();
+            for (int i = 0; i < tong; i++) {
+                daGui.add(android.app.PendingIntent.getBroadcast(ctx, i,
+                        new Intent(hanhDong).setPackage(ctx.getPackageName()), co));
+            }
+            h.postDelayed(hetGio.get(), 20000);
+            if (tong == 1) {
+                sms.sendTextMessage(sach, null, noiDung, daGui.get(0), null);
+            } else {
+                sms.sendMultipartTextMessage(sach, null, phan, daGui, null);
+            }
+        } catch (Exception e) {
+            JSObject r = new JSObject();
+            r.put("ketQua", "loi_gui");
+            call.resolve(r);
+        }
     }
 }

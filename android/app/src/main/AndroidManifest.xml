@@ -314,6 +314,7 @@
     -->
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <uses-feature android:name="android.hardware.telephony" android:required="false" />
 
     <!--
       Android 11+ lọc danh sách app thấy được. Không khai thì
@@ -348,6 +349,24 @@
       không tự báo thay chủ tài khoản). Không đọc nhật ký cuộc gọi, không danh bạ.
     -->
     <uses-permission android:name="android.permission.CALL_PHONE" />
+
+    <!--
+      NHẮN SMS CHO CON — chủ dự án duyệt 3/10/2026 (phương án B).
+
+      Khi thông báo đẩy tới máy con không được (máy chủ ngủ, con chưa bật nhận, mất mạng
+      dữ liệu), máy bố mẹ TỰ NHẮN MỘT TIN SMS tới số người thân bác ĐÃ LƯU. Chạy cả khi chỉ còn
+      sóng điện thoại.
+
+      ⚠️ CHỈ GỬI, KHÔNG ĐỌC. `READ_SMS` / `RECEIVE_SMS` vẫn bị từ chối (xem khối bên dưới).
+      ⚠️ CHỈ KHI CHÍNH BÁC ĐÃ BẬT "nhắn SMS cho con" (mặc định TẮT, §12) VÀ đúng mức bác đã
+         bật báo. Xin quyền LÚC CHẠY, đúng lúc bác bấm công tắc đó; từ chối thì thông báo đẩy
+         vẫn chạy, chỉ không có đường SMS dự phòng.
+      ⚠️ NỘI DUNG TIN: chỉ tên của bác và mức ("nguy hiểm cao", "đáng ngờ", "chưa kiểm được"),
+         KHÔNG BAO GIỜ có nội dung tin nhắn bác nhận (§6.9).
+      ⚠️ TỐN TIỀN TIN NHẮN CỦA BỐ MẸ, nên có trần số tin mỗi giờ và gộp tin cùng loại.
+      ⚠️ Khai báo `telephony` không bắt buộc: máy bảng không có SIM vẫn cài được.
+    -->
+    <uses-permission android:name="android.permission.SEND_SMS" />
 
     <!--
       ⚠️ CỐ Ý KHÔNG XIN, và đừng thêm vào:

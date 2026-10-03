@@ -110,6 +110,7 @@
     <tr><td>Trạng thái cuộc gọi</td><td>Biết máy <em>đang</em> có cuộc gọi hay không, để nhắc khi cuộc gọi kéo dài bất thường hoặc khi có mã OTP đến trong lúc gọi.</td><td>Không. Ứng dụng không biết số gọi đến, không đọc nhật ký cuộc gọi, không nghe hay ghi âm cuộc gọi.</td></tr>
     <tr><td>Hiện trên ứng dụng khác</td><td>Hiện dải cảnh báo và nút nổi, kể cả khi bạn đang nghe gọi.</td><td>Không áp dụng.</td></tr>
     <tr><td>Gọi điện</td><td>Nút “gọi người thân” gọi thẳng số bạn đã lưu, chỉ khi bạn bấm.</td><td>Không.</td></tr>
+    <tr><td>Gửi SMS</td><td>Khi thông báo tới máy người thân không được, và <strong>chỉ khi bạn đã bật</strong> “nhắn SMS cho con”, máy tự nhắn một tin tới số bạn đã lưu. Tin chỉ có tên bạn và mức (ví dụ “nguy hiểm cao”), <strong>không có nội dung tin nhắn bạn nhận</strong>.</td><td>Tin SMS đi qua nhà mạng của bạn tới số bạn đã lưu và tính vào gói tin nhắn của bạn. Ứng dụng <strong>chỉ gửi, không đọc</strong> tin nhắn.</td></tr>
     <tr><td>Camera</td><td>Chụp ảnh khi bạn chủ động chụp để kiểm.</td><td>Ảnh chỉ gửi đi khi bạn bấm kiểm (mục 1).</td></tr>
     <tr><td>Kiểm tra máy</td><td>Nhận ra ứng dụng lạ có quyền điều khiển máy, hoặc ứng dụng vừa được cài từ tệp tải về.</td><td>Không gửi danh sách ứng dụng; chỉ gửi ba con số đếm.</td></tr>
   </tbody>
@@ -189,12 +190,13 @@
     <tr><td>Phone state</td><td>Knowing <em>whether</em> a call is in progress, to remind you when a call runs unusually long or a one-time code arrives mid-call.</td><td>No. The app does not know the caller’s number, does not read call logs, and does not listen to or record calls.</td></tr>
     <tr><td>Display over other apps</td><td>Showing a warning strip and floating button, including during a call.</td><td>Not applicable.</td></tr>
     <tr><td>Phone calls</td><td>The “call family” button dials a number you saved, only when you tap it.</td><td>No.</td></tr>
+    <tr><td>Sending SMS</td><td>When the alert cannot reach a family member’s phone, and <strong>only if you switched on</strong> “text my child”, the phone texts a number you saved. The text contains only your name and the level (for example “high risk”), <strong>never the content of the message you received</strong>.</td><td>The SMS travels through your carrier to the saved number and counts against your text plan. The app <strong>only sends, it never reads</strong> messages.</td></tr>
     <tr><td>Camera</td><td>Taking a photo when you choose to photograph something to check.</td><td>Only when you tap check (section 1).</td></tr>
     <tr><td>Device check</td><td>Spotting unknown apps with control permissions, or apps just installed from a downloaded file.</td><td>No app list is sent; only three counts.</td></tr>
   </tbody>
 </table>
 </div>
-<p>Khoan Đã does <strong>not</strong> request SMS, call-log or contacts permissions, and does <strong>not</strong> use an Accessibility service.</p>
+<p>Khoan Đã does <strong>not</strong> request permission to <strong>read</strong> SMS or call logs or contacts, and does <strong>not</strong> use an Accessibility service.</p>
 
 <h2>4. Accounts and Trusted Circle</h2>
 <p>An account is optional. If you create one, the server keeps your name, phone number and role (parent or family member); passwords and sign-in sessions are stored only as hashes, never in the original form.</p>

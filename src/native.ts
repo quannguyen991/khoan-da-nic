@@ -79,6 +79,10 @@ interface CauNoi {
   /** Phần 4 (23/9/2026) — gọi thẳng một chạm; thiếu quyền thì mở bàn phím quay số. */
   goiThang(o: { so: string }): Promise<{ cach: 'goi_thang' | 'mo_ban_phim' }>;
   xinQuyenGoiThang(): Promise<{ daCo: boolean }>;
+  /** 3/10/2026 — nhắn SMS cho con khi thông báo đẩy không tới được. CHỈ GỬI, không đọc SMS. */
+  trangThaiQuyenGuiSms(): Promise<{ daCo: boolean }>;
+  xinQuyenGuiSms(): Promise<{ daCo: boolean }>;
+  guiSms(o: { so: string; noiDung: string }): Promise<{ ketQua: 'da_gui' | 'loi_gui' | 'khong_xac_nhan' | 'khong_co_quyen' }>;
   /** Nhịp bảo vệ (23/9/2026): trao/thu hồi token cho dịch vụ nền báo về mỗi 6 giờ. */
   datNhipBaoVe(o: { bat: boolean; token?: string; duong?: string }): Promise<{ ok: boolean }>;
   trangThaiMay(): Promise<{
@@ -1127,6 +1131,35 @@ export function goiDienThoai(so: string): void {
     const kq = await hanGio(c.goiThang({ so: sach }).then(() => 'da_goi' as const), 'khong_xong' as const);
     if (kq !== 'da_goi') window.open(`tel:${sach}`, '_self');
   });
+}
+
+/**
+ * ══════ NHẮN SMS CHO CON (3/10/2026) ══════
+ * Trả LỜI THẬT, không phải lời hứa (§4.3, §11):
+ *   da_gui         — modem báo gửi xong MỌI phần của tin. KHÔNG có nghĩa con đã đọc.
+ *   loi_gui        — có phần bị từ chối (hết tiền, không SIM, chế độ máy bay…) hoặc cầu nối hỏng.
+ *   khong_xac_nhan — hết hạn chờ mà hệ điều hành chưa báo gì.
+ *   khong_co_quyen — bác chưa cho phép SEND_SMS.
+ *   khong_phai_apk — bản web / APK cũ chưa có hàm này: không có đường SMS, và KHÔNG hiện lỗi.
+ */
+export type KetQuaGuiSms = 'da_gui' | 'loi_gui' | 'khong_xac_nhan' | 'khong_co_quyen' | 'khong_phai_apk';
+
+export async function guiSms(so: string, noiDung: string): Promise<KetQuaGuiSms> {
+  const c = (await cauHoacNull())?.cau;
+  if (!c || typeof c.guiSms !== 'function') return 'khong_phai_apk';
+  try {
+    // Hạn chờ dài hơn native (20 giây) một chút: để native tự báo "không xác nhận" trước.
+    return (await hanGio(c.guiSms({ so, noiDung }).then((r) => r.ketQua), 'khong_xac_nhan' as const, 25_000));
+  } catch { return 'loi_gui'; }
+}
+
+/** Xin quyền gửi SMS — CHỈ gọi đúng lúc bác bấm công tắc "nhắn SMS cho con". `null` = không phải APK. */
+export async function xinQuyenGuiSms(): Promise<boolean | null> {
+  const c = (await cauHoacNull())?.cau;
+  if (!c || typeof c.xinQuyenGuiSms !== 'function') return null;
+  try {
+    return (await hanGio(c.xinQuyenGuiSms(), { daCo: false }, 60_000)).daCo;
+  } catch { return false; }
 }
 
 /** Xin quyền gọi thẳng (bước "Con cháu cài giúp"). `null` = không phải APK. */

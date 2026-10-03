@@ -7,7 +7,9 @@ import {
 } from '../tai-khoan';
 import { ManGhepConChau } from './GhepConChau';
 import { GhiLoiNhan } from './GhiLoiNhan';
-import { laApk, xinQuyenGoiThang } from '../native';
+import { laApk, xinQuyenGoiThang, xinQuyenGuiSms } from '../native';
+import { docVongTron } from '../lib/vong-tron-gia-dinh';
+import { sachSo } from '../lib/sms-bao-con';
 import { dongBoNhipBaoVe } from '../lib/nhip-bao-ve';
 
 /**
@@ -50,7 +52,7 @@ export function ManConCaiGiup({ t, setView, onDangNhapXong, onDanhSachGhep, onDi
   const [matKhau, setMatKhau] = useState('');
   const [loi, setLoi] = useState<string | null>(null);
   const [dangLam, setDangLam] = useState(false);
-  const [quyTac, setQuyTac] = useState<QuyTacBao>({ baoKhiCao: false, baoKhiOtpTrongCuocGoi: false, choConXemBaoVe: false });
+  const [quyTac, setQuyTac] = useState<QuyTacBao>({ baoKhiCao: false, baoQuaSms: false, baoKhiNghiNgo: false, baoKhiChuaKiem: false, baoKhiOtpTrongCuocGoi: false, choConXemBaoVe: false });
   const [daLuuQuyTac, setDaLuuQuyTac] = useState(false);
   /*
    * ⚠️ `laApk()` TRẢ PROMISE (phải hỏi cầu nối native). Viết `laApk() && …` thẳng
@@ -62,6 +64,29 @@ export function ManConCaiGiup({ t, setView, onDangNhapXong, onDanhSachGhep, onDi
   /** Phần 4 — quyền gọi thẳng (CALL_PHONE). `null` = chưa hỏi. Từ chối thì nút gọi vẫn mở bàn phím quay số. */
   const [quyenGoiThang, setQuyenGoiThang] = useState<boolean | null>(null);
   const xinGoiThang = async () => { setQuyenGoiThang((await xinQuyenGoiThang()) === true); };
+
+  /*
+   * 3/10/2026 — "NHẮN SMS CHO CON KHI THÔNG BÁO KHÔNG TỚI ĐƯỢC" (chỉ APK). Xin quyền SEND_SMS NGAY LÚC
+   * bác bấm công tắc, không xin lúc cài. Từ chối ⇒ công tắc KHÔNG bật (không lưu "bật" mà không gửi
+   * được — §4.3). Công tắc này chỉ cho phép đường SMS; có báo con hay không vẫn do công tắc của từng
+   * mức quyết định, nên bật nó một mình không làm máy nhắn gì cả.
+   */
+  const [loiSms, setLoiSms] = useState<string | null>(null);
+  const coSoCuaCon = () => {
+    try {
+      const ds: { phone?: string }[] = JSON.parse(localStorage.getItem('familyMembers') || '[]');
+      if (Array.isArray(ds) && ds.some((m) => sachSo(m?.phone))) return true;
+    } catch { /* kho hỏng: coi như chưa có */ }
+    return docVongTron().nguoiThan.some((n) => sachSo(n.dienThoai));
+  };
+  const doiSms = async (bat: boolean) => {
+    setLoiSms(null);
+    if (bat) {
+      if ((await xinQuyenGuiSms()) !== true) { setLoiSms(t('Chưa bật được: máy chưa cho phép gửi tin nhắn SMS.')); return; }
+      if (!coSoCuaCon()) setLoiSms(t('Chưa có số của con trên máy này nên chưa nhắn SMS được.'));
+    }
+    await luuQuyTac({ ...quyTac, baoQuaSms: bat });
+  };
 
   useEffect(() => {
     if (buoc !== 'quy_tac' || !docPhien()) return;
@@ -167,6 +192,43 @@ export function ManConCaiGiup({ t, setView, onDangNhapXong, onDanhSachGhep, onDi
             />
             <span className="text-[16px] font-bold text-[#2e1065] leading-snug">{t('Báo cho con khi Khoan Đã thấy nguy hiểm cao')}</span>
           </label>
+          {/*
+            3/10/2026 — HAI MỨC NỮA, MỖI MỨC MỘT CÔNG TẮC RIÊNG, MẶC ĐỊNH TẮT (§12). Bác (hoặc con
+            ngồi cạnh bác) tự bấm; không mức nào bật kéo theo mức khác, và không có nút "bật hết".
+          */}
+          <label className="flex items-center gap-3 min-h-[56px] rounded-[18px] border-2 border-[#2e1065] px-4 py-3">
+            <input
+              type="checkbox"
+              className="w-6 h-6 shrink-0"
+              checked={quyTac.baoKhiNghiNgo}
+              onChange={(e) => { void luuQuyTac({ ...quyTac, baoKhiNghiNgo: e.target.checked }); }}
+            />
+            <span className="text-[16px] font-bold text-[#2e1065] leading-snug">{t('Báo cho con khi có dấu hiệu đáng ngờ (cảnh báo gấp)')}</span>
+          </label>
+          <label className="flex items-center gap-3 min-h-[56px] rounded-[18px] border-2 border-[#2e1065] px-4 py-3">
+            <input
+              type="checkbox"
+              className="w-6 h-6 shrink-0"
+              checked={quyTac.baoKhiChuaKiem}
+              onChange={(e) => { void luuQuyTac({ ...quyTac, baoKhiChuaKiem: e.target.checked }); }}
+            />
+            <span className="text-[16px] font-bold text-[#2e1065] leading-snug">{t('Báo cho con khi Khoan Đã chưa kiểm được một thứ bác gửi (tin nhắn đơn giản)')}</span>
+          </label>
+          {dangChayApk && (
+            <label className="flex items-center gap-3 min-h-[56px] rounded-[18px] border-2 border-[#2e1065] px-4 py-3">
+              <input
+                type="checkbox"
+                className="w-6 h-6 shrink-0"
+                checked={quyTac.baoQuaSms}
+                onChange={(e) => { void doiSms(e.target.checked); }}
+              />
+              <span className="flex flex-col gap-0.5">
+                <span className="text-[16px] font-bold text-[#2e1065] leading-snug">{t('Nhắn SMS cho con khi thông báo không tới được')}</span>
+                <span className="text-[14px] text-slate-700 leading-snug">{t('Máy bố mẹ tự gửi, tốn tiền tin nhắn của bố mẹ. Chỉ có tên và mức, không có nội dung tin. Chỉ gửi cho mức bác đã bật ở trên.')}</span>
+              </span>
+            </label>
+          )}
+          {loiSms && <p role="status" className="text-[14px] font-semibold text-slate-700 leading-snug">{loiSms}</p>}
           {dangChayApk && (
             <label className="flex items-center gap-3 min-h-[56px] rounded-[18px] border-2 border-[#2e1065] px-4 py-3">
               <input

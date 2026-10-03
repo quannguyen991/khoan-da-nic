@@ -1,4 +1,5 @@
 import { api } from './api-goc';
+import { ghiQuyTacDem } from './lib/quy-tac-bao-dem';
 
 /**
  * TÀI KHOẢN — lớp gọi API thật của máy chủ.
@@ -245,22 +246,36 @@ export async function giaHanNeuSapHet(bayGio: number = Date.now()): Promise<bool
 /* ══════════ QUY TẮC "BÁO CHO CON" — Phần 2 ══════════ */
 export interface QuyTacBao {
   baoKhiCao: boolean;
+  /** 3/10/2026 — máy bố mẹ được TỰ NHẮN SMS cho con khi thông báo đẩy không tới. Mặc định TẮT. */
+  baoQuaSms: boolean;
+  /** 3/10/2026 — có dấu hiệu đáng ngờ (NGHI_NGO) → CẢNH BÁO GẤP. Mặc định TẮT. */
+  baoKhiNghiNgo: boolean;
+  /** 3/10/2026 — Khoan Đã chưa kiểm được một thứ bác gửi → TIN NHẮN ĐƠN GIẢN. Mặc định TẮT. */
+  baoKhiChuaKiem: boolean;
   baoKhiOtpTrongCuocGoi: boolean;
   /** Cho con xem máy này còn được bảo vệ không (23/9/2026) — mặc định TẮT, xem lib/nhip-bao-ve. */
   choConXemBaoVe: boolean;
 }
 const quyTacTu = (t: any): QuyTacBao => ({
   baoKhiCao: t?.baoKhiCao === true,
+  baoQuaSms: t?.baoQuaSms === true,
+  baoKhiNghiNgo: t?.baoKhiNghiNgo === true,
+  baoKhiChuaKiem: t?.baoKhiChuaKiem === true,
   baoKhiOtpTrongCuocGoi: t?.baoKhiOtpTrongCuocGoi === true,
   choConXemBaoVe: t?.choConXemBaoVe === true,
 });
 
+/** Chỉ ghi bản sao sau khi MÁY CHỦ đã trả lời — xem `lib/quy-tac-bao-dem.ts`. */
 export async function docQuyTacBao(): Promise<QuyTacBao> {
-  return quyTacTu(await goi('/api/gia-dinh/quy-tac-bao', {}, true));
+  const q = quyTacTu(await goi('/api/gia-dinh/quy-tac-bao', {}, true));
+  ghiQuyTacDem(q);
+  return q;
 }
 
 export async function datQuyTacBao(q: Partial<QuyTacBao>): Promise<QuyTacBao> {
-  return quyTacTu(await goi('/api/gia-dinh/quy-tac-bao', { method: 'PUT', body: JSON.stringify(q) }, true));
+  const moi = quyTacTu(await goi('/api/gia-dinh/quy-tac-bao', { method: 'PUT', body: JSON.stringify(q) }, true));
+  ghiQuyTacDem(moi);
+  return moi;
 }
 
 /*
@@ -279,7 +294,7 @@ export interface PhanHoiBaoDong {
 
 export interface SuKienBaoDong {
   id: string;
-  loaiSuKien: 'ket_qua_kiem' | 'otp_trong_cuoc_goi' | 'cai_app_trong_cuoc_goi' | 'tien_ra_trong_cuoc_goi';
+  loaiSuKien: 'ket_qua_kiem' | 'ket_qua_nghi_ngo' | 'chua_kiem_duoc' | 'otp_trong_cuoc_goi' | 'cai_app_trong_cuoc_goi' | 'tien_ra_trong_cuoc_goi';
   nhan: string | null;
   hoKichBan: string | null;
   luc: number;
