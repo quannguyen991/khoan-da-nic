@@ -2874,7 +2874,7 @@ function VoiceView({
       setMicHong(true);
       setIsRecording(false);
       if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-        themBaoLoiVaoHoiThoai('Trình duyệt chưa được cấp quyền Micro. Bác hãy bấm "Cho phép" để ghi âm giọng nói trực tiếp.');
+        themBaoLoiVaoHoiThoai(t('Trình duyệt chưa được cấp quyền Micro. Bác hãy bấm "Cho phép" để ghi âm giọng nói trực tiếp.'));
       }
     }
   };
@@ -3211,7 +3211,7 @@ function VoiceView({
                 : message.role === 'user'
                 ? 'bg-[#ede9fe] border-[#c4b5fd] text-[#321379] rounded-br-md'
                 : 'bg-white/85 border-white text-[#321379] rounded-bl-md'}`}>
-                {message.text}
+                {message.role === 'assistant' && message.text === 'Cháu nghe đây ạ, Bác cứ kể nhé.' ? t(message.text) : message.text}
               </div>
             </div>
           ))}

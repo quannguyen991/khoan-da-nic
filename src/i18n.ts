@@ -1230,6 +1230,8 @@ export const translations: Record<Lang, Record<string, string>> = {
     "Đã nối": "Đã nối",
     "Chỉ có tên và số — không đọc pin, vị trí hay tin nhắn": "Chỉ có tên và số — không đọc pin, vị trí hay tin nhắn",
     "Xem việc tiếp theo": "Xem việc tiếp theo",
+    "Cháu nghe đây ạ, Bác cứ kể nhé.": "Cháu nghe đây ạ, Bác cứ kể nhé.",
+    "Trình duyệt chưa được cấp quyền Micro. Bác hãy bấm \"Cho phép\" để ghi âm giọng nói trực tiếp.": "Trình duyệt chưa được cấp quyền Micro. Bác hãy bấm \"Cho phép\" để ghi âm giọng nói trực tiếp.",
     "Gọi ngân hàng ngay": "Gọi ngân hàng ngay",
     // Leo thang sau 60 giây — thêm 22/9/2026.
     "Đã qua 60 giây.": "Đã qua 60 giây.",
@@ -2533,6 +2535,8 @@ export const translations: Record<Lang, Record<string, string>> = {
     "Đã nối": "Connected",
     "Chỉ có tên và số — không đọc pin, vị trí hay tin nhắn": "Name and number only — battery, location and messages are not read",
     "Xem việc tiếp theo": "See the next steps",
+    "Cháu nghe đây ạ, Bác cứ kể nhé.": "I am listening. Go ahead and tell me.",
+    "Trình duyệt chưa được cấp quyền Micro. Bác hãy bấm \"Cho phép\" để ghi âm giọng nói trực tiếp.": "The browser has not been given microphone permission. Tap Allow so I can hear you.",
     "Gọi ngân hàng ngay": "Call your bank now",
     // Leo thang sau 60 giây — thêm 22/9/2026.
     "Đã qua 60 giây.": "60 seconds have passed.",
