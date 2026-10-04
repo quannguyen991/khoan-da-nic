@@ -42,6 +42,7 @@ async function startServer() {
     // Báo động chưa ai phản ứng từ trước lần khởi động này: hẹn lại leo thang
     // (sự kiện nằm trong kho chung, hẹn giờ thì không sống qua khởi động lại).
     void backendModule.khoiPhucLeoThang?.();
+    void backendModule.khoiDongTuVung?.();
   });
 }
 

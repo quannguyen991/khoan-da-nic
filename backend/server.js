@@ -39,6 +39,8 @@ const TC = require('./src/trusted-circle');
 const { taoKho, traNguCanh, docMaRaDa } = require('./src/intel-radar');
 const { napTuDuLieu } = require('./src/intel-store');
 const CONG_DONG = require('./src/cong-dong-canh-giac');
+const TV = require('./src/tu-vung-dong');
+const crypto = require('node:crypto');
 const { moKho } = require('./src/vault-store');
 const { canDangNhap } = require('./src/auth');
 const {
@@ -1342,6 +1344,58 @@ app.post('/api/cong-dong/canh-giac', chanDoc, async (req, res) => {
   }
 });
 
+/**
+ * ══════════ TỪ VỰNG ĐỘNG — cổng quản trị (3/10/2026) ══════════
+ * Luồng ứng viên → AI duyệt trước → NGƯỜI duyệt: xem `src/tu-vung-dong.js`.
+ * Mọi route dưới đây đòi `x-khoan-da-review-token` đúng bằng `KHOAN_DA_REVIEW_TOKEN`;
+ * chưa đặt biến đó thì cổng ĐÓNG (không có mật khẩu mặc định). Không dính tài khoản
+ * người dùng và không route nào nhận nội dung tin nhắn của người dùng.
+ */
+// Mã chỉ hiện ở trang quản trị (không tới người dùng cuối) nên không cần câu trong catalog.
+const MA_AI_TAT_QUAN_TRI = 'KHONG_GOI_AI';
+function dungToken(req) {
+  const that = process.env.KHOAN_DA_REVIEW_TOKEN;
+  const gui = req.get('x-khoan-da-review-token');
+  if (!that || typeof gui !== 'string') return false;
+  const a = crypto.createHash('sha256').update(gui).digest();
+  const b = crypto.createHash('sha256').update(that).digest();
+  return crypto.timingSafeEqual(a, b);
+}
+const canTokenQuanTri = (req, res, next) => (dungToken(req) ? next() : res.status(403).json({ ok: false, maLoi: 'KHONG_GOI_DUOC' }));
+const baoLoiTuVung = (res, e) => (e instanceof TV.LoiTuVung
+  ? res.status(e.ma === 'KHONG_THAY_UNG_VIEN' ? 404 : 409).json({ ok: false, maLoi: e.ma, chiTiet: e.chiTiet ?? null })
+  : res.status(500).json({ ok: false, maLoi: 'LOI_MAY_CHU' }));
+
+app.get('/api/admin/tu-vung', chanDoc, canTokenQuanTri, async (req, res) => {
+  try {
+    const ds = await TV.liet(await KP.khoChung());
+    res.json({ ok: true, tinHieuChoPhep: TV.TIN_HIEU_CHO_PHEP, ungVien: ds, soDangNap: ds.filter((u) => u.trangThai === 'da_nap').length });
+  } catch (e) { baoLoiTuVung(res, e); }
+});
+app.post('/api/admin/tu-vung/de-xuat', chanDoc, canTokenQuanTri, async (req, res) => {
+  try {
+    const b = req.body || {};
+    const r = await TV.deXuat(await KP.khoChung(), { cum: b.cum, tinHieu: b.tinHieu, nguon: b.nguon, trichBao: b.trichBao, tu: 'quan_tri' });
+    if (r.loi) return res.status(400).json({ ok: false, maLoi: r.loi, chiTiet: r.chiTiet ?? null });
+    // AI duyệt trước chạy nền; không chặn người quản trị.
+    if (!r.trung && !KHONG_GOI_AI) void TV.aiDuyetTruoc(await KP.khoChung(), r.ungVien.id).catch(() => {});
+    return res.json({ ok: true, ungVien: r.ungVien, trung: r.trung === true });
+  } catch (e) { return baoLoiTuVung(res, e); }
+});
+app.post('/api/admin/tu-vung/thu-thap', chanDoc, canTokenQuanTri, async (req, res) => {
+  if (KHONG_GOI_AI) return res.json({ ok: true, ketQua: { daChay: false, loi: 'KHONG_GOI_AI' } });
+  try { return res.json({ ok: true, ketQua: await TV.thuThap(await KP.khoChung()) }); } catch (e) { return baoLoiTuVung(res, e); }
+});
+app.post('/api/admin/tu-vung/:id/ai', chanDoc, canTokenQuanTri, async (req, res) => {
+  if (KHONG_GOI_AI) return res.json({ ok: false, maLoi: MA_AI_TAT_QUAN_TRI });
+  try { return res.json({ ok: true, ungVien: await TV.aiDuyetTruoc(await KP.khoChung(), req.params.id) }); } catch (e) { return baoLoiTuVung(res, e); }
+});
+for (const [duong, ham] of [['duyet', 'duyet'], ['tu-choi', 'tuChoi'], ['go', 'go']]) {
+  app.post(`/api/admin/tu-vung/:id/${duong}`, chanDoc, canTokenQuanTri, async (req, res) => {
+    try { return res.json({ ok: true, ungVien: await TV[ham](await KP.khoChung(), req.params.id) }); } catch (e) { return baoLoiTuVung(res, e); }
+  });
+}
+
 /** Cổng duyệt nội bộ — không có đường duyệt công khai. */
 app.post('/api/cong-dong/canh-giac/:id/duyet', chanDoc, (req, res) => {
   const ban = CONG_DONG.duyet(req.params.id, req.get('x-khoan-da-review-token'));
@@ -1897,7 +1951,24 @@ function taoServer(cong = CONG) {
   return app.listen(cong, () => {
     console.log(`Khoan Đã — máy chủ chạy ở cổng ${cong}`);
     void khoiPhucLeoThang();
+    void khoiDongTuVung();
   });
+}
+
+/**
+ * Khởi động từ vựng động: nạp lại mục ĐÃ DUYỆT từ kho vào gói, rồi hẹn quét báo mỗi ngày.
+ * ⚠️ Hỏng thì bỏ qua và nói ra: phân tích lừa đảo không được chết theo tính năng phụ (§6.7).
+ * Test (NODE_TEST_CONTEXT) không bao giờ quét báo thật.
+ */
+async function khoiDongTuVung() {
+  try {
+    const n = await TV.napLai(await KP.khoChung());
+    console.log(`[tu-vung] nạp ${n} mẫu đã duyệt`);
+  } catch (e) {
+    console.error('[tu-vung] không nạp được:', e?.message);
+  }
+  if (process.env.NODE_TEST_CONTEXT || process.env.KHOAN_DA_TU_VUNG_TU_THU_THAP === '0' || KHONG_GOI_AI) return;
+  TV.henGio(() => KP.khoChung());
 }
 
 if (require.main === module) taoServer();
@@ -1907,4 +1978,4 @@ if (require.main === module) taoServer();
  * dist/server.cjs, lệnh `npm start` trên Render) gắn `app` này vào một app ngoài
  * rồi tự `listen`. Nên `khoiPhucLeoThang` phải được xuất ra để nó gọi.
  */
-module.exports = { app, taoServer, CONG, khoiPhucLeoThang };
+module.exports = { app, taoServer, CONG, khoiPhucLeoThang, khoiDongTuVung };

@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Duyệt từ vựng mới</title>
+<style>
+:root{--nen:#faf7ff;--chu:#1e1b4b;--phu:#4c4577;--vien:#6d5bd0;--tim:#6d28d9;--do:#b91c1c;--xanh:#166534;--the:#fff}
+@media (prefers-color-scheme:dark){:root{--nen:#14122b;--chu:#f1edff;--phu:#c7bff0;--vien:#9a8cf0;--tim:#b79cff;--do:#ff9d9d;--xanh:#86efac;--the:#1f1b40}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--nen);color:var(--chu);font:17px/1.55 system-ui,"Segoe UI",sans-serif}
+main{max-width:760px;margin:0 auto;padding:16px 16px 80px}
+h1{font-size:1.5rem;margin:12px 0 4px}
+h2{font-size:1.2rem;margin:28px 0 10px}
+p.phu{color:var(--phu);margin:4px 0}
+input,select,textarea,button{font:inherit;color:inherit}
+input,select,textarea{width:100%;min-height:52px;padding:10px 12px;border:2px solid var(--vien);border-radius:14px;background:var(--the)}
+label{display:block;font-weight:700;margin:12px 0 4px}
+button{min-height:52px;padding:10px 18px;border-radius:14px;border:2px solid var(--vien);background:var(--the);font-weight:700;cursor:pointer}
+button.chinh{background:var(--tim);border-color:var(--tim);color:#fff}
+button.nguy{border-color:var(--do);color:var(--do)}
+.hang{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+.the{background:var(--the);border:2px solid var(--vien);border-radius:18px;padding:16px;margin:12px 0}
+.cum{font-size:1.5rem;font-weight:800;line-height:1.3;overflow-wrap:anywhere}
+.nhan{display:inline-block;font-size:.85rem;font-weight:700;padding:2px 10px;border-radius:999px;border:2px solid var(--vien);margin:2px 6px 2px 0}
+.tt{margin:6px 0;color:var(--phu)}
+.canh{border-color:var(--do);color:var(--do)}
+.ok{border-color:var(--xanh);color:var(--xanh)}
+#thongBao{position:sticky;top:0;background:var(--nen);padding:8px 0;font-weight:700;min-height:2.4em}
+details{margin-top:24px}
+</style>
+</head>
+<body>
+<main>
+  <h1>Duyệt từ vựng mới</h1>
+  <p class="phu">AI chỉ lọc trước. Cụm nào chỉ vào bộ luật khi bác bấm “Nạp”. Cụm chỉ được làm tăng cảnh giác, không bao giờ hạ mức.</p>
+
+  <label for="token">Mã duyệt (KHOAN_DA_REVIEW_TOKEN)</label>
+  <input id="token" type="password" autocomplete="off">
+  <div class="hang"><button id="tai" class="chinh" type="button">Tải danh sách</button><button id="quet" type="button">Quét báo ngay</button></div>
+  <div id="thongBao" role="status" aria-live="polite"></div>
+
+  <h2>Chờ bác duyệt <span id="dem1"></span></h2>
+  <div id="choDuyet"></div>
+
+  <h2>Chưa qua AI <span id="dem2"></span></h2>
+  <p class="phu">AI chưa chạy được cho các cụm này. Bác vẫn nạp được, nhưng chưa có ý kiến AI.</p>
+  <div id="choAi"></div>
+
+  <h2>Đang có hiệu lực <span id="dem3"></span></h2>
+  <div id="daNap"></div>
+
+  <details><summary>Đã loại (AI hoặc bác)</summary><div id="daLoai"></div></details>
+
+  <details open><summary>Thêm một cụm bằng tay</summary>
+    <label for="fCum">Cụm từ (2–8 từ, đúng nguyên văn)</label><input id="fCum" maxlength="60">
+    <label for="fTinHieu">Loại tín hiệu</label><select id="fTinHieu"></select>
+    <label for="fNguonTen">Tên nguồn (báo / cơ quan)</label><input id="fNguonTen" maxlength="80">
+    <label for="fNguonUrl">Đường dẫn nguồn (https)</label><input id="fNguonUrl" inputmode="url">
+    <label for="fTrich">Đoạn trích có chứa cụm (không bắt buộc)</label><textarea id="fTrich" rows="3" maxlength="240"></textarea>
+    <div class="hang"><button id="gui" class="chinh" type="button">Đề xuất</button></div>
+  </details>
+</main>
+<script src="/quan-tri-tu-vung.js"></script>
+</body>
+</html>
