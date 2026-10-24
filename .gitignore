@@ -94,3 +94,8 @@ android/app/google-services.json
 *.jks
 *.keystore
 android/keystore.properties
+
+# Không theo dõi các workspace/thử nghiệm phụ
+codebrain/
+.impeccable/
+

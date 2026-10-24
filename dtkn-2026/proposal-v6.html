@@ -1,0 +1,660 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>[ĐTKN2026]_V1_ShieldGen_Proposal — Khoan Đã</title>
+<style>
+  @font-face{ font-family:"Fr"; src:url("fonts-v4/Fraunces-var.ttf") format("truetype"); font-weight:800 900; }
+  @font-face{ font-family:"InterV"; src:url("fonts-v2/Inter-400.ttf") format("truetype"); font-weight:400; }
+  @font-face{ font-family:"InterV"; src:url("fonts-v2/Inter-600.ttf") format("truetype"); font-weight:600; }
+  @font-face{ font-family:"InterV"; src:url("fonts-v2/Inter-700.ttf") format("truetype"); font-weight:700; }
+  @font-face{ font-family:"InterV"; src:url("fonts-v2/Inter-800.ttf") format("truetype"); font-weight:800; }
+  @page { size: 1280px 720px; margin: 0; }
+  :root{ --navy:#1f3585; --ink:#1b1f2c; --muted:#4b5266; }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  body{ font-family:"InterV",Arial,sans-serif; color:var(--ink); background:#999; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .slide{ width:1280px; height:720px; position:relative; overflow:hidden; margin:0 auto 22px; page-break-after:always; break-after:page;
+    background:#eeeee9 url("img/paper.jpg") repeat; }
+  .slide:last-child{ page-break-after:auto; break-after:auto; margin-bottom:0; }
+  .strip{ position:absolute; left:0; top:0; width:1280px; height:64px; background:#fff; border-bottom:1px solid #d9dce6; }
+  .strip img{ width:1280px; height:64px; display:block; }
+  .frame{ position:absolute; left:26px; top:86px; right:26px; bottom:24px; border:1.6px solid var(--navy); border-radius:26px; }
+  .ast{ position:absolute; left:50%; transform:translateX(-50%); width:44px; height:44px; border-radius:50%; background:var(--navy); display:flex; align-items:center; justify-content:center; z-index:4; }
+  .ast svg{ width:24px; height:24px; }
+  .tag{ position:absolute; right:58px; top:104px; background:var(--navy); color:#fff; font-size:14px; font-weight:600; padding:8px 20px; border-radius:999px; z-index:3; }
+  .handle{ position:absolute; left:58px; top:106px; font-size:14px; font-weight:600; color:var(--ink); z-index:3; }
+  .pg{ position:absolute; right:58px; bottom:38px; font-size:13px; font-weight:600; color:var(--navy); z-index:3; }
+  .content{ position:absolute; left:64px; right:64px; top:138px; bottom:50px; }
+  h1{ font-family:"Fr",Georgia,serif; font-weight:900; color:var(--navy); font-size:70px; line-height:1.0; letter-spacing:-.02em; }
+  h2{ font-family:"Fr",Georgia,serif; font-weight:800; color:var(--navy); font-size:24px; line-height:1.15; }
+  h3{ font-size:16px; font-weight:800; color:var(--ink); line-height:1.3; }
+  p, li{ font-size:15.5px; line-height:1.5; color:var(--ink); }
+  p.m{ color:var(--muted); }
+  .sm{ font-size:13px; color:var(--muted); line-height:1.45; }
+  .serif{ font-family:"Fr",Georgia,serif; }
+  .lbl{ font-size:12.5px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--navy); }
+  .rule{ border-top:1.5px solid var(--navy); }
+  ul.l{ list-style:none; }
+  ul.l li{ position:relative; padding-left:20px; margin-bottom:6px; font-size:14.5px; }
+  ul.l li::before{ content:"✳"; position:absolute; left:0; top:0; color:var(--navy); font-size:14px; font-weight:800; }
+  .box{ background:var(--navy); color:#fff; border-radius:20px; padding:22px 24px; }
+  .box h2, .box h3, .box p, .box li{ color:#fff; }
+  .num{ font-family:"Fr",Georgia,serif; font-weight:900; color:var(--navy); font-size:70px; line-height:1; letter-spacing:-.02em; }
+  .num small{ font-size:24px; font-weight:800; }
+  .stats3{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; padding-top:10px; }
+  .two{ display:grid; gap:28px; }
+  .cols3{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:26px; }
+  .person{ display:flex; gap:16px; align-items:center; margin-bottom:12px; }
+  .avatar{ width:66px; height:66px; border-radius:50%; background:var(--navy); color:#fff; display:flex; align-items:center; justify-content:center; font-family:"Fr",Georgia,serif; font-weight:900; font-size:28px; flex:0 0 auto; }
+  .bmgrid{ display:grid; grid-template-columns:1fr 1fr 1.25fr 1fr 1fr; grid-template-rows:1fr 1fr 0.9fr; gap:10px; height:470px;
+    grid-template-areas:'kp ka vp cr cs' 'kp kr vp ch cs' 'cost cost rev rev rev'; }
+  .cell{ border-top:1.5px solid var(--navy); padding-top:9px; }
+  .cell h3{ color:var(--navy); margin-bottom:4px; }
+  .step{ display:flex; gap:14px; padding:10px 0; border-top:1.5px solid var(--navy); }
+  .step .n{ width:38px; height:38px; border-radius:50%; background:var(--navy); color:#fff; font-family:"Fr",Georgia,serif; font-weight:900; font-size:18px; display:flex; align-items:center; justify-content:center; flex:0 0 38px; }
+  .rowhd{ display:flex; justify-content:space-between; align-items:baseline; gap:10px; }
+  .banner{ width:100%; height:250px; object-fit:cover; object-position:center 30%; border-radius:18px; display:block; }
+  .tbl{ width:100%; border-collapse:collapse; font-size:14px; }
+  .tbl th{ text-align:left; font-size:12px; letter-spacing:.06em; text-transform:uppercase; color:var(--navy); border-bottom:1.5px solid var(--navy); padding:8px 8px; }
+  .tbl td{ border-bottom:1px solid #c9d2ea; padding:9px 8px; vertical-align:top; }
+  .tbl.wide td{ font-size:14px; padding:10px 8px; }
+  .cmp{ width:100%; border-collapse:collapse; font-size:14px; }
+  .cmp th{ font-size:12px; color:var(--navy); text-align:center; border-bottom:1.5px solid var(--navy); padding:8px 6px; }
+  .cmp td{ text-align:center; padding:9px 6px; border-bottom:1px solid #c9d2ea; font-size:17px; color:var(--navy); }
+  .cmp td:first-child{ text-align:left; font-size:14px; color:var(--ink); font-weight:600; }
+  .cmp .me{ background:rgba(31,53,133,.08); font-weight:800; }
+  .formula{ font-family:"Fr",Georgia,serif; font-weight:900; font-size:34px; color:#fff; margin:10px 0 10px; line-height:1.2; }
+  .formula span{ color:#fff; }
+  .formula .big{ font-size:46px; color:#ffd56b; }
+  .chart{ width:100%; }
+  .chart text{ font-family:"InterV",Arial,sans-serif; }
+  .iphone{ position:relative; width:214px; padding:11px; border-radius:48px; background:linear-gradient(145deg,#3a3f48,#0e1014 45%,#2a2e36); box-shadow:0 22px 40px rgba(20,33,92,.35), inset 0 0 0 2px #5b616c; margin-bottom:12px; }
+  .iphone .scr{ border-radius:32px; overflow:hidden; aspect-ratio:9/16; background:#000; position:relative; }
+  .iphone .scr img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .iphone .isl{ position:absolute; top:19px; left:50%; transform:translateX(-50%); width:76px; height:22px; background:#000; border-radius:14px; z-index:2; }
+  .screen{ display:flex; flex-direction:column; align-items:center; text-align:center; }
+  .iphone{ position:relative; width:200px; padding:5px; border-radius:40px; background:linear-gradient(145deg,#4a5059,#101216 40%,#2a2e36); box-shadow:0 20px 36px rgba(20,33,92,.32), inset 0 0 0 1.5px #6b7280; margin:0 auto 10px; }
+  .iphone .scr{ border-radius:35px; overflow:hidden; aspect-ratio:393/852; background:#000; position:relative; }
+  .iphone .scr{ isolation:isolate; }
+  .iphone .scr::before{ display:none; content:""; position:absolute; inset:-14px; background-image:var(--bg); background-size:cover; background-position:center; filter:blur(14px); opacity:.9; z-index:0; }
+  .iphone .scr img{ position:relative; z-index:1; width:100%; height:100%; object-fit:cover; object-position:center top; display:block; }
+  .iphone .isl{ top:12px; width:62px; height:18px; border-radius:12px; }
+</style>
+</head>
+<body>
+<section class="slide">
+  <div class="strip"><img src="img/strip-tai-tro.png" alt="Đơn vị tổ chức và nhà tài trợ"></div>
+  <div class="frame"></div>
+  <div class="ast" style="top:64px;"><svg viewBox="0 0 24 24"><path d="M12 2v20M3.5 7l17 10M3.5 17l17-10" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/></svg></div>
+  <div class="ast" style="bottom:2px;"><svg viewBox="0 0 24 24"><path d="M12 2v20M3.5 7l17 10M3.5 17l17-10" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/></svg></div>
+  <div class="handle">@khoan-da</div>
+  <div class="tag">Hồ sơ dự án · 2026</div>
+  <div class="content" style="top:136px;">
+    <img src="img/banner-body.jpg" alt="Đấu Trường Khởi Nghiệp 2026" class="banner">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:26px;">
+      <h1 style="font-size:96px;">Khoan Đã</h1>
+      <div style="width:470px;padding-bottom:12px;">
+        <p style="font-size:19px;font-weight:700;color:var(--navy);margin-bottom:8px;">Tạo một khoảng dừng trước khi quá muộn.</p>
+        <p class="m" style="font-size:15px;">Ứng dụng giúp người cao tuổi dừng lại 60 giây, biết mình đang gặp dấu hiệu lừa đảo nào, và gọi con cháu trước khi chuyển tiền.</p>
+      </div>
+    </div>
+  </div>
+  <div class="pg">1</div>
+</section>
+<section class="slide ">
+  <div class="strip"><img src="img/strip-tai-tro.png" alt="Đơn vị tổ chức và nhà tài trợ"></div>
+  <div class="frame"></div>
+  <div class="ast" style="top:64px;"><svg viewBox="0 0 24 24"><path d="M12 2v20M3.5 7l17 10M3.5 17l17-10" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/></svg></div>
+  <div class="ast" style="bottom:2px;"><svg viewBox="0 0 24 24"><path d="M12 2v20M3.5 7l17 10M3.5 17l17-10" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/></svg></div>
+  <div class="handle">@khoan-da</div>
+  <div class="tag">Business Model</div>
+  <div class="content">
+    <h1 style="font-size:46px;margin-bottom:12px;">Business Model</h1>
+    <div class="bmgrid">
+      <div class="cell" style="grid-area:kp;"><h3>Đối tác chính</h3><ul class="l sm"><li>Ngân hàng, ví điện tử: cảnh báo trước giao dịch đáng ngờ</li><li>Hạ tầng SMS, Zalo OA</li><li>Hội người cao tuổi, nhóm gia đình</li></ul></div>
+      <div class="cell" style="grid-area:ka;"><h3>Hoạt động chính</h3><ul class="l sm"><li>Kiểm tra cuộc gọi, tin, link</li><li>Khoảng dừng 60 giây</li><li>Một chạm gọi con cháu</li></ul></div>
+      <div class="box" style="grid-area:vp;padding:16px 18px;"><div class="lbl" style="color:#cfd8f5;">Giá trị cung cấp</div><div class="serif" style="font-size:21px;line-height:1.15;margin:6px 0 8px;color:#fff;">Giữ lại tiền tích luỹ cho gia đình</div><ul class="l" style="font-size:13px;"><li>Một vụ tránh được 21,5 triệu (giả định, xem trang 9)</li><li>Con cháu được báo ngay lúc đang bị giục</li><li>Người cao tuổi biết mình đang bị nhắm vào kịch bản nào</li></ul></div>
+      <div class="cell" style="grid-area:cr;"><h3>Quan hệ khách hàng</h3><ul class="l sm"><li>Con cháu thiết lập một lần</li><li>"Nói cho cháu nghe" bằng giọng nói</li></ul></div>
+      <div class="cell" style="grid-area:cs;"><h3>Phân khúc</h3><ul class="l sm"><li><b>Người 60+</b> dùng miễn phí</li><li><b>Con cháu</b> trả gói Pro</li><li><b>Ngân hàng, ví</b>: đối tác B2B</li></ul></div>
+      <div class="cell" style="grid-area:kr;"><h3>Nguồn lực chính</h3><ul class="l sm"><li>Bộ luật rủi ro, 64 tín hiệu</li><li>Kho mẫu lừa đảo Việt Nam</li><li>App đã chạy thật, đội 5 người</li></ul></div>
+      <div class="cell" style="grid-area:ch;"><h3>Kênh</h3><ul class="l sm"><li>Facebook, TikTok</li><li>Nhóm Zalo gia đình, trường học</li></ul></div>
+      <div class="cell" style="grid-area:cost;"><h3>Cấu trúc chi phí</h3><p class="sm">Ngân sách 15 tháng <b>68,8 triệu đồng</b>: khoảng 61% cho truyền thông, phần còn lại cho hạ tầng API, nghiên cứu, thí điểm, tuyển người.</p></div>
+      <div class="cell" style="grid-area:rev;"><h3>Dòng doanh thu</h3><p class="sm"><b>Gói Pro 29.000–49.000 đ/tháng</b>, con cháu trả cho cả nhà. Người cao tuổi dùng miễn phí. B2B từ ngân hàng, ví là hướng mở rộng.</p></div>
+    </div>
+  </div>
+  <div class="pg">2</div>
+</section>
+
+<section class="slide ">
+  <div class="strip"><img src="img/strip-tai-tro.png" alt="Đơn vị tổ chức và nhà tài trợ"></div>
+  <div class="frame"></div>
+  <div class="ast" style="top:64px;"><svg viewBox="0 0 24 24"><path d="M12 2v20M3.5 7l17 10M3.5 17l17-10" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/></svg></div>
+  <div class="ast" style="bottom:2px;"><svg viewBox="0 0 24 24"><path d="M12 2v20M3.5 7l17 10M3.5 17l17-10" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/></svg></div>
+  <div class="handle">@khoan-da</div>
+  <div class="tag">Vấn đề</div>
+  <div class="content">
+    <h1 style="font-size:44px;margin-bottom:16px;">Vấn đề đáng thay đổi: người cao tuổi chuyển tiền khi không có khoảng dừng</h1>
+    <div class="two" style="grid-template-columns:1fr 1fr;">
+      <div>
+        <div class="stats3 rule">
+          <div><div class="num" style="font-size:40px;">6.000<small> tỷ</small></div><p class="sm">đồng bị mất 11 tháng đầu 2025 (Bộ Công an)</p></div>
+          <div><div class="num" style="font-size:40px;">442<small> tỷ $</small></div><p class="sm">mất trong 12 tháng ở 42 nước (GASA 2025)</p></div>
+          <div><div class="num" style="font-size:40px;">+25%</div><p class="sm">thiệt hại ở Mỹ chỉ trong một năm (FTC)</p></div>
+        </div>
+        <div style="margin-top:12px;"><div class="lbl">Thiệt hại lừa đảo ở Mỹ, tỷ USD</div><div id="chart-ftc" style="margin-top:4px;"></div></div>
+        <div class="box" style="margin-top:12px;padding:12px 18px;"><div class="lbl" style="color:#cfd8f5;">Thiệt hại của một vụ (giả định)</div><p style="font-size:15px;margin-top:6px;color:#fff;">20 triệu tiền tích luỹ bị chuyển đi, cộng 1,5 triệu chi phí xử lý: gọi ngân hàng, tra soát, trình báo. Thời gian và niềm tin không quy đổi thành tiền.</p></div>
+      </div>
+      <div>
+        <div class="lbl" style="margin-bottom:8px;">Vì sao bố mẹ dễ bị lừa</div>
+        <div class="rule" style="padding:11px 0;"><h3>Bị lừa rồi giấu</h3><p class="sm">Sợ bị trách là "lẩm cẩm", nên nạn nhân không kể cho ai, và kẻ gian tiếp tục thao túng.</p></div>
+        <div class="rule" style="padding:11px 0;"><h3>Bắt máy mọi số lạ</h3><p class="sm">Nghe số nước ngoài, bấm link lạ, dễ tin người xưng công an hay cán bộ.</p></div>
+        <div class="rule" style="padding:11px 0;"><h3>Bị giục làm ngay</h3><p class="sm">Kẻ gian ép chuyển tiền ngay, bảo đừng cúp máy. Không có khoảng dừng để hỏi con cháu.</p></div>
+        <div class="rule" style="padding:11px 0;"><h3>Con cháu bị gạt đi</h3><p class="sm">Người thân đi làm cả ngày, bố mẹ ở nhà một mình và cho rằng con cháu "lo xa".</p></div>
+        <p class="sm" style="margin-top:10px;">Thiệt hại được lặp lại: nạn nhân bị lừa một lần thường bị nhắm tiếp.</p>
+      </div>
+    </div>
+  </div>
+  <div class="pg">3</div>
+</section>
+
+<section class="slide ">
+  <div class="strip"><img src="img/strip-tai-tro.png" alt="Đơn vị tổ chức và nhà tài trợ"></div>
+  <div class="frame"></div>
+  <div class="ast" style="top:64px;"><svg viewBox="0 0 24 24"><path d="M12 2v20M3.5 7l17 10M3.5 17l17-10" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/></svg></div>
+  <div class="ast" style="bottom:2px;"><svg viewBox="0 0 24 24"><path d="M12 2v20M3.5 7l17 10M3.5 17l17-10" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/></svg></div>
+  <div class="handle">@khoan-da</div>
+  <div class="tag">Khách hàng</div>
+  <div class="content">
+    <h1 style="font-size:50px;margin-bottom:16px;">Con cháu mua, cha mẹ dùng</h1>
+    <div style="display:grid;grid-template-columns:1fr 1fr 0.9fr;gap:26px;">
+      <div class="rule" style="padding-top:14px;">
+        <div class="person"><div class="avatar">B</div><div><h2>Anh Bình, 35 tuổi</h2><p class="sm">Người mua · nhân viên văn phòng</p></div></div>
+        <ul class="l"><li>Vợ chồng đi làm cả ngày, mẹ ở nhà một mình</li><li>Đã dặn mẹ nhiều lần, mẹ bảo "lo xa"</li><li>Sẵn sàng trả tiền để bảo vệ bố mẹ</li></ul>
+        <p class="sm" style="margin-top:6px;">Chân dung minh hoạ, dựa trên phỏng vấn nội bộ của đội.</p>
+      </div>
+      <div class="rule" style="padding-top:14px;">
+        <div class="person"><div class="avatar">H</div><div><h2>Bà Hương, 65–70 tuổi</h2><p class="sm">Người dùng · đã nghỉ hưu</p></div></div>
+        <ul class="l"><li>Biết gọi điện, dùng Zalo, xem YouTube</li><li>Bắt máy số lạ, bấm link lạ</li><li>Bị lừa thì im lặng vì sợ bị trách</li></ul>
+        <p class="sm" style="margin-top:6px;">Chân dung minh hoạ.</p>
+      </div>
+      <div class="box" style="display:flex;flex-direction:column;justify-content:space-between;">
+        <div class="num" style="color:#fff;font-size:84px;">61,4<small>%</small></div>
+        <p style="font-size:16px;color:#fff;">người từ 60 tuổi dùng Internet: đủ điều kiện cài và dùng ứng dụng đơn giản.</p>
+        <p class="sm" style="color:#cfd8f5;">Niên giám thống kê 2024 (NSO)</p>
+      </div>
+    </div>
+    <div class="rule" style="margin-top:24px;padding-top:14px;">
+      <div class="lbl">Ai quyết định mua, và vì sao</div>
+      <div class="cols3" style="margin-top:10px;">
+        <div><h3>Người mua: con cháu</h3><p class="sm">Trả tiền, nhận báo động và được xem kết quả. Họ mua vì nỗi lo khi không ở cạnh bố mẹ.</p></div>
+        <div><h3>Người dùng: bố mẹ</h3><p class="sm">Chỉ cần làm theo bốn nút lớn và trả lời câu CÓ / KHÔNG. Không cần đăng ký tài khoản.</p></div>
+        <div><h3>Giả thuyết cần thí điểm</h3><p class="sm">Con cháu sẵn sàng trả 29.000–49.000 đ/tháng cho cả nhà. Chưa kiểm chứng; đây là việc đầu tiên của giai đoạn 1.</p></div>
+      </div>
+    </div>
+  </div>
+  <div class="pg">4</div>
+</section>
+
+<section class="slide ">
+  <div class="strip"><img src="img/strip-tai-tro.png" alt="Đơn vị tổ chức và nhà tài trợ"></div>
+  <div class="frame"></div>
+  <div class="ast" style="top:64px;"><svg viewBox="0 0 24 24"><path d="M12 2v20M3.5 7l17 10M3.5 17l17-10" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/></svg></div>
+  <div class="ast" style="bottom:2px;"><svg viewBox="0 0 24 24"><path d="M12 2v20M3.5 7l17 10M3.5 17l17-10" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/></svg></div>
+  <div class="handle">@khoan-da</div>
+  <div class="tag">Thị trường</div>
+  <div class="content">
+    <h1 style="font-size:50px;margin-bottom:16px;">14,2 triệu người 60+, bắt đầu từ 10.000 gia đình</h1>
+    <div style="display:grid;grid-template-columns:1.05fr 1fr;gap:30px;">
+      <div>
+        <div class="lbl">Quy mô thị trường (triệu người)</div>
+        <div id="chart-tam" style="margin-top:10px;"></div>
+        <p class="sm" style="margin-top:8px;">TAM: điều tra dân số giữa kỳ 2024 (GSO). SAM: khoảng 38,2% người 60+ sống ở đô thị (GSO 2024, đội ước tính).</p>
+        <div class="box" style="margin-top:18px;padding:18px 22px;"><div class="lbl" style="color:#cfd8f5;">SOM · mục tiêu đầu tiên</div><div class="num" style="color:#fff;font-size:50px;margin-top:4px;">10.000<small> gia đình</small></div><p style="font-size:14px;margin-top:4px;color:#e0e7fa;">Khoảng 0,07% người 60+ cả nước. Đây là mục tiêu năm đầu, không phải dự báo.</p></div>
+      </div>
+      <div>
+        <div class="lbl" style="margin-bottom:10px;">Trần doanh thu lý thuyết từ SOM</div>
+        <table class="tbl">
+          <tr><th>Giá gói Pro</th><th>Nếu 10.000 gia đình trả đủ 12 tháng</th></tr>
+          <tr><td>29.000 đ/tháng</td><td><b>≈ 3,5 tỷ đồng / năm</b></td></tr>
+          <tr><td>39.000 đ/tháng</td><td><b>≈ 4,7 tỷ đồng / năm</b></td></tr>
+          <tr><td>49.000 đ/tháng</td><td><b>≈ 5,9 tỷ đồng / năm</b></td></tr>
+        </table>
+        <p class="sm" style="margin-top:10px;">Đây là trần lý thuyết khi cả 10.000 gia đình đều trả Pro, không phải dự báo. Tỷ lệ trả phí thực tế sẽ đo ở giai đoạn thí điểm.</p>
+        <p style="margin-top:16px;font-size:15px;"><b>Điểm vào thị trường:</b> bắt đầu từ các gia đình đã có con cháu đang dùng app, rồi mở sang nhóm qua hội người cao tuổi.</p>
+      </div>
+    </div>
+  </div>
+  <div class="pg">5</div>
+</section>
+
+<section class="slide ">
+  <div class="strip"><img src="img/strip-tai-tro.png" alt="Đơn vị tổ chức và nhà tài trợ"></div>
+  <div class="frame"></div>
+  <div class="ast" style="top:64px;"><svg viewBox="0 0 24 24"><path d="M12 2v20M3.5 7l17 10M3.5 17l17-10" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/></svg></div>
+  <div class="ast" style="bottom:2px;"><svg viewBox="0 0 24 24"><path d="M12 2v20M3.5 7l17 10M3.5 17l17-10" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/></svg></div>
+  <div class="handle">@khoan-da</div>
+  <div class="tag">Cạnh tranh</div>
+  <div class="content">
+    <h1 style="font-size:50px;margin-bottom:14px;">Đối thủ dừng ở việc phát hiện, Khoan Đã giữ người dùng lại</h1>
+    <div style="display:grid;grid-template-columns:1.25fr 1fr;gap:30px;">
+      <div>
+        <table class="cmp">
+          <tr><th style="text-align:left;">Tiêu chí</th><th>Truecaller</th><th>Google</th><th>Scamio</th><th class="me">Khoan Đã</th></tr>
+          <tr><td>Nhận diện số lừa, spam</td><td>●</td><td>●</td><td>○</td><td class="me">●</td></tr>
+          <tr><td>Phân tích tin nhắn, link, ảnh</td><td>◐</td><td>●</td><td>●</td><td class="me">●</td></tr>
+          <tr><td>Hỏi từng bước, dừng 60 giây</td><td>○</td><td>○</td><td>○</td><td class="me">●</td></tr>
+          <tr><td>Gọi con cháu một chạm</td><td>◐</td><td>○</td><td>○</td><td class="me">●</td></tr>
+          <tr><td>Thiết kế cho người 60+</td><td>○</td><td>○</td><td>○</td><td class="me">●</td></tr>
+          <tr><td>Kịch bản lừa ở Việt Nam</td><td>◐</td><td>○</td><td>◐</td><td class="me">●</td></tr>
+        </table>
+        <p class="sm" style="margin-top:8px;">● có &nbsp; ◐ một phần &nbsp; ○ không. Đội tự đánh giá theo mô tả chức năng công khai, tháng 10/2026. Cần kiểm lại trước khi nộp.</p>
+      </div>
+      <div>
+        <div class="box"><div class="lbl" style="color:#cfd8f5;">Khoảng trống</div><p style="font-size:17px;margin-top:8px;color:#fff;">Phát hiện lừa đảo đã có nhiều công cụ. Thứ thiếu là khoảng dừng: giữ người cao tuổi lại đủ 60 giây, và đưa con cháu vào trước khi tiền đi.</p></div>
+        <div class="rule" style="padding-top:12px;margin-top:16px;"><h3>Vì sao khó bị sao chép</h3><p class="sm">Việc hỏi từng bước và gọi con cháu cần thiết kế cho người 60+ và quy tắc gia đình. Đây là lớp sản phẩm, không chỉ là bộ lọc.</p></div>
+        <div class="rule" style="padding-top:12px;"><h3>Bên cạnh ngân hàng</h3><p class="sm">Ngân hàng và ví là đối tác B2B cho cảnh báo giao dịch. Họ giảm tra soát và hoàn tiền; Khoan Đã giảm nhu cầu đó ngay từ đầu.</p></div>
+      </div>
+    </div>
+  </div>
+  <div class="pg">6</div>
+</section>
+
+<section class="slide ">
+  <div class="strip"><img src="img/strip-tai-tro.png" alt="Đơn vị tổ chức và nhà tài trợ"></div>
+  <div class="frame"></div>
+  <div class="ast" style="top:64px;"><svg viewBox="0 0 24 24"><path d="M12 2v20M3.5 7l17 10M3.5 17l17-10" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/></svg></div>
+  <div class="ast" style="bottom:2px;"><svg viewBox="0 0 24 24"><path d="M12 2v20M3.5 7l17 10M3.5 17l17-10" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/></svg></div>
+  <div class="handle">@khoan-da</div>
+  <div class="tag">Giải pháp</div>
+  <div class="content">
+    <h1 style="font-size:50px;margin-bottom:14px;">Một khoảng dừng 60 giây</h1>
+    <div style="display:grid;grid-template-columns:1.05fr 1fr;gap:30px;">
+      <div id="layers" style="display:flex;flex-direction:column;gap:6px;"></div>
+      <div>
+        <div class="lbl" style="margin-bottom:8px;">Khi có cuộc gọi</div>
+        <div class="step"><div class="n">1</div><div><h3>Bấm "Đang bị ai gọi?"</h3><p class="sm">Chọn việc người gọi đang đòi: chuyển tiền, OTP, cài app, gửi giấy tờ.</p></div></div>
+        <div class="step"><div class="n">2</div><div><h3>Trả lời vài câu CÓ / KHÔNG</h3><p class="sm">AI chỉ đọc tín hiệu. Luật cố định quyết định mức rủi ro.</p></div></div>
+        <div class="step"><div class="n">3</div><div><h3>Màn hình đỏ đếm 60 giây</h3><p class="sm">Dừng lại. Mọi thao tác chuyển tiền được tạm dừng trong lúc chờ.</p></div></div>
+        <div class="step"><div class="n">4</div><div><h3>Gọi con cháu một chạm</h3><p class="sm">Báo động tới tối đa 5 người thân. Báo lần 2 nếu 60 giây chưa ai trả lời.</p></div></div>
+        <p class="sm" style="margin-top:12px;">Không lưu nội dung tin nhắn. Người thân chỉ nhận cảnh báo, không đọc tin. Luôn có lối thoát "Tôi ổn".</p>
+      </div>
+    </div>
+  </div>
+  <div class="pg">7</div>
+</section>
+
+<section class="slide ">
+  <div class="strip"><img src="img/strip-tai-tro.png" alt="Đơn vị tổ chức và nhà tài trợ"></div>
+  <div class="frame"></div>
+  <div class="ast" style="top:64px;"><svg viewBox="0 0 24 24"><path d="M12 2v20M3.5 7l17 10M3.5 17l17-10" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/></svg></div>
+  <div class="ast" style="bottom:2px;"><svg viewBox="0 0 24 24"><path d="M12 2v20M3.5 7l17 10M3.5 17l17-10" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/></svg></div>
+  <div class="handle">@khoan-da</div>
+  <div class="tag">Giá trị saving</div>
+  <div class="content">
+    <h1 style="font-size:46px;margin-bottom:10px;">Tiết kiệm bằng phòng ngừa: giữ nguồn lực</h1>
+    <table class="tbl wide" style="font-size:13px;">
+      <tr><th>Nguồn lực đang bị lãng phí</th><th>Khi lừa đảo xảy ra</th><th>Khoan Đã tiết kiệm bằng cách nào</th><th>Cách đo</th></tr>
+      <tr><td><b>Tiền tích luỹ</b></td><td>20 triệu bị chuyển cho kẻ gian (giả định), gần như không thu hồi</td><td>Khoảng dừng 60 giây trước khi chuyển; con cháu được báo</td><td>Số vụ được chặn và số tiền giữ lại</td></tr>
+      <tr><td><b>Chi phí xử lý</b></td><td>1,5 triệu cho gọi ngân hàng, tra soát, trình báo (giả định)</td><td>Chặn vụ ngay từ đầu, nên không phát sinh quy trình xử lý</td><td>Chi phí xử lý tránh được mỗi vụ</td></tr>
+      <tr><td><b>Thời gian con cháu</b></td><td>Nghỉ việc, gọi nhiều nơi, kể lại nhiều lần</td><td>Một chạm gọi người thân; cảnh báo thay cho việc kể lại</td><td>Số giờ tiết kiệm: chưa quy đổi, đo khi thí điểm</td></tr>
+      <tr><td><b>Nhân lực ngân hàng, công an</b></td><td>Khiếu nại, rà soát, lập hồ sơ cho vụ khó thu hồi</td><td>Giảm số vụ đến bước phải xử lý</td><td>Chưa quy đổi; cần số liệu từ đối tác</td></tr>
+      <tr><td><b>Niềm tin của gia đình</b></td><td>Bị lừa rồi giấu, con cháu mất an tâm</td><td>Người thân được báo ngay, không phải tự phát hiện</td><td>Tỷ lệ gia đình kích hoạt "Nhắc con cháu"</td></tr>
+    </table>
+    <div style="display:grid;grid-template-columns:1.1fr 1fr;gap:24px;margin-top:12px;">
+      <div class="box" style="padding:16px 20px;"><div class="lbl" style="color:#cfd8f5;">Cơ sở pháp lý</div><p style="font-size:14.5px;margin-top:6px;color:#fff;">Luật Thực hành tiết kiệm, chống lãng phí số 110/2025/QH15 coi tiết kiệm là sử dụng hiệu quả các nguồn lực. Khoan Đã tiết kiệm bằng phòng ngừa, không chỉ xử lý sau khi đã mất.</p></div>
+      <div class="rule" style="padding-top:12px;"><h3>Chỉ tiền có số liệu</h3><p class="sm">Cost avoidance chỉ tính khoản tiền (giả định). Ba nguồn còn lại chưa quy đổi thành tiền, nên không cộng vào tài chính.</p></div>
+    </div>
+  </div>
+  <div class="pg">8</div>
+</section>
+
+<section class="slide ">
+  <div class="strip"><img src="img/strip-tai-tro.png" alt="Đơn vị tổ chức và nhà tài trợ"></div>
+  <div class="frame"></div>
+  <div class="ast" style="top:64px;"><svg viewBox="0 0 24 24"><path d="M12 2v20M3.5 7l17 10M3.5 17l17-10" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/></svg></div>
+  <div class="ast" style="bottom:2px;"><svg viewBox="0 0 24 24"><path d="M12 2v20M3.5 7l17 10M3.5 17l17-10" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/></svg></div>
+  <div class="handle">@khoan-da</div>
+  <div class="tag">Cost avoidance</div>
+  <div class="content">
+    <h1 style="font-size:50px;margin-bottom:14px;">Mỗi vụ được chặn giữ lại 21,5 triệu đồng</h1>
+    <div style="display:grid;grid-template-columns:0.95fr 1.15fr;gap:28px;">
+      <div>
+        <div class="box" style="padding:20px 22px;">
+          <div class="lbl" style="color:#cfd8f5;">Cost avoidance một vụ (giả định)</div>
+          <div class="formula"><span>20</span> + <span>1,5</span> = <span class="big">21,5</span> triệu</div>
+          <p style="font-size:14px;color:#e6edff;">Tiền tích luỹ không bị chuyển đi, cộng chi phí xử lý không phát sinh (gọi ngân hàng, tra soát, trình báo).</p>
+        </div>
+        <div style="margin-top:14px;" id="chart-one"></div>
+        <p class="sm" style="margin-top:4px;">Tiết kiệm theo Luật 110/2025/QH15 là sử dụng hiệu quả nguồn lực: Khoan Đã tiết kiệm bằng cách ngăn một vụ trước khi tiền đi, thay vì xử lý sau khi mất.</p>
+      </div>
+      <div>
+        <div class="lbl" style="margin-bottom:8px;">Số vụ chặn được trong 15 tháng so với chi phí 68,8 triệu</div>
+        <div id="chart-cav"></div>
+        <table class="tbl" style="margin-top:8px;font-size:13px;">
+          <tr><th>Số vụ chặn được</th><th>Giá trị giữ lại</th><th>So với chi phí 68,8 triệu</th></tr>
+          <tr><td>1 vụ</td><td>21,5 triệu</td><td>31%</td></tr>
+          <tr><td>3 vụ</td><td>64,5 triệu</td><td>94%</td></tr>
+          <tr><td><b>4 vụ</b></td><td><b>86 triệu</b></td><td><b>125%: đã hoà vốn</b></td></tr>
+          <tr><td>10 vụ</td><td>215 triệu</td><td>313%</td></tr>
+        </table>
+        <p class="sm" style="margin-top:8px;">Hoà vốn cần khoảng 3,2 vụ. Số 20 triệu là giả định; xem phụ lục A.</p>
+      </div>
+    </div>
+  </div>
+  <div class="pg">9</div>
+</section>
+
+<section class="slide ">
+  <div class="strip"><img src="img/strip-tai-tro.png" alt="Đơn vị tổ chức và nhà tài trợ"></div>
+  <div class="frame"></div>
+  <div class="ast" style="top:64px;"><svg viewBox="0 0 24 24"><path d="M12 2v20M3.5 7l17 10M3.5 17l17-10" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/></svg></div>
+  <div class="ast" style="bottom:2px;"><svg viewBox="0 0 24 24"><path d="M12 2v20M3.5 7l17 10M3.5 17l17-10" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/></svg></div>
+  <div class="handle">@khoan-da</div>
+  <div class="tag">Tài chính</div>
+  <div class="content">
+    <h1 style="font-size:50px;margin-bottom:14px;">Hoà vốn khoảng 200 gia đình trả phí</h1>
+    <div style="display:grid;grid-template-columns:1.3fr 1fr;gap:28px;">
+      <div>
+        <div class="lbl">Doanh thu gói Pro so với chi phí 15 tháng (triệu đồng/năm)</div>
+        <div id="chart-be" style="margin-top:8px;"></div>
+        <p class="sm" style="margin-top:4px;">Giả định: Pro 29.000 đ/tháng, 12 tháng. Chi phí 68,8 triệu là ngân sách 15 tháng, đặt cạnh doanh thu một năm để so sánh.</p>
+      </div>
+      <div>
+        <table class="tbl">
+          <tr><th>Giá Pro</th><th>Gia đình trả phí để hoà vốn</th></tr>
+          <tr><td>29.000 đ/tháng</td><td><b>≈ 198, làm tròn 200</b></td></tr>
+          <tr><td>39.000 đ/tháng</td><td>≈ 147</td></tr>
+          <tr><td>49.000 đ/tháng</td><td>≈ 117</td></tr>
+        </table>
+        <div class="rule" style="padding-top:12px;margin-top:14px;"><div class="lbl">Ngân sách 15 tháng, triệu đồng</div><div id="chart-budget" style="margin-top:8px;"></div></div>
+        <p class="sm" style="margin-top:10px;">Marketing và truyền thông chiếm phần lớn ngân sách. Đây là chi phí cần đo bằng số gia đình kích hoạt, không chỉ lượt xem.</p>
+      </div>
+    </div>
+  </div>
+  <div class="pg">10</div>
+</section>
+
+<section class="slide ">
+  <div class="strip"><img src="img/strip-tai-tro.png" alt="Đơn vị tổ chức và nhà tài trợ"></div>
+  <div class="frame"></div>
+  <div class="ast" style="top:64px;"><svg viewBox="0 0 24 24"><path d="M12 2v20M3.5 7l17 10M3.5 17l17-10" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/></svg></div>
+  <div class="ast" style="bottom:2px;"><svg viewBox="0 0 24 24"><path d="M12 2v20M3.5 7l17 10M3.5 17l17-10" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/></svg></div>
+  <div class="handle">@khoan-da</div>
+  <div class="tag">Triển khai</div>
+  <div class="content">
+    <h1 style="font-size:50px;margin-bottom:12px;">15 tháng: thí điểm trước, mở rộng sau</h1>
+    <div id="chart-gantt"></div>
+    <p class="sm" style="margin-top:2px;">Thời gian từng việc là dự kiến của đội. Giai đoạn 1 đến T3/2027, giai đoạn 2 từ T4/2027.</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px;margin-top:14px;">
+      <div class="rule" style="padding-top:12px;"><h3>Giai đoạn 1 · thí điểm</h3><p class="sm">Kiểm chứng giả thuyết trả phí. Đo tỷ lệ kích hoạt "Nhắc con cháu".</p></div>
+      <div class="rule" style="padding-top:12px;"><h3>Giai đoạn 2 · mở rộng</h3><p class="sm">Hội người cao tuổi, nhóm Zalo gia đình, hạ tầng API SMS / Zalo OA.</p></div>
+      <div class="rule" style="padding-top:12px;"><h3>KPI theo dõi</h3><p class="sm">Gia đình kích hoạt; tỷ lệ chuyển sang Pro; số vụ được chặn; báo nhầm trên tổng cảnh báo.</p></div>
+    </div>
+  </div>
+  <div class="pg">11</div>
+</section>
+
+<section class="slide ">
+  <div class="strip"><img src="img/strip-tai-tro.png" alt="Đơn vị tổ chức và nhà tài trợ"></div>
+  <div class="frame"></div>
+  <div class="ast" style="top:64px;"><svg viewBox="0 0 24 24"><path d="M12 2v20M3.5 7l17 10M3.5 17l17-10" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/></svg></div>
+  <div class="ast" style="bottom:2px;"><svg viewBox="0 0 24 24"><path d="M12 2v20M3.5 7l17 10M3.5 17l17-10" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/></svg></div>
+  <div class="handle">@khoan-da</div>
+  <div class="tag">Rủi ro</div>
+  <div class="content">
+    <h1 style="font-size:50px;margin-bottom:14px;">Năm rủi ro lớn, đã có kế hoạch xử lý</h1>
+    <div style="display:grid;grid-template-columns:0.9fr 1.1fr;gap:28px;">
+      <div><div class="lbl">Ma trận rủi ro (khả năng × tác động)</div><div id="chart-risk" style="margin-top:8px;"></div></div>
+      <div>
+        <div class="rule" style="padding:10px 0;"><div class="rowhd"><h3>Hệ điều hành hạn chế đọc SMS</h3><span class="lbl">16 · Cao</span></div><p class="sm">Dùng API chính thức, xử lý ngay trên máy; tính năng riêng cho từng hệ điều hành.</p></div>
+        <div class="rule" style="padding:10px 0;"><div class="rowhd"><h3>Người cao tuổi ngại công nghệ</h3><span class="lbl">12 · Cao</span></div><p class="sm">Con cháu cài đặt, lưu số, đặt quy tắc; trang chủ chỉ 4 nút to.</p></div>
+        <div class="rule" style="padding:10px 0;"><div class="rowhd"><h3>Báo nhầm, người dùng bỏ app</h3><span class="lbl">12 · Cao</span></div><p class="sm">Công bố tỷ lệ báo nhầm; luôn có lối thoát "Tôi ổn".</p></div>
+        <div class="rule" style="padding:10px 0;"><div class="rowhd"><h3>Gia đình không trả gói Pro</h3><span class="lbl">12 · Cao</span></div><p class="sm">Bản miễn phí đủ dùng; thêm nguồn thu từ B2B và tài trợ.</p></div>
+        <div class="rule" style="padding:10px 0;border-bottom:1.5px solid var(--navy);"><div class="rowhd"><h3>Lộ dữ liệu riêng tư</h3><span class="lbl">10 · Vừa</span></div><p class="sm">Không lưu nội dung tin nhắn; người thân chỉ thấy cảnh báo, không đọc tin.</p></div>
+        <p class="sm" style="margin-top:8px;">Điểm = khả năng × tác động, thang 1–5, đội tự đánh giá.</p>
+      </div>
+    </div>
+  </div>
+  <div class="pg">12</div>
+</section>
+
+<section class="slide ">
+  <div class="strip"><img src="img/strip-tai-tro.png" alt="Đơn vị tổ chức và nhà tài trợ"></div>
+  <div class="frame"></div>
+  <div class="ast" style="top:64px;"><svg viewBox="0 0 24 24"><path d="M12 2v20M3.5 7l17 10M3.5 17l17-10" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/></svg></div>
+  <div class="ast" style="bottom:2px;"><svg viewBox="0 0 24 24"><path d="M12 2v20M3.5 7l17 10M3.5 17l17-10" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/></svg></div>
+  <div class="handle">@khoan-da</div>
+  <div class="tag">Cảm ơn</div>
+  <div class="content">
+    <div style="display:flex;flex-direction:column;justify-content:center;height:100%;">
+      <h1 style="font-size:140px;">Cảm ơn!</h1>
+      <p class="serif" style="font-size:30px;color:var(--navy);margin-top:12px;">Tạo một khoảng dừng trước khi quá muộn.</p>
+      <p class="m" style="margin-top:24px;font-size:17px;">Đội ShieldGen · khoan-da.onrender.com</p>
+    </div>
+  </div>
+  <div class="pg">13</div>
+</section>
+
+<section class="slide ">
+  <div class="strip"><img src="img/strip-tai-tro.png" alt="Đơn vị tổ chức và nhà tài trợ"></div>
+  <div class="frame"></div>
+  <div class="ast" style="top:64px;"><svg viewBox="0 0 24 24"><path d="M12 2v20M3.5 7l17 10M3.5 17l17-10" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/></svg></div>
+  <div class="ast" style="bottom:2px;"><svg viewBox="0 0 24 24"><path d="M12 2v20M3.5 7l17 10M3.5 17l17-10" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/></svg></div>
+  <div class="handle">@khoan-da</div>
+  <div class="tag">Phụ lục A · Cách tính</div>
+  <div class="content">
+    <h1 style="font-size:46px;margin-bottom:14px;">Cách tính cost avoidance và hoà vốn</h1>
+    <table class="tbl wide">
+      <tr><th>Đại lượng</th><th>Công thức / giá trị</th><th>Trạng thái</th></tr>
+      <tr><td>Tiền bị chuyển trung bình một vụ</td><td>20 triệu đồng</td><td>Giả định của đội, cần đối chiếu số liệu công khai</td></tr>
+      <tr><td>Chi phí xử lý một vụ</td><td>1,5 triệu đồng (gọi ngân hàng, tra soát, trình báo)</td><td>Giả định của đội</td></tr>
+      <tr><td>Cost avoidance một vụ</td><td>20 + 1,5 = 21,5 triệu đồng</td><td>Tính từ hai giả định trên</td></tr>
+      <tr><td>Số vụ cần chặn để hoà vốn 15 tháng</td><td>68,8 ÷ 21,5 ≈ 3,2, làm tròn 4 vụ</td><td>Tính toán</td></tr>
+      <tr><td>Doanh thu một gia đình trả Pro một năm</td><td>29.000 × 12 = 348.000 đồng (49.000 cho 588.000)</td><td>Theo giá đề xuất</td></tr>
+      <tr><td>Gia đình trả Pro để hoà vốn một năm</td><td>68,8 triệu ÷ 0,348 triệu ≈ 198, làm tròn 200</td><td>Tính toán; giả định tỷ lệ trả phí</td></tr>
+    </table>
+    <p class="sm" style="margin-top:14px;"><b>Độ nhạy.</b> Nếu tiền bị chuyển trung bình chỉ 10 triệu, cost avoidance một vụ còn 11,5 triệu, và hoà vốn cần khoảng 6 vụ. Nếu 30 triệu, hoà vốn cần khoảng 2 đến 3 vụ. Thí điểm sẽ thay các giả định này bằng số liệu đo được.</p>
+  </div>
+  <div class="pg">PL1</div>
+</section>
+
+<section class="slide ">
+  <div class="strip"><img src="img/strip-tai-tro.png" alt="Đơn vị tổ chức và nhà tài trợ"></div>
+  <div class="frame"></div>
+  <div class="ast" style="top:64px;"><svg viewBox="0 0 24 24"><path d="M12 2v20M3.5 7l17 10M3.5 17l17-10" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/></svg></div>
+  <div class="ast" style="bottom:2px;"><svg viewBox="0 0 24 24"><path d="M12 2v20M3.5 7l17 10M3.5 17l17-10" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/></svg></div>
+  <div class="handle">@khoan-da</div>
+  <div class="tag">Phụ lục B · Đội ngũ</div>
+  <div class="content">
+    <h1 style="font-size:46px;margin-bottom:22px;">Đội ngũ và quản trị</h1>
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:22px;">
+      <div class="rule" style="padding-top:16px;"><div class="avatar">Q</div><h2 style="font-size:20px;margin-top:10px;">Quân</h2><p class="lbl" style="margin-top:4px;font-size:11px;">Trưởng nhóm sản phẩm</p><p class="sm" style="margin-top:8px;">Trực tiếp xây dựng và phát triển ứng dụng.</p></div>
+      <div class="rule" style="padding-top:16px;"><div class="avatar">T</div><h2 style="font-size:20px;margin-top:10px;">Thanh</h2><p class="lbl" style="margin-top:4px;font-size:11px;">Sáng tạo &amp; cộng đồng</p><p class="sm" style="margin-top:8px;">Hình ảnh, video, nội dung và truyền thông.</p></div>
+      <div class="rule" style="padding-top:16px;"><div class="avatar">L</div><h2 style="font-size:20px;margin-top:10px;">Lan</h2><p class="lbl" style="margin-top:4px;font-size:11px;">Tăng trưởng &amp; thị trường</p><p class="sm" style="margin-top:8px;">Khảo sát thị trường, hiểu người dùng.</p></div>
+      <div class="rule" style="padding-top:16px;"><div class="avatar">Đ</div><h2 style="font-size:20px;margin-top:10px;">Đạt</h2><p class="lbl" style="margin-top:4px;font-size:11px;">Đối tác &amp; kinh doanh</p><p class="sm" style="margin-top:8px;">Tìm đối tác B2B, xây mô hình doanh thu.</p></div>
+      <div class="rule" style="padding-top:16px;"><div class="avatar">M</div><h2 style="font-size:20px;margin-top:10px;">Minh</h2><p class="lbl" style="margin-top:4px;font-size:11px;">Nội dung &amp; an toàn</p><p class="sm" style="margin-top:8px;">Bảo đảm thông tin trong app đúng và rõ ràng.</p></div>
+    </div>
+    <p class="sm" style="margin-top:22px;">Cơ cấu quản trị: quyết định sản phẩm và số liệu do nhóm sáng lập thông qua; quyết định pháp lý và tài chính cần luật sư đối chiếu trước khi ký kết.</p>
+  </div>
+  <div class="pg">PL2</div>
+</section>
+
+<section class="slide ">
+  <div class="strip"><img src="img/strip-tai-tro.png" alt="Đơn vị tổ chức và nhà tài trợ"></div>
+  <div class="frame"></div>
+  <div class="ast" style="top:64px;"><svg viewBox="0 0 24 24"><path d="M12 2v20M3.5 7l17 10M3.5 17l17-10" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/></svg></div>
+  <div class="ast" style="bottom:2px;"><svg viewBox="0 0 24 24"><path d="M12 2v20M3.5 7l17 10M3.5 17l17-10" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/></svg></div>
+  <div class="handle">@khoan-da</div>
+  <div class="tag">Phụ lục C · Nguồn số liệu</div>
+  <div class="content">
+    <h1 style="font-size:46px;margin-bottom:14px;">Nguồn số liệu và mức độ tin cậy</h1>
+    <table class="tbl wide">
+      <tr><th>Số liệu</th><th>Nguồn</th><th>Mức độ</th></tr>
+      <tr><td>6.000 tỷ đồng, 11 tháng 2025</td><td>Bộ Công an (vụ đã trình báo)</td><td>Số công bố</td></tr>
+      <tr><td>442 tỷ USD, 42 nước</td><td>GASA 2025</td><td>Số công bố</td></tr>
+      <tr><td>+25%, 10,0 → 12,5 tỷ USD</td><td>FTC, 3/2025</td><td>Số công bố</td></tr>
+      <tr><td>14,2 triệu người 60+; 38,2% đô thị</td><td>GSO, điều tra dân số giữa kỳ 2024</td><td>Số công bố; tỷ lệ đô thị là ước tính</td></tr>
+      <tr><td>61,4% người từ 60 tuổi dùng Internet</td><td>NSO, Niên giám 2024</td><td>Số công bố</td></tr>
+      <tr><td>82,6% bắt được; 1,8% báo nhầm</td><td>Bộ mẫu nội bộ 531 tin</td><td>Đã dùng để chỉnh luật; chưa kiểm độc lập</td></tr>
+      <tr><td>Chi phí 68,8 triệu; giá Pro; cost avoidance</td><td>Kế hoạch của đội</td><td>Giả định, xem phụ lục A</td></tr>
+    </table>
+  </div>
+  <div class="pg">PL3</div>
+</section>
+
+<section class="slide ">
+  <div class="strip"><img src="img/strip-tai-tro.png" alt="Đơn vị tổ chức và nhà tài trợ"></div>
+  <div class="frame"></div>
+  <div class="ast" style="top:64px;"><svg viewBox="0 0 24 24"><path d="M12 2v20M3.5 7l17 10M3.5 17l17-10" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/></svg></div>
+  <div class="ast" style="bottom:2px;"><svg viewBox="0 0 24 24"><path d="M12 2v20M3.5 7l17 10M3.5 17l17-10" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/></svg></div>
+  <div class="handle">@khoan-da</div>
+  <div class="tag">Phụ lục D · Màn hình</div>
+  <div class="content">
+    <h1 style="font-size:46px;margin-bottom:12px;">Ba màn hình thật của app</h1>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px;justify-items:center;margin-top:6px;">
+      <div class="screen"><div class="iphone"><div class="scr" style="--bg:url(img/f-dang-goi.png)"><img src="img/f-dang-goi.png" alt="Đang bị ai gọi"></div></div><h3>1 · Đang bị ai gọi?</h3><p class="sm">Chọn việc người gọi đòi hỏi</p></div>
+      <div class="screen"><div class="iphone"><div class="scr" style="--bg:url(img/f-khan-cap.png)"><img src="img/f-khan-cap.png" alt="Khẩn cấp"></div></div><h3>2 · Dừng 60 giây</h3><p class="sm">Màn đỏ đếm ngược, gọi con cháu một chạm</p></div>
+      <div class="screen"><div class="iphone"><div class="scr" style="--bg:url(img/f-trang-chu.png)"><img src="img/f-trang-chu.png" alt="Trang chủ"></div></div><h3>3 · Trang chủ gọn</h3><p class="sm">Bốn nút lớn, chữ to, dễ bấm</p></div>
+    </div>
+  </div>
+  <div class="pg">PL4</div>
+</section>
+
+<script>
+const NS = 'http://www.w3.org/2000/svg';
+const NAVY = '#1f3585', NAVY2 = '#3a57b0', LIGHT = '#9fb2e6', GREY = '#c9ccd6', INK = '#1b1f2c', RED = '#b42318';
+const el = (tag, attrs, parent, text) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (text !== undefined) e.textContent = text; if (parent) parent.appendChild(e); return e; };
+const svgIn = (id, w, h) => el('svg', {viewBox:`0 0 ${w} ${h}`, width:'100%'}, document.getElementById(id));
+
+function hbars(id, items, max, w=560) {
+  const rowH = 44, h = items.length*rowH + 6, s = svgIn(id, w, h), lab = 210, bw = w - lab - 96;
+  items.forEach((it, i) => {
+    const y = 4 + i*rowH;
+    el('text', {x:0, y:y+21, 'font-size':15, 'font-weight':700, fill:INK}, s, it.label);
+    el('rect', {x:lab, y:y+6, width:bw, height:22, fill:'none', stroke:NAVY, 'stroke-width':1}, s);
+    el('rect', {x:lab, y:y+6, width:Math.max(4, bw*it.value/max), height:22, fill:it.color}, s);
+    el('text', {x:lab + bw*it.value/max + 10, y:y+23, 'font-size':15, 'font-weight':800, fill:NAVY}, s, it.text);
+  });
+}
+function vbars(id, items, max, w=560, h=260) {
+  const s = svgIn(id, w, h), base = h - 44, top = 36, cw = (w-40)/items.length, bw = cw*0.46;
+  items.forEach((it, i) => {
+    const x = 20 + i*cw + (cw-bw)/2, bh = (base-top)*it.value/max, y = base - bh;
+    el('rect', {x, y, width:bw, height:bh, fill:it.color}, s);
+    el('text', {x:x+bw/2, y:y-10, 'text-anchor':'middle', 'font-size':17, 'font-weight':800, fill:NAVY}, s, it.text);
+    el('text', {x:20 + i*cw + cw/2, y:base+26, 'text-anchor':'middle', 'font-size':13, 'font-weight':700, fill:INK}, s, it.label);
+  });
+  el('line', {x1:10, x2:w-10, y1:base, y2:base, stroke:NAVY, 'stroke-width':1.5}, s);
+}
+function stackOne(id) {
+  const w = 560, s = svgIn(id, w, 96), total = 21.5, sc = (w-10)/total;
+  let x = 0;
+  [{v:20, c:NAVY, t:'20 triệu tiền bị chuyển'}, {v:1.5, c:'#c0392b', t:''}].forEach(seg => {
+    el('rect', {x, y:6, width:seg.v*sc, height:40, fill:seg.c}, s);
+    x += seg.v*sc;
+  });
+  el('text', {x:0, y:70, 'font-size':14, 'font-weight':800, fill:NAVY}, s, '20 triệu tiền bị chuyển');
+  el('text', {x:w, y:70, 'text-anchor':'end', 'font-size':14, 'font-weight':800, fill:'#c0392b'}, s, '+1,5 triệu xử lý');
+}
+function breakEven() {
+  const w = 640, h = 330, l = 56, r = 24, t = 18, b = 46, xmax = 400, ymax = 140;
+  const s = svgIn('chart-be', w, h);
+  const sx = x => l + x/xmax*(w-l-r), sy = y => h-b - y/ymax*(h-b-t);
+  for (let y = 0; y <= ymax; y += 20) {
+    el('line', {x1:l, x2:w-r, y1:sy(y), y2:sy(y), stroke:'#d6dae6'}, s);
+    el('text', {x:l-10, y:sy(y)+5, 'text-anchor':'end', 'font-size':13, fill:INK}, s, y);
+  }
+  for (let x = 0; x <= xmax; x += 100) el('text', {x:sx(x), y:h-b+20, 'text-anchor':'middle', 'font-size':13, fill:INK}, s, x);
+  el('text', {x:w-r, y:h-8, 'text-anchor':'end', 'font-size':13, 'font-weight':700, fill:NAVY}, s, 'số gia đình trả gói Pro');
+  el('line', {x1:sx(0), y1:sy(0), x2:sx(xmax), y2:sy(xmax*0.348), stroke:NAVY, 'stroke-width':4}, s);
+  el('line', {x1:sx(0), y1:sy(68.8), x2:sx(xmax), y2:sy(68.8), stroke:RED, 'stroke-width':2.5, 'stroke-dasharray':'8 6'}, s);
+  el('text', {x:sx(395), y:sy(68.8)-10, 'text-anchor':'end', 'font-size':14, 'font-weight':800, fill:RED}, s, 'Chi phí 68,8 triệu');
+  el('text', {x:sx(395), y:sy(xmax*0.348)+18, 'text-anchor':'end', 'font-size':14, 'font-weight':800, fill:NAVY}, s, 'Doanh thu Pro');
+  const xb = 68.8/0.348;
+  el('circle', {cx:sx(xb), cy:sy(68.8), r:8, fill:'#fff', stroke:NAVY, 'stroke-width':3}, s);
+  el('text', {x:sx(xb)-14, y:sy(68.8)+34, 'text-anchor':'end', 'font-size':14, 'font-weight':800, fill:NAVY}, s, 'Hoà vốn ≈ 200');
+}
+function riskMatrix() {
+  const w = 480, h = 330, l = 64, t = 12, cell = 54;
+  const s = svgIn('chart-risk', w, h);
+  const shade = v => v >= 12 ? NAVY : v >= 8 ? '#8fa3dd' : '#dde4f7';
+  for (let i = 1; i <= 5; i++) for (let j = 1; j <= 5; j++) el('rect', {x:l+(i-1)*cell, y:t+(5-j)*cell, width:cell-2, height:cell-2, fill:shade(i*j)}, s);
+  for (let i = 1; i <= 5; i++) el('text', {x:l+(i-1)*cell+cell/2, y:t+5*cell+18, 'text-anchor':'middle', 'font-size':13, fill:INK}, s, i);
+  for (let j = 1; j <= 5; j++) el('text', {x:l-12, y:t+(5-j)*cell+cell/2+5, 'text-anchor':'end', 'font-size':13, fill:INK}, s, j);
+  el('text', {x:l+2.5*cell, y:h-2, 'text-anchor':'middle', 'font-size':13, 'font-weight':700, fill:NAVY}, s, 'Khả năng xảy ra');
+  el('text', {x:14, y:t+2.5*cell, 'font-size':13, 'font-weight':700, fill:NAVY, transform:`rotate(-90 14 ${t+2.5*cell})`, 'text-anchor':'middle'}, s, 'Tác động');
+  const pts = [{n:'1', k:4, t:4}, {n:'2', k:4, t:3}, {n:'3', k:3, t:4}, {n:'4', k:3, t:4}, {n:'5', k:2, t:5}];
+  pts.forEach((p, idx) => {
+    const dx = idx === 3 ? 16 : 0, dy = idx === 3 ? -14 : 0;
+    const cx = l+(p.k-1)*cell+cell/2 - 1 + dx, cy = t+(5-p.t)*cell+cell/2 - 1 + dy;
+    el('circle', {cx, cy, r:15, fill:'#fff', stroke:NAVY, 'stroke-width':2.5}, s);
+    el('text', {x:cx, y:cy+5, 'text-anchor':'middle', 'font-size':14, 'font-weight':800, fill:NAVY}, s, p.n);
+  });
+}
+function gantt() {
+  const months = ['T10','T11','T12','T1','T2','T3','T4','T5','T6','T7','T8','T9','T10','T11','T12'];
+  const w = 1152, labW = 330, cw = (w-labW-10)/15, rows = [
+    {n:'Giai đoạn 1: khảo sát, thí điểm', a:0, b:6, c:NAVY, bold:true},
+    {n:'Giai đoạn 2: mở rộng', a:6, b:15, c:NAVY2, bold:true},
+    {n:'Nghiên cứu và thí điểm', a:0, b:5, c:LIGHT},
+    {n:'Xây kho kịch bản lừa đảo', a:0, b:5, c:LIGHT},
+    {n:'Chiến dịch trước ra mắt', a:4, b:6, c:LIGHT},
+    {n:'Marketing cùng đối tác', a:6, b:15, c:LIGHT},
+    {n:'Hạ tầng API SMS / Zalo OA', a:6, b:10, c:LIGHT},
+    {n:'Tuyển thêm người', a:9, b:15, c:LIGHT},
+  ];
+  const h = 60 + rows.length*26 + 26;
+  const s = svgIn('chart-gantt', w, h);
+  months.forEach((m, i) => el('text', {x:labW+i*cw+cw/2, y:16, 'text-anchor':'middle', 'font-size':12, 'font-weight':700, fill:INK}, s, m));
+  el('text', {x:labW+3*cw, y:34, 'text-anchor':'middle', 'font-size':13, 'font-weight':800, fill:NAVY}, s, '2026');
+  el('text', {x:labW+10*cw, y:34, 'text-anchor':'middle', 'font-size':13, 'font-weight':800, fill:NAVY}, s, '2027');
+  rows.forEach((r, i) => {
+    const y = 48 + i*26;
+    el('text', {x:0, y:y+15, 'font-size':14, 'font-weight': r.bold ? 800 : 600, fill:INK}, s, r.n);
+    el('rect', {x:labW, y:y+3, width:15*cw, height:18, fill:'#e7ebf6'}, s);
+    el('rect', {x:labW+r.a*cw, y:y+3, width:(r.b-r.a)*cw, height:18, fill:r.c}, s);
+  });
+  el('line', {x1:labW+6*cw, x2:labW+6*cw, y1:44, y2:48+rows.length*26, stroke:RED, 'stroke-dasharray':'4 4', 'stroke-width':1.5}, s);
+  el('text', {x:labW+6*cw+6, y:48+rows.length*26+16, 'font-size':13, 'font-weight':700, fill:RED}, s, 'Chuyển giai đoạn (T4/2027)');
+}
+
+vbars('chart-ftc', [
+  {label:'2023', value:10.0, color:LIGHT, text:'10,0'},
+  {label:'2024', value:12.5, color:NAVY, text:'12,5'},
+], 14, 520, 150);
+hbars('chart-tam', [
+  {label:'TAM · người 60+ cả nước', value:14.2, color:NAVY, text:'14,2 triệu'},
+  {label:'SAM · người 60+ đô thị', value:5.4, color:NAVY2, text:'≈ 5,4 triệu'},
+], 15, 560);
+hbars('chart-budget', [
+  {label:'Giai đoạn 1', value:5.8, color:LIGHT, text:'5,8'},
+  {label:'Giai đoạn 2', value:63, color:NAVY, text:'63'},
+], 70, 470);
+stackOne('chart-one');
+vbars('chart-cav', [
+  {label:'1 vụ chặn', value:21.5, color:LIGHT, text:'21,5'},
+  {label:'3 vụ chặn', value:64.5, color:NAVY2, text:'64,5'},
+  {label:'4 vụ chặn', value:86, color:NAVY, text:'86'},
+  {label:'Chi phí 15 tháng', value:68.8, color:GREY, text:'68,8'},
+], 100, 560, 190);
+breakEven();
+riskMatrix();
+gantt();
+
+const layers = [
+  {t:'Lợi ích cốt lõi', d:'Khoảng dừng 60 giây trước khi chuyển tiền', c:NAVY, w:100},
+  {t:'Sản phẩm cơ bản', d:'Kiểm tra cuộc gọi, tin, link; cảnh báo; một chạm gọi người thân', c:'#2a449a', w:94},
+  {t:'Sản phẩm kỳ vọng', d:'Trang chủ 4 nút to; hỏi từng bước CÓ / KHÔNG; màn đỏ đếm 60 giây', c:NAVY2, w:88},
+  {t:'Sản phẩm gia tăng', d:'Báo động tới 5 người thân; báo lần 2; hướng dẫn 72 giờ nếu lỡ chuyển tiền', c:'#6f86c8', w:82},
+  {t:'Sản phẩm tiềm năng', d:'Cảnh báo giao dịch đáng ngờ cùng ngân hàng; báo cáo ẩn danh; kịch bản theo vùng', c:LIGHT, w:76, dark:true},
+];
+const host = document.getElementById('layers');
+layers.forEach((L, i) => {
+  const d = document.createElement('div');
+  d.style.cssText = `width:${L.w}%;background:${L.c};color:${L.dark ? INK : '#fff'};border-radius:14px;padding:9px 16px;`;
+  d.innerHTML = `<div style="font-size:11px;font-weight:800;letter-spacing:.1em;opacity:.8;">TẦNG ${i+1}</div><div style="font-family:Fr,Georgia,serif;font-weight:800;font-size:17px;line-height:1.2;">${L.t}</div><div style="font-size:12.5px;margin-top:2px;line-height:1.35;opacity:.95;">${L.d}</div>`;
+  host.appendChild(d);
+});
+</script>
+</body>
+</html>

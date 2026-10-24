@@ -176,6 +176,7 @@ npm run build:apk      # vite build --mode apk && npx cap sync android
 | `docs/KE-HOACH-TANG-SUC-MANH-2026-10.md` | Kế hoạch tăng sức mạnh, các ý đã loại, 4 câu hỏi chờ chủ dự án |
 | `docs/HUONG-DOT-PHA-LUAT-NOI-CHAM-2026-10.md` | Hướng "luật nới chậm" đã thẩm định, cổng 0–3, quyết định §12 |
 | `docs/DANH-GIA-20-Y-TUONG.md`, `docs/TINH-NANG-KHA-THI.md` | Đánh giá ý tưởng (tháng 8), có một số mục đã làm |
+| `docs/PHIEU-TRIEN-KHAI-2026-10-15.md` | Ghi nhận thay đổi Trung tâm Bảo vệ, trợ lý tại chỗ, bàn phím và trạng thái build/phát hành ngày 15/10 |
 | `docs/DANH-GIA-KE-HOACH-APK.md` | Phân phối APK |
 | `nextgen-2026/7-QA-BAN-TO-CHUC-SONG-NGU.md`, `.pdf`, `7b-…md` | Q&A 100 câu song ngữ cho giám khảo (PDF 79 trang, bản lời thường). Số liệu ở đây là 1.637 test, APK 1.6 — **cần cập nhật sang 1.7 và 1.680.** |
 | `nextgen-2026/8-NGUON-VON-NGAN-HANG-KHA-THI-TAC-DONG.pdf` | Nguồn vốn, ngân hàng, khả thi, kế hoạch triển khai, tác động (33 trang) |
