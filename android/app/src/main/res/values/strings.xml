@@ -11,6 +11,19 @@
   gọn nhãn dài.
 -->
 <resources>
+    <string name="keyboard_name">Khoan Đã - Bàn phím bảo vệ</string>
+    <string name="keyboard_vietnamese">Tiếng Việt</string>
+    <string name="keyboard_check">Kiểm tra bản nháp</string>
+    <string name="keyboard_reply">Câu mẫu</string>
+    <string name="keyboard_sample_reply">Tôi cần hỏi ý kiến người nhà trước.</string>
+    <string name="keyboard_space">Dấu cách</string>
+    <string name="keyboard_diacritics">Chọn chữ có dấu</string>
+    <string name="keyboard_private_field">Ô mật khẩu, PIN hoặc chỉ nhập số: bàn phím không đọc hay kiểm tra nội dung.</string>
+    <string name="keyboard_no_draft">Chưa có chữ trước con trỏ để kiểm tra.</string>
+    <string name="keyboard_confirm_title">Xác nhận kiểm tra bản nháp</string>
+    <string name="keyboard_confirm_body">Nội dung này sẽ được chuyển vào Khoan Đã để kiểm tra bằng bộ phân tích hiện có. Lượt kiểm có thể gửi chữ lên máy chủ theo cách app thông báo. Bác xem lại trước khi tiếp tục:\n\n%1$s</string>
+    <string name="keyboard_cancel">Hủy</string>
+    <string name="keyboard_continue">Tiếp tục kiểm</string>
     <string name="app_name">Khoan Đã</string>
     <string name="title_activity_main">Khoan Đã</string>
     <string name="package_name">vn.khoanda.app</string>

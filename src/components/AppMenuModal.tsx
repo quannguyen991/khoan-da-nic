@@ -9,9 +9,11 @@ import {
   ChevronRight, 
   Sparkles,
   Zap,
+  ShieldCheck,
 } from 'lucide-react';
 import { ViewState, NguoiThan } from '../App';
 import { nguoiGoiDauTien } from '../lib/vong-tron-gia-dinh';
+import { TRUNG_TAM_BAO_VE, tra } from '../catalog';
 
 interface AppMenuModalProps {
   isOpen: boolean;
@@ -108,6 +110,8 @@ export function AppMenuModal({
       setView('warning');
     }
   };
+
+  const lang = (() => { try { return localStorage.getItem('lang') === 'en' ? 'en' as const : 'vi' as const; } catch { return 'vi' as const; } })();
 
 
   return (
@@ -255,6 +259,17 @@ export function AppMenuModal({
                     <span className="text-[14px] text-gray-600 font-medium block mt-0.5">
                       {t("Cháu mở sẵn tin, bác chỉ việc bấm Gửi")}
                     </span>
+                  </span>
+                </button>
+
+                <button
+                  onClick={() => handleGo('trung_tam_bao_ve')}
+                  className="sm:col-span-2 bg-violet-950 hover:bg-violet-900 text-white rounded-2xl p-4 flex items-center gap-3.5 text-left border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] active:scale-95 transition-transform"
+                >
+                  <span className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center shrink-0"><ShieldCheck size={24} /></span>
+                  <span className="min-w-0">
+                    <span className="font-black text-[17px] leading-tight block">{tra(TRUNG_TAM_BAO_VE, 'CENTER_MENU', lang)}</span>
+                    <span className="text-[14px] text-violet-100 font-medium block mt-0.5">{tra(TRUNG_TAM_BAO_VE, 'CENTER_MENU_HELP', lang)}</span>
                   </span>
                 </button>
               </div>

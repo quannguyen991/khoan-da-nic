@@ -112,6 +112,20 @@
             </intent-filter>
         </service>
 
+        <!-- Bàn phím tùy chọn: chỉ hệ điều hành mới được bind vào IME này. -->
+        <service
+            android:name=".KhoanDaKeyboardService"
+            android:label="@string/keyboard_name"
+            android:permission="android.permission.BIND_INPUT_METHOD"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.view.InputMethod" />
+            </intent-filter>
+            <meta-data
+                android:name="android.view.im"
+                android:resource="@xml/keyboard_method" />
+        </service>
+
         <!--
           DỰNG LẠI LỐI TẮT SAU KHI KHỞI ĐỘNG MÁY / SAU KHI CẬP NHẬT APP.
 

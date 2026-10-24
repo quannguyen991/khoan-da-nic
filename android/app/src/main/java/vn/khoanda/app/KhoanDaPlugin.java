@@ -7,6 +7,12 @@ import android.app.NotificationManager;
 import android.app.NotificationChannel;
 import android.app.Notification;
 import android.speech.SpeechRecognizer;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
+import android.os.SystemClock;
+import android.view.HapticFeedbackConstants;
 
 import com.getcapacitor.JSArray;
 import com.getcapacitor.JSObject;
@@ -21,7 +27,7 @@ import com.getcapacitor.annotation.PermissionCallback;
 import org.json.JSONException;
 
 /**
- * CẦU NỐI GIỮA TẦNG WEB VÀ HAI TÍNH NĂNG NATIVE.
+ * CẦU NỐI GIỮA TẦNG WEB VÀ CÁC TÍNH NĂNG NATIVE.
  *
  * ⚠️ §4.2 — LỚP NÀY KHÔNG QUYẾT ĐỊNH GÌ VỀ RỦI RO.
  * Nó chỉ đưa nội dung thô lên cho tầng web, và tầng web gửi sang bộ luật. Không
@@ -82,6 +88,131 @@ import org.json.JSONException;
         }
 )
 public class KhoanDaPlugin extends Plugin {
+
+    private static final String KHO_CUU_GIU = "khoanda_cu_chi_cuu_giu";
+    private SensorManager quanLyCamBien;
+    private SensorEventListener nguoiNgheCamBien;
+    private long latMayOnDinhTu = 0L;
+    private long mocLacCuoi = 0L;
+    private long cuaSoLacTu = 0L;
+    private long kichHoatCuoi = 0L;
+    private float giaTocTruoc = SensorManager.GRAVITY_EARTH;
+    private int soNhipLac = 0;
+    private int huongLacCuoi = 0;
+
+    private boolean docBat(String ma) {
+        return getContext().getSharedPreferences(KHO_CUU_GIU, android.content.Context.MODE_PRIVATE)
+                .getBoolean(ma, false);
+    }
+
+    private void dungCamBienCuuGiu() {
+        if (quanLyCamBien != null && nguoiNgheCamBien != null) {
+            try { quanLyCamBien.unregisterListener(nguoiNgheCamBien); } catch (Exception ignored) { }
+        }
+        nguoiNgheCamBien = null;
+        quanLyCamBien = null;
+        latMayOnDinhTu = 0L;
+        soNhipLac = 0;
+        huongLacCuoi = 0;
+    }
+
+    private void batCamBienCuuGiu() {
+        dungCamBienCuuGiu();
+        if ((!docBat("latMay") && !docBat("lacMay")) || getActivity() == null) return;
+        quanLyCamBien = (SensorManager) getContext().getSystemService(android.content.Context.SENSOR_SERVICE);
+        if (quanLyCamBien == null) return;
+        Sensor giaToc = quanLyCamBien.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        if (giaToc == null) return;
+        nguoiNgheCamBien = new SensorEventListener() {
+            @Override public void onSensorChanged(SensorEvent suKien) {
+                long bayGio = SystemClock.elapsedRealtime();
+                if (bayGio - kichHoatCuoi < 20000L) return;
+                float x = suKien.values[0], y = suKien.values[1], z = suKien.values[2];
+                float doLon = (float) Math.sqrt(x * x + y * y + z * z);
+
+                if (docBat("latMay")) {
+                    boolean upOnDinh = z < -8.5f && Math.abs(x) < 2.8f && Math.abs(y) < 2.8f
+                            && doLon > 8.7f && doLon < 11.3f;
+                    if (upOnDinh) {
+                        if (latMayOnDinhTu == 0L) latMayOnDinhTu = bayGio;
+                        if (bayGio - latMayOnDinhTu >= 1300L) { kichHoatCuuGiu("lat_may"); return; }
+                    } else latMayOnDinhTu = 0L;
+                }
+
+                if (docBat("lacMay")) {
+                    float bienThien = Math.abs(doLon - giaTocTruoc);
+                    giaTocTruoc = doLon;
+                    float trucNgang = Math.abs(x) >= Math.abs(y) ? x : y;
+                    int huong = trucNgang >= 0 ? 1 : -1;
+                    boolean doiChieu = huongLacCuoi == 0 || huong != huongLacCuoi;
+                    if (bienThien > 3.6f && Math.abs(trucNgang) > 4.4f && doiChieu
+                            && (mocLacCuoi == 0L || (bayGio - mocLacCuoi >= 140L && bayGio - mocLacCuoi <= 1000L))) {
+                        if (cuaSoLacTu == 0L || bayGio - cuaSoLacTu > 1800L) {
+                            cuaSoLacTu = bayGio;
+                            soNhipLac = 1;
+                        } else soNhipLac++;
+                        mocLacCuoi = bayGio;
+                        huongLacCuoi = huong;
+                        if (soNhipLac >= 3) { kichHoatCuuGiu("lac_may"); }
+                    } else if (cuaSoLacTu != 0L && bayGio - cuaSoLacTu > 1800L) {
+                        cuaSoLacTu = 0L; soNhipLac = 0; huongLacCuoi = 0;
+                    }
+                }
+            }
+            @Override public void onAccuracyChanged(Sensor sensor, int accuracy) { }
+        };
+        quanLyCamBien.registerListener(nguoiNgheCamBien, giaToc, SensorManager.SENSOR_DELAY_GAME);
+    }
+
+    private void kichHoatCuuGiu(String cuChi) {
+        kichHoatCuoi = SystemClock.elapsedRealtime();
+        latMayOnDinhTu = 0L;
+        soNhipLac = 0;
+        if (getActivity() != null) {
+            getActivity().runOnUiThread(() -> {
+                try { getActivity().getWindow().getDecorView().performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP); }
+                catch (Exception ignored) { }
+                JSObject data = new JSObject();
+                data.put("cuChi", cuChi);
+                notifyListeners("rescueGesture", data, true);
+            });
+        }
+    }
+
+    @Override
+    protected void handleOnResume() {
+        super.handleOnResume();
+        batCamBienCuuGiu();
+    }
+
+    @Override
+    protected void handleOnPause() {
+        dungCamBienCuuGiu();
+        super.handleOnPause();
+    }
+
+    @PluginMethod
+    public void trangThaiCuChiCuuGiu(PluginCall call) {
+        SensorManager sm = (SensorManager) getContext().getSystemService(android.content.Context.SENSOR_SERVICE);
+        JSObject r = new JSObject();
+        r.put("hoTro", sm != null && sm.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) != null);
+        r.put("latMay", docBat("latMay"));
+        r.put("lacMay", docBat("lacMay"));
+        r.put("dangBat", docBat("latMay") || docBat("lacMay"));
+        r.put("dangLangNghe", nguoiNgheCamBien != null);
+        call.resolve(r);
+    }
+
+    @PluginMethod
+    public void datCuChiCuuGiu(PluginCall call) {
+        android.content.SharedPreferences p = getContext().getSharedPreferences(KHO_CUU_GIU, android.content.Context.MODE_PRIVATE);
+        android.content.SharedPreferences.Editor e = p.edit();
+        if (call.getBoolean("latMay") != null) e.putBoolean("latMay", Boolean.TRUE.equals(call.getBoolean("latMay")));
+        if (call.getBoolean("lacMay") != null) e.putBoolean("lacMay", Boolean.TRUE.equals(call.getBoolean("lacMay")));
+        e.apply();
+        batCamBienCuuGiu();
+        trangThaiCuChiCuuGiu(call);
+    }
 
     // ─────────── Đọc thông báo (§15.4) ───────────
 
@@ -147,6 +278,43 @@ public class KhoanDaPlugin extends Plugin {
     @PluginMethod
     public void moCaiDatDocThongBao(PluginCall call) {
         getContext().startActivity(DocThongBao.manCaiDat());
+        call.resolve();
+    }
+
+    @PluginMethod
+    public void trangThaiBanPhimKhoanDa(PluginCall call) {
+        android.view.inputmethod.InputMethodManager imm =
+                (android.view.inputmethod.InputMethodManager) getContext().getSystemService(android.content.Context.INPUT_METHOD_SERVICE);
+        boolean bat = false;
+        if (imm != null) {
+            String dichVu = getContext().getPackageName() + "/" + KhoanDaKeyboardService.class.getName();
+            for (android.view.inputmethod.InputMethodInfo info : imm.getEnabledInputMethodList()) {
+                if (dichVu.equals(info.getId())) { bat = true; break; }
+            }
+        }
+        JSObject r = new JSObject();
+        r.put("daBat", bat);
+        call.resolve(r);
+    }
+
+    @PluginMethod
+    public void moCaiDatBanPhimKhoanDa(PluginCall call) {
+        try {
+            Intent i = new Intent(android.provider.Settings.ACTION_INPUT_METHOD_SETTINGS)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            getContext().startActivity(i);
+            call.resolve();
+        } catch (Exception e) {
+            call.reject("KHONG_MO_DUOC_CAI_DAT_BAN_PHIM");
+        }
+    }
+
+    @PluginMethod
+    public void chonBanPhimKhoanDa(PluginCall call) {
+        android.view.inputmethod.InputMethodManager imm =
+                (android.view.inputmethod.InputMethodManager) getContext().getSystemService(android.content.Context.INPUT_METHOD_SERVICE);
+        if (imm == null) { call.reject("KHONG_CO_BO_CHON_BAN_PHIM"); return; }
+        getActivity().runOnUiThread(imm::showInputMethodPicker);
         call.resolve();
     }
 

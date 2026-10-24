@@ -76,8 +76,11 @@ import {
   napChuCuocGoi, trangThaiTheoDoiCuocGoi, datTheoDoiCuocGoi, docTo, dungDocTo, dayAppXuong,
   goiDienThoai, guiSms,
   batBongBong, tatBongBong, trangThaiBongBong,
+  ngheCuChiCuuGiu,
   type QuyenNative, type TrangThaiMay,
 } from './native';
+import { TrungTamBaoVe, ManCuuGiu } from './components/TrungTamBaoVe';
+import { BanPhimKhoanDa } from './components/BanPhimKhoanDa';
 import { GuardianIntroView, GuardianAuthView, GuardianView } from './components/Guardian';
 import { AppMenuModal } from './components/AppMenuModal';
 import { HangRaoLoi } from './hang-rao-loi';
@@ -85,6 +88,7 @@ import { MatKhauGiaDinh, docMatKhauGiaDinh } from './components/MatKhauGiaDinh';
 import { KhoiQuyTac, ManDatQuyTac } from './components/QuyTacGiaDinh';
 import { CanhBaoChinhThuc } from './components/CanhBaoChinhThuc';
 import { TroLyNoi } from './components/TroLyNoi';
+import { TroLyPhanHoiTaiCho } from './components/TroLyPhanHoiTaiCho';
 import { QuaCauNoi } from './components/QuaCauNoi';
 import {
   docVongTron, vongTronRong, chonQuyTac, duocHienQuyTac, thuTuGoi, tinhHuongGoi, vaiChoTinhHuong, nguoiGoiDauTien,
@@ -186,7 +190,7 @@ function KhungTaiTre({ t, children }: { t: any; children: React.ReactNode }) {
 }
 import { EMERGENCY_NUMBERS } from './data/so-khan-cap';
 
-export type ViewState = 'intro' | 'home' | 'voice' | 'phone' | 'link' | 'qr' | 'learn' | 'profile' | 'settings' | 'history' | 'family' | 'search' | 'login' | 'add_family' | 'warning' | 'guardian' | 'account' | 'privacy' | 'notifications' | 'device_data' | 'hoi_nhanh' | 'mat_khau_gia_dinh' | 'quy_tac_gia_dinh' | 'ho_so_vu_viec' | 'ra_da_thu_doan' | 'cong_dong' | 'doi_phan_ung' | 'so_ngan_hang' | 'theo_doi_72h' | 'tro_ly' | 'ghep_con_chau' | 'con_cai_giup' | 'chia_khoa' | 'ngan_hang_mo_phong';
+export type ViewState = 'intro' | 'home' | 'voice' | 'phone' | 'link' | 'qr' | 'learn' | 'profile' | 'settings' | 'history' | 'family' | 'search' | 'login' | 'add_family' | 'warning' | 'guardian' | 'account' | 'privacy' | 'notifications' | 'device_data' | 'hoi_nhanh' | 'mat_khau_gia_dinh' | 'quy_tac_gia_dinh' | 'ho_so_vu_viec' | 'ra_da_thu_doan' | 'cong_dong' | 'doi_phan_ung' | 'so_ngan_hang' | 'theo_doi_72h' | 'tro_ly' | 'ghep_con_chau' | 'con_cai_giup' | 'chia_khoa' | 'ngan_hang_mo_phong' | 'trung_tam_bao_ve' | 'cuu_giu' | 'thoat_an_toan' | 'ban_phim';
 
 /**
  * MỘT NGƯỜI THÂN TRONG VÒNG TRÒN GIA ĐÌNH.
@@ -453,6 +457,15 @@ export default function App() {
 
   const [dangChayApk, setDangChayApk] = useState(false);
   useEffect(() => { void laApk().then(setDangChayApk); }, []);
+
+  useEffect(() => {
+    let huy = false;
+    let goBo = () => {};
+    void ngheCuChiCuuGiu(() => {
+      if (!huy) setView('cuu_giu');
+    }).then((g) => { if (huy) g(); else goBo = g; });
+    return () => { huy = true; goBo(); };
+  }, []);
 
   /**
    * ĐỌC LẠI TRẠNG THÁI MÁY MỖI LẦN APP TRỞ LẠI TIỀN CẢNH.
@@ -1531,6 +1544,10 @@ export default function App() {
             {view === 'history' && <HistoryView setView={setView} t={t} lang={lang} isLoggedIn={isLoggedIn} historyItems={historyItems} setHistoryItems={setHistoryItems} setAnalyzeResult={setAnalyzeResult} />}
             {view === 'profile' && <ProfileView setView={setView} t={t} isLoggedIn={isLoggedIn} hoSo={hoSo} onDangXuat={dangXuat} />}
             {view === 'family' && <FamilyView setView={setView} t={t} lang={lang} isLoggedIn={isLoggedIn} familyMembers={familyMembers} setFamilyMembers={setFamilyMembers} />}
+            {view === 'trung_tam_bao_ve' && <TrungTamBaoVe setView={setView} lang={lang} onTriggerEmergency={triggerEmergencyAlert} />}
+            {view === 'ban_phim' && <BanPhimKhoanDa setView={setView} lang={lang} />}
+            {view === 'cuu_giu' && <ManCuuGiu setView={setView} onTriggerEmergency={triggerEmergencyAlert} />}
+            {view === 'thoat_an_toan' && <TrungTamBaoVe setView={setView} lang={lang} onTriggerEmergency={triggerEmergencyAlert} initialSafeExit />}
             {view === 'learn' && <KhungTaiTre t={t}><LearnView setView={setView} t={t} lang={lang} onTriggerEmergency={triggerEmergencyAlert} /></KhungTaiTre>}
             {view === 'login' && <LoginView setView={setView} t={t} lang={lang} onDangNhapXong={setHoSo} userRole={userRole} setUserRole={setUserRole} />}
             {view === 'add_family' && <AddFamilyView setView={setView} t={t} setFamilyMembers={setFamilyMembers} />}
@@ -8675,6 +8692,10 @@ export function WarningView({
           </button>
         )}
         </>)}
+
+        {(result?.queryText?.trim() || result?.queryImage) && result && (
+          <TroLyPhanHoiTaiCho result={result} lang={lang} setView={setView} familyMembers={familyMembers ?? []} />
+        )}
 
         {/*
           §4.6 — NGUYÊN TẮC LUÔN CÓ LỐI RA.

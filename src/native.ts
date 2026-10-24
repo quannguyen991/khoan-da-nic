@@ -24,6 +24,9 @@ import { api } from './api-goc';
 type Nhan = 'CAO' | 'NGHI_NGO' | 'CHUA_THAY';
 
 interface CauNoi {
+  addListener(eventName: 'rescueGesture', listener: (data: { cuChi: string }) => void): Promise<{ remove(): Promise<void> }>;
+  trangThaiCuChiCuuGiu(): Promise<{ hoTro: boolean; dangBat: boolean; latMay: boolean; lacMay: boolean; dangLangNghe: boolean }>;
+  datCuChiCuuGiu(o: { latMay?: boolean; lacMay?: boolean }): Promise<{ hoTro: boolean; dangBat: boolean; latMay: boolean; lacMay: boolean; dangLangNghe: boolean }>;
   batBongBong(): Promise<{ ket: string }>;
   tatBongBong(): Promise<void>;
   trangThaiBongBong(): Promise<{ dangChay: boolean; coQuyen: boolean }>;
@@ -92,6 +95,9 @@ interface CauNoi {
   moCaiDatTroNang(): Promise<void>;
   trangThaiBoNghe(): Promise<{ daCo: boolean; lyDo?: string; sdk?: number }>;
   moCaiDatGiongNoi(): Promise<void>;
+  trangThaiBanPhimKhoanDa(): Promise<{ daBat: boolean }>;
+  moCaiDatBanPhimKhoanDa(): Promise<void>;
+  chonBanPhimKhoanDa(): Promise<void>;
   batDauNghe(o: { ngonNgu?: string }): Promise<{
     vanBan: string; doTinCayThapNhat: number; ghiAmFailed: boolean; maLoi?: string;
   }>;
@@ -213,6 +219,40 @@ async function cauHoacNull(): Promise<{ cau: CauNoi } | null> {
 }
 
 export const laApk = async () => (await layCau()).co;
+
+export type TrangThaiCuChiCuuGiu = {
+  hoTro: boolean; dangBat: boolean; latMay: boolean; lacMay: boolean; dangLangNghe: boolean;
+};
+
+/** Cử chỉ chỉ được nghe khi APK đang ở tiền cảnh; trình duyệt trả về không hỗ trợ. */
+export async function trangThaiCuChiCuuGiu(): Promise<TrangThaiCuChiCuuGiu | null> {
+  const c = (await cauHoacNull())?.cau;
+  if (!c || typeof c.trangThaiCuChiCuuGiu !== 'function') return null;
+  try { return await hanGio(c.trangThaiCuChiCuuGiu(), { hoTro: false, dangBat: false, latMay: false, lacMay: false, dangLangNghe: false }); }
+  catch { return null; }
+}
+
+export async function datCuChiCuuGiu(o: { latMay?: boolean; lacMay?: boolean }): Promise<TrangThaiCuChiCuuGiu | null> {
+  const c = (await cauHoacNull())?.cau;
+  if (!c || typeof c.datCuChiCuuGiu !== 'function') return null;
+  try { return await hanGio(c.datCuChiCuuGiu(o), { hoTro: false, dangBat: false, latMay: false, lacMay: false, dangLangNghe: false }); }
+  catch { return null; }
+}
+
+export async function ngheCuChiCuuGiu(onRescue: (data: { cuChi: string }) => void): Promise<() => void> {
+  const c = (await cauHoacNull())?.cau;
+  if (!c || typeof c.addListener !== 'function') return () => {};
+  try {
+    const handle = await hanGio(c.addListener('rescueGesture', onRescue), { remove: async () => {} });
+    return () => { void handle.remove().catch(() => {}); };
+  } catch { return () => {}; }
+}
+
+/** Đọc câu Safe Exit bằng giọng máy sẵn có; chỉ âm thanh trên thiết bị. */
+export async function docCauCuuGiu(chu: string): Promise<boolean> {
+  const kq = await docTo(chu, 'vi-VN');
+  return kq.ok;
+}
 
 // ═══════════ Đọc thông báo tin nhắn — §15.4 ═══════════
 
@@ -628,6 +668,27 @@ export async function moCaiDatGiongNoi(): Promise<boolean> {
   } catch {
     return false;   // ROM không có màn đó — §6.7, app vẫn chạy.
   }
+}
+
+export async function trangThaiBanPhimKhoanDa(): Promise<boolean | null> {
+  const c = (await cauHoacNull())?.cau;
+  if (!c) return null;
+  try {
+    const r = await hanGio(c.trangThaiBanPhimKhoanDa(), { daBat: false });
+    return r.daBat;
+  } catch { return null; }
+}
+
+export async function moCaiDatBanPhimKhoanDa(): Promise<boolean> {
+  const c = (await cauHoacNull())?.cau;
+  if (!c) return false;
+  try { await c.moCaiDatBanPhimKhoanDa(); return true; } catch { return false; }
+}
+
+export async function chonBanPhimKhoanDa(): Promise<boolean> {
+  const c = (await cauHoacNull())?.cau;
+  if (!c) return false;
+  try { await c.chonBanPhimKhoanDa(); return true; } catch { return false; }
 }
 
 // ═══════════ Thông báo thường trực ═══════════

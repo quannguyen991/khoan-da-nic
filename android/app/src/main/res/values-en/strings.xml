@@ -16,6 +16,19 @@
   ⚠️ KHÔNG DÙNG CHỮ "SAFE" Ở BẤT KỲ ĐÂU (§4.1). Hệ thống không hứa an toàn.
 -->
 <resources>
+    <string name="keyboard_name">Khoan Da - Guardian Keyboard</string>
+    <string name="keyboard_vietnamese">Vietnamese</string>
+    <string name="keyboard_check">Check draft</string>
+    <string name="keyboard_reply">Template</string>
+    <string name="keyboard_sample_reply">I need to ask someone I trust first.</string>
+    <string name="keyboard_space">Space</string>
+    <string name="keyboard_diacritics">Choose a Vietnamese character</string>
+    <string name="keyboard_private_field">Password, PIN, or number-only field: the keyboard will not read or check its contents.</string>
+    <string name="keyboard_no_draft">There is no text before the cursor to check.</string>
+    <string name="keyboard_confirm_title">Confirm draft check</string>
+    <string name="keyboard_confirm_body">This text will be handed to Khoan Da for checking with its existing analysis service. The check may send text to the server as disclosed in the app. Review before continuing:\n\n%1$s</string>
+    <string name="keyboard_cancel">Cancel</string>
+    <string name="keyboard_continue">Continue</string>
     <string name="app_name">Khoan Đã</string>
     <string name="title_activity_main">Khoan Đã</string>
 
