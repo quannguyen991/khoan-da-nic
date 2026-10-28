@@ -187,6 +187,24 @@ test('§6.8 · CSP, x-frame-options, referrer-policy có mặt', async () => {
   assert.equal(r.headers.get('x-content-type-options'), 'nosniff');
 });
 
+/**
+ * ⚠️ `microphone=()` ĐÃ TỪNG LÀM CHẾT VOICE TRÊN WEB. Header này tắt micro cho
+ * CẢ TRANG, nên getUserMedia và Web Speech đều bị chặn trước khi app kịp hỏi
+ * quyền. Test này chốt: micro phải mở cho đúng origin của app.
+ */
+test('§6.8 · permissions-policy cho micro ở chính app (không được là microphone=())', async () => {
+  const r = await fetch(`${coSo}/api/analyze`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ vanBan: 'test' }),
+  });
+  const pp = r.headers.get('permissions-policy');
+  assert.ok(pp, 'thiếu permissions-policy');
+  assert.match(pp, /microphone=\(self\)/);
+  assert.doesNotMatch(pp, /microphone=\(\)/);
+  assert.match(pp, /camera=\(\)/);
+});
+
 // ══════════════════════════════════════════════════════════════════════════
 // §4.1 · §11 — NHỮNG CHỮ KHÔNG ĐƯỢC VIẾT (soi mã nguồn giao diện)
 // ══════════════════════════════════════════════════════════════════════════

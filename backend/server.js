@@ -183,11 +183,15 @@ app.use((req, res, next) => {
   }
 
   /*
-   * Máy chủ này không cần camera, micro, vị trí hay cảm biến nào. Khai ra để
-   * nếu có ngày một tệp tĩnh bị chèn mã lạ, nó cũng không xin được những thứ đó.
+   * ⚠️ MICRO PHẢI MỞ CHO CHÍNH APP, KHÔNG ĐƯỢC ĐỂ `microphone=()`.
+   * `microphone=()` tắt micro cho CẢ TRANG CHÍNH, không chỉ iframe: getUserMedia
+   * ném NotAllowedError và webkitSpeechRecognition trả `not-allowed`, nên nút
+   * "Bấm để nói" trên web chết lặng — đúng lỗi "không voice được trên web".
+   * `(self)` chỉ cho đúng origin này dùng micro; bên ngoài vẫn không được.
+   * Camera, vị trí, thanh toán, USB vẫn tắt hẳn.
    */
   res.setHeader('permissions-policy',
-    'camera=(), microphone=(), geolocation=(), payment=(), usb=(), interest-cohort=()');
+    'camera=(), microphone=(self), geolocation=(), payment=(), usb=(), interest-cohort=()');
 
   next();
 });
