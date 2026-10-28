@@ -99,6 +99,7 @@ import { DaiTheoDoi72Gio, ManTheoDoi72Gio, chuNhac72Gio } from './components/The
 import { batDauTheoDoi } from './lib/theo-doi-72-gio';
 import { ManHoSoVuViec, ManRaDaThuDoan } from './components/HoSoVaRaDa';
 import { CongDongCanhGiac } from './components/CongDongCanhGiac';
+import { GopY } from './components/GopY';
 import { ManGhepConChau } from './components/GhepConChau';
 import { ManConCaiGiup } from './components/ConCaiGiup';
 import { dongBoNhipBaoVe } from './lib/nhip-bao-ve';
@@ -190,7 +191,7 @@ function KhungTaiTre({ t, children }: { t: any; children: React.ReactNode }) {
 }
 import { EMERGENCY_NUMBERS } from './data/so-khan-cap';
 
-export type ViewState = 'intro' | 'home' | 'voice' | 'phone' | 'link' | 'qr' | 'learn' | 'profile' | 'settings' | 'history' | 'family' | 'search' | 'login' | 'add_family' | 'warning' | 'guardian' | 'account' | 'privacy' | 'notifications' | 'device_data' | 'hoi_nhanh' | 'mat_khau_gia_dinh' | 'quy_tac_gia_dinh' | 'ho_so_vu_viec' | 'ra_da_thu_doan' | 'cong_dong' | 'doi_phan_ung' | 'so_ngan_hang' | 'theo_doi_72h' | 'tro_ly' | 'ghep_con_chau' | 'con_cai_giup' | 'chia_khoa' | 'ngan_hang_mo_phong' | 'trung_tam_bao_ve' | 'cuu_giu' | 'thoat_an_toan' | 'ban_phim';
+export type ViewState = 'intro' | 'home' | 'voice' | 'phone' | 'link' | 'qr' | 'learn' | 'profile' | 'settings' | 'history' | 'family' | 'search' | 'login' | 'add_family' | 'warning' | 'guardian' | 'account' | 'privacy' | 'notifications' | 'device_data' | 'hoi_nhanh' | 'mat_khau_gia_dinh' | 'quy_tac_gia_dinh' | 'ho_so_vu_viec' | 'ra_da_thu_doan' | 'cong_dong' | 'doi_phan_ung' | 'so_ngan_hang' | 'theo_doi_72h' | 'tro_ly' | 'ghep_con_chau' | 'con_cai_giup' | 'chia_khoa' | 'ngan_hang_mo_phong' | 'trung_tam_bao_ve' | 'cuu_giu' | 'thoat_an_toan' | 'ban_phim' | 'gop_y';
 
 /**
  * MỘT NGƯỜI THÂN TRONG VÒNG TRÒN GIA ĐÌNH.
@@ -1559,6 +1560,7 @@ export default function App() {
             {view === 'ho_so_vu_viec' && <ManHoSoVuViec setView={setView} t={t} lang={lang} lichSu={historyItems} />}
             {view === 'ra_da_thu_doan' && <ManRaDaThuDoan setView={setView} t={t} lang={lang} lichSu={historyItems} />}
             {view === 'cong_dong' && <CongDongCanhGiac t={t} setView={setView} />}
+            {view === 'gop_y' && <GopY t={t} setView={setView} />}
             {view === 'ghep_con_chau' && <ManGhepConChau t={t} setView={setView} onDanhSach={hopNhatDaGhep} />}
             {view === 'chia_khoa' && <ManChiaKhoa t={t} setView={setView} />}
             {view === 'ngan_hang_mo_phong' && <ManNganHangMoPhong t={t} setView={setView} />}
@@ -5732,6 +5734,20 @@ function SettingsView({
         <div className="flex-1 min-w-0">
           <h3 className="font-black text-[16px] text-[#311068] leading-snug">{t("Cộng đồng cảnh giác")}</h3>
           <p className="text-[14px] text-slate-600 leading-snug mt-0.5">{t("Chia sẻ ẩn danh để mọi người cùng đề phòng.")}</p>
+        </div>
+        <ChevronRight size={20} className="text-[#8b5cf6] shrink-0" />
+      </button>
+
+      <button
+        onClick={() => setView('gop_y')}
+        className="w-full max-w-[360px] bg-white rounded-3xl p-5 border border-[#e4d4ff] shadow-[0_8px_24px_rgba(91,33,182,0.10)] mb-6 flex items-center gap-3 text-left active:scale-[0.98] transition-transform"
+      >
+        <div className="w-12 h-12 rounded-2xl bg-[#f1e8ff] border border-[#dcc7ff] flex items-center justify-center text-[#7c3aed] shrink-0">
+          <MessageSquare size={24} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <h3 className="font-black text-[16px] text-[#311068] leading-snug">{t("Góp ý cho Khoan Đã")}</h3>
+          <p className="text-[14px] text-slate-600 leading-snug mt-0.5">{t("Cho biết ý kiến để sửa cho dễ dùng hơn.")}</p>
         </div>
         <ChevronRight size={20} className="text-[#8b5cf6] shrink-0" />
       </button>
