@@ -614,8 +614,15 @@ function analyze(input = {}, nguCanhTinCay = {}) {
   // §4.3 — sàn: KHÔNG nguồn nào đọc được thì nhãn KHÔNG được là "chưa thấy".
   // Sàn chỉ LÀM TĂNG cảnh giác, không bao giờ giảm (§4.2).
   let riskLabel = kq.riskLabel;
+  /*
+   * ⚠️ `trang_thai_may` KHÔNG PHẢI NỘI DUNG. Đo 30/10/2026 trên APK: một ảnh chụp màn hình mà máy chủ
+   * KHÔNG đọc được chữ nào (`khong_doc_duoc_anh`, AI không chạy) vẫn ra "Chưa thấy dấu hiệu rủi ro",
+   * vì app gửi kèm tóm tắt máy (`trangThaiMay.docDuoc: true`) và nó được đếm vào `daKiem`. Sàn này
+   * đếm đúng những thứ thật sự đọc được nội dung tin.
+   */
+  const daKiemNoiDung = san.daKiem.filter((m) => m !== 'trang_thai_may');
   if (overrides.length > 0) riskLabel = 'HIGH';
-  else if (san.daKiem.length === 0 && riskLabel === 'NO_SIGNS_FOUND') riskLabel = 'SUSPICIOUS';
+  else if (daKiemNoiDung.length === 0 && riskLabel === 'NO_SIGNS_FOUND') riskLabel = 'SUSPICIOUS';
   /**
    * §16.3 — SÀN CHO CA "HỎI NGƯỜI THÂN MÀ KHÔNG AI TRẢ LỜI".
    *

@@ -169,9 +169,15 @@
         </service>
 
         <!-- Chụp MỘT khung hình màn hình khi bác chạm nút nổi — xem ChupManHinh.java -->
+        <!--
+          taskAffinity="" — ĐÂY LÀ LÝ DO ẢNH CHỤP TỪNG RA TRANG CHỦ KHOAN ĐÃ THAY VÌ ZALO (đo 30/10/2026).
+          Không có nó, activity này nằm trong task của app, nên Android đưa cả app lên trước và hộp xác
+          nhận vẽ trên trang chủ Khoan Đã. Có task riêng thì màn chụp chỉ phủ trong suốt lên app đang mở.
+        -->
         <activity
             android:name=".ChupManHinhActivity"
             android:exported="false"
+            android:taskAffinity=""
             android:excludeFromRecents="true"
             android:theme="@android:style/Theme.Translucent.NoTitleBar" />
         <service

@@ -247,3 +247,16 @@ test('ghi âm #11b — thiếu SỐ ĐO thì nói ra, KHÔNG nâng mức', () =>
   assert.ok(r.chuaKiem.includes('ghi_am_khong_do_duoc_do_tin_cay'),
     'nâng mức thì không, nhưng NÓI RA thì bắt buộc');
 });
+
+// 30/10/2026 — ảnh KHÔNG đọc được + máy "đã xem" (trangThaiMay.docDuoc) KHÔNG được ra "Chưa thấy dấu hiệu".
+// Đo trên APK: tóm tắt máy vào `daKiem` làm sàn tắt, nhãn thành CHUA_THAY trong khi ảnh chưa ai đọc.
+test('§4.3 — trạng thái máy không được tính là đã kiểm nội dung (ảnh hỏng vẫn không ra "chưa thấy")', () => {
+  const kq = analyze({
+    vanBan: '',
+    anh: 'data:image/jpeg;base64,xxx',
+    ocrFailed: true,
+    trangThaiMay: { docDuoc: true, soUngDungLa: 0 },
+  });
+  assert.notStrictEqual(kq.nhan, 'CHUA_THAY', 'ảnh không đọc được mà vẫn ra "Chưa thấy dấu hiệu"');
+  assert.ok(kq.chuaKiem.includes('khong_doc_duoc_anh'));
+});
