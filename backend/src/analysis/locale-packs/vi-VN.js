@@ -18,7 +18,9 @@
 module.exports = {
   locale: 'vi-VN',
   language: 'vi',
-  localePackVersion: 'vi-VN@1.2.1',   // 1.2.1 (24/9/2026): lời kể lại "ngân hàng bảo chuyển", "không thì TK bị khoá"
+  localePackVersion: 'vi-VN@1.3.0',   // 1.3.0 (30/10/2026): mẫu kịch bản 2026 — OTP trên link, lệ phí qua link,
+                                      //   doạ khoá/đình chỉ định danh, giả con ở đồn công an, đầu tư "nội bộ"
+                                      // 1.2.1 (24/9/2026): lời kể lại "ngân hàng bảo chuyển", "không thì TK bị khoá"
                                       // 1.2.0 (25/9/2026): mẫu cố định cho tín hiệu AI hay bỏ
   supportedCountryProfiles: ['VN', 'GLOBAL'],
 
@@ -80,6 +82,9 @@ module.exports = {
     CRED_ID_BIOMETRIC_DOCS: [
       { pattern: '(gửi|chụp|quay|cung cấp|chuyển)(?:(?!không|đừng|chớ|chẳng)[^.]){0,24}(ảnh|hình|video|clip)[^.]{0,16}(cccd|căn cước|chứng minh|cmnd|chân dung|khuôn mặt|giấy tờ tùy thân|giấy tờ tuỳ thân)', scope: 'action' },
       { pattern: '(xác thực|cập nhật|đăng ký|quét)\\s*(khuôn mặt|sinh trắc)[^.]{0,30}(qua|theo|trên|tại|bằng)\\s*(link|đường dẫn|zalo|cuộc gọi video|ứng dụng (tôi|em|được) gửi)', scope: 'action' },
+      // 30/10/2026 — "chụp HAI MẶT căn cước gửi qua Zalo" (không có chữ "ảnh") và "mượn / thuê căn cước để đăng ký sim, lập công ty".
+      { pattern: '(chụp|gửi|cung cấp|chuyển)[^.]{0,16}(hai mặt|2 mặt|mặt trước và mặt sau)[^.]{0,16}(cccd|căn cước|chứng minh|cmnd)', scope: 'action' },
+      { pattern: '(mượn|thuê|mua|cho thuê|cho mượn)\\s+(cccd|căn cước|chứng minh nhân dân|cmnd|giấy tờ tùy thân|giấy tờ tuỳ thân)', scope: 'action' },
       { pattern: '(quay|gọi)\\s*video[^.]{0,24}(khuôn mặt|xoay mặt|nháy mắt|quay mặt)', scope: 'action' },
     ],
     CRED_BANK_LOGIN: [
@@ -107,6 +112,17 @@ module.exports = {
       { pattern: 'đăng nhập[^.]{0,20}(theo|qua|tại|vào)\\s*\\[\\s*(đường dẫn|đường link|link|liên kết)', scope: 'action' },
       { pattern: '(mở|vào|truy cập|bấm|nhấn)\\s*(vào\\s*)?\\[?\\s*(đường dẫn|đường link|link|liên kết)[^.]{0,30}(để\\s+)?đăng nhập', scope: 'action' },
       { pattern: '(link|đường dẫn|liên kết)[^.]{0,20}(nhập|điền)[^.]{0,16}(thông tin\\s+(ngân hàng|tài khoản|thẻ)|tài khoản ngân hàng)', scope: 'action' },
+      /*
+       * 30/10/2026 — NHẬP OTP / MÃ XÁC MINH NGAY TRÊN MỘT ĐƯỜNG LINK. Đo trên bộ `mo-rong`:
+       * "Truy cập vneid-xacthuc.top, nhập số CCCD và mã OTP", "Nhập mã OTP vừa gửi và mật
+       * khẩu tại đường link để mở khoá ví", "Đăng nhập tại link, nhập mật khẩu và mã xác minh
+       * 2 bước" — tầng luật chỉ thấy "mật khẩu" hoặc không thấy gì, nên trang giả ra CHUA_THAY.
+       * ⚠️ BẮT BUỘC có LIÊN KẾT trong cùng câu. "Nhập mã OTP để xác nhận giao dịch trên ứng
+       * dụng" là tin OTP thật của ngân hàng — không có link, không khớp (đã có ca kiểm).
+       * ⚠️ Không dùng "website / trang web": "nhập mã OTP tại trang thanh toán" là cổng 3DS thật.
+       */
+      { pattern: '(nhập|điền)[^.]{0,36}(mã otp|otp|mã xác (thực|minh|nhận)|xác minh 2 bước)[^.]{0,40}(tại|qua|theo|trên)\\s*(đường dẫn|đường link|link|liên kết)', scope: 'action' },
+      { pattern: '(truy cập|vào|bấm|nhấn|mở|đăng nhập)[^.]{0,50}(đường dẫn|đường link|link|liên kết)[^.]{0,60}(nhập|điền)[^.]{0,36}(mã otp|otp|mã xác (thực|minh|nhận)|xác minh 2 bước)', scope: 'action' },
     ],
     FIN_TRANSFER_REQUEST: [
       { pattern: 'chuyển\\b[^.]{0,40}(tiền|triệu|đồng|khoản|vào tài khoản|sang tài khoản)', scope: 'action' },
@@ -182,6 +198,18 @@ module.exports = {
       { pattern: 'thanh toán\\s+((hộ|giúp|trước)\\s+)?\\d+([.,]\\d+)?\\s*(đ|k|tr|triệu|đồng|nghìn)(?![a-zà-ỹ])', scope: 'action' },
       { pattern: 'bổ sung\\s+(thêm\\s+)?(vốn|tiền|số dư|ký quỹ)', scope: 'action' },
       { pattern: '(thanh toán|nộp|đóng|chuyển)[^.]{0,20}(?<!học )(?<!viện )phí[^.]{0,40}trước khi\\s+(nhận|được|giải ngân|rút)', scope: 'action' },
+      /*
+       * 30/10/2026 — hai cách đòi tiền mà bộ luật chưa thấy (đo trên bộ `mo-rong`):
+       *   "Cần nạp thêm 3.000.000 để hoàn thành nhiệm vụ"  — số có dấu chấm ngăn nghìn, KHÔNG có đơn vị
+       *   "Nộp lệ phí tại đường link để tránh bị phạt"      — đóng tiền QUA LIÊN KẾT
+       * ⚠️ Số phải từ 6 chữ số trở lên (bộ chuẩn hoá đã bỏ dấu chấm ngăn nghìn: "3.000.000" thành
+       * "3000000"): "chuyển 5 con cá" hay "gửi 3 người" không khớp. Không bắt đầu bằng 0 (đó là SĐT/STK).
+       * ⚠️ Tín hiệu này một mình là 14 điểm, dưới ngưỡng 20 — nó chỉ nâng mức khi đi cùng một
+       * dấu hiệu khác, nên tin nhắn con nhắc mẹ "mẹ chuyển 500.000 tiền chợ" vẫn là CHUA_THAY.
+       */
+      // Không có "gửi": "gửi 123456 là mã của bạn" là mã xác thực, không phải số tiền.
+      { pattern: '(nạp|chuyển|đóng|nộp)\\s+(thêm\\s+)?[1-9]\\d{5,9}(?![\\d])', scope: 'action' },
+      { pattern: 'nộp[^.]{0,24}(phạt|lệ phí|phí)[^.]{0,40}(tại|qua|theo|trên)\\s*(đường dẫn|đường link|link|liên kết)', scope: 'action' },
     ],
     /**
      * "Chuyển nhầm" rồi đòi trả sang tài khoản KHÁC — xem `signal-registry.js`.
@@ -335,6 +363,9 @@ module.exports = {
     DEV_SCREEN_SHARE_BANKING: [
       { pattern: '(chia sẻ|bật)\\b[^.]{0,16}màn hình\\b[^.]{0,48}(ngân hàng|banking|tài khoản)', scope: 'action' },
       { pattern: 'chia sẻ màn hình\\b[^.]{0,44}(app|ứng dụng)\\s+ngân hàng', scope: 'action' },
+      // 30/10/2026 — "bật chia sẻ màn hình trong cuộc gọi Zalo… để em hướng dẫn bác thao tác chuyển
+      // tiền sang tài khoản bảo mật": câu dài hơn 48 ký tự nên hai mẫu trên trượt. Đòi vế chuyển tiền.
+      { pattern: '(chia sẻ|bật)\\b[^.]{0,16}màn hình\\b[^.]{0,90}(thao tác|hướng dẫn)[^.]{0,30}(chuyển tiền|chuyển khoản|giao dịch)', scope: 'action' },
     ],
     /**
      * ⚠️ MÃ USSD CHUYỂN HƯỚNG CUỘC GỌI — THÊM 2/9/2026.
@@ -396,6 +427,9 @@ module.exports = {
       { pattern: '(tôi là|đây là|mình là)[^.]{0,30}(công an|cảnh sát|điều tra viên|viện kiểm sát|toà án|cán bộ)', scope: 'any' },
       { pattern: '(công an|cảnh sát)\\s+(phường|quận|huyện|tỉnh|thành phố)', scope: 'any' },
       { pattern: '\\b(bộ công an|cục cảnh sát|c06)\\b', scope: 'any' },
+      // 30/10/2026 — "em chuyển máy cho công an điều tra": kẻ nhận cuộc gọi đầu CHUYỂN MÁY sang "công an".
+      // Không có động từ gọi/báo nên mẫu tường thuật bên dưới không thấy. Một mình 10 điểm.
+      { pattern: '(chuyển máy|nối máy|chuyển cuộc gọi|chuyển tiếp cuộc gọi)[^.]{0,24}(công an|cảnh sát|điều tra viên|viện kiểm sát|toà án)', scope: 'any' },
 
       /*
        * ── Giọng người kể lại (bác tự gõ vào ô "kể tình huống") ──
@@ -435,6 +469,8 @@ module.exports = {
        * `khong_canh_bao` bỏ các câu tuyên truyền.
        */
       { pattern: '(ngân hàng|nhân viên ngân hàng|bên ngân hàng)(?:(?!không|chẳng|đừng|chưa|chớ)[^.]){0,20}(bảo|yêu cầu|đề nghị|đòi|hướng dẫn|bắt)(?:(?!không|chẳng|đừng|chưa|chớ)[^.]){0,30}(chuyển|nộp|nạp|gửi tiền)', scope: 'khong_canh_bao' },
+      // 30/10/2026 — "Tôi gọi từ ngân hàng, chị đang nợ thẻ tín dụng…": mở đầu bằng "gọi / nhắn từ ngân hàng".
+      { pattern: '(tôi|em|chúng tôi|bên em|bên tôi)\\s+(đang\\s+)?(gọi|nhắn|liên hệ|gọi điện)\\s+(từ|bên)\\s+(ngân hàng|phòng tín dụng|bộ phận thu hồi nợ)', scope: 'khong_canh_bao' },
     ],
     /**
      * ══ HAI MÃ DANH TÍNH CHƯA TỪNG CÓ MẪU Ở NGÔN NGỮ NÀO — thêm 24/9/2026 ══
@@ -514,6 +550,13 @@ module.exports = {
 
       // ── Người thân Ở XA: không gặp mặt được nên không xác minh được ──
       { pattern: '(con|cháu|em|anh|chị|bố|mẹ)[^.]{0,26}(nước ngoài|bên kia|du học|xuất khẩu lao động|đi làm xa|ở xa)', scope: 'any' },
+
+      // ── 30/10/2026 — "mẹ ơi con đang ở đồn công an / bệnh viện / lỡ gây tai nạn" ──
+      // Người xưng là con TỰ NHẮN gặp nạn (khác ID_FAMILY_EMERGENCY_THIRD_PARTY, người LẠ báo).
+      // Một mình 12 điểm: "mẹ ơi con ở bệnh viện thăm bà" không đủ ngưỡng; chỉ nâng khi đi cùng
+      // yêu cầu chuyển tiền hay giữ bí mật.
+      { pattern: '(mẹ|bố|ba|má)\\s*ơi[^.]{0,40}(con|em)[^.]{0,30}(đồn công an|bị bắt|bị giữ|gây tai nạn|bị tai nạn|nằm viện|đang cấp cứu)', scope: 'any' },
+      { pattern: '(con|em)\\s+(đang\\s+)?ở\\s+(đồn công an|đồn cảnh sát|trại tạm giam)', scope: 'any' },
     ],
     MAN_SECRECY: [
       // 24/9/2026 — "(không) ĐƯỢC nói với ai": chữ "được" chen giữa từng làm mẫu trượt.
@@ -577,6 +620,15 @@ module.exports = {
        */
       { pattern: '(không\\s+(thì\\s+)?|kẻo\\s+)(tài khoản|tk|thẻ|sim|số|thuê bao)[^.]{0,20}(sẽ\\s+)?bị\\s+(tạm\\s+)?(khóa|khoá|phong tỏa|phong toả|đóng băng)', scope: 'khong_canh_bao' },
       { pattern: '(tài khoản|tk|thẻ|sim|thuê bao)[^.]{0,20}sẽ\\s+bị\\s+(tạm\\s+)?(khóa|khoá|phong tỏa|phong toả|đóng băng)', scope: 'khong_canh_bao' },
+      /*
+       * 30/10/2026 — "SẮP bị khoá do chưa xác thực" và "sẽ bị đình chỉ / vô hiệu hoá" cho tài khoản
+       * định danh, SIM, ví (kịch bản VNeID, chuẩn hoá thuê bao). Hai mẫu trên chỉ có "sẽ bị khoá".
+       * ⚠️ "đình chỉ" CHỈ khi đứng sau tài khoản / định danh / SIM / ví — vẫn KHÔNG tính "cháu bị
+       * đình chỉ thi" (xem ghi chú ở đầu nhóm). Một mình 12 điểm, dưới ngưỡng 20.
+       */
+      { pattern: '(tài khoản|tk|thẻ|sim|thuê bao|vneid|định danh|căn cước|cccd|ví)[^.]{0,30}(sắp|sẽ|đang)\\s+bị\\s+(tạm\\s+)?(khóa|khoá|đình chỉ|vô hiệu hoá|vô hiệu hóa|phong tỏa|phong toả)', scope: 'khong_canh_bao' },
+      // 30/10/2026 — "hồ sơ sẽ chuyển sang công an": doạ đẩy vụ việc lên cơ quan điều tra (kịch bản nhắc nợ giả).
+      { pattern: '(hồ sơ|vụ việc|trường hợp)[^.]{0,24}(chuyển sang|chuyển cho|chuyển giao|bàn giao|đẩy sang)[^.]{0,12}(công an|cơ quan điều tra|toà án|viện kiểm sát)', scope: 'khong_canh_bao' },
     ],
     MAN_URGENCY: [
       { pattern: '\\b(ngay|gấp|lập tức|khẩn|trong vòng \\d+)\\b', scope: 'action' },
@@ -593,6 +645,16 @@ module.exports = {
        */
       { pattern: '(lợi nhuận|lãi)\\s+(cao|khủng|gấp \\d|x\\d)', scope: 'khong_canh_bao' },
       { pattern: '\\d+([.,]\\d+)?\\s*%\\s*(\\/|một|mỗi|trên)\\s*(ngày|tuần|tháng)', scope: 'khong_canh_bao' },
+      /*
+       * 30/10/2026 — DỤ ĐẦU TƯ QUA NGƯỜI QUEN / "NỘI BỘ" (kịch bản tình cảm dẫn dắt, bot AI sinh lời):
+       *   "em có người quen làm sàn vàng nội bộ, anh nạp thử 2 triệu… lời lắm"
+       *   "bot giao dịch AI tự động sinh lời, rút tiền bất cứ lúc nào"
+       * ⚠️ KHÔNG "sàn" trần, "đầu tư" trần hay "sinh lời" trần — tin quảng cáo tiết kiệm thật có
+       * những chữ này. Đòi "nội bộ", hoặc người quen + sàn + lãi, hoặc bot tự động + sinh lời.
+       */
+      { pattern: '\\b(sàn|kèo|dự án|mã)\\s+[^.]{0,12}nội bộ', scope: 'khong_canh_bao' },
+      { pattern: '(người quen|bạn|anh|chị|thầy|cô)[^.]{0,24}(làm|bên|trong)\\s+(sàn|chứng khoán|forex|tiền ảo|crypto)[^.]{0,60}(lời|lãi|lợi nhuận|nạp|đầu tư)', scope: 'khong_canh_bao' },
+      { pattern: '\\b(bot|robot|ai)\\b[^.]{0,30}(tự động|tự giao dịch)[^.]{0,30}(sinh lời|sinh lãi|kiếm tiền|lợi nhuận)', scope: 'khong_canh_bao' },
     ],
     /**
      * QR DẪN TỚI ĐĂNG NHẬP / THANH TOÁN / NHẬN TIỀN — 25/9/2026. Trước đây tầng luật
@@ -639,6 +701,12 @@ module.exports = {
       { pattern: '(đóng|nộp|chuyển|thanh toán)\\s*(trước)?[^.]{0,20}\\d[\\d.,]*\\s*[dđk]?[^.]{0,20}(phí|lệ phí|tiền cọc|tiền đặt cọc)', scope: 'action' },
       { pattern: '(phí|lệ phí|tiền cọc)[^.]{0,26}(trước|mới|thì)[^.]{0,26}(nhận|rút|giải ngân|giao|lấy)', scope: 'action' },
       { pattern: '(nộp|đóng|chuyển)[^.]{0,30}(rồi|sau đó|xong)[^.]{0,20}(nhận|rút|hoàn|trả lại|giải ngân)', scope: 'action' },
+      /*
+       * 30/10/2026 — "Chuyển trước phí bảo hiểm khoản vay 2 triệu để duyệt hồ sơ": phí đứng
+       * TRƯỚC số tiền nên mẫu "số rồi mới phí" ở trên trượt. ⚠️ ĐÒI vế vay / duyệt hồ sơ / giải ngân:
+       * "đóng trước phí bảo hiểm xe" là việc thường, và cho vay thật không thu phí trước khi giải ngân.
+       */
+      { pattern: '(đóng|nộp|chuyển|thanh toán)\\s+trước\\s+(phí|lệ phí)[^.]{0,40}(khoản vay|vay vốn|duyệt (hồ sơ|vay)|giải ngân)', scope: 'action' },
     ],
     /**
      * ══════ TÍN HIỆU THÊM 19/8/2026, SAU KHI ĐO BỘ 100 TÌNH HUỐNG ══════

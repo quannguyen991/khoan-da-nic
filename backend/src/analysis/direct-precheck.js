@@ -54,7 +54,10 @@ const { laTinHieu } = require('./signal-registry');
  * Cùng bài học với cụm `nhan qua` trong bộ lọc tin tức: **bỏ dấu làm ranh giới
  * ngữ nghĩa biến mất, nên cụm ngắn và phổ biến là bẫy.**
  */
-const PHU_DINH = /(khong|dung|chang|never|do not|cannot)\s*(can|phai|nen|duoc|bao gio)?\s*$/;
+// 30/10/2026: + "yêu cầu / đòi / hỏi" — "Công an không yêu cầu CHUYỂN tiền" là lời dặn của cơ quan; trước đây
+// chỉ một từ đứng ngay trước chỗ khớp mới tính là phủ định nên "không yêu cầu chuyển" lọt thành
+// FIN_TRANSFER_REQUEST. Chỉ bỏ ĐÚNG cụm bị phủ định: lệnh sau dấu phẩy là một chỗ khớp khác và vẫn nổ.
+const PHU_DINH = /(khong|dung|chang|never|do not|cannot)\s*(can|phai|nen|duoc|bao gio)?\s*(yeu cau|doi hoi|doi|hoi)?\s*$/;
 
 /**
  * "chớ" vẫn được bắt — nhưng CHỈ trên bản CÒN DẤU, nơi nó khác "cho".
@@ -88,6 +91,13 @@ function laPhuDinh(text, viTri) {
    * sai an toàn đã ghi ở trên: thà bỏ sót một phủ định thật còn hơn vứt tín hiệu.
    */
   if (/\bneu\s+(khong|chua|ko)\s*$/.test(truoc.slice(0, m.index + m[0].length))) return false;
+  /*
+   * 30/10/2026 — "NẾU HÔM NAY CHỊ KHÔNG chuyển 38 triệu vào tài khoản này thì hồ sơ chuyển sang công an":
+   * có chữ chen giữa "nếu" và "không" nên mẫu trên (đòi hai từ liền nhau) trượt, và cả lời doạ đòi nợ
+   * giả ra CHUA_THAY không một tín hiệu. Nhìn rộng hơn 16 ký tự, nhưng vẫn chặn ở dấu câu.
+   */
+  const rong = boDau(text.slice(Math.max(0, viTri - 48), viTri));
+  if (/\bneu\b[^,;.]{0,30}\b(khong|chua|ko)\s*(yeu cau|doi hoi|doi|hoi)?\s*$/.test(rong)) return false;
   // Chỉ xét đoạn GIỮA từ phủ định và cụm. Dấu phẩy đứng TRƯỚC từ phủ định là
   // chuyện khác: "Bác cứ bình tĩnh, không cần gấp đâu." vẫn là phủ định thật.
   return !KHONG_PHAI_PHU_DINH.test(truoc.slice(m.index));

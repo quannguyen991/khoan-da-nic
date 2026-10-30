@@ -34,7 +34,13 @@ const gioiHan = soCo('--gioi-han', null);
  * Nên `--ghi` với bộ riêng ghi ra `eval/results/<bo>.json`, không bao giờ
  * ghi đè `latest.json` — tệp mà /transparency đọc.
  */
-const BO_RIENG = { 'doi-chung': 'doi-chung', 'mau-that': 'mau-that' };
+/**
+ * `--bo mo-rong` (30/10/2026) — 80 mẫu TỰ SOẠN cho các kịch bản 2026 bộ chính còn mỏng (VNeID,
+ * chuẩn hoá SIM, hoàn thuế, tai nạn giả, đầu tư bot AI, thuê tài khoản…) cùng tin lành gần giống.
+ * Nhãn do máy gán, chưa người duyệt; luật được chỉnh sau khi nhìn bộ này nên đây là số HỒI QUY,
+ * không phải số độc lập. Không vào `latest.json`.
+ */
+const BO_RIENG = { 'doi-chung': 'doi-chung', 'mau-that': 'mau-that', 'mo-rong': 'mo-rong' };
 const iBo = process.argv.indexOf('--bo');
 const tenBo = iBo > 0 ? process.argv[iBo + 1] : null;
 if (tenBo && !BO_RIENG[tenBo]) {

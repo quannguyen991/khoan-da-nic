@@ -15,7 +15,16 @@ module.exports = {
                                //   FIN_ACCOUNT_OPENING_FOR_OTHERS, CRED_ID_BIOMETRIC_DOCS,
                                //   DEV_SIM_SWAP_ESIM (người dùng duyệt)
                                // 1.2.0 (24/9/2026): 64 — thêm MAN_HEALTH_MIRACLE_CLAIM
-  RULE_VERSION: '1.6.3',       // cap nhóm + 26 cộng hưởng + 1 suy ra + 20/45/69, Phụ lục B
+  RULE_VERSION: '1.6.4',       // cap nhóm + 26 cộng hưởng + 1 suy ra + 20/45/69, Phụ lục B
+                               // 1.6.4 (30/10/2026): mẫu cố định cho kịch bản 2026 bộ chính còn mỏng —
+                               //   nhập OTP trên link, nạp số có dấu ngăn nghìn, nộp lệ phí qua link,
+                               //   doạ "sắp bị khoá/đình chỉ" tài khoản định danh/SIM/ví, giả con ở đồn
+                               //   công an, dụ đầu tư "nội bộ"/bot AI. Không đổi trọng số, ngưỡng, tổ hợp.
+                               //   Bộ chính 571 + bộ ChatGPT 153: 0 mẫu lành đổi mức. vi-VN@1.3.0.
+                               //   Cùng bản: khung "có hiện tượng giả danh…" (bài dặn của cơ quan), bộ bắt phủ
+                               //   định nhìn qua "yêu cầu/đòi/hỏi", "nếu … không" có chữ chen giữa, "cứ" trong
+                               //   LENH_TRUC_TIEP (vá câu thần chú "không yêu cầu…, bác cứ gửi…"), mượn/thuê
+                               //   căn cước, nhắc nợ giả. 860 mẫu: 0 tin lành bị nâng.
                                // 1.6.3 (25/9/2026): hai mẫu 1.6.2 có bản tiếng Anh (en-US@1.1.1).
                                //   Bộ cũ, bộ ChatGPT, 30 ca tấn công và mô phỏng gộp AI: 0 mẫu đổi mức.
                                // 1.6.2 (24/9/2026): lời bác KỂ LẠI trong trợ lý — "ngân hàng

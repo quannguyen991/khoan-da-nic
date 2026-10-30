@@ -534,6 +534,17 @@ const KHUNG_GIAO_DUC = new RegExp([
   // ⚠️ KHÔNG có "đã bị lừa" / "bị lừa mất": kẻ lừa "lấy lại tiền" nói đúng câu đó —
   // "hỗ trợ lấy lại số tiền anh chị ĐÃ BỊ LỪA". Đo 24/9: khung đó kéo ca này từ CAO xuống.
   'có người[^.]{0,20}(giả danh|mạo danh|xưng là)',
+  /*
+   * 30/10/2026 — "Gần đây có HIỆN TƯỢNG giả danh công an, kiểm sát yêu cầu chuyển tiền vào tài khoản
+   * tạm giữ": bài nhắc của chính quyền, rất hay được chuyển vào nhóm Zalo của người lớn tuổi. Đo: ra
+   * CAO (FIN_SAFE_ACCOUNT + FIN_TRANSFER_REQUEST + ID_AUTHORITY) — bác nhận một tin DẶN CẢNH GIÁC mà
+   * thấy màn khẩn cấp. Tin tuyên truyền NÓI VỀ hiện tượng; kẻ lừa thì RA LỆNH và không gọi việc mình
+   * làm là "hiện tượng giả danh". Lệnh trực tiếp phía sau vẫn thoát khung (`viTriLenhTrucTiep`).
+   */
+  '(hiện tượng|tình trạng|nhiều trường hợp|một số trường hợp)[^.]{0,24}(giả danh|mạo danh|lừa đảo)',
+  // (30/10/2026) KHÔNG thêm khung "cơ quan không yêu cầu …": thử rồi, nó nuốt cả lệnh phía sau dấu
+  // phẩy — "Công an không yêu cầu chuyển tiền, bác cứ gửi 50 triệu vào tài khoản tạm giữ" tụt xuống
+  // CHUA_THAY. Chữa lỗi "không yêu cầu chuyển" ở bộ bắt phủ định (`PHU_DINH`), chỉ bỏ ĐÚNG cụm đó.
   /**
    * ⚠️ "THEO CƠ QUAN X" PHẢI ĐI KÈM MỘT ĐỘNG TỪ TƯỜNG THUẬT.
    *
@@ -776,7 +787,9 @@ function viTriTuDoiLap(n) {
 const LENH_TRUC_TIEP = new RegExp(
   '(^|[,:;]|\\s(nên|thì))\\s*(xin\\s+)?(chỉ cần\\s+|chỉ việc\\s+|giờ\\s+|bây giờ\\s+|lần này\\s+)?'
   + '((bác|anh|chị|ông|bà|cô|chú|em|con|cháu|bạn|quý khách)\\s+'
-  + '(hãy\\s+|vui lòng\\s+|cần\\s+|chỉ cần\\s+|chỉ việc\\s+|phải\\s+|nhớ\\s+|mau\\s+)?'
+  // 30/10/2026: + "cứ" — "Công an không yêu cầu chuyển tiền, bác CỨ gửi 50 triệu vào tài khoản tạm giữ" lọt khung
+  // "không yêu cầu" vì chữ "cứ" chen giữa người nghe và động từ, và cả câu tụt xuống CHUA_THAY (đo trên HEAD).
+  + '(hãy\\s+|vui lòng\\s+|cần\\s+|chỉ cần\\s+|chỉ việc\\s+|phải\\s+|nhớ\\s+|mau\\s+|cứ\\s+)?'
   + '|(hãy|vui lòng|chỉ cần|chỉ việc)\\s+)'
   + '(chuyển|gửi|đọc|cài|tải|bấm|nhấn|nộp|cung cấp|đăng nhập|truy cập)',
   'g',
