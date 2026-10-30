@@ -618,8 +618,13 @@ export interface NoiDungChiaSe {
   anh?: string;
   /** `dang-bi-goi` · `kiem-tin-nhan` · `goi-nguoi-than` */
   loiTat?: string;
-  /** §4.3 — `ANH_QUA_LON` · `KHONG_DOC_DUOC_ANH`. Hỏng thì NÓI, không im. */
+  /** §4.3 — `ANH_QUA_LON` · `KHONG_DOC_DUOC_ANH` · `KHONG_CHUP_DUOC`. Hỏng thì NÓI, không im. */
   maLoi?: string;
+  /**
+   * `true` ⇒ ảnh do nút "Chụp màn hình đi kiểm" của bong bóng nổi tạo ra (30/10/2026).
+   * Tầng web đặt nó vào ô xem trước và ĐỢI BÁC BẤM "Kiểm tra" — không tự gửi đi.
+   */
+  tuChup?: boolean;
 }
 
 export async function noiDungChiaSe(): Promise<NoiDungChiaSe> {

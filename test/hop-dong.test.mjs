@@ -46,7 +46,8 @@ const goi = async (duong, than) => {
   return { ma: r.status, than: await r.json(), headers: r.headers };
 };
 
-const doc = (p) => readFileSync(path.join(GOC, p), 'utf8');
+// Chuẩn hoá CRLF → LF: cây làm việc Windows có thể xuống dòng CRLF, còn ca kiểm dưới tìm chuỗi nhiều dòng theo LF.
+const doc = (p) => readFileSync(path.join(GOC, p), 'utf8').replace(/\r\n/g, '\n');
 
 // ══════════════════════════════════════════════════════════════════════════
 // §HĐ + §4.2 — TÍN HIỆU CỦA NHÁNH PHẢI ĐI ĐƯỢC QUA CỬA HTTP

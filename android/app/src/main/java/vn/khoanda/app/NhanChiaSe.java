@@ -13,17 +13,15 @@ import java.io.InputStream;
 /**
  * NHẬN NỘI DUNG CHIA SẺ TỪ APP KHÁC, VÀ NHẬN LỐI TẮT.
  *
- * ══════════ VÌ SAO KHÔNG TỰ CHỤP MÀN HÌNH ══════════
+ * ══════════ HAI ĐƯỜNG LẤY ẢNH MÀN HÌNH — CẢ HAI ĐỀU DO BÁC CHỦ ĐỘNG ══════════
  *
- * Android KHÔNG cho app bên thứ ba chụp màn hình của app khác. `MediaProjection`
- * làm được nhưng đòi một hộp thoại xác nhận mỗi lần và hiện biểu tượng ghi màn
- * hình suốt thời gian chạy. Dùng nó để "âm thầm theo dõi màn hình của người già"
- * vừa bất khả thi về kỹ thuật, vừa sai về đạo đức, và Play Store sẽ từ chối.
+ * ① BÁC TỰ CHỤP bằng phím của máy rồi bấm Chia sẻ → Khoan Đã. Không đòi quyền nào.
+ * ② (từ 30/10/2026) BÁC CHẠM NÚT NỔI → "Chụp màn hình đi kiểm". Dùng `MediaProjection`, một
+ *    lần, có hộp xác nhận của Android mỗi lần — xem `ChupManHinh` (bốn ràng buộc, và vì sao
+ *    đường này từng bị từ chối). KHÔNG BAO GIỜ tự chụp ngầm, không quay video.
  *
- * Đường đúng: BÁC tự chụp màn hình rồi bấm Chia sẻ → Khoan Đã. Chủ động, có chủ
- * đích, không có gì chạy ngầm. Đây cũng là cách duy nhất lấy được nội dung từ
- * Zalo, Messenger hay app ngân hàng — những chỗ mà đọc thông báo chỉ thấy một
- * dòng tóm tắt.
+ * Cả hai là cách lấy được nội dung từ Zalo, Messenger hay app ngân hàng — những chỗ mà đọc
+ * thông báo chỉ thấy một dòng tóm tắt.
  *
  * ══════════ BA RÀNG BUỘC ══════════
  *
@@ -59,6 +57,12 @@ public final class NhanChiaSe {
         /** Lối tắt bác vừa bấm, ví dụ `dang-bi-goi`. */
         public String loiTat;
         /**
+         * Ảnh này do NÚT CHỤP MÀN HÌNH của bong bóng nổi tạo ra (không phải ảnh bác chia sẻ sang).
+         * Tầng web dùng cờ này để đặt ảnh vào ô xem trước và ĐỢI BÁC BẤM "Kiểm tra" — chụp màn hình
+         * có thể chứa thứ bác không định gửi, nên nó không tự rời máy (PERMISSIONS-AND-POLICY.md).
+         */
+        public boolean tuChup;
+        /**
          * ⚠️ §4.3 — MÃ HỎNG, KHÔNG PHẢI SỰ IM LẶNG.
          * Ảnh quá to, không đọc được, không giải mã được: ba ca khác nhau. Trả
          * về null trơn là để màn hình nói "chưa thấy dấu hiệu rủi ro" về một thứ
@@ -83,6 +87,18 @@ public final class NhanChiaSe {
             KetQua r = new KetQua();
             // khoanda://loi-tat/dang-bi-goi  →  "dang-bi-goi"
             r.loiTat = data.getLastPathSegment();
+            /*
+             * 30/10/2026 — ẢNH VỪA CHỤP TỪ NÚT NỔI. Không phải lối tắt điều hướng: đây là NỘI DUNG,
+             * nên đổi thành `anh` để tầng web đưa vào đúng đường "bác chia sẻ một ảnh sang" (cùng
+             * `handleAnalyze`, cùng nhãn §4.3). Lấy MỘT LẦN rồi xoá — xem `ChupManHinh.layVaXoa`.
+             * Ảnh đã mất (app chạy lại sau khi đã lấy) ⇒ báo mã lỗi, không giả vờ là có ảnh.
+             */
+            if (ChupManHinh.LOI_TAT.equals(r.loiTat)) {
+                r.loiTat = null;
+                r.anh = ChupManHinh.layVaXoa();
+                r.tuChup = true;
+                if (r.anh == null) r.maLoi = "KHONG_CHUP_DUOC";
+            }
             return r;
         }
 

@@ -1505,6 +1505,9 @@ export const TRUNG_TAM_BAO_VE: Record<string, Cap> = {
   TTS_UNAVAILABLE: c('Chưa phát được câu nói. Bác vẫn có thể tự đọc câu trên màn hình.', 'Could not play the phrase. You can read it from the screen.'),
   IN_SITU_TITLE: c('Trợ lý phản hồi tại chỗ', 'In-situ response assistant'),
   IN_SITU_HELP: c('Bác có thể dừng trao đổi, dùng câu trả lời trung tính hoặc chuẩn bị nội dung để tự chọn người nhận. Khoan Đã không tự gửi tin.', 'You can stop the conversation, copy a neutral response, or prepare content and choose who receives it. Khoan Đã never sends messages automatically.'),
+  IN_SITU_MORE: c('Cần trợ giúp thêm?', 'Need more help?'),
+  // Nhãn ngắn cho nút trong hàng hai cột (nhãn đầy đủ SEND_TO_FAMILY xuống 4 dòng ở khổ 375px).
+  SEND_TO_FAMILY_SHORT: c('Gửi người thân', 'Send to family'),
   SAFE_REPLY: c('Trả lời an toàn', 'Safe response'),
   RESPONSE_COPIED: c('Đã chép câu trả lời. Bác tự xem lại rồi mới dán hoặc gửi.', 'Response copied. Review it before pasting or sending.'),
   STOP_CONTACT: c('Ngừng liên lạc', 'Stop contact'),

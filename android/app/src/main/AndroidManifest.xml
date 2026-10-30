@@ -168,6 +168,17 @@
                 android:value="Nut tat noi tren man hinh de nguoi cao tuoi mo nhanh khi bi lua dao" />
         </service>
 
+        <!-- Chụp MỘT khung hình màn hình khi bác chạm nút nổi — xem ChupManHinh.java -->
+        <activity
+            android:name=".ChupManHinhActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+        <service
+            android:name=".ChupManHinhService"
+            android:exported="false"
+            android:foregroundServiceType="mediaProjection" />
+
         <service
             android:name=".TheoDoiCuocGoi"
             android:exported="false"
@@ -279,6 +290,14 @@
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <!--
+      CHỤP MÀN HÌNH THEO YÊU CẦU (30/10/2026) — xem ChupManHinh.java. Đây là quyền "loại dịch vụ", KHÔNG
+      phải quyền nguy hiểm: không có hộp xin quyền riêng; việc chụp luôn qua hộp xác nhận của Android MỖI LẦN.
+      ⚠️ GOOGLE PLAY SẼ HỎI khi nộp (khai báo loại foreground service `mediaProjection`). Chuẩn bị: mô tả
+      "người cao tuổi chạm nút nổi để chụp tin nhắn đang xem và gửi đi kiểm", video demo hộp xác nhận,
+      và nói rõ app chụp MỘT khung hình rồi tắt, không quay video, không ghi ra đĩa, không chụp ngầm.
+    -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION" />
 
     <!--
       ⚠️ POPUP ĐÈ LÊN MÀN HÌNH.

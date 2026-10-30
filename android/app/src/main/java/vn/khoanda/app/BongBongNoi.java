@@ -189,12 +189,11 @@ public class BongBongNoi extends Service {
      *   ② Gửi ảnh màn hình đi kiểm
      *   ③ Dừng 60 giây
      *
-     * ⚠️ KHÔNG TỰ CHỤP MÀN HÌNH ĐƯỢC, VÀ KHÔNG GIẢ VỜ LÀ CÓ. Chụp màn hình từ
-     * nền đòi quyền MediaProjection — quyền cho phép đọc MỌI THỨ hiện trên màn
-     * hình bất kỳ lúc nào, kể cả màn hình ngân hàng. Thang quyền trong
-     * PERMISSIONS-AND-POLICY.md nói rõ ta đi đường ít phơi bày nhất: bác tự chụp
-     * bằng phím của máy, nút này mở chỗ chọn ảnh. Một thao tác đổi lấy việc
-     * không phải xin một quyền nhìn được màn hình ngân hàng của bác.
+     * ⚠️ CHỤP MÀN HÌNH — ĐÃ ĐẢO CHIỀU 30/10/2026 THEO YÊU CẦU CỦA NGƯỜI DÙNG SẢN PHẨM. Trước đó
+     * nút ② chỉ mở chỗ chọn ảnh, vì `MediaProjection` là quyền đọc được MỌI THỨ trên màn hình,
+     * kể cả màn hình ngân hàng. Nay nút ② chụp một lần — nhưng chỉ khi bác chạm, có hộp xác
+     * nhận của Android mỗi lần, một khung hình rồi tắt, không ghi ra đĩa. Xem `ChupManHinh`.
+     * Máy không mở được thì nút rơi về chỗ chọn ảnh như cũ.
      *
      * ⚠️ LUÔN CÓ NÚT ĐÓNG (§4.6). Menu vẽ đè lên app khác; không đóng được là
      * biến một lối tắt thành một vật cản.
@@ -214,7 +213,7 @@ public class BongBongNoi extends Service {
             khung.setPadding(d, d, d, d);
 
             khung.addView(nutMenu(getString(R.string.bb_kiem_tin), "khoanda://loi-tat/kiem-tin-nhan"));
-            khung.addView(nutMenu(getString(R.string.bb_gui_anh), "khoanda://loi-tat/quet-anh"));
+            khung.addView(nutChup(getString(R.string.bb_chup_man_hinh)));
             khung.addView(nutMenu(getString(R.string.bb_dung_60s), "khoanda://loi-tat/dung-lai-60s"));
 
             android.widget.Button dong = new android.widget.Button(this);
@@ -255,6 +254,44 @@ public class BongBongNoi extends Service {
         b.setMinHeight((int) (56 * getResources().getDisplayMetrics().density));   // §4.4
         b.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) { dongMenu(); moSau(dich); }
+        });
+        return b;
+    }
+
+    /**
+     * ② CHỤP MÀN HÌNH ĐANG XEM — 30/10/2026. Đóng menu và ẩn chính bong bóng TRƯỚC khi chụp, để
+     * ảnh là tin nhắn bác đang xem chứ không phải cái nút. Hộp xác nhận của Android hiện ra ngay
+     * sau đó (`ChupManHinhActivity`). Máy không mở được thì rơi về chỗ chọn ảnh như trước.
+     */
+    private android.widget.Button nutChup(String chu) {
+        android.widget.Button b = new android.widget.Button(this);
+        b.setText(chu);
+        b.setTextSize(17);
+        b.setAllCaps(false);
+        b.setMinHeight((int) (56 * getResources().getDisplayMetrics().density));
+        b.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) {
+                dongMenu();
+                final View goc = bong;
+                if (goc == null || !ChupManHinh.duocHoTro()) { moSau("khoanda://loi-tat/quet-anh"); return; }
+                goc.setVisibility(View.INVISIBLE);
+                goc.postDelayed(new Runnable() {
+                    @Override public void run() {
+                        try {
+                            Intent i = new Intent(BongBongNoi.this, ChupManHinhActivity.class);
+                            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(i);
+                        } catch (Throwable t) {
+                            android.util.Log.e("KhoanDa", "khong mo duoc chup man hinh", t);
+                            moSau("khoanda://loi-tat/quet-anh");
+                        }
+                    }
+                }, 250);
+                // Hiện lại sau khi chụp xong — bong bóng không được biến mất vĩnh viễn.
+                goc.postDelayed(new Runnable() {
+                    @Override public void run() { goc.setVisibility(View.VISIBLE); }
+                }, 5000);
+            }
         });
         return b;
     }

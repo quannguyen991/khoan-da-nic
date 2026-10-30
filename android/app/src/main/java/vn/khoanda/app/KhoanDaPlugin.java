@@ -862,6 +862,7 @@ public class KhoanDaPlugin extends Plugin {
         if (k.vanBan != null) r.put("vanBan", k.vanBan);
         if (k.anh != null) r.put("anh", k.anh);
         if (k.loiTat != null) r.put("loiTat", k.loiTat);
+        if (k.tuChup) r.put("tuChup", true);
         // §4.3 — ca hỏng có mã riêng, KHÔNG im lặng.
         if (k.maLoi != null) r.put("maLoi", k.maLoi);
         call.resolve(r);

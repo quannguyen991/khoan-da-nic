@@ -983,6 +983,9 @@ export default function App() {
    * ⚠️ Ở BẢN WEB, `noiDungChiaSe()` trả `{ co: false }` và không ném — cùng một
    * mã nguồn chạy được ở cả ba nơi (§6.7).
    */
+  /** Ảnh vừa chụp từ nút nổi, đang chờ bác xem và bấm "Kiểm tra" — xem khối `tuChup` bên dưới. */
+  const [anhChupSan, setAnhChupSan] = useState<string | null>(null);
+
   useEffect(() => {
     let huy = false;
 
@@ -1045,10 +1048,10 @@ export default function App() {
          * ở đó sẽ tự nói đúng trạng thái.
          */
         /*
-         * `quet-anh` — từ menu của bong bóng nổi. Không tự chụp màn hình được
-         * (xem `BongBongNoi.moMenu`: chụp từ nền đòi quyền nhìn được MỌI màn hình,
-         * kể cả màn hình ngân hàng). Bác tự chụp bằng phím của máy, đây mở
-         * chỗ chọn ảnh — một thao tác đổi lấy việc không phải xin quyền đó.
+         * `quet-anh` — chỗ chọn ảnh có sẵn. Từ 30/10/2026 nút nổi có nút "Chụp màn hình đi kiểm"
+         * (xem `ChupManHinh.java`): ảnh vừa chụp quay về đây KHÔNG qua nhánh lối tắt này mà qua
+         * `d.anh` bên dưới — nó là NỘI DUNG, đi đúng đường với ảnh bác chia sẻ sang. `quet-anh`
+         * còn dùng khi máy không chụp được (rơi về chọn ảnh) và từ lối tắt giữ biểu tượng.
          */
         /*
          * ═════ MÁY TỰ BẬT: ĐANG GỌI + MÃ OTP / ĐANG GỌI + VỪA CÀI APP (Phần 4, 23/9/2026) ═════
@@ -1107,15 +1110,54 @@ export default function App() {
        * vào `chuaKiem`. Chặn ở đây là nuốt mất đúng thứ §4.3 sinh ra để nói:
        * bác chia sẻ một ảnh sang, app im lặng, và bác tưởng đã kiểm rồi.
        */
+      /*
+       * ═════ ẢNH TỪ NÚT "CHỤP MÀN HÌNH ĐI KIỂM" — 30/10/2026 ═════
+       * Chụp màn hình có thể chứa thứ bác không định gửi (tin nhắn khác, số dư). Nên KHÔNG tự gửi:
+       * đặt vào ô xem trước ở trang chủ, bác nhìn thấy rồi bấm "Kiểm tra" (bảng "điều gì rời máy,
+       * khi nào" trong PERMISSIONS-AND-POLICY.md: "người dùng bấm kiểm"). Ảnh bác CHIA SẺ SANG từ
+       * app khác thì giữ nguyên đường cũ — chia sẻ đã là một lần chọn gửi.
+       * Chế độ siêu đơn giản không có ô xem trước ⇒ đi thẳng như ảnh chia sẻ (bác vừa chạm chụp).
+       */
+      if (d.tuChup && d.anh) {
+        if (localStorage.getItem('khoan_da_sieu_don_gian') === '1') {
+          handleAnalyze('', d.anh);
+        } else {
+          setAnhChupSan(d.anh);
+          setView('home');
+        }
+        return;
+      }
       if (d.vanBan || d.anh) {
         handleAnalyze(d.vanBan ?? '', d.anh ?? null);
+      } else if (d.maLoi === 'KHONG_CHUP_DUOC') {
+        // Ảnh vừa chụp đã được lấy rồi (hoặc mất) — đừng đứng yên ở màn cũ như thể có gì xảy ra.
+        setView('home');
       }
     };
 
     void lay();
     const khiHien = () => { if (document.visibilityState === 'visible') void lay(); };
     document.addEventListener('visibilitychange', khiHien);
-    return () => { huy = true; document.removeEventListener('visibilitychange', khiHien); };
+    /*
+     * ═════ TRONG APK, `visibilitychange` KHÔNG CHẠY KHI APP QUAY LẠI TỪ MỘT MÀN TRONG SUỐT — 30/10/2026 ═════
+     * Đo trên máy ảo Android 14: nút "Chụp màn hình đi kiểm" chụp xong, app được đưa lên bằng deep link
+     * (`onNewIntent`), nhưng WebView không đổi `document.visibilityState`, nên `lay()` không chạy và ảnh
+     * nằm chờ trong bộ nhớ native. Sự kiện đúng là `appStateChange` của Capacitor (`isActive` = true).
+     * Chỉ đăng ký trên APK — trình duyệt không có plugin này.
+     */
+    let boNgheTrangThai: (() => void) | undefined;
+    void (async () => {
+      if (!(await laApk())) return;
+      const { App } = await import('@capacitor/app');
+      const h = await App.addListener('appStateChange', ({ isActive }) => { if (isActive) void lay(); });
+      if (huy) void h.remove();
+      else boNgheTrangThai = () => { void h.remove(); };
+    })().catch(() => { /* không đăng ký được thì vẫn còn visibilitychange ở trên */ });
+    return () => {
+      huy = true;
+      document.removeEventListener('visibilitychange', khiHien);
+      boNgheTrangThai?.();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -1524,6 +1566,8 @@ export default function App() {
                 familyMembers={familyMembers}
                 onTriggerEmergency={triggerEmergencyAlert}
                 lang={lang}
+                anhChoKiem={anhChupSan}
+                onDaNhanAnh={() => setAnhChupSan(null)}
               />
             )}
             {view === 'voice' && <VoiceView setView={setView} t={t} onAnalyze={handleAnalyze} isAnalyzing={isAnalyzing} onTriggerEmergency={triggerEmergencyAlert} />}
@@ -2190,7 +2234,9 @@ function HomeView({
   onOpenMenu,
   familyMembers,
   onTriggerEmergency,
-  lang = 'vi'
+  lang = 'vi',
+  anhChoKiem,
+  onDaNhanAnh,
 }: {
   setView: (v: ViewState) => void,
   t: any,
@@ -2202,9 +2248,18 @@ function HomeView({
   onOpenMenu?: () => void,
   familyMembers?: NguoiThan[],
   onTriggerEmergency?: () => void,
+  /** Ảnh vừa chụp từ nút nổi — đặt vào ô xem trước, KHÔNG tự gửi đi. */
+  anhChoKiem?: string | null,
+  onDaNhanAnh?: () => void,
 }) {
   const [inputText, setInputText] = useState('');
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  useEffect(() => {
+    if (!anhChoKiem) return;
+    setSelectedImage(anhChoKiem);
+    onDaNhanAnh?.();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [anhChoKiem]);
   const [showQuickCallModal, setShowQuickCallModal] = useState(false);
 
   /**
@@ -3027,14 +3082,32 @@ function VoiceView({
             return;
           }
           console.warn('Speech recognition notice:', event.error);
-          if (event.error === 'not-allowed' || event.error === 'service-not-allowed'
-              || event.error === 'audio-capture') {
+          /*
+           * ═════ LỖI KHÔNG CỨU ĐƯỢC THÌ DỪNG HẲN, ĐỪNG TỰ KHỞI ĐỘNG LẠI — 30/10/2026 ═════
+           * Bản trước chỉ tắt cờ `isRecording` mà để `recognitionRef` lại, nên `onend` (luôn
+           * chạy sau lỗi) hẹn `start()` lại sau 300ms, rồi lỗi, rồi lại hẹn — vòng lặp vô hạn
+           * mỗi 0,3 giây khi micro bị chặn. Trên Chrome mỗi vòng có thể hiện lại hộp xin quyền.
+           * `network` (Chrome gửi tiếng lên máy chủ hãng, mất mạng thì không nghe được) và
+           * `language-not-supported` cũng không cứu được bằng cách thử lại, và trước đây im lặng.
+           */
+          const loiKhongCuuDuoc = event.error === 'not-allowed' || event.error === 'service-not-allowed'
+            || event.error === 'audio-capture' || event.error === 'network'
+            || event.error === 'language-not-supported';
+          if (loiKhongCuuDuoc) {
             setMicHong(true);
             setIsRecording(false);
+            if (restartTimeoutRef.current) clearTimeout(restartTimeoutRef.current);
+            const hong = recognitionRef.current;
+            recognitionRef.current = null;
+            try { hong?.stop(); } catch (e) {}
+            if (timerRef.current) clearInterval(timerRef.current);
+            if (noSpeechTimeoutRef.current) clearTimeout(noSpeechTimeoutRef.current);
           }
-          if (event.error === 'not-allowed') {
+          if (event.error === 'not-allowed' || event.error === 'service-not-allowed' || event.error === 'audio-capture') {
             // Dùng lại đúng câu đã có trong catalog — cùng một sự việc thì cùng một câu.
             themBaoLoiVaoHoiThoai(t('Máy chưa cho Khoan Đã dùng micro. Bác gõ chữ hoặc gửi ảnh giúp cháu nhé.'));
+          } else if (event.error === 'network' || event.error === 'language-not-supported') {
+            themBaoLoiVaoHoiThoai(t('Máy chưa chuyển được lời nói thành chữ. Bác gõ chữ hoặc gửi ảnh giúp cháu nhé.'));
           }
         };
 
@@ -7255,9 +7328,12 @@ export function WarningView({
   // Nhãn NGUYÊN VĂN §4.1, tra từ catalog. Không có nhãn thứ tư.
   const nhanChu = nhan ? tra(NHAN, nhan, lang) : null;
   const lyDo = traNhieu(MA_LY_DO, result?.maLyDo ?? [], lang);
-  /** Màn gấp chỉ để ba dòng lý do; phần còn lại nằm dưới nếp gấp "Xem thêm". */
-  const lyDoHien = manGapGap ? lyDo.slice(0, 3) : lyDo.slice(0, 8);
-  const lyDoConLai = manGapGap ? lyDo.slice(3, 8) : [];
+  /**
+   * Mọi màn chỉ để ba dòng lý do; phần còn lại nằm dưới nếp gấp — "Xem thêm" ở màn gấp,
+   * "Xem thêm dấu hiệu" ở màn thường (tối giản chữ, 30/10/2026). Không xoá dấu hiệu nào.
+   */
+  const lyDoHien = lyDo.slice(0, 3);
+  const lyDoConLai = lyDo.slice(3, 8);
 
   /**
    * §HĐ luật 3 + `aiDaChay`.
@@ -7608,6 +7684,30 @@ export function WarningView({
     oNhan.current?.focus();
   }, []);
 
+  /**
+   * ═════ TỐI GIẢN CHỮ — 30/10/2026 ═════
+   * Hai dòng nói KIẾN TRÚC (AI chỉ trích dấu hiệu · AI chạy ở đâu) không phải việc bác
+   * phải làm, nên gộp vào MỘT nếp gấp "Xem cách kiểm tra" ở mọi mức. Không bỏ chữ nào:
+   * §4.1 vẫn có dòng giải thích, §11 vẫn nói thật AI chạy ở đâu — chỉ không đứng giữa
+   * nhãn và việc cần làm. `aiDaChay !== true` thì dòng đầu vẫn KHÔNG hiện (§11).
+   */
+  const dongGiaiThichAi = !khongGoiDuoc && result?.aiDaChay === true
+    ? t('AI đã trích ra các dấu hiệu. Mức rủi ro là do bộ luật cố định quyết định.')
+    : '';
+  const dongNoiChayAi = !tuBamDung && noiChayAi ? (tra(NOI_CHAY_AI, noiChayAi, lang) ?? '') : '';
+  const khoiCachKiemTra = (dongGiaiThichAi || dongNoiChayAi) ? (
+    <>
+      {dongGiaiThichAi && (
+        <p className="text-[14px] font-semibold leading-snug text-center">{dongGiaiThichAi}</p>
+      )}
+      {dongNoiChayAi && (
+        <p className={`text-[14px] font-semibold leading-snug text-center ${dongGiaiThichAi ? 'mt-1.5' : ''}`}>
+          {noiChayAi?.startsWith('tren_may') ? '🔒 ' : ''}{dongNoiChayAi}
+        </p>
+      )}
+    </>
+  ) : null;
+
   return (
     <motion.div
       animate={{ scale: 1 }}
@@ -7918,20 +8018,11 @@ export function WarningView({
           hiệu" lúc đó là một câu sai, và §11 cấm gán việc cho model chưa hề được
           gọi. Trường hợp ấy `chuaKiem` đã mang sẵn `ai_khong_chay` để nói thay.
         */}
-        {!khongGoiDuoc && result?.aiDaChay === true ? (
-          laChuaThay ? (
-            <details className="w-full max-w-sm mb-3 rounded-2xl border border-white/20 bg-black/15 px-3 py-2 text-white/90">
-              <summary className="cursor-pointer text-[14px] font-bold text-center">{t('Xem cách kiểm tra')}</summary>
-              <p className="mt-2 text-[14px] leading-snug text-center">
-                {t('AI đã trích ra các dấu hiệu. Mức rủi ro là do bộ luật cố định quyết định.')}
-              </p>
-            </details>
-          ) : (
-            <p className="text-[14px] text-white/85 mb-4 text-center leading-snug max-w-sm">
-              {t('AI đã trích ra các dấu hiệu. Mức rủi ro là do bộ luật cố định quyết định.')}
-            </p>
-          )
-        ) : null}
+        {/*
+          30/10/2026 — DÒNG GIẢI THÍCH AI NAY NẰM TRONG NẾP GẤP "Xem cách kiểm tra" Ở CUỐI
+          KHỐI GIỮA (cùng `noiChayAi`) — xem `khoiCachKiemTra`. Điều kiện `aiDaChay === true`
+          giữ nguyên bên trong biến `dongGiaiThichAi`.
+        */}
 
         {/*
           THẺ TRUNG TÂM — biểu tượng + vòng đếm ngược trong một khối kính mờ, nổi
@@ -8153,13 +8244,14 @@ export function WarningView({
           ⚠️ Khung câu "Họ thường…", không phải "Họ sẽ…" (§11) — đã cố định ở
           catalog, không sửa ở đây.
         */}
+        {/* 30/10/2026 — GẤP LẠI: chỉ còn một dòng tiêu đề, bấm mới thấy các bước họ thường làm. */}
         {canVerify && cauDuBao.length > 0 && (
-          <div className="w-full bg-sky-950/55 border-2 border-sky-300/60 rounded-[22px] backdrop-blur-md mb-2 overflow-hidden">
-            <div className="flex items-start gap-2 px-4 pt-4">
-              <AlertTriangle size={20} className="text-sky-200 shrink-0 mt-0.5" />
+          <details className="w-full bg-sky-950/55 border-2 border-sky-300/60 rounded-[22px] backdrop-blur-md mb-2 overflow-hidden">
+            <summary className="flex items-center gap-2 px-4 py-3 cursor-pointer list-none">
+              <AlertTriangle size={20} className="text-sky-200 shrink-0" />
               <h3 className="text-white font-black text-[17px] leading-snug">{KHUNG_KICH_BAN[lang]}</h3>
-            </div>
-            <div className="mt-2">
+            </summary>
+            <div>
               {cauDuBao.map((cau, i) => (
                 <div key={cau} className={`flex items-center gap-3 px-4 py-2.5 ${i > 0 ? 'border-t border-white/15' : ''}`}>
                   <span className="w-7 h-7 rounded-full bg-white/20 text-white text-[14px] font-black flex items-center justify-center shrink-0">{i + 1}</span>
@@ -8168,7 +8260,7 @@ export function WarningView({
               ))}
             </div>
             <p className="text-sky-50 text-[14px] leading-relaxed px-4 pb-4 pt-1">{KET_KICH_BAN[lang]}</p>
-          </div>
+          </details>
         )}
 
         {/*
@@ -8380,23 +8472,11 @@ export function WarningView({
           nhắc lại. Đo được nó cùng hai khối khác đẩy nút gọi xuống dưới đáy
           màn — mà thứ tự đúng là: hành động trước, bản nhắc lại sau.
         */}
-        {!manGapGap && !tuBamDung && noiChayAi && tra(NOI_CHAY_AI, noiChayAi, lang) && (
-          laChuaThay ? (
-            <details className="w-full mt-2 rounded-2xl border border-white/20 bg-black/15 px-3 py-2 text-white/90">
-              <summary className="cursor-pointer text-[14px] font-bold text-center">{t('Xem thông tin kiểm tra')}</summary>
-              <p className="mt-2 text-[14px] font-semibold leading-snug text-center">
-                {noiChayAi.startsWith('tren_may') ? '🔒 ' : ''}{tra(NOI_CHAY_AI, noiChayAi, lang)}
-              </p>
-            </details>
-          ) : (
-            <div className={`w-full mt-2 rounded-2xl px-3.5 py-2.5 border-2 ${
-              noiChayAi.startsWith('tren_may') ? 'bg-black/35 border-emerald-300/70' : 'bg-black/35 border-white/30'
-            }`}>
-              <p className="text-[14px] font-bold text-white leading-snug">
-                {noiChayAi.startsWith('tren_may') ? '🔒 ' : ''}{tra(NOI_CHAY_AI, noiChayAi, lang)}
-              </p>
-            </div>
-          )
+        {!manGapGap && !tuBamDung && khoiCachKiemTra && (
+          <details className="w-full mt-2 rounded-2xl border border-white/20 bg-black/15 px-3 py-2 text-white/90">
+            <summary className="cursor-pointer text-[14px] font-bold text-center">{t('Xem cách kiểm tra')}</summary>
+            <div className="mt-2">{khoiCachKiemTra}</div>
+          </details>
         )}
       </div>
 
@@ -8414,33 +8494,51 @@ export function WarningView({
           được ngay còn hơn một cái form. Chúng đến từ `so-khan-cap.ts`, không
           phải số bịa cho đẹp bố cục.
         */}
-        {!heroGap && !firstContact.phone && (soCongAn || soBaoLuaDao) && (
-          <div className="w-full grid grid-cols-2 gap-2">
-            {soCongAn && (
-              <a
-                href={`tel:${soCongAn.cleanPhone}`}
-                className="min-h-[72px] rounded-[22px] bg-white text-slate-900 border-2 border-white/60 shadow-md px-3 py-3 flex flex-col items-center justify-center gap-1 active:scale-95 transition-all"
-              >
-                <ShieldCheck size={22} className="text-slate-800 shrink-0" />
-                <span className="text-[16px] font-black leading-tight text-center">{soCongAn.name}</span>
-              </a>
-            )}
-            {soBaoLuaDao && (
-              <a
-                href={`tel:${soBaoLuaDao.cleanPhone}`}
-                className="min-h-[72px] rounded-[22px] bg-white text-slate-900 border-2 border-white/60 shadow-md px-3 py-3 flex flex-col items-center justify-center gap-1 active:scale-95 transition-all"
-              >
-                <PhoneOff size={22} className="text-slate-800 shrink-0" />
-                <span className="text-[16px] font-black leading-tight text-center">{soBaoLuaDao.name}</span>
-              </a>
-            )}
-          </div>
-        )}
+        {/*
+          30/10/2026 — MỨC "CHƯA THẤY DẤU HIỆU" KHÔNG ĐƯỢC CÓ NÚT VÀNG TO "GỌI NGAY" ĐỨNG GIỮA MÀN.
+          Nó nói ngược với nhãn. Ba nút gọi / nhắn người thân và số khẩn cấp gấp vào một dòng,
+          bấm là thấy đủ — không xoá nút nào. Lối "Tôi đã lỡ chuyển tiền…" bên dưới vẫn để ngoài
+          (sửa 22/9/2026: người đã lỡ chuyển tiền cần thấy nó ngay ở mọi mức).
+        */}
+        {(() => {
+          const khoiGoi = (
+            <>
+              {!heroGap && !firstContact.phone && (soCongAn || soBaoLuaDao) && (
+                <div className="w-full grid grid-cols-2 gap-2">
+                  {soCongAn && (
+                    <a
+                      href={`tel:${soCongAn.cleanPhone}`}
+                      className="min-h-[72px] rounded-[22px] bg-white text-slate-900 border-2 border-white/60 shadow-md px-3 py-3 flex flex-col items-center justify-center gap-1 active:scale-95 transition-all"
+                    >
+                      <ShieldCheck size={22} className="text-slate-800 shrink-0" />
+                      <span className="text-[16px] font-black leading-tight text-center">{soCongAn.name}</span>
+                    </a>
+                  )}
+                  {soBaoLuaDao && (
+                    <a
+                      href={`tel:${soBaoLuaDao.cleanPhone}`}
+                      className="min-h-[72px] rounded-[22px] bg-white text-slate-900 border-2 border-white/60 shadow-md px-3 py-3 flex flex-col items-center justify-center gap-1 active:scale-95 transition-all"
+                    >
+                      <PhoneOff size={22} className="text-slate-800 shrink-0" />
+                      <span className="text-[16px] font-black leading-tight text-center">{soBaoLuaDao.name}</span>
+                    </a>
+                  )}
+                </div>
+              )}
 
-        {/* Màn gấp: nút chính đã nằm ngay dưới nhãn (`nutHanhDongGap`), nút soạn
-            tin nằm trong "Xem thêm". Màn thường giữ chỗ cũ. */}
-        {!heroGap && nutGoiChinh}
-        {!heroGap && nutNhanTin}
+              {/* Màn gấp: nút chính đã nằm ngay dưới nhãn (`nutHanhDongGap`), nút soạn
+                  tin nằm trong "Xem thêm". Màn thường giữ chỗ cũ. */}
+              {!heroGap && nutGoiChinh}
+              {!heroGap && nutNhanTin}
+            </>
+          );
+          return laChuaThay && !heroGap ? (
+            <details className="w-full rounded-2xl border border-white/20 bg-black/15 px-3 py-2 text-white/90">
+              <summary className="cursor-pointer text-[14px] font-bold text-center">{t('Gọi người thân hoặc số khẩn cấp')}</summary>
+              <div className="mt-2 flex flex-col items-center gap-2.5">{khoiGoi}</div>
+            </details>
+          ) : khoiGoi;
+        })()}
 
         {/*
           MẬT KHẨU GIA ĐÌNH — CHỐNG DEEPFAKE BẰNG THỨ KHÔNG CẦN AI.
@@ -8495,25 +8593,32 @@ export function WarningView({
           thích ở khối "LIÊN HỆ KHẨN CẤP".
         */}
         {(moThem || !manGapGap) && (<>
-        {manGapGap && !tuBamDung && noiChayAi && tra(NOI_CHAY_AI, noiChayAi, lang) && (
+        {manGapGap && !tuBamDung && khoiCachKiemTra && (
           <div className={`w-full mb-2 rounded-2xl px-3.5 py-2.5 border-2 ${
-            noiChayAi.startsWith('tren_may') ? 'bg-black/35 border-emerald-300/70' : 'bg-black/35 border-white/30'
+            noiChayAi?.startsWith('tren_may') ? 'bg-black/35 border-emerald-300/70' : 'bg-black/35 border-white/30'
           }`}>
-            <p className="text-[14px] font-bold text-white leading-snug">
-              {noiChayAi.startsWith('tren_may') ? '🔒 ' : ''}{tra(NOI_CHAY_AI, noiChayAi, lang)}
-            </p>
+            {khoiCachKiemTra}
           </div>
         )}
-        {lyDoConLai.length > 0 && (
-          <ul className="w-full flex flex-col gap-1.5 mb-2">
-            {lyDoConLai.map((cau) => (
-              <li key={cau} className="px-3.5 py-2 bg-black/30 rounded-2xl text-white font-semibold text-[16px] border border-white/15 flex items-start gap-2 leading-snug">
-                <AlertTriangle size={18} className="text-amber-300 shrink-0 mt-0.5" />
-                <span>{cau}</span>
-              </li>
-            ))}
-          </ul>
-        )}
+        {lyDoConLai.length > 0 && (() => {
+          const danhSach = (
+            <ul className="w-full flex flex-col gap-1.5 mb-2">
+              {lyDoConLai.map((cau) => (
+                <li key={cau} className="px-3.5 py-2 bg-black/30 rounded-2xl text-white font-semibold text-[16px] border border-white/15 flex items-start gap-2 leading-snug">
+                  <AlertTriangle size={18} className="text-amber-300 shrink-0 mt-0.5" />
+                  <span>{cau}</span>
+                </li>
+              ))}
+            </ul>
+          );
+          // Màn gấp: đã nằm sau nút "Xem thêm". Màn thường: gấp riêng, đừng để dài thêm màn.
+          return manGapGap ? danhSach : (
+            <details className="w-full mb-2 rounded-2xl border border-white/20 bg-black/15 px-3 py-2 text-white/90">
+              <summary className="cursor-pointer text-[14px] font-bold text-center">{t('Xem thêm dấu hiệu')}</summary>
+              <div className="mt-2">{danhSach}</div>
+            </details>
+          );
+        })()}
         {manGapGap && (
           <CanhBaoChinhThuc
             nhan={nhan ?? null}

@@ -1288,6 +1288,8 @@ export const translations: Record<Lang, Record<string, string>> = {
     "Dữ liệu mẫu dùng để kiểm tra luồng thông báo hai phía.": "Dữ liệu mẫu dùng để kiểm tra luồng thông báo hai phía.",
     "Cộng đồng": "Cộng đồng",
     "Chia sẻ ẩn danh để mọi người cùng đề phòng.": "Chia sẻ ẩn danh để mọi người cùng đề phòng.",
+    "Xem thêm dấu hiệu": "Xem thêm dấu hiệu",
+    "Gọi người thân hoặc số khẩn cấp": "Gọi người thân hoặc số khẩn cấp",
   },
   en: {
     "Chỉ chạy trên Chrome hoặc Edge của máy tính.": "Only works in Chrome or Edge on a computer.",
@@ -2614,6 +2616,8 @@ export const translations: Record<Lang, Record<string, string>> = {
     "Dữ liệu mẫu dùng để kiểm tra luồng thông báo hai phía.": "Sample data used to test the two-way alert flow.",
     "Cộng đồng": "Community",
     "Chia sẻ ẩn danh để mọi người cùng đề phòng.": "Share anonymously so others can stay alert.",
+    "Xem thêm dấu hiệu": "See more signals",
+    "Gọi người thân hoặc số khẩn cấp": "Call family or emergency numbers",
   }
 };
 

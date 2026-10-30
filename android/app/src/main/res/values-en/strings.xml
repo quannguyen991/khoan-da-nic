@@ -89,5 +89,10 @@
     <string name="bb_kiem_tin">Check a message</string>
     <string name="bb_gui_anh">Send a picture</string>
     <string name="bb_dung_60s">Pause for 60 Seconds</string>
+    <string name="bb_chup_man_hinh">Capture screen to check</string>
+    <string name="chup_kenh">Screen capture</string>
+    <string name="chup_tieu_de">Capturing the screen to check it</string>
+    <string name="chup_noi_dung">Captures once, then switches itself off. No video.</string>
+    <string name="chup_loi">Could not capture the screen. Please try again, or take a screenshot yourself and share it with Khoan Đã.</string>
     <string name="bb_dong">Close</string>
 </resources>

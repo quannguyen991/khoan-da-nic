@@ -63,7 +63,8 @@ test('micro bị chặn thì DỪNG đếm giờ, không chỉ hiện một dòn
   }
   const i = APP.indexOf("event.error === 'not-allowed' || event.error === 'service-not-allowed'");
   assert.ok(i > 0, 'ba mã lỗi phải được gom vào một nhánh');
-  const khoi = APP.slice(i, i + 260);
+  // 420 ký tự: từ 30/10/2026 điều kiện gom thêm `network` / `language-not-supported` (cũng không cứu được bằng thử lại).
+  const khoi = APP.slice(i, i + 420);
   assert.match(khoi, /setMicHong\(true\)/, 'phải bật cờ micHong');
   assert.match(khoi, /setIsRecording\(false\)/,
     'phải tắt isRecording — để nguyên là đồng hồ vẫn chạy và màn vẫn khoe "Đang nghe bác nói"');

@@ -112,8 +112,9 @@ test('bằng chứng dài của màn gấp nằm dưới nếp gấp, và KHÔNG
     'lượt hiện thẳng phải bị chặn bởi !manGapGap');
 
   // Lý do: màn gấp ba dòng, phần còn lại xuống nếp gấp — không dòng nào bị vứt.
-  assert.match(APP, /const lyDoHien = manGapGap \? lyDo\.slice\(0, 3\) : lyDo\.slice\(0, 8\);/,
-    'màn gấp chỉ để ba dòng lý do');
-  assert.match(APP, /const lyDoConLai = manGapGap \? lyDo\.slice\(3, 8\) : \[\];/,
+  // Từ 30/10/2026 MỌI màn chỉ để ba dòng (tối giản chữ); phần còn lại gấp lại ở cả màn thường.
+  assert.match(APP, /const lyDoHien = lyDo\.slice\(0, 3\);/,
+    'mọi màn chỉ để ba dòng lý do');
+  assert.match(APP, /const lyDoConLai = lyDo\.slice\(3, 8\);/,
     'phần lý do còn lại phải được bày ra ở chỗ khác, không được cắt đi');
 });

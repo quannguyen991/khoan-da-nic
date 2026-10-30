@@ -9,6 +9,20 @@ function cheThongTin(text: string): string {
     .replace(/\b\d{4,19}\b/g, (so) => `${so.slice(0, 2)}••••${so.slice(-2)}`);
 }
 
+/**
+ * ═════ TỐI GIẢN — 30/10/2026 ═════
+ * Người dùng: thẻ này "cho ra khá nhiều chữ". Bản trước có: tiêu đề, đoạn giải thích,
+ * nhãn "Việc nên làm trước", câu việc, nút, rồi BA nút mỗi nút kèm một đoạn mô tả (một đoạn
+ * là cả câu trả lời mẫu 200 ký tự), cộng một dòng đỏ nhắc OTP lặp lại câu việc ở trên.
+ *
+ * Nay: MỘT việc (câu + nút), hai nút ngắn chỉ có nhãn, "Ngừng liên lạc" gấp lại. Câu trả lời
+ * mẫu không còn phơi ra — bấm là sao chép và có dòng báo "đã sao chép". Mức "Chưa thấy dấu
+ * hiệu" gấp cả thẻ vào một dòng.
+ *
+ * ⚠️ KHÔNG BỎ: dòng riêng tư "Khoan Đã không tự gửi tin" (nằm trong bảng chia sẻ, nơi bác sắp
+ * gửi đi), tên nút "Soạn/Gửi" nói đúng việc là MỞ bảng chia sẻ chứ không phải đã gửi (§11),
+ * và lối chặn liên lạc — chỉ gấp lại.
+ */
 export function TroLyPhanHoiTaiCho({
   result, lang, setView, familyMembers,
 }: { result: KetQuaPhanTich; lang: Lang; setView: (view: ViewState) => void; familyMembers: NguoiThan[] }) {
@@ -27,6 +41,7 @@ export function TroLyPhanHoiTaiCho({
   const mucDich = result.nhan ? tra(NHAN, result.nhan, lang) : null;
   const giaiThich = traNhieu(MA_LY_DO, lyDo, lang).slice(0, 3).join('; ');
   const nguoiThan = familyMembers.find((n) => n.phone?.trim()) ?? null;
+  const laChuaThay = result.nhan === 'CHUA_THAY';
 
   const noiDungChiaSe = [
     chu('EVIDENCE_NOTE'),
@@ -73,63 +88,76 @@ export function TroLyPhanHoiTaiCho({
     ? 'I will not continue this conversation through this channel.'
     : 'Tôi không tiếp tục trao đổi qua kênh này.';
 
-  return (
-    <section className="mt-5 rounded-[22px] border-2 border-[#2e1065] bg-white p-4 text-[#1e1b4b] shadow-[3px_3px_0_#2e1065]">
-      <div className="flex items-center gap-2">
-        <MessageSquareText size={23} aria-hidden="true" />
-        <h2 className="text-[20px] font-black leading-snug">{chu('IN_SITU_TITLE')}</h2>
-      </div>
-      <p className="mt-2 text-[15px] leading-relaxed">{chu('IN_SITU_HELP')}</p>
-
+  const noiDung = (
+    <>
       <div className="mt-3 rounded-xl border-2 border-red-800 bg-red-50 p-3">
-        <p className="text-[14px] font-black uppercase tracking-wide text-red-900">{chu('PRIMARY_ACTION')}</p>
-        <p className="mt-1 text-[16px] font-bold leading-relaxed text-red-950">{chu(uuTienOtp ? 'PRIMARY_OTP' : uuTienGiaDinh ? 'PRIMARY_FAMILY' : uuTienNganHang ? 'PRIMARY_BANK' : uuTienDung ? 'PRIMARY_STOP' : 'PRIMARY_REPLY')}</p>
+        <p className="text-[16px] font-bold leading-snug text-red-950">{chu(uuTienOtp ? 'PRIMARY_OTP' : uuTienGiaDinh ? 'PRIMARY_FAMILY' : uuTienNganHang ? 'PRIMARY_BANK' : uuTienDung ? 'PRIMARY_STOP' : 'PRIMARY_REPLY')}</p>
         <button type="button" onClick={() => {
           if (uuTienOtp || uuTienGiaDinh) setView('family');
           else if (uuTienNganHang) setView('so_ngan_hang');
           else if (uuTienDung) setMoHuongDan(true);
           else void saoChep(loiTuChoi, chu('RESPONSE_COPIED'));
-        }} className="mt-2 min-h-[48px] rounded-xl border border-red-900 bg-white px-3 py-2 text-[15px] font-black">{chu(uuTienOtp || uuTienGiaDinh ? 'OPEN_TRUSTED_CONTACTS' : uuTienNganHang ? 'OPEN_BANK_DIRECTORY' : uuTienDung ? 'STOP_CONTACT' : 'SAFE_REPLY')}</button>
+        }} className="mt-2 min-h-[52px] w-full rounded-xl border border-red-900 bg-white px-3 py-2 text-[16px] font-black">{chu(uuTienOtp || uuTienGiaDinh ? 'OPEN_TRUSTED_CONTACTS' : uuTienNganHang ? 'OPEN_BANK_DIRECTORY' : uuTienDung ? 'STOP_CONTACT' : 'SAFE_REPLY')}</button>
       </div>
 
-      <div className="mt-4 grid gap-3">
+      <div className="mt-3 grid grid-cols-2 gap-2">
         <button type="button" onClick={() => void saoChep(loiTuChoi, chu('RESPONSE_COPIED'))}
-          className={`min-h-[58px] rounded-2xl border-2 border-[#2e1065] px-4 py-3 text-left text-[16px] font-black leading-snug ${uuTienDung || (!uuTienOtp && !uuTienGiaDinh) ? 'bg-violet-800 text-white' : 'bg-white'}`}>
-          <span className="flex items-center gap-2"><Copy size={20} aria-hidden="true" />{chu('SAFE_REPLY')}</span>
-          <span className="mt-1 block text-[14px] font-medium">{loiTuChoi}</span>
+          className="min-h-[56px] rounded-2xl border-2 border-[#2e1065] bg-white px-3 py-2 text-[15px] font-black leading-snug flex items-center justify-center gap-2">
+          <Copy size={19} className="shrink-0" aria-hidden="true" /><span>{chu('SAFE_REPLY')}</span>
         </button>
-
-        <button type="button" onClick={() => setMoHuongDan((x) => !x)}
-          className={`min-h-[58px] rounded-2xl border-2 border-[#2e1065] px-4 py-3 text-left text-[16px] font-black leading-snug ${uuTienDung ? 'bg-white' : 'bg-amber-100'}`}>
-          <span className="flex items-center gap-2"><ShieldAlert size={20} aria-hidden="true" />{chu('STOP_CONTACT')}</span>
-          <span className="mt-1 block text-[14px] font-medium">{chu('STOP_CONTACT_HELP')}</span>
-        </button>
-        {moHuongDan && <div className="rounded-xl bg-amber-50 p-3 text-[15px] leading-relaxed">
-          <p>{chu('STOP_CONTACT_DETAIL')}</p>
-          <button type="button" onClick={() => void saoChep(phanHoiCuoi, chu('RESPONSE_COPIED'))}
-            className="mt-3 min-h-[48px] rounded-xl border border-amber-900 bg-white px-3 py-2 font-bold">{chu('FINAL_NEUTRAL_REPLY')}</button>
-        </div>}
-
         <button type="button" onClick={() => setMoBangChiaSe(true)}
-          className={`min-h-[58px] rounded-2xl border-2 border-[#2e1065] px-4 py-3 text-left text-[16px] font-black leading-snug ${uuTienOtp || uuTienGiaDinh ? 'bg-violet-800 text-white' : 'bg-white'}`}>
-          <span className="flex items-center gap-2"><Share2 size={20} aria-hidden="true" />{chu('SEND_TO_FAMILY')}</span>
-          <span className="mt-1 block text-[14px] font-medium">{chu('SEND_TO_FAMILY_HELP')}</span>
+          className="min-h-[56px] rounded-2xl border-2 border-[#2e1065] bg-violet-800 px-3 py-2 text-[15px] font-black leading-snug text-white flex items-center justify-center gap-2">
+          <Share2 size={19} className="shrink-0" aria-hidden="true" /><span>{chu('SEND_TO_FAMILY_SHORT')}</span>
         </button>
       </div>
+
+      {/* Việc chính ĐÃ là "Ngừng liên lạc" thì không lặp thêm một nút cùng tên ngay bên dưới. */}
+      {!(uuTienDung && !uuTienOtp && !uuTienGiaDinh && !uuTienNganHang) && (
+        <button type="button" aria-expanded={moHuongDan} onClick={() => setMoHuongDan((x) => !x)}
+          className="mt-2 min-h-[52px] w-full rounded-2xl border-2 border-[#2e1065] bg-white px-3 py-2 text-[15px] font-black leading-snug flex items-center justify-center gap-2">
+          <ShieldAlert size={19} className="shrink-0" aria-hidden="true" /><span>{chu('STOP_CONTACT')}</span>
+        </button>
+      )}
+      {moHuongDan && <div className="mt-2 rounded-xl bg-amber-50 p-3 text-[15px] leading-snug">
+        <p>{chu('STOP_CONTACT_HELP')}</p>
+        <p className="mt-1.5">{chu('STOP_CONTACT_DETAIL')}</p>
+        <button type="button" onClick={() => void saoChep(phanHoiCuoi, chu('RESPONSE_COPIED'))}
+          className="mt-3 min-h-[52px] rounded-xl border border-amber-900 bg-white px-3 py-2 font-bold">{chu('FINAL_NEUTRAL_REPLY')}</button>
+      </div>}
 
       {moBangChiaSe && <div className="mt-3 rounded-2xl border border-violet-300 bg-violet-50 p-3">
         <h3 className="text-[16px] font-black">{chu('EVIDENCE_TITLE')}</h3>
-        <p className="mt-1 text-[14px] leading-relaxed">{chu('EVIDENCE_PRIVACY')}</p>
-        <label className="mt-3 block text-[14px] font-bold">{chu('EVIDENCE_PREVIEW')}</label>
-        <textarea readOnly value={noiDungChiaSe} className="mt-1 min-h-36 w-full rounded-xl border border-violet-300 bg-white p-3 text-[14px] leading-relaxed" />
+        <p className="mt-1 text-[14px] leading-snug">{chu('EVIDENCE_PRIVACY')}</p>
+        <label className="sr-only" htmlFor="khoan-da-ban-xem-truoc">{chu('EVIDENCE_PREVIEW')}</label>
+        <textarea id="khoan-da-ban-xem-truoc" readOnly value={noiDungChiaSe} className="mt-2 min-h-28 w-full rounded-xl border border-violet-300 bg-white p-3 text-[14px] leading-snug" />
         <div className="mt-3 grid gap-2 sm:grid-cols-2">
           <button type="button" onClick={() => void chiaSe()} className="min-h-[54px] rounded-xl bg-violet-800 px-3 py-2 font-black text-white"><Share2 size={19} className="mr-2 inline" aria-hidden="true" />{chu('OPEN_SHARE_SHEET')}</button>
           {nguoiThan ? <button type="button" onClick={moTinNhanNguoiThan} className="min-h-[54px] rounded-xl border-2 border-[#2e1065] bg-white px-3 py-2 font-bold"><Phone size={19} className="mr-2 inline" aria-hidden="true" />{chu('OPEN_SAVED_CONTACT').replace('{ten}', nguoiThan.name)}</button>
             : <button type="button" onClick={() => setView('family')} className="min-h-[54px] rounded-xl border-2 border-[#2e1065] bg-white px-3 py-2 font-bold"><Phone size={19} className="mr-2 inline" aria-hidden="true" />{chu('OPEN_TRUSTED_CONTACTS')}</button>}
         </div>
       </div>}
-      {uuTienOtp && <p className="mt-3 rounded-xl bg-red-50 p-3 text-[16px] font-black text-red-900">{chu('OTP_REMINDER')}</p>}
       {bao && <p role="status" className="mt-3 rounded-xl bg-emerald-50 p-3 text-[14px] font-bold text-emerald-900"><Check size={18} className="mr-1 inline" aria-hidden="true" />{bao}</p>}
+    </>
+  );
+
+  return (
+    <section className="mt-4 rounded-[22px] border-2 border-[#2e1065] bg-white p-4 text-[#1e1b4b] shadow-[3px_3px_0_#2e1065]">
+      {laChuaThay ? (
+        <details>
+          <summary className="flex cursor-pointer items-center gap-2 text-[16px] font-black leading-snug">
+            <MessageSquareText size={22} aria-hidden="true" />{chu('IN_SITU_MORE')}
+          </summary>
+          {noiDung}
+        </details>
+      ) : (
+        <>
+          <div className="flex items-center gap-2">
+            <MessageSquareText size={22} aria-hidden="true" />
+            <h2 className="text-[18px] font-black leading-snug">{chu('IN_SITU_TITLE')}</h2>
+          </div>
+          {noiDung}
+        </>
+      )}
     </section>
   );
 }

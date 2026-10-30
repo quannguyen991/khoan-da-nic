@@ -38,7 +38,8 @@ test('màn gấp có biến heroGap: gấp + có kết quả + chưa ở luồng
 test('thứ tự trên màn gấp: câu lệnh → nút chính → (dòng AI, lý do, "chưa kiểm được")', () => {
   const iLenh = APP.indexOf('data-vai-tro="cau-lenh"');
   const iNut = APP.indexOf('{nutHanhDongGap}');
-  const iAi = APP.indexOf("t('AI đã trích ra các dấu hiệu. Mức rủi ro là do bộ luật cố định quyết định.')");
+  // Từ 30/10/2026 dòng AI nằm trong nếp gấp "Xem cách kiểm tra" (biến `khoiCachKiemTra`) — mốc là nếp gấp đó.
+  const iAi = APP.indexOf("t('Xem cách kiểm tra')");
   const iChuaKiem = APP.indexOf("t('Những thứ cháu CHƯA kiểm được')");
   assert.ok(iLenh > 0 && iNut > 0 && iAi > 0 && iChuaKiem > 0, 'thiếu một mốc — đổi chữ thì sửa cả test');
   assert.ok(iLenh < iNut, 'câu lệnh phải đứng ngay trên nút');
@@ -48,7 +49,8 @@ test('thứ tự trên màn gấp: câu lệnh → nút chính → (dòng AI, l�
 test('câu để bác nói với người gọi: dưới nút gọi, dạng điều kiện, ngắn, có ở cả hai catalog', () => {
   const iNut = APP.indexOf('{nutHanhDongGap}');
   const iCau = APP.indexOf('data-vai-tro="cau-noi-voi-nguoi-goi"');
-  const iAi = APP.indexOf("t('AI đã trích ra các dấu hiệu. Mức rủi ro là do bộ luật cố định quyết định.')");
+  // Từ 30/10/2026 dòng AI nằm trong nếp gấp "Xem cách kiểm tra" (biến `khoiCachKiemTra`) — mốc là nếp gấp đó.
+  const iAi = APP.indexOf("t('Xem cách kiểm tra')");
   assert.ok(iCau > 0, 'thiếu câu để bác nói với người gọi');
   assert.ok(iNut < iCau && iCau < iAi, 'câu nói đứng SAU nút gọi (hành động trước, chữ sau) và trước khối giải thích');
   const khoi = APP.slice(iCau, iCau + 600);
