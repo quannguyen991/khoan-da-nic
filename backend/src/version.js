@@ -15,7 +15,12 @@ module.exports = {
                                //   FIN_ACCOUNT_OPENING_FOR_OTHERS, CRED_ID_BIOMETRIC_DOCS,
                                //   DEV_SIM_SWAP_ESIM (người dùng duyệt)
                                // 1.2.0 (24/9/2026): 64 — thêm MAN_HEALTH_MIRACLE_CLAIM
-  RULE_VERSION: '1.6.4',       // cap nhóm + 26 cộng hưởng + 1 suy ra + 20/45/69, Phụ lục B
+  RULE_VERSION: '1.6.5',       // cap nhóm + 26 cộng hưởng + 1 suy ra + 20/45/69, Phụ lục B
+                               // 1.6.5 (21/11/2026): mẫu cố định từ bộ `eval/bao-chi` (31 tin lừa có thật
+                               //   do báo chí trích) — phạt nguội, "nếu không phải bạn thì bấm link"/link
+                               //   đổi mật khẩu, huỷ dịch vụ (nhận cả https://, www), doạ mất lương hưu,
+                               //   "trong 3 giờ". Bộ kiểm dấu bỏ qua chỗ che "[…]". Không đổi trọng số,
+                               //   ngưỡng, tổ hợp. vi-VN@1.3.1. Bộ bao-chi từ nay là bộ hồi quy.
                                // 1.6.4 (30/10/2026): mẫu cố định cho kịch bản 2026 bộ chính còn mỏng —
                                //   nhập OTP trên link, nạp số có dấu ngăn nghìn, nộp lệ phí qua link,
                                //   doạ "sắp bị khoá/đình chỉ" tài khoản định danh/SIM/ví, giả con ở đồn

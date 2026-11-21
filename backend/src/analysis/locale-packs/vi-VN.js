@@ -18,7 +18,8 @@
 module.exports = {
   locale: 'vi-VN',
   language: 'vi',
-  localePackVersion: 'vi-VN@1.3.0',   // 1.3.0 (30/10/2026): mẫu kịch bản 2026 — OTP trên link, lệ phí qua link,
+  localePackVersion: 'vi-VN@1.3.1',   // 1.3.1 (21/11/2026): phạt nguội, SMS 'nếu không phải bạn bấm link', doạ mất lương hưu
+                                        // 1.3.0 (30/10/2026): mẫu kịch bản 2026 — OTP trên link, lệ phí qua link,
                                       //   doạ khoá/đình chỉ định danh, giả con ở đồn công an, đầu tư "nội bộ"
                                       // 1.2.1 (24/9/2026): lời kể lại "ngân hàng bảo chuyển", "không thì TK bị khoá"
                                       // 1.2.0 (25/9/2026): mẫu cố định cho tín hiệu AI hay bỏ
@@ -113,6 +114,15 @@ module.exports = {
       { pattern: '(mở|vào|truy cập|bấm|nhấn)\\s*(vào\\s*)?\\[?\\s*(đường dẫn|đường link|link|liên kết)[^.]{0,30}(để\\s+)?đăng nhập', scope: 'action' },
       { pattern: '(link|đường dẫn|liên kết)[^.]{0,20}(nhập|điền)[^.]{0,16}(thông tin\\s+(ngân hàng|tài khoản|thẻ)|tài khoản ngân hàng)', scope: 'action' },
       /*
+       * 21/11/2026 (luật 1.6.5) — bộ `eval/bao-chi`: 31 tin lừa có thật do báo chí trích.
+       * SMS giả ngân hàng / ví: "tài khoản của bạn đã mở dịch vụ, phí 3,6 triệu sẽ bị trừ; nếu
+       * không phải bạn vui lòng nhấn vào [liên kết]", "… vào [liên kết] để sửa đổi mật khẩu".
+       * Ngân hàng thật bảo gọi tổng đài, không gửi liên kết để huỷ dịch vụ hay đổi mật khẩu.
+       */
+      { pattern: 'nếu không phải\\s+(bạn|quý khách|anh|chị|ông|bà)[^.]{0,50}(vào|ấn|bấm|nhấn|truy cập|mở)\\s*(vào\\s*)?(\\[\\s*)?(đường dẫn|đường link|link|liên kết|https?:|www)', scope: 'any' },
+      { pattern: '(vào|ấn|bấm|nhấn|truy cập|mở)\\s*(vào\\s*)?(\\[\\s*)?(đường dẫn|đường link|link|liên kết|https?:|www)[^.]{0,40}(sửa đổi mật khẩu|đổi mật khẩu|thoát khỏi thiết bị|(hủy|huỷ)\\s+(dịch vụ|đăng ký|gói))', scope: 'any' },
+      { pattern: '(vào|ấn|bấm|nhấn|truy cập|mở)\\s*(vào\\s*)?(\\[\\s*)?(đường dẫn|đường link|link|liên kết|https?:|www)[^.]{0,30}kiểm tra hoặc (hủy|huỷ)', scope: 'any' },
+      /*
        * 30/10/2026 — NHẬP OTP / MÃ XÁC MINH NGAY TRÊN MỘT ĐƯỜNG LINK. Đo trên bộ `mo-rong`:
        * "Truy cập vneid-xacthuc.top, nhập số CCCD và mã OTP", "Nhập mã OTP vừa gửi và mật
        * khẩu tại đường link để mở khoá ví", "Đăng nhập tại link, nhập mật khẩu và mã xác minh
@@ -197,6 +207,13 @@ module.exports = {
       { pattern: 'thanh toán[^.]{0,24}(tại|qua|theo|vào)\\s*\\[?\\s*(đường dẫn|đường link|link|liên kết)', scope: 'action' },
       { pattern: 'thanh toán\\s+((hộ|giúp|trước)\\s+)?\\d+([.,]\\d+)?\\s*(đ|k|tr|triệu|đồng|nghìn)(?![a-zà-ỹ])', scope: 'action' },
       { pattern: 'bổ sung\\s+(thêm\\s+)?(vốn|tiền|số dư|ký quỹ)', scope: 'action' },
+      /*
+       * 21/11/2026 (luật 1.6.5) — bộ `eval/bao-chi`: 31 tin lừa có thật do báo chí trích.
+       * "Vui lòng thanh toán sớm để tránh các khoản phí phạt phát sinh", "chưa thanh toán khoản
+       * phạt … mức phạt tăng thêm 50%". Phạt giao thông thật nộp qua Cổng dịch vụ công hoặc kho
+       * bạc, không qua tin nhắn đòi "thanh toán".
+       */
+      { pattern: 'thanh toán[^.]{0,30}(khoản phạt|tiền phạt|phí phạt|phạt giao thông|phạt nguội)', scope: 'any' },
       { pattern: '(thanh toán|nộp|đóng|chuyển)[^.]{0,20}(?<!học )(?<!viện )phí[^.]{0,40}trước khi\\s+(nhận|được|giải ngân|rút)', scope: 'action' },
       /*
        * 30/10/2026 — hai cách đòi tiền mà bộ luật chưa thấy (đo trên bộ `mo-rong`):
@@ -448,6 +465,14 @@ module.exports = {
        */
       { pattern: '(công an|cảnh sát|điều tra viên|viện kiểm sát|toà án)(?:(?!không|chẳng|đừng|chớ)[^.]){0,26}(gọi|gọi điện|nhắn|báo|yêu cầu|thông báo|bảo)', scope: 'any' },
       { pattern: '(gọi|nhắn|điện)(?:(?!không|chẳng)[^.]){0,18}(từ|của|xưng là|tự xưng)[^.]{0,12}(công an|cảnh sát|viện kiểm sát|toà án)', scope: 'any' },
+      /*
+       * 21/11/2026 (luật 1.6.5) — bộ `eval/bao-chi`: 31 tin lừa có thật do báo chí trích.
+       * "Phương tiện của quý khách bị ghi nhận vi phạm…", "Quý khách còn một khoản phạt giao
+       * thông chưa thanh toán" — tin PHẠT NGUỘI giả; cả 4 mẫu ra CHUA_THAY. Thông báo phạt thật
+       * (VNeID, CSGT) cũng nói "phương tiện vi phạm", nên một mình chỉ 10 điểm, dưới ngưỡng 20.
+       */
+      { pattern: '(phương tiện|biển số|biển kiểm soát)[^.]{0,50}(vi phạm|phạt nguội)', scope: 'any' },
+      { pattern: '(khoản|tiền)\\s+phạt\\s+(giao thông|vi phạm|nguội)', scope: 'any' },
     ],
     ID_TAX_BENEFIT_IMPERSONATION: [
       /*
@@ -460,6 +485,13 @@ module.exports = {
       { pattern: '\\b(bảo hiểm xã hội|trợ cấp nhà nước)\\b', scope: 'any' },
     ],
     ID_BANK_IMPERSONATION: [
+      /*
+       * 21/11/2026 (luật 1.6.5) — bộ `eval/bao-chi`: 31 tin lừa có thật do báo chí trích.
+       * "Tài khoản của quý khách đã đăng ký chương trình…", "Tài khoản của bạn đã mở dịch vụ…",
+       * "đang được đăng nhập trên thiết bị khác". Một mình 8 điểm; chỉ nâng mức khi đi cùng liên
+       * kết đổi mật khẩu / huỷ dịch vụ (CRED_BANK_LOGIN).
+       */
+      { pattern: '(tài khoản|tk)\\s+(của\\s+)?(quý khách|bạn)[^.]{0,20}(đã|đang)\\s+(được\\s+)?(đăng ký|mở|đăng nhập|kích hoạt)', scope: 'any' },
       { pattern: '(tôi là|đây là)[^.]{0,26}(nhân viên|cán bộ)[^.]{0,16}ngân hàng', scope: 'any' },
       { pattern: '(vietcombank|bidv|vietinbank|techcombank|agribank)\\b[^.]{0,26}(thông báo|yêu cầu)', scope: 'any' },
       /*
@@ -598,6 +630,14 @@ module.exports = {
       { pattern: '(risk_?label|risk level)[^.]{0,12}(=|:)?[^.]{0,10}(safe|low)', scope: 'any' },
     ],
     MAN_FEAR_THREAT: [
+      /*
+       * 21/11/2026 (luật 1.6.5) — bộ `eval/bao-chi`: 31 tin lừa có thật do báo chí trích.
+       * Phạt nguội giả doạ "mức phạt sẽ tăng thêm 50%", "tạm giữ giấy tờ phương tiện"; BHXH giả
+       * doạ "không nhận được lương hưu". Một mình 12 điểm, dưới ngưỡng 20.
+       */
+      { pattern: '(mức phạt|tiền phạt|khoản phạt)[^.]{0,20}(sẽ\\s+)?tăng\\s+(thêm\\s+)?\\d+\\s*%', scope: 'khong_canh_bao' },
+      { pattern: 'tạm giữ\\s+(giấy tờ|phương tiện|bằng lái|giấy phép lái xe)', scope: 'khong_canh_bao' },
+      { pattern: '(không nhận được|gián đoạn|dừng chi trả|ngừng chi trả)[^.]{0,30}(lương hưu|trợ cấp|chế độ bảo hiểm)', scope: 'khong_canh_bao' },
       { pattern: '(bắt giữ|bị bắt|khởi tố|truy tố|phong toả|tạm giam)', scope: 'any' },
       { pattern: '\\b(rửa tiền|cắt trợ cấp|liên quan.{0,12}vụ án)\\b', scope: 'any' },
       /*
@@ -632,6 +672,8 @@ module.exports = {
     ],
     MAN_URGENCY: [
       { pattern: '\\b(ngay|gấp|lập tức|khẩn|trong vòng \\d+)\\b', scope: 'action' },
+      // 21/11/2026 (luật 1.6.5) — "phí sẽ bị trừ trong 3 giờ", "sẽ bị khoá sau 2 giờ nữa". 7 điểm.
+      { pattern: '(trong|sau)\\s+\\d+\\s*(giờ|tiếng|phút)(\\s+nữa)?(?![a-zà-ỹ])', scope: 'any' },
     ],
     MAN_KEEP_CALL_ACTIVE: [
       { pattern: '(giữ máy|đừng tắt máy|không được tắt máy)', scope: 'any' },

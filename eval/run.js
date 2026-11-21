@@ -40,7 +40,7 @@ const gioiHan = soCo('--gioi-han', null);
  * Nhãn do máy gán, chưa người duyệt; luật được chỉnh sau khi nhìn bộ này nên đây là số HỒI QUY,
  * không phải số độc lập. Không vào `latest.json`.
  */
-const BO_RIENG = { 'doi-chung': 'doi-chung', 'mau-that': 'mau-that', 'mo-rong': 'mo-rong' };
+const BO_RIENG = { 'doi-chung': 'doi-chung', 'mau-that': 'mau-that', 'mo-rong': 'mo-rong', 'kiem-moi': 'kiem-moi', 'bao-chi': 'bao-chi' };
 const iBo = process.argv.indexOf('--bo');
 const tenBo = iBo > 0 ? process.argv[iBo + 1] : null;
 if (tenBo && !BO_RIENG[tenBo]) {

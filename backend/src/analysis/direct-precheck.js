@@ -206,7 +206,13 @@ function bienDich(src) {
 
 function khopBoDauDungCho(normalized, chuoi, start, end) {
   if (chuoi.length !== normalized.length) return true;   // không đồng chỉ số: không xét
-  const doanGoc = normalized.slice(start, end);
+  /*
+   * 21/11/2026 (luật 1.6.5): BỎ QUA CHỖ CHE TRONG NGOẶC VUÔNG. Tin không dấu có chỗ che
+   * "[liên kết đã ẩn]" (người dùng tự che, hoặc mẫu báo chí trong `eval/bao-chi`) bị coi là
+   * "bỏ dấu đè lên chữ có dấu" chỉ vì chữ trong ngoặc có dấu — "vui long nhan vao [liên kết
+   * đã ẩn] de huy" mất cả tín hiệu. Chữ trong ngoặc không phải lời kẻ gian nên không xét.
+   */
+  const doanGoc = normalized.slice(start, end).replace(/\[[^\]]{0,40}(\]|$)/g, '');
   return boDau(doanGoc) === doanGoc;
 }
 

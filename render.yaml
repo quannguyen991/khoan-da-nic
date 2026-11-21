@@ -250,8 +250,12 @@ services:
       # ⚠️ ĐỪNG ĐO LẠI qwen bằng lát nhỏ rồi kết luận nó tốt hơn. Lát 40 mẫu đầu
       # của bộ dữ liệu toàn mẫu nguy hiểm; muốn so thì phải chạy cả bộ.
 
+      # ══════ 21/11/2026 — 0731 CŨNG BỊ GỠ (503 model_not_found) ══════
+      # Không còn lựa chọn giữ 0731. Đổi sang qwen3.8-flash. Đo cả bộ 531 mẫu,
+      # luật 1.6.4: báo đỏ 81,9%, báo đỏ nhầm 4,7%; bộ ngoài mẫu eval/kiem-moi:
+      # 37/40 báo đỏ, 0/30 báo nhầm. Lát không dấu vẫn là điểm yếu đã biết.
       - key: RISK_LLM_MODEL
-        value: deepseek-v4-flash-0731
+        value: qwen3.8-flash
       # ── Dự phòng 1: qwen trên máy chủ tự vận hành ──
       #
       # ⚠️ ĐỨNG TRƯỚC GEMINI DÙ BẮT ÍT HƠN MỘT CA (4/5 so với 5/5).
