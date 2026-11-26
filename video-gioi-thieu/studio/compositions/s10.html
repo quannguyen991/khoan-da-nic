@@ -1,0 +1,46 @@
+<template>
+<link rel="stylesheet" href="assets/kd.css">
+<style>#root{position:absolute;inset:0;overflow:hidden}</style>
+<div id="root" data-composition-id="s10" data-width="1920" data-height="1080">
+<div id="s10-wrap" class="wrap">
+<div id="s10-h" class="t" style="position:absolute;left:200px;top:100px;font-size:70px">Around the <span class="hl">pause</span></div><div id="s10-pb" class="phone" style="left:200px;top:220px"><div class="screen" style="width:296px;height:640px"><div id="s10-pb-in" style="position:absolute;left:0;top:0;width:296px;height:640px;transform-origin:0 0"><img id="s10-pb-i0" src="assets/screens/11-bank-hotlines.jpg" style="opacity:1"></div><div id="s10-pb-sh" class="sheen"></div></div></div><div id="s10-cb" class="abs" style="left:560px;top:290px;width:420px"><div class="t" style="font-size:58px">Official bank numbers.</div><div class="t thin" style="font-size:36px;margin-top:14px;color:#3a3560">Source and date on every line.</div></div><div id="s10-h72" class="abs" style="left:560px;top:560px;width:460px"><div class="t" style="font-size:54px">72-hour watch</div><div class="label" style="font-size:28px;font-weight:600;color:#8a3a00;margin-top:6px">Placeholder — capture real screen</div><div style="position:relative;height:26px;border-radius:14px;background:rgba(255,255,255,.55);margin-top:26px;overflow:hidden"><div id="s10-b72" style="height:100%;width:100%;border-radius:14px;background:linear-gradient(90deg,#8f6dff,#e86bff);transform-origin:0 50%"></div></div><div class="label" style="display:flex;justify-content:space-between;font-size:28px;font-weight:500;color:#3a3560;margin-top:12px"><span>Transfer</span><span>24 h</span><span>48 h</span><span>72 h</span></div></div><div id="s10-pf" class="phone" style="left:1080px;top:220px"><div class="screen" style="width:296px;height:640px"><div id="s10-pf-in" style="position:absolute;left:0;top:0;width:296px;height:640px;transform-origin:0 0"><img id="s10-pf-i0" src="assets/screens/10-family-loved-ones.jpg" style="opacity:1"></div><div id="s10-pf-sh" class="sheen"></div></div></div><div id="s10-cf" class="abs" style="left:1440px;top:300px;width:290px"><div class="t" style="font-size:58px">Family one tap away.</div></div><svg id="s10-sp1" class="sp" style="left:1700px;top:180px;width:48px;height:48px;opacity:0" viewBox="0 0 24 24"><path fill="#ffffff" d="M12 0C12 7 17 12 24 12C17 12 12 17 12 24C12 17 7 12 0 12C7 12 12 7 12 0Z"/></svg><svg id="s10-sp2" class="sp" style="left:1030px;top:880px;width:40px;height:40px;opacity:0" viewBox="0 0 24 24"><path fill="#ffd3f6" d="M12 0C12 7 17 12 24 12C17 12 12 17 12 24C12 17 7 12 0 12C7 12 12 7 12 0Z"/></svg>
+<div id="s10-leak" class="leak" style="opacity:0"></div>
+</div></div>
+<script>
+
+const master = gsap.timeline({ paused: true });
+const tl = gsap.timeline();
+master.add(tl, 0);
+tl.timeScale(1.1431);
+const Q = s => document.querySelector(s);
+const QA = s => [...document.querySelectorAll(s)];
+function split(sel){const el=Q(sel);const txt=el.textContent;el.textContent='';const out=[];
+  txt.split(' ').forEach((w,i,a)=>{const W=document.createElement('span');W.className='w';
+    [...w].forEach(c=>{const s=document.createElement('span');s.className='ch';s.textContent=c;W.appendChild(s);out.push(s)});
+    el.appendChild(W);if(i<a.length-1)el.appendChild(document.createTextNode(' '))});return out}
+function count(sel,from,to,t,dur,fmt,ease){const o={v:from};Q(sel).textContent=fmt(from);
+  tl.to(o,{v:to,duration:dur,ease:ease||'power3.out',onUpdate:()=>{Q(sel).textContent=fmt(o.v)}},t)}
+function twinkle(sel,t,hold){tl.fromTo(sel,{scale:0,rotation:-70,opacity:0},{scale:1,rotation:0,opacity:1,duration:.55,ease:'back.out(2.2)'},t);
+  tl.to(sel,{scale:0,rotation:70,opacity:0,duration:.7,ease:'power2.in'},t+(hold||.9))}
+function rise(sel,t,o){o=o||{};tl.fromTo(sel,{opacity:0,y:o.y||60,scale:o.s||1,filter:'blur(16px)'},{opacity:1,y:0,scale:1,filter:'blur(0px)',duration:o.d||.9,ease:o.e||'power3.out',stagger:o.st||0},t)}
+function flipChars(sel,t,o){o=o||{};const els=split(sel);
+  tl.fromTo(els,{opacity:0,rotationX:-100,y:60,transformPerspective:800,transformOrigin:'50% 100%'},{opacity:1,rotationX:0,y:0,duration:o.d||.8,ease:'back.out(1.6)',stagger:o.st||.035},t)}
+function flipEl(sel,t,o){o=o||{};tl.fromTo(sel,{opacity:0,rotationX:-80,y:60,transformPerspective:900,transformOrigin:'50% 100%'},{opacity:1,rotationX:0,y:0,duration:o.d||.9,ease:'back.out(1.5)'},t)}
+function sheen(sel,t){tl.fromTo(sel,{x:0},{x:1300,duration:1.3,ease:'power2.inOut',immediateRender:false},t)}
+
+tl.fromTo('#s10-wrap',{opacity:0,filter:'blur(14px)'},{opacity:1,filter:'blur(0px)',duration:0.82,ease:'power2.out'},0.12);tl.fromTo('#s10-leak',{x:-1100},{x:2500,duration:1.34,ease:'power2.inOut'},0);tl.fromTo('#s10-leak',{opacity:0},{opacity:1,duration:0.41,ease:'power1.out'},0);tl.to('#s10-leak',{opacity:0,duration:0.51,ease:'power1.in'},0.67);
+
+rise('#s10-h',.5,{y:30,d:.7});
+tl.fromTo('#s10-pb',{y:220,opacity:0,rotationY:-40,transformPerspective:1500},{y:0,opacity:1,rotationY:-8,duration:1.1,ease:'expo.out'},.8); sheen('#s10-pb-sh',1.6);
+flipEl('#s10-cb',1.4,{d:.9});
+tl.fromTo('#s10-pf',{y:220,opacity:0,rotationY:40,transformPerspective:1500},{y:0,opacity:1,rotationY:8,duration:1.1,ease:'expo.out'},3.0); sheen('#s10-pf-sh',3.8);
+flipEl('#s10-cf',3.6,{d:.9});
+flipEl('#s10-h72',5.2,{d:.9});
+tl.fromTo('#s10-b72',{scaleX:0},{scaleX:1,duration:2.4,ease:'power2.inOut'},5.7);
+tl.to('#s10-pb',{y:-12,duration:2.0,yoyo:true,repeat:1,ease:'sine.inOut'},3.0);
+twinkle('#s10-sp1',4.0); twinkle('#s10-sp2',6.6);
+
+tl.to('#s10-wrap',{opacity:0,filter:'blur(18px)',scale:.97,duration:1.03,ease:'power2.in'},9.40);
+window.__timelines['s10'] = master;
+</script>
+</template>

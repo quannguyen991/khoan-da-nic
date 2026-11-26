@@ -1,0 +1,43 @@
+<template>
+<link rel="stylesheet" href="assets/kd.css">
+<style>#root{position:absolute;inset:0;overflow:hidden}</style>
+<div id="root" data-composition-id="s12" data-width="1920" data-height="1080">
+<div id="s12-wrap" class="wrap">
+<div id="s12-m0" class="t thin" style="position:absolute;left:200px;top:140px;font-size:42px;color:#3a3560">Industry fit · banking and fintech</div><div id="s12-m1" class="t" style="position:absolute;left:200px;top:205px;width:760px;font-size:100px">A warning layer before <span class="hl">Confirm.</span></div><div id="s12-m2" class="label" style="position:absolute;left:200px;top:560px;font-size:28px;font-weight:600;color:#8a3a00">Concept sketch — not a real bank screen.</div><div id="s12-bk" class="cardl abs" style="left:1010px;top:170px;width:700px;height:500px;padding:40px;overflow:hidden"><div class="label" style="font-size:32px;font-weight:600;color:#4b4670">Transfer</div><div class="label" style="font-size:28px;color:#6b6592;margin-top:18px">To · new beneficiary</div><div class="t" style="font-size:72px;margin:6px 0 26px">50,000,000 ₫</div><div data-layout-allow-overlap style="height:84px;border-radius:20px;background:#141032;color:#fff;font-size:38px;font-weight:600;display:flex;align-items:center;justify-content:center;font-family:Outfit">Confirm transfer</div><div id="s12-ov" data-layout-allow-overlap style="position:absolute;left:0;top:0;width:100%;height:100%;background:#f9f7ff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px"><svg width="150" height="150" viewBox="0 0 320 320"><defs><linearGradient id="s12-og" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#b99bff"/><stop offset="1" stop-color="#f08bff"/></linearGradient></defs><rect x="62" y="52" width="78" height="216" rx="39" fill="url(#s12-og)"/><rect x="180" y="52" width="78" height="216" rx="39" fill="url(#s12-og)"/></svg><div class="t" style="font-size:56px">Pause. Verify.</div><div class="label" style="font-size:32px;color:#4b4670">Someone you trust can look first.</div></div></div><div id="s12-l1" class="abs" style="left:200px;top:700px;width:700px"><div class="label" style="font-size:30px;font-weight:600;color:#5a2cc4">Lean by design</div><div class="t mid" style="font-size:40px;line-height:1.15;margin-top:4px">Rules run first, so fewer AI calls.</div><div class="label" style="font-size:28px;font-weight:600;color:#8a3a00;margin-top:6px">design intent · not yet measured</div></div><div id="s12-l2" class="abs" style="left:1010px;top:700px;width:700px"><div class="label" style="font-size:30px;font-weight:600;color:#5a2cc4">Local-first</div><div class="t mid" style="font-size:40px;line-height:1.15;margin-top:4px">Contacts and rules stay on the device.</div></div><svg id="s12-sp1" class="sp" style="left:920px;top:160px;width:50px;height:50px;opacity:0" viewBox="0 0 24 24"><path fill="#ffffff" d="M12 0C12 7 17 12 24 12C17 12 12 17 12 24C12 17 7 12 0 12C7 12 12 7 12 0Z"/></svg><svg id="s12-sp2" class="sp" style="left:1690px;top:700px;width:40px;height:40px;opacity:0" viewBox="0 0 24 24"><path fill="#ffd3f6" d="M12 0C12 7 17 12 24 12C17 12 12 17 12 24C12 17 7 12 0 12C7 12 12 7 12 0Z"/></svg>
+
+</div></div>
+<script>
+
+const master = gsap.timeline({ paused: true });
+const tl = gsap.timeline();
+master.add(tl, 0);
+tl.timeScale(0.9921);
+const Q = s => document.querySelector(s);
+const QA = s => [...document.querySelectorAll(s)];
+function split(sel){const el=Q(sel);const txt=el.textContent;el.textContent='';const out=[];
+  txt.split(' ').forEach((w,i,a)=>{const W=document.createElement('span');W.className='w';
+    [...w].forEach(c=>{const s=document.createElement('span');s.className='ch';s.textContent=c;W.appendChild(s);out.push(s)});
+    el.appendChild(W);if(i<a.length-1)el.appendChild(document.createTextNode(' '))});return out}
+function count(sel,from,to,t,dur,fmt,ease){const o={v:from};Q(sel).textContent=fmt(from);
+  tl.to(o,{v:to,duration:dur,ease:ease||'power3.out',onUpdate:()=>{Q(sel).textContent=fmt(o.v)}},t)}
+function twinkle(sel,t,hold){tl.fromTo(sel,{scale:0,rotation:-70,opacity:0},{scale:1,rotation:0,opacity:1,duration:.55,ease:'back.out(2.2)'},t);
+  tl.to(sel,{scale:0,rotation:70,opacity:0,duration:.7,ease:'power2.in'},t+(hold||.9))}
+function rise(sel,t,o){o=o||{};tl.fromTo(sel,{opacity:0,y:o.y||60,scale:o.s||1,filter:'blur(16px)'},{opacity:1,y:0,scale:1,filter:'blur(0px)',duration:o.d||.9,ease:o.e||'power3.out',stagger:o.st||0},t)}
+function flipChars(sel,t,o){o=o||{};const els=split(sel);
+  tl.fromTo(els,{opacity:0,rotationX:-100,y:60,transformPerspective:800,transformOrigin:'50% 100%'},{opacity:1,rotationX:0,y:0,duration:o.d||.8,ease:'back.out(1.6)',stagger:o.st||.035},t)}
+function flipEl(sel,t,o){o=o||{};tl.fromTo(sel,{opacity:0,rotationX:-80,y:60,transformPerspective:900,transformOrigin:'50% 100%'},{opacity:1,rotationX:0,y:0,duration:o.d||.9,ease:'back.out(1.5)'},t)}
+function sheen(sel,t){tl.fromTo(sel,{x:0},{x:1300,duration:1.3,ease:'power2.inOut',immediateRender:false},t)}
+
+tl.fromTo('#s12-wrap',{opacity:0,filter:'blur(26px)',scale:1.07},{opacity:1,filter:'blur(0px)',scale:1,duration:0.89,ease:'power2.out'},0);
+
+rise('#s12-m0',.5,{y:24,d:.6}); flipEl('#s12-m1',.8,{d:1.0}); rise('#s12-m2',1.6,{y:16,d:.6});
+tl.fromTo('#s12-m1 .hl',{backgroundPosition:'0% 0'},{backgroundPosition:'100% 0',duration:2.4,ease:'sine.inOut'},1.0);
+tl.fromTo('#s12-bk',{opacity:0,y:90,scale:.92,rotationY:-30,rotationX:8,transformPerspective:1400},{opacity:1,y:0,scale:1,rotationY:-6,rotationX:0,duration:1.0,ease:'expo.out'},.8);
+tl.fromTo('#s12-ov',{y:520},{y:0,duration:.8,ease:'power3.out'},2.4);
+rise('#s12-l1',3.4,{y:40,d:.7}); rise('#s12-l2',4.0,{y:40,d:.7});
+twinkle('#s12-sp1',2.9); twinkle('#s12-sp2',4.6);
+
+tl.to('#s12-wrap',{opacity:0,filter:'blur(18px)',scale:.97,duration:0.89,ease:'power2.in'},7.20);
+window.__timelines['s12'] = master;
+</script>
+</template>

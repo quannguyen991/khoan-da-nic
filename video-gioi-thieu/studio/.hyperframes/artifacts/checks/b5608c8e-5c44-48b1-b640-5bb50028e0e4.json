@@ -1,0 +1,1317 @@
+{
+  "ok": true,
+  "strict": false,
+  "browserSkipped": false,
+  "lint": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 0,
+    "infoCount": 0,
+    "findings": [],
+    "filesScanned": 48
+  },
+  "runtime": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 0,
+    "infoCount": 0,
+    "findings": []
+  },
+  "layout": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 0,
+    "infoCount": 30,
+    "findings": [
+      {
+        "code": "content_overlap",
+        "severity": "info",
+        "time": 5.05,
+        "selector": "#c01-call > div:nth-of-type(2)",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 1317.38,
+          "top": 498.61,
+          "right": 1666.84,
+          "bottom": 552.81,
+          "width": 349.46,
+          "height": 54.2
+        },
+        "containerSelector": "#c02-n",
+        "text": "Unknown number",
+        "fixHint": "Give each block its own zone, or put data-layout-allow-overlap on the text or on a container inside the scene. A marker on the scene root does not apply.",
+        "dataAttributes": {},
+        "sourceFile": "compositions/c01.html",
+        "bbox": {
+          "x": 1317.38,
+          "y": 498.61,
+          "width": 349.46,
+          "height": 54.2
+        },
+        "firstSeen": 5.05,
+        "lastSeen": 5.05,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          5.05
+        ]
+      },
+      {
+        "code": "content_overlap",
+        "severity": "info",
+        "time": 5.05,
+        "selector": "#c01-call > div:nth-of-type(3)",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 1446.08,
+          "top": 558.72,
+          "right": 1575.6,
+          "bottom": 603.07,
+          "width": 129.52,
+          "height": 44.35
+        },
+        "containerSelector": "#c02-n",
+        "text": "calling…",
+        "fixHint": "Give each block its own zone, or put data-layout-allow-overlap on the text or on a container inside the scene. A marker on the scene root does not apply.",
+        "dataAttributes": {},
+        "sourceFile": "compositions/c01.html",
+        "bbox": {
+          "x": 1446.08,
+          "y": 558.72,
+          "width": 129.52,
+          "height": 44.35
+        },
+        "firstSeen": 5.05,
+        "lastSeen": 5.05,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          5.05
+        ]
+      },
+      {
+        "code": "content_overlap",
+        "severity": "info",
+        "time": 5.05,
+        "selector": "#c01-l1",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 211.1,
+          "top": 281.83,
+          "right": 1142.58,
+          "bottom": 420.77,
+          "width": 931.48,
+          "height": 138.94
+        },
+        "containerSelector": "#c02-n",
+        "text": "“This is the police.”",
+        "fixHint": "Give each block its own zone, or put data-layout-allow-overlap on the text or on a container inside the scene. A marker on the scene root does not apply.",
+        "dataAttributes": {},
+        "sourceFile": "compositions/c01.html",
+        "bbox": {
+          "x": 211.1,
+          "y": 281.83,
+          "width": 931.48,
+          "height": 138.94
+        },
+        "firstSeen": 5.05,
+        "lastSeen": 5.05,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          5.05
+        ]
+      },
+      {
+        "code": "content_overlap",
+        "severity": "info",
+        "time": 5.05,
+        "selector": "#c01-l2 > span:nth-of-type(1) > span:nth-of-type(2)",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 262.43,
+          "top": 397.7,
+          "right": 343.22,
+          "bottom": 536.64,
+          "width": 80.79,
+          "height": 138.94
+        },
+        "containerSelector": "#c02-n",
+        "text": "D",
+        "fixHint": "Give each block its own zone, or put data-layout-allow-overlap on the text or on a container inside the scene. A marker on the scene root does not apply.",
+        "dataAttributes": {},
+        "sourceFile": "compositions/c01.html",
+        "bbox": {
+          "x": 262.43,
+          "y": 397.7,
+          "width": 80.79,
+          "height": 138.94
+        },
+        "firstSeen": 5.05,
+        "lastSeen": 5.05,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          5.05
+        ]
+      },
+      {
+        "code": "content_overlap",
+        "severity": "info",
+        "time": 5.05,
+        "selector": "#c01-l2 > span:nth-of-type(1) > span:nth-of-type(3)",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 343.22,
+          "top": 397.7,
+          "right": 404.37,
+          "bottom": 536.64,
+          "width": 61.15,
+          "height": 138.94
+        },
+        "containerSelector": "#c02-n",
+        "text": "o",
+        "fixHint": "Give each block its own zone, or put data-layout-allow-overlap on the text or on a container inside the scene. A marker on the scene root does not apply.",
+        "dataAttributes": {},
+        "sourceFile": "compositions/c01.html",
+        "bbox": {
+          "x": 343.22,
+          "y": 397.7,
+          "width": 61.15,
+          "height": 138.94
+        },
+        "firstSeen": 5.05,
+        "lastSeen": 5.05,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          5.05
+        ]
+      },
+      {
+        "code": "content_overlap",
+        "severity": "info",
+        "time": 5.05,
+        "selector": "#c01-l2 > span:nth-of-type(2) > span:nth-of-type(1)",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 430.64,
+          "top": 397.7,
+          "right": 491.35,
+          "bottom": 536.64,
+          "width": 60.71,
+          "height": 138.94
+        },
+        "containerSelector": "#c02-n",
+        "text": "n",
+        "fixHint": "Give each block its own zone, or put data-layout-allow-overlap on the text or on a container inside the scene. A marker on the scene root does not apply.",
+        "dataAttributes": {},
+        "sourceFile": "compositions/c01.html",
+        "bbox": {
+          "x": 430.64,
+          "y": 397.7,
+          "width": 60.71,
+          "height": 138.94
+        },
+        "firstSeen": 5.05,
+        "lastSeen": 5.05,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          5.05
+        ]
+      },
+      {
+        "code": "content_overlap",
+        "severity": "info",
+        "time": 5.05,
+        "selector": "#c01-l2 > span:nth-of-type(2) > span:nth-of-type(2)",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 491.35,
+          "top": 397.7,
+          "right": 552.51,
+          "bottom": 536.64,
+          "width": 61.16,
+          "height": 138.94
+        },
+        "containerSelector": "#c02-n",
+        "text": "o",
+        "fixHint": "Give each block its own zone, or put data-layout-allow-overlap on the text or on a container inside the scene. A marker on the scene root does not apply.",
+        "dataAttributes": {},
+        "sourceFile": "compositions/c01.html",
+        "bbox": {
+          "x": 491.35,
+          "y": 397.7,
+          "width": 61.16,
+          "height": 138.94
+        },
+        "firstSeen": 5.05,
+        "lastSeen": 5.05,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          5.05
+        ]
+      },
+      {
+        "code": "content_overlap",
+        "severity": "info",
+        "time": 5.05,
+        "selector": "#c01-l2 > span:nth-of-type(2) > span:nth-of-type(3)",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 552.51,
+          "top": 397.7,
+          "right": 594.12,
+          "bottom": 536.64,
+          "width": 41.61,
+          "height": 138.94
+        },
+        "containerSelector": "#c02-n",
+        "text": "t",
+        "fixHint": "Give each block its own zone, or put data-layout-allow-overlap on the text or on a container inside the scene. A marker on the scene root does not apply.",
+        "dataAttributes": {},
+        "sourceFile": "compositions/c01.html",
+        "bbox": {
+          "x": 552.51,
+          "y": 397.7,
+          "width": 41.61,
+          "height": 138.94
+        },
+        "firstSeen": 5.05,
+        "lastSeen": 5.05,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          5.05
+        ]
+      },
+      {
+        "code": "content_overlap",
+        "severity": "info",
+        "time": 5.05,
+        "selector": "#c01-l2 > span:nth-of-type(3) > span:nth-of-type(1)",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 620.39,
+          "top": 397.7,
+          "right": 681.1,
+          "bottom": 536.64,
+          "width": 60.71,
+          "height": 138.94
+        },
+        "containerSelector": "#c02-n",
+        "text": "h",
+        "fixHint": "Give each block its own zone, or put data-layout-allow-overlap on the text or on a container inside the scene. A marker on the scene root does not apply.",
+        "dataAttributes": {},
+        "sourceFile": "compositions/c01.html",
+        "bbox": {
+          "x": 620.39,
+          "y": 397.7,
+          "width": 60.71,
+          "height": 138.94
+        },
+        "firstSeen": 5.05,
+        "lastSeen": 5.05,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          5.05
+        ]
+      },
+      {
+        "code": "content_overlap",
+        "severity": "info",
+        "time": 5.05,
+        "selector": "#c01-l2 > span:nth-of-type(3) > span:nth-of-type(2)",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 681.1,
+          "top": 397.7,
+          "right": 744.35,
+          "bottom": 536.64,
+          "width": 63.25,
+          "height": 138.94
+        },
+        "containerSelector": "#c02-n",
+        "text": "a",
+        "fixHint": "Give each block its own zone, or put data-layout-allow-overlap on the text or on a container inside the scene. A marker on the scene root does not apply.",
+        "dataAttributes": {},
+        "sourceFile": "compositions/c01.html",
+        "bbox": {
+          "x": 681.1,
+          "y": 397.7,
+          "width": 63.25,
+          "height": 138.94
+        },
+        "firstSeen": 5.05,
+        "lastSeen": 5.05,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          5.05
+        ]
+      },
+      {
+        "code": "content_overlap",
+        "severity": "info",
+        "time": 5.05,
+        "selector": "#c01-l2 > span:nth-of-type(3) > span:nth-of-type(3)",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 744.35,
+          "top": 397.7,
+          "right": 805.06,
+          "bottom": 536.64,
+          "width": 60.71,
+          "height": 138.94
+        },
+        "containerSelector": "#c02-n",
+        "text": "n",
+        "fixHint": "Give each block its own zone, or put data-layout-allow-overlap on the text or on a container inside the scene. A marker on the scene root does not apply.",
+        "dataAttributes": {},
+        "sourceFile": "compositions/c01.html",
+        "bbox": {
+          "x": 744.35,
+          "y": 397.7,
+          "width": 60.71,
+          "height": 138.94
+        },
+        "firstSeen": 5.05,
+        "lastSeen": 5.05,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          5.05
+        ]
+      },
+      {
+        "code": "content_overlap",
+        "severity": "info",
+        "time": 5.05,
+        "selector": "#c01-l2 > span:nth-of-type(3) > span:nth-of-type(4)",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 805.06,
+          "top": 397.7,
+          "right": 867.1,
+          "bottom": 536.64,
+          "width": 62.04,
+          "height": 138.94
+        },
+        "containerSelector": "#c02-n",
+        "text": "g",
+        "fixHint": "Give each block its own zone, or put data-layout-allow-overlap on the text or on a container inside the scene. A marker on the scene root does not apply.",
+        "dataAttributes": {},
+        "sourceFile": "compositions/c01.html",
+        "bbox": {
+          "x": 805.06,
+          "y": 397.7,
+          "width": 62.04,
+          "height": 138.94
+        },
+        "firstSeen": 5.05,
+        "lastSeen": 5.05,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          5.05
+        ]
+      },
+      {
+        "code": "content_overlap",
+        "severity": "info",
+        "time": 5.05,
+        "selector": "#c01-l2 > span:nth-of-type(4) > span:nth-of-type(1)",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 893.36,
+          "top": 397.7,
+          "right": 950.42,
+          "bottom": 536.64,
+          "width": 57.06,
+          "height": 138.94
+        },
+        "containerSelector": "#c02-n",
+        "text": "u",
+        "fixHint": "Give each block its own zone, or put data-layout-allow-overlap on the text or on a container inside the scene. A marker on the scene root does not apply.",
+        "dataAttributes": {},
+        "sourceFile": "compositions/c01.html",
+        "bbox": {
+          "x": 893.36,
+          "y": 397.7,
+          "width": 57.06,
+          "height": 138.94
+        },
+        "firstSeen": 5.05,
+        "lastSeen": 5.05,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          5.05
+        ]
+      },
+      {
+        "code": "content_overlap",
+        "severity": "info",
+        "time": 5.05,
+        "selector": "#c01-l2 > span:nth-of-type(4) > span:nth-of-type(2)",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 950.42,
+          "top": 397.7,
+          "right": 1013.67,
+          "bottom": 536.64,
+          "width": 63.25,
+          "height": 138.94
+        },
+        "containerSelector": "#c02-n",
+        "text": "p",
+        "fixHint": "Give each block its own zone, or put data-layout-allow-overlap on the text or on a container inside the scene. A marker on the scene root does not apply.",
+        "dataAttributes": {},
+        "sourceFile": "compositions/c01.html",
+        "bbox": {
+          "x": 950.42,
+          "y": 397.7,
+          "width": 63.25,
+          "height": 138.94
+        },
+        "firstSeen": 5.05,
+        "lastSeen": 5.05,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          5.05
+        ]
+      },
+      {
+        "code": "content_overlap",
+        "severity": "info",
+        "time": 5.05,
+        "selector": "#c01-l2 > span:nth-of-type(4) > span:nth-of-type(3)",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 1013.67,
+          "top": 397.7,
+          "right": 1044.36,
+          "bottom": 536.64,
+          "width": 30.69,
+          "height": 138.94
+        },
+        "containerSelector": "#c02-n",
+        "text": ".",
+        "fixHint": "Give each block its own zone, or put data-layout-allow-overlap on the text or on a container inside the scene. A marker on the scene root does not apply.",
+        "dataAttributes": {},
+        "sourceFile": "compositions/c01.html",
+        "bbox": {
+          "x": 1013.67,
+          "y": 397.7,
+          "width": 30.69,
+          "height": 138.94
+        },
+        "firstSeen": 5.05,
+        "lastSeen": 5.05,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          5.05
+        ]
+      },
+      {
+        "code": "content_overlap",
+        "severity": "info",
+        "time": 5.05,
+        "selector": "#c01-l2 > span:nth-of-type(4) > span:nth-of-type(4)",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 1044.36,
+          "top": 397.7,
+          "right": 1095.69,
+          "bottom": 536.64,
+          "width": 51.33,
+          "height": 138.94
+        },
+        "containerSelector": "#c02-n",
+        "text": "”",
+        "fixHint": "Give each block its own zone, or put data-layout-allow-overlap on the text or on a container inside the scene. A marker on the scene root does not apply.",
+        "dataAttributes": {},
+        "sourceFile": "compositions/c01.html",
+        "bbox": {
+          "x": 1044.36,
+          "y": 397.7,
+          "width": 51.33,
+          "height": 138.94
+        },
+        "firstSeen": 5.05,
+        "lastSeen": 5.05,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          5.05
+        ]
+      },
+      {
+        "code": "content_overlap",
+        "severity": "info",
+        "time": 5.05,
+        "selector": "#c01-l3 > span:nth-of-type(1) > span:nth-of-type(2)",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 262.43,
+          "top": 513.58,
+          "right": 330.53,
+          "bottom": 652.52,
+          "width": 68.1,
+          "height": 138.94
+        },
+        "containerSelector": "#c02-n",
+        "text": "T",
+        "fixHint": "Give each block its own zone, or put data-layout-allow-overlap on the text or on a container inside the scene. A marker on the scene root does not apply.",
+        "dataAttributes": {},
+        "sourceFile": "compositions/c01.html",
+        "bbox": {
+          "x": 262.43,
+          "y": 513.58,
+          "width": 68.1,
+          "height": 138.94
+        },
+        "firstSeen": 5.05,
+        "lastSeen": 5.05,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          5.05
+        ]
+      },
+      {
+        "code": "content_overlap",
+        "severity": "info",
+        "time": 5.05,
+        "selector": "#c01-l3 > span:nth-of-type(1) > span:nth-of-type(3)",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 330.53,
+          "top": 513.58,
+          "right": 388.59,
+          "bottom": 652.52,
+          "width": 58.06,
+          "height": 138.94
+        },
+        "containerSelector": "#c02-n",
+        "text": "e",
+        "fixHint": "Give each block its own zone, or put data-layout-allow-overlap on the text or on a container inside the scene. A marker on the scene root does not apply.",
+        "dataAttributes": {},
+        "sourceFile": "compositions/c01.html",
+        "bbox": {
+          "x": 330.53,
+          "y": 513.58,
+          "width": 58.06,
+          "height": 138.94
+        },
+        "firstSeen": 5.05,
+        "lastSeen": 5.05,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          5.05
+        ]
+      },
+      {
+        "code": "content_overlap",
+        "severity": "info",
+        "time": 5.05,
+        "selector": "#c01-l3 > span:nth-of-type(1) > span:nth-of-type(4)",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 388.59,
+          "top": 513.58,
+          "right": 414.98,
+          "bottom": 652.52,
+          "width": 26.39,
+          "height": 138.94
+        },
+        "containerSelector": "#c02-n",
+        "text": "l",
+        "fixHint": "Give each block its own zone, or put data-layout-allow-overlap on the text or on a container inside the scene. A marker on the scene root does not apply.",
+        "dataAttributes": {},
+        "sourceFile": "compositions/c01.html",
+        "bbox": {
+          "x": 388.59,
+          "y": 513.58,
+          "width": 26.39,
+          "height": 138.94
+        },
+        "firstSeen": 5.05,
+        "lastSeen": 5.05,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          5.05
+        ]
+      },
+      {
+        "code": "content_overlap",
+        "severity": "info",
+        "time": 5.05,
+        "selector": "#c01-l3 > span:nth-of-type(1) > span:nth-of-type(5)",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 414.98,
+          "top": 513.58,
+          "right": 441.37,
+          "bottom": 652.52,
+          "width": 26.39,
+          "height": 138.94
+        },
+        "containerSelector": "#c02-n",
+        "text": "l",
+        "fixHint": "Give each block its own zone, or put data-layout-allow-overlap on the text or on a container inside the scene. A marker on the scene root does not apply.",
+        "dataAttributes": {},
+        "sourceFile": "compositions/c01.html",
+        "bbox": {
+          "x": 414.98,
+          "y": 513.58,
+          "width": 26.39,
+          "height": 138.94
+        },
+        "firstSeen": 5.05,
+        "lastSeen": 5.05,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          5.05
+        ]
+      },
+      {
+        "code": "content_overlap",
+        "severity": "info",
+        "time": 5.05,
+        "selector": "#c01-l3 > span:nth-of-type(2) > span:nth-of-type(1)",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 467.64,
+          "top": 513.58,
+          "right": 528.35,
+          "bottom": 652.52,
+          "width": 60.71,
+          "height": 138.94
+        },
+        "containerSelector": "#c02-n",
+        "text": "n",
+        "fixHint": "Give each block its own zone, or put data-layout-allow-overlap on the text or on a container inside the scene. A marker on the scene root does not apply.",
+        "dataAttributes": {},
+        "sourceFile": "compositions/c01.html",
+        "bbox": {
+          "x": 467.64,
+          "y": 513.58,
+          "width": 60.71,
+          "height": 138.94
+        },
+        "firstSeen": 5.05,
+        "lastSeen": 5.05,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          5.05
+        ]
+      },
+      {
+        "code": "content_overlap",
+        "severity": "info",
+        "time": 5.05,
+        "selector": "#c01-l3 > span:nth-of-type(2) > span:nth-of-type(2)",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 528.35,
+          "top": 513.58,
+          "right": 589.51,
+          "bottom": 652.52,
+          "width": 61.16,
+          "height": 138.94
+        },
+        "containerSelector": "#c02-n",
+        "text": "o",
+        "fixHint": "Give each block its own zone, or put data-layout-allow-overlap on the text or on a container inside the scene. A marker on the scene root does not apply.",
+        "dataAttributes": {},
+        "sourceFile": "compositions/c01.html",
+        "bbox": {
+          "x": 528.35,
+          "y": 513.58,
+          "width": 61.16,
+          "height": 138.94
+        },
+        "firstSeen": 5.05,
+        "lastSeen": 5.05,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          5.05
+        ]
+      },
+      {
+        "code": "content_overlap",
+        "severity": "info",
+        "time": 5.05,
+        "selector": "#c01-l3 > span:nth-of-type(3) > span:nth-of-type(1)",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 615.77,
+          "top": 513.58,
+          "right": 676.93,
+          "bottom": 652.52,
+          "width": 61.16,
+          "height": 138.94
+        },
+        "containerSelector": "#c02-n",
+        "text": "o",
+        "fixHint": "Give each block its own zone, or put data-layout-allow-overlap on the text or on a container inside the scene. A marker on the scene root does not apply.",
+        "dataAttributes": {},
+        "sourceFile": "compositions/c01.html",
+        "bbox": {
+          "x": 615.77,
+          "y": 513.58,
+          "width": 61.16,
+          "height": 138.94
+        },
+        "firstSeen": 5.05,
+        "lastSeen": 5.05,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          5.05
+        ]
+      },
+      {
+        "code": "content_overlap",
+        "severity": "info",
+        "time": 5.05,
+        "selector": "#c01-l3 > span:nth-of-type(3) > span:nth-of-type(2)",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 676.93,
+          "top": 513.58,
+          "right": 737.64,
+          "bottom": 652.52,
+          "width": 60.71,
+          "height": 138.94
+        },
+        "containerSelector": "#c02-n",
+        "text": "n",
+        "fixHint": "Give each block its own zone, or put data-layout-allow-overlap on the text or on a container inside the scene. A marker on the scene root does not apply.",
+        "dataAttributes": {},
+        "sourceFile": "compositions/c01.html",
+        "bbox": {
+          "x": 676.93,
+          "y": 513.58,
+          "width": 60.71,
+          "height": 138.94
+        },
+        "firstSeen": 5.05,
+        "lastSeen": 5.05,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          5.05
+        ]
+      },
+      {
+        "code": "content_overlap",
+        "severity": "info",
+        "time": 5.05,
+        "selector": "#c01-l3 > span:nth-of-type(3) > span:nth-of-type(3)",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 737.64,
+          "top": 513.58,
+          "right": 795.7,
+          "bottom": 652.52,
+          "width": 58.06,
+          "height": 138.94
+        },
+        "containerSelector": "#c02-n",
+        "text": "e",
+        "fixHint": "Give each block its own zone, or put data-layout-allow-overlap on the text or on a container inside the scene. A marker on the scene root does not apply.",
+        "dataAttributes": {},
+        "sourceFile": "compositions/c01.html",
+        "bbox": {
+          "x": 737.64,
+          "y": 513.58,
+          "width": 58.06,
+          "height": 138.94
+        },
+        "firstSeen": 5.05,
+        "lastSeen": 5.05,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          5.05
+        ]
+      },
+      {
+        "code": "content_overlap",
+        "severity": "info",
+        "time": 5.05,
+        "selector": "#c01-l3 > span:nth-of-type(3) > span:nth-of-type(4)",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 795.7,
+          "top": 513.58,
+          "right": 826.39,
+          "bottom": 652.52,
+          "width": 30.69,
+          "height": 138.94
+        },
+        "containerSelector": "#c02-n",
+        "text": ".",
+        "fixHint": "Give each block its own zone, or put data-layout-allow-overlap on the text or on a container inside the scene. A marker on the scene root does not apply.",
+        "dataAttributes": {},
+        "sourceFile": "compositions/c01.html",
+        "bbox": {
+          "x": 795.7,
+          "y": 513.58,
+          "width": 30.69,
+          "height": 138.94
+        },
+        "firstSeen": 5.05,
+        "lastSeen": 5.05,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          5.05
+        ]
+      },
+      {
+        "code": "content_overlap",
+        "severity": "info",
+        "time": 5.05,
+        "selector": "#c01-l3 > span:nth-of-type(3) > span:nth-of-type(5)",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 826.39,
+          "top": 513.58,
+          "right": 877.72,
+          "bottom": 652.52,
+          "width": 51.33,
+          "height": 138.94
+        },
+        "containerSelector": "#c02-n",
+        "text": "”",
+        "fixHint": "Give each block its own zone, or put data-layout-allow-overlap on the text or on a container inside the scene. A marker on the scene root does not apply.",
+        "dataAttributes": {},
+        "sourceFile": "compositions/c01.html",
+        "bbox": {
+          "x": 826.39,
+          "y": 513.58,
+          "width": 51.33,
+          "height": 138.94
+        },
+        "firstSeen": 5.05,
+        "lastSeen": 5.05,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          5.05
+        ]
+      },
+      {
+        "code": "content_overlap",
+        "severity": "info",
+        "time": 29.577,
+        "selector": "#c08-q1 > div:nth-of-type(1)",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 906.98,
+          "top": 277.78,
+          "right": 1116.86,
+          "bottom": 337.9,
+          "width": 209.88,
+          "height": 60.12
+        },
+        "containerSelector": "#c08-q1 > div:nth-of-type(2)",
+        "text": "Let me ask you:",
+        "fixHint": "Give each block its own zone, or put data-layout-allow-overlap on the text or on a container inside the scene. A marker on the scene root does not apply.",
+        "dataAttributes": {},
+        "sourceFile": "compositions/c08.html",
+        "bbox": {
+          "x": 906.98,
+          "y": 277.78,
+          "width": 209.88,
+          "height": 60.12
+        },
+        "firstSeen": 29.577,
+        "lastSeen": 29.577,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          29.577
+        ]
+      },
+      {
+        "code": "content_overlap",
+        "severity": "info",
+        "time": 68.532,
+        "selector": "#c12-rail > span:nth-of-type(1)",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 1710.35,
+          "top": 96.98,
+          "right": 1845.75,
+          "bottom": 134.89,
+          "width": 135.4,
+          "height": 37.91
+        },
+        "containerSelector": "#c13-rail > span:nth-of-type(1)",
+        "text": "STEP 3 / 7",
+        "fixHint": "Give each block its own zone, or put data-layout-allow-overlap on the text or on a container inside the scene. A marker on the scene root does not apply.",
+        "dataAttributes": {},
+        "sourceFile": "compositions/c12.html",
+        "bbox": {
+          "x": 1710.35,
+          "y": 96.98,
+          "width": 135.4,
+          "height": 37.91
+        },
+        "firstSeen": 68.532,
+        "lastSeen": 68.532,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          68.532
+        ]
+      },
+      {
+        "code": "content_overlap",
+        "severity": "info",
+        "time": 68.532,
+        "selector": "#c12-hk",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 201.67,
+          "top": 170.81,
+          "right": 323.64,
+          "bottom": 213.72,
+          "width": 121.97,
+          "height": 42.91
+        },
+        "containerSelector": "#c13-hk",
+        "text": "STEP 3",
+        "fixHint": "Give each block its own zone, or put data-layout-allow-overlap on the text or on a container inside the scene. A marker on the scene root does not apply.",
+        "dataAttributes": {},
+        "sourceFile": "compositions/c12.html",
+        "bbox": {
+          "x": 201.67,
+          "y": 170.81,
+          "width": 121.97,
+          "height": 42.91
+        },
+        "firstSeen": 68.532,
+        "lastSeen": 68.532,
+        "occurrences": 1,
+        "heldMs": 0,
+        "times": [
+          68.532
+        ]
+      }
+    ],
+    "duration": 119.03,
+    "samples": [
+      6.613,
+      19.838,
+      33.064,
+      46.289,
+      59.515,
+      72.741,
+      85.966,
+      99.192,
+      112.417
+    ],
+    "transitionSamples": [],
+    "transitionSamplesDropped": 0,
+    "tolerance": 2,
+    "totalIssueCount": 30,
+    "truncated": false
+  },
+  "motion": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 0,
+    "infoCount": 0,
+    "findings": [],
+    "enabled": false,
+    "samples": 0
+  },
+  "contrast": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 0,
+    "infoCount": 0,
+    "findings": [],
+    "enabled": true,
+    "samples": [
+      6.613,
+      33.064,
+      59.515,
+      85.966,
+      112.417
+    ],
+    "checked": 10,
+    "passed": 10
+  },
+  "craft": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 12,
+    "infoCount": 0,
+    "findings": [
+      {
+        "code": "line_unread",
+        "severity": "warning",
+        "message": "\"“This is the police.” “Do not hang up.” “Tell no one.” Tr...\" (13 words) is on screen 2.69 s (±0.01 s), under its 3.30 s floor: hold it about 0.5 s + 0.3 s a word (4.40 s here) before it leaves or changes; see references/motion.md.",
+        "text": "“This is the police.” “Do not hang up.” “Tell no one.” Transfer now.",
+        "selector": "#c01-wrap > div:nth-of-type(2)",
+        "dataAttributes": {},
+        "sourceFile": "compositions/c01.html",
+        "bbox": {
+          "x": 220.95,
+          "y": 688.84,
+          "width": 734.03,
+          "height": 127.10000000000002
+        },
+        "time": 2.373,
+        "words": 13,
+        "seconds": 2.695,
+        "floorSeconds": 3.3
+      },
+      {
+        "code": "line_unread",
+        "severity": "warning",
+        "message": "\"Are they asking you to transfer, deposit, or withdraw money?\" (10 words) is on screen 1.54 s (±0.01 s), under its 2.63 s floor: hold it about 0.5 s + 0.3 s a word (3.50 s here) before it leaves or changes; see references/motion.md.",
+        "text": "Are they asking you to transfer, deposit, or withdraw money?",
+        "selector": "#c08-q1 > div:nth-of-type(2)",
+        "dataAttributes": {},
+        "sourceFile": "compositions/c08.html",
+        "bbox": {
+          "x": 883.78,
+          "y": 363.15,
+          "width": 695.95,
+          "height": 180.81000000000006
+        },
+        "time": 29.534,
+        "words": 10,
+        "seconds": 1.54,
+        "floorSeconds": 2.625
+      },
+      {
+        "code": "line_unread",
+        "severity": "warning",
+        "message": "\"Let me ask you:\" (4 words) is on screen 1.19 s (±0.01 s), under its 1.27 s floor: hold it about 0.5 s + 0.3 s a word (1.70 s here) before it leaves or changes; see references/motion.md.",
+        "text": "Let me ask you:",
+        "selector": "#c08-q2 > div:nth-of-type(1)",
+        "dataAttributes": {},
+        "sourceFile": "compositions/c08.html",
+        "bbox": {
+          "x": 904,
+          "y": 310.36,
+          "width": 206.98000000000002,
+          "height": 37.81999999999999
+        },
+        "time": 31.111,
+        "words": 4,
+        "seconds": 1.192,
+        "floorSeconds": 1.275
+      },
+      {
+        "code": "line_unread",
+        "severity": "warning",
+        "message": "\"Are they telling you not to hang up, to stay on the line?\" (13 words) is on screen 1.19 s (±0.01 s), under its 3.30 s floor: hold it about 0.5 s + 0.3 s a word (4.40 s here) before it leaves or changes; see references/motion.md.",
+        "text": "Are they telling you not to hang up, to stay on the line?",
+        "selector": "#c08-q2 > div:nth-of-type(2)",
+        "dataAttributes": {},
+        "sourceFile": "compositions/c08.html",
+        "bbox": {
+          "x": 904,
+          "y": 354.16,
+          "width": 758.5,
+          "height": 113.21999999999997
+        },
+        "time": 31.111,
+        "words": 13,
+        "seconds": 1.192,
+        "floorSeconds": 3.3
+      },
+      {
+        "code": "line_unread",
+        "severity": "warning",
+        "message": "\"A code arrived while you are on a call. Anyone who calls ...\" (20 words) is on screen 2.61 s (±0.01 s), under its 4.88 s floor: hold it about 0.5 s + 0.3 s a word (6.50 s here) before it leaves or changes; see references/motion.md.",
+        "text": "A code arrived while you are on a call. Anyone who calls and asks for a code is a scammer.",
+        "selector": "#c08c-al > div:nth-of-type(2)",
+        "dataAttributes": {},
+        "sourceFile": "compositions/c08c.html",
+        "bbox": {
+          "x": 995.82,
+          "y": 683,
+          "width": 619.2900000000001,
+          "height": 129.58000000000004
+        },
+        "time": 45.17,
+        "words": 20,
+        "seconds": 2.608,
+        "floorSeconds": 4.875
+      },
+      {
+        "code": "line_unread",
+        "severity": "warning",
+        "message": "\"This is the police. Read me the OTP now. Never share your...\" (15 words) is on screen 1.23 s (±0.01 s), under its 3.75 s floor: hold it about 0.5 s + 0.3 s a word (5.00 s here) before it leaves or changes; see references/motion.md.",
+        "text": "This is the police. Read me the OTP now. Never share your OTP with anyone.",
+        "selector": "#c10-big > div:nth-of-type(1)",
+        "dataAttributes": {},
+        "sourceFile": "compositions/c10.html",
+        "bbox": {
+          "x": 251.09,
+          "y": 467.67,
+          "width": 1346.87,
+          "height": 141.19
+        },
+        "time": 55.578,
+        "words": 15,
+        "seconds": 1.229,
+        "floorSeconds": 3.75
+      },
+      {
+        "code": "line_unread",
+        "severity": "warning",
+        "message": "\"no matching quote — flag dropped\" (5 words) is on screen 0.89 s (±0.01 s), under its 1.50 s floor: hold it about 0.5 s + 0.3 s a word (2.00 s here) before it leaves or changes; see references/motion.md.",
+        "text": "no matching quote — flag dropped",
+        "selector": "#c13-drop",
+        "dataAttributes": {},
+        "sourceFile": "compositions/c13.html",
+        "bbox": {
+          "x": 1240,
+          "y": 804.63,
+          "width": 626.8400000000001,
+          "height": 50
+        },
+        "time": 71.873,
+        "words": 5,
+        "seconds": 0.894,
+        "floorSeconds": 1.5
+      },
+      {
+        "code": "line_unread",
+        "severity": "warning",
+        "message": "\"No clear risk signals found\" (5 words) is on screen 1.03 s (±0.01 s), under its 1.50 s floor: hold it about 0.5 s + 0.3 s a word (2.00 s here) before it leaves or changes; see references/motion.md.",
+        "text": "No clear risk signals found",
+        "selector": "#c15-bad",
+        "dataAttributes": {},
+        "sourceFile": "compositions/c15.html",
+        "bbox": {
+          "x": 1038.88,
+          "y": 469.64,
+          "width": 641.97,
+          "height": 67.39999999999998
+        },
+        "time": 78.977,
+        "words": 5,
+        "seconds": 1.031,
+        "floorSeconds": 1.5
+      },
+      {
+        "code": "line_unread",
+        "severity": "warning",
+        "message": "\"Insists you stay on the line\" (6 words) is on screen 1.20 s (±0.01 s), under its 1.72 s floor: hold it about 0.5 s + 0.3 s a word (2.30 s here) before it leaves or changes; see references/motion.md.",
+        "text": "Insists you stay on the line",
+        "selector": "#c16-rs3",
+        "dataAttributes": {},
+        "sourceFile": "compositions/c16.html",
+        "bbox": {
+          "x": 855.34,
+          "y": 737,
+          "width": 443.33000000000004,
+          "height": 48
+        },
+        "time": 83.634,
+        "words": 6,
+        "seconds": 1.204,
+        "floorSeconds": 1.725
+      },
+      {
+        "code": "line_unread",
+        "severity": "warning",
+        "message": "\"Next: a pilot with older adults and their families.\" (9 words) is on screen 1.91 s (±0.01 s), under its 2.40 s floor: hold it about 0.5 s + 0.3 s a word (3.20 s here) before it leaves or changes; see references/motion.md.",
+        "text": "Next: a pilot with older adults and their families.",
+        "selector": "#c27-q7",
+        "dataAttributes": {},
+        "sourceFile": "compositions/c27.html",
+        "bbox": {
+          "x": 200,
+          "y": 713.98,
+          "width": 722.11,
+          "height": 101.28999999999996
+        },
+        "time": 113.143,
+        "words": 9,
+        "seconds": 1.913,
+        "floorSeconds": 2.4
+      },
+      {
+        "code": "line_unread",
+        "severity": "warning",
+        "message": "The film's last line \"Pause. Verify. Protect.\" (3 words) is on screen 1.66 s (±0.01 s), under the 2.00 s a closing line needs: hold it about 0.5 s + 0.3 s a word and at least 2 s before the film ends; see references/motion.md.",
+        "text": "Pause. Verify. Protect.",
+        "selector": "#c28-tag",
+        "dataAttributes": {},
+        "sourceFile": "compositions/c28.html",
+        "bbox": {
+          "x": 616.24,
+          "y": 789.27,
+          "width": 687.52,
+          "height": 88.12
+        },
+        "time": 117.378,
+        "words": 3,
+        "seconds": 1.658,
+        "floorSeconds": 2
+      },
+      {
+        "code": "line_unread",
+        "severity": "warning",
+        "message": "The film's last line \"khoan-da.onrender.com\" (4 words) is on screen 1.10 s (±0.01 s), under the 2.00 s a closing line needs: hold it about 0.5 s + 0.3 s a word and at least 2 s before the film ends; see references/motion.md.",
+        "text": "khoan-da.onrender.com",
+        "selector": "#c28-url",
+        "dataAttributes": {},
+        "sourceFile": "compositions/c28.html",
+        "bbox": {
+          "x": 733.86,
+          "y": 887.01,
+          "width": 452.2700000000001,
+          "height": 53.39999999999998
+        },
+        "time": 117.937,
+        "words": 4,
+        "seconds": 1.099,
+        "floorSeconds": 2
+      }
+    ],
+    "enabled": true,
+    "step": 0.19899999999999807,
+    "samples": 599
+  },
+  "audio": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 0,
+    "infoCount": 0,
+    "findings": []
+  },
+  "hdr": {
+    "autoPromotion": null,
+    "inspection": "available"
+  },
+  "snapshots": {
+    "enabled": false,
+    "files": [],
+    "times": [],
+    "findingFiles": []
+  }
+}

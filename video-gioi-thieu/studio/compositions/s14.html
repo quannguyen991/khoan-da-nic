@@ -1,0 +1,45 @@
+<template>
+<link rel="stylesheet" href="assets/kd.css">
+<style>#root{position:absolute;inset:0;overflow:hidden}</style>
+<div id="root" data-composition-id="s14" data-width="1920" data-height="1080">
+<div id="s14-wrap" class="wrap">
+<div id="s14-halo" class="abs" style="left:700px;top:40px;width:520px;height:520px;border-radius:50%;border:5px solid rgba(255,255,255,.7);opacity:0"></div><img id="s14-logo" class="abs" src="assets/logo-512.png" style="left:770px;top:110px;width:380px;height:380px;border-radius:88px;opacity:0;box-shadow:0 40px 100px rgba(114,63,217,.45)"><div id="s14-wm" class="t" style="position:absolute;left:0;width:1920px;top:560px;text-align:center;font-size:156px">Khoan Đã</div><div id="s14-tag" class="t" style="position:absolute;left:0;width:1920px;top:760px;text-align:center;font-size:70px"><span class="hl">Pause. Verify. Protect.</span></div><div id="s14-url" class="t mid" style="position:absolute;left:0;width:1920px;top:860px;text-align:center;font-size:42px;color:#3a3560">khoan-da.onrender.com</div><svg id="s14-sp1" class="sp" style="left:630px;top:180px;width:60px;height:60px;opacity:0" viewBox="0 0 24 24"><path fill="#ffffff" d="M12 0C12 7 17 12 24 12C17 12 12 17 12 24C12 17 7 12 0 12C7 12 12 7 12 0Z"/></svg><svg id="s14-sp2" class="sp" style="left:1240px;top:160px;width:48px;height:48px;opacity:0" viewBox="0 0 24 24"><path fill="#ffd3f6" d="M12 0C12 7 17 12 24 12C17 12 12 17 12 24C12 17 7 12 0 12C7 12 12 7 12 0Z"/></svg><svg id="s14-sp3" class="sp" style="left:560px;top:460px;width:40px;height:40px;opacity:0" viewBox="0 0 24 24"><path fill="#cfe8ff" d="M12 0C12 7 17 12 24 12C17 12 12 17 12 24C12 17 7 12 0 12C7 12 12 7 12 0Z"/></svg><svg id="s14-sp4" class="sp" style="left:1300px;top:430px;width:56px;height:56px;opacity:0" viewBox="0 0 24 24"><path fill="#ffffff" d="M12 0C12 7 17 12 24 12C17 12 12 17 12 24C12 17 7 12 0 12C7 12 12 7 12 0Z"/></svg>
+<div id="s14-leak" class="leak" style="opacity:0"></div>
+</div></div>
+<script>
+
+const master = gsap.timeline({ paused: true });
+const tl = gsap.timeline();
+master.add(tl, 0);
+tl.timeScale(0.9353);
+const Q = s => document.querySelector(s);
+const QA = s => [...document.querySelectorAll(s)];
+function split(sel){const el=Q(sel);const txt=el.textContent;el.textContent='';const out=[];
+  txt.split(' ').forEach((w,i,a)=>{const W=document.createElement('span');W.className='w';
+    [...w].forEach(c=>{const s=document.createElement('span');s.className='ch';s.textContent=c;W.appendChild(s);out.push(s)});
+    el.appendChild(W);if(i<a.length-1)el.appendChild(document.createTextNode(' '))});return out}
+function count(sel,from,to,t,dur,fmt,ease){const o={v:from};Q(sel).textContent=fmt(from);
+  tl.to(o,{v:to,duration:dur,ease:ease||'power3.out',onUpdate:()=>{Q(sel).textContent=fmt(o.v)}},t)}
+function twinkle(sel,t,hold){tl.fromTo(sel,{scale:0,rotation:-70,opacity:0},{scale:1,rotation:0,opacity:1,duration:.55,ease:'back.out(2.2)'},t);
+  tl.to(sel,{scale:0,rotation:70,opacity:0,duration:.7,ease:'power2.in'},t+(hold||.9))}
+function rise(sel,t,o){o=o||{};tl.fromTo(sel,{opacity:0,y:o.y||60,scale:o.s||1,filter:'blur(16px)'},{opacity:1,y:0,scale:1,filter:'blur(0px)',duration:o.d||.9,ease:o.e||'power3.out',stagger:o.st||0},t)}
+function flipChars(sel,t,o){o=o||{};const els=split(sel);
+  tl.fromTo(els,{opacity:0,rotationX:-100,y:60,transformPerspective:800,transformOrigin:'50% 100%'},{opacity:1,rotationX:0,y:0,duration:o.d||.8,ease:'back.out(1.6)',stagger:o.st||.035},t)}
+function flipEl(sel,t,o){o=o||{};tl.fromTo(sel,{opacity:0,rotationX:-80,y:60,transformPerspective:900,transformOrigin:'50% 100%'},{opacity:1,rotationX:0,y:0,duration:o.d||.9,ease:'back.out(1.5)'},t)}
+function sheen(sel,t){tl.fromTo(sel,{x:0},{x:1300,duration:1.3,ease:'power2.inOut',immediateRender:false},t)}
+
+tl.fromTo('#s14-wrap',{opacity:0,filter:'blur(14px)'},{opacity:1,filter:'blur(0px)',duration:0.67,ease:'power2.out'},0.10);tl.fromTo('#s14-leak',{x:-1100},{x:2500,duration:1.09,ease:'power2.inOut'},0);tl.fromTo('#s14-leak',{opacity:0},{opacity:1,duration:0.34,ease:'power1.out'},0);tl.to('#s14-leak',{opacity:0,duration:0.42,ease:'power1.in'},0.55);
+
+tl.fromTo('#s14-logo',{opacity:0,scale:.3,rotation:-14,y:80},{opacity:1,scale:1,rotation:0,y:0,duration:1.1,ease:'back.out(1.8)'},.4);
+tl.fromTo('#s14-halo',{opacity:.9,scale:.7},{opacity:0,scale:1.6,duration:1.4,ease:'power2.out'},.6);
+flipChars('#s14-wm',1.2,{st:.05});
+rise('#s14-tag',2.0,{y:40,d:.9});
+tl.fromTo('#s14-tag .hl',{backgroundPosition:'0% 0'},{backgroundPosition:'100% 0',duration:2.4,ease:'sine.inOut'},2.0);
+rise('#s14-url',2.7,{y:24,d:.7});
+['#s14-sp1','#s14-sp2','#s14-sp3','#s14-sp4'].forEach((s,i)=>twinkle(s,.9+i*.2));
+tl.to('#s14-wrap',{scale:1.03,duration:3.0,ease:'sine.inOut'},1.8);
+
+
+window.__timelines['s14'] = master;
+</script>
+</template>

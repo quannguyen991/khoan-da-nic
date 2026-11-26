@@ -1,0 +1,62 @@
+<template>
+<link rel="stylesheet" href="assets/kd.css">
+<style>#root{position:absolute;inset:0;overflow:hidden}</style>
+<div id="root" data-composition-id="s05" data-width="1920" data-height="1080">
+<div id="s05-wrap" class="wrap">
+<div class="abs" style="left:200px;top:200px;width:1020px"><div id="s05-c1" class="t" style="font-size:148px;white-space:nowrap"><span class="hl">One</span> <span id="s05-c1b">question.</span></div><div id="s05-c2" class="t thin" style="font-size:60px;margin-top:26px;color:#3a3560;width:1020px">What are you being asked to do?</div></div><div class="abs" style="left:200px;top:700px;display:flex;align-items:center;gap:22px"><div id="s05-d1" class="dot"></div><div id="s05-d2" class="dot"></div><div id="s05-d3" class="dot"></div><div id="s05-c3" class="t mid" style="font-size:44px;margin-left:14px">A few taps. No typing.</div></div><div id="s05-ph" class="phone" style="left:1260px;top:110px"><div class="screen" style="width:349px;height:756px"><div id="s05-ph-in" style="position:absolute;left:0;top:0;width:349px;height:756px;transform-origin:0 0"><img id="s05-ph-i0" src="assets/screens/01-home-simple.jpg" style="opacity:1"><img id="s05-ph-i1" src="assets/screens/02-one-question.jpg" style="opacity:0"><img id="s05-ph-i2" src="assets/screens/03-question-1.jpg" style="opacity:0"><img id="s05-ph-i3" src="assets/screens/04-question-2.jpg" style="opacity:0"><div id="s05-tp" class="tapc" style="opacity:0"></div><svg id="s05-cur" class="cur" viewBox="0 0 24 24"><path d="M4 2.5v17l4.6-4.2 3.2 6.6 2.8-1.4-3.1-6.3 6.3-.2z" fill="#141032" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></svg></div><div id="s05-ph-sh" class="sheen"></div></div></div><svg id="s05-sp1" class="sp" style="left:1160px;top:150px;width:50px;height:50px;opacity:0" viewBox="0 0 24 24"><path fill="#ffffff" d="M12 0C12 7 17 12 24 12C17 12 12 17 12 24C12 17 7 12 0 12C7 12 12 7 12 0Z"/></svg><svg id="s05-sp2" class="sp" style="left:1700px;top:880px;width:44px;height:44px;opacity:0" viewBox="0 0 24 24"><path fill="#ffd3f6" d="M12 0C12 7 17 12 24 12C17 12 12 17 12 24C12 17 7 12 0 12C7 12 12 7 12 0Z"/></svg>
+<div id="s05-leak" class="leak" style="opacity:0"></div>
+</div></div>
+<script>
+
+const master = gsap.timeline({ paused: true });
+const tl = gsap.timeline();
+master.add(tl, 0);
+tl.timeScale(1.1371);
+const Q = s => document.querySelector(s);
+const QA = s => [...document.querySelectorAll(s)];
+function split(sel){const el=Q(sel);const txt=el.textContent;el.textContent='';const out=[];
+  txt.split(' ').forEach((w,i,a)=>{const W=document.createElement('span');W.className='w';
+    [...w].forEach(c=>{const s=document.createElement('span');s.className='ch';s.textContent=c;W.appendChild(s);out.push(s)});
+    el.appendChild(W);if(i<a.length-1)el.appendChild(document.createTextNode(' '))});return out}
+function count(sel,from,to,t,dur,fmt,ease){const o={v:from};Q(sel).textContent=fmt(from);
+  tl.to(o,{v:to,duration:dur,ease:ease||'power3.out',onUpdate:()=>{Q(sel).textContent=fmt(o.v)}},t)}
+function twinkle(sel,t,hold){tl.fromTo(sel,{scale:0,rotation:-70,opacity:0},{scale:1,rotation:0,opacity:1,duration:.55,ease:'back.out(2.2)'},t);
+  tl.to(sel,{scale:0,rotation:70,opacity:0,duration:.7,ease:'power2.in'},t+(hold||.9))}
+function rise(sel,t,o){o=o||{};tl.fromTo(sel,{opacity:0,y:o.y||60,scale:o.s||1,filter:'blur(16px)'},{opacity:1,y:0,scale:1,filter:'blur(0px)',duration:o.d||.9,ease:o.e||'power3.out',stagger:o.st||0},t)}
+function flipChars(sel,t,o){o=o||{};const els=split(sel);
+  tl.fromTo(els,{opacity:0,rotationX:-100,y:60,transformPerspective:800,transformOrigin:'50% 100%'},{opacity:1,rotationX:0,y:0,duration:o.d||.8,ease:'back.out(1.6)',stagger:o.st||.035},t)}
+function flipEl(sel,t,o){o=o||{};tl.fromTo(sel,{opacity:0,rotationX:-80,y:60,transformPerspective:900,transformOrigin:'50% 100%'},{opacity:1,rotationX:0,y:0,duration:o.d||.9,ease:'back.out(1.5)'},t)}
+function sheen(sel,t){tl.fromTo(sel,{x:0},{x:1300,duration:1.3,ease:'power2.inOut',immediateRender:false},t)}
+
+tl.fromTo('#s05-wrap',{opacity:0,filter:'blur(14px)'},{opacity:1,filter:'blur(0px)',duration:0.82,ease:'power2.out'},0.12);tl.fromTo('#s05-leak',{x:-1100},{x:2500,duration:1.33,ease:'power2.inOut'},0);tl.fromTo('#s05-leak',{opacity:0},{opacity:1,duration:0.41,ease:'power1.out'},0);tl.to('#s05-leak',{opacity:0,duration:0.51,ease:'power1.in'},0.67);
+
+tl.fromTo('#s05-ph',{y:260,opacity:0,scale:.9,rotationY:-40,rotationX:8,transformPerspective:1500},{y:0,opacity:1,scale:1,rotationY:-10,rotationX:0,duration:1.2,ease:'expo.out'},.25);
+tl.to('#s05-ph',{rotationY:-4,rotationX:2,duration:3.2,ease:'sine.inOut'},1.6);
+tl.to('#s05-ph',{rotationY:-10,rotationX:0,duration:3.2,ease:'sine.inOut'},4.8);
+sheen('#s05-ph-sh',1.2); sheen('#s05-ph-sh',5.0);
+tl.fromTo('#s05-c1 .hl',{opacity:0,rotationX:-80,y:70,transformPerspective:900,transformOrigin:'50% 100%'},{opacity:1,rotationX:0,y:0,duration:.9,ease:'back.out(1.5)'},.5);
+flipChars('#s05-c1b',.8,{st:.04});
+const T=split('#s05-c2'); tl.fromTo(T,{opacity:0,y:26},{opacity:1,y:0,duration:.5,ease:'power2.out',stagger:.02},1.5);
+const W=349,H=756;
+function zoomTo(px,py,t,s){const x=Math.min(0,Math.max(W-W*s,W/2-px*s)),y=Math.min(0,Math.max(H-H*s,H/2-py*s));
+  tl.to('#s05-ph-in',{scale:s,x:x,y:y,duration:.7,ease:'power3.inOut'},t);}
+function zoomOut(t){tl.to('#s05-ph-in',{scale:1,x:0,y:0,duration:.6,ease:'power3.inOut'},t);}
+const cx=[[174,529],[174,348],[174,537],[174,537]];
+tl.fromTo('#s05-cur',{x:240,y:700,opacity:0},{x:cx[0][0]-16,y:cx[0][1]-10,opacity:1,duration:.8,ease:'power3.out'},1.3);
+const taps=[2.3,4.0,5.6,7.1], dots=[null,'#s05-d1','#s05-d2','#s05-d3'];
+taps.forEach((t,k)=>{
+  zoomTo(cx[k][0],cx[k][1],t-.8,1.45);
+  tl.fromTo('#s05-tp',{x:cx[k][0],y:cx[k][1],scale:.3,opacity:.95},{scale:1.8,opacity:0,duration:.6,ease:'power2.out'},t);
+  tl.to('#s05-cur',{scale:.86,duration:.12,yoyo:true,repeat:1,ease:'sine.inOut',transformOrigin:'16px 10px'},t-.05);
+  if(dots[k]) tl.fromTo(dots[k],{backgroundColor:'rgba(114,63,217,.25)',scale:1},{backgroundColor:'#723fd9',scale:1.35,duration:.4,ease:'back.out(3)'},t);
+  if(k<3){ tl.to('#s05-ph-i'+k,{opacity:0,duration:.3},t+.12); tl.to('#s05-ph-i'+(k+1),{opacity:1,duration:.3},t+.12);
+    zoomOut(t+.35); tl.to('#s05-cur',{x:cx[k+1][0]-16,y:cx[k+1][1]-10,duration:.7,ease:'power3.inOut'},t+.5); }
+});
+zoomOut(7.5);
+rise('#s05-c3',5.8,{y:30,d:.7});
+twinkle('#s05-sp1',2.6); twinkle('#s05-sp2',6.2);
+
+tl.to('#s05-wrap',{opacity:0,filter:'blur(18px)',scale:.97,duration:1.02,ease:'power2.in'},9.40);
+window.__timelines['s05'] = master;
+</script>
+</template>

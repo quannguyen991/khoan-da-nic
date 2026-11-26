@@ -104,3 +104,7 @@ dtkn-2026/build-v*.py
 dtkn-2026/shots/
 
 
+
+# Video giới thiệu: môi trường Python và video đã render (156 MB, vượt giới hạn GitHub)
+video-gioi-thieu/studio/.venv-tts/
+video-gioi-thieu/studio/renders/

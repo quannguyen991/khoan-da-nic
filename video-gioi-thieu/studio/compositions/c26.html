@@ -1,0 +1,45 @@
+<template>
+<link rel="stylesheet" href="assets/kd.css">
+<style>#root{position:absolute;inset:0;overflow:hidden}</style>
+<div id="root" data-composition-id="c26" data-width="1920" data-height="1080">
+<div id="c26-wrap" class="wrap">
+<div id="c26-hk" class="kicker abs" style="left:200px;top:290px;color:#5a2cc4">Industry fit · banking and fintech</div><div id="c26-ht" class="t abs" style="left:200px;top:350px;width:800px;font-size:96px;color:#141032">A warning layer before <span class="hl">Confirm.</span></div><div id="c26-bk" class="cardl abs" style="left:1020px;top:200px;width:700px;height:560px;padding:40px;overflow:hidden"><div class="label" style="font-size:34px;font-weight:600;color:#4b4670">Transfer</div><div class="label" style="font-size:30px;color:#6b6592;margin-top:18px">To · new beneficiary</div><div class="t" style="font-size:76px;margin:6px 0 30px">50,000,000 ₫</div><div data-layout-allow-overlap style="height:96px;border-radius:22px;background:#141032;color:#fff;font-size:42px;font-weight:600;display:flex;align-items:center;justify-content:center;font-family:Outfit">Confirm transfer</div><div id="c26-ov" data-layout-allow-overlap style="position:absolute;left:0;top:0;width:100%;height:100%;background:#f9f7ff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px"><svg width="170" height="170" viewBox="0 0 320 320"><defs><linearGradient id="c26-og" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#b99bff"/><stop offset="1" stop-color="#f08bff"/></linearGradient></defs><rect x="62" y="52" width="78" height="216" rx="39" fill="url(#c26-og)"/><rect x="180" y="52" width="78" height="216" rx="39" fill="url(#c26-og)"/></svg><div class="t" style="font-size:62px">Pause. Verify.</div><div class="label" style="font-size:34px;color:#4b4670">Someone you trust can look first.</div></div></div><div id="c26-m2" class="label abs" style="left:200px;top:610px;font-size:30px;font-weight:600;color:#8a3a00">Concept sketch — not a real bank screen.</div><svg id="c26-sp1" class="sp" style="left:940px;top:150px;width:50px;height:50px;opacity:0" viewBox="0 0 24 24"><path fill="#ffffff" d="M12 0C12 7 17 12 24 12C17 12 12 17 12 24C12 17 7 12 0 12C7 12 12 7 12 0Z"/></svg><svg id="c26-sp2" class="sp" style="left:1690px;top:780px;width:40px;height:40px;opacity:0" viewBox="0 0 24 24"><path fill="#ffd3f6" d="M12 0C12 7 17 12 24 12C17 12 12 17 12 24C12 17 7 12 0 12C7 12 12 7 12 0Z"/></svg>
+<div id="c26-leak" class="leak" style="opacity:0"></div>
+</div></div>
+<script>
+
+const master = gsap.timeline({ paused: true });
+const tl = gsap.timeline();
+master.add(tl, 0);
+tl.timeScale(1.1662);
+const Q = s => document.querySelector(s);
+const QA = s => [...document.querySelectorAll(s)];
+function split(sel){const el=Q(sel);const txt=el.textContent;el.textContent='';const out=[];
+  txt.split(' ').forEach((w,i,a)=>{const W=document.createElement('span');W.className='w';
+    [...w].forEach(c=>{const s=document.createElement('span');s.className='ch';s.textContent=c;W.appendChild(s);out.push(s)});
+    el.appendChild(W);if(i<a.length-1)el.appendChild(document.createTextNode(' '))});return out}
+function count(sel,from,to,t,dur,fmt,ease){const o={v:from};Q(sel).textContent=fmt(from);
+  tl.to(o,{v:to,duration:dur,ease:ease||'power3.out',onUpdate:()=>{Q(sel).textContent=fmt(o.v)}},t)}
+function twinkle(sel,t,hold){tl.fromTo(sel,{scale:0,rotation:-70,opacity:0},{scale:1,rotation:0,opacity:1,duration:.5,ease:'back.out(2.2)'},t);
+  tl.to(sel,{scale:0,rotation:70,opacity:0,duration:.6,ease:'power2.in'},t+(hold||.8))}
+function rise(sel,t,o){o=o||{};tl.fromTo(sel,{opacity:0,y:o.y||50,scale:o.s||1,filter:'blur(14px)'},{opacity:1,y:0,scale:1,filter:'blur(0px)',duration:o.d||.7,ease:o.e||'power3.out',stagger:o.st||0},t)}
+function flipChars(sel,t,o){o=o||{};const els=split(sel);
+  tl.fromTo(els,{opacity:0,rotationX:-100,y:60,transformPerspective:800,transformOrigin:'50% 100%'},{opacity:1,rotationX:0,y:0,duration:o.d||.7,ease:'back.out(1.6)',stagger:o.st||.03},t)}
+function flipEl(sel,t,o){o=o||{};tl.fromTo(sel,{opacity:0,rotationX:-80,y:50,transformPerspective:900,transformOrigin:'50% 100%'},{opacity:1,rotationX:0,y:0,duration:o.d||.7,ease:'back.out(1.5)'},t)}
+function fly(sel,t,o){o=o||{};tl.fromTo(sel,{opacity:0,x:o.x===undefined?420:o.x,y:o.y||0,rotationY:o.ry===undefined?-55:o.ry,rotationX:o.rx||0,scale:o.s||.85,transformPerspective:1500},
+  {opacity:1,x:0,y:0,rotationY:0,rotationX:0,scale:1,duration:o.d||.8,ease:o.e||'expo.out',stagger:o.st||0},t)}
+function bob(sel,t,dur,amp){tl.to(sel,{y:'-='+(amp||10),duration:dur||1.4,ease:'sine.inOut',yoyo:true,repeat:1},t)}
+function pulse(sel,t,sc){tl.fromTo(sel,{scale:1},{scale:sc||1.06,duration:.25,ease:'power2.out',yoyo:true,repeat:1,immediateRender:false},t)}
+function hlg(sel,t,d){tl.fromTo(sel,{backgroundPosition:'0% 0'},{backgroundPosition:'100% 0',duration:d||2.2,ease:'sine.inOut'},t)}
+
+tl.fromTo('#c26-wrap',{opacity:0,filter:'blur(12px)'},{opacity:1,filter:'blur(0px)',duration:0.56,ease:'power2.out'},0.08);tl.fromTo('#c26-leak',{x:-1100},{x:2500,duration:0.91,ease:'power2.inOut'},0);tl.fromTo('#c26-leak',{opacity:0},{opacity:1,duration:0.28,ease:'power1.out'},0);tl.to('#c26-leak',{opacity:0,duration:0.35,ease:'power1.in'},0.45);
+
+rise('#c26-hk',.2,{y:24,d:.4}); flipEl('#c26-ht',.3,{d:.8}); hlg('#c26-ht .hl',.5,2); rise('#c26-m2',1.0,{y:16,d:.5});
+tl.fromTo('#c26-bk',{opacity:0,y:90,scale:.92,rotationY:-30,rotationX:8,transformPerspective:1400},{opacity:1,y:0,scale:1,rotationY:-6,rotationX:0,duration:.9,ease:'expo.out'},.5);
+tl.fromTo('#c26-ov',{y:600},{y:0,duration:.8,ease:'power3.out'},1.8);
+twinkle('#c26-sp1',2.2); twinkle('#c26-sp2',3.0);
+
+tl.to('#c26-wrap',{opacity:0,filter:'blur(16px)',scale:.97,duration:0.70,ease:'power2.in'},4.00);
+window.__timelines['c26'] = master;
+</script>
+</template>

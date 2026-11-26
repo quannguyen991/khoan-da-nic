@@ -1,0 +1,77 @@
+<template>
+<link rel="stylesheet" href="assets/kd.css">
+<style>#root{position:absolute;inset:0;overflow:hidden}</style>
+<div id="root" data-composition-id="c08b" data-width="1920" data-height="1080">
+<div id="c08b-wrap" class="wrap">
+<div id="c08b-hk" class="kicker abs" style="left:200px;top:290px;color:#5a2cc4">Tap to check</div><div id="c08b-ht" class="t abs" style="left:200px;top:350px;width:720px;font-size:92px;color:#141032">Check what you are <span class="hl">looking at.</span></div><div id="c08b-c1" class="chip abs" style="left:200px;top:700px;font-size:38px">One picture. Not saved on the phone.</div><div id="c08b-m1" class="cardl abs" style="left:1000px;top:260px;width:720px;padding:36px 40px;font-family:Outfit"><div style="display:flex;align-items:center;gap:24px"><img src="assets/logo-512.png" style="width:100px;height:100px;border-radius:28px"><div style="font-size:46px;font-weight:700;color:#141032">Khoan Đã</div></div><div id="c08b-mb" style="margin-top:28px;display:flex;align-items:center;gap:22px;background:linear-gradient(100deg,#6a34d6,#8f5cf0);color:#fff;border-radius:999px;height:120px;padding:0 40px;font-size:48px;font-weight:700"><div style="width:62px;height:62px;flex:none"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><circle cx="12" cy="12" r="3"/></svg></div>Check this screen</div><div style="margin-top:20px;display:flex;align-items:center;justify-content:center;height:96px;border-radius:999px;border:4px solid #cdbdf7;font-size:40px;font-weight:600;color:#141032">Open Khoan Đã</div></div><div id="c08b-m2" class="abs" style="left:1000px;top:260px;width:720px;border-radius:44px;background:#f3f1f8;padding:44px 44px 36px;font-family:Outfit;box-shadow:0 36px 90px rgba(60,30,130,.28);opacity:0"><div style="font-size:48px;font-weight:700;line-height:1.15;color:#141032">Allow Khoan Đã to capture your screen?</div><div style="font-size:32px;font-weight:500;color:#6a6490;margin-top:14px">Your phone asks every time.</div><div style="display:flex;justify-content:flex-end;align-items:center;gap:36px;margin-top:34px"><span style="font-size:42px;font-weight:600;color:#6a6490">Cancel</span><span id="c08b-go" style="background:#6a34d6;color:#fff;border-radius:999px;padding:20px 48px;font-size:44px;font-weight:700">Start now</span></div></div><div id="c08b-m3" class="cardl abs" style="left:1000px;top:260px;width:720px;padding:36px 40px;font-family:Outfit;opacity:0"><div style="position:relative;height:300px;border-radius:28px;background:#eee9ff;overflow:hidden"><div class="abs" style="left:34px;top:34px;width:420px;border-radius:26px;background:#fff;padding:20px 26px;font-size:36px;font-weight:600;line-height:1.2;color:#141032;box-shadow:0 12px 30px rgba(60,30,130,.15)">Your account is locked. Verify now</div><div class="abs" style="left:34px;top:190px;width:300px;height:22px;border-radius:11px;background:#d9ceff"></div><div class="abs" style="left:34px;top:232px;width:220px;height:22px;border-radius:11px;background:#e3dcfb"></div><div id="c08b-fl" class="abs" style="left:0;top:0;width:100%;height:100%;background:#fff;opacity:0"></div></div><div style="font-size:46px;font-weight:700;color:#141032;margin-top:28px">Checking this picture…</div><div style="height:16px;border-radius:8px;background:#e6defb;margin-top:20px;overflow:hidden"><div id="c08b-bar" style="width:100%;height:100%;border-radius:8px;background:linear-gradient(90deg,#8f6dff,#ff6fd6);transform-origin:0 50%"></div></div></div><svg id="c08b-sp1" class="sp" style="left:940px;top:200px;width:50px;height:50px;opacity:0" viewBox="0 0 24 24"><path fill="#ffffff" d="M12 0C12 7 17 12 24 12C17 12 12 17 12 24C12 17 7 12 0 12C7 12 12 7 12 0Z"/></svg><svg id="c08b-sp2" class="sp" style="left:1650px;top:820px;width:44px;height:44px;opacity:0" viewBox="0 0 24 24"><path fill="#ffffff" d="M12 0C12 7 17 12 24 12C17 12 12 17 12 24C12 17 7 12 0 12C7 12 12 7 12 0Z"/></svg>
+
+</div></div>
+<script>
+
+const master = gsap.timeline({ paused: true });
+const tl = gsap.timeline();
+master.add(tl, 0);
+tl.timeScale(1.0014);
+const Q = s => document.querySelector(s);
+const QA = s => [...document.querySelectorAll(s)];
+function split(sel){const el=Q(sel);const txt=el.textContent;el.textContent='';const out=[];
+  txt.split(' ').forEach((w,i,a)=>{const W=document.createElement('span');W.className='w';
+    [...w].forEach(c=>{const s=document.createElement('span');s.className='ch';s.textContent=c;W.appendChild(s);out.push(s)});
+    el.appendChild(W);if(i<a.length-1)el.appendChild(document.createTextNode(' '))});return out}
+function count(sel,from,to,t,dur,fmt,ease){const o={v:from};Q(sel).textContent=fmt(from);
+  tl.to(o,{v:to,duration:dur,ease:ease||'power3.out',onUpdate:()=>{Q(sel).textContent=fmt(o.v)}},t)}
+function twinkle(sel,t,hold){tl.fromTo(sel,{scale:0,rotation:-70,opacity:0},{scale:1,rotation:0,opacity:1,duration:.5,ease:'back.out(2.2)'},t);
+  tl.to(sel,{scale:0,rotation:70,opacity:0,duration:.6,ease:'power2.in'},t+(hold||.8))}
+function rise(sel,t,o){o=o||{};tl.fromTo(sel,{opacity:0,y:o.y||50,scale:o.s||1,filter:'blur(14px)'},{opacity:1,y:0,scale:1,filter:'blur(0px)',duration:o.d||.7,ease:o.e||'power3.out',stagger:o.st||0},t)}
+function flipChars(sel,t,o){o=o||{};const els=split(sel);
+  tl.fromTo(els,{opacity:0,rotationX:-100,y:60,transformPerspective:800,transformOrigin:'50% 100%'},{opacity:1,rotationX:0,y:0,duration:o.d||.7,ease:'back.out(1.6)',stagger:o.st||.03},t)}
+function flipEl(sel,t,o){o=o||{};tl.fromTo(sel,{opacity:0,rotationX:-80,y:50,transformPerspective:900,transformOrigin:'50% 100%'},{opacity:1,rotationX:0,y:0,duration:o.d||.7,ease:'back.out(1.5)'},t)}
+function fly(sel,t,o){o=o||{};tl.fromTo(sel,{opacity:0,x:o.x===undefined?420:o.x,y:o.y||0,rotationY:o.ry===undefined?-55:o.ry,rotationX:o.rx||0,scale:o.s||.85,transformPerspective:1500},
+  {opacity:1,x:0,y:0,rotationY:0,rotationX:0,scale:1,duration:o.d||.8,ease:o.e||'expo.out',stagger:o.st||0},t)}
+function bob(sel,t,dur,amp){tl.to(sel,{y:'-='+(amp||10),duration:dur||1.4,ease:'sine.inOut',yoyo:true,repeat:1},t)}
+function pulse(sel,t,sc){tl.fromTo(sel,{scale:1},{scale:sc||1.06,duration:.25,ease:'power2.out',yoyo:true,repeat:1,immediateRender:false},t)}
+function hlg(sel,t,d){tl.fromTo(sel,{backgroundPosition:'0% 0'},{backgroundPosition:'100% 0',duration:d||2.2,ease:'sine.inOut'},t)}
+
+function ttl(sel,t,kind,o){o=o||{};
+  if(kind==='mask') tl.fromTo(sel,{clipPath:'inset(0px 0px 900px 0px)',y:70,opacity:1},{clipPath:'inset(0px 0px -60px 0px)',y:0,duration:o.d||.85,ease:'power3.out'},t);
+  else if(kind==='type') tl.fromTo(sel,{clipPath:'inset(0px 900px 0px 0px)',opacity:1},{clipPath:'inset(0px -60px 0px 0px)',duration:o.d||.9,ease:'steps(22)'},t);
+  else if(kind==='slam') tl.fromTo(sel,{opacity:0,scale:2.3,filter:'blur(16px)',transformOrigin:'0% 50%'},{opacity:1,scale:1,filter:'blur(0px)',duration:.45,ease:'power4.out'},t);
+  else if(kind==='slide') tl.fromTo(sel,{opacity:0,x:-520,skewX:24},{opacity:1,x:0,skewX:0,duration:.8,ease:'power4.out'},t);
+  else if(kind==='drop') tl.fromTo(sel,{opacity:0,y:-300},{opacity:1,y:0,duration:.95,ease:'bounce.out'},t);
+  else if(kind==='zoomout') tl.fromTo(sel,{opacity:0,scale:.35,filter:'blur(14px)',transformOrigin:'0% 50%'},{opacity:1,scale:1,filter:'blur(0px)',duration:.8,ease:'back.out(1.4)'},t);
+  else if(kind==='skew') tl.fromTo(sel,{opacity:0,y:90,skewY:8,filter:'blur(10px)'},{opacity:1,y:0,skewY:0,filter:'blur(0px)',duration:.8,ease:'expo.out'},t);
+  else flipEl(sel,t,o);}
+function ent(sel,t,kind,o){o=o||{};let f,to;
+  if(kind==='zig'){f={opacity:0,x:i=>i%2?780:-780,skewX:i=>i%2?-16:16};to={opacity:1,x:0,skewX:0,duration:.75,ease:'power4.out'};}
+  else if(kind==='drop'){f={opacity:0,y:-460};to={opacity:1,y:0,duration:.95,ease:'bounce.out'};}
+  else if(kind==='pop'){f={opacity:0,scale:0};to={opacity:1,scale:1,duration:.6,ease:'back.out(2.6)'};}
+  else if(kind==='wipe'){f={opacity:0,clipPath:'inset(-80px 1100px -80px -80px)'};to={opacity:1,clipPath:'inset(-80px -80px -80px -80px)',duration:.8,ease:'power3.inOut'};}
+  else if(kind==='wipeup'){f={opacity:0,clipPath:'inset(1100px -80px -80px -80px)',y:80};to={opacity:1,clipPath:'inset(-80px -80px -80px -80px)',y:0,duration:.9,ease:'power3.out'};}
+  else if(kind==='swing'){f={opacity:0,rotation:-75,y:-60,transformOrigin:'0% 0%'};to={opacity:1,rotation:0,y:0,duration:1.1,ease:'elastic.out(1,.55)'};}
+  else if(kind==='zoom'){f={opacity:0,scale:2.4,filter:'blur(18px)'};to={opacity:1,scale:1,filter:'blur(0px)',duration:.7,ease:'power3.out'};}
+  else if(kind==='slam'){f={opacity:0,scale:1.9};to={opacity:1,scale:1,duration:.32,ease:'power4.out'};}
+  else if(kind==='flipx'){f={opacity:0,rotationX:-100,transformOrigin:'50% 0%',transformPerspective:900};to={opacity:1,rotationX:0,duration:.8,ease:'back.out(1.5)'};}
+  else if(kind==='spiral'){f={opacity:0,rotation:140,scale:.15};to={opacity:1,rotation:0,scale:1,duration:.9,ease:'back.out(1.4)'};}
+  else if(kind==='scatter'){f={opacity:0,x:i=>[-760,560,-340,820,-620][i%5],y:i=>[-320,420,-520,300,520][i%5],rotation:i=>[-40,30,-22,46,-36][i%5],scale:.7};to={opacity:1,x:0,y:0,rotation:0,scale:1,duration:.85,ease:'power3.out'};}
+  else {f={opacity:0,y:420};to={opacity:1,y:0,duration:1,ease:'elastic.out(1,.6)'};}
+  to.stagger=o.st||0; tl.fromTo(sel,f,to,t);}
+
+tl.fromTo('#c08b-wrap',{clipPath:'polygon(0% 0%,0% 0%,-30% 100%,-30% 100%)'},{clipPath:'polygon(0% 0%,135% 0%,105% 100%,-30% 100%)',duration:0.63,ease:'power3.inOut'},0);
+
+rise('#c08b-hk',.2,{y:24,d:.5}); ttl('#c08b-ht',.35,'skew',{d:.8}); hlg('#c08b-ht .hl',.5,2.0);
+ent('#c08b-m1',0.25+.1,'zoom');
+pulse('#c08b-mb',0.25+1.2,1.06);
+tl.to('#c08b-m1',{opacity:0,y:-40,scale:.94,duration:.35,ease:'power2.in'},0.25+1.8);
+ent('#c08b-m2',0.25+1.9,'flipx');
+rise('#c08b-c1',2.17+.3,{y:30,d:.6});
+pulse('#c08b-go',2.17+.8,1.1);
+tl.to('#c08b-m2',{opacity:0,scale:1.05,duration:.3,ease:'power2.in'},2.17+1.5);
+ent('#c08b-m3',2.17+1.6,'wipe');
+tl.fromTo('#c08b-fl',{opacity:.9},{opacity:0,duration:.5,ease:'power2.out',immediateRender:false},2.17+1.75);
+tl.fromTo('#c08b-bar',{scaleX:0},{scaleX:1,duration:1.6,ease:'power1.inOut'},2.17+2.1);
+twinkle('#c08b-sp1',1.4); twinkle('#c08b-sp2',2.17+1.8);
+
+tl.to('#c08b-wrap',{opacity:0,filter:'blur(16px)',scale:.97,duration:0.60,ease:'power2.in'},5.70);
+window.__timelines['c08b'] = master;
+</script>
+</template>

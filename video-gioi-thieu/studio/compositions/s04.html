@@ -1,0 +1,44 @@
+<template>
+<link rel="stylesheet" href="assets/kd.css">
+<style>#root{position:absolute;inset:0;overflow:hidden}</style>
+<div id="root" data-composition-id="s04" data-width="1920" data-height="1080">
+<div id="s04-wrap" class="wrap">
+<div id="s04-halo" class="abs" style="left:700px;top:40px;width:520px;height:520px;border-radius:50%;border:5px solid rgba(255,255,255,.7);opacity:0"></div><img id="s04-logo" class="abs" src="assets/logo-512.png" style="left:770px;top:110px;width:380px;height:380px;border-radius:88px;opacity:0;box-shadow:0 40px 100px rgba(114,63,217,.45)"><div id="s04-wm" class="t" style="position:absolute;left:0;width:1920px;top:520px;text-align:center;font-size:140px">Khoan Đã</div><div id="s04-sub" class="t thin" style="position:absolute;left:0;width:1920px;top:690px;text-align:center;font-size:48px;color:#3a3560">Vietnamese for “hold on”</div><div style="position:absolute;left:0;width:1920px;top:770px;text-align:center;font-size:76px;display:flex;justify-content:center;gap:34px"><span id="s04-g1" class="t"><span class="hl">Pause.</span></span><span id="s04-g2" class="t"><span class="hl">Verify.</span></span><span id="s04-g3" class="t"><span class="hl">Protect.</span></span></div><svg id="s04-sp1" class="sp" style="left:640px;top:200px;width:60px;height:60px;opacity:0" viewBox="0 0 24 24"><path fill="#ffffff" d="M12 0C12 7 17 12 24 12C17 12 12 17 12 24C12 17 7 12 0 12C7 12 12 7 12 0Z"/></svg><svg id="s04-sp2" class="sp" style="left:1230px;top:180px;width:48px;height:48px;opacity:0" viewBox="0 0 24 24"><path fill="#ffd3f6" d="M12 0C12 7 17 12 24 12C17 12 12 17 12 24C12 17 7 12 0 12C7 12 12 7 12 0Z"/></svg><svg id="s04-sp3" class="sp" style="left:560px;top:480px;width:40px;height:40px;opacity:0" viewBox="0 0 24 24"><path fill="#cfe8ff" d="M12 0C12 7 17 12 24 12C17 12 12 17 12 24C12 17 7 12 0 12C7 12 12 7 12 0Z"/></svg><svg id="s04-sp4" class="sp" style="left:1290px;top:450px;width:56px;height:56px;opacity:0" viewBox="0 0 24 24"><path fill="#ffffff" d="M12 0C12 7 17 12 24 12C17 12 12 17 12 24C12 17 7 12 0 12C7 12 12 7 12 0Z"/></svg><svg id="s04-sp5" class="sp" style="left:900px;top:90px;width:36px;height:36px;opacity:0" viewBox="0 0 24 24"><path fill="#ffd3f6" d="M12 0C12 7 17 12 24 12C17 12 12 17 12 24C12 17 7 12 0 12C7 12 12 7 12 0Z"/></svg>
+
+</div></div>
+<script>
+
+const master = gsap.timeline({ paused: true });
+const tl = gsap.timeline();
+master.add(tl, 0);
+tl.timeScale(1.2500);
+const Q = s => document.querySelector(s);
+const QA = s => [...document.querySelectorAll(s)];
+function split(sel){const el=Q(sel);const txt=el.textContent;el.textContent='';const out=[];
+  txt.split(' ').forEach((w,i,a)=>{const W=document.createElement('span');W.className='w';
+    [...w].forEach(c=>{const s=document.createElement('span');s.className='ch';s.textContent=c;W.appendChild(s);out.push(s)});
+    el.appendChild(W);if(i<a.length-1)el.appendChild(document.createTextNode(' '))});return out}
+function count(sel,from,to,t,dur,fmt,ease){const o={v:from};Q(sel).textContent=fmt(from);
+  tl.to(o,{v:to,duration:dur,ease:ease||'power3.out',onUpdate:()=>{Q(sel).textContent=fmt(o.v)}},t)}
+function twinkle(sel,t,hold){tl.fromTo(sel,{scale:0,rotation:-70,opacity:0},{scale:1,rotation:0,opacity:1,duration:.55,ease:'back.out(2.2)'},t);
+  tl.to(sel,{scale:0,rotation:70,opacity:0,duration:.7,ease:'power2.in'},t+(hold||.9))}
+function rise(sel,t,o){o=o||{};tl.fromTo(sel,{opacity:0,y:o.y||60,scale:o.s||1,filter:'blur(16px)'},{opacity:1,y:0,scale:1,filter:'blur(0px)',duration:o.d||.9,ease:o.e||'power3.out',stagger:o.st||0},t)}
+function flipChars(sel,t,o){o=o||{};const els=split(sel);
+  tl.fromTo(els,{opacity:0,rotationX:-100,y:60,transformPerspective:800,transformOrigin:'50% 100%'},{opacity:1,rotationX:0,y:0,duration:o.d||.8,ease:'back.out(1.6)',stagger:o.st||.035},t)}
+function flipEl(sel,t,o){o=o||{};tl.fromTo(sel,{opacity:0,rotationX:-80,y:60,transformPerspective:900,transformOrigin:'50% 100%'},{opacity:1,rotationX:0,y:0,duration:o.d||.9,ease:'back.out(1.5)'},t)}
+function sheen(sel,t){tl.fromTo(sel,{x:0},{x:1300,duration:1.3,ease:'power2.inOut',immediateRender:false},t)}
+
+tl.fromTo('#s04-wrap',{opacity:0,scale:1.5,filter:'blur(24px)'},{opacity:1,scale:1,filter:'blur(0px)',duration:1.24,ease:'power3.out'},0);
+
+tl.fromTo('#s04-logo',{opacity:0,scale:.3,rotation:-14,y:80},{opacity:1,scale:1,rotation:0,y:0,duration:1.1,ease:'back.out(1.8)'},.5);
+tl.fromTo('#s04-halo',{opacity:.9,scale:.7},{opacity:0,scale:1.6,duration:1.4,ease:'power2.out'},.7);
+tl.to('#s04-logo',{y:-14,duration:1.8,yoyo:true,repeat:1,ease:'sine.inOut'},1.8);
+flipChars('#s04-wm',1.4,{st:.05});
+rise('#s04-sub',2.3,{y:30,d:.7});
+['#s04-g1','#s04-g2','#s04-g3'].forEach((s,i)=>tl.fromTo(s,{opacity:0,y:60,scale:.6,rotationX:-70,transformPerspective:800},{opacity:1,y:0,scale:1,rotationX:0,duration:.7,ease:'back.out(2)'},2.9+i*.3));
+['#s04-sp1','#s04-sp2','#s04-sp3','#s04-sp4','#s04-sp5'].forEach((s,i)=>twinkle(s,.9+i*.18));
+
+tl.to('#s04-wrap',{opacity:0,filter:'blur(18px)',scale:.97,duration:1.12,ease:'power2.in'},5.60);
+window.__timelines['s04'] = master;
+</script>
+</template>

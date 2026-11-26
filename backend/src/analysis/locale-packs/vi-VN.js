@@ -584,7 +584,7 @@ module.exports = {
       { pattern: '(thu hồi|lấy lại)\\s*(\\d+\\s*%\\s*)?tiền\\s*(đã\\s*)?(bị\\s*lừa|từ\\s+sàn)', scope: 'any' },
       { pattern: 'chuyên viên\\s+hỗ trợ\\s+tài chính[^.]{0,40}(hoàn lại|thu hồi|giải ngân|xử lý)', scope: 'any' },
       { pattern: 'thu hồi\\s+(vốn|tiền)\\s+(bị\\s+)?treo', scope: 'any' },
-      { pattern: '(chỉ cho|giới thiệu)\\s*(chỗ|bên|nơi|cách)\\s*(lấy lại|thu hồi)[^.]{0,30}(tiền|vốn)', scope: 'any' },
+      { pattern: '(chỉ cho|giới thiệu)\\s*(chỗ|bên|nơi|cách)\\s*(lấy lại|thu hồi)(?![a-zà-ỹ])', scope: 'any' },
     ],
     ID_TECH_SUPPORT_IMPERSONATION: [
       { pattern: '(hỗ trợ|kỹ thuật viên)\\s+(kỹ thuật|viễn thông)', scope: 'any' },

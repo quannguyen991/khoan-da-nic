@@ -1,0 +1,71 @@
+<template>
+<link rel="stylesheet" href="assets/kd.css">
+<style>#root{position:absolute;inset:0;overflow:hidden}</style>
+<div id="root" data-composition-id="c07" data-width="1920" data-height="1080">
+<div id="c07-wrap" class="wrap">
+<div id="c07-hk" class="kicker abs" style="left:200px;top:130px;color:#5a2cc4">Someone is calling?</div><div id="c07-ht" class="t abs" style="left:200px;top:190px;width:1560px;font-size:92px;color:#141032">What are they <span class="hl">asking</span> you to do?</div><div id="c07-o1" class="ui-opt abs" style="left:200px;top:380px;width:284px;height:440px;flex-direction:column;justify-content:center;text-align:center;gap:26px;padding:24px 18px;font-size:38px;border-radius:44px"><div class="oi" style="background:#fde3e3"><svg viewBox="0 0 24 24" fill="none" stroke="#b91c1c" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg></div>Transfer or withdraw money</div><div id="c07-o2" class="ui-opt abs" style="left:509px;top:380px;width:284px;height:440px;flex-direction:column;justify-content:center;text-align:center;gap:26px;padding:24px 18px;font-size:38px;border-radius:44px"><div class="oi" style="background:#ffefc9"><svg viewBox="0 0 24 24" fill="none" stroke="#a85a00" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>Give an OTP or password</div><div id="c07-o3" class="ui-opt abs" style="left:818px;top:380px;width:284px;height:440px;flex-direction:column;justify-content:center;text-align:center;gap:26px;padding:24px 18px;font-size:38px;border-radius:44px"><div class="oi" style="background:#efe5ff"><svg viewBox="0 0 24 24" fill="none" stroke="#6a34d6" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg></div>Install an app or tap a link</div><div id="c07-o4" class="ui-opt abs" style="left:1127px;top:380px;width:284px;height:440px;flex-direction:column;justify-content:center;text-align:center;gap:26px;padding:24px 18px;font-size:38px;border-radius:44px"><div class="oi" style="background:#e0ebff"><svg viewBox="0 0 24 24" fill="none" stroke="#1d4ed8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg></div>Send ID or document photos</div><div id="c07-o5" class="ui-opt abs" style="left:1436px;top:380px;width:284px;height:440px;flex-direction:column;justify-content:center;text-align:center;gap:26px;padding:24px 18px;font-size:38px;border-radius:44px"><div class="oi" style="background:#e8ebf2"><svg viewBox="0 0 24 24" fill="none" stroke="#334155" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></div>I am not sure / something else</div><svg id="c07-sp1" class="sp" style="left:840px;top:110px;width:50px;height:50px;opacity:0" viewBox="0 0 24 24"><path fill="#ffffff" d="M12 0C12 7 17 12 24 12C17 12 12 17 12 24C12 17 7 12 0 12C7 12 12 7 12 0Z"/></svg><svg id="c07-sp2" class="sp" style="left:1790px;top:880px;width:44px;height:44px;opacity:0" viewBox="0 0 24 24"><path fill="#ffd3f6" d="M12 0C12 7 17 12 24 12C17 12 12 17 12 24C12 17 7 12 0 12C7 12 12 7 12 0Z"/></svg>
+
+</div></div>
+<script>
+
+const master = gsap.timeline({ paused: true });
+const tl = gsap.timeline();
+master.add(tl, 0);
+tl.timeScale(1.2821);
+const Q = s => document.querySelector(s);
+const QA = s => [...document.querySelectorAll(s)];
+function split(sel){const el=Q(sel);const txt=el.textContent;el.textContent='';const out=[];
+  txt.split(' ').forEach((w,i,a)=>{const W=document.createElement('span');W.className='w';
+    [...w].forEach(c=>{const s=document.createElement('span');s.className='ch';s.textContent=c;W.appendChild(s);out.push(s)});
+    el.appendChild(W);if(i<a.length-1)el.appendChild(document.createTextNode(' '))});return out}
+function count(sel,from,to,t,dur,fmt,ease){const o={v:from};Q(sel).textContent=fmt(from);
+  tl.to(o,{v:to,duration:dur,ease:ease||'power3.out',onUpdate:()=>{Q(sel).textContent=fmt(o.v)}},t)}
+function twinkle(sel,t,hold){tl.fromTo(sel,{scale:0,rotation:-70,opacity:0},{scale:1,rotation:0,opacity:1,duration:.5,ease:'back.out(2.2)'},t);
+  tl.to(sel,{scale:0,rotation:70,opacity:0,duration:.6,ease:'power2.in'},t+(hold||.8))}
+function rise(sel,t,o){o=o||{};tl.fromTo(sel,{opacity:0,y:o.y||50,scale:o.s||1,filter:'blur(14px)'},{opacity:1,y:0,scale:1,filter:'blur(0px)',duration:o.d||.7,ease:o.e||'power3.out',stagger:o.st||0},t)}
+function flipChars(sel,t,o){o=o||{};const els=split(sel);
+  tl.fromTo(els,{opacity:0,rotationX:-100,y:60,transformPerspective:800,transformOrigin:'50% 100%'},{opacity:1,rotationX:0,y:0,duration:o.d||.7,ease:'back.out(1.6)',stagger:o.st||.03},t)}
+function flipEl(sel,t,o){o=o||{};tl.fromTo(sel,{opacity:0,rotationX:-80,y:50,transformPerspective:900,transformOrigin:'50% 100%'},{opacity:1,rotationX:0,y:0,duration:o.d||.7,ease:'back.out(1.5)'},t)}
+function fly(sel,t,o){o=o||{};tl.fromTo(sel,{opacity:0,x:o.x===undefined?420:o.x,y:o.y||0,rotationY:o.ry===undefined?-55:o.ry,rotationX:o.rx||0,scale:o.s||.85,transformPerspective:1500},
+  {opacity:1,x:0,y:0,rotationY:0,rotationX:0,scale:1,duration:o.d||.8,ease:o.e||'expo.out',stagger:o.st||0},t)}
+function bob(sel,t,dur,amp){tl.to(sel,{y:'-='+(amp||10),duration:dur||1.4,ease:'sine.inOut',yoyo:true,repeat:1},t)}
+function pulse(sel,t,sc){tl.fromTo(sel,{scale:1},{scale:sc||1.06,duration:.25,ease:'power2.out',yoyo:true,repeat:1,immediateRender:false},t)}
+function hlg(sel,t,d){tl.fromTo(sel,{backgroundPosition:'0% 0'},{backgroundPosition:'100% 0',duration:d||2.2,ease:'sine.inOut'},t)}
+
+function ttl(sel,t,kind,o){o=o||{};
+  if(kind==='mask') tl.fromTo(sel,{clipPath:'inset(0px 0px 900px 0px)',y:70,opacity:1},{clipPath:'inset(0px 0px -60px 0px)',y:0,duration:o.d||.85,ease:'power3.out'},t);
+  else if(kind==='type') tl.fromTo(sel,{clipPath:'inset(0px 900px 0px 0px)',opacity:1},{clipPath:'inset(0px -60px 0px 0px)',duration:o.d||.9,ease:'steps(22)'},t);
+  else if(kind==='slam') tl.fromTo(sel,{opacity:0,scale:2.3,filter:'blur(16px)',transformOrigin:'0% 50%'},{opacity:1,scale:1,filter:'blur(0px)',duration:.45,ease:'power4.out'},t);
+  else if(kind==='slide') tl.fromTo(sel,{opacity:0,x:-520,skewX:24},{opacity:1,x:0,skewX:0,duration:.8,ease:'power4.out'},t);
+  else if(kind==='drop') tl.fromTo(sel,{opacity:0,y:-300},{opacity:1,y:0,duration:.95,ease:'bounce.out'},t);
+  else if(kind==='zoomout') tl.fromTo(sel,{opacity:0,scale:.35,filter:'blur(14px)',transformOrigin:'0% 50%'},{opacity:1,scale:1,filter:'blur(0px)',duration:.8,ease:'back.out(1.4)'},t);
+  else if(kind==='skew') tl.fromTo(sel,{opacity:0,y:90,skewY:8,filter:'blur(10px)'},{opacity:1,y:0,skewY:0,filter:'blur(0px)',duration:.8,ease:'expo.out'},t);
+  else flipEl(sel,t,o);}
+function ent(sel,t,kind,o){o=o||{};let f,to;
+  if(kind==='zig'){f={opacity:0,x:i=>i%2?780:-780,skewX:i=>i%2?-16:16};to={opacity:1,x:0,skewX:0,duration:.75,ease:'power4.out'};}
+  else if(kind==='drop'){f={opacity:0,y:-460};to={opacity:1,y:0,duration:.95,ease:'bounce.out'};}
+  else if(kind==='pop'){f={opacity:0,scale:0};to={opacity:1,scale:1,duration:.6,ease:'back.out(2.6)'};}
+  else if(kind==='wipe'){f={opacity:0,clipPath:'inset(-80px 1100px -80px -80px)'};to={opacity:1,clipPath:'inset(-80px -80px -80px -80px)',duration:.8,ease:'power3.inOut'};}
+  else if(kind==='wipeup'){f={opacity:0,clipPath:'inset(1100px -80px -80px -80px)',y:80};to={opacity:1,clipPath:'inset(-80px -80px -80px -80px)',y:0,duration:.9,ease:'power3.out'};}
+  else if(kind==='swing'){f={opacity:0,rotation:-75,y:-60,transformOrigin:'0% 0%'};to={opacity:1,rotation:0,y:0,duration:1.1,ease:'elastic.out(1,.55)'};}
+  else if(kind==='zoom'){f={opacity:0,scale:2.4,filter:'blur(18px)'};to={opacity:1,scale:1,filter:'blur(0px)',duration:.7,ease:'power3.out'};}
+  else if(kind==='slam'){f={opacity:0,scale:1.9};to={opacity:1,scale:1,duration:.32,ease:'power4.out'};}
+  else if(kind==='flipx'){f={opacity:0,rotationX:-100,transformOrigin:'50% 0%',transformPerspective:900};to={opacity:1,rotationX:0,duration:.8,ease:'back.out(1.5)'};}
+  else if(kind==='spiral'){f={opacity:0,rotation:140,scale:.15};to={opacity:1,rotation:0,scale:1,duration:.9,ease:'back.out(1.4)'};}
+  else if(kind==='scatter'){f={opacity:0,x:i=>[-760,560,-340,820,-620][i%5],y:i=>[-320,420,-520,300,520][i%5],rotation:i=>[-40,30,-22,46,-36][i%5],scale:.7};to={opacity:1,x:0,y:0,rotation:0,scale:1,duration:.85,ease:'power3.out'};}
+  else {f={opacity:0,y:420};to={opacity:1,y:0,duration:1,ease:'elastic.out(1,.6)'};}
+  to.stagger=o.st||0; tl.fromTo(sel,f,to,t);}
+
+tl.fromTo('#c07-wrap',{clipPath:'polygon(0% 0%,0% 0%,-30% 100%,-30% 100%)'},{clipPath:'polygon(0% 0%,135% 0%,105% 100%,-30% 100%)',duration:0.81,ease:'power3.inOut'},0);
+
+rise('#c07-hk',.2,{y:24,d:.5}); ttl('#c07-ht',.35,'type',{d:.8}); hlg('#c07-ht .hl',.5,2.0);
+ent(['#c07-o1','#c07-o2','#c07-o3','#c07-o4','#c07-o5'],.5,'scatter',{st:.15});
+tl.to(['#c07-o1','#c07-o3','#c07-o4','#c07-o5'],{opacity:.35,scale:.96,duration:.4,ease:'power2.out'},2.0);
+tl.to('#c07-o2',{scale:1.1,y:-26,duration:.45,ease:'back.out(2)'},2.0);
+tl.fromTo('#c07-o2',{boxShadow:'0 22px 56px rgba(60,30,130,.22)'},{boxShadow:'0 0 0 10px rgba(255,200,60,.9),0 30px 80px rgba(255,170,0,.5)',duration:.5,yoyo:true,repeat:3,ease:'sine.inOut',immediateRender:false},2.1);
+twinkle('#c07-sp1',1.4); twinkle('#c07-sp2',2.6);
+
+tl.to('#c07-wrap',{opacity:0,filter:'blur(16px)',scale:.97,duration:0.77,ease:'power2.in'},4.20);
+window.__timelines['c07'] = master;
+</script>
+</template>

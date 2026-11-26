@@ -1,0 +1,48 @@
+<template>
+<link rel="stylesheet" href="assets/kd.css">
+<style>#root{position:absolute;inset:0;overflow:hidden}</style>
+<div id="root" data-composition-id="c17" data-width="1920" data-height="1080">
+<div id="c17-wrap" class="wrap">
+<div id="c17-hk" class="kicker abs" style="left:200px;top:130px;color:#5a2cc4">Honest by design</div><div id="c17-ht" class="t abs" style="left:200px;top:190px;width:1500px;font-size:88px;color:#141032">Same size as the <span class="hl">verdict.</span></div><div id="c17-va" class="abs" style="left:200px;top:370px;width:700px;height:430px;border-radius:56px;background:linear-gradient(160deg,#b91c1c,#c92a2a);color:#fff;text-align:center;font-family:Outfit;box-shadow:0 34px 80px rgba(150,10,10,.4)"><div style="width:120px;height:120px;border-radius:50%;background:#fff;margin:40px auto 18px;display:flex;align-items:center;justify-content:center"><div style="width:66px;height:66px"><svg viewBox="0 0 24 24" fill="none" stroke="#b91c1c" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg></div></div><div style="font-size:90px;font-weight:800">High risk</div><div style="font-size:48px;font-weight:700;margin-top:6px">Please hang up now.</div></div><div id="c17-vb" class="ui-nocheck abs" style="left:1000px;top:370px;width:720px;height:430px;padding:30px 44px"><div class="nt" style="font-size:56px"><div style="width:64px;height:64px;flex:none"><svg viewBox="0 0 24 24" fill="none" stroke="#5a3a0a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/></svg></div>What I could NOT check</div><ul style="padding:0"><li style="font-size:42px;margin:14px 0 0 40px">Khoan Đã could not hear the call</li><li style="font-size:42px;margin:14px 0 0 40px">No AI read the content this time</li></ul></div><svg class="abs" style="left:0;top:0" width="1920" height="1080" viewBox="0 0 1920 1080" fill="none" stroke="#723fd9" stroke-width="6" stroke-linecap="round"><path id="c17-br" d="M200 826 H1720"/><path d="M200 812 V840"/><path d="M1720 812 V840"/></svg><div id="c17-eq" class="t abs" style="left:660px;width:600px;top:800px;text-align:center;font-size:38px;font-weight:700;color:#5a2cc4;background:#efe6ff;border-radius:999px;padding:6px 0">same size · same weight</div><svg id="c17-sp1" class="sp" style="left:960px;top:330px;width:50px;height:50px;opacity:0" viewBox="0 0 24 24"><path fill="#ffffff" d="M12 0C12 7 17 12 24 12C17 12 12 17 12 24C12 17 7 12 0 12C7 12 12 7 12 0Z"/></svg><svg id="c17-sp2" class="sp" style="left:1790px;top:300px;width:40px;height:40px;opacity:0" viewBox="0 0 24 24"><path fill="#ffd3f6" d="M12 0C12 7 17 12 24 12C17 12 12 17 12 24C12 17 7 12 0 12C7 12 12 7 12 0Z"/></svg>
+
+</div></div>
+<script>
+
+const master = gsap.timeline({ paused: true });
+const tl = gsap.timeline();
+master.add(tl, 0);
+tl.timeScale(1.2821);
+const Q = s => document.querySelector(s);
+const QA = s => [...document.querySelectorAll(s)];
+function split(sel){const el=Q(sel);const txt=el.textContent;el.textContent='';const out=[];
+  txt.split(' ').forEach((w,i,a)=>{const W=document.createElement('span');W.className='w';
+    [...w].forEach(c=>{const s=document.createElement('span');s.className='ch';s.textContent=c;W.appendChild(s);out.push(s)});
+    el.appendChild(W);if(i<a.length-1)el.appendChild(document.createTextNode(' '))});return out}
+function count(sel,from,to,t,dur,fmt,ease){const o={v:from};Q(sel).textContent=fmt(from);
+  tl.to(o,{v:to,duration:dur,ease:ease||'power3.out',onUpdate:()=>{Q(sel).textContent=fmt(o.v)}},t)}
+function twinkle(sel,t,hold){tl.fromTo(sel,{scale:0,rotation:-70,opacity:0},{scale:1,rotation:0,opacity:1,duration:.5,ease:'back.out(2.2)'},t);
+  tl.to(sel,{scale:0,rotation:70,opacity:0,duration:.6,ease:'power2.in'},t+(hold||.8))}
+function rise(sel,t,o){o=o||{};tl.fromTo(sel,{opacity:0,y:o.y||50,scale:o.s||1,filter:'blur(14px)'},{opacity:1,y:0,scale:1,filter:'blur(0px)',duration:o.d||.7,ease:o.e||'power3.out',stagger:o.st||0},t)}
+function flipChars(sel,t,o){o=o||{};const els=split(sel);
+  tl.fromTo(els,{opacity:0,rotationX:-100,y:60,transformPerspective:800,transformOrigin:'50% 100%'},{opacity:1,rotationX:0,y:0,duration:o.d||.7,ease:'back.out(1.6)',stagger:o.st||.03},t)}
+function flipEl(sel,t,o){o=o||{};tl.fromTo(sel,{opacity:0,rotationX:-80,y:50,transformPerspective:900,transformOrigin:'50% 100%'},{opacity:1,rotationX:0,y:0,duration:o.d||.7,ease:'back.out(1.5)'},t)}
+function fly(sel,t,o){o=o||{};tl.fromTo(sel,{opacity:0,x:o.x===undefined?420:o.x,y:o.y||0,rotationY:o.ry===undefined?-55:o.ry,rotationX:o.rx||0,scale:o.s||.85,transformPerspective:1500},
+  {opacity:1,x:0,y:0,rotationY:0,rotationX:0,scale:1,duration:o.d||.8,ease:o.e||'expo.out',stagger:o.st||0},t)}
+function bob(sel,t,dur,amp){tl.to(sel,{y:'-='+(amp||10),duration:dur||1.4,ease:'sine.inOut',yoyo:true,repeat:1},t)}
+function pulse(sel,t,sc){tl.fromTo(sel,{scale:1},{scale:sc||1.06,duration:.25,ease:'power2.out',yoyo:true,repeat:1,immediateRender:false},t)}
+function hlg(sel,t,d){tl.fromTo(sel,{backgroundPosition:'0% 0'},{backgroundPosition:'100% 0',duration:d||2.2,ease:'sine.inOut'},t)}
+
+tl.fromTo('#c17-wrap',{opacity:0,filter:'blur(22px)',scale:1.06},{opacity:1,filter:'blur(0px)',scale:1,duration:0.77,ease:'power2.out'},0);
+
+rise('#c17-hk',.2,{y:24,d:.4}); flipEl('#c17-ht',.3,{d:.7}); hlg('#c17-ht .hl',.5,2);
+tl.fromTo('#c17-va',{opacity:0,x:-300,rotationY:50,transformPerspective:1500},{opacity:1,x:0,rotationY:0,duration:.8,ease:'expo.out'},.6);
+tl.fromTo('#c17-vb',{opacity:0,x:300,rotationY:-50,transformPerspective:1500},{opacity:1,x:0,rotationY:0,duration:.8,ease:'expo.out'},.8);
+tl.fromTo('#c17-br',{strokeDasharray:'1600 1600',strokeDashoffset:1600},{strokeDashoffset:0,duration:.8,ease:'power2.inOut'},1.6);
+rise('#c17-eq',2.0,{y:20,d:.5});
+tl.fromTo('#c17-vb',{boxShadow:'0 34px 80px rgba(100,60,10,.3)'},{boxShadow:'0 0 70px rgba(255,170,0,.8)',duration:.5,yoyo:true,repeat:1,immediateRender:false},2.2);
+twinkle('#c17-sp1',1.4); twinkle('#c17-sp2',2.4);
+
+tl.to('#c17-wrap',{opacity:0,filter:'blur(16px)',scale:.97,duration:0.77,ease:'power2.in'},3.60);
+window.__timelines['c17'] = master;
+</script>
+</template>

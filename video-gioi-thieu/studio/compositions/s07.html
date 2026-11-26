@@ -1,0 +1,44 @@
+<template>
+<link rel="stylesheet" href="assets/kd.css">
+<style>#root{position:absolute;inset:0;overflow:hidden}</style>
+<div id="root" data-composition-id="s07" data-width="1920" data-height="1080">
+<div id="s07-wrap" class="wrap">
+<div id="s07-e1" class="t thin" style="position:absolute;left:200px;top:150px;font-size:58px;color:#ffd3d9">If fear takes over:</div><div id="s07-e2" class="t" style="position:absolute;left:200px;top:225px;font-size:176px;color:#fff">Pause</div><div id="s07-e3" class="t" style="position:absolute;left:200px;top:400px;font-size:176px;color:#fff">60 seconds.</div><div id="s07-q" class="cardl abs" style="left:200px;top:640px;width:780px;padding:30px 40px"><div class="label" style="font-size:28px;font-weight:600;color:#a50013;margin-bottom:8px">One sentence to say out loud</div><div class="t mid" style="font-size:46px;line-height:1.22;letter-spacing:-.01em">“Let me ask my family and call you back.”</div></div><svg class="abs" style="left:0;top:0" width="1920" height="1080" viewBox="0 0 1920 1080" fill="none" stroke="#ffffff" stroke-width="4" stroke-dasharray="10 12" stroke-linecap="round"><path id="s07-pa" d="M980 740 C 1100 740, 1140 520, 1272 470"/></svg><div id="s07-ph" class="phone" style="left:1260px;top:110px"><div class="screen" style="width:349px;height:756px"><div id="s07-ph-in" style="position:absolute;left:0;top:0;width:349px;height:756px;transform-origin:0 0"><img id="s07-ph-i0" src="assets/screens/07-pause-60s.jpg" style="opacity:1"></div><div id="s07-ph-sh" class="sheen"></div></div></div><svg id="s07-sp1" class="sp" style="left:1140px;top:150px;width:52px;height:52px;opacity:0" viewBox="0 0 24 24"><path fill="#ffe0e6" d="M12 0C12 7 17 12 24 12C17 12 12 17 12 24C12 17 7 12 0 12C7 12 12 7 12 0Z"/></svg><svg id="s07-sp2" class="sp" style="left:1690px;top:900px;width:44px;height:44px;opacity:0" viewBox="0 0 24 24"><path fill="#ffe0e6" d="M12 0C12 7 17 12 24 12C17 12 12 17 12 24C12 17 7 12 0 12C7 12 12 7 12 0Z"/></svg>
+
+</div></div>
+<script>
+
+const master = gsap.timeline({ paused: true });
+const tl = gsap.timeline();
+master.add(tl, 0);
+tl.timeScale(0.9977);
+const Q = s => document.querySelector(s);
+const QA = s => [...document.querySelectorAll(s)];
+function split(sel){const el=Q(sel);const txt=el.textContent;el.textContent='';const out=[];
+  txt.split(' ').forEach((w,i,a)=>{const W=document.createElement('span');W.className='w';
+    [...w].forEach(c=>{const s=document.createElement('span');s.className='ch';s.textContent=c;W.appendChild(s);out.push(s)});
+    el.appendChild(W);if(i<a.length-1)el.appendChild(document.createTextNode(' '))});return out}
+function count(sel,from,to,t,dur,fmt,ease){const o={v:from};Q(sel).textContent=fmt(from);
+  tl.to(o,{v:to,duration:dur,ease:ease||'power3.out',onUpdate:()=>{Q(sel).textContent=fmt(o.v)}},t)}
+function twinkle(sel,t,hold){tl.fromTo(sel,{scale:0,rotation:-70,opacity:0},{scale:1,rotation:0,opacity:1,duration:.55,ease:'back.out(2.2)'},t);
+  tl.to(sel,{scale:0,rotation:70,opacity:0,duration:.7,ease:'power2.in'},t+(hold||.9))}
+function rise(sel,t,o){o=o||{};tl.fromTo(sel,{opacity:0,y:o.y||60,scale:o.s||1,filter:'blur(16px)'},{opacity:1,y:0,scale:1,filter:'blur(0px)',duration:o.d||.9,ease:o.e||'power3.out',stagger:o.st||0},t)}
+function flipChars(sel,t,o){o=o||{};const els=split(sel);
+  tl.fromTo(els,{opacity:0,rotationX:-100,y:60,transformPerspective:800,transformOrigin:'50% 100%'},{opacity:1,rotationX:0,y:0,duration:o.d||.8,ease:'back.out(1.6)',stagger:o.st||.035},t)}
+function flipEl(sel,t,o){o=o||{};tl.fromTo(sel,{opacity:0,rotationX:-80,y:60,transformPerspective:900,transformOrigin:'50% 100%'},{opacity:1,rotationX:0,y:0,duration:o.d||.9,ease:'back.out(1.5)'},t)}
+function sheen(sel,t){tl.fromTo(sel,{x:0},{x:1300,duration:1.3,ease:'power2.inOut',immediateRender:false},t)}
+
+tl.fromTo('#s07-wrap',{clipPath:'polygon(0% 0%,0% 0%,-30% 100%,-30% 100%)'},{clipPath:'polygon(0% 0%,135% 0%,105% 100%,-30% 100%)',duration:0.94,ease:'power3.inOut'},0);
+
+rise('#s07-e1',.6,{y:30,d:.7}); flipEl('#s07-e2',.9,{d:.9}); flipEl('#s07-e3',1.3,{d:.9});
+tl.fromTo('#s07-q',{opacity:0,y:80,scale:.94,rotationX:20,transformPerspective:1100},{opacity:1,y:0,scale:1,rotationX:0,duration:.9,ease:'back.out(1.5)'},2.2);
+tl.fromTo('#s07-ph',{x:300,opacity:0,scale:.9,rotationY:40,transformPerspective:1500},{x:0,opacity:1,scale:1,rotationY:-10,duration:1.2,ease:'expo.out'},.9);
+tl.to('#s07-ph',{rotationY:-3,y:-12,duration:2.6,ease:'sine.inOut',yoyo:true,repeat:1},2.2);
+sheen('#s07-ph-sh',2.0); sheen('#s07-ph-sh',4.8);
+tl.fromTo('#s07-pa',{strokeDasharray:'700 700',strokeDashoffset:700},{strokeDashoffset:0,duration:.9,ease:'power2.out'},3.0);
+twinkle('#s07-sp1',2.6); twinkle('#s07-sp2',4.2);
+
+tl.to('#s07-wrap',{opacity:0,filter:'blur(18px)',scale:.97,duration:0.90,ease:'power2.in'},7.80);
+window.__timelines['s07'] = master;
+</script>
+</template>

@@ -1,0 +1,47 @@
+<template>
+<link rel="stylesheet" href="assets/kd.css">
+<style>#root{position:absolute;inset:0;overflow:hidden}</style>
+<div id="root" data-composition-id="c23" data-width="1920" data-height="1080">
+<div id="c23-wrap" class="wrap">
+<div id="c23-hk" class="kicker abs" style="left:200px;top:130px;color:#5a2cc4">After a transfer</div><div id="c23-ht" class="t abs" style="left:200px;top:190px;width:1500px;font-size:112px;color:#141032"><span class="hl">72-hour</span> watch.</div><div class="abs" style="left:200px;top:520px;width:1520px;height:48px;border-radius:26px;background:rgba(255,255,255,.55);overflow:hidden"><div id="c23-bar" style="width:100%;height:100%;border-radius:26px;background:linear-gradient(90deg,#8f6dff,#ff6fd6);transform-origin:0 50%"></div></div><div id="c23-tk0" class="abs" style="left:200px;top:600px;width:260px;margin-left:0px;text-align:left;font-family:Outfit;font-weight:700;font-size:46px;color:#141032;opacity:0">Transfer</div><div id="c23-tk1" class="abs" style="left:706px;top:600px;width:200px;margin-left:-100px;text-align:center;font-family:Outfit;font-weight:700;font-size:46px;color:#141032;opacity:0">24 h</div><div id="c23-tk2" class="abs" style="left:1212px;top:600px;width:200px;margin-left:-100px;text-align:center;font-family:Outfit;font-weight:700;font-size:46px;color:#141032;opacity:0">48 h</div><div id="c23-tk3" class="abs" style="left:1460px;top:600px;width:260px;margin-left:0px;text-align:right;font-family:Outfit;font-weight:700;font-size:46px;color:#141032;opacity:0">72 h</div><div id="c23-sh" class="abs" style="left:150px;top:440px;width:130px;height:130px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 14px 40px rgba(114,63,217,.45)"><div style="width:76px;height:76px"><svg viewBox="0 0 24 24" fill="none" stroke="#723fd9" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg></div></div><div id="c23-nt" class="label abs" style="left:200px;top:760px;font-size:34px;font-weight:600;color:#8a3a00">Illustrative — real screen still to capture.</div><svg id="c23-sp1" class="sp" style="left:1650px;top:250px;width:52px;height:52px;opacity:0" viewBox="0 0 24 24"><path fill="#ffffff" d="M12 0C12 7 17 12 24 12C17 12 12 17 12 24C12 17 7 12 0 12C7 12 12 7 12 0Z"/></svg><svg id="c23-sp2" class="sp" style="left:900px;top:860px;width:40px;height:40px;opacity:0" viewBox="0 0 24 24"><path fill="#ffd3f6" d="M12 0C12 7 17 12 24 12C17 12 12 17 12 24C12 17 7 12 0 12C7 12 12 7 12 0Z"/></svg>
+
+</div></div>
+<script>
+
+const master = gsap.timeline({ paused: true });
+const tl = gsap.timeline();
+master.add(tl, 0);
+tl.timeScale(1.1569);
+const Q = s => document.querySelector(s);
+const QA = s => [...document.querySelectorAll(s)];
+function split(sel){const el=Q(sel);const txt=el.textContent;el.textContent='';const out=[];
+  txt.split(' ').forEach((w,i,a)=>{const W=document.createElement('span');W.className='w';
+    [...w].forEach(c=>{const s=document.createElement('span');s.className='ch';s.textContent=c;W.appendChild(s);out.push(s)});
+    el.appendChild(W);if(i<a.length-1)el.appendChild(document.createTextNode(' '))});return out}
+function count(sel,from,to,t,dur,fmt,ease){const o={v:from};Q(sel).textContent=fmt(from);
+  tl.to(o,{v:to,duration:dur,ease:ease||'power3.out',onUpdate:()=>{Q(sel).textContent=fmt(o.v)}},t)}
+function twinkle(sel,t,hold){tl.fromTo(sel,{scale:0,rotation:-70,opacity:0},{scale:1,rotation:0,opacity:1,duration:.5,ease:'back.out(2.2)'},t);
+  tl.to(sel,{scale:0,rotation:70,opacity:0,duration:.6,ease:'power2.in'},t+(hold||.8))}
+function rise(sel,t,o){o=o||{};tl.fromTo(sel,{opacity:0,y:o.y||50,scale:o.s||1,filter:'blur(14px)'},{opacity:1,y:0,scale:1,filter:'blur(0px)',duration:o.d||.7,ease:o.e||'power3.out',stagger:o.st||0},t)}
+function flipChars(sel,t,o){o=o||{};const els=split(sel);
+  tl.fromTo(els,{opacity:0,rotationX:-100,y:60,transformPerspective:800,transformOrigin:'50% 100%'},{opacity:1,rotationX:0,y:0,duration:o.d||.7,ease:'back.out(1.6)',stagger:o.st||.03},t)}
+function flipEl(sel,t,o){o=o||{};tl.fromTo(sel,{opacity:0,rotationX:-80,y:50,transformPerspective:900,transformOrigin:'50% 100%'},{opacity:1,rotationX:0,y:0,duration:o.d||.7,ease:'back.out(1.5)'},t)}
+function fly(sel,t,o){o=o||{};tl.fromTo(sel,{opacity:0,x:o.x===undefined?420:o.x,y:o.y||0,rotationY:o.ry===undefined?-55:o.ry,rotationX:o.rx||0,scale:o.s||.85,transformPerspective:1500},
+  {opacity:1,x:0,y:0,rotationY:0,rotationX:0,scale:1,duration:o.d||.8,ease:o.e||'expo.out',stagger:o.st||0},t)}
+function bob(sel,t,dur,amp){tl.to(sel,{y:'-='+(amp||10),duration:dur||1.4,ease:'sine.inOut',yoyo:true,repeat:1},t)}
+function pulse(sel,t,sc){tl.fromTo(sel,{scale:1},{scale:sc||1.06,duration:.25,ease:'power2.out',yoyo:true,repeat:1,immediateRender:false},t)}
+function hlg(sel,t,d){tl.fromTo(sel,{backgroundPosition:'0% 0'},{backgroundPosition:'100% 0',duration:d||2.2,ease:'sine.inOut'},t)}
+
+tl.fromTo('#c23-wrap',{opacity:0,scale:1.45,filter:'blur(20px)'},{opacity:1,scale:1,filter:'blur(0px)',duration:0.76,ease:'power3.out'},0);
+
+rise('#c23-hk',.2,{y:24,d:.4}); flipEl('#c23-ht',.3,{d:.7}); hlg('#c23-ht .hl',.5,2);
+tl.fromTo('#c23-bar',{scaleX:0},{scaleX:1,duration:2.2,ease:'power2.inOut'},.7);
+tl.fromTo('#c23-sh',{x:0,scale:.6,opacity:0},{x:1490,scale:1,opacity:1,duration:2.2,ease:'power2.inOut'},.7);
+[0,1,2,3].forEach(i=>tl.fromTo('#c23-tk'+i,{opacity:0,y:24},{opacity:1,y:0,duration:.4},.8+i*.6));
+rise('#c23-nt',2.2,{y:16,d:.5});
+twinkle('#c23-sp1',1.6); twinkle('#c23-sp2',2.6);
+
+tl.to('#c23-wrap',{opacity:0,filter:'blur(16px)',scale:.97,duration:0.69,ease:'power2.in'},3.40);
+window.__timelines['c23'] = master;
+</script>
+</template>

@@ -1,0 +1,48 @@
+<template>
+<link rel="stylesheet" href="assets/kd.css">
+<style>#root{position:absolute;inset:0;overflow:hidden}</style>
+<div id="root" data-composition-id="s01" data-width="1920" data-height="1080">
+<div id="s01-wrap" class="wrap">
+<svg class="abs" style="left:0;top:0" width="1920" height="1080" viewBox="0 0 1920 1080"><circle id="s01-r0" cx="1560" cy="880" r="320" fill="none" stroke="#d9c8ff" stroke-width="5" style="transform-box:fill-box;transform-origin:center;opacity:0"/><circle id="s01-r1" cx="1560" cy="880" r="320" fill="none" stroke="#d9c8ff" stroke-width="5" style="transform-box:fill-box;transform-origin:center;opacity:0"/><circle id="s01-r2" cx="1560" cy="880" r="320" fill="none" stroke="#d9c8ff" stroke-width="5" style="transform-box:fill-box;transform-origin:center;opacity:0"/><circle id="s01-r3" cx="1560" cy="880" r="320" fill="none" stroke="#d9c8ff" stroke-width="5" style="transform-box:fill-box;transform-origin:center;opacity:0"/><circle id="s01-r4" cx="1560" cy="880" r="320" fill="none" stroke="#d9c8ff" stroke-width="5" style="transform-box:fill-box;transform-origin:center;opacity:0"/></svg><div id="s01-call" class="chip" style="position:absolute;left:200px;top:120px"><span id="s01-cd" style="width:34px;height:34px;border-radius:50%;background:#d6203b;display:inline-block"></span>Unknown number · calling…</div><div class="abs" style="left:200px;top:290px;color:#fff;width:1400px"><div id="s01-l1" class="t" style="font-size:110px">“This is the police.”</div><div id="s01-l2" class="t" style="font-size:110px">“Do not hang up.”</div><div id="s01-l3" class="t" style="font-size:110px">“Tell no one.”</div><div id="s01-l4" class="t hlw" style="font-size:124px;margin-top:22px">Transfer now.</div></div><svg id="s01-sp1" class="sp" style="left:760px;top:760px;width:60px;height:60px;opacity:0" viewBox="0 0 24 24"><path fill="#ffffff" d="M12 0C12 7 17 12 24 12C17 12 12 17 12 24C12 17 7 12 0 12C7 12 12 7 12 0Z"/></svg><svg id="s01-sp2" class="sp" style="left:1060px;top:700px;width:44px;height:44px;opacity:0" viewBox="0 0 24 24"><path fill="#ffd3f6" d="M12 0C12 7 17 12 24 12C17 12 12 17 12 24C12 17 7 12 0 12C7 12 12 7 12 0Z"/></svg><svg id="s01-sp3" class="sp" style="left:1190px;top:800px;width:52px;height:52px;opacity:0" viewBox="0 0 24 24"><path fill="#cfe8ff" d="M12 0C12 7 17 12 24 12C17 12 12 17 12 24C12 17 7 12 0 12C7 12 12 7 12 0Z"/></svg>
+
+</div></div>
+<script>
+
+const master = gsap.timeline({ paused: true });
+const tl = gsap.timeline();
+master.add(tl, 0);
+tl.timeScale(0.8321);
+const Q = s => document.querySelector(s);
+const QA = s => [...document.querySelectorAll(s)];
+function split(sel){const el=Q(sel);const txt=el.textContent;el.textContent='';const out=[];
+  txt.split(' ').forEach((w,i,a)=>{const W=document.createElement('span');W.className='w';
+    [...w].forEach(c=>{const s=document.createElement('span');s.className='ch';s.textContent=c;W.appendChild(s);out.push(s)});
+    el.appendChild(W);if(i<a.length-1)el.appendChild(document.createTextNode(' '))});return out}
+function count(sel,from,to,t,dur,fmt,ease){const o={v:from};Q(sel).textContent=fmt(from);
+  tl.to(o,{v:to,duration:dur,ease:ease||'power3.out',onUpdate:()=>{Q(sel).textContent=fmt(o.v)}},t)}
+function twinkle(sel,t,hold){tl.fromTo(sel,{scale:0,rotation:-70,opacity:0},{scale:1,rotation:0,opacity:1,duration:.55,ease:'back.out(2.2)'},t);
+  tl.to(sel,{scale:0,rotation:70,opacity:0,duration:.7,ease:'power2.in'},t+(hold||.9))}
+function rise(sel,t,o){o=o||{};tl.fromTo(sel,{opacity:0,y:o.y||60,scale:o.s||1,filter:'blur(16px)'},{opacity:1,y:0,scale:1,filter:'blur(0px)',duration:o.d||.9,ease:o.e||'power3.out',stagger:o.st||0},t)}
+function flipChars(sel,t,o){o=o||{};const els=split(sel);
+  tl.fromTo(els,{opacity:0,rotationX:-100,y:60,transformPerspective:800,transformOrigin:'50% 100%'},{opacity:1,rotationX:0,y:0,duration:o.d||.8,ease:'back.out(1.6)',stagger:o.st||.035},t)}
+function flipEl(sel,t,o){o=o||{};tl.fromTo(sel,{opacity:0,rotationX:-80,y:60,transformPerspective:900,transformOrigin:'50% 100%'},{opacity:1,rotationX:0,y:0,duration:o.d||.9,ease:'back.out(1.5)'},t)}
+function sheen(sel,t){tl.fromTo(sel,{x:0},{x:1300,duration:1.3,ease:'power2.inOut',immediateRender:false},t)}
+
+
+
+tl.to('#s01-call',{keyframes:{x:[0,-9,9,-7,7,-4,4,0]},duration:.8,ease:'none'},.4);
+tl.to('#s01-call',{keyframes:{x:[0,-9,9,-7,7,-4,4,0]},duration:.8,ease:'none'},2.0);
+tl.to('#s01-call',{keyframes:{x:[0,-9,9,-7,7,-4,4,0]},duration:.8,ease:'none'},3.6);
+tl.fromTo('#s01-cd',{scale:1},{scale:1.55,duration:.45,yoyo:true,repeat:6,ease:'sine.inOut'},.2);
+[.3,1.1,1.9,2.7,3.5].forEach((t,i)=>tl.fromTo('#s01-r'+i,{scale:.15,opacity:.75},{scale:3.3,opacity:0,duration:2.2,ease:'power1.out'},t));
+const B=split('#s01-l2'),C=split('#s01-l3');
+const op={opacity:0,rotationX:-100,y:60,transformPerspective:800,transformOrigin:'50% 100%'},to={opacity:1,rotationX:0,y:0,duration:.7,ease:'back.out(1.5)',stagger:.03};
+tl.fromTo(B,op,to,1.5); tl.fromTo(C,op,to,2.2);
+tl.fromTo('#s01-l4',{opacity:0,scale:.8,y:50,filter:'blur(22px)',rotationX:-60,transformPerspective:900},{opacity:1,scale:1,y:0,rotationX:0,filter:'blur(0px)',duration:1.0,ease:'expo.out'},3.0);
+tl.fromTo('#s01-l4',{backgroundPosition:'0% 0'},{backgroundPosition:'100% 0',duration:2.6,ease:'sine.inOut'},3.0);
+twinkle('#s01-sp1',3.5); twinkle('#s01-sp2',3.8); twinkle('#s01-sp3',4.1);
+
+tl.to('#s01-wrap',{opacity:0,filter:'blur(18px)',scale:.97,duration:0.75,ease:'power2.in'},6.40);
+window.__timelines['s01'] = master;
+</script>
+</template>

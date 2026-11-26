@@ -1,0 +1,45 @@
+<template>
+<link rel="stylesheet" href="assets/kd.css">
+<style>#root{position:absolute;inset:0;overflow:hidden}</style>
+<div id="root" data-composition-id="s11" data-width="1920" data-height="1080">
+<div id="s11-wrap" class="wrap">
+<div id="s11-o0" class="t thin" style="position:absolute;left:200px;top:130px;font-size:42px;color:#3a3560">Target outcome</div><div id="s11-o1" class="t" style="position:absolute;left:200px;top:195px;width:820px;font-size:100px">More people <span class="hl">pause</span> before they transfer.</div><div style="position:absolute;left:200px;top:500px;width:700px;height:300px;border-bottom:4px solid #141032"><div id="s11-br0" style="position:absolute;bottom:0;left:30px;width:100px;border-radius:18px 18px 0 0;background:linear-gradient(180deg,#b99bff,#723fd9)"></div><div id="s11-br1" style="position:absolute;bottom:0;left:180px;width:100px;border-radius:18px 18px 0 0;background:linear-gradient(180deg,#b99bff,#723fd9)"></div><div id="s11-br2" style="position:absolute;bottom:0;left:330px;width:100px;border-radius:18px 18px 0 0;background:linear-gradient(180deg,#b99bff,#723fd9)"></div><div id="s11-br3" style="position:absolute;bottom:0;left:480px;width:100px;border-radius:18px 18px 0 0;border:4px dashed #723fd9;border-bottom:0;background:repeating-linear-gradient(135deg,rgba(216,201,255,.8) 0 14px,rgba(244,238,255,.8) 14px 28px)"></div><div id="s11-tgt" class="label" style="position:absolute;left:596px;top:20px;font-size:30px;font-weight:600;color:#5a2cc4;line-height:1.2;width:130px">target —<br>measured in pilot</div></div><div id="s11-note" class="label" style="position:absolute;left:200px;top:815px;font-size:28px;color:#3a3560">Illustrative shape, no values.</div><div id="s11-s0" class="t thin" style="position:absolute;left:1060px;top:140px;font-size:40px;color:#3a3560">Expected contribution · to validate</div><div id="s11-r0" class="abs" style="left:1060px;top:230px;width:670px;display:flex;align-items:center;gap:26px"><div style="width:96px;height:96px;border-radius:50%;background:linear-gradient(135deg,#6a34d6,#b85cff);color:#fff;font-weight:800;font-size:40px;display:flex;align-items:center;justify-content:center;flex:none">1</div><div class="t mid" style="font-size:44px;line-height:1.1">Protect household savings</div></div><div id="s11-r1" class="abs" style="left:1060px;top:370px;width:670px;display:flex;align-items:center;gap:26px"><div style="width:96px;height:96px;border-radius:50%;background:linear-gradient(135deg,#6a34d6,#b85cff);color:#fff;font-weight:800;font-size:40px;display:flex;align-items:center;justify-content:center;flex:none">3</div><div class="t mid" style="font-size:44px;line-height:1.1">Less fear, less isolation</div></div><div id="s11-r2" class="abs" style="left:1060px;top:510px;width:670px;display:flex;align-items:center;gap:26px"><div style="width:96px;height:96px;border-radius:50%;background:linear-gradient(135deg,#6a34d6,#b85cff);color:#fff;font-weight:800;font-size:36px;display:flex;align-items:center;justify-content:center;flex:none">10</div><div class="t mid" style="font-size:44px;line-height:1.1">Inclusion for people 60+</div></div><div id="s11-r3" class="abs" style="left:1060px;top:650px;width:670px;display:flex;align-items:center;gap:26px"><div style="width:96px;height:96px;border-radius:50%;background:linear-gradient(135deg,#6a34d6,#b85cff);color:#fff;font-weight:800;font-size:36px;display:flex;align-items:center;justify-content:center;flex:none">16</div><div class="t mid" style="font-size:44px;line-height:1.1">Fraud-resistant trust</div></div><svg id="s11-sp1" class="sp" style="left:1650px;top:150px;width:52px;height:52px;opacity:0" viewBox="0 0 24 24"><path fill="#ffffff" d="M12 0C12 7 17 12 24 12C17 12 12 17 12 24C12 17 7 12 0 12C7 12 12 7 12 0Z"/></svg><svg id="s11-sp2" class="sp" style="left:960px;top:520px;width:40px;height:40px;opacity:0" viewBox="0 0 24 24"><path fill="#ffffff" d="M12 0C12 7 17 12 24 12C17 12 12 17 12 24C12 17 7 12 0 12C7 12 12 7 12 0Z"/></svg>
+
+</div></div>
+<script>
+
+const master = gsap.timeline({ paused: true });
+const tl = gsap.timeline();
+master.add(tl, 0);
+tl.timeScale(1.2187);
+const Q = s => document.querySelector(s);
+const QA = s => [...document.querySelectorAll(s)];
+function split(sel){const el=Q(sel);const txt=el.textContent;el.textContent='';const out=[];
+  txt.split(' ').forEach((w,i,a)=>{const W=document.createElement('span');W.className='w';
+    [...w].forEach(c=>{const s=document.createElement('span');s.className='ch';s.textContent=c;W.appendChild(s);out.push(s)});
+    el.appendChild(W);if(i<a.length-1)el.appendChild(document.createTextNode(' '))});return out}
+function count(sel,from,to,t,dur,fmt,ease){const o={v:from};Q(sel).textContent=fmt(from);
+  tl.to(o,{v:to,duration:dur,ease:ease||'power3.out',onUpdate:()=>{Q(sel).textContent=fmt(o.v)}},t)}
+function twinkle(sel,t,hold){tl.fromTo(sel,{scale:0,rotation:-70,opacity:0},{scale:1,rotation:0,opacity:1,duration:.55,ease:'back.out(2.2)'},t);
+  tl.to(sel,{scale:0,rotation:70,opacity:0,duration:.7,ease:'power2.in'},t+(hold||.9))}
+function rise(sel,t,o){o=o||{};tl.fromTo(sel,{opacity:0,y:o.y||60,scale:o.s||1,filter:'blur(16px)'},{opacity:1,y:0,scale:1,filter:'blur(0px)',duration:o.d||.9,ease:o.e||'power3.out',stagger:o.st||0},t)}
+function flipChars(sel,t,o){o=o||{};const els=split(sel);
+  tl.fromTo(els,{opacity:0,rotationX:-100,y:60,transformPerspective:800,transformOrigin:'50% 100%'},{opacity:1,rotationX:0,y:0,duration:o.d||.8,ease:'back.out(1.6)',stagger:o.st||.035},t)}
+function flipEl(sel,t,o){o=o||{};tl.fromTo(sel,{opacity:0,rotationX:-80,y:60,transformPerspective:900,transformOrigin:'50% 100%'},{opacity:1,rotationX:0,y:0,duration:o.d||.9,ease:'back.out(1.5)'},t)}
+function sheen(sel,t){tl.fromTo(sel,{x:0},{x:1300,duration:1.3,ease:'power2.inOut',immediateRender:false},t)}
+
+tl.fromTo('#s11-wrap',{clipPath:'circle(0% at 50% 100%)'},{clipPath:'circle(150% at 50% 100%)',duration:1.21,ease:'power2.inOut'},0);
+
+rise('#s11-o0',.5,{y:24,d:.6}); flipEl('#s11-o1',.8,{d:1.0});
+tl.fromTo('#s11-o1 .hl',{backgroundPosition:'0% 0'},{backgroundPosition:'100% 0',duration:2.4,ease:'sine.inOut'},1.0);
+[[0,60],[1,120],[2,190],[3,270]].forEach(([i,h],k)=>tl.fromTo('#s11-br'+i,{height:0},{height:h,duration:.9,ease:'back.out(1.4)'},1.9+k*.35));
+tl.fromTo('#s11-tgt',{opacity:0,x:-20},{opacity:1,x:0,duration:.6},3.4); rise('#s11-note',3.6,{y:14,d:.5});
+tl.fromTo('#s11-br3',{boxShadow:'0 0 0 rgba(114,63,217,0)'},{boxShadow:'0 0 40px rgba(114,63,217,.6)',duration:.8,yoyo:true,repeat:3,ease:'sine.inOut'},3.6);
+rise('#s11-s0',4.4,{y:24,d:.6});
+[0,1,2,3].forEach(i=>tl.fromTo('#s11-r'+i,{opacity:0,x:120,rotationY:50,transformPerspective:1200},{opacity:1,x:0,rotationY:0,duration:.8,ease:'power3.out'},4.8+i*.5));
+twinkle('#s11-sp1',4.0); twinkle('#s11-sp2',6.0);
+
+tl.to('#s11-wrap',{opacity:0,filter:'blur(18px)',scale:.97,duration:1.10,ease:'power2.in'},9.00);
+window.__timelines['s11'] = master;
+</script>
+</template>
