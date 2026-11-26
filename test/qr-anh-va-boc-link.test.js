@@ -85,3 +85,17 @@ test('qrChuoi gửi kèm văn bản qua HTTP /api/analyze và /api/analyze/so-bo
     await new Promise((resolve) => server.close(resolve));
   }
 });
+
+test('mở rộng thương hiệu Việt Nam: phát hiện giả mạo MoMo, eTax, EVN, ViettelPost, HDBank', () => {
+  const cases = [
+    { vanBan: 'Nhận quà từ MoMo tại https://momo-nhanthuong.top/nhan' },
+    { vanBan: 'Hoàn thuế eTax tại https://etax-hoanthue.online/kiemtra' },
+    { vanBan: 'EVN thông báo cắt điện, xem tại https://evn-thanhtoan.xyz/bill' },
+    { vanBan: 'ViettelPost giao hàng thất bại, xác nhận tại https://viettelpost-giaohang.shop/don' },
+    { vanBan: 'HDBank yêu cầu xác thực tại https://hdbank-baomat.site/login' },
+  ];
+  for (const c of cases) {
+    const r = analyze(c);
+    assert.ok(r.maLyDo.includes('WEB_BRAND_DOMAIN_MISMATCH'), `Thiếu WEB_BRAND_DOMAIN_MISMATCH cho: ${c.vanBan} -> [${r.maLyDo}]`);
+  }
+});

@@ -63,6 +63,23 @@ describe('VietQR EMVCo Inspector (offline, §4.3, §11, i18n)', () => {
     assert.ok(kqEn.canhBaoNoiDung.some((c) => /Integrity check/i.test(c)));
   });
 
+  it('nhận diện thêm BIN SeABank (970440) và cảnh báo memo hoàn thuế / cắt điện / phí hải quan + TLD .shop/.online', () => {
+    const tag38 = buildTlv('38', `${buildTlv('00', 'A000000727')}${buildTlv('01', `${buildTlv('00', '970440')}${buildTlv('01', '9876543210')}`)}${buildTlv('02', 'QRIBFTTA')}`);
+    const tag62 = buildTlv('62', buildTlv('08', 'Hoan thue TNCN qua eTax phi hai quan'));
+    const body = `${buildTlv('00', '01')}${buildTlv('01', '12')}${tag38}${buildTlv('53', '704')}${buildTlv('54', '1500000')}${buildTlv('58', 'VN')}${tag62}6304`;
+    const qr = `${body}${tinhCrc16Ccitt(new TextEncoder().encode(body))}`;
+
+    const kq = phanTichVietQR(qr, 'vi');
+    assert.equal(kq.crcHopLe, true);
+    assert.equal(kq.nganHang, 'SeABank');
+    assert.ok(kq.canhBaoNoiDung.some((c) => /hoàn thuế/i.test(c)));
+    assert.ok(kq.canhBaoNoiDung.some((c) => /hải quan/i.test(c)));
+
+    const kqShop = phanTichVietQR('https://viettelpost-giaohang.shop/nhanhang', 'vi');
+    assert.equal(kqShop.loaiQR, 'url');
+    assert.ok(kqShop.canhBaoNoiDung.length >= 1);
+  });
+
   it('chặn các URI scheme nguy hiểm (javascript:, intent:) và cảnh báo link .apk', () => {
     const kqJs = phanTichVietQR('javascript:alert(1)', 'vi');
     assert.equal(kqJs.hopLe, false);
@@ -107,5 +124,9 @@ describe('Bộ sàng lọc Tầng 0 tại máy (`tang-0-cuc-bo.ts`)', () => {
     const lanh = sangLocTinDenTaiMay('[Vietcombank] Mã OTP của quý khách là 123456. Tuyệt đối không chia sẻ mã OTP cho bất kỳ ai.');
     assert.equal(lanh.coDauHieu, false);
     assert.equal(lanh.nhanDeXuat, 'CHUA_THAY');
+
+    const evnFake = sangLocTinDenTaiMay('Thông báo cắt điện khẩn cấp EVN, xem hóa đơn tại evn-hoadon.online');
+    assert.equal(evnFake.coDauHieu, true);
+    assert.equal(evnFake.nhanDeXuat, 'CAO');
   });
 });

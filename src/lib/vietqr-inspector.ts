@@ -47,26 +47,52 @@ const DANH_BA_BIN: Record<string, string> = {
   '970454': 'BVBank',
   '970406': 'DongA Bank',
   '970449': 'LPBank',
+  '970440': 'SeABank',
+  '970425': 'ABBank',
+  '970414': 'OceanBank',
+  '970419': 'NCB',
+  '970427': 'VietABank',
+  '970428': 'Nam A Bank',
+  '970433': 'VietBank',
+  '970438': 'BaoViet Bank',
+  '970439': 'Public Bank',
+  '970452': 'KienlongBank',
+  '970458': 'UOB Vietnam',
+  '970424': 'Shinhan Bank',
+  '970446': 'Co-opBank',
+  '422589': 'CIMB Bank',
 };
 
 const TU_KHOA_BAY_NOI_DUNG = [
   {
     ma: 'TAM_GIU',
-    mau: /\b(tam giu|tai khoan an toan|bao lanh|chung minh vo toi)\b/i,
-    vi: 'Nội dung chuyển ghi "tạm giữ / bảo lãnh / chứng minh vô tội" — dấu hiệu lừa đảo thường gặp.',
-    en: 'Transfer memo mentions "holding / bail / prove innocence" — a common scam pattern.',
+    mau: /\b(tam giu|tai khoan an toan|bao lanh|chung minh vo toi|giai toa)\b/i,
+    vi: 'Nội dung chuyển ghi "tạm giữ / bảo lãnh / chứng minh vô tội / giải tỏa" — dấu hiệu lừa đảo thường gặp.',
+    en: 'Transfer memo mentions "holding / bail / prove innocence / unfreeze" — a common scam pattern.',
   },
   {
     ma: 'PHAT_NGUOI',
-    mau: /\b(phat nguoi|vi pham giao thong|khoi to|toa an)\b/i,
-    vi: 'Nội dung chuyển ghi "phạt nguội / khởi tố / tòa án" vào tài khoản qua QR.',
-    en: 'Transfer memo mentions "traffic fine / prosecution / court" via QR transfer.',
+    mau: /\b(phat nguoi|nop phat|vi pham giao thong|khoi to|toa an|lenh bat|dong bo vneid|dong bo bhyt)\b/i,
+    vi: 'Nội dung chuyển ghi "phạt nguội / nộp phạt / khởi tố / đồng bộ VNeID" vào tài khoản qua QR.',
+    en: 'Transfer memo mentions "traffic fine / prosecution / VNeID sync" via QR transfer.',
   },
   {
     ma: 'PHI_HO_SO',
-    mau: /\b(phi ho so|thu hoi von|tien coc|giai ngan|nang han muc)\b/i,
-    vi: 'Nội dung chuyển ghi "phí hồ sơ / tiền cọc / giải ngân" — cẩn trọng phí ứng trước.',
-    en: 'Transfer memo mentions "processing fee / deposit / disbursement" — watch out for advance-fee traps.',
+    mau: /\b(phi ho so|thu hoi von|tien coc|giai ngan|nang han muc|mo khoa|doi ung|mo the vip|phi kich hoat)\b/i,
+    vi: 'Nội dung chuyển ghi "phí hồ sơ / tiền cọc / giải ngân / đối ứng" — cẩn trọng phí ứng trước.',
+    en: 'Transfer memo mentions "processing fee / deposit / disbursement / matching transfer" — watch out for advance-fee traps.',
+  },
+  {
+    ma: 'THUE_HOA_DON_DIEN',
+    mau: /\b(hoan thue|cat dien|tien dien qua han|dong bo etax)\b/i,
+    vi: 'Nội dung chuyển nhắc "hoàn thuế / cắt điện / eTax" — cơ quan thuế và điện lực không thu qua QR cá nhân.',
+    en: 'Transfer memo mentions "tax refund / power cutoff / eTax" — tax and power utilities do not collect via personal QR.',
+  },
+  {
+    ma: 'HAI_QUAN_VE_COC',
+    mau: /\b(phi hai quan|thong quan|nha o xa hoi|dat coc ve)\b/i,
+    vi: 'Nội dung chuyển nhắc "phí hải quan / thông quan / đặt cọc vé / nhà ở xã hội" — cần kiểm tra lại người nhận.',
+    en: 'Transfer memo mentions "customs fee / ticket deposit / social housing" — verify the recipient independently.',
   },
 ];
 
@@ -152,7 +178,7 @@ export function phanTichVietQR(raw = '', lang: NgonNguVietQR = 'vi'): KetQuaViet
       tenMien = chuoi.slice(0, 60);
     }
     const laLinkLa =
-      /\.(apk|exe|zip|xyz|top|tk|ml|ga|cf|gq|click|loan|buzz|icu|vip)$/i.test(tenMien) ||
+      /\.(apk|exe|zip|xyz|top|tk|ml|ga|cf|gq|click|loan|buzz|icu|vip|rest|cyou|shop|online|site|sbs|cfd|asia)$/i.test(tenMien) ||
       /\.apk(\?|#|$)/i.test(chuoi);
     const canhBaoUrl = laEn
       ? [

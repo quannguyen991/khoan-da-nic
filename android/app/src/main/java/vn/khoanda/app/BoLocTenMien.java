@@ -20,23 +20,31 @@ public final class BoLocTenMien {
 
     private static final List<String> ALLOWLIST_CHINH_THUC = Arrays.asList(
             "gov.vn", "chinhphu.vn", "dichvucong.gov.vn", "bocongan.gov.vn", "csgt.vn",
-            "gdt.gov.vn", "baohiemxahoi.gov.vn", "evn.com.vn", "vneid.gov.vn",
+            "gdt.gov.vn", "thuedientu.gdt.gov.vn", "baohiemxahoi.gov.vn",
+            "evn.com.vn", "evnhanoi.vn", "evnspc.vn", "vneid.gov.vn",
             "vietcombank.com.vn", "bidv.com.vn", "vietinbank.vn", "agribank.com.vn",
             "techcombank.com.vn", "mbbank.com.vn", "vpbank.com.vn", "acb.com.vn",
             "tpbank.vn", "sacombank.com.vn", "hdbank.com.vn", "vib.com.vn",
             "msb.com.vn", "ocb.com.vn", "seabank.com.vn", "shb.com.vn",
-            "momo.vn", "zalopay.vn", "vnpay.vn", "viettelmoney.vn"
+            "eximbank.com.vn", "lpbank.com.vn",
+            "momo.vn", "zalopay.vn", "vnpay.vn", "viettelmoney.vn",
+            "vietnampost.vn", "vnpost.vn", "viettelpost.com.vn", "ghn.vn", "ghtk.vn", "shopee.vn"
     );
 
     private static final Set<String> DUOI_MIEN_RUI_RO = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
-            "top", "xyz", "vip", "icu", "buzz", "click", "link", "tk", "ml", "ga", "cf", "gq", "loan"
+            "top", "xyz", "vip", "icu", "buzz", "click", "link", "tk", "ml", "ga", "cf", "gq", "loan",
+            "rest", "cyou", "shop", "online", "site", "website", "space", "fun", "live", "work",
+            "monster", "quest", "sbs", "cfd", "bond", "pro", "store", "life", "help", "asia"
     )));
 
     private static final List<String> TU_KHOA_MAO_DANH = Arrays.asList(
             "bocongan", "congan", "canhsat", "vienkiemsat", "toaan",
-            "dichvucong", "vneid", "vssid", "etax", "cucthue", "tongcucthue", "phatnguoi",
+            "dichvucong", "vneid", "vssid", "bhxh", "etax", "cucthue", "tongcucthue", "phatnguoi",
+            "evn", "dienluc", "vietnampost", "vnpost", "viettelpost", "ghn", "ghtk", "shopee", "tiktok",
             "vietcombank", "bidv", "vietinbank", "agribank", "techcombank",
-            "mbbank", "vpbank", "sacombank", "tpbank", "zalopay", "momopay"
+            "mbbank", "vpbank", "acb", "sacombank", "tpbank", "hdbank", "vib",
+            "msb", "ocb", "shb", "seabank", "eximbank", "lpbank",
+            "momo", "momopay", "zalopay", "vnpay", "viettelmoney", "napas"
     );
 
     private static final Set<String> DANH_SACH_DEN_MAC_DINH = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
@@ -48,8 +56,16 @@ public final class BoLocTenMien {
             "vneid-online.top",
             "phatnguoi-csgt.xyz",
             "cucthue-vn.top",
+            "etax-hoanthue.online",
+            "dienluc-evn.top",
+            "bhxh-vssid.xyz",
             "vietcombank-xacthuc.xyz",
-            "bidv-xacthuc.top"
+            "bidv-xacthuc.top",
+            "techcombank-baomat.online",
+            "mbbank-xacthuc.site",
+            "viettelpost-giaohang.shop",
+            "vnpost-nhanhang.online",
+            "momo-nhanthuong.top"
     )));
 
     private static final Set<String> DANH_SACH_DEN_BO_SUNG = ConcurrentHashMap.newKeySet();
@@ -107,6 +123,44 @@ public final class BoLocTenMien {
         for (String kw : TU_KHOA_MAO_DANH) {
             if (khongDauGach.contains(kw)) return true;
         }
+
+        // Bat bien the typosquatting gan giong ten mien chinh thuc (khoang cach <= 2 voi nhan >= 6 ky tu)
+        String nhanChinh = layNhanChinh(d);
+        if (nhanChinh.length() >= 6) {
+            for (String goc : ALLOWLIST_CHINH_THUC) {
+                String nhanGoc = layNhanChinh(goc);
+                if (nhanGoc.length() >= 6 && !nhanChinh.equals(nhanGoc) && levenshtein(nhanChinh, nhanGoc) <= 2) {
+                    return true;
+                }
+            }
+        }
         return false;
+    }
+
+    private static String layNhanChinh(String domain) {
+        String s = domain;
+        if (s.startsWith("www.")) s = s.substring(4);
+        int dot = s.indexOf('.');
+        return dot > 0 ? s.substring(0, dot) : s;
+    }
+
+    private static int levenshtein(String a, String b) {
+        int m = a.length();
+        int n = b.length();
+        if (Math.abs(m - n) > 2) return 3;
+        int[] prev = new int[n + 1];
+        int[] curr = new int[n + 1];
+        for (int j = 0; j <= n; j++) prev[j] = j;
+        for (int i = 1; i <= m; i++) {
+            curr[0] = i;
+            for (int j = 1; j <= n; j++) {
+                int cost = a.charAt(i - 1) == b.charAt(j - 1) ? 0 : 1;
+                curr[j] = Math.min(Math.min(curr[j - 1] + 1, prev[j] + 1), prev[j - 1] + cost);
+            }
+            int[] tmp = prev;
+            prev = curr;
+            curr = tmp;
+        }
+        return prev[n];
     }
 }

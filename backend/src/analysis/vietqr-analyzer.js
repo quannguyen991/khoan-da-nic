@@ -105,18 +105,18 @@ function phanTichChuoiQr(vanBan = '') {
 
     if (noiDung) {
       const kd = boDau(noiDung).toLowerCase();
-      if (/\b(tam giu|tai khoan an toan|bao lanh|chung minh vo toi)\b/.test(kd)) {
+      if (/\b(tam giu|tai khoan an toan|bao lanh|chung minh vo toi|giai toa)\b/.test(kd)) {
         them('FIN_SAFE_ACCOUNT', noiDung);
         them('FIN_TRANSFER_REQUEST', noiDung);
         them('WEB_QR_TO_LOGIN_PAYMENT', noiDung);
       }
-      if (/\b(phat nguoi|vi pham giao thong|khoi to|toa an|lenh bat)\b/.test(kd)) {
+      if (/\b(phat nguoi|nop phat|vi pham giao thong|khoi to|toa an|lenh bat|dong bo vneid|dong bo bhyt)\b/.test(kd)) {
         them('ID_AUTHORITY_IMPERSONATION', noiDung);
         them('MAN_FEAR_THREAT', noiDung);
         them('FIN_TRANSFER_REQUEST', noiDung);
         them('WEB_QR_TO_LOGIN_PAYMENT', noiDung);
       }
-      if (/\b(phi ho so|thu hoi von|tien coc|giai ngan|nang han muc|mo khoa)\b/.test(kd)) {
+      if (/\b(phi ho so|thu hoi von|tien coc|giai ngan|nang han muc|mo khoa|hoan thue|cat dien|phi hai quan|thong quan|doi ung|mo the vip|phi kich hoat|nha o xa hoi|dat coc ve)\b/.test(kd)) {
         them('FIN_RECOVERY_FEE', noiDung);
         them('OFF_ADVANCE_FEE', noiDung);
         them('FIN_TRANSFER_REQUEST', noiDung);

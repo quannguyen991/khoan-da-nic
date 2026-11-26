@@ -89,6 +89,10 @@ test('4. Local DNS VPN: chỉ định tuyến 10.111.222.2/32, không 0.0.0.0/0,
   assert.match(PLUGIN, /tatVpnDns/);
   assert.match(NATIVE_TS, /batVpnDns/);
 
+  const bl = boChuThich(JAVA('BoLocTenMien.java'));
+  assert.match(bl, /levenshtein\(/, 'BoLocTenMien phải có kiểm tra typosquatting bằng Levenshtein');
+  assert.match(bl, /viettelpost/, 'BoLocTenMien phải có từ khóa mạo danh giao hàng/ví điện tử');
+
   const appTsx = doc('src/App.tsx');
   for (const fn of [
     'trangThaiAppTinNhanMacDinh', 'quyenUsageStats', 'xinQuyenUsageStats',
