@@ -102,6 +102,18 @@ interface CauNoi {
     vanBan: string; doTinCayThapNhat: number; ghiAmFailed: boolean; maLoi?: string;
   }>;
   dungNghe(): Promise<void>;
+  trangThaiAppTinNhanMacDinh(): Promise<{
+    goiSmsMacDinh: string | null; daBatDocThongBao: boolean; daBatThongBaoHeThong: boolean; hoTroSmsQuaThongBao: boolean;
+  }>;
+  trangThaiQuyenUsageStats(): Promise<{ daBat: boolean }>;
+  moCaiDatUsageStats(): Promise<void>;
+  kiemTraNfc(): Promise<{ hoTro: boolean; dangBat: boolean }>;
+  ocrAnh(o: { anh: string }): Promise<{
+    docDuoc: boolean; vanBan: string; dangKiem: boolean; coTinHieuTien: boolean; maLoi?: string;
+  }>;
+  trangThaiVpnDns(): Promise<{ dangChay: boolean; daCapQuyen: boolean; soTenMienDaChan: number }>;
+  batVpnDns(): Promise<{ dangChay: boolean; maLoi?: string }>;
+  tatVpnDns(): Promise<{ dangChay: boolean }>;
 }
 
 /**
@@ -1249,4 +1261,91 @@ export async function datNhipBaoVeNative(o: { bat: boolean; token?: string; duon
   try {
     await hanGio(c.datNhipBaoVe(o), { ok: false });
   } catch { /* APK cũ chưa có hàm này */ }
+}
+
+// ═══════════ Mở rộng Play-Store-safe: SMS qua thông báo, UsageStats F3, NFC F1, OCR offline, Local DNS VPN ═══════════
+
+export interface TrangThaiSmsMacDinh {
+  goiSmsMacDinh: string | null;
+  daBatDocThongBao: boolean;
+  daBatThongBaoHeThong: boolean;
+  hoTroSmsQuaThongBao: boolean;
+}
+
+export async function trangThaiAppTinNhanMacDinh(): Promise<TrangThaiSmsMacDinh | null> {
+  const c = (await cauHoacNull())?.cau;
+  if (!c || typeof c.trangThaiAppTinNhanMacDinh !== 'function') return null;
+  try {
+    return await hanGio(c.trangThaiAppTinNhanMacDinh(), null as unknown as TrangThaiSmsMacDinh);
+  } catch { return null; }
+}
+
+export async function quyenUsageStats(): Promise<QuyenNative> {
+  const c = (await cauHoacNull())?.cau;
+  if (!c || typeof c.trangThaiQuyenUsageStats !== 'function') return 'khong_ho_tro';
+  try {
+    return (await hanGio(c.trangThaiQuyenUsageStats(), { daBat: false })).daBat ? 'da_bat' : 'chua_bat';
+  } catch { return 'khong_ho_tro'; }
+}
+
+export async function xinQuyenUsageStats(): Promise<void> {
+  const c = (await cauHoacNull())?.cau;
+  if (!c || typeof c.moCaiDatUsageStats !== 'function') return;
+  try { await c.moCaiDatUsageStats(); } catch { /* ROM chặn */ }
+}
+
+export async function kiemTraNfc(): Promise<{ hoTro: boolean; dangBat: boolean } | null> {
+  const c = (await cauHoacNull())?.cau;
+  if (!c || typeof c.kiemTraNfc !== 'function') return null;
+  try {
+    return await hanGio(c.kiemTraNfc(), null as unknown as { hoTro: boolean; dangBat: boolean });
+  } catch { return null; }
+}
+
+export interface KetQuaOcrTaiMay {
+  docDuoc: boolean;
+  vanBan: string;
+  dangKiem: boolean;
+  coTinHieuTien: boolean;
+  maLoi?: string;
+}
+
+/** Chạy OCR offline trên thiết bị cho một ảnh chụp/chia sẻ (không quét thư viện ảnh). */
+export async function ocrAnhTaiMay(anh: string): Promise<KetQuaOcrTaiMay | null> {
+  const c = (await cauHoacNull())?.cau;
+  if (!c || typeof c.ocrAnh !== 'function') return null;
+  try {
+    return await hanGio(
+      c.ocrAnh({ anh }),
+      { docDuoc: false, vanBan: '', dangKiem: false, coTinHieuTien: false, maLoi: 'HET_GIO_OCR' },
+      8000,
+    );
+  } catch {
+    return { docDuoc: false, vanBan: '', dangKiem: false, coTinHieuTien: false, maLoi: 'OCR_THAT_BAI' };
+  }
+}
+
+export async function trangThaiVpnDns(): Promise<{ dangChay: boolean; daCapQuyen: boolean; soTenMienDaChan: number } | null> {
+  const c = (await cauHoacNull())?.cau;
+  if (!c || typeof c.trangThaiVpnDns !== 'function') return null;
+  try {
+    return await hanGio(c.trangThaiVpnDns(), null as unknown as { dangChay: boolean; daCapQuyen: boolean; soTenMienDaChan: number });
+  } catch { return null; }
+}
+
+export async function batVpnDns(): Promise<{ dangChay: boolean; maLoi?: string } | null> {
+  const c = (await cauHoacNull())?.cau;
+  if (!c || typeof c.batVpnDns !== 'function') return null;
+  try {
+    return await hanGio(c.batVpnDns(), { dangChay: false, maLoi: 'HET_GIO' }, 60_000);
+  } catch { return { dangChay: false, maLoi: 'KHONG_BAT_DUOC_VPN' }; }
+}
+
+export async function tatVpnDns(): Promise<boolean> {
+  const c = (await cauHoacNull())?.cau;
+  if (!c || typeof c.tatVpnDns !== 'function') return false;
+  try {
+    await hanGio(c.tatVpnDns(), { dangChay: false });
+    return true;
+  } catch { return false; }
 }

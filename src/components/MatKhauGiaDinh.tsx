@@ -1,42 +1,21 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ChevronLeft, Users, Check, ShieldCheck, Trash2 } from 'lucide-react';
+import { ChevronLeft, Users, Check, ShieldCheck, Trash2, Eye, Sparkles } from 'lucide-react';
+import { tinhTinHieuNgay, taoMaGiongGiaDinh } from '../lib/tin-hieu-ngay';
+import { TOTEM_UI, tra, type Lang } from '../catalog';
 
 /**
- * MẬT KHẨU GIA ĐÌNH — thứ deepfake không vượt qua được.
+ * MẬT KHẨU GIA ĐÌNH & TÍN HIỆU ĐỔI MỖI NGÀY — thứ deepfake không vượt qua được.
  *
- * ══════════ VÌ SAO CẦN, KHI ĐÃ CÓ CẢ BỘ LUẬT VÀ AI ══════════
- *
- * Cả hệ thống phân tích của Khoan Đã đọc CHỮ. Một cuộc gọi video giả mặt con
- * cháu, giọng nhân bản từ ba mươi giây video trên mạng — không có chữ nào để
- * đọc, không có tin nhắn nào để dán vào ô kiểm.
- *
- * Cách chống rẻ nhất đã có từ trước khi có máy tính: một cụm từ cả nhà thống
- * nhất trước, không bao giờ gửi qua mạng. Kẻ giả mạo không biết nó, và không có
- * mô hình nào sinh ra nó được.
- *
- * ══════════ ⚠️ APP KHÔNG LƯU MẬT KHẨU. ĐÂY LÀ QUYẾT ĐỊNH, KHÔNG PHẢI THIẾU SÓT ══════════
- *
- * Lưu vào máy thì tiện hơn: app kiểm hộ, bác chỉ cần gõ vào. Nhưng đặt cạnh
- * chính tính năng "kiểm xem máy có đang bị điều khiển không" thì thấy ngay vì
- * sao không được: kịch bản lừa đảo phổ biến nhất ở Việt Nam kết thúc bằng việc
- * kẻ tấn công NHÌN ĐƯỢC MÀN HÌNH của nạn nhân.
- *
- * Nếu mật khẩu nằm trong máy, thứ duy nhất chống được deepfake sẽ lộ ngay trong
- * đúng kịch bản mà nó sinh ra để chống. App chỉ cần NHẮC bác hỏi — nó không cần
- * biết câu trả lời, và không nên biết.
- *
- * ⚠️ GỢI Ý THÌ LƯU, ĐÁP ÁN THÌ KHÔNG. Người cao tuổi quên là chuyện thật, và
- * "quên mất mật khẩu" mà không có lối ra thì tính năng chết. Gợi ý là câu chỉ
- * người trong nhà hiểu ("con vật nhà mình nuôi hồi ở quê"), đọc trộm cũng không
- * suy ra được đáp án.
+ * - Mật khẩu miệng: app KHÔNG lưu mật khẩu, chỉ lưu câu gợi nhớ (§12).
+ * - Tín hiệu đổi mỗi ngày: 8 màu × 16 biểu tượng × 90 số kiểm = 11.520 tổ hợp,
+ *   sinh hạt giống bằng CSPRNG, hỗ trợ cả nhấn giữ cảm ứng lẫn giữ phím Space/Enter (§4.4).
  */
 
 const KHOA = 'khoan_da_mat_khau_gia_dinh';
 
 export interface MatKhauGiaDinhLuu {
   daLap: boolean;
-  /** Câu gợi nhớ. KHÔNG PHẢI mật khẩu — xem chú thích đầu tệp. */
   goiY: string;
   ngayLap: number;
 }
@@ -51,22 +30,41 @@ export function docMatKhauGiaDinh(): MatKhauGiaDinhLuu | null {
 }
 
 export function MatKhauGiaDinh({
-  setView, t,
+  setView,
+  t,
+  lang = 'vi',
 }: {
   setView: (v: any) => void;
   t: any;
+  lang?: Lang;
 }) {
   const [daLuu, setDaLuu] = useState<MatKhauGiaDinhLuu | null>(() => docMatKhauGiaDinh());
   const [goiY, setGoiY] = useState('');
   const [buoc, setBuoc] = useState<1 | 2>(daLuu ? 2 : 1);
+  const [seedNgay, setSeedNgay] = useState<string>(() => {
+    try {
+      let s = localStorage.getItem('khoan_da_totem_seed') || '';
+      if (!s) {
+        s = taoMaGiongGiaDinh();
+        localStorage.setItem('khoan_da_totem_seed', s);
+      }
+      return s;
+    } catch {
+      return taoMaGiongGiaDinh();
+    }
+  });
+  const [nhapSeed, setNhapSeed] = useState('');
+  const [dangXemTotem, setDangXemTotem] = useState(false);
+  const [dangXemSeed, setDangXemSeed] = useState(false);
+  const totemHomNay = tinhTinHieuNgay(seedNgay, Date.now(), lang);
+  const chuTotem = (ma: string) => tra(TOTEM_UI, ma, lang) ?? '';
 
   const luu = () => {
     const m: MatKhauGiaDinhLuu = { daLap: true, goiY: goiY.trim(), ngayLap: Date.now() };
     try {
       localStorage.setItem(KHOA, JSON.stringify(m));
     } catch {
-      // Không lưu được thì tính năng vẫn dùng được — nó nằm ở đầu người, không
-      // ở trong máy. Chỉ mất phần nhắc lại gợi ý.
+      // Không lưu được thì tính năng vẫn dùng được
     }
     setDaLuu(m);
     setBuoc(2);
@@ -112,13 +110,6 @@ export function MatKhauGiaDinh({
 
       {buoc === 1 ? (
         <>
-          {/*
-            NGHI THỨC BA BƯỚC — cố ý không rút ngắn.
-
-            Tính năng này chỉ hiệu quả nếu CẢ NHÀ cùng biết, nên màn hình phải
-            nói rõ đây là việc làm cùng nhau, không phải một ô để bác điền một
-            mình rồi xong.
-          */}
           <div className="w-full max-w-[420px] bg-white rounded-[26px] p-5 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] mb-5">
             <h3 className="font-black text-[17px] text-[#311068] mb-3">{t('Cách làm')}</h3>
             <ol className="flex flex-col gap-3">
@@ -139,10 +130,6 @@ export function MatKhauGiaDinh({
 
           <div className="w-full max-w-[420px] bg-white rounded-[26px] p-5 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] mb-5">
             <h3 className="font-black text-[17px] text-[#311068] mb-1">{t('Câu nhắc cho bác')}</h3>
-            {/*
-              ⚠️ Ô NÀY KHÔNG PHẢI CHỖ GÕ MẬT KHẨU. Nói thẳng ra, vì bác sẽ định
-              gõ mật khẩu vào đây — đó là phản xạ tự nhiên với mọi ô nhập.
-            */}
             <p className="text-[14px] text-slate-600 leading-relaxed mb-3">
               {t('Khoan Đã KHÔNG giữ mật khẩu. Đây chỉ là câu nhắc cho bác.')}
             </p>
@@ -192,13 +179,120 @@ export function MatKhauGiaDinh({
 
           <button
             onClick={xoa}
-            className="w-full max-w-[420px] min-h-[52px] px-4 bg-white hover:bg-slate-50 active:scale-95 text-slate-600 font-bold rounded-2xl text-[15px] border-2 border-slate-200 flex items-center justify-center gap-2 transition-all"
+            className="w-full max-w-[420px] min-h-[52px] px-4 bg-white hover:bg-slate-50 active:scale-95 text-slate-600 font-bold rounded-2xl text-[15px] border-2 border-slate-200 flex items-center justify-center gap-2 transition-all mb-5"
           >
             <Trash2 size={18} />
             <span>{t('Đổi mật khẩu khác')}</span>
           </button>
         </>
       )}
+
+      {/* Tín hiệu gia đình đổi mỗi ngày (Daily Family Totem — 11.520 tổ hợp, hỗ trợ cả bàn phím A11y) */}
+      <div className="w-full max-w-[420px] bg-white rounded-[26px] p-5 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] mt-2 space-y-3">
+        <div className="flex items-center gap-2">
+          <Sparkles size={20} className="text-[#7c3aed] shrink-0" />
+          <h3 className="font-black text-[17px] text-[#311068]">{chuTotem('TIEU_DE')}</h3>
+        </div>
+        <p className="text-[14px] text-slate-600 leading-relaxed">{chuTotem('MO_TA')}</p>
+
+        <button
+          type="button"
+          aria-pressed={dangXemTotem}
+          onPointerDown={() => setDangXemTotem(true)}
+          onPointerUp={() => setDangXemTotem(false)}
+          onPointerLeave={() => setDangXemTotem(false)}
+          onPointerCancel={() => setDangXemTotem(false)}
+          onKeyDown={(e) => {
+            if (e.key === ' ' || e.key === 'Enter') {
+              e.preventDefault();
+              setDangXemTotem(true);
+            }
+          }}
+          onKeyUp={(e) => {
+            if (e.key === ' ' || e.key === 'Enter') setDangXemTotem(false);
+          }}
+          onBlur={() => setDangXemTotem(false)}
+          style={
+            dangXemTotem
+              ? { backgroundColor: totemHomNay.mau.nenHex, color: totemHomNay.mau.maHex }
+              : undefined
+          }
+          className="w-full min-h-[64px] px-4 py-3 rounded-2xl border-2 border-dashed border-[#7c3aed] bg-purple-50 text-[#311068] font-black text-[17px] flex items-center justify-center gap-2 select-none touch-none"
+        >
+          <Eye size={20} className="shrink-0" />
+          <span>{dangXemTotem ? totemHomNay.chuoiHienThi : chuTotem('GIU_XEM_TOTEM')}</span>
+        </button>
+
+        <div className="text-[14px] text-slate-700 bg-slate-50 rounded-xl p-3 flex items-center justify-between gap-2">
+          <button
+            type="button"
+            aria-pressed={dangXemSeed}
+            onPointerDown={() => setDangXemSeed(true)}
+            onPointerUp={() => setDangXemSeed(false)}
+            onPointerLeave={() => setDangXemSeed(false)}
+            onPointerCancel={() => setDangXemSeed(false)}
+            onKeyDown={(e) => {
+              if (e.key === ' ' || e.key === 'Enter') {
+                e.preventDefault();
+                setDangXemSeed(true);
+              }
+            }}
+            onKeyUp={(e) => {
+              if (e.key === ' ' || e.key === 'Enter') setDangXemSeed(false);
+            }}
+            onBlur={() => setDangXemSeed(false)}
+            className="min-h-[52px] px-2 text-left flex items-center gap-1.5 select-none touch-none"
+          >
+            <Eye size={16} className="text-slate-500 shrink-0" />
+            <span>
+              {chuTotem('MA_GHEP_NHAN')}{' '}
+              <b className="font-mono tracking-wider">{dangXemSeed ? seedNgay : '••••••••'}</b>
+            </span>
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              const moi = taoMaGiongGiaDinh();
+              setSeedNgay(moi);
+              try {
+                localStorage.setItem('khoan_da_totem_seed', moi);
+              } catch {
+                // ignore
+              }
+            }}
+            className="min-h-[52px] px-3 rounded-xl bg-white border border-slate-300 font-bold text-slate-800 text-[14px] shrink-0"
+          >
+            {chuTotem('DOI_MA')}
+          </button>
+        </div>
+
+        <div className="flex gap-2">
+          <input
+            value={nhapSeed}
+            onChange={(e) => setNhapSeed(e.target.value.toUpperCase())}
+            placeholder={chuTotem('NHAP_MA_PLACEHOLDER')}
+            maxLength={12}
+            className="flex-1 min-h-[52px] px-3 rounded-xl border border-slate-300 text-[14px] font-mono"
+          />
+          <button
+            type="button"
+            onClick={() => {
+              const s = nhapSeed.trim().toUpperCase();
+              if (s.length < 4) return;
+              setSeedNgay(s);
+              setNhapSeed('');
+              try {
+                localStorage.setItem('khoan_da_totem_seed', s);
+              } catch {
+                // ignore
+              }
+            }}
+            className="min-h-[52px] px-4 rounded-xl bg-[#311068] text-white font-bold text-[14px]"
+          >
+            {chuTotem('DONG_BO')}
+          </button>
+        </div>
+      </div>
     </motion.div>
   );
 }

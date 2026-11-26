@@ -32,8 +32,8 @@
   "phienBan": {
     "analysis": "1.0.0",
     "registry": "1.2.0",
-    "rule": "1.6.5",
-    "prompt": "1.4.0"
+    "rule": "1.6.11",
+    "prompt": "1.4.2"
   },
   "truongHopDong": [
     "nhan",

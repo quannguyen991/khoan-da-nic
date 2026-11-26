@@ -1,0 +1,463 @@
+OpenAI Codex v0.164.0
+--------
+workdir: D:\KHOAN-DA-24H\dtkn-2026\vong3-tham-khao\cham-diem
+model: gpt-6.1-terra
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: high
+reasoning summaries: none
+session id: 01a21855-4503-7411-8176-e7c66b1140cc
+--------
+user
+Trả lời bằng tiếng Việt. Bạn là giám khảo độc lập, khó tính, chấm trung thực theo bằng chứng trong văn bản; không nâng điểm vì lịch sự. Được tìm web kiểm vài số liệu.
+
+=== ĐỀ BÀI VÒNG 3 ===
+--- TRANG 1 ---
+ĐỀ BÀI VÒNG 3 CUỘC THI  
+ĐẤU TRƯỜNG KHỞI NGHIỆP 2026 
+1.​ BỐI CẢNH 
+TIẾT KIỆM: ĐỘNG LỰC MỚI CỦA PHÁT TRIỂN BỀN VỮNG  
+ 
+Thế giới đang bước vào giai đoạn mà phát triển bền vững không còn là một lựa 
+chọn, mà đã trở thành yêu cầu tất yếu. Những thách thức như biến đổi khí hậu, 
+cạn kiệt tài nguyên, khủng hoảng năng lượng và tình trạng lãng phí trong sản 
+xuất cũng như tiêu dùng đang tạo ra áp lực ngày càng lớn đối với mọi quốc gia, 
+doanh nghiệp và cá nhân.  
+ 
+Tại Việt Nam, định hướng này ngày càng được cụ thể hóa thông qua nhiều chủ 
+trương và chính sách quan trọng. Luật Thực hành tiết kiệm, chống lãng phí số 
+110/2025/QH15 (có hiệu lực từ ngày 01/07/2026) xác định tiết kiệm và chống lãng 
+phí là trách nhiệm của toàn xã hội, đồng thời quy định ngày 31/5 hằng năm là 
+Ngày toàn dân tiết kiệm, chống lãng phí. Bên cạnh đó, Quyết định 924/QĐ-TTg 
+của Thủ tướng Chính phủ lựa chọn chủ đề năm 2026 là:  
+  
+"Tiết kiệm năng lượng - Thịnh vượng tương lai."  
+ 
+Trong bối cảnh đó, "tiết kiệm" không còn chỉ được hiểu là giảm tiêu dùng hay 
+cắt giảm chi phí, mà trở thành tư duy sử dụng hiệu quả nguồn lực để tạo ra giá 
+trị bền vững. Đây chính là nền tảng cho những mô hình đổi mới sáng tạo và khởi 
+nghiệp của tương lai.  
+ 
+TỪ NHỮNG NGUỒN LỰC BỊ LÃNG PHÍ ĐẾN NHỮNG CƠ HỘI KHỞI   
+ 
+Chính những thách thức đó đang đặt ra yêu cầu về những giải pháp mới - nơi đổi 
+mới sáng tạo và tinh thần khởi nghiệp có thể đóng vai trò tiên phong trong 
+việc kiến tạo các mô hình phát triển hiệu quả và bền vững hơn. 
+ 
+Lịch sử của nhiều startup thành công cho thấy, những ý tưởng tạo ra tác động lớn 
+thường bắt nguồn từ việc nhìn thấy những vấn đề mà xã hội chưa giải quyết hiệu 
+quả. 
+●​ Một quy trình lãng phí → cơ hội để tối ưu. 
+●​ Một nguồn lực chưa được khai thác → cơ hội để tạo giá trị mới. 
+●​ Một thói quen thiếu bền vững → cơ hội để thay đổi bằng giải pháp sáng 
+tạo. 
+
+--- TRANG 2 ---
+Trong bối cảnh đó, mỗi sự lãng phí không chỉ là một vấn đề cần được giải 
+quyết mà còn là điểm khởi đầu của những ý tưởng có khả năng tạo ra giá trị 
+kinh tế, xã hội và môi trường.  
+Đây cũng là không gian để thế hệ trẻ phát huy tư duy đổi mới và tinh thần khởi 
+nghiệp nhằm kiến tạo những giải pháp mang lại tác động tích cực cho cộng 
+đồng.  
+2.​ CHỦ ĐỀ 
+SAVING FOR THE FUTURE_Kiến tạo kỷ nguyên xanh_ 
+Chủ đề Saving for the Future - Kiến tạo kỷ nguyên xanh được xây dựng trên 
+một cách tiếp cận rộng hơn về khái niệm "saving". 
+"Saving" không chỉ là tiết kiệm nguồn lực, mà còn là khả năng nhận diện những 
+giá trị đang bị bỏ ngỏ và chuyển hóa chúng thành các giải pháp mang lại lợi ích 
+lâu dài cho xã hội. 
+Theo tinh thần đó, nguồn lực không chỉ giới hạn ở năng lượng hay tài nguyên 
+thiên nhiên, mà còn bao gồm thời gian, tri thức, công nghệ, dữ liệu, tài chính, giá 
+trị văn hóa và các nguồn lực cộng đồng. Mỗi cải tiến trong cách sử dụng nguồn 
+lực đều có thể góp phần nâng cao hiệu quả, giảm lãng phí và tạo ra những tác 
+động tích cực ở quy mô lớn hơn. 
+Thông qua chủ đề này, cuộc thi mong muốn truyền cảm hứng để người trẻ tiếp 
+cận khởi nghiệp dưới góc nhìn của đổi mới sáng tạo vì phát triển bền vững - nơi 
+những giải pháp có giá trị không nhất thiết phải tạo ra nhiều nguồn lực mới, mà 
+có thể bắt đầu từ việc khai mở tiềm năng của những nguồn lực đang hiện hữu. 
+3.​ ĐỀ BÀI VÒNG 3 - KIẾN TẠO 
+Tại Vòng 3 - Kiến tạo, các đội thi sẽ tiếp tục hoàn thiện và chỉnh sửa đề án trên 
+cơ sở tiếp thu các đánh giá, phản hồi và góc nhìn chuyên môn từ các vòng thi 
+trước. Các đội thi sẽ được Mentor từ Vòng 2 tiếp tục cố vấn và đồng hành trong 
+quá trình rà soát, củng cố và phát triển đề án, hướng tới việc nâng cao tính khả 
+thi, tiềm năng phát triển và khả năng thuyết phục nhà đầu tư  
+Sau khi hoàn thiện đề án, Top 07 đội thi xuất sắc nhất sẽ chính thức bước vào 
+Vòng Chung kết và trực tiếp trình bày dự án trước Hội đồng Đầu tư (Shark) cùng 
+khán giả. 
+Tại Vòng Chung kết, sau phần trình bày của mỗi đội, các Shark sẽ trực tiếp đặt 
+câu hỏi thẩm định, tập trung đánh giá tiềm năng, tính khả thi, khả năng phát 
+
+--- TRANG 3 ---
+triển và những yếu tố cốt lõi của dự án. Trên cơ sở phần trình bày và trao đổi trực 
+tiếp, mỗi Shark sẽ đưa ra mức đầu tư giả định dành cho đội thi. 
+Trong quá trình thẩm định, các đội thi cần bảo vệ đề án, làm rõ các lựa chọn 
+chiến lược và thuyết phục các Shark về tiềm năng của dự án, qua đó tối đa hóa 
+mức đầu tư giả định mà đội có thể nhận được. 
+Đội có tổng giá trị đầu tư giả định cao nhất sẽ trở thành Quán quân 
+Đấu Trường Khởi Nghiệp. 
+Tại Vòng Chung kết, dự án không còn dừng lại ở ý tưởng hay mô hình giả định, dự án 
+cần chứng minh được khả năng thương mại hoá, tăng trưởng và sẵn sàng nhận vốn 
+đầu tư phát triển.  
+4.​ YÊU CẦU BÀI THI: HỒ SƠ DỰ ÁN (PROPOSAL) 
+Về nội dung  
+Để đảm bảo thời lượng thuyết trình (5 phút) được sử dụng hiệu quả, Ban Tổ chức 
+khuyến khích các đội thi tinh gọn và tối ưu nội dung slide, ưu tiên các thông tin 
+trọng tâm và có giá trị thuyết phục nhất. Tuy nhiên, Proposal vẫn phải đảm bảo 
+đầy đủ các nội dung bắt buộc sau:  
+(1)​ Business Model 
+(2)​Vấn đề & Khoảng trống thị trường (Problem Statement) 
+(3)​ Nghiên cứu thị trường & Khách hàng mục tiêu (Market Research & Target 
+Customers) 
+(4)​Giải pháp đề xuất (Proposed Solution) 
+(5)​ Phân tích cạnh tranh (Competitive Analysis) 
+(6)​Đo lường tác động (Impact Measurement) 
+(7)​Tài chính (Finance) 
+(8)​Nhu cầu vốn & Kế hoạch huy động vốn (Capital Needs & Funding Strategy) 
+5. THỂ LỆ ĐÊM CHUNG KẾT 
+Top 07 đội thi xuất sắc nhất sẽ tiến hành tham gia bảo vệ dự án trực tiếp trước 
+Ban Giám khảo  đêm Chung kết. 
+ 
+Thời gian: Chủ nhật, ngày 29/11/2026 
+ 
+Cách thức: Trực tiếp tại trường Đại học Anh Quốc Việt Nam BUV 
+Lưu ý: Mỗi đội phải có tối thiểu 2 thành viên tham gia Vòng Chung kết trực tiếp. 
+ 
+Nội dung thi của mỗi đội tại đêm Chung kết: 
+ 
+
+--- TRANG 4 ---
+A. Thuyết trình đề án (5 phút) 
+-​
+Mỗi đội thi sẽ trình bày đề án trong 5 phút (Elevator Pitching) 
+-​
+Nội dung thuyết trình: Thí sinh trình bày Hồ sơ dự án (Proposal) đã hoàn 
+thiện từ Vòng 3. 
+-​
+Ngôn ngữ sử dụng trong bản Hồ sơ dự án và phần thuyết trình: Tiếng Việt 
+100% 
+ 
+B. Investment Q&A & Negotiation (3 phút) 
+Ngay sau khi kết thúc phần thuyết trình, mỗi đội thi sẽ bước vào phần Investment 
+Q&A & Negotiation với Hội đồng Đầu tư (Shark). Trong 03 phút, đội thi sẽ công bố 
+Deal, trả lời câu hỏi thẩm định và đàm phán trực tiếp với Sharks nhằm gia tăng 
+mức đầu tư nhận được và đi đến quyết định đầu tư.  
+  
+LUẬT CHƠI “THE POWER SHIFT” (Cơ chế Investment & Negotiation): 
+(1)​ Cơ chế gọi vốn - Dành cho đội thi 
+Ngay sau phần thuyết trình, đội thi phải chủ động công bố Deal - mức vốn cần 
+gọi và tỷ lệ cổ phần sẵn sàng trao đổi, theo cấu trúc: 
+“Chúng tôi gọi X VNĐ cho Y% cổ phần.” 
+Trong quá trình đàm phán, đội thi có quyền: 
+●​ Chấp nhận Deal do một/nhiều Shark đề xuất. 
+●​ Tiếp tục thương lượng với từng Shark về số tiền đầu tư và/hoặc tỷ lệ cổ 
+phần. 
+●​ Từ chối Offer/Counter-offer của một/nhiều Shark nếu nhận thấy các điều 
+kiện đầu tư chưa phù hợp, đồng thời có quyền tiếp tục đàm phán hoặc 
+chấp nhận Deal từ Shark khác. 
+●​ Từ chối Deal với một hoặc một số Shark mà không ảnh hưởng đến quyền 
+tiếp tục đàm phán với các Shark còn lại. 
+●​ Chỉ khi đội thi không chấp nhận bất kỳ Deal nào được đề xuất bởi các 
+Shark trong thời gian quy định, đội thi mới kết thúc phần thi với trạng 
+thái No Deal. 
+ 
+
+--- TRANG 5 ---
+(2)​Cơ chế đầu tư - Dành cho Hội đồng Đầu tư (Sharks) 
+Mỗi Shark được sử dụng quỹ đầu tư giả định trị giá 10 tỷ VNĐ để đầu tư vào các 
+đội thi. Sharks căn cứ vào phần thuyết trình, kết quả thẩm định và quá trình đàm 
+phán để đưa ra quyết định đầu tư.  
+Sau/Trong phần thẩm định, Sharks có quyền: 
+●​ Accept Deal: Chấp nhận nguyên bản mức vốn và tỷ lệ cổ phần do đội thi đề 
+xuất. 
+●​ Counter-offer: Đưa ra đề nghị mới, có thể thay đổi số tiền đầu tư và/hoặc 
+tỷ lệ cổ phần.​
+ Ví dụ:​
+ Đội A: “1 tỷ VNĐ cho 20% cổ phần.”​
+ Shark: “Tôi đầu tư 1 tỷ nhưng muốn 30%.”​
+ → Đây là Counter-offer của Shark. 
+●​ Syndicate: Hai hoặc nhiều Sharks có thể cùng tham gia đầu tư vào một đội 
+thi, với tổng số tiền đầu tư và tỷ lệ cổ phần được thống nhất trong quá 
+trình đàm phán. 
+Đặc quyền của các Sharks:  
+Giai đoạn Băng giá (No Deal): Shark có quyền kích hoạt trạng thái “Băng giá” đối 
+với đội thi nếu nhận định dự án không đáp ứng yêu cầu đầu tư hoặc phần thể 
+hiện của đội thi không đủ thuyết phục. Khi No Deal được xác lập, Shark sẽ rút 
+khỏi Deal và không thực hiện đầu tư vào đội thi đó. 
+ 
+(3)​Cơ chế xác định giá trị Deal 
+Đối với mỗi đội thi, Post-money Valuation được xác định dựa trên tổng số tiền đầu 
+tư và tổng tỷ lệ cổ phần trao cho Shark(s) từ TẤT CẢ các Deal thành công, theo 
+công thức:  
+Post-money Valuation = Tổng số tiền đầu tư ÷ Tổng tỷ lệ cổ 
+phần trao cho Shark(s) 
+Ví dụ:  
+
+--- TRANG 6 ---
+Đội A được 1 deal:  
+1 tỷ VNĐ cho 20% cổ phần 
+→ Tổng giá trị đầu tư = 1 tỷ VNĐ 
+→ Tổng tỷ lệ cổ phần = 20% 
+→ Post-money Valuation = 1 tỷ ÷ 20% = 
+5 tỷ VNĐ 
+Đội B được 2 deals:  
++​ 1 tỷ VNĐ cho 10% cổ phần 
++​ 1.5 tỷ VNĐ cho 20% cổ phần 
+→ Tổng giá trị đầu tư = 2,5 tỷ VNĐ 
+→ Tổng tỷ lệ cổ phần = 30% 
+→ Post-money Valuation = 2,5 tỷ ÷ 
+30% = 8,33 tỷ VNĐ.  
+Lưu ý:  
+-​
+Một Offer/Counter-offer chỉ được ghi nhận là Deal thành công khi đội thi và 
+Shark(s) thống nhất được các điều khoản đầu tư trong thời gian quy định. 
+-​
+Đội thi được phép trao đổi tối đa nhỏ hơn 50% cổ phần cho các Sharks. 
+Trường hợp tổng tỷ lệ cổ phần trao cho Sharks vượt quá mức quy định, 
+Deal sẽ KHÔNG được công nhận. 
+-​
+Nếu đội thi không chốt được bất kỳ Deal thành công nào trước khi thời 
+gian quy định (3 phút) kết thúc, kết quả đầu tư của đội được tính là 0.  
+Ghi chú: 
+-​
+Số tiền đầu tư không phải là tiêu chí duy nhất để xác định kết quả. Đội 
+thi cần cân đối giữa mức vốn huy động và tỷ lệ cổ phần trao đổi để tối ưu 
+hóa Post-money Valuation. 
+-​
+Sau khi tất cả các đội hoàn thành phần thi, Hội đồng Đầu tư có quyền rà 
+soát trước khi công bố kết quả cuối cùng. 
+-​
+Mức đầu tư tại Vòng Chung kết chỉ mang tính giả định, phục vụ mục đích 
+học tập, trải nghiệm và đánh giá năng lực khởi nghiệp. Mức đầu tư này 
+không cấu thành cam kết đầu tư hoặc giao dịch đầu tư thực tế và không 
+làm phát sinh quan hệ pháp lý giữa đội thi và thành viên Hội đồng Đầu 
+tư.  
+Đội có Post-money Valuation cao nhất sẽ trở thành  
+Quán quân Đấu Trường Khởi Nghiệp. 
+ 
+6. QUY ĐỊNH BÀI THI & CÁCH THỨC NỘP BÀI 
+
+--- TRANG 7 ---
+ 
+QUY ĐỊNH BÀI THI 
+ 
+Hình thức: 
+-​
+Bài thi được trình bày dưới dạng slide, kích thước 16:9, định dạng PDF 
+(không quá 10 MB) 
+-​
+Số lượng: Tối đa 10 trang nội dung (các trang Business Model, bìa, mục lục, 
+phụ lục sẽ KHÔNG tính vào 10 trang này). 
+-​
+Bài làm phải bao gồm 1 slide Business Model ở đầu bài thi. Các bài dự thi 
+không có slide này sẽ bị coi là không hợp lệ.  
+-​
+Các slide mở đầu, kết thúc và phụ lục là tùy chọn. 
+-​
+Phụ lục (nếu có) được trình bày trong tối đa 01 slide ở cuối bài thi. Đội thi 
+trình bày các nội dung ngay trên slide, KHÔNG gắn link tới các tài liệu 
+docs/sheets bên ngoài slide thuyết trình. 
+-​
+Trong bài làm KHÔNG được có hình ảnh, tên hay thông tin của các thành 
+viên của đội. 
+ 
+Ngôn ngữ:  
+-​
+Đề án chỉ được sử dụng tiếng Việt. 
+-​
+Trong trường hợp có các thuật ngữ chuyên ngành hoặc danh từ riêng 
+(Marketing, Business Model, …), các đội có thể sử dụng ngôn ngữ gốc (tiếng 
+Anh hoặc tiếng Việt). 
+  
+CÁCH THỨC NỘP BÀI 
+ 
+-​
+Hạn chót nộp bài: 23h00 ngày 26/11/2026 
+-​
+Đội thi nộp bài qua Google Form: Link Form nộp bài 
+-​
+Đội thi đặt tên theo cú pháp: [ĐTKN2026]_V3_[Tên đội]_Proposal 
+-​
+Ban Tổ chức chỉ chấp nhận bài thi nộp lần đầu. Các đội thi cần chủ động 
+nộp trước thời hạn tối thiểu 30 phút để đảm bảo an toàn đường truyền. 
+-​
+Nếu gặp sự cố trong thời gian nộp (trước 23h00 ngày 26/11/2026), đội thi 
+cần báo ngay cho Ban Tổ chức kèm minh chứng (ảnh/video). Sau 23h00, 
+mọi khiếu nại sẽ không được tiếp nhận. 
+-​
+Form nộp bài sẽ được mở thêm 30 phút (đến 23h30); tuy nhiên, bài làm 
+nộp muộn không có khiếu nại hợp lệ, sau 23h00 sẽ bị trừ 10% tổng điểm; 
+
+--- TRANG 8 ---
+nộp sau 23h15 sẽ bị trừ 15%. Sau 23h30, Ban Tổ chức sẽ không ghi nhận 
+bài làm nếu không có lý do khiếu nại chính đáng. 
+-​
+Thí sinh sẽ nhận email xác nhận trong vòng 24 giờ sau hạn chót nộp bài 
+qua email của nhóm trưởng. Nếu không nhận được, đội thi cần báo lại với 
+Ban Tổ chức trong vòng 12 giờ kể từ thời điểm hết hạn. 
+-​
+Đội thi không được phép chỉnh sửa đề án sau khi đã nộp. 
+-​
+Bất kỳ tài liệu nào không tuân thủ các yêu cầu nộp sẽ tự động bị loại. 
+ 
+MỘT SỐ LƯU Ý KHI NỘP BÀI 
+Trước khi nộp bài 
+-​
+Kiểm tra kỹ bài làm để đảm bảo tuân thủ các hướng dẫn của Ban Tổ chức 
+và xuất ra tệp PDF. 
+-​
+Xác minh kích thước tệp của bài nộp và nén lại trước khi nộp. 
+Trong khi nộp bài 
+-​
+Đảm bảo có kết nối Internet ổn định và thiết bị hoạt động tốt để nộp bài. 
+-​
+Chụp ảnh hoặc quay video ghi lại toàn bộ quá trình nộp bài, bao gồm tất cả 
+các tài liệu đã nộp và thời gian nộp bài. 
+Sau khi nộp bài 
+-​
+Ban Tổ chức sẽ gửi email xác nhận việc nộp bài trong vòng tối đa 24 tiếng 
+kể từ thời điểm đội thi hoàn tất nộp bài. Nếu sau thời gian trên đội thi chưa 
+nhận được email xác nhận, vui lòng liên hệ với Ban Tổ chức.  
+-​
+Đối với bất kỳ vấn đề kỹ thuật khẩn cấp nào, vui lòng liên hệ với Ban Tổ 
+chức qua trang Fanpage chính thức. 
+ 
+GHI CHÚ QUAN TRỌNG 
+-​
+Ban Tổ chức có trách nhiệm phản hồi yêu cầu hỗ trợ của đội trong vòng 1 
+giờ. 
+-​
+Ban Tổ chức chỉ chấp nhận các yêu cầu và khiếu nại gửi qua trang Fanpage 
+chính thức hoặc hotline trước ngày 28/11/2026. Bất kỳ yêu cầu nào gửi sau 
+thời gian này sẽ bị coi là không hợp lệ. 
+-​
+Ban Tổ chức chỉ chấp nhận các yêu cầu kèm theo bằng chứng hỗ trợ đầy 
+đủ và hợp lệ. 
+
+--- TRANG 9 ---
+-​
+Ban Tổ chức không chịu trách nhiệm về việc đội thi không tuân thủ hướng 
+dẫn nộp bài và có quyền đánh giá, loại bỏ các bài nộp không hợp lệ. 
+ 
+7. THÔNG TIN LIÊN HỆ 
+Email: 
+  
+nextgensocialimpact.work@gmail.com
+Facebook: Đấu Trường Khởi Nghiệp  
+SĐT:  
+0847 771 971 (Ms Chi) 
+0889 972 899 (Ms My) 
+0869 254 944 (Ms Thảo) 
+ 
+ 
+ 
+
+
+=== SLIDE VÒNG 3 (12 trang, văn bản trích từ PDF; trang 4 có 2 ảnh chụp app thật, trang 5 có biểu đồ tròn khảo sát; các biểu đồ khác là hình vẽ) ===
+--- TRANG 1 ---
+Khoan Đã · Business Model Saving for the Future: khai mở nguồn lực sẵn có của gia đình để giữ lại năm giá trị. Mọi con số doanh thu là giả thuyết. Đối tác chính Hoạt động chính GIÁ TRỊ CUNG CẤP Tự bật lúc đang bị gọi, kéo người thân vào, bác tự quyết Thời gian Tiền tích luỹ Chi phí xử lý Tri thức Niềm tin gia đình Quan hệ khách hàng Phân khúc Nguồn lực chính Kênh Cấu trúc chi phí Kế hoạch 18 tháng: 1 tỷ đồng (giả định, chưa có báo giá): thí điểm với đối tác, nhân sự hỗ trợ, kiểm thử độc lập, pháp lý, hạ tầng. Chi phí có một hộ ≈ 20.000 đ qua buổi hướng dẫn; phục vụ ≈ 5.000 đ/hộ trả phí/tháng. Dòng doanh thu · lõi miễn phí mãi; ba chân trả tiền là giả thuyết 1. Gói Gia đình (4 người cao tuổi, báo cáo tuần, 72 giờ) 29.000 đ/tháng hoặc 299.000 đ/năm. 2. Tài trợ nhóm 20.000 đ/hộ/tháng từ hội, trường, doanh nghiệp. 3. Phí cấp phép từ ngân hàng, ví, nhà mạng (năm 2). Năm 3 kịch bản cơ sở ≈ 3,1 tỷ/năm. Chưa thu đồng nào. Hội người cao tuổi, trường học: kênh thử nghiệm ✳ Người lớn bảo trợ pháp lý ✳ Ngân hàng, ví, nhà mạng: kênh ở chặng 2 ✳ Kiểm tin nhắn, link, ảnh ✳ Tự mở màn đỏ khi đang gọi mà có OTP, tiền ra ✳ Dừng 60 giây, gọi người thân ✳ Thư ký nghe máy hộ (bản thử) ✳ Con cháu cài và bật quyền một lần; bác không phải nhớ mở app ✳ Luôn có nút "Tôi ổn" ✳ Dùng: người 60+, miễn phí, gồm báo 1 người thân ✳ Trả tiền: con cháu ✳ Tài trợ: trường, hội, doanh nghiệp ✳ Có sẵn: điện thoại, Zalo, gia đình ✳ Tự xây: bộ luật 64 tín hiệu, app ✳ Buổi hướng dẫn ở hội, trường ✳ Nhóm Zalo gia đình ✳ Khoan Đã (1) Business Model 1
+--- TRANG 2 ---
+Lừa đảo lấy quyết định trước, lấy tiền sau: 5 mắt xích 1 Giả danh công an, ngân hàng 2 Doạ sợ án, khoá tài khoản 3 Cô lập "đừng nói với ai" 4 Đổi kênh mã OTP, app lạ 5 Chuyển tiền rồi bị đòi thêm Khoan Đã chen vào ba mắt xích cuối, không đòi người già nhớ gì: kéo người thân vào · tự bật khi có OTP, tiền ra lúc đang gọi · dừng 60 giây Kẻ lừa đảo lấy quyết định, không lấy tiền ngay. 8.000+ tỷ thiệt hại do lừa đảo trực tuyến năm 2025, ước tính của Bộ Công an 90% phụ huynh, người lớn tuổi được hỏi đã từng nhận cuộc gọi, tin nhắn lừa đảo; chỉ 17% nói sẽ hỏi con cháu. n = 29 (trong 100 người khảo sát, 19–26/11/2026) Rất khó lấy lại tiền sau khi đã chuyển: thu hồi chậm, cơ quan chức năng mới đang thí điểm truy vết. Vì vậy phải chặn quyết định trước, không chờ xử lý sau Cảnh báo đúng lúc có tác dụng: hơn 1,9 triệu lượt khách đã dừng hoặc huỷ giao dịch khi ngân hàng cảnh báo (NHNN, đến 28/9/2026; không phải tất cả là lừa đảo). Khoan Đã đưa cảnh báo lên sớm hơn: lúc bác còn đang nghe máy. Đối chiếu đề bài: quy trình lãng phí (xử lý sau khi tiền đã đi) · nguồn lực chưa khai thác (người thân, thời gian) · thói quen thiếu bền vững (làm theo ngay, giấu con cháu). Ở Mỹ, người 60+ báo mất 7,75 tỷ USD năm 2025 (FBI IC3). Khoan Đã (2) Vấn đề & khoảng trống 2
+--- TRANG 3 ---
+Cha mẹ 60+ dùng miễn phí, con cháu trả phí Người 60+ dùng · miễn phí Con cháu trả phí · 30–45 tuổi báo động gọi một chạm Trường, hội, doanh nghiệp tài trợ nhóm (giả thuyết) VIỆC ĐẦU TIÊN: KIỂM CHỨNG GIẢ THUYẾT TRẢ PHÍ 29.000 đ · giá sàn 49.000 đ 99.000 đ Giá sàn 29.000 đ vì cho doanh thu kỳ vọng cao nhất theo khảo sát (giá × tỷ lệ sẵn sàng trả). 73% con cháu lo cha mẹ bị lừa (4–5/5) 52% muốn được báo ngay về máy mình khi cha mẹ bị ép chuyển tiền 55% chọn trả 29.000 đ hoặc 49.000 đ mỗi tháng 86% sẵn sàng giới thiệu cho người khác n = 71 con cháu (riêng ô 86%: cả 100 người), khảo sát của đội 19–26/11/2026, 91% ở Hà Nội và TP.HCM. Trả phí là ý định, chưa phải trả thật. TAM 14,2 triệu người 60+ SAM ≈ 5,4 triệu (đô thị; ước tính thô) SOM 5.000 hộ ≥ 5.000 người 60+ TAM: Cục Thống kê, mốc 1/4/2024. SAM = 38,2% thành thị × 14,2 triệu (ước tính thô). SOM: mục tiêu giả định T18, 5.000 hộ có người 60+ (≥ 5.000 người, ≈ 0,1% SAM); các trang sau tính theo hộ. Khoan Đã (3) Thị trường & khách hàng 3
+--- TRANG 4 ---
+Tự bật khi đang bị gọi, kéo người thân vào, rồi mới dừng 60 giây Màn hỏi một câu, chạm là kiểm Màn đỏ 60 giây, nút gọi con cháu ①Tự bật khi đang gọi mà có OTP hoặc tiền vừa ra ANDROID ②Kéo người thân bình tĩnh vào: máy con cháu tự nhận báo động ĐÃ CÓ ③Dừng 60 giây · bộ luật 64 tín hiệu quyết mức, AI chỉ nhận tín hiệu ĐÃ CÓ ④Hậu kiểm 72 giờ · luôn có nút "Tôi ổn, không có gì nguy hiểm" ĐÃ CÓ MỚI Thư ký nghe máy hộ BẢN THỬ TRÊN WEB Số lạ gọi tới: trợ lý nghe trước, hỏi tên và lý do; nghe thấy đòi chuyển tiền, mã OTP thì báo người thân. Chạy theo kịch bản thử; chưa nối vào cuộc gọi thật. 22% → 4% Thí nghiệm có đối chứng ở Anh (ĐH Nottingham, 2023): cảnh báo đúng lúc kèm nút hoãn giảm tỷ lệ trả tiền cho kẻ lừa từ 22% còn 4%. Tình huống giả lập. Ảnh chụp từ app thật. Tự bật chạy trên Android, cần bác cho phép một lần; tự báo người thân chạy khi bác đã đặt quy tắc gia đình. Không chặn cuộc gọi, không chặn giao dịch, không hứa lấy lại tiền. Khoan Đã (4) Giải pháp 4
+--- TRANG 5 ---
+Sản phẩm đã chạy; 90 ngày tới chứng minh ba điều để bán được 3.000 biến thể tin nhắn bỏ dấu, viết tắt, đổi xưng hô để lách bộ lọc: 0 bỏ sót, 0 báo oan 931 lượt đo trên 5 bộ mẫu ngày 26/11/2026: 891 tin gốc + 40 biến thể bỏ dấu (luật 1.6.7 + AI) 86% tin lừa nặng có thật do báo chí trích được cảnh báo (đỏ hoặc vàng); bộ này không dùng để viết luật từ đầu 1.740 bài kiểm thử tự động, 0 lỗi (26/11/2026). Đã chạy: kiểm mã VietQR, nhận ra link rút gọn, lọc Tầng 0 tại máy BỘ ĐO NỘI BỘ 531 TIN 265 tin nguy hiểm 230 26 230 báo đỏ đúng 26 báo vàng 9 bỏ sót (trên 265 tin nguy hiểm) 9 169 tin lành (không phải lừa đảo) 158 158 đúng 7 báo vàng nhầm 4 báo đỏ nhầm (trên 169 tin lành) 7 4 97 tin nhãn Nghi ngờ (không vẽ): 29 được báo vàng hoặc đỏ, 68 không báo. Đo 26/11/2026: luật 1.6.7 + AI Qwen 3.8 flash. Bộ mẫu này đã dùng để chỉnh luật. Luật 1.6.6–1.6.7 (26/11) thêm thủ đoạn 2026 (VNeID, BHXH, thuế, shipper, sinh trắc, QR): bộ 40 tin đội soạn để viết luật này đạt 40/40, 0 sót, 0 báo nhầm. BA ĐIỀU PHẢI CHỨNG MINH TRƯỚC KHI MỞ RỘNG BÁN, MỖI ĐIỀU MỘT TIÊU CHÍ ĐẠT (MỤC TIÊU GIẢ ĐỊNH) H1 Người 60+ dùng được ≥ 4/5 người tự làm xong 5 nhiệm vụ thử; có người lớn đi cùng H2 Con cháu chịu trả tiền Đạt: ≥ 10% hộ thử trả gói 29.000 đ. Khảo sát 71 con cháu, mức sẵn sàng trả mỗi tháng: 31% 32,4% 22,5% 14,1% Dưới 20.000 đ 29.000 đ 49.000 đ Chỉ dùng miễn phí H3 Bắt được tin chưa từng thấy Đạt: ≥ 90% tin lừa được cảnh báo, ≤ 5% tin lành báo đỏ. Đã đo trên tin lừa có thật báo chí trích: bản cũ sót 7/14 tin nặng, luật 1.6.7 còn sót 2/14 (26/11). Khoan Đã (4) Giải pháp · sẵn sàng bán thử 5
+--- TRANG 6 ---
+Các bên giải từng mảnh; Khoan Đã nối các mảnh lại Giải pháp Phát hiện, tra cứu Tự bật khi đang bị gọi Tự báo người thân Khoảng dừng lúc bị giục Thiết kế cho người 60+ Khoan Đã nTrust Zalo: Chống lừa đảo Truecaller, Scamio Ngân hàng (SIMO) Lớp kỹ năng số cho người cao tuổi có một phần chưa thấy Đội tự đánh giá từ mô tả công khai, chưa kiểm chứng từng bên; tự bật chạy trên Android, cần bác cho phép; tự báo cần bác đặt quy tắc gia đình trước; "dễ dùng hơn cho người 60+" là giả thuyết, sẽ thử với người dùng. Bổ sung, không thay thế Ngân hàng cảnh báo trong luồng giao dịch (SIMO) và áp hạn mức, thời gian chờ (Công văn 6190). Khoan Đã đứng trước đó, lúc bác còn đang nghe máy. ✳ Nền tảng lớn có thể làm tương tự, nên chặng 2 chọn hợp tác: họ có người dùng, Khoan Đã có khoảng dừng và vòng người thân. Lợi thế bền chưa được chứng minh. ✳ Khoan Đã (5) Cạnh tranh 6
+--- TRANG 7 ---
+Saving for the Future: giữ tiền dưỡng già, đo bằng việc thật ĐÃ CHẠY THẬT HÔM NAY 1 Tiết kiệm công nghệ, chi phí: lọc Tầng 0 ngay tại máy Không cần mạng, 0 token AI: bắt 42/42 tin lừa mẫu chuẩn, không báo oan 44 tin lành; trên bộ 571 tin, bắt sẵn 34,5% tin nguy hiểm trước khi gọi AI (bộ đã dùng chỉnh luật). Chi phí phục vụ thấp nên lõi miễn phí mãi được. 2 Lấp khoảng trống chính sách, tránh lãng phí xử lý sau Công văn 6190/NHNN-TT: hạn mức mặc định 400 triệu, chờ tối thiểu 24 giờ khi chuyển cho người nhận mới; ngân hàng làm xong trước 01/3/2027. Khoản dưới 400 triệu vẫn đi ngay: Khoan Đã chen vào trước bước mở app ngân hàng, bớt việc tra soát, trình báo sau khi đã mất tiền. 3 Đo trên tin lừa có thật do báo chí trích Bỏ sót tin nặng giảm từ 7/14 xuống 2/14 (cảnh báo 12/14 ≈ 86%); báo đỏ nhầm trên 169 tin lành 4/169 ≈ 2,4%. Đối chứng ngoài: Nottingham 22% → 4%; NHNN hơn 1,9 triệu lượt dừng giao dịch. KẾ HOẠCH ĐO HÀNH VI 90 NGÀY (MỤC TIÊU GIẢ ĐỊNH, ĐO TỪ T1–T3) Cài đặt mốc gốc Kích hoạt: đặt quy tắc gia đình ≥ 60% số cài Phiên mức cao hoàn tất 60 giây ≥ 70% phiên Gọi hoặc báo người thân ≥ 50% phiên Còn dùng ngày 30 ≥ 40% kích hoạt Thử nghiệm đối chứng A/B (chưa bắt đầu): 30 người 60+, chia ngẫu nhiên 15/15; người đóng vai gọi theo một kịch bản cố định; đo ai làm theo lệnh chuyển tiền giả lập, người ghi không biết ai ở nhóm nào. Đạt: nhóm dùng Khoan Đã thấp hơn ít nhất 20 điểm %. 5 GIÁ TRỊ GIỮ LẠI, KHAI MỞ TỪ 7 NGUỒN LỰC ĐỀ BÀI NÊU, MỖI GIÁ TRỊ MỘT CHỈ SỐ BÁO CÁO QUÝ 1 Thời gian nguồn lực: thời gian · đo: % phiên đủ 60 giây 2 Tiền tích luỹ nguồn lực: tài chính · đo: tự khai "chưa chuyển"; nhóm B so với A 3 Chi phí xử lý nguồn lực: dữ liệu, công nghệ · đo: số lần tra soát, trình báo 4 Tri thức nguồn lực: tri thức · đo: bài 8 tình huống trước, sau 30 ngày 5 Niềm tin gia đình nguồn lực: văn hoá, cộng đồng · đo: % phiên có gọi người thân Khoan Đã (6) Đo lường tác động 7
+--- TRANG 8 ---
+Bán qua tổ chức để giảm chi phí; năm 3 thêm phí cấp phép DÒNG DOANH THU KÊNH BÁN AI TRẢ BẮT ĐẦU CÁCH TÍNH NĂM 3 TRIỆU/THÁNG Gói Gia đình Zalo gia đình; con cháu giới thiệu Con cháu, 29.000 đ/tháng T3 20.000 hộ × 10% × 29.000 58,0 Tài trợ nhóm Gói Doanh nghiệp, Chi nhánh: từ 50 hộ (1 triệu/tháng); phúc lợi cha mẹ nhân viên, CSR; kèm buổi hướng dẫn 45 phút Tổ chức, 20.000 đ/hộ/tháng T10 5.000 hộ × 20.000 (tính riêng, ngoài số hộ tự cài) 100,0 Phí cấp phép Ngân hàng, ví, nhà mạng nhúng khoảng dừng Đối tác, 2.000 đ/người dùng/tháng Năm 2 (sau T18) 1 đối tác × 50.000 người 100,0 Năm 3, kịch bản cơ sở 258,0 CHI PHÍ CÓ MỘT HỘ (GIẢ ĐỊNH) 1 buổi ≈ 1 triệu đ ÷ 50 hộ kích hoạt = 20.000 đ/hộ Cài và đặt quy tắc gia đình ngay tại buổi, có người hướng dẫn. 100 buổi = 100 triệu = 5.000 hộ: khớp khoản "thử nghiệm, tiếp cận" trong kế hoạch vốn. DOANH THU CHẠY NĂM 3 (GIẢ ĐỊNH) ≈ 3,1 tỷ Chưa có đối tác cấp phép: ≈ 1,9 tỷ. Đây là kịch bản để thấy quy mô khi qua đủ cổng, không phải dự báo. Định giá dùng kịch bản năm 5 ở phụ lục. TIỀN LỆ CHO CHÂN CẤP PHÉP Carefull (Mỹ): hơn 35 tổ chức tài chính, gọi 16,5 triệu USD (2023). Bán cho ngân hàng, ví (thiết kế): Mọi số trang này là giả định, chưa có thư ý định hay thoả thuận nào. Hộ tự cài 5.000 (T18) → 20.000 (năm 3); hộ được tài trợ tính riêng, không đếm trùng. Chân cấp phép cần thư ý định của đối tác. Bổ sung SIMO, phủ khoản dưới 400 triệu (CV 6190) ✳ Không lưu OTP, thông tin cá nhân; lỗi thì không chặn giao dịch ✳ 2.000 đ/người/tháng ≈ 0,08%/năm của sổ tiết kiệm 30 triệu ✳ Khoan Đã (7) Tài chính · đi thị trường 8
+--- TRANG 9 ---
+Doanh thu đi chậm; vốn đi trước để tới các mốc 0 10 20 30 40 T3 T6 T9 T12 T15 T18 Doanh thu mỗi tháng (triệu đồng) · kịch bản giả định Gói gia đình, T18: 14,5 Tổng gồm tài trợ nhóm: 14,5 + 20 = 34,5 T10: bắt đầu thử tài trợ 86 triệu doanh thu cộng dồn 18 tháng, chỉ gói gia đình (giả định); gồm tài trợ nhóm: 236 triệu 414 triệu doanh thu chạy năm tháng 18 nếu có tài trợ nhóm (chỉ gói gia đình: 174 triệu) 58% doanh thu tháng 18 đến từ tài trợ nhóm, chưa có thư ý định nào: vì vậy Cổng 1 đòi thư ý định trước khi giải ngân tiếp KINH TẾ ĐƠN VỊ MỘT HỘ TRẢ PHÍ (GIẢ ĐỊNH) giá 29.000 đ − phục vụ 5.000 đ = biên 24.000 đ/tháng tiếp cận 200.000 đ/hộ trả phí ÷ biên 24.000 đ = hoàn vốn ≈ 8 tháng Nếu chỉ 5% trả phí: ≈ 17 tháng. Trả gói năm 299.000 đ: thu trước 100%, hoàn chi phí tiếp cận ngay tháng 1 (dư ≈ 39.000 đ/hộ sau chi phí phục vụ năm đầu). Chưa có dữ liệu rời bỏ. ĐỌC KẾT QUẢ Gói gia đình là phễu lấy dữ liệu hành vi, ưu tiên bán gói năm 299.000 đ. 5% trả thay vì 10% là hoàn vốn lâu gấp đôi, nên động lực mở rộng là tài trợ nhóm và cấp phép cho ngân hàng, ví (trang 8). Máy chủ, AI cho người dùng miễn phí nằm trong khoản hạ tầng chung 100 triệu/18 tháng; biên 24.000 đ chưa trừ phí cổng thanh toán nếu bán qua kho ứng dụng. Giả định: 5.000 hộ ở T18, 10% trả phí, tài trợ 20.000 đ/hộ/tháng (500 hộ từ T10, 1.000 hộ từ T13), tiếp cận ≈ 20.000 đ/hộ kích hoạt. Chưa có doanh thu thật, chưa có bên tài trợ nào chấp nhận mức giá. Không cộng "tiền tránh mất" vào doanh thu. Khoan Đã (7) Tài chính 9
+--- TRANG 10 ---
+Gọi vốn theo mốc bằng chứng; mỗi đợt mở khi qua cổng Chúng tôi gọi 1 tỷ đồng cho 10% cổ phần 10 tỷ định giá sau đầu tư, giả định theo luật chơi. VC năm 5: 3,8–10,5 tỷ (500.000–1 triệu người qua đối tác; gốc 1 triệu: 6,3–10,5 tỷ). Tiềm năng, chưa chứng minh 25% 20% 15% 10% 10% 10% 10% 1 tỷ đồng KẾ HOẠCH DÙNG VỐN 18 THÁNG (GIẢ ĐỊNH, CHƯA CÓ BÁO GIÁ; KIỂM THỬ, PHÁP LÝ CHI DẦN THEO 3 ĐỢT) Thí điểm khoảng dừng với đối tác 250 triệu Hỗ trợ bán thời gian 200 triệu Kiểm thử độc lập, bảo mật 150 triệu Thử nghiệm, tiếp cận cộng đồng 100 triệu Pháp nhân, pháp lý, dữ liệu 100 triệu Hạ tầng máy chủ, AI 100 triệu Dự phòng 100 triệu GIẢI NGÂN THEO CỔNG ĐỢT 1 · T0–3 200 triệu Giải ngân ngay; dùng để đạt Cổng 1 ĐỢT 2 · T4–9 400 triệu Mở khi đạt Cổng 1; dùng để đạt Cổng 2 ĐỢT 3 · T10–18 400 triệu Mở khi đạt Cổng 2; thí điểm với đối tác, 5.000 hộ ① Rủi ro thực của nhà đầu tư chỉ 200 triệu (2%) trong 90 ngày đợt 1; 800 triệu còn lại chỉ mở khi qua Cổng 1 và Cổng 2. Đợt 1 chỉ chi kiểm thử mù ban đầu, tư vấn pháp lý khởi tạo. ② Sản phẩm lõi đã xong với 0 đồng vốn ngoài: app Android, web, 1.740 bài kiểm thử, bộ luật 64 tín hiệu. Quyền: báo cáo quý, ưu tiên vòng sau. NGOÀI TIỀN: HỆ SINH THÁI NHÀ ĐẦU TƯ RÚT NGẮN ĐƯỜNG TỚI CỔNG Giới thiệu ngân hàng, ví, viễn thông Hội, trường để thử Pháp lý, pháp nhân bảo trợ Kiểm thử, bảo mật Giả định theo luật chơi; cổ phần thật chỉ phát hành khi có pháp nhân do người lớn đại diện. Khoan Đã (8) Nhu cầu vốn & huy động 10
+--- TRANG 11 ---
+Mỗi cổng mở khoá tiền bằng một chỉ số kinh doanh T3 T6 T9 T12 T15 T18 T0–T3 · nền móng, kiểm thử mù T3–T9 · thử, bắt đầu thu gói gia đình T9–T18 · mở rộng, tài trợ, đối tác Cổng 1 (T3): kiểm thử độc lập đạt; có thư ý định Cổng 2 (T9): giữ chân ngày 30 ≥ 40% 150 500 1.000 2.000 3.000 5.000 Hộ kích hoạt (mục tiêu giả định) Đợt 1 (200 triệu · T0–T3) → Cổng 1 mở Đợt 2 (400 triệu · T4–T9) → Cổng 2 mở Đợt 3 (400 triệu · T10–T18) = 1 tỷ CỔNG 1 · T3 mở 400 triệu đợt 2 Kiểm thử độc lập trên tin ngoài mẫu đạt H3 (≥ 90% tin lừa được cảnh báo, ≤ 5% tin lành báo đỏ); ≥ 1 thư ý định tài trợ; 150 hộ kích hoạt CỔNG 2 · T9 mở 400 triệu đợt 3 Giữ chân ngày 30 ≥ 40%; ≥ 10% hộ thử trả phí; 1.000 hộ; ≥ 1 thư ý định của ngân hàng, ví hoặc nhà mạng T18 · VÒNG SAU gọi vốn tiếp, mở chân cấp phép năm 2 5.000 hộ; doanh thu tháng thật; 1 đối tác đã chạy thí điểm khoảng dừng RỦI RO CHÍNH VÀ CÁCH XỬ LÝ 1 Báo nhầm: vàng/đỏ, nút "Tôi ổn", công bố tỷ lệ 2 Không trả phí: bản miễn phí đủ dùng; chuyển sang tài trợ nhóm nếu dưới 5% 3 Quên mở app, quyền Android: máy tự bật khi đang gọi mà có OTP, tiền ra; người thân tự được báo; chưa cấp quyền thì vẫn có thông báo và kiểm tay 4 Dữ liệu, pháp lý: gửi máy chủ để phân tích, không lưu; người lớn bảo trợ 5 Ngân hàng tự làm: đứng trước bước mở app ngân hàng; ngân hàng là kênh ở chặng 2 Báo cáo quý: hộ kích hoạt, % đủ 60 giây, % trả phí, giữ chân, báo nhầm. Khoan Đã (8) Huy động vốn · lộ trình 11
+--- TRANG 12 ---
+Phụ lục: cách tính, giả định và nguồn số liệu CÁCH TÍNH Định giá sau đầu tư 1 tỷ ÷ 10% = 10 tỷ Gói gia đình (thu từ T3) tháng 18 5.000 × 10% × 29.000 = 14,5 triệu/tháng Tài trợ nhóm 500 hộ (T10–12) = 10 triệu/tháng; 1.000 hộ (T13–18) = 20 triệu/tháng Tiếp cận mỗi hộ 10% × 1 tỷ ÷ 5.000 hộ ≈ 20.000 đ Dùng vốn (triệu) 250 + 200 + 150 + 100 + 100 + 100 + 100 = 1.000 Phương pháp VC Năm 5: 1.000.000 người qua đối tác × 2.000 đ × 12 + 20.000 hộ × 299.000 đ ≈ 30 tỷ/năm; × 3–5 lần × 0,7 ÷ 10 = 6,3–10,5 tỷ Độ nhạy Hệ số 3; người qua đối tác 250.000 / 500.000 / 1.000.000: 2,5 / 3,8 / 6,3 tỷ GIẢ ĐỊNH CỦA ĐỘI (CHƯA KIỂM CHỨNG) TRIỆU Đ/THÁNG T3 T6 T9 T12 T15 T18 Hộ kích hoạt 150 500 1.000 2.000 3.000 5.000 Gói gia đình 0,4 1,4 2,9 5,8 8,7 14,5 Tài trợ nhóm 0 0 0 10 20 20 Nội suy tuyến tính; cộng 18 tháng: 86 và 236 triệu. NGUỒN SỐ LIỆU 14,2 triệu người 60+; 38,2% thành thị Cục Thống kê, điều tra giữa kỳ, mốc 1/4/2024 8.000+ tỷ (2025) Bộ Công an qua VTV, 24/4/2026 1,9+ triệu lượt dừng/hủy NHNN, số đến 28/9/2026, qua CafeF 8/10/2026 Hạn mức, thời gian chờ Công văn 6190/NHNN-TT, 20/7/2026 Người 60+ Mỹ mất 7,75 tỷ USD FBI IC3, báo cáo 2025 22% → 4% (thí nghiệm) ĐH Nottingham, CeDEx 2023-08 Carefull 16,5 triệu USD CityBiz 10/2023 Khảo sát 100 người (71 con cháu), 91% ở HN, TP.HCM Đội, 19–26/11/2026 Đo nội bộ 931 lượt (891 + 40 biến thể); 1.740 bài kiểm thử Đội, 26/11/2026, luật 1.6.7 Cuộc thi chỉ giả định đầu tư. Mọi con số do đội tự đặt đều là giả định, chưa có doanh thu hay khách hàng thật. Trả phí 10% (khảo sát: 55% chọn 29–49 nghìn đ); gói 29.000 đ/tháng, 299.000 đ/năm ✳ VC: năm 5 cần 1 triệu người qua đối tác (năm 3: 50.000); chưa có đối tác, 2.000 đ là mức tự đặt; đòi lãi 20 lần thì còn một nửa ✳ Tài trợ 20.000 đ/hộ/tháng từ T10 (chưa có khách); phục vụ 5.000 đ/hộ trả phí ✳ Năm 3: 20.000 hộ; 5.000 hộ tài trợ; 1 đối tác × 50.000 người × 2.000 đ; 1 buổi ≈ 1 triệu đ, 50 hộ ✳ Định nghĩa: kích hoạt = đã cài và đặt quy tắc gia đình; giữ chân ngày 30 = còn mở app ngày 30 ✳ SAM = 38,2% thành thị × 14,2 triệu: phép tính thô, coi tỷ lệ thành thị của người 60+ bằng toàn dân ✳ Khoan Đã Phụ lục 12
+
+Bối cảnh: đội học sinh dưới 18 tuổi, chưa pháp nhân, chưa doanh thu, chưa thử thực địa; có app Android và web đã chạy; khảo sát online 100 người (mẫu thuận tiện). Deal công bố: 1 tỷ cho 10% (định giá sau đầu tư giả định 10 tỷ), giải ngân 3 đợt 200/400/400 triệu theo cổng.
+Thang: Sáng tạo 20, Phù hợp vấn đề-thị trường 20, Khả thi và mở rộng 30, Tác động và hiệu quả nguồn lực 20, Hình thức 10.
+Đầu ra: (1) bảng điểm 5 tiêu chí kèm lý do bám chữ (nêu số trang), tổng điểm; (2) góc nhìn Shark: có đầu tư Deal này không, mức bạn chào; (3) 5 chỗ mất điểm nhiều nhất kèm cách sửa không bịa số; (4) mâu thuẫn số liệu giữa các trang. Tối đa 600 từ.
+warning: Codex is ignoring 3 unrecognized configuration settings. Check for typos or deprecated settings.
+  user (C:\Users\admin\.codex\config.toml): `disable_response_storage` is ignored.
+  user (C:\Users\admin\.codex\config.toml): `network_access` is ignored.
+  user (C:\Users\admin\.codex\config.toml): `windows_wsl_setup_acknowledged` is ignored.
+warning: Codex is ignoring 3 unrecognized configuration settings. Check for typos or deprecated settings.
+  user (C:\Users\admin\.codex\config.toml): `disable_response_storage` is ignored.
+  user (C:\Users\admin\.codex\config.toml): `network_access` is ignored.
+  user (C:\Users\admin\.codex\config.toml): `windows_wsl_setup_acknowledged` is ignored.
+codex
+Tôi sẽ đối chiếu các tuyên bố và phép tính giữa các trang, đồng thời kiểm tra nhanh một vài số liệu có ảnh hưởng lớn đến lập luận.
+web search: 
+web search: site:sbv.gov.vn 6190 2026 400 triệu 24 giờ người thụ hưởng mới ...
+codex
+## 1. Bảng điểm
+
+| Tiêu chí | Điểm | Lý do |
+|---|---:|---|
+| Sáng tạo | **14/20** | Kết hợp cảnh báo lúc gọi, khoảng dừng và người thân (tr. 4) có giá trị; từng thành phần không mới, lợi thế bền chưa chứng minh (tr. 6). |
+| Phù hợp vấn đề – thị trường | **13/20** | Vấn đề rõ, đúng đối tượng. Khảo sát 100 người là mẫu thuận tiện, 91% ở hai thành phố; ý định trả tiền chưa phải hành vi mua (tr. 2–3). SAM là ngoại suy thô. |
+| Khả thi và mở rộng | **15/30** | Có app và kiểm thử nội bộ (tr. 4–5), nhưng chưa thử thực địa, chưa có doanh thu hay đối tác; 5.000 hộ và cấp phép vẫn là giả định (tr. 8–11). Khả năng tự bật cần kiểm chứng trên thiết bị thực tế. |
+| Tác động và hiệu quả nguồn lực | **11/20** | Có mục tiêu và thiết kế đối chứng (tr. 7), nhưng chưa chứng minh giảm mất tiền. Bộ dữ liệu đã dùng chỉnh luật không đánh giá độc lập; 30 người khó kết luận chắc chắn. |
+| Hình thức | **7/10** | Có Business Model đầu bài, 10 trang nội dung và một phụ lục; phân biệt khá rõ giả định (tr. 1–12). Nội dung dày cho 5 phút. Chưa thể kiểm tra cỡ chữ, dung lượng PDF, ảnh và thông tin thành viên từ bản trích. |
+| **Tổng** | **60/100** | Chấm trên văn bản được cung cấp, không khẳng định hồ sơ hợp lệ về kỹ thuật. |
+
+Kiểm nhanh: con số **7,75 tỷ USD** tại tr. 2 phù hợp [báo cáo FBI IC3](https://www.ic3.gov/AnnualReport/Reports/2025_IC3Report.pdf?hss_channel=lcp-44730), nhưng là **thiệt hại được báo cáo**, không phải toàn bộ thiệt hại thực tế.
+
+## 2. Góc nhìn Shark
+
+**Không nhận deal 1 tỷ/10% ở giai đoạn này.** Định giá 10 tỷ dựa chủ yếu vào đối tác, giá cấp phép và quy mô chưa kiểm chứng. Chào giả định **200 triệu cho 10%**, giải ngân theo cột mốc kiểm thử độc lập và thử thực địa; quyền đầu tư tiếp sẽ thương lượng sau. Đây là đề nghị cho vòng hiện tại, không mặc định 800 triệu còn lại đã được cam kết.
+
+## 3. Năm chỗ mất điểm và cách sửa
+
+1. **Hiệu quả sản phẩm chưa độc lập** (tr. 5): tách mẫu chưa từng dùng chỉnh luật; công bố cỡ mẫu, nhãn, bỏ sót và báo nhầm.
+2. **Chưa thử với người dùng** (tr. 4, 7): thử đủ quy trình cài quyền, nhận cảnh báo, gọi người thân trên nhiều máy Android; báo cả ca thất bại.
+3. **Chưa có sức mua** (tr. 3, 8–9): phỏng vấn, thử bán thật hoặc lấy thư ý định; giữ khảo sát là ý định, không suy thành doanh thu.
+4. **Mở rộng và chi phí thiếu căn cứ** (tr. 8–10): lấy báo giá, tính đủ hỗ trợ, người dùng miễn phí và phí thanh toán; lập kịch bản không có đối tác.
+5. **Tác động chưa được chứng minh** (tr. 7): công bố A/B là thăm dò; bổ sung quy trình tuyển mẫu, tiêu chí đo và kết quả thực tế trước khi tuyên bố hiệu quả.
+
+## 4. Mâu thuẫn và điểm số liệu cần sửa
+
+- **Tr. 5 và 7:** 86% là **12/14 tin lừa nặng**, không đủ đại diện cho toàn bộ tin lừa có thật; tr. 5 diễn đạt rộng hơn.
+- **Tr. 1 và 8:** gói 29.000 đồng có “72 giờ” và 4 người; bảng doanh thu chỉ tính theo hộ, chưa làm rõ giới hạn và chi phí cho mỗi hộ.
+- **Tr. 9:** hoàn vốn 200.000/24.000 ≈ **8,33 tháng**; nếu tính theo tháng thu đủ, cần sang **tháng thứ 9**, không phải khoảng 8 tháng.
+- **Tr. 10:** 200 triệu bằng 2% định giá sau đầu tư giả định, nhưng gọi đó là **toàn bộ rủi ro thực của nhà đầu tư** là chưa có căn cứ: quyền, cam kết và điều kiện giải ngân chưa được xác lập.
+- **Tr. 3 và 5:** mức 55% trả 29.000 hoặc 49.000 đồng là tổng tỷ lệ lựa chọn, không chứng minh riêng **29.000 đồng tối đa hóa doanh thu kỳ vọng** nếu chưa trình bày cách xử lý lựa chọn 49.000 đồng.
+tokens used
+18,182
+## 1. Bảng điểm
+
+| Tiêu chí | Điểm | Lý do |
+|---|---:|---|
+| Sáng tạo | **14/20** | Kết hợp cảnh báo lúc gọi, khoảng dừng và người thân (tr. 4) có giá trị; từng thành phần không mới, lợi thế bền chưa chứng minh (tr. 6). |
+| Phù hợp vấn đề – thị trường | **13/20** | Vấn đề rõ, đúng đối tượng. Khảo sát 100 người là mẫu thuận tiện, 91% ở hai thành phố; ý định trả tiền chưa phải hành vi mua (tr. 2–3). SAM là ngoại suy thô. |
+| Khả thi và mở rộng | **15/30** | Có app và kiểm thử nội bộ (tr. 4–5), nhưng chưa thử thực địa, chưa có doanh thu hay đối tác; 5.000 hộ và cấp phép vẫn là giả định (tr. 8–11). Khả năng tự bật cần kiểm chứng trên thiết bị thực tế. |
+| Tác động và hiệu quả nguồn lực | **11/20** | Có mục tiêu và thiết kế đối chứng (tr. 7), nhưng chưa chứng minh giảm mất tiền. Bộ dữ liệu đã dùng chỉnh luật không đánh giá độc lập; 30 người khó kết luận chắc chắn. |
+| Hình thức | **7/10** | Có Business Model đầu bài, 10 trang nội dung và một phụ lục; phân biệt khá rõ giả định (tr. 1–12). Nội dung dày cho 5 phút. Chưa thể kiểm tra cỡ chữ, dung lượng PDF, ảnh và thông tin thành viên từ bản trích. |
+| **Tổng** | **60/100** | Chấm trên văn bản được cung cấp, không khẳng định hồ sơ hợp lệ về kỹ thuật. |
+
+Kiểm nhanh: con số **7,75 tỷ USD** tại tr. 2 phù hợp [báo cáo FBI IC3](https://www.ic3.gov/AnnualReport/Reports/2025_IC3Report.pdf?hss_channel=lcp-44730), nhưng là **thiệt hại được báo cáo**, không phải toàn bộ thiệt hại thực tế.
+
+## 2. Góc nhìn Shark
+
+**Không nhận deal 1 tỷ/10% ở giai đoạn này.** Định giá 10 tỷ dựa chủ yếu vào đối tác, giá cấp phép và quy mô chưa kiểm chứng. Chào giả định **200 triệu cho 10%**, giải ngân theo cột mốc kiểm thử độc lập và thử thực địa; quyền đầu tư tiếp sẽ thương lượng sau. Đây là đề nghị cho vòng hiện tại, không mặc định 800 triệu còn lại đã được cam kết.
+
+## 3. Năm chỗ mất điểm và cách sửa
+
+1. **Hiệu quả sản phẩm chưa độc lập** (tr. 5): tách mẫu chưa từng dùng chỉnh luật; công bố cỡ mẫu, nhãn, bỏ sót và báo nhầm.
+2. **Chưa thử với người dùng** (tr. 4, 7): thử đủ quy trình cài quyền, nhận cảnh báo, gọi người thân trên nhiều máy Android; báo cả ca thất bại.
+3. **Chưa có sức mua** (tr. 3, 8–9): phỏng vấn, thử bán thật hoặc lấy thư ý định; giữ khảo sát là ý định, không suy thành doanh thu.
+4. **Mở rộng và chi phí thiếu căn cứ** (tr. 8–10): lấy báo giá, tính đủ hỗ trợ, người dùng miễn phí và phí thanh toán; lập kịch bản không có đối tác.
+5. **Tác động chưa được chứng minh** (tr. 7): công bố A/B là thăm dò; bổ sung quy trình tuyển mẫu, tiêu chí đo và kết quả thực tế trước khi tuyên bố hiệu quả.
+
+## 4. Mâu thuẫn và điểm số liệu cần sửa
+
+- **Tr. 5 và 7:** 86% là **12/14 tin lừa nặng**, không đủ đại diện cho toàn bộ tin lừa có thật; tr. 5 diễn đạt rộng hơn.
+- **Tr. 1 và 8:** gói 29.000 đồng có “72 giờ” và 4 người; bảng doanh thu chỉ tính theo hộ, chưa làm rõ giới hạn và chi phí cho mỗi hộ.
+- **Tr. 9:** hoàn vốn 200.000/24.000 ≈ **8,33 tháng**; nếu tính theo tháng thu đủ, cần sang **tháng thứ 9**, không phải khoảng 8 tháng.
+- **Tr. 10:** 200 triệu bằng 2% định giá sau đầu tư giả định, nhưng gọi đó là **toàn bộ rủi ro thực của nhà đầu tư** là chưa có căn cứ: quyền, cam kết và điều kiện giải ngân chưa được xác lập.
+- **Tr. 3 và 5:** mức 55% trả 29.000 hoặc 49.000 đồng là tổng tỷ lệ lựa chọn, không chứng minh riêng **29.000 đồng tối đa hóa doanh thu kỳ vọng** nếu chưa trình bày cách xử lý lựa chọn 49.000 đồng.

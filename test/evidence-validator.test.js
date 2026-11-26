@@ -72,3 +72,12 @@ test('§6.4 — offset lệch KHÔNG làm loại tín hiệu nếu chuỗi có t
   s.evidence[0].end = 1002;
   assert.ok(validateEvidence(s, ctxVi));
 });
+
+test('§6.4 — trích dẫn nối hai mảnh nguyên văn đúng thứ tự bằng "..." thì được nhận; đảo thứ tự hoặc bịa một mảnh thì bị loại', () => {
+  const ctx = buildContext('Quý khách chuyển 1.200.000đ thuế giải ngân vào số 9999 8888 7777 trước khi nhận tiền.');
+  assert.ok(validateEvidence(th('chuyển 1.200.000đ thuế giải ngân... trước khi nhận tiền'), ctx));
+  // Đảo ngược thứ tự xuất hiện → loại.
+  assert.ok(!validateEvidence(th('trước khi nhận tiền... chuyển 1.200.000đ thuế giải ngân'), ctx));
+  // Một trong hai mảnh không có thật hoặc bị dịch → loại.
+  assert.ok(!validateEvidence(th('chuyển 1.200.000đ thuế giải ngân... before receiving money'), ctx));
+});

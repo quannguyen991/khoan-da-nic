@@ -1,6 +1,8 @@
 package vn.khoanda.app;
 
 import android.Manifest;
+import android.app.Activity;
+import android.net.VpnService;
 import android.os.Build;
 import android.content.Intent;
 import android.app.NotificationManager;
@@ -20,9 +22,12 @@ import com.getcapacitor.PermissionState;
 import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
+import com.getcapacitor.annotation.ActivityCallback;
 import com.getcapacitor.annotation.CapacitorPlugin;
 import com.getcapacitor.annotation.Permission;
 import com.getcapacitor.annotation.PermissionCallback;
+
+import androidx.activity.result.ActivityResult;
 
 import org.json.JSONException;
 
@@ -1446,5 +1451,143 @@ public class KhoanDaPlugin extends Plugin {
             r.put("ketQua", "loi_gui");
             call.resolve(r);
         }
+    }
+
+    // ─────────── Trạng thái app Tin nhắn mặc định (Hướng A Play Store) ───────────
+
+    @PluginMethod
+    public void trangThaiAppTinNhanMacDinh(PluginCall call) {
+        String pkg = DocThongBao.appTinNhanMacDinh(getContext());
+        boolean docTb = DocThongBao.daBatQuyen(getContext());
+        boolean tbHeThong = DocThongBao.thongBaoHeThongDangBat(getContext());
+        JSObject r = new JSObject();
+        r.put("goiSmsMacDinh", pkg);
+        r.put("daBatDocThongBao", docTb);
+        r.put("daBatThongBaoHeThong", tbHeThong);
+        r.put("hoTroSmsQuaThongBao", pkg != null && docTb && tbHeThong);
+        call.resolve(r);
+    }
+
+    // ─────────── UsageStatsManager (F3 Co-Pilot) & NFC (F1) ───────────
+
+    @PluginMethod
+    public void trangThaiQuyenUsageStats(PluginCall call) {
+        JSObject r = new JSObject();
+        r.put("daBat", GiamSatUngDung.daBatQuyen(getContext()));
+        call.resolve(r);
+    }
+
+    @PluginMethod
+    public void moCaiDatUsageStats(PluginCall call) {
+        try {
+            getContext().startActivity(GiamSatUngDung.manCaiDat());
+            call.resolve();
+        } catch (Exception e) {
+            call.reject("KHONG_MO_DUOC_CAI_DAT");
+        }
+    }
+
+    @PluginMethod
+    public void kiemTraNfc(PluginCall call) {
+        boolean[] kq = GiamSatUngDung.kiemTraNfc(getContext());
+        JSObject r = new JSObject();
+        r.put("hoTro", kq[0]);
+        r.put("dangBat", kq[1]);
+        call.resolve(r);
+    }
+
+    // ─────────── On-device OCR offline (ML Kit Text Recognition) ───────────
+
+    @PluginMethod
+    public void ocrAnh(final PluginCall call) {
+        String anh = call.getString("anh");
+        if (anh == null || anh.isEmpty()) {
+            JSObject r = new JSObject();
+            r.put("docDuoc", false);
+            r.put("vanBan", "");
+            r.put("dangKiem", false);
+            r.put("coTinHieuTien", false);
+            r.put("maLoi", "THIEU_ANH");
+            call.resolve(r);
+            return;
+        }
+        call.setKeepAlive(true);
+        OcrTaiMay.nhanDienTuDataUri(anh, new OcrTaiMay.KetQua() {
+            @Override
+            public void xong(String vanBan, boolean dangKiem, boolean coTinHieuTien) {
+                JSObject r = new JSObject();
+                r.put("docDuoc", true);
+                r.put("vanBan", vanBan);
+                r.put("dangKiem", dangKiem);
+                r.put("coTinHieuTien", coTinHieuTien);
+                call.resolve(r);
+            }
+
+            @Override
+            public void hong(String maLoi) {
+                JSObject r = new JSObject();
+                r.put("docDuoc", false);
+                r.put("vanBan", "");
+                r.put("dangKiem", false);
+                r.put("coTinHieuTien", false);
+                r.put("maLoi", maLoi);
+                call.resolve(r);
+            }
+        });
+    }
+
+    // ─────────── Local DNS VPN (chỉ lọc truy vấn tên miền cục bộ) ───────────
+
+    @PluginMethod
+    public void trangThaiVpnDns(PluginCall call) {
+        JSObject r = new JSObject();
+        r.put("dangChay", VpnLocDns.dangChay.get());
+        r.put("daCapQuyen", VpnLocDns.daCapQuyen(getContext()));
+        r.put("soTenMienDaChan", VpnLocDns.soTenMienDaChan.get());
+        call.resolve(r);
+    }
+
+    @PluginMethod
+    public void batVpnDns(PluginCall call) {
+        Intent xinQuyen = null;
+        try {
+            xinQuyen = VpnService.prepare(getContext());
+        } catch (Throwable t) {
+            JSObject r = new JSObject();
+            r.put("dangChay", false);
+            r.put("maLoi", "KHONG_HO_TRO_VPN");
+            call.resolve(r);
+            return;
+        }
+        if (xinQuyen != null) {
+            call.setKeepAlive(true);
+            startActivityForResult(call, xinQuyen, "sauKhiXinVpn");
+            return;
+        }
+        VpnLocDns.bat(getContext());
+        JSObject r = new JSObject();
+        r.put("dangChay", true);
+        call.resolve(r);
+    }
+
+    @ActivityCallback
+    private void sauKhiXinVpn(PluginCall call, ActivityResult result) {
+        JSObject r = new JSObject();
+        if (result != null && result.getResultCode() == Activity.RESULT_OK) {
+            VpnLocDns.bat(getContext());
+            r.put("dangChay", true);
+        } else {
+            r.put("dangChay", false);
+            r.put("maLoi", "CHUA_CAP_QUYEN_VPN");
+        }
+        call.resolve(r);
+    }
+
+    @PluginMethod
+    public void tatVpnDns(PluginCall call) {
+        VpnLocDns.tat(getContext());
+        JSObject r = new JSObject();
+        r.put("dangChay", false);
+        call.resolve(r);
     }
 }

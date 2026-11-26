@@ -38,16 +38,49 @@ const { scopeCuaTinHieu } = require('./signal-registry');
  */
 const chuanHoaTrich = (quote) => chuanHoa(String(quote).replace(/\s+/g, ' '));
 
-/**
- * Offset do gateway trả về hay lệch; thứ kiểm được là CHUỖI CON có thật hay không.
- * Nên ở đây chỉ kiểm sự tồn tại, không kiểm offset.
- */
-function trichCoThat(quote, ctx) {
+function trichDon(quote, ctx) {
   if (typeof quote !== 'string' || !quote.trim()) return false;
   const q = chuanHoaTrich(quote);
+  if (!q) return false;
   if (ctx.normalized.includes(q)) return true;
   // §6.13 — tiếng Việt không dấu cũng là bản gốc hợp lệ.
   return ctx.folded.includes(boDau(q));
+}
+
+/**
+ * Offset do gateway trả về hay lệch; thứ kiểm được là CHUỖI CON có thật hay không.
+ * Nên ở đây chỉ kiểm sự tồn tại, không kiểm offset.
+ *
+ * Nếu model nối hai mảnh nguyên văn trong cùng nguồn bằng "..." / "…", chỉ chấp
+ * nhận khi MỌI mảnh (≥ 3 ký tự) đều có thật nguyên văn đúng ngôn ngữ gốc và xuất
+ * hiện theo đúng thứ tự từ trái sang phải (không cho dịch hay bịa mảnh nào).
+ */
+function trichCoThat(quote, ctx) {
+  if (trichDon(quote, ctx)) return true;
+  if (typeof quote !== 'string' || !/(?:\.{3}|…)/.test(quote)) return false;
+  const manh = quote.split(/\s*(?:\.{3}|…)\s*/).map((m) => m.trim()).filter(Boolean);
+  if (manh.length < 2 || manh.some((m) => m.length < 3)) return false;
+
+  let viTriNorm = 0;
+  const khopNorm = manh.every((m) => {
+    const q = chuanHoaTrich(m);
+    if (!q) return false;
+    const idx = ctx.normalized.indexOf(q, viTriNorm);
+    if (idx < 0) return false;
+    viTriNorm = idx + q.length;
+    return true;
+  });
+  if (khopNorm) return true;
+
+  let viTriFold = 0;
+  return manh.every((m) => {
+    const qf = boDau(chuanHoaTrich(m));
+    if (!qf) return false;
+    const idx = ctx.folded.indexOf(qf, viTriFold);
+    if (idx < 0) return false;
+    viTriFold = idx + qf.length;
+    return true;
+  });
 }
 
 /**
@@ -71,13 +104,30 @@ const locTheoEvidence = (signals = [], ctx) => signals.filter((s) => validateEvi
  * — đã đo: 29/30 tín hiệu bị loại oan trên mẫu nguy hiểm đều do lỗi này.
  * Nên phải xét cả chiều ngược lại: đoạn nằm trong quote.
  */
-function doanChongLan(quote, ctx) {
+function doanChongLanDon(quote, ctx) {
   if (typeof quote !== 'string' || !quote.trim()) return [];
   // ⚠️ CÙNG hàm chuẩn hoá với `trichCoThat` — xem chú thích dài ở đó.
   const q = chuanHoaTrich(quote);
   const qf = boDau(q);
   return ctx.segments.filter((d) => d.normalized.includes(q) || d.folded.includes(qf)
     || q.includes(d.normalized) || qf.includes(d.folded));
+}
+
+function doanChongLan(quote, ctx) {
+  const trucTiep = doanChongLanDon(quote, ctx);
+  if (trucTiep.length > 0 || typeof quote !== 'string' || !/(?:\.{3}|…)/.test(quote)) {
+    return trucTiep;
+  }
+  const manh = quote.split(/\s*(?:\.{3}|…)\s*/).map((m) => m.trim()).filter((m) => m.length >= 3);
+  if (manh.length < 2) return [];
+  const daThay = new Set();
+  const ra = [];
+  for (const m of manh) {
+    for (const d of doanChongLanDon(m, ctx)) {
+      if (!daThay.has(d.index)) { daThay.add(d.index); ra.push(d); }
+    }
+  }
+  return ra;
 }
 
 /** Đoạn nào chứa câu trích này? Dùng để áp scope/speech act cho tín hiệu từ AI. */

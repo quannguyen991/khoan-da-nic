@@ -99,6 +99,12 @@ export function TrungTamBaoVe({
           </section>
 
           <section className={`${khungThe} mt-4`}>
+            <h2 className="flex items-center gap-2 text-[19px] font-black"><Phone size={22} aria-hidden="true" />{chu('THU_KY_TITLE')}</h2>
+            <p className="mt-1 text-[15px] leading-relaxed text-slate-700">{chu('THU_KY_HELP')}</p>
+            <button type="button" onClick={() => setView('thu_ky')} className={`${nut} mt-3 flex items-center justify-center gap-2 bg-indigo-800 text-white`}><Phone size={20} aria-hidden="true" />{chu('OPEN_THU_KY')}</button>
+          </section>
+
+          <section className={`${khungThe} mt-4`}>
             <h2 className="flex items-center gap-2 text-[19px] font-black"><Keyboard size={22} aria-hidden="true" />{chu('KEYBOARD_TITLE')}</h2>
             <p className="mt-1 text-[15px] leading-relaxed text-slate-700">{chu('KEYBOARD_HELP')}</p>
             <button type="button" onClick={() => setView('ban_phim')} className={`${nut} mt-3 flex items-center justify-center gap-2`}><Settings2 size={20} aria-hidden="true" />{chu('KEYBOARD_SETUP_TITLE')}</button>
@@ -142,6 +148,7 @@ export function ManCuuGiu({ setView, onTriggerEmergency }: { setView: (view: Vie
       <h1 className="text-[30px] font-black leading-snug">{chu('RESCUE_TITLE')}</h1>
       <p className="mt-2 text-[18px] leading-relaxed">{chu('RESCUE_HELP')}</p>
       <button type="button" onClick={() => void phatCau()} className="mt-5 min-h-[64px] rounded-2xl border-2 border-[#2e1065] bg-violet-800 px-4 py-3 text-[18px] font-black text-white"><Volume2 size={22} className="mr-2 inline" aria-hidden="true" />{dangDoc ? chu('SPEAK_AGAIN') : chu('SPEAK_FOR_ME')}</button>
+      <button type="button" onClick={() => { void docCauCuuGiu(chu('DETERRENCE_LINE')).then((ok) => { setDangDoc(ok); setLoiDoc(!ok); }); }} className="mt-3 min-h-[56px] rounded-2xl border-2 border-[#2e1065] bg-red-800 px-4 py-3 text-[16px] font-black text-white"><Volume2 size={20} className="mr-2 inline" aria-hidden="true" />{chu('PLAY_DETERRENCE')}</button>
       {loiDoc && <p role="status" className="mt-2 text-[15px] font-bold text-amber-900">{chu('TTS_UNAVAILABLE')}</p>}
       <button type="button" onClick={() => setView('family')} className="mt-3 min-h-[64px] rounded-2xl border-2 border-[#2e1065] bg-emerald-800 px-4 py-3 text-[18px] font-black text-white"><Phone size={22} className="mr-2 inline" aria-hidden="true" />{chu('CALL_TRUSTED')}</button>
       <button type="button" onClick={onTriggerEmergency} className="mt-3 min-h-[64px] rounded-2xl border-2 border-[#2e1065] bg-red-800 px-4 py-3 text-[18px] font-black text-white"><ShieldAlert size={22} className="mr-2 inline" aria-hidden="true" />{chu('OPEN_SOS')}</button>

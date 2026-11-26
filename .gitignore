@@ -98,4 +98,9 @@ android/keystore.properties
 # Không theo dõi các workspace/thử nghiệm phụ
 codebrain/
 .impeccable/
+dtkn-2026/draft-v*.pdf
+dtkn-2026/proposal-v*.html
+dtkn-2026/build-v*.py
+dtkn-2026/shots/
+
 

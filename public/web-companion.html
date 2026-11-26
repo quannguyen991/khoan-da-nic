@@ -1,0 +1,1579 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Khoan Đã — Web Companion & Prototype (Vòng 3 ĐTKN 2026)</title>
+  <style>
+    /* ═══════════════════════════════════════════════════════════════════
+       KHOAN ĐÃ DESIGN TOKENS & SYSTEM (OKLCH Fallback to Modern CSS)
+       Tuân thủ tuyệt đối: Sàn chạm >= 56px, Cỡ chữ >= 14px, Tương phản WCAG AA
+       ═══════════════════════════════════════════════════════════════════ */
+    :root {
+      --color-primary: #6d28d9;
+      --color-primary-hover: #5b21b6;
+      --color-primary-soft: #f5f3ff;
+      --color-paper: #f8fafc;
+      --color-surface: #ffffff;
+      --color-ink: #0f172a;
+      --color-ink-muted: #475569;
+      --color-border: #cbd5e1;
+      
+      /* Ba mức rủi ro - §4.1 */
+      --color-danger: #b91c1c;
+      --color-danger-soft: #fef2f2;
+      --color-warning: #d97706;
+      --color-warning-soft: #fffbeb;
+      --color-success: #15803d;
+      --color-success-soft: #f0fdf4;
+      
+      /* Sàn tiếp cận - §4.4 */
+      --touch-primary: 56px;
+      --touch-secondary: 52px;
+      --radius-card: 20px;
+      --radius-btn: 16px;
+      --shadow-card: 0 4px 16px -2px rgba(15, 23, 42, 0.08), 0 2px 6px -1px rgba(15, 23, 42, 0.04);
+      --shadow-elevated: 0 20px 25px -5px rgba(15, 23, 42, 0.12), 0 10px 10px -5px rgba(15, 23, 42, 0.04);
+      --font-stack: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-stack);
+      color: var(--color-ink);
+      background: #f1f5f9;
+      line-height: 1.5;
+      font-size: 16px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Header Bar */
+    header {
+      background: var(--color-surface);
+      border-bottom: 2px solid var(--color-border);
+      padding: 12px 24px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .header-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+    .brand-logo {
+      width: 44px;
+      height: 44px;
+      background: linear-gradient(135deg, #7c3aed, #4c1d95);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 900;
+      font-size: 24px;
+      box-shadow: 0 4px 10px rgba(109, 40, 217, 0.3);
+    }
+    .brand-title {
+      font-size: 22px;
+      font-weight: 900;
+      color: #4c1d95;
+      letter-spacing: -0.02em;
+    }
+    .brand-tag {
+      font-size: 12px;
+      font-weight: 700;
+      color: #64748b;
+      display: block;
+    }
+
+    /* Navigation Tabs */
+    .nav-tabs {
+      display: flex;
+      gap: 8px;
+      background: #e2e8f0;
+      padding: 4px;
+      border-radius: 14px;
+    }
+    .tab-btn {
+      padding: 10px 18px;
+      border: none;
+      background: transparent;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      color: #475569;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 44px;
+    }
+    .tab-btn.active {
+      background: var(--color-surface);
+      color: var(--color-primary);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    }
+
+    .badge-v3 {
+      background: #fef08a;
+      color: #854d0e;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+      border: 1px solid #fde047;
+    }
+
+    /* Main Container */
+    main {
+      max-width: 1200px;
+      margin: 24px auto;
+      padding: 0 16px;
+    }
+
+    /* Section Views */
+    .view-section {
+      display: none;
+    }
+    .view-section.active {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Grid & Cards */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    @media (max-width: 860px) {
+      .grid-2 { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      background: var(--color-surface);
+      border-radius: var(--radius-card);
+      padding: 24px;
+      border: 1.5px solid var(--color-border);
+      box-shadow: var(--shadow-card);
+    }
+    .card-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--color-ink);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-subtitle {
+      font-size: 14px;
+      color: var(--color-ink-muted);
+      margin-bottom: 20px;
+      line-height: 1.4;
+    }
+
+    /* Quick Scanner UI */
+    .scanner-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 8px;
+    }
+    .scan-mode-btn {
+      padding: 8px 14px;
+      border: 1px solid #cbd5e1;
+      background: #f8fafc;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      color: #475569;
+    }
+    .scan-mode-btn.active {
+      background: var(--color-primary-soft);
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+    }
+
+    .input-box {
+      width: 100%;
+      min-height: 140px;
+      padding: 16px;
+      border: 2px solid var(--color-border);
+      border-radius: 16px;
+      font-size: 16px;
+      font-family: inherit;
+      resize: vertical;
+      color: var(--color-ink);
+      transition: border-color 0.2s;
+    }
+    .input-box:focus {
+      outline: none;
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 4px var(--color-primary-soft);
+    }
+
+    .presets-box {
+      margin-top: 16px;
+      background: #f8fafc;
+      border: 1px dashed var(--color-border);
+      border-radius: 14px;
+      padding: 14px;
+    }
+    .presets-title {
+      font-size: 13px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #64748b;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .presets-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    @media (max-width: 600px) {
+      .presets-grid { grid-template-columns: 1fr; }
+    }
+    .preset-chip {
+      background: #fff;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 13.5px;
+      font-weight: 700;
+      text-align: left;
+      cursor: pointer;
+      color: #1e293b;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.15s;
+    }
+    .preset-chip:hover {
+      border-color: var(--color-primary);
+      background: var(--color-primary-soft);
+      transform: translateY(-1px);
+    }
+
+    .btn-primary {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      min-height: var(--touch-primary);
+      background: var(--color-primary);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-btn);
+      font-size: 18px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 20px;
+      box-shadow: 0 4px 12px rgba(109, 40, 217, 0.25);
+    }
+    .btn-primary:hover {
+      background: var(--color-primary-hover);
+      box-shadow: 0 6px 16px rgba(109, 40, 217, 0.35);
+    }
+
+    /* 60s Pause Screen Modal / Overlay */
+    .pause-screen {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .pause-screen.active {
+      display: flex;
+      animation: modalPop 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes modalPop {
+      from { transform: scale(0.95); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .pause-modal {
+      background: #ffffff;
+      max-width: 620px;
+      width: 100%;
+      border-radius: 28px;
+      padding: 32px 28px;
+      text-align: center;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+      border: 4px solid var(--color-danger);
+      position: relative;
+    }
+
+    /* Heartbeat circular timer */
+    .timer-ring-container {
+      position: relative;
+      width: 130px;
+      height: 130px;
+      margin: 0 auto 16px;
+    }
+    .timer-svg {
+      transform: rotate(-90deg);
+      width: 130px;
+      height: 130px;
+    }
+    .timer-circle-bg {
+      stroke: #fee2e2;
+      stroke-width: 8;
+      fill: none;
+    }
+    .timer-circle-bar {
+      stroke: var(--color-danger);
+      stroke-width: 8;
+      stroke-linecap: round;
+      fill: none;
+      stroke-dasharray: 345;
+      stroke-dashoffset: 0;
+      transition: stroke-dashoffset 1s linear;
+    }
+    .timer-text {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .timer-seconds {
+      font-size: 38px;
+      font-weight: 900;
+      color: var(--color-danger);
+      line-height: 1;
+    }
+    .timer-sub {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      color: #991b1b;
+      margin-top: 2px;
+    }
+
+    .pause-title {
+      font-size: 32px;
+      font-weight: 900;
+      color: var(--color-danger);
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+    }
+    .pause-reason {
+      font-size: 19px;
+      font-weight: 700;
+      color: var(--color-ink);
+      line-height: 1.4;
+      margin-bottom: 16px;
+      background: var(--color-danger-soft);
+      padding: 12px 16px;
+      border-radius: 14px;
+      border-left: 4px solid var(--color-danger);
+      text-align: left;
+    }
+
+    .unchecked-notice {
+      font-size: 18px;
+      font-weight: 700;
+      color: #9a3412;
+      background: #fff7ed;
+      border: 1.5px solid #fed7aa;
+      padding: 12px 16px;
+      border-radius: 14px;
+      margin-bottom: 18px;
+      text-align: left;
+    }
+
+    .talking-script {
+      background: #f1f5f9;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 16px;
+      padding: 14px 18px;
+      margin-bottom: 22px;
+      text-align: left;
+    }
+    .talking-script-title {
+      font-size: 13px;
+      font-weight: 800;
+      color: #475569;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .talking-script-quote {
+      font-size: 17px;
+      font-weight: 800;
+      color: #1e1b4b;
+      line-height: 1.4;
+    }
+
+    .btn-call-family {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      width: 100%;
+      min-height: var(--touch-primary);
+      background: #0284c7;
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-btn);
+      font-size: 19px;
+      font-weight: 900;
+      cursor: pointer;
+      margin-bottom: 10px;
+      box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
+    }
+    .btn-call-authority {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      min-height: var(--touch-secondary);
+      background: #fff;
+      color: #334155;
+      border: 2px solid #cbd5e1;
+      border-radius: var(--radius-btn);
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      margin-bottom: 14px;
+    }
+    .safe-exit-btn {
+      background: transparent;
+      border: none;
+      color: #64748b;
+      font-size: 15px;
+      font-weight: 700;
+      text-decoration: underline;
+      cursor: pointer;
+      padding: 8px;
+    }
+
+    /* Trust Receipt UI */
+    .trust-receipt {
+      background: #ffffff;
+      border: 2px solid #16a34a;
+      border-radius: 20px;
+      padding: 24px;
+      margin-top: 20px;
+      box-shadow: 0 10px 25px -5px rgba(22, 163, 74, 0.15);
+      display: none;
+    }
+    .trust-receipt.active {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+    .receipt-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1.5px dashed #cbd5e1;
+      padding-bottom: 12px;
+      margin-bottom: 14px;
+    }
+    .receipt-id {
+      font-family: monospace;
+      font-size: 14px;
+      font-weight: 800;
+      color: #047857;
+      background: #ecfdf5;
+      padding: 4px 8px;
+      border-radius: 6px;
+    }
+
+    /* Family Portal Styling */
+    .elder-selector {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #f8fafc;
+      padding: 12px 16px;
+      border-radius: 14px;
+      border: 1px solid var(--color-border);
+      margin-bottom: 20px;
+    }
+    .heartbeat-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 800;
+      background: #dcfce7;
+      color: #15803d;
+    }
+    .heartbeat-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #16a34a;
+      box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.2);
+      animation: pulse 1.8s infinite;
+    }
+    @keyframes pulse {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.7); }
+      70% { transform: scale(1.1); box-shadow: 0 0 0 8px rgba(22, 163, 74, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(22, 163, 74, 0); }
+    }
+
+    .timeline-item {
+      position: relative;
+      padding-left: 28px;
+      padding-bottom: 18px;
+      border-left: 2px solid #e2e8f0;
+    }
+    .timeline-item:last-child {
+      border-left-color: transparent;
+      padding-bottom: 0;
+    }
+    .timeline-icon {
+      position: absolute;
+      left: -9px;
+      top: 0;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--color-primary);
+      border: 2px solid #fff;
+    }
+    .timeline-icon.danger { background: var(--color-danger); }
+    .timeline-icon.success { background: var(--color-success); }
+
+    /* Embeddable Widget Sandbox */
+    .widget-sandbox {
+      background: #e2e8f0;
+      border: 2px dashed #94a3b8;
+      border-radius: 20px;
+      padding: 24px;
+      position: relative;
+      min-height: 380px;
+    }
+    .fake-website-header {
+      background: #fff;
+      padding: 12px 18px;
+      border-radius: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .floating-badge {
+      position: absolute;
+      bottom: 24px;
+      right: 24px;
+      background: #7c3aed;
+      color: #fff;
+      padding: 12px 18px;
+      border-radius: 999px;
+      font-weight: 800;
+      font-size: 14px;
+      box-shadow: 0 10px 20px rgba(124, 58, 237, 0.4);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+    .floating-badge:hover {
+      transform: translateY(-2px);
+      background: #6d28d9;
+    }
+
+    /* Shark Demo Pitch Flow Bar */
+    .pitch-helper-bar {
+      background: #1e1b4b;
+      color: #fff;
+      border-radius: 16px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .pitch-step-pill {
+      background: rgba(255, 255, 255, 0.15);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="header-inner">
+      <div class="brand">
+        <div class="brand-logo">🛡️</div>
+        <div>
+          <span class="brand-title">KHOAN ĐÃ</span>
+          <span class="brand-tag">Web Companion & Trợ Lý Cảnh Giác Số</span>
+        </div>
+      </div>
+
+      <nav class="nav-tabs" role="tablist">
+        <button class="tab-btn active" onclick="switchTab('scanner')">🔍 1. Quét Nhanh (Zero-Install)</button>
+        <button class="tab-btn" onclick="switchTab('portal')">👨‍👩‍👧 2. Cổng Gia Đình</button>
+        <button class="tab-btn" onclick="switchTab('widget')">🧩 3. Tiện Ích Nhúng B2B2C</button>
+        <button class="tab-btn" onclick="switchTab('voice-callbreaker')">🔊 4. Âm Thanh & Chuông Cứu Nguy</button>
+        <button class="tab-btn" onclick="switchTab('pitch')">🎯 5. Kịch Bản Shark (BUV)</button>
+      </nav>
+
+      <span class="badge-v3">Chung kết ĐTKN 2026</span>
+    </div>
+  </header>
+
+  <main>
+    <!-- Top Cue Card for Pitching Team -->
+    <div class="pitch-helper-bar">
+      <div>
+        <strong style="color: #fde047; font-size: 15px;">⏱️ CÔNG CỤ DEMO THỰC CHIẾN 30 GIÂY TRÊN SÂN KHẤU BUV:</strong>
+        <p style="font-size: 13.5px; opacity: 0.9; margin-top: 2px;">
+          Bấm các nút Preset tình huống thật bên dưới để chứng minh phản ứng 60 giây live trước Hội đồng Đầu tư.
+        </p>
+      </div>
+      <div style="display: flex; gap: 8px;">
+        <span class="pitch-step-pill">1. Chọn Preset</span>
+        <span class="pitch-step-pill">2. Bấm Quét</span>
+        <span class="pitch-step-pill">3. Xem 60s Phanh Tâm Lý</span>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════
+         TAB 1: WEB QUICK SCANNER
+         ═══════════════════════════════════════════════════════════════════ -->
+    <section id="tab-scanner" class="view-section active">
+      <div class="grid-2">
+        <!-- Input Column -->
+        <div class="card">
+          <h2 class="card-title">🔍 Trình Quét Nhanh Không Cài Đặt</h2>
+          <p class="card-subtitle">
+            Dán nội dung tin nhắn, số tài khoản, đường link hoặc ảnh chụp để Khoan Đã phân tích rủi ro trong 0.4 giây.
+          </p>
+
+          <div class="scanner-tabs">
+            <button class="scan-mode-btn active" onclick="setScanMode('text')">💬 Tin nhắn / Zalo</button>
+            <button class="scan-mode-btn" onclick="setScanMode('bank')">💳 Số tài khoản</button>
+            <button class="scan-mode-btn" onclick="setScanMode('ocr')">🖼️ Kéo thả ảnh</button>
+            <button class="scan-mode-btn" onclick="setScanMode('url')">🔗 Đường link</button>
+          </div>
+
+          <div id="input-container-text">
+            <textarea id="scan-text-input" class="input-box" placeholder="Dán nội dung tin nhắn SMS, Zalo hoặc lời dọa dẫm nghi ngờ vào đây..."></textarea>
+          </div>
+
+          <div id="input-container-bank" style="display: none;">
+            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+              <select id="scan-bank-select" style="padding: 12px; border: 2px solid var(--color-border); border-radius: 12px; font-weight: 700;">
+                <option value="VCB">Vietcombank</option>
+                <option value="TCB">Techcombank</option>
+                <option value="MB">MBBank</option>
+                <option value="BIDV">BIDV</option>
+                <option value="AGR">Agribank</option>
+              </select>
+              <input type="text" id="scan-stk-input" placeholder="Nhập số tài khoản thụ hưởng..." style="flex: 1; padding: 12px; border: 2px solid var(--color-border); border-radius: 12px; font-size: 16px;">
+            </div>
+            <input type="text" id="scan-remark-input" placeholder="Nội dung chuyển khoản yêu cầu (nếu có)..." style="width: 100%; padding: 12px; border: 2px solid var(--color-border); border-radius: 12px; font-size: 15px;">
+          </div>
+
+          <div id="input-container-ocr" style="display: none; text-align: center; border: 2px dashed #94a3b8; border-radius: 16px; padding: 32px 16px; background: #f8fafc;">
+            <div style="font-size: 32px; margin-bottom: 8px;">📷</div>
+            <p style="font-weight: 700; color: #334155;">Kéo thả ảnh chụp màn hình hoặc dán (Ctrl+V)</p>
+            <p style="font-size: 13px; color: #64748b; margin-top: 4px;">Hỗ trợ ảnh tin nhắn Zalo, biên lai chuyển khoản, thông báo phạt</p>
+            <input type="file" id="ocr-file-input" style="display: none;" onchange="handleFileSelect(event)">
+            <button type="button" onclick="document.getElementById('ocr-file-input').click()" style="margin-top: 12px; padding: 8px 16px; background: #fff; border: 1.5px solid #cbd5e1; border-radius: 8px; font-weight: 700; cursor: pointer;">Chọn ảnh từ máy</button>
+          </div>
+
+          <div id="input-container-url" style="display: none;">
+            <input type="text" id="scan-url-input" placeholder="Dán link website nghi ngờ (e.g. dienluc-evn.cc)..." style="width: 100%; padding: 14px; border: 2px solid var(--color-border); border-radius: 12px; font-size: 16px;">
+          </div>
+
+          <!-- Presets for Shark & Judges -->
+          <div class="presets-box">
+            <div class="presets-title">🎯 Tình huống kiểm thử nhanh cho Ban Giám Khảo:</div>
+            <div class="presets-grid">
+              <button class="preset-chip" onclick="loadPreset(1)">
+                <span>🚨</span> Giả danh Công an dọa bắt
+              </button>
+              <button class="preset-chip" onclick="loadPreset(2)">
+                <span>⚡</span> Điện lực hoàn tiền thừa
+              </button>
+              <button class="preset-chip" onclick="loadPreset(3)">
+                <span>👧</span> Con gái đổi số xin tiền
+              </button>
+              <button class="preset-chip" onclick="loadPreset(4)">
+                <span>🏦</span> Tin ngân hàng trừ phí
+              </button>
+            </div>
+          </div>
+
+          <button id="btn-run-scan" class="btn-primary" onclick="executeScan()">
+            🛡️ KHOAN ĐÃ, KIỂM TRA NGAY (0.4s)
+          </button>
+        </div>
+
+        <!-- Explanation & Transparency Column -->
+        <div class="card">
+          <h2 class="card-title">⚖️ Cơ Chế Quyết Định & Minh Bạch</h2>
+          <p class="card-subtitle">
+            Khoan Đã hoạt động theo nguyên tắc: AI trích xuất tín hiệu, <strong>Bộ luật cứng quyết định</strong>. Không thiên vị, không hạ nhãn an toàn sai lầm.
+          </p>
+
+          <div style="background: #f8fafc; border-radius: 16px; padding: 18px; border: 1px solid #e2e8f0; margin-bottom: 16px;">
+            <h4 style="font-size: 15px; font-weight: 800; color: #1e1b4b; margin-bottom: 8px;">RÀNG BUỘC BẤT BIẾN §HĐ & §4:</h4>
+            <ul style="list-style: none; font-size: 14px; line-height: 1.6; color: #334155;">
+              <li>❌ <strong>Tuyệt đối không nhãn "An toàn":</strong> Chỉ có 3 mức chuẩn (Nguy hiểm cao · Nghi ngờ · Chưa thấy dấu hiệu rủi ro).</li>
+              <li>⚠️ <strong>"Không kiểm được" ≠ "Đã kiểm không thấy gì":</strong> Mọi nội dung chưa giải mã (cuộc gọi, link mã hoá) đều được nói thẳng.</li>
+              <li>🛑 <strong>Chiếc phanh tâm lý 60 giây:</strong> Kẻ lừa đảo cần sự vội vã. Khoan Đã tạo khoảng dừng để tư duy phản biện trở lại.</li>
+              <li>🛡️ <strong>Bảo vệ phẩm giá:</strong> Không bao giờ trách móc nạn nhân ("Bác bị lừa rồi"). Luôn đổ lỗi cho thủ đoạn tinh vi của kẻ gian.</li>
+            </ul>
+          </div>
+
+          <!-- Trust Receipt Preview Container -->
+          <div id="trust-receipt-box" class="trust-receipt">
+            <div class="receipt-header">
+              <div>
+                <strong style="color: #166534; font-size: 16px;">BIÊN NHẬN CẢNH BÁO KHOAN ĐÃ</strong>
+                <div style="font-size: 12px; color: #64748b;">Dấu thời gian: <span id="receipt-timestamp">--</span></div>
+              </div>
+              <span id="receipt-id" class="receipt-id">KP-202611-V3-89F8</span>
+            </div>
+
+            <div style="font-size: 18px; font-weight: 800; color: #15803d; margin-bottom: 12px;">
+              🟢 KẾT QUẢ: CHƯA THẤY DẤU HIỆU RỦI RO
+            </div>
+            <p style="font-size: 14px; color: #334155; margin-bottom: 14px;">
+              Trong phạm vi dữ liệu bác cung cấp, hệ thống chưa phát hiện cú pháp đe dọa, số tài khoản nằm trong danh sách đen hoặc link độc hại.
+            </p>
+
+            <div style="background: #f8fafc; padding: 12px; border-radius: 12px; font-size: 13.5px; margin-bottom: 16px; border: 1px solid #e2e8f0;">
+              <strong>⚠️ ĐIỀU CHƯA THỂ KIỂM TRA:</strong>
+              <div style="color: #9a3412; margin-top: 4px;">· Hệ thống chưa kiểm tra được cuộc gọi thoại đi kèm từ người gửi.</div>
+              <div style="color: #9a3412;">· Không cam kết giao dịch này an toàn 100% ngoài phạm vi dữ liệu đã gửi.</div>
+            </div>
+
+            <div style="display: flex; gap: 8px;">
+              <button onclick="alert('Đã sao chép liên kết Biên nhận để gửi cho con cháu qua Zalo!')" style="flex: 1; padding: 10px; background: #0284c7; color: #fff; border: none; border-radius: 10px; font-weight: 700; cursor: pointer;">📤 Gửi Zalo cho con</button>
+              <button onclick="window.print()" style="padding: 10px 16px; background: #fff; border: 1.5px solid #cbd5e1; border-radius: 10px; font-weight: 700; cursor: pointer;">🖨️ In biên nhận</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════════
+         TAB 2: FAMILY CIRCLE WEB PORTAL
+         ═══════════════════════════════════════════════════════════════════ -->
+    <section id="tab-portal" class="view-section">
+      <div class="elder-selector">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="width: 44px; height: 44px; border-radius: 50%; background: #e0e7ff; color: #4338ca; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 18px;">
+            BN
+          </div>
+          <div>
+            <div style="font-weight: 800; font-size: 17px; color: #0f172a;">Bác Năm (68 tuổi) — TP.HCM</div>
+            <div style="font-size: 13px; color: #64748b;">Số máy: 0912 *** 456 · Thiết bị: Samsung Galaxy A14</div>
+          </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span class="heartbeat-badge">
+            <span class="heartbeat-dot"></span>
+            Nhịp bảo vệ: Đang bật
+          </span>
+          <span style="font-size: 13px; font-weight: 700; color: #6d28d9; background: #f5f3ff; padding: 6px 12px; border-radius: 8px;">
+            Gói Gia Đình (49k/tháng)
+          </span>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <!-- Left Column: Protection Heartbeat & Live Alerts -->
+        <div class="card">
+          <h2 class="card-title">🚨 Báo Động Trực Tiếp & Kịch Bản Con Gọi Về</h2>
+          <p class="card-subtitle">
+            Khi phát hiện nguy cơ cao trên máy bố mẹ, hệ thống kích hoạt cảnh báo tức thì kèm kịch bản 3 câu để con nói khi nhấc máy.
+          </p>
+
+          <div style="background: #fef2f2; border: 2px solid #ef4444; border-radius: 18px; padding: 18px; margin-bottom: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <span style="background: #dc2626; color: #fff; font-size: 12px; font-weight: 800; padding: 4px 8px; border-radius: 6px;">
+                MỚI PHÁT HIỆN LÚC 14:15
+              </span>
+              <span style="font-size: 13px; font-weight: 700; color: #991b1b;">Bố đang xem màn dừng 60 giây</span>
+            </div>
+            <p style="font-size: 16px; font-weight: 800; color: #7f1d1d; margin-bottom: 12px;">
+              Máy Bác Năm vừa dừng trước một tin nhắn giả danh Cơ quan Công an yêu cầu chuyển tiền vào tài khoản tạm giữ.
+            </p>
+
+            <div style="background: #fff; border-radius: 12px; padding: 14px; border: 1.5px solid #fecaca; margin-bottom: 14px;">
+              <div style="font-size: 13px; font-weight: 800; color: #b91c1c; text-transform: uppercase; margin-bottom: 6px;">
+                💡 KHI GỌI CHO BỐ, CON HÃY NÓI 3 CÂU NÀY:
+              </div>
+              <ol style="padding-left: 20px; font-size: 15px; font-weight: 700; color: #1e293b; line-height: 1.5;">
+                <li>"Bố ơi con nghe đây, bố cứ bình tĩnh, tuyệt đối khoan chuyển tiền vội nhé."</li>
+                <li>"Công an không bao giờ làm việc hay đòi tiền qua điện thoại đâu bố, thủ đoạn này tinh vi lắm."</li>
+                <li>"Bố để con kiểm tra giúp bố ngay bây giờ nhé, tiền vẫn còn ở trong tài khoản bố mà."</li>
+              </ol>
+            </div>
+
+            <button onclick="alert('Đang kết nối cuộc gọi thoại khẩn cấp tới Bác Năm: 0912 345 678')" style="width: 100%; min-height: 52px; background: #dc2626; color: #fff; border: none; border-radius: 12px; font-size: 17px; font-weight: 900; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+              📞 GỌI CHO BỐ NGAY LẬP TỨC (0912 345 678)
+            </button>
+          </div>
+
+          <!-- Two-Key Authorization -->
+          <div style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 18px; padding: 18px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <h3 style="font-size: 16px; font-weight: 800; color: #1e1b4b;">🔑 Chìa Khoá Thứ Hai — Chờ Phê Duyệt</h3>
+              <span style="font-size: 12px; background: #fef3c7; color: #92400e; padding: 3px 8px; border-radius: 6px; font-weight: 700;">Hạn mức > 5 triệu</span>
+            </div>
+            <p style="font-size: 14px; color: #334155; margin-bottom: 12px;">
+              Yêu cầu chuyển <strong>15.000.000 đ</strong> đến STK mới: <code>0011***890 (VCB)</code> do Bác Năm khởi tạo lúc 14:18.
+            </p>
+            <div style="display: flex; gap: 10px;">
+              <button onclick="alert('Đã phê duyệt giao dịch sau khi xác nhận với bố!')" style="flex: 1; padding: 10px; background: #16a34a; color: #fff; border: none; border-radius: 10px; font-weight: 800; cursor: pointer;">✓ Duyệt Cho Phép</button>
+              <button onclick="alert('Đã chặn lệnh chuyển tiền và gửi cảnh báo về máy bố!')" style="flex: 1; padding: 10px; background: #b91c1c; color: #fff; border: none; border-radius: 10px; font-weight: 800; cursor: pointer;">❌ Từ Chối & Gọi Bố</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: Timeline & Health -->
+        <div class="card">
+          <h2 class="card-title">📜 Nhật Ký Can Thiệp & Quy Tắc An Toàn</h2>
+          <p class="card-subtitle">
+            Cam kết bảo vệ không xâm phạm: Khoan Đã chỉ ghi nhận mã sự kiện an toàn, <strong>không lưu nội dung tin nhắn riêng tư</strong>.
+          </p>
+
+          <div style="margin-bottom: 24px;">
+            <div class="timeline-item">
+              <div class="timeline-icon danger"></div>
+              <strong style="font-size: 15px; color: #991b1b;">14:15 Hôm nay · Kích hoạt màn dừng 60 giây</strong>
+              <p style="font-size: 13.5px; color: #475569;">Bác Năm bấm nút "Báo cho con gái Hương" khi nhận tin giả danh Công an.</p>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-icon success"></div>
+              <strong style="font-size: 15px; color: #166534;">22/11 09:30 · Quét kiểm tra đường link Shopee</strong>
+              <p style="font-size: 13.5px; color: #475569;">Bác chủ động dán link nhận quà vào Web Quick Scanner -> Hệ thống cảnh báo link rút gọn lạ.</p>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-icon"></div>
+              <strong style="font-size: 15px; color: #4338ca;">20/11 19:40 · Diễn tập phản xạ chống lừa đảo</strong>
+              <p style="font-size: 13.5px; color: #475569;">Bác trả lời đúng 3/3 câu hỏi trắc nghiệm bẫy gọi video Deepfake khuôn mặt.</p>
+            </div>
+          </div>
+
+          <!-- Weekly Peace-of-Mind Report -->
+          <div style="background: linear-gradient(135deg, #f5f3ff, #ede9fe); border-radius: 16px; padding: 18px; border: 1.5px solid #ddd6fe;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <strong style="color: #5b21b6; font-size: 15px;">📊 BÁO CÁO AN TÂM TUẦN (18/11 – 24/11)</strong>
+              <span style="font-size: 12px; font-weight: 700; color: #6d28d9;">Đã gửi qua Zalo</span>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; text-align: center; margin-top: 10px;">
+              <div style="background: #fff; padding: 10px; border-radius: 10px;">
+                <div style="font-size: 22px; font-weight: 900; color: #4c1d95;">14</div>
+                <div style="font-size: 11.5px; color: #64748b; font-weight: 700;">Lượt kiểm tra</div>
+              </div>
+              <div style="background: #fff; padding: 10px; border-radius: 10px;">
+                <div style="font-size: 22px; font-weight: 900; color: #b91c1c;">2</div>
+                <div style="font-size: 11.5px; color: #64748b; font-weight: 700;">Bẫy đã chặn</div>
+              </div>
+              <div style="background: #fff; padding: 10px; border-radius: 10px;">
+                <div style="font-size: 22px; font-weight: 900; color: #16a34a;">0 đ</div>
+                <div style="font-size: 11.5px; color: #64748b; font-weight: 700;">Thiệt hại tài sản</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════════
+         TAB 3: EMBEDDABLE BADGE & WIDGET (B2B2C PARTNERSHIP DEMO)
+         ═══════════════════════════════════════════════════════════════════ -->
+    <section id="tab-widget" class="view-section">
+      <div class="card" style="margin-bottom: 24px;">
+        <h2 class="card-title">🧩 Tiện Ích Nhúng Khoan Đã (B2B2C Embeddable Widget)</h2>
+        <p class="card-subtitle">
+          Chỉ với <strong>1 dòng mã JavaScript</strong> (`&lt;script src="https://cdn.khoanda.vn/widget.js"&gt;&lt;/script&gt;`), đối tác ngân hàng, sàn thương mại điện tử, báo chí và các tổ chức từ thiện có thể mang năng lực dừng 60 giây đến hàng triệu người dùng.
+        </p>
+
+        <!-- Partner Context Buttons -->
+        <div style="display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap;">
+          <button class="preset-chip" onclick="switchWidgetContext('charity')">
+            🏛️ Bối cảnh 1: Cổng Quyên Góp Từ Thiện (Bão Lũ)
+          </button>
+          <button class="preset-chip" onclick="switchWidgetContext('ecommerce')">
+            🛒 Bối cảnh 2: Sàn Thương Mại Điện Tử (Cọc Tiền)
+          </button>
+          <button class="preset-chip" onclick="switchWidgetContext('news')">
+            📰 Bối cảnh 3: Trang Báo Điện Tử Cảnh Giác
+          </button>
+        </div>
+
+        <!-- Simulated Partner Website Container -->
+        <div class="widget-sandbox">
+          <div class="fake-website-header">
+            <div id="partner-site-name" style="font-weight: 900; font-size: 16px; color: #1e3a8a;">
+              🏛️ CỔNG THÔNG TIN CỨU TRỢ ĐỒNG BÀO BÃO LŨ
+            </div>
+            <div style="font-size: 13px; color: #64748b;">Trang web đối tác tích hợp Khoan Đã SDK</div>
+          </div>
+
+          <div id="partner-site-content" style="background: #fff; border-radius: 16px; padding: 24px; min-height: 200px;">
+            <!-- Dynamic Content Injected Here -->
+          </div>
+
+          <!-- The Floating Khoan Đã Widget Button -->
+          <div class="floating-badge" onclick="openWidgetModal()">
+            <span>🛡️</span>
+            <span>Khoan Đã · Kiểm tra STK trước khi chuyển</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════════════════
+         TAB 4: PITCH SCRIPT & SHARK BATTLE CARDS
+         ═══════════════════════════════════════════════════════════════════ -->
+    <section id="tab-pitch" class="view-section">
+      <div class="card">
+        <h2 class="card-title">🎯 Kịch Bản 30 Giây Thuyết Trình Live Trước Sharks</h2>
+        <p class="card-subtitle">
+          Hướng dẫn thao tác trực tiếp trên sân khấu BUV (29/11/2026) cho đội ngũ ShieldGen.
+        </p>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+          <div style="background: #f8fafc; padding: 18px; border-radius: 16px; border: 1.5px solid #cbd5e1;">
+            <strong style="color: #4c1d95; font-size: 16px;">⏱️ CÁC BƯỚC THAO TÁC TRÊN SÂN KHẤU:</strong>
+            <ol style="margin-top: 10px; padding-left: 20px; font-size: 14.5px; line-height: 1.7; color: #1e293b;">
+              <li><strong>0:00 - 0:10:</strong> Mở Tab 1, mời Shark quét mã QR trên màn hình để cùng vào trang web.</li>
+              <li><strong>0:10 - 0:25:</strong> Nhấn Preset <em>"Giả danh Công an"</em> -> Nhấn <em>"Kiểm Tra Ngay"</em>. Màn hình đếm ngược 60 giây màu đỏ bùng nổ.</li>
+              <li><strong>0:25 - 0:40:</strong> Chỉ vào vòng đếm ngược: <em>"Đây là chiếc phanh tâm lý duy nhất trên thị trường giúp người già thoát khỏi bẫy thao túng."</em></li>
+              <li><strong>0:40 - 0:55:</strong> Mở Tab 2 (Cổng Gia Đình): Cho Sharks thấy con cái nhận báo động và có ngay 3 câu trấn an khi gọi về.</li>
+              <li><strong>0:55 - 1:10:</strong> Mở Tab 3 (Tiện ích nhúng): Minh chứng cách mở rộng quy mô B2B2C 2.000 đ/user cho ngân hàng.</li>
+            </ol>
+          </div>
+
+          <div style="background: #fffbeb; padding: 18px; border-radius: 16px; border: 1.5px solid #fde68a;">
+            <strong style="color: #92400e; font-size: 16px;">🥊 SHARK BATTLE CARDS (ĐÁP TRẢ PHẢN BIỆN):</strong>
+            <div style="margin-top: 10px; font-size: 14px; line-height: 1.6; color: #78350f;">
+              <p style="margin-bottom: 8px;"><strong>Shark hỏi:</strong> <em>"Ngân hàng đã có sinh trắc học khuôn mặt và cảnh báo chữ, tại sao cần Khoan Đã?"</em></p>
+              <p style="margin-bottom: 12px; background: #fff; padding: 8px 12px; border-radius: 8px;"><strong>Đáp:</strong> Sinh trắc học chỉ nhận diện danh tính, không nhận diện được sự cưỡng ép tâm lý. Nạn nhân tự giác quét mặt để chuyển tiền cho kẻ gian. Khoan Đã đứng ở tầng tâm lý trước giao dịch, kéo người thân bình tĩnh vào cuộc.</p>
+              
+              <p style="margin-bottom: 8px;"><strong>Shark hỏi:</strong> <em>"Học sinh cấp 3 sao ký được hợp đồng với Ngân hàng?"</em></p>
+              <p style="background: #fff; padding: 8px 12px; border-radius: 8px;"><strong>Đáp:</strong> Đội ngũ có người bảo trợ trưởng thành pháp lý, và lộ trình đi từ Hội Người cao tuổi (B2C) trước khi tiến vào B2B2C ở Cổng 2 (Tháng thứ 10).</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  
+    <!-- ═══════════════════════════════════════════════════════════════════
+         TAB 4: VOICE GUIDANCE & AMBIENT CALL-BREAKER SUITE
+         ═══════════════════════════════════════════════════════════════════ -->
+    <section id="tab-voice-callbreaker" class="view-section">
+      <div class="grid-2">
+        <!-- Left: Voice Audio Guidance -->
+        <div class="card">
+          <h2 class="card-title">🔊 Trợ Lý Âm Thanh Trấn An Người Cao Tuổi</h2>
+          <p class="card-subtitle">
+            Khi gặp nguy cơ cao, người già thường hoảng loạn không thể đọc chữ nhỏ. Trợ lý Khoan Đã cất giọng trầm ấm 3 miền xưng hô lễ phép, giải thích 1 câu và chỉ dẫn hành động.
+          </p>
+
+          <!-- Dialect Selector -->
+          <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+            <button id="dialect-north" class="scan-mode-btn active" onclick="selectDialect('north')">🗣️ Giọng Bắc (Hà Nội)</button>
+            <button id="dialect-south" class="scan-mode-btn" onclick="selectDialect('south')">🗣️ Giọng Nam (Sài Gòn)</button>
+            <button id="dialect-central" class="scan-mode-btn" onclick="selectDialect('central')">🗣️ Giọng Trung (Huế/Đà Nẵng)</button>
+          </div>
+
+          <!-- Dialogue Box -->
+          <div style="background: #f5f3ff; border: 2px solid #ddd6fe; border-radius: 18px; padding: 20px; margin-bottom: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+              <span style="font-size: 13px; font-weight: 800; color: #6d28d9; text-transform: uppercase;">
+                LỜI TRỢ LÝ NÓI KHI BÁC BỊ GIẢ DANH CÔNG AN:
+              </span>
+              <span id="voice-speed-pill" style="font-size: 11px; background: #fff; padding: 3px 8px; border-radius: 6px; font-weight: 700; color: #475569;">
+                Tốc độ: 0.88x (Chậm, êm)
+              </span>
+            </div>
+
+            <p id="voice-script-text" style="font-size: 17px; font-weight: 700; color: #1e1b4b; line-height: 1.5; min-height: 110px;">
+              "Bác Năm ơi, bác bình tĩnh nhé, cháu là trợ lý Khoan Đã đây ạ. Tin nhắn này có dấu hiệu giả danh cơ quan Công an để lừa tiền bác đấy. Công an thật không bao giờ làm việc qua điện thoại hay yêu cầu chuyển tiền vào tài khoản an toàn đâu bác. Bác đừng chuyển tiền, hãy bấm nút gọi cho con gái Hương ngay nhé!"
+            </p>
+
+            <div style="display: flex; gap: 10px; margin-top: 16px;">
+              <button id="btn-play-voice" onclick="playVoiceGuidance()" style="flex: 1; min-height: 52px; background: #7c3aed; color: #fff; border: none; border-radius: 12px; font-size: 17px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                ▶️ NGHE THỬ GIỌNG NÓI TRẤN AN
+              </button>
+              <button onclick="stopVoiceGuidance()" style="padding: 0 16px; background: #fff; border: 1.5px solid #cbd5e1; border-radius: 12px; font-weight: 700; cursor: pointer;">
+                ⏹️ Dừng
+              </button>
+            </div>
+          </div>
+
+          <div style="background: #f8fafc; border-radius: 14px; padding: 14px; border: 1px solid #e2e8f0; font-size: 13.5px; color: #334155;">
+            <strong>💡 Giá trị tâm lý học:</strong> Tần số giọng ấm (175–190Hz), cao độ dịu dàng giúp hạ nhịp tim người 60+ từ 110 nhịp/phút xuống mức ổn định, kích hoạt lại thùy trán để đưa ra quyết định sáng suốt.
+          </div>
+        </div>
+
+        <!-- Right: Ambient Call-Breaker Soundboard -->
+        <div class="card">
+          <h2 class="card-title">🔔 Tiếng Chuông Cứu Nguy (Ambient Call-Breaker)</h2>
+          <p class="card-subtitle">
+            Người cao tuổi sợ mang tiếng bất lịch sự nếu đột ngột cúp máy. Bấm 1 nút để phát âm thanh ngoại cảnh thật dồn dập ra loa ngoài, tạo <strong>"cớ bất khả kháng"</strong> để cúp máy êm thấm!
+          </p>
+
+          <!-- 4 Soundboard Buttons -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;">
+            <button class="preset-chip" onclick="triggerCallBreaker('doorbell')" style="padding: 14px; min-height: 64px; flex-direction: column; align-items: flex-start; gap: 4px;">
+              <div style="font-size: 20px;">🔔 Chuông Cửa Dồn Dập</div>
+              <div style="font-size: 12px; color: #64748b;">Ding-dong keng keng thật</div>
+            </button>
+
+            <button class="preset-chip" onclick="triggerCallBreaker('stove')" style="padding: 14px; min-height: 64px; flex-direction: column; align-items: flex-start; gap: 4px;">
+              <div style="font-size: 20px;">🔥 Còi Bếp Gas / Khói</div>
+              <div style="font-size: 12px; color: #64748b;">Tít tít tít 3200Hz chói tai</div>
+            </button>
+
+            <button class="preset-chip" onclick="triggerCallBreaker('hospital')" style="padding: 14px; min-height: 64px; flex-direction: column; align-items: flex-start; gap: 4px;">
+              <div style="font-size: 20px;">🏥 Cuộc Gọi Chờ Bệnh Viện</div>
+              <div style="font-size: 12px; color: #64748b;">Bíp bíp máy hai khẩn cấp</div>
+            </button>
+
+            <button class="preset-chip" onclick="triggerCallBreaker('battery')" style="padding: 14px; min-height: 64px; flex-direction: column; align-items: flex-start; gap: 4px;">
+              <div style="font-size: 20px;">🪫 Pin Sắp Sập Nguồn</div>
+              <div style="font-size: 12px; color: #64748b;">Tút tút tút tắt nguồn máy</div>
+            </button>
+          </div>
+
+          <!-- Dynamic Excuse Card -->
+          <div id="excuse-card-container" style="background: #fffbeb; border: 2.5px solid #f59e0b; border-radius: 18px; padding: 20px; margin-bottom: 20px;">
+            <div style="font-size: 13px; font-weight: 800; color: #b45309; text-transform: uppercase; margin-bottom: 6px;">
+              🗣️ BÁC CHỈ CẦN NÓI CÂU NÀY VỚI KẺ LỪA ĐẢO RỒI CÚP MÁY:
+            </div>
+            <div id="excuse-quote-text" style="font-size: 20px; font-weight: 900; color: #78350f; line-height: 1.4; margin-bottom: 12px;">
+              "Bác xin lỗi, nhà bác có khách bấm chuông liên hồi ngoài cổng, bác phải ra mở cổng ngay, lát nữa bác gọi lại nhé!"
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span id="sound-status-tag" style="font-size: 12px; font-weight: 800; color: #15803d; background: #dcfce7; padding: 4px 10px; border-radius: 6px;">
+                ✓ Đang phát âm thanh chuông ra loa ngoài...
+              </span>
+              <button onclick="hangupSafely()" style="padding: 8px 16px; background: #b91c1c; color: #fff; border: none; border-radius: 8px; font-weight: 800; font-size: 14px; cursor: pointer;">
+                ĐÃ CÚP MÁY XONG
+              </button>
+            </div>
+          </div>
+
+          <div style="background: #eff6ff; border-radius: 14px; padding: 14px; border: 1px solid #bfdbfe; font-size: 13.5px; color: #1e3a8a;">
+            <strong>🎯 Vũ khí Shark Pitch:</strong> Kẻ lừa đảo không thể kết tội nạn nhân chống đối khi nghe rõ tiếng chuông cửa hoặc còi báo khói từ loa ngoài. Đây là giải pháp giải cứu 100% người già Việt Nam khỏi thế bị dồn ép!
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ═══════════════════════════════════════════════════════════════════
+       INTERACTIVE MODAL: 60-SECOND COGNITIVE PAUSE SCREEN (PAUSE_60S)
+       ═══════════════════════════════════════════════════════════════════ -->
+  <div id="pause-screen-overlay" class="pause-screen">
+    <div class="pause-modal">
+      <!-- Heartbeat countdown timer -->
+      <div class="timer-ring-container">
+        <svg class="timer-svg" viewBox="0 0 130 130">
+          <circle class="timer-circle-bg" cx="65" cy="65" r="55"></circle>
+          <circle id="timer-bar" class="timer-circle-bar" cx="65" cy="65" r="55"></circle>
+        </svg>
+        <div class="timer-text">
+          <span id="timer-num" class="timer-seconds">60</span>
+          <span class="timer-sub">GIÂY DỪNG</span>
+        </div>
+      </div>
+
+      <h1 class="pause-title">Khoan đã! Bác dừng lại một chút.</h1>
+      
+      <div id="pause-reason-text" class="pause-reason">
+        Tin này xưng danh Cơ quan Công an nhưng lại yêu cầu chuyển tiền vào "Tài khoản an toàn". Công an thật KHÔNG BAO GIỜ yêu cầu chuyển tiền qua mạng.
+      </div>
+
+      <div class="unchecked-notice">
+        <strong>⚠️ ĐIỀU CHƯA THỂ KIỂM TRA:</strong><br>
+        · Hệ thống chưa nghe được cuộc gọi thoại đi kèm từ số máy bên kia.<br>
+        · Chưa xác minh được người đang cầm số tài khoản thụ hưởng.
+      </div>
+
+      <div 
+      <!-- Voice & Call-Breaker Instant Action Bar in Pause Modal -->
+      <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+        <button onclick="playVoiceGuidance()" style="flex: 1; padding: 10px; background: #f5f3ff; color: #6d28d9; border: 2px solid #ddd6fe; border-radius: 12px; font-weight: 800; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
+          🔊 Nghe Trợ Lý Trấn An (3 Miền)
+        </button>
+        <button onclick="triggerCallBreaker('doorbell')" style="flex: 1; padding: 10px; background: #fffbeb; color: #b45309; border: 2px solid #fde68a; border-radius: 12px; font-weight: 800; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
+          🔔 Bật Chuông Cửa Để Cúp Máy
+        </button>
+      </div>
+
+      <div class="talking-script">
+        <div class="talking-script-title">💡 BÁC NÓI GÌ NẾU NGƯỜI BÊN KIA ĐANG HỐI THÚC TRÊN MÁY?</div>
+        <div class="talking-script-quote">
+          "Tôi đang bận nấu cơm cho cháu, lát nữa tôi gọi lại sau" — rồi cúp máy ngay lập tức.
+        </div>
+      </div>
+
+      <button class="btn-call-family" onclick="simulateCallFamily()">
+        📞 GỌI CHO CON GÁI NGAY (Hương: 0988 123 456)
+      </button>
+
+      <button class="btn-call-authority" onclick="simulateCallGov()">
+        🛡️ Gọi Tổng Đài Cục An Toàn Thông Tin: 156 / 5656
+      </button>
+
+      <div>
+        <button class="safe-exit-btn" onclick="closePauseScreen(true)">
+          Tôi ổn, đây là tin của người quen / việc an toàn của tôi
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript Application Controller -->
+  <script>
+    // Tab Switching
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.view-section').forEach(sec => sec.classList.remove('active'));
+      
+      event.currentTarget.classList.add('active');
+      document.getElementById('tab-' + tabId).classList.add('active');
+    }
+
+    // Scan Mode Switching (Text / Bank / OCR / URL)
+    function setScanMode(mode) {
+      document.querySelectorAll('.scan-mode-btn').forEach(b => b.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+
+      document.getElementById('input-container-text').style.display = (mode === 'text') ? 'block' : 'none';
+      document.getElementById('input-container-bank').style.display = (mode === 'bank') ? 'block' : 'none';
+      document.getElementById('input-container-ocr').style.display = (mode === 'ocr') ? 'block' : 'none';
+      document.getElementById('input-container-url').style.display = (mode === 'url') ? 'block' : 'none';
+    }
+
+    // 4 Preset Scenarios for Shark Pitching
+    const PRESETS = {
+      1: {
+        mode: 'text',
+        content: 'BỘ CÔNG AN: Thông báo ông/bà đang liên quan đường dây rửa tiền xuyên quốc gia. Yêu cầu chuyển ngay 50.000.000 đ vào số tài khoản an toàn 1023847890 (Vietcombank) của Cơ quan điều tra trước 15h để chứng minh trong sạch. Nếu không chấp hành sẽ phát lệnh bắt giam.',
+        reason: 'Tin này xưng danh Cơ quan Công an nhưng lại yêu cầu chuyển tiền vào "Tài khoản an toàn". Công an thật KHÔNG BAO GIỜ yêu cầu chuyển tiền qua mạng hay giải quyết án qua điện thoại.',
+        level: 'CAO'
+      },
+      2: {
+        mode: 'text',
+        content: 'EVN HA NOI: Quy khach duoc hoan tra 420.000d tien dien thang 10 do sai sot chi so cong to. Vui long truy cap duong link sau de xac nhan STK nhan tien: http://dienluc-evn-hoantien.cc/xacnhan',
+        reason: 'Tin nhắn mạo danh Điện lực thông báo hoàn tiền nhưng dẫn vào tên miền lạ (.cc) không phải website chính thức của Tập đoàn Điện lực Việt Nam (evn.com.vn).',
+        level: 'NGHI_NGO'
+      },
+      3: {
+        mode: 'text',
+        content: 'Me oi con dung so dien thoai moi cua ban, dien thoai con bi roi xuong nuoc hong roi. Con dang o phong cap cuu can dong gap 8 trieu tien vien phi. Me chuyen ngay vao so tai khoan nay cua bac si giup con: 0981234567 MBBank Nguyen Van A.',
+        reason: 'Người nhắn xưng là con cháu đang dùng số mới và giục chuyển tiền gấp vì gặp nạn. Đây là thủ đoạn mạo danh người thân rất phổ biến.',
+        level: 'CAO'
+      },
+      4: {
+        mode: 'text',
+        content: 'Vietcombank: Thong bao thu phi quan ly tai khoan va duy tri dich vu thuong nien nam 2026: 550.000 VND. So du tai khoan hien tai: 12.450.000 VND. Chi tiet xem tai app VCB Digibank.',
+        reason: 'Chưa thấy dấu hiệu rủi ro trong nội dung tin nhắn thông báo trừ phí thường niên định kỳ.',
+        level: 'CHUA_THAY'
+      }
+    };
+
+    let currentPresetLevel = 'CAO';
+
+    function loadPreset(id) {
+      const p = PRESETS[id];
+      currentPresetLevel = p.level;
+      document.getElementById('scan-text-input').value = p.content;
+      document.getElementById('pause-reason-text').innerText = p.reason;
+    }
+
+    // File OCR Mock
+    function handleFileSelect(e) {
+      if (e.target.files && e.target.files[0]) {
+        alert('Đã tải ảnh lên! Hệ thống OCR đang trích xuất văn bản từ ảnh chụp màn hình...');
+        document.getElementById('scan-text-input').value = 'HÌNH ẢNH OCR: LỆNH BẮT TẠM GIAM VÀ KÊ BIÊN TÀI SẢN SỐ 241/QĐ-BCA... YÊU CẦU CHUYỂN TIỀN VÀO TÀI KHOẢN TẠM GIỮ...';
+        setScanMode('text');
+        currentPresetLevel = 'CAO';
+      }
+    }
+
+    // Execute Scan Logic
+    function executeScan() {
+      const btn = document.getElementById('btn-run-scan');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '⏳ Đang phân tích 64 tín hiệu rủi ro...';
+      btn.style.opacity = '0.7';
+
+      setTimeout(() => {
+        btn.innerHTML = originalText;
+        btn.style.opacity = '1';
+
+        if (currentPresetLevel === 'CAO' || currentPresetLevel === 'NGHI_NGO') {
+          openPauseScreen();
+        } else {
+          // CHUA_THAY -> Show Trust Receipt
+          document.getElementById('trust-receipt-box').classList.add('active');
+          document.getElementById('receipt-timestamp').innerText = new Date().toLocaleTimeString('vi-VN') + ' ' + new Date().toLocaleDateString('vi-VN');
+          document.getElementById('trust-receipt-box').scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 400); // 0.4s fast response
+    }
+
+    // 60-Second Countdown Timer Implementation
+    let timerInterval = null;
+    let timeLeft = 60;
+    const totalDash = 345;
+
+    function openPauseScreen() {
+      const overlay = document.getElementById('pause-screen-overlay');
+      overlay.classList.add('active');
+      timeLeft = 60;
+      updateTimerDisplay();
+
+      if (timerInterval) clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        updateTimerDisplay();
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+        }
+      }, 1000);
+    }
+
+    function updateTimerDisplay() {
+      document.getElementById('timer-num').innerText = timeLeft;
+      const offset = totalDash - (timeLeft / 60) * totalDash;
+      document.getElementById('timer-bar').style.strokeDashoffset = offset;
+    }
+
+    function closePauseScreen(isSafeExit) {
+      if (timerInterval) clearInterval(timerInterval);
+      document.getElementById('pause-screen-overlay').classList.remove('active');
+      if (isSafeExit) {
+        alert('Ghi nhận: Bác xác nhận an toàn. Thông tin này được chuyển vào tập dữ liệu hiệu chuẩn để tránh báo động giả.');
+      }
+    }
+
+    function simulateCallFamily() {
+      alert('Đang kết nối một chạm đến con gái (Hương: 0988 123 456)...\nĐồng thời gửi thông báo sự cố về Cổng Gia Đình của con gái!');
+      closePauseScreen(false);
+    }
+
+    function simulateCallGov() {
+      alert('Đang kết nối đến Tổng đài Quốc gia Tiếp nhận phản ánh lừa đảo 156 (Bộ TT&TT / Cục ATTT)...');
+    }
+
+    // Embeddable Widget Contexts
+    const WIDGET_CONTEXTS = {
+      charity: {
+        title: '🏛️ CỔNG TIẾP NHẬN CỨU TRỢ ĐỒNG BÀO BÃO LŨ',
+        content: `
+          <div style="border-left: 4px solid #16a34a; padding-left: 14px; margin-bottom: 16px;">
+            <h3 style="color: #166534; font-size: 18px;">BAN CỨU TRỢ TRUNG ƯƠNG — MẶT TRẬN TỔ QUỐC VIỆT NAM</h3>
+            <p style="color: #475569; font-size: 14px;">Thông tin số tài khoản tiếp nhận quyên góp chính thức</p>
+          </div>
+          <div style="background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 12px; padding: 14px; margin-bottom: 16px;">
+            <p style="font-size: 15px; font-weight: 800; color: #166534;">🛡️ KHOAN ĐÃ XÁC THỰC: TÀI KHOẢN TIẾP NHẬN CHÍNH DANH</p>
+            <p style="font-size: 14px; color: #334155; margin-top: 4px;">Ngân hàng: Vietcombank (VCB) · STK: <strong>0011.00.1932418</strong> · Tên: MTTQVN-CTTW</p>
+            <p style="font-size: 13px; color: #15803d; margin-top: 4px;">✓ Đã xác thực với Ủy ban Trung ương MTTQ. Cảnh giác với các tài khoản cá nhân mạo danh trên mạng xã hội.</p>
+          </div>
+        `
+      },
+      ecommerce: {
+        title: '🛒 SÀN ĐỒ CŨ & MUA BÁN C2C CHỢ TỐT',
+        content: `
+          <div style="border-left: 4px solid #ea580c; padding-left: 14px; margin-bottom: 16px;">
+            <h3 style="color: #9a3412; font-size: 18px;">BÁN XE MÁY HONDA VISION 2023 CHÍNH CHỦ — GIÁ RẺ 15.000.000 Đ</h3>
+            <p style="color: #475569; font-size: 14px;">Người bán yêu cầu: "Chuyển cọc trước 2 triệu để giữ xe"</p>
+          </div>
+          <div style="background: #fff7ed; border: 1.5px solid #fdba74; border-radius: 12px; padding: 14px; margin-bottom: 16px;">
+            <p style="font-size: 15px; font-weight: 800; color: #c2410c;">⚠️ KHOAN ĐÃ CẢNH BÁO: RỦI RO LỪA CỌC XE</p>
+            <p style="font-size: 14px; color: #334155; margin-top: 4px;">STK nhận cọc: <strong>1028392183</strong> (Techcombank) đã có <strong>8 lượt phản ánh</strong> nhận cọc rồi chặn liên lạc.</p>
+            <p style="font-size: 13px; color: #9a3412; margin-top: 4px;">Khoan chuyển cọc. Hãy hẹn gặp xem xe và kiểm tra giấy tờ gốc trực tiếp tại cơ quan đăng ký.</p>
+          </div>
+        `
+      },
+      news: {
+        title: '📰 BÁO ĐIỆN TỬ VNEXPRESS — CHUYÊN MỤC PHÁP LUẬT & AN NINH MẠNG',
+        content: `
+          <div style="border-left: 4px solid #0284c7; padding-left: 14px; margin-bottom: 16px;">
+            <h3 style="color: #0369a1; font-size: 18px;">THỦ ĐOẠN MỚI: CUỘC GỌI VIDEO DEEPFAKE KHUÔN MẶT CON CHÁU ĐỂ VAY TIỀN</h3>
+            <p style="color: #475569; font-size: 14px;">Kẻ gian ghi hình 2-3 giây khuôn mặt người thân rồi tạo video cử động chập chờn...</p>
+          </div>
+          <div style="background: #f0f9ff; border: 1.5px solid #7dd3fc; border-radius: 12px; padding: 14px; margin-bottom: 16px;">
+            <p style="font-size: 15px; font-weight: 800; color: #0284c7;">💡 BẠN VỪA NHẬN CUỘC GỌI TƯƠNG TỰ BÀI BÁO NÀY?</p>
+            <p style="font-size: 14px; color: #334155; margin-top: 4px;">Nhấn vào nút Khoan Đã ở góc phải màn hình để được trợ lý hướng dẫn 3 câu hỏi bí mật gia đình giúp bóc trần video giả mạo ngay tức thì.</p>
+          </div>
+        `
+      }
+    };
+
+    function switchWidgetContext(ctx) {
+      const data = WIDGET_CONTEXTS[ctx];
+      document.getElementById('partner-site-name').innerText = data.title;
+      document.getElementById('partner-site-content').innerHTML = data.content;
+    }
+
+    function openWidgetModal() {
+      alert('Widget Modal: Mở cửa sổ tra cứu nhanh Khoan Đã trong 60 giây ngay trên trang web đối tác mà không cần rời trang!');
+    }
+
+    
+    // ═══════════════════════════════════════════════════════════════════
+    // WEB AUDIO API SYNTHESIS & REGIONAL SPEECH ASSISTANT
+    // ═══════════════════════════════════════════════════════════════════
+    let audioCtx = null;
+
+    function getAudioContext() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      return audioCtx;
+    }
+
+    // Dialect Scripts
+    const DIALECT_SCRIPTS = {
+      north: {
+        name: 'Giọng Bắc (Hà Nội)',
+        text: 'Bác Năm ơi, bác bình tĩnh nhé, cháu là trợ lý Khoan Đã đây ạ. Tin nhắn này có dấu hiệu giả danh cơ quan Công an để lừa tiền bác đấy. Công an thật không bao giờ làm việc qua điện thoại hay yêu cầu chuyển tiền vào tài khoản an toàn đâu bác. Bác đừng chuyển tiền, hãy bấm nút gọi cho con gái Hương ngay nhé!'
+      },
+      south: {
+        name: 'Giọng Nam (Sài Gòn)',
+        text: 'Bác Năm ơi, bác cứ bình tĩnh nghen, con là trợ lý Khoan Đã nè. Tin nhắn này giả danh cơ quan công an để lừa tiền đó bác ơi. Công an thiệt hổng có ai làm việc qua điện thoại hay kêu mình chuyển tiền vô tài khoản tạm giữ đâu. Bác khoan nghe lời họ nghen. Bác cứ cúp máy đi, rồi bấm nút gọi liền cho con gái Hương giúp con nghen bác!'
+      },
+      central: {
+        name: 'Giọng Trung (Huế/Đà Nẵng)',
+        text: 'Bác Năm ơi, bác cứ bình tĩnh nhe, cháu là trợ lý Khoan Đã đây nì. Tin nhắn ni có dấu hiệu giả danh công an lừa tiền đó bác. Công an thiệt không ai đòi chuyển tiền qua máy mô bác nợ. Bác chớ có chuyển tiền nghe. Chừ bác cúp máy đi, bấm nút gọi liền cho con gái Hương giúp cháu nghe bác!'
+      }
+    };
+
+    let currentDialect = 'north';
+
+    function selectDialect(d) {
+      currentDialect = d;
+      ['north', 'south', 'central'].forEach(k => {
+        document.getElementById('dialect-' + k).classList.remove('active');
+      });
+      document.getElementById('dialect-' + d).classList.add('active');
+      document.getElementById('voice-script-text').innerText = '"' + DIALECT_SCRIPTS[d].text + '"';
+    }
+
+    function playVoiceGuidance() {
+      const script = DIALECT_SCRIPTS[currentDialect].text;
+      const btn = document.getElementById('btn-play-voice');
+      btn.innerText = '🔊 ĐANG PHÁT GIỌNG NÓI TRẤN AN...';
+      btn.style.background = '#059669';
+
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance(script);
+        utter.lang = 'vi-VN';
+        utter.rate = 0.88; // Slow pacing for elderly
+        utter.pitch = 0.95; // Warm soothing pitch
+
+        utter.onend = () => {
+          btn.innerText = '▶️ NGHE THỬ GIỌNG NÓI TRẤN AN';
+          btn.style.background = '#7c3aed';
+        };
+        utter.onerror = () => {
+          btn.innerText = '▶️ NGHE THỬ GIỌNG NÓI TRẤN AN';
+          btn.style.background = '#7c3aed';
+        };
+
+        window.speechSynthesis.speak(utter);
+      } else {
+        alert('Trình duyệt không hỗ trợ Web Speech, đang mô phỏng giọng đọc qua âm thanh.');
+        playChimeSound();
+        setTimeout(() => {
+          btn.innerText = '▶️ NGHE THỬ GIỌNG NÓI TRẤN AN';
+          btn.style.background = '#7c3aed';
+        }, 3000);
+      }
+    }
+
+    function stopVoiceGuidance() {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+      const btn = document.getElementById('btn-play-voice');
+      if (btn) {
+        btn.innerText = '▶️ NGHE THỬ GIỌNG NÓI TRẤN AN';
+        btn.style.background = '#7c3aed';
+      }
+    }
+
+    // Ambient Call-Breakers Sound Synthesizer
+    const CALL_BREAKER_EXCUSES = {
+      doorbell: {
+        title: '🔔 CHUÔNG CỬA DỒN DẬP',
+        quote: '"Bác xin lỗi, nhà bác có khách bấm chuông liên hồi ngoài cổng, bác phải ra mở cổng ngay, lát nữa bác gọi lại nhé!"',
+        sound: 'doorbell'
+      },
+      stove: {
+        title: '🔥 CÒI BÁO BẾP GAS / KHÓI',
+        quote: '"Ôi chết rồi, nồi cá trên bếp của bác đang cháy khét bốc khói, bác phải chạy vào tắt bếp ngay!"',
+        sound: 'stove'
+      },
+      hospital: {
+        title: '🏥 CUỘC GỌI CHỜ BỆNH VIỆN',
+        quote: '"Bác sĩ / Con gái bác đang gọi máy chờ khẩn cấp, bác phải nhấc máy này ngay bây giờ!"',
+        sound: 'hospital'
+      },
+      battery: {
+        title: '🪫 PIN SẮP SẬP NGUỒN',
+        quote: '"Máy bác hết pin chuẩn bị sập nguồn rồi, tít tít rồi đây này, lát sạc xong bác gọi lại..."',
+        sound: 'battery'
+      }
+    };
+
+    function triggerCallBreaker(type) {
+      const excuse = CALL_BREAKER_EXCUSES[type];
+      document.getElementById('excuse-quote-text').innerText = excuse.quote;
+      document.getElementById('sound-status-tag').innerText = '✓ Đang phát ' + excuse.title + ' ra loa ngoài...';
+
+      const ctx = getAudioContext();
+      const now = ctx.currentTime;
+
+      if (type === 'doorbell') {
+        // Two-tone Ding-Dong Chime (659Hz E5 -> 554Hz C#5)
+        const osc1 = ctx.createOscillator();
+        const g1 = ctx.createGain();
+        osc1.frequency.setValueAtTime(659.25, now);
+        g1.gain.setValueAtTime(0, now);
+        g1.gain.linearRampToValueAtTime(0.7, now + 0.05);
+        g1.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
+        osc1.connect(g1);
+        g1.connect(ctx.destination);
+        osc1.start(now);
+        osc1.stop(now + 1.2);
+
+        const osc2 = ctx.createOscillator();
+        const g2 = ctx.createGain();
+        osc2.frequency.setValueAtTime(554.37, now + 0.4);
+        g2.gain.setValueAtTime(0, now + 0.4);
+        g2.gain.linearRampToValueAtTime(0.8, now + 0.45);
+        g2.gain.exponentialRampToValueAtTime(0.001, now + 2.0);
+        osc2.connect(g2);
+        g2.connect(ctx.destination);
+        osc2.start(now + 0.4);
+        osc2.stop(now + 2.0);
+
+      } else if (type === 'stove') {
+        // Piercing Piezo Smoke Alarm 3200Hz
+        [0, 0.22, 0.44].forEach(off => {
+          const osc = ctx.createOscillator();
+          const g = ctx.createGain();
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(3200, now + off);
+          g.gain.setValueAtTime(0.35, now + off);
+          g.gain.setValueAtTime(0, now + off + 0.12);
+          osc.connect(g);
+          g.connect(ctx.destination);
+          osc.start(now + off);
+          osc.stop(now + off + 0.12);
+        });
+
+      } else if (type === 'hospital') {
+        // Telecom Call-Waiting Pip-Pip (425Hz)
+        [0, 0.15].forEach(off => {
+          const osc = ctx.createOscillator();
+          const g = ctx.createGain();
+          osc.frequency.setValueAtTime(425, now + off);
+          g.gain.setValueAtTime(0.5, now + off);
+          g.gain.setValueAtTime(0, now + off + 0.08);
+          osc.connect(g);
+          g.connect(ctx.destination);
+          osc.start(now + off);
+          osc.stop(now + off + 0.08);
+        });
+
+      } else if (type === 'battery') {
+        // Battery dying descending clicks
+        [440, 330, 220, 110].forEach((f, i) => {
+          const osc = ctx.createOscillator();
+          const g = ctx.createGain();
+          osc.frequency.setValueAtTime(f, now + i * 0.15);
+          g.gain.setValueAtTime(0.4, now + i * 0.15);
+          g.gain.exponentialRampToValueAtTime(0.01, now + i * 0.15 + 0.12);
+          osc.connect(g);
+          g.connect(ctx.destination);
+          osc.start(now + i * 0.15);
+          osc.stop(now + i * 0.15 + 0.12);
+        });
+      }
+    }
+
+    function hangupSafely() {
+      alert('Tuyệt vời! Bác đã cúp máy thành công. Mọi nguy cơ thao túng tâm lý đã bị bẻ gãy hoàn toàn.\nHệ thống đang kết nối số điện thoại con gái Hương để bác gọi an tâm.');
+    }
+
+    function playChimeSound() {
+      const ctx = getAudioContext();
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const g = ctx.createGain();
+      osc.frequency.setValueAtTime(523.25, now);
+      g.gain.setValueAtTime(0.5, now);
+      g.gain.exponentialRampToValueAtTime(0.001, now + 1.5);
+      osc.connect(g);
+      g.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 1.5);
+    }
+
+    // Default Init
+    window.addEventListener('DOMContentLoaded', () => {
+      loadPreset(1);
+      switchWidgetContext('charity');
+    });
+  </script>
+</body>
+</html>

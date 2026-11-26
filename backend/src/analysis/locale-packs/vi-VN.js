@@ -18,7 +18,17 @@
 module.exports = {
   locale: 'vi-VN',
   language: 'vi',
-  localePackVersion: 'vi-VN@1.3.1',   // 1.3.1 (21/11/2026): phạt nguội, SMS 'nếu không phải bạn bấm link', doạ mất lương hưu
+  localePackVersion: 'vi-VN@1.3.5',   // 1.3.5 (26/11/2026): bổ sung từ crawl 35 nhóm Facebook chống lừa đảo —
+                                        //   mua card điện thoại, seeding thu hồi vốn bị treo / chỉ chỗ lấy lại,
+                                        //   mua hàng ảo hoàn 10% hoa hồng / đặt thêm đơn hàng rút vốn, đóng phí thông quan nhận quà.
+                                        // 1.3.4 (26/11/2026): bổ sung mẫu từ crawl Facebook Chrome Debug (chongluadao.vn/BoCongAn/cộng đồng) —
+                                        //   cài app qua file gửi kèm (VNeID/đất đai), cán bộ xã/phường đòi VNeID/cài app,
+                                        //   nạp tiền đặt đơn hàng hưởng hoa hồng, đóng phí xác minh nâng cấp tài khoản rút vốn.
+                                        // 1.3.3 (26/11/2026): thu thập báo chí & chongluadao.vn vòng 2 — shipper thu cước 35k,
+                                        //   sai STK/cú pháp chuyển tiền đối ứng, Find My/Apple ID, tuyển dụng dự án hợp tác, cháy phòng & gói AI livestream
+                                        // 1.3.2 (26/11/2026): thu thập báo chí & chongluadao.vn — hack Zalo mượn tiền (k0/gởi),
+                                        //   bẫy tình thừa kế USDT, kết nối từ xa, xem phim AI kiếm tiền, góp vốn nhàn rỗi, chuyển sai cú pháp
+                                        // 1.3.1 (21/11/2026): phạt nguội, SMS 'nếu không phải bạn bấm link', doạ mất lương hưu
                                         // 1.3.0 (30/10/2026): mẫu kịch bản 2026 — OTP trên link, lệ phí qua link,
                                       //   doạ khoá/đình chỉ định danh, giả con ở đồn công an, đầu tư "nội bộ"
                                       // 1.2.1 (24/9/2026): lời kể lại "ngân hàng bảo chuyển", "không thì TK bị khoá"
@@ -49,9 +59,11 @@ module.exports = {
       // 25/9/2026: "mã xác minh tới rồi chú ĐỌC nhanh CHO CHÁU" — mã đứng trước động từ.
       { pattern: 'mã(?![a-zà-ỹ])[^.]{0,30}(đọc|nhắn|(?<!thông |cảnh )báo)\\s+((lại|giúp|nhanh|ngay|luôn)\\s+)*cho\\s+(tôi|em|cháu|mình|anh|chị|con)(?![a-zà-ỹ])', scope: 'action' },
       { pattern: 'mã\\s*(xác nhận|xác thực|kích hoạt|giao dịch)[^.]{0,30}(đọc|gửi lại|báo|cho (tôi|em|anh|chị))', scope: 'action' },
+      { pattern: '(gửi|verify)[^.]{0,28}(6[-\\s]*digit\\s*otp|mã\\s*xác\\s*nhận\\s*6\\s*số|mã\\s*otp[^.]{0,20}(cho (tôi|em|cháu|anh|chị|bên em)|qua zalo))', scope: 'action' },
+      { pattern: 'đăng nhập[^.]{0,32}(và|rồi)\\s*(xác nhận|nhập|xác thực)\\s*(mã\\s*)?otp', scope: 'action' },
     ],
     CRED_PASSWORD_PIN: [
-      { pattern: '(cung cấp|đọc|gửi|cho)\\b[^.]{0,26}\\b(mật khẩu|mã pin)\\b', scope: 'action' },
+      { pattern: '(cung cấp|đọc|gửi|cho|đưa)\\b[^.]{0,26}\\b(mật khẩu|mã pin)\\b', scope: 'action' },
       // 25/9/2026 — "vui lòng phản hồi email này bằng mã PIN hiện tại của thẻ".
       { pattern: '(phản hồi|trả lời)[^.]{0,30}bằng\\s+(mã pin|mật khẩu|pin)(?![a-zà-ỹ])', scope: 'action' },
     ],
@@ -84,9 +96,11 @@ module.exports = {
       { pattern: '(gửi|chụp|quay|cung cấp|chuyển)(?:(?!không|đừng|chớ|chẳng)[^.]){0,24}(ảnh|hình|video|clip)[^.]{0,16}(cccd|căn cước|chứng minh|cmnd|chân dung|khuôn mặt|giấy tờ tùy thân|giấy tờ tuỳ thân)', scope: 'action' },
       { pattern: '(xác thực|cập nhật|đăng ký|quét)\\s*(khuôn mặt|sinh trắc)[^.]{0,30}(qua|theo|trên|tại|bằng)\\s*(link|đường dẫn|zalo|cuộc gọi video|ứng dụng (tôi|em|được) gửi)', scope: 'action' },
       // 30/10/2026 — "chụp HAI MẶT căn cước gửi qua Zalo" (không có chữ "ảnh") và "mượn / thuê căn cước để đăng ký sim, lập công ty".
-      { pattern: '(chụp|gửi|cung cấp|chuyển)[^.]{0,16}(hai mặt|2 mặt|mặt trước và mặt sau)[^.]{0,16}(cccd|căn cước|chứng minh|cmnd)', scope: 'action' },
+      { pattern: '(chụp|gửi|cung cấp|chuyển)[^.]{0,16}(hai mặt|2 mặt|mặt trước và mặt sau)[^.]{0,16}(cccd|căn cước|chứng minh|cmnd|id card)', scope: 'action' },
       { pattern: '(mượn|thuê|mua|cho thuê|cho mượn)\\s+(cccd|căn cước|chứng minh nhân dân|cmnd|giấy tờ tùy thân|giấy tờ tuỳ thân)', scope: 'action' },
-      { pattern: '(quay|gọi)\\s*video[^.]{0,24}(khuôn mặt|xoay mặt|nháy mắt|quay mặt)', scope: 'action' },
+      { pattern: '(quay|gọi|mở cuộc gọi)\\s*video[^.]{0,24}(khuôn mặt|xoay mặt|nháy mắt|quay mặt|quay thẳng mặt|quét khuôn mặt)', scope: 'action' },
+      { pattern: '(truy cập|vào|bấm|gửi|cài)[^.]{0,36}(quét khuôn mặt|xác thực khuôn mặt|cập nhật sinh trắc|xác thực sinh trắc|biometric)', scope: 'action' },
+      { pattern: '(hỗ trợ|hướng dẫn)[^.]{0,24}(xác thực|cập nhật|quét)\\s*(khuôn mặt|sinh trắc)', scope: 'any' },
     ],
     CRED_BANK_LOGIN: [
       { pattern: 'đăng nhập\\b[^.]{0,30}(ngân hàng|internet banking|tài khoản|app ngân hàng)', scope: 'action' },
@@ -113,6 +127,7 @@ module.exports = {
       { pattern: 'đăng nhập[^.]{0,20}(theo|qua|tại|vào)\\s*\\[\\s*(đường dẫn|đường link|link|liên kết)', scope: 'action' },
       { pattern: '(mở|vào|truy cập|bấm|nhấn)\\s*(vào\\s*)?\\[?\\s*(đường dẫn|đường link|link|liên kết)[^.]{0,30}(để\\s+)?đăng nhập', scope: 'action' },
       { pattern: '(link|đường dẫn|liên kết)[^.]{0,20}(nhập|điền)[^.]{0,16}(thông tin\\s+(ngân hàng|tài khoản|thẻ)|tài khoản ngân hàng)', scope: 'action' },
+      { pattern: '(click|bấm|vào|nhấn vào)[^.]{0,30}(link|đường dẫn|liên kết)[^.]{0,40}(verify password|đổi mật khẩu|hủy dịch vụ)', scope: 'action' },
       /*
        * 21/11/2026 (luật 1.6.5) — bộ `eval/bao-chi`: 31 tin lừa có thật do báo chí trích.
        * SMS giả ngân hàng / ví: "tài khoản của bạn đã mở dịch vụ, phí 3,6 triệu sẽ bị trừ; nếu
@@ -120,8 +135,11 @@ module.exports = {
        * Ngân hàng thật bảo gọi tổng đài, không gửi liên kết để huỷ dịch vụ hay đổi mật khẩu.
        */
       { pattern: 'nếu không phải\\s+(bạn|quý khách|anh|chị|ông|bà)[^.]{0,50}(vào|ấn|bấm|nhấn|truy cập|mở)\\s*(vào\\s*)?(\\[\\s*)?(đường dẫn|đường link|link|liên kết|https?:|www)', scope: 'any' },
+      { pattern: '(không phải[^.]{0,24}(đăng ký|đk|thực hiện)|không thực hiện giao dịch|muốn\\s+(hủy|huỷ))[^.]{0,48}(vào|ấn|bấm|nhấn|nhấp|truy cập|mở)\\s*(vào\\s*)?(\\[\\s*)?(đường dẫn|đường link|link|liên kết|https?:|www)', scope: 'khong_canh_bao' },
+      { pattern: '(nhấp|nhấn|bấm)\\s+(vào\\s+)?(\\[\\s*)?(đường dẫn|đường link|link|liên kết)[^.]{0,24}(hủy|huỷ)(?!\\s*(đơn|lịch))', scope: 'action' },
       { pattern: '(vào|ấn|bấm|nhấn|truy cập|mở)\\s*(vào\\s*)?(\\[\\s*)?(đường dẫn|đường link|link|liên kết|https?:|www)[^.]{0,40}(sửa đổi mật khẩu|đổi mật khẩu|thoát khỏi thiết bị|(hủy|huỷ)\\s+(dịch vụ|đăng ký|gói))', scope: 'any' },
       { pattern: '(vào|ấn|bấm|nhấn|truy cập|mở)\\s*(vào\\s*)?(\\[\\s*)?(đường dẫn|đường link|link|liên kết|https?:|www)[^.]{0,30}kiểm tra hoặc (hủy|huỷ)', scope: 'any' },
+      { pattern: 'điểm thưởng[^.]{0,80}(đổi|nhận)[^.]{0,30}(tại|qua)\\s*:?\\s*(\\[\\s*)?(liên kết|link|đường dẫn|https?:)', scope: 'khong_canh_bao' },
       /*
        * 30/10/2026 — NHẬP OTP / MÃ XÁC MINH NGAY TRÊN MỘT ĐƯỜNG LINK. Đo trên bộ `mo-rong`:
        * "Truy cập vneid-xacthuc.top, nhập số CCCD và mã OTP", "Nhập mã OTP vừa gửi và mật
@@ -133,6 +151,8 @@ module.exports = {
        */
       { pattern: '(nhập|điền)[^.]{0,36}(mã otp|otp|mã xác (thực|minh|nhận)|xác minh 2 bước)[^.]{0,40}(tại|qua|theo|trên)\\s*(đường dẫn|đường link|link|liên kết)', scope: 'action' },
       { pattern: '(truy cập|vào|bấm|nhấn|mở|đăng nhập)[^.]{0,50}(đường dẫn|đường link|link|liên kết)[^.]{0,60}(nhập|điền)[^.]{0,36}(mã otp|otp|mã xác (thực|minh|nhận)|xác minh 2 bước)', scope: 'action' },
+      { pattern: '(find my|iphone|icloud)[^.]{0,50}(được\\s*định vị|đã\\s*định vị|xem vị trí thiết bị)[^.]{0,50}(link|đường dẫn|liên kết|truy cập|bấm|nhấn|https?:|www)', scope: 'any' },
+      { pattern: '(bấm|nhấn|truy cập|vào)[^.]{0,30}(link|đường dẫn|liên kết|https?:|www)[^.]{0,30}(xem vị trí thiết bị|đăng nhập apple id)', scope: 'any' },
     ],
     FIN_TRANSFER_REQUEST: [
       { pattern: 'chuyển\\b[^.]{0,40}(tiền|triệu|đồng|khoản|vào tài khoản|sang tài khoản)', scope: 'action' },
@@ -144,6 +164,8 @@ module.exports = {
        */
       { pattern: '\\b(transfer|pay|send)\\b[^.]{0,36}(tài khoản|account|\\d{3})', scope: 'action' },
       { pattern: '\\b(nộp|gửi)\\b[^.]{0,24}(tiền|triệu|đồng)\\b', scope: 'action' },
+      { pattern: '(đóng|nộp)\\s+tiền\\s+ngay', scope: 'action' },
+      { pattern: '(đặt cọc|chuyển cọc)\\s*(\\d+%|\\d+[.,]?\\d*\\s*(k|triệu|tr|đ|vnd))', scope: 'action' },
       /**
        * ⚠️ BỐN ĐỘNG TỪ "ĐƯA TIỀN VÀO" CÒN THIẾU — vá 15/8/2026.
        *
@@ -178,7 +200,7 @@ module.exports = {
        * của bệnh viện, và đã đo được nó đẩy một tin nhắn con gái thật lên CAO.
        * ⚠️ `(?![a-zà-ỹ])` thay cho `\b` — `đ` không phải ký tự chữ trong JavaScript.
        */
-      { pattern: '(chuyển|nạp|đóng|nộp|gửi)\\s+\\d+\\s*(đ|k|tr|triệu|đồng|nghìn|tỷ|tỉ)(?![a-zà-ỹ])', scope: 'action' },
+      { pattern: '(chuyển|nạp|đóng|nộp|gửi)\\s+((thêm|trước|ngay|gấp)\\s+)?\\d+\\s*(đ|k|tr|triệu|đồng|nghìn|tỷ|tỉ)(?![a-zà-ỹ])', scope: 'action' },
       /**
        * ⚠️ "STK" LÀ CÁCH VIẾT PHỔ BIẾN NHẤT, VÀ TRƯỚC ĐÂY KHÔNG CÓ MẪU NÀO.
        *
@@ -225,8 +247,23 @@ module.exports = {
        * dấu hiệu khác, nên tin nhắn con nhắc mẹ "mẹ chuyển 500.000 tiền chợ" vẫn là CHUA_THAY.
        */
       // Không có "gửi": "gửi 123456 là mã của bạn" là mã xác thực, không phải số tiền.
-      { pattern: '(nạp|chuyển|đóng|nộp)\\s+(thêm\\s+)?[1-9]\\d{5,9}(?![\\d])', scope: 'action' },
+      { pattern: '(nạp|chuyển|đóng|nộp)\\s+((thêm|trước|ngay|gấp)\\s+)?[1-9]\\d{5,9}(?![\\d])', scope: 'action' },
       { pattern: 'nộp[^.]{0,24}(phạt|lệ phí|phí)[^.]{0,40}(tại|qua|theo|trên)\\s*(đường dẫn|đường link|link|liên kết)', scope: 'action' },
+      { pattern: '(nộp|đóng)\\s+(phạt|tiền bảo lãnh|phí\\s+(xác minh|kiểm dịch|hồ sơ|mở băng))', scope: 'action' },
+      { pattern: '(chuyển|nạp)\\s+(thêm|vốn|deposit)[^.]{0,30}(tài khoản|số|ví|wallet|mở khóa)', scope: 'action' },
+      { pattern: '(đóng trước|nộp trước)[^.]{0,28}(thuế|phí)[^.]{0,30}(nhận thưởng|nhận tiền|giải ngân|rút tiền|khoản vay|duyệt hồ sơ)', scope: 'action' },
+      { pattern: '(thanh toán|đóng|nộp)[^.]{0,24}\\d+[^.]{0,24}(theo mã chuyển khoản|trước khi mở niêm phong)', scope: 'action' },
+      { pattern: 'đặt cọc\\s+(phí|tiền)\\s+(bảo đảm|giữ chỗ|giao hàng)', scope: 'action' },
+      { pattern: '\\bck\\s+luôn\\s+(số|stk|tk)\\b', scope: 'action' },
+      { pattern: '(nộp|đóng|thanh toán)\\s+tiền\\s+(làm\\s+)?hồ sơ\\s+[1-9]\\d{4,9}(?![\\d])', scope: 'action' },
+      { pattern: '(nộp|đóng)\\s+(thêm\\s+)?\\d+\\s*%[^.]{0,30}(phí|bảo hiểm)', scope: 'action' },
+      { pattern: '(cho mượn|mượn|vay)[^.]{0,36}(chuyển|gửi|gởi)\\s*(vào|sang|qua)\\s*(số này|stk|tk|tài khoản)', scope: 'action' },
+      { pattern: '(chuyển|gửi|gởi)\\s*(tiền|khoản)?\\s*(vào|sang)\\s*số này', scope: 'action' },
+      { pattern: 'đóng\\s+phí[^.]{0,28}(vào|qua|tới)\\s*(stk|tk|số tài khoản|tài khoản)', scope: 'action' },
+    ],
+    FIN_TRANSFER_MEMO_MISMATCH: [
+      { pattern: '(chuyển|ghi)\\s*(sai|nhầm)\\s*(cú pháp|nội dung)[^.]{0,40}(chuyển lại|hoàn tiền|xác nhận)', scope: 'khong_canh_bao' },
+      { pattern: '(sai|nhầm)\\s*(số tài khoản|stk|cú pháp|nội dung)[^.]{0,50}(chuyển tiền đối ứng|chuyển lại|chuyển thêm|sửa lỗi hệ thống|hoàn lại)', scope: 'khong_canh_bao' },
     ],
     /**
      * "Chuyển nhầm" rồi đòi trả sang tài khoản KHÁC — xem `signal-registry.js`.
@@ -241,6 +278,7 @@ module.exports = {
        */
       { pattern: '(chuyển trả|trả lại|hoàn lại|chuyển lại)[^.]{0,40}(sang|vào|qua|tới)\\s*\\[?\\s*(tài khoản|stk|tk|số tài khoản)\\s*\\]?\\s*(khác|này|được chỉ định|chỉ định|bên thu hồi|của công ty|công ty)', scope: 'action' },
       { pattern: '(khoản tiền|số tiền)\\s*(vừa nhận|không phải của)[^.]{0,60}(chuyển trả|trả lại|hoàn lại)', scope: 'action' },
+      { pattern: '(lỡ|gửi)\\s*(chuyển nhầm|nhầm số tài khoản)[^.]{0,45}(tài khoản khác|hủy ngay|bấm vào link)', scope: 'any' },
     ],
     /**
      * Mở ví / thẻ / tài khoản hộ để lấy hoa hồng, hoặc cho thuê tài khoản.
@@ -249,6 +287,8 @@ module.exports = {
      */
     FIN_ACCOUNT_OPENING_FOR_OTHERS: [
       { pattern: '(mở|đăng ký|làm)[^.]{0,20}(ví điện tử|ví|tài khoản ngân hàng|tài khoản|thẻ tín dụng|thẻ)[^.]{0,40}(hoa hồng|tiền công|trả công)', scope: 'khong_canh_bao' },
+      { pattern: '(thuê|mướn|mua lại)\\s+(tài khoản ngân hàng|thẻ atm|thẻ ngân hàng)[^.]{0,40}(hoa hồng|trả công|triệu)', scope: 'khong_canh_bao' },
+      { pattern: '(tuyển|tìm)\\s+người\\s+mở\\s+(ví điện tử|tài khoản ngân hàng)[^.]{0,40}(trả công|hoa hồng)', scope: 'khong_canh_bao' },
       { pattern: '(cho thuê|bán|mua lại|cho mượn)[^.]{0,12}(tài khoản ngân hàng|tài khoản|thẻ ngân hàng|ví điện tử)', scope: 'khong_canh_bao' },
       { pattern: '(mở|kích hoạt)\\s*hạn mức[^.]{0,30}(ví|thẻ)', scope: 'action' },
     ],
@@ -285,9 +325,11 @@ module.exports = {
        */
       { pattern: '(muốn|để|mới|được)\\s*rút[^.]{0,40}(phải|cần|thì)\\s*(nạp|nộp|đóng|chuyển)\\s*(thêm|phí|tiền|khoản)', scope: 'action' },
       { pattern: 'rút\\s*(tiền|lợi nhuận|lãi|vốn|hoa hồng)[^.]{0,30}(nạp thêm|nộp thêm|đóng thêm|phí rút|phí xác minh|thuế thu nhập)', scope: 'action' },
+      { pattern: 'không\\s+(đóng|nộp)[^.]{0,24}(tiền|phí)\\s+(bảo hiểm|hồ sơ)[^.]{0,36}(không rút|chưa rút|bị treo)', scope: 'action' },
+      { pattern: 'đặt thêm\\s*\\d*\\s*đơn hàng[^.]{0,30}(để\\s+)?(rút|nhận lại|mở khoá|mở khóa)', scope: 'action' },
     ],
     FIN_GIFT_CARD_PAYMENT: [
-      { pattern: 'thẻ\\s+(quà tặng|cào|game|điện thoại)', scope: 'action' },
+      { pattern: '(thẻ|card)\\s+(quà tặng|cào|game|điện thoại)', scope: 'action' },
     ],
     FIN_PRECIOUS_METAL_PURCHASE: [
       { pattern: '(mua|đổi)\\b[^.]{0,16}(vàng|bạc)\\b', scope: 'action' },
@@ -303,7 +345,7 @@ module.exports = {
     ],
     DEV_REMOTE_CONTROL_APP: [
       { pattern: '\\b(anydesk|teamviewer|ultraviewer|quicksupport)\\b', scope: 'action' },
-      { pattern: '(điều khiển|truy cập)\\s+từ xa', scope: 'action' },
+      { pattern: '(điều khiển|truy cập|kết nối)\\s+từ xa', scope: 'action' },
       /**
        * Đo trên bộ 100: "tai ung dung Ultraview roi cho toi ma de toi ho tro
        * tu xa" — KHÔNG bật tín hiệu nào. `ultraviewer` có trong danh sách
@@ -314,6 +356,7 @@ module.exports = {
       { pattern: '\\b(ultraview|teamview|any ?desk|quick ?support|rustdesk)\\w*\\b', scope: 'khong_canh_bao' },
       { pattern: '(hỗ trợ|thao tác|làm giúp|cài giúp)[^.]{0,16}từ xa', scope: 'action' },
       { pattern: '(cho|đọc|gửi)[^.]{0,14}(mã|id)[^.]{0,20}(để|cho)[^.]{0,14}(tôi|em|anh|mình)[^.]{0,20}(vào|truy cập|hỗ trợ|điều khiển)', scope: 'action' },
+      { pattern: 'cho\\s+(em|tôi)\\s+thông tin[^.]{0,24}(em|tôi)\\s+cài\\s+(cho|giúp)', scope: 'action' },
     ],
     DEV_INSTALL_APK_UNKNOWN: [
       /**
@@ -376,9 +419,13 @@ module.exports = {
       { pattern: '(cài|tải|mở)\\s*(đặt\\s*)?[^.]{0,24}(ứng dụng|app|phần mềm)[^.]{0,24}(theo|qua|từ|trong|ở)\\s*(file|tệp|link|đường link|đường dẫn)(\\s*/\\s*(file|tệp|link|đường dẫn))?\\s*(mà\\s*)?(tôi|em|anh|chị|bên (tôi|em)|được)\\s*(vừa\\s*)?(gửi|cung cấp)', scope: 'action' },
       { pattern: '(mở|cài)[^.]{0,12}(file|tệp)\\s*(ứng dụng|cài đặt|cài)[^.]{0,30}(gửi|cung cấp)', scope: 'khong_canh_bao' },
       { pattern: '(cài|mở|tải)[^.]{0,20}(ứng dụng|app|phần mềm)\\s*(được|mà\\s*(tôi|em|anh|chị)|tôi|em|bên (tôi|em))\\s*(vừa\\s*)?(gửi|cung cấp)', scope: 'action' },
+      { pattern: '(cài|tải)[^.]{0,20}(phần mềm bảo mật|ứng dụng\\s+(vneid|vssid|etax)\\s*(bản\\s*)?(mới|cập nhật))', scope: 'action' },
+      { pattern: '(cài|tải)\\s*(đặt\\s*)?(ứng dụng|app|phần mềm)\\s+theo\\s+hướng dẫn[^.]{0,24}(gửi|đồng bộ|cập nhật)', scope: 'action' },
+      { pattern: '(cài|tải)[^.]{0,28}(ứng dụng|app|phần mềm)[^.]{0,24}(qua|theo)\\s*file\\s*(gửi|đính)\\s*kèm', scope: 'action' },
+      { pattern: '(cài|tải|install)[^.]{0,24}(file|tệp)?[^.]{0,16}\\.apk\\b', scope: 'khong_canh_bao' },
     ],
     DEV_SCREEN_SHARE_BANKING: [
-      { pattern: '(chia sẻ|bật)\\b[^.]{0,16}màn hình\\b[^.]{0,48}(ngân hàng|banking|tài khoản)', scope: 'action' },
+      { pattern: '(chia sẻ|bật)\\b[^.]{0,16}màn hình\\b[^.]{0,48}(ngân hàng|banking|tài khoản|zalo|cho tôi|để kiểm tra)', scope: 'action' },
       { pattern: 'chia sẻ màn hình\\b[^.]{0,44}(app|ứng dụng)\\s+ngân hàng', scope: 'action' },
       // 30/10/2026 — "bật chia sẻ màn hình trong cuộc gọi Zalo… để em hướng dẫn bác thao tác chuyển
       // tiền sang tài khoản bảo mật": câu dài hơn 48 ký tự nên hai mẫu trên trượt. Đòi vế chuyển tiền.
@@ -443,7 +490,7 @@ module.exports = {
       // ⚠️ B.4: phải có CẢ "công an" LẪN "cảnh sát".
       { pattern: '(tôi là|đây là|mình là)[^.]{0,30}(công an|cảnh sát|điều tra viên|viện kiểm sát|toà án|cán bộ)', scope: 'any' },
       { pattern: '(công an|cảnh sát)\\s+(phường|quận|huyện|tỉnh|thành phố)', scope: 'any' },
-      { pattern: '\\b(bộ công an|cục cảnh sát|c06)\\b', scope: 'any' },
+      { pattern: '\\b(bộ công an|cục cảnh sát|cục csgt|phòng csgt|cơ quan điều tra|cảnh sát khu vực|c06)\\b', scope: 'any' },
       // 30/10/2026 — "em chuyển máy cho công an điều tra": kẻ nhận cuộc gọi đầu CHUYỂN MÁY sang "công an".
       // Không có động từ gọi/báo nên mẫu tường thuật bên dưới không thấy. Một mình 10 điểm.
       { pattern: '(chuyển máy|nối máy|chuyển cuộc gọi|chuyển tiếp cuộc gọi)[^.]{0,24}(công an|cảnh sát|điều tra viên|viện kiểm sát|toà án)', scope: 'any' },
@@ -464,6 +511,7 @@ module.exports = {
        * không được trườn qua một từ phủ định nào".
        */
       { pattern: '(công an|cảnh sát|điều tra viên|viện kiểm sát|toà án)(?:(?!không|chẳng|đừng|chớ)[^.]){0,26}(gọi|gọi điện|nhắn|báo|yêu cầu|thông báo|bảo)', scope: 'any' },
+      { pattern: 'cán bộ\\s+(xã|phường|địa chính|tổ dân phố)(?:(?!không|chẳng|đừng|chớ)[^.]){0,30}(gọi|yêu cầu|báo|cài|cập nhật|cấp quyền|vneid)', scope: 'any' },
       { pattern: '(gọi|nhắn|điện)(?:(?!không|chẳng)[^.]){0,18}(từ|của|xưng là|tự xưng)[^.]{0,12}(công an|cảnh sát|viện kiểm sát|toà án)', scope: 'any' },
       /*
        * 21/11/2026 (luật 1.6.5) — bộ `eval/bao-chi`: 31 tin lừa có thật do báo chí trích.
@@ -471,8 +519,11 @@ module.exports = {
        * thông chưa thanh toán" — tin PHẠT NGUỘI giả; cả 4 mẫu ra CHUA_THAY. Thông báo phạt thật
        * (VNeID, CSGT) cũng nói "phương tiện vi phạm", nên một mình chỉ 10 điểm, dưới ngưỡng 20.
        */
-      { pattern: '(phương tiện|biển số|biển kiểm soát)[^.]{0,50}(vi phạm|phạt nguội)', scope: 'any' },
+      { pattern: '(phương tiện|biển số|biển kiểm soát)[^.]{0,50}(vi phạm|phạt nguội|vượt đèn đỏ)', scope: 'any' },
       { pattern: '(khoản|tiền)\\s+phạt\\s+(giao thông|vi phạm|nguội)', scope: 'any' },
+      { pattern: 'vi phạm\\s+luật\\s+giao thông', scope: 'any' },
+      { pattern: 'bị phạt\\s+(số\\s+)?tiền\\s+\\d', scope: 'any' },
+      { pattern: '\\[\\s*phạt nguội\\s*\\]', scope: 'any' },
     ],
     ID_TAX_BENEFIT_IMPERSONATION: [
       /*
@@ -482,7 +533,8 @@ module.exports = {
        */
       { pattern: '(chương trình|gói|chính sách)\\s*(hỗ trợ|trợ cấp|ưu đãi)[^.]{0,44}(danh sách|thụ hưởng|đối tượng|xét duyệt)', scope: 'any' },
       { pattern: '(chi cục|cơ quan|cục)\\s+thuế', scope: 'any' },
-      { pattern: '\\b(bảo hiểm xã hội|trợ cấp nhà nước)\\b', scope: 'any' },
+      { pattern: '\\b(bảo hiểm xã hội|trợ cấp nhà nước|nợ thuế quá hạn)\\b', scope: 'any' },
+      { pattern: 'mã số thuế[^.]{0,24}cưỡng chế', scope: 'any' },
     ],
     ID_BANK_IMPERSONATION: [
       /*
@@ -491,8 +543,8 @@ module.exports = {
        * "đang được đăng nhập trên thiết bị khác". Một mình 8 điểm; chỉ nâng mức khi đi cùng liên
        * kết đổi mật khẩu / huỷ dịch vụ (CRED_BANK_LOGIN).
        */
-      { pattern: '(tài khoản|tk)\\s+(của\\s+)?(quý khách|bạn)[^.]{0,20}(đã|đang)\\s+(được\\s+)?(đăng ký|mở|đăng nhập|kích hoạt)', scope: 'any' },
-      { pattern: '(tôi là|đây là)[^.]{0,26}(nhân viên|cán bộ)[^.]{0,16}ngân hàng', scope: 'any' },
+      { pattern: '(tài khoản|tk)\\s+(ngân hàng\\s+)?(của\\s+)?(quý khách|bạn|cô|chú|bác|anh|chị|ông|bà)[^.]{0,20}(đã|đang)\\s+(được\\s+)?(đăng ký|mở|đăng nhập|kích hoạt)', scope: 'any' },
+      { pattern: '(tôi|em|đây)\\s+là[^.]{0,20}(nhân viên|cán bộ)[^.]{0,16}(ngân hàng|vietcombank|bidv|vietinbank|techcombank|agribank|mb bank|acb|vpbank|sacombank)', scope: 'any' },
       { pattern: '(vietcombank|bidv|vietinbank|techcombank|agribank)\\b[^.]{0,26}(thông báo|yêu cầu)', scope: 'any' },
       /*
        * 24/9/2026 — lời bác KỂ LẠI: "ngân hàng bảo chuyển tiền…", "bên ngân hàng yêu cầu
@@ -503,6 +555,7 @@ module.exports = {
       { pattern: '(ngân hàng|nhân viên ngân hàng|bên ngân hàng)(?:(?!không|chẳng|đừng|chưa|chớ)[^.]){0,20}(bảo|yêu cầu|đề nghị|đòi|hướng dẫn|bắt)(?:(?!không|chẳng|đừng|chưa|chớ)[^.]){0,30}(chuyển|nộp|nạp|gửi tiền)', scope: 'khong_canh_bao' },
       // 30/10/2026 — "Tôi gọi từ ngân hàng, chị đang nợ thẻ tín dụng…": mở đầu bằng "gọi / nhắn từ ngân hàng".
       { pattern: '(tôi|em|chúng tôi|bên em|bên tôi)\\s+(đang\\s+)?(gọi|nhắn|liên hệ|gọi điện)\\s+(từ|bên)\\s+(ngân hàng|phòng tín dụng|bộ phận thu hồi nợ)', scope: 'khong_canh_bao' },
+      { pattern: '(hỗ trợ|giúp)\\s*(mở khoá|mở khóa)\\s*(tài khoản|thẻ)\\s*(ngân hàng)?', scope: 'any' },
     ],
     /**
      * ══ HAI MÃ DANH TÍNH CHƯA TỪNG CÓ MẪU Ở NGÔN NGỮ NÀO — thêm 24/9/2026 ══
@@ -528,9 +581,14 @@ module.exports = {
      */
     ID_RECOVERY_SUPPORT_IMPERSONATION: [
       { pattern: '(hỗ trợ|giúp|dịch vụ|đơn vị|văn phòng|luật sư|có thể|có khả năng)[^.]{0,30}(lấy lại|thu hồi|truy hồi|đòi lại)\\s*(số\\s*|khoản\\s*)?(tiền|tài sản)', scope: 'any' },
+      { pattern: '(thu hồi|lấy lại)\\s*(\\d+\\s*%\\s*)?tiền\\s*(đã\\s*)?(bị\\s*lừa|từ\\s+sàn)', scope: 'any' },
+      { pattern: 'chuyên viên\\s+hỗ trợ\\s+tài chính[^.]{0,40}(hoàn lại|thu hồi|giải ngân|xử lý)', scope: 'any' },
+      { pattern: 'thu hồi\\s+(vốn|tiền)\\s+(bị\\s+)?treo', scope: 'any' },
+      { pattern: '(chỉ cho|giới thiệu)\\s*(chỗ|bên|nơi|cách)\\s*(lấy lại|thu hồi)[^.]{0,30}(tiền|vốn)', scope: 'any' },
     ],
     ID_TECH_SUPPORT_IMPERSONATION: [
       { pattern: '(hỗ trợ|kỹ thuật viên)\\s+(kỹ thuật|viễn thông)', scope: 'any' },
+      { pattern: '(find my|hỗ trợ\\s+apple|trung tâm\\s+apple)', scope: 'any' },
     ],
     /**
      * §9.2 — MẠO DANH CHÍNH KHOAN ĐÃ.
@@ -579,6 +637,7 @@ module.exports = {
       { pattern: '(đổi|dùng|chuyển)\\s*(sang\\s*)?(số|sđt|số điện thoại)\\s*(mới|khác)', scope: 'any' },
       { pattern: '(số|sđt)\\s*(này|mới|khác)\\s*(là\\s*)?(của\\s*)?(con|cháu|em|mẹ|bố|ba|má|anh|chị)', scope: 'any' },
       { pattern: '(con|cháu|em|mẹ|bố|ba|má)[^.]{0,20}(đổi|mất|hỏng)[^.]{0,12}(số|sđt|máy|điện thoại)', scope: 'any' },
+      { pattern: '(mẹ|bố|ba|má)\\s+ơi\\s+con\\b[^.]{0,60}(vỡ màn hình|hỏng máy|máy hư|chuyển gấp|stk bạn)', scope: 'any' },
 
       // ── Người thân Ở XA: không gặp mặt được nên không xác minh được ──
       { pattern: '(con|cháu|em|anh|chị|bố|mẹ)[^.]{0,26}(nước ngoài|bên kia|du học|xuất khẩu lao động|đi làm xa|ở xa)', scope: 'any' },
@@ -588,7 +647,13 @@ module.exports = {
       // Một mình 12 điểm: "mẹ ơi con ở bệnh viện thăm bà" không đủ ngưỡng; chỉ nâng khi đi cùng
       // yêu cầu chuyển tiền hay giữ bí mật.
       { pattern: '(mẹ|bố|ba|má)\\s*ơi[^.]{0,40}(con|em)[^.]{0,30}(đồn công an|bị bắt|bị giữ|gây tai nạn|bị tai nạn|nằm viện|đang cấp cứu)', scope: 'any' },
+      { pattern: '(mẹ|bố|ba|má)\\s*(à|ơi)[^.]{0,30}(con|em)[^.]{0,30}(đâm vào|cấp cứu|viện phí|máy con bị hư)', scope: 'any' },
       { pattern: '(con|em)\\s+(đang\\s+)?ở\\s+(đồn công an|đồn cảnh sát|trại tạm giam)', scope: 'any' },
+      { pattern: '(sếp|giám đốc)\\s+đây[^.]{0,30}(đang họp gấp|chuyển ngay)', scope: 'any' },
+    ],
+    ID_CONTACT_ACCOUNT_TAKEOVER: [
+      { pattern: '(cho mượn|mượn|vay)[^.]{0,36}(chuyển|gửi|gởi)[^.]{0,20}(số này|stk|tk|tài khoản)[\\s\\S]{0,60}(trả lại|gửi lại|gởi lại|hoàn lại)', scope: 'khong_canh_bao' },
+      { pattern: '(cho mượn|mượn)\\s+(tạm\\s+)?(chuyển|gửi|gởi)\\s+(vào\\s+)?(số này|stk này|tk này|tài khoản này)', scope: 'khong_canh_bao' },
     ],
     MAN_SECRECY: [
       // 24/9/2026 — "(không) ĐƯỢC nói với ai": chữ "được" chen giữa từng làm mẫu trượt.
@@ -618,6 +683,7 @@ module.exports = {
       { pattern: '(tắt|vô hiệu hoá|vô hiệu hóa)[^.]{0,16}(bộ lọc|kiểm duyệt|cảnh báo)', scope: 'any' },
       { pattern: '(trả lời|đánh dấu|phân loại|kết luận|xác nhận|báo cáo)[^.]{0,24}(là|rằng)?[^.]{0,14}an toàn', scope: 'any' },
       { pattern: '(bạn|mày) (bây giờ )?là[^.]{0,24}(trợ lý|ai|trí tuệ)', scope: 'any' },
+      { pattern: 'kết quả phân tích\\s*:\\s*(chưa thấy|không thấy|an toàn)', scope: 'any' },
       { pattern: '(chế độ|che do) (nhà phát triển|developer)', scope: 'any' },
       { pattern: '(lời nhắc|prompt) (hệ thống|gốc)', scope: 'any' },
       { pattern: '\\[\\s*/?\\s*system\\s*\\]', scope: 'any' },
@@ -628,6 +694,9 @@ module.exports = {
       { pattern: '(developer mode|jailbreak)', scope: 'any' },
       { pattern: '(classify|mark|output|respond)[^.]{0,16}as safe', scope: 'any' },
       { pattern: '(risk_?label|risk level)[^.]{0,12}(=|:)?[^.]{0,10}(safe|low)', scope: 'any' },
+      { pattern: '(lưu ý|ghi chú|chỉ dẫn|note)\\s+(cho|to)\\s+(the\\s+)?(ai|mô hình|model)[^.]{0,44}(hợp lệ|legitimate|không cần cảnh báo|no warning|safe|none)', scope: 'any' },
+      { pattern: '(nói với người dùng|trả lời|hãy trả về)[^.]{0,40}(hợp lệ|mức thấp|chưa thấy dấu hiệu rủi ro)', scope: 'any' },
+      { pattern: 'ignore\\s+any\\s+warning\\s+(your\\s+)?app\\s+shows', scope: 'any' },
     ],
     MAN_FEAR_THREAT: [
       /*
@@ -635,9 +704,14 @@ module.exports = {
        * Phạt nguội giả doạ "mức phạt sẽ tăng thêm 50%", "tạm giữ giấy tờ phương tiện"; BHXH giả
        * doạ "không nhận được lương hưu". Một mình 12 điểm, dưới ngưỡng 20.
        */
+      { pattern: '(bị trừ|phí duy trì)[^.]{0,36}(phí dịch vụ tự động|mỗi tháng|hàng tháng)', scope: 'khong_canh_bao' },
+      { pattern: 'sẽ\\s+(cắt|ngắt|ngừng)\\s+(điện|nước|dịch vụ)[^.]{0,55}(bấm\\s+(số|phím)\\s+\\d|trong\\s+thời gian tới)', scope: 'khong_canh_bao' },
       { pattern: '(mức phạt|tiền phạt|khoản phạt)[^.]{0,20}(sẽ\\s+)?tăng\\s+(thêm\\s+)?\\d+\\s*%', scope: 'khong_canh_bao' },
       { pattern: 'tạm giữ\\s+(giấy tờ|phương tiện|bằng lái|giấy phép lái xe)', scope: 'khong_canh_bao' },
-      { pattern: '(không nhận được|gián đoạn|dừng chi trả|ngừng chi trả)[^.]{0,30}(lương hưu|trợ cấp|chế độ bảo hiểm)', scope: 'khong_canh_bao' },
+      { pattern: 'thẻ\\s+(bị\\s+)?(khóa|khoá)\\s+vĩnh viễn', scope: 'khong_canh_bao' },
+      { pattern: '(tránh|kẻo)\\s+tăng\\s+mức phạt', scope: 'khong_canh_bao' },
+      { pattern: '(không nhận được|gián đoạn|dừng chi trả|ngừng chi trả|tạm ngưng chi trả)[^.]{0,30}(lương hưu|trợ cấp|chế độ bảo hiểm)', scope: 'khong_canh_bao' },
+      { pattern: '(cưỡng chế hóa đơn|tước bằng lái|khóa giao dịch)', scope: 'khong_canh_bao' },
       { pattern: '(bắt giữ|bị bắt|khởi tố|truy tố|phong toả|tạm giam)', scope: 'any' },
       { pattern: '\\b(rửa tiền|cắt trợ cấp|liên quan.{0,12}vụ án)\\b', scope: 'any' },
       /*
@@ -659,7 +733,9 @@ module.exports = {
        * thật "tài khoản đã bị khoá do nhập sai mật khẩu" không có dạng đó.
        */
       { pattern: '(không\\s+(thì\\s+)?|kẻo\\s+)(tài khoản|tk|thẻ|sim|số|thuê bao)[^.]{0,20}(sẽ\\s+)?bị\\s+(tạm\\s+)?(khóa|khoá|phong tỏa|phong toả|đóng băng)', scope: 'khong_canh_bao' },
-      { pattern: '(tài khoản|tk|thẻ|sim|thuê bao)[^.]{0,20}sẽ\\s+bị\\s+(tạm\\s+)?(khóa|khoá|phong tỏa|phong toả|đóng băng)', scope: 'khong_canh_bao' },
+      { pattern: '(tài khoản|tk|thẻ|sim|thuê bao)[^.]{0,38}sẽ\\s+bị\\s+(tạm\\s+)?(khóa|khoá|phong tỏa|phong toả|đóng băng|thu hồi)', scope: 'khong_canh_bao' },
+      { pattern: '(mỗi tháng|hàng tháng|tự động)\\s*(thu phí|trừ phí|trừ)\\s*\\d[\\d.,]*\\s*(vnd|vnđ|đ|đồng|triệu|k)', scope: 'khong_canh_bao' },
+      { pattern: 'bắt buộc\\s+(phong tỏa|phong toả|đóng băng)[^.]{0,24}(toàn bộ\\s+)?(tiền|tài khoản)', scope: 'khong_canh_bao' },
       /*
        * 30/10/2026 — "SẮP bị khoá do chưa xác thực" và "sẽ bị đình chỉ / vô hiệu hoá" cho tài khoản
        * định danh, SIM, ví (kịch bản VNeID, chuẩn hoá thuê bao). Hai mẫu trên chỉ có "sẽ bị khoá".
@@ -697,6 +773,8 @@ module.exports = {
       { pattern: '\\b(sàn|kèo|dự án|mã)\\s+[^.]{0,12}nội bộ', scope: 'khong_canh_bao' },
       { pattern: '(người quen|bạn|anh|chị|thầy|cô)[^.]{0,24}(làm|bên|trong)\\s+(sàn|chứng khoán|forex|tiền ảo|crypto)[^.]{0,60}(lời|lãi|lợi nhuận|nạp|đầu tư)', scope: 'khong_canh_bao' },
       { pattern: '\\b(bot|robot|ai)\\b[^.]{0,30}(tự động|tự giao dịch)[^.]{0,30}(sinh lời|sinh lãi|kiếm tiền|lợi nhuận)', scope: 'khong_canh_bao' },
+      { pattern: '(thu hồi|lấy lại)\\s+100\\s*%\\s*(tiền|số tiền|vốn)\\s*(đã\\s*)?(bị\\s*(lừa|mất|treo))?', scope: 'any' },
+      { pattern: '(chỉ cần|chỉ việc)\\s+góp vốn[^.]{0,30}(không phải làm gì|ngồi hưởng|nhận lãi)', scope: 'khong_canh_bao' },
     ],
     /**
      * QR DẪN TỚI ĐĂNG NHẬP / THANH TOÁN / NHẬN TIỀN — 25/9/2026. Trước đây tầng luật
@@ -707,6 +785,7 @@ module.exports = {
      */
     WEB_QR_TO_LOGIN_PAYMENT: [
       { pattern: '(quét|scan)\\s*(mã|qr|mã qr)[^.]{0,30}(để|rồi|và|xong)\\s*(đăng nhập|thanh toán|xác nhận|xác thực|nhận\\s+(tiền|quà|thưởng|lì xì|hoàn tiền)|hoàn\\s+(tiền|lại)|mở tài khoản|đăng ký)', scope: 'action' },
+      { pattern: '(quét|scan)\\s*(mã\\s*)?qr[^.]{0,24}(đổi\\s*esim|qua\\s*link|giữ\\s*số)', scope: 'action' },
     ],
     /**
      * OFF_ADVANCE_FEE và OFF_TASK_PREPAY TRƯỚC ĐÂY KHÔNG CÓ MẪU NÀO ở vi-VN —
@@ -722,6 +801,7 @@ module.exports = {
        * bị đẩy lên CAO. `tạm ứng` là từ chuẩn của bệnh viện và cơ quan.
        */
       { pattern: '(đặt cọc|ứng trước|nạp trước|đóng trước)', scope: 'action' },
+      { pattern: 'chuyển\\s+(lại\\s+)?tiền cọc\\s+\\d', scope: 'action' },
       /*
        * Ba lối viết đo được 19/9/2026, không miếng nào ở trên bắt được:
        *   · "nạp thêm 4.800.000đ để đồng bộ lệnh, xong là rút được"
@@ -749,6 +829,16 @@ module.exports = {
        * "đóng trước phí bảo hiểm xe" là việc thường, và cho vay thật không thu phí trước khi giải ngân.
        */
       { pattern: '(đóng|nộp|chuyển|thanh toán)\\s+trước\\s+(phí|lệ phí)[^.]{0,40}(khoản vay|vay vốn|duyệt (hồ sơ|vay)|giải ngân)', scope: 'action' },
+      { pattern: 'cọc\\s+(\\d+\\s*%|\\d+\\s*(k|tr|triệu|nghìn|đồng))[^.]{0,28}(giữ phòng|giữ chỗ|nhận hàng|nguyên liệu|ship\\s+hỏa\\s+tốc)', scope: 'action' },
+      { pattern: 'nộp[^.]{0,24}phí\\s+giữ\\s+chỗ[^.]{0,36}(trước thời hạn|hướng dẫn)', scope: 'action' },
+      { pattern: '(đóng|nộp)[^.]{0,24}(phí|tiền)\\s+(làm\\s+hồ sơ|bảo hiểm\\s*(cho\\s*)?khoản vay)[^.]{0,44}(giải ngân|rút tiền|kích hoạt ví)', scope: 'action' },
+      { pattern: 'nộp\\s+tiền\\s+làm\\s+hồ sơ[^.]{0,75}(xử lý|giải ngân)', scope: 'action' },
+      { pattern: '(anh|chị|bác|em|bạn)\\s+cứ\\s+cọc\\s+đi', scope: 'action' },
+      { pattern: 'chuyển\\s+lại\\s+tiền\\s+do\\s+sai\\s+(nội dung|cú pháp)', scope: 'action' },
+      { pattern: '(chuyển|nạp|đóng)[^.]{0,20}(tiền đối ứng|phí sửa lỗi)[^.]{0,40}(sửa lỗi|hệ thống|giải ngân|hoàn lại)', scope: 'action' },
+      { pattern: 'tiền hàng\\s+(đã\\s+)?thanh toán rồi[^.]{0,30}(tiền ship|cước|phí)[^.]{0,30}(gửi|chuyển)\\s*(vào|sang)\\s*(số tài khoản|tài khoản|stk)', scope: 'action' },
+      { pattern: '(đóng|nộp|chuyển|thanh toán)\\s+phí\\s+(giao lại|lưu kho|thông quan|hải quan|vận chuyển)[^.]{0,24}(vào|qua|\\d|nhận quà|nhận hàng|để nhận)', scope: 'action' },
+      { pattern: '(đóng|nộp|chuyển)[^.]{0,24}(phí xác minh|nâng cấp tài khoản)[^.]{0,24}(rút tiền|rút vốn|hoàn tiền)', scope: 'action' },
     ],
     /**
      * ══════ TÍN HIỆU THÊM 19/8/2026, SAU KHI ĐO BỘ 100 TÌNH HUỐNG ══════
@@ -786,6 +876,8 @@ module.exports = {
        */
       { pattern: '(đừng|không được|khoan)\\s*(gọi|nhắn|liên hệ|hỏi)[^.]{0,24}(lại|cho|với)', scope: 'action' },
       { pattern: '(một mình|tự đi|đi một mình)[^.]{0,20}(đừng|không)\\s*(cho|nói|báo)', scope: 'action' },
+      { pattern: '(không có|tránh)\\s+người thứ ba', scope: 'any' },
+      { pattern: '(không gian|phòng|chỗ)\\s+yên tĩnh[^.]{0,30}(không có người|một mình)', scope: 'any' },
     ],
     ID_UTILITY_IMPERSONATION: [
       { pattern: '\\b(evn|điện lực|công ty (cấp )?nước|cấp điện)\\b[^.]{0,40}(nợ|quá hạn|cắt|ngừng cung cấp)', scope: 'any' },
@@ -796,12 +888,19 @@ module.exports = {
        * bấm mã chuyển hướng cuộc gọi để "nâng sóng".
        */
       { pattern: '(hệ thống|nhà mạng|tổng đài)[^.]{0,30}(sóng|5g|4g|sim)\\b', scope: 'any' },
+      { pattern: 'sử dụng\\s+điện\\s+cao\\s+bất thường', scope: 'any' },
+      { pattern: 'bấm\\s+(số|phím)\\s+\\d[^.]{0,30}(nhân viên\\s+)?(điện lực|cấp nước|tổng đài)', scope: 'any' },
+      { pattern: '\\bsim\\b[^.]{0,28}(sai thông tin|chưa chuẩn hoá|chưa chuẩn hóa|bị khóa|bị khoá)', scope: 'khong_canh_bao' },
     ],
     ID_DELIVERY_IMPERSONATION: [
-      { pattern: '(bưu điện|bưu phẩm|kiện hàng|đơn hàng)[^.]{0,36}(đang (bị )?giữ|lưu kho|hải quan|tạm giữ)', scope: 'any' },
+      { pattern: '(bưu điện|bưu phẩm|bưu kiện|kiện hàng|đơn hàng|đơn vị vận chuyển|giao hàng tiết kiệm|hải quan)[^.]{0,40}(đang (bị )?giữ|lưu kho|quá thời gian lưu kho|hải quan|tạm giữ|phát sinh phí|thu hộ|0đ|chưa đóng phí)', scope: 'any' },
+      { pattern: '(giao hàng|shipper|bưu tá)[^.]{0,40}(nhầm[^.]{0,24}hội viên|trừ\\s+\\d[^.]{0,24}tháng|(hủy|huỷ)\\s+(gói|hội viên|thẻ))', scope: 'any' },
+      { pattern: '(tiền hàng|đơn hàng)[^.]{0,30}(thanh toán rồi|đã thanh toán)[^.]{0,30}(tiền ship|cước|phí giao)[^.]{0,40}(gửi|chuyển)[^.]{0,20}(số tài khoản|tài khoản|stk|tk)', scope: 'any' },
     ],
     ID_EMPLOYER_JOB_IMPERSONATION: [
       { pattern: '(tuyển|tuyển dụng|tuyển gấp)[^.]{0,40}(cộng tác viên|ctv|nhân viên|việc tại nhà|part ?time)', scope: 'any' },
+      { pattern: 'tham gia\\s+nhiệm vụ\\s+(like|share|chia sẻ|xem video|thả tim)', scope: 'khong_canh_bao' },
+      { pattern: '(tuyển|tuyển dụng)[^.]{0,40}(dự án hợp tác|tham gia dự án)', scope: 'any' },
     ],
     MAN_LOVE_BOMBING: [
       /*
@@ -821,6 +920,11 @@ module.exports = {
       { pattern: '(muốn|xin)\\s*(được\\s*)?(làm quen|kết bạn)[^.]{0,30}(lâu dài|nghiêm túc|trò chuyện)', scope: 'any' },
       { pattern: '(quen|nói chuyện|yêu)[^.]{0,26}(trên mạng|qua mạng|chưa gặp)[^.]{0,40}(gửi|chuyển|cho)\\s*(tiền|\\d)', scope: 'any' },
       { pattern: '(em yêu|anh yêu|bé yêu|honey|darling)\\b[^.]{0,60}(chuyển|gửi|đóng|nộp)[^.]{0,20}(tiền|\\d)', scope: 'any' },
+      { pattern: '(chỉ còn|sống được)[^.]{0,20}(tháng|tuần|ngày)[\\s\\S]{0,60}(để lại|tài sản|thừa kế)', scope: 'khong_canh_bao' },
+      { pattern: 'bức thư cuối cùng[\\s\\S]{0,60}(để lại|tài sản|cho bạn)', scope: 'khong_canh_bao' },
+      { pattern: 'để lại cho bạn\\s+(một số\\s+)?(tài sản|thừa kế)', scope: 'khong_canh_bao' },
+      { pattern: 'tất cả những gì tôi có\\s+(đều\\s+)?để lại', scope: 'khong_canh_bao' },
+      { pattern: 'bức thư cuối cùng', scope: 'khong_canh_bao' },
     ],
     OFF_PRIZE_GIFT: [
       { pattern: '(trúng|nhận)\\s*(thưởng|giải|quà)[^.]{0,40}(nộp|đóng|chuyển|phí)', scope: 'any' },
@@ -830,6 +934,11 @@ module.exports = {
        * cuộc thi phải nạp tiền mới được dự là hình của cả họ kịch bản "mẫu nhí".
        */
       { pattern: '(giải thưởng|hợp đồng|phần thưởng|giải nhất|top\\s*1)[^.]{0,24}\\d+\\s*(triệu|tỷ|tỉ)', scope: 'any' },
+      { pattern: 'điểm thưởng[^.]{0,55}(đổi|nhận)[^.]{0,30}miễn phí', scope: 'khong_canh_bao' },
+      { pattern: 'điểm thưởng\\s+(sắp\\s+)?hết hạn[^.]{0,44}(đổi|nhận)[^.]{0,24}(tại|qua)', scope: 'khong_canh_bao' },
+      { pattern: 'điểm thưởng\\s+(sắp\\s+)?hết hạn', scope: 'khong_canh_bao' },
+      { pattern: 'đổi\\s+(quà|thưởng)\\s+ngay', scope: 'khong_canh_bao' },
+      { pattern: 'may mắn\\s+(trúng|nhận)\\s+(thưởng|giải|phần quà|quà)', scope: 'khong_canh_bao' },
     ],
     /**
      * Quảng cáo sức khoẻ thần kỳ — xem registry. `(?<!nào\s)`: "không có thuốc
@@ -844,12 +953,24 @@ module.exports = {
     MAN_SCARCITY_PRESSURE: [
       { pattern: '(chỉ còn|còn duy nhất|số lượng có hạn|suất cuối)[^.]{0,30}(hôm nay|trong ngày|tối nay|\\d+\\s*(suất|phút|giờ))', scope: 'any' },
       { pattern: '(giữ (chỗ|suất)|đặt cọc)[^.]{0,24}(ngay|hôm nay|trong ngày)[^.]{0,20}(kẻo|nếu không|mai là)', scope: 'action' },
+      { pattern: '(giữ\\s+(xe|phòng|chỗ)|cọc\\s+ngay)[^.]{0,24}(không|kẻo)\\s+(khách khác|người khác)\\s+(thuê|đặt|lấy)\\s*mất', scope: 'khong_canh_bao' },
+      { pattern: '(sắp\\s+cháy phòng|cháy phòng)[^.]{0,30}(cọc|giữ phòng|chuyển khoản)', scope: 'khong_canh_bao' },
+      { pattern: '(cọc|đặt cọc|giữ phòng)[^.]{0,30}(sắp\\s+cháy phòng|cháy phòng)', scope: 'khong_canh_bao' },
     ],
     OFF_TASK_PREPAY: [
       { pattern: '(nhiệm vụ|đơn hàng|chốt đơn)[^.]{0,40}(nạp|ứng|đặt cọc|chuyển)', scope: 'action' },
       /* "nạp tiền mua lượt vote cho bé" — cuộc thi ảnh mẫu nhí, bộ 100 kịch bản. */
       { pattern: '(nạp|mua|chuyển)[^.]{0,24}(lượt|vote|bình chọn)\\b', scope: 'action' },
       { pattern: '(nạp|ứng)[^.]{0,30}(làm nhiệm vụ|hoàn thành nhiệm vụ|nâng (gói|cấp)|rút (được|về))', scope: 'action' },
+      { pattern: '(nạp|đóng)[^.]{0,20}(deposit|vốn)[^.]{0,30}(wallet|rút cả gốc lẫn lãi|phí mở băng|unlock commission)', scope: 'action' },
+      { pattern: 'nhiệm vụ\\s+(like|share|chia sẻ|xem video|thả tim)(\\s+(và|&)\\s+(like|share|chia sẻ))?[^.]{0,44}(hoa hồng|nhận\\s+\\d)', scope: 'khong_canh_bao' },
+      { pattern: '(xỏ vòng|xỏ hạt|gấp phong bì|dán tem)[^.]{0,36}tại nhà', scope: 'khong_canh_bao' },
+      { pattern: 'làm\\s+(vài\\s+)?nhiệm vụ\\s+(video|online)[^.]{0,30}(thưởng|hoa hồng)', scope: 'khong_canh_bao' },
+      { pattern: '(xem phim|xem video)[^.]{0,24}(ai|giải trí|ngắn)?[^.]{0,16}(vừa\\s+)?kiếm tiền', scope: 'khong_canh_bao' },
+      { pattern: '(nạp|đóng|chuyển)[^.]{0,24}(tham gia\\s+(dự án|nhiệm vụ)|dự án hợp tác)', scope: 'action' },
+      { pattern: '(phí kích hoạt|nạp|đóng)[^.]{0,30}(gói ai|ai livestream|kiếm hoa hồng hàng ngày)', scope: 'action' },
+      { pattern: '(nạp|đóng|chuyển)[^.]{0,24}(đặt đơn hàng|chốt đơn)[^.]{0,24}(hoa hồng|kiếm tiền)', scope: 'action' },
+      { pattern: '(mua hàng ảo|đặt thêm\\s*\\d*\\s*đơn hàng)[^.]{0,40}(hoàn tiền|hoa hồng|lỗi|rút)', scope: 'action' },
     ],
   },
 

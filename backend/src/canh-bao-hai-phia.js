@@ -54,6 +54,7 @@
  * HÀM THUẦN + MỘT KHO. Không mạng ở đây — `guiPush` do tầng gọi cắm vào.
  */
 
+const crypto = require('node:crypto');
 const {
   nenTuDongCanhBao, timThanhVien, trangThaiGiaoNhan, TRANG_THAI_GIAO_NHAN,
 } = require('./trusted-circle');
@@ -79,43 +80,96 @@ const HANH_DONG_KHI_CHUA_CO_QUY_TAC = Object.freeze(['bao_cho_nguoi_than', 'dong
 
 /** Nhãn nào thì đổ chuông. Chỉ CAO. NGHI_NGO gom vào báo cáo cuối ngày. */
 const NHAN_DO_CHUONG = new Set(['CAO']);
+const NHAN_HOP_LE = new Set(['CAO', 'NGHI_NGO', 'CHUA_THAY']);
 
 /** Hạn chờ xác nhận người thân đã nhận, trước khi tính đường dự phòng. */
 const HAN_XAC_NHAN_MS = 60_000;
-
-let demId = 0;
-const sinhId = (thoiDiem) => {
-  demId += 1;
-  return `cb_${thoiDiem.toString(36)}_${demId.toString(36)}`;
-};
+const BANG_CANH_BAO = 'canh_bao_hai_phia';
 
 /**
- * ════════ BẢNG `canh_bao` ════════
+ * Mã cảnh báo ngẫu nhiên mật mã (48-bit entropy), chống đoán tuần tự ID của người khác.
+ */
+const sinhId = (thoiDiem) => `cb_${thoiDiem.toString(36)}_${crypto.randomBytes(6).toString('hex')}`;
+
+function lamSachGhiKho(ghi) {
+  if (!ghi || typeof ghi !== 'object') return null;
+  // §6.9 — `vault-store` cấm tuyệt đối trường `noiDung` (TRUONG_CAM).
+  const { noiDung: _boQua, ...sach } = ghi;
+  return sach;
+}
+
+/**
+ * ════════ BẢNG `canh_bao` (ĐỒNG BỘ TRÊN BỘ NHỚ + GHI BỀN VỮNG XUỐNG VAULT-STORE) ════════
  * Đây chính là nguồn dữ liệu để chứng minh sản phẩm hoạt động — và cũng là
  * nguồn duy nhất để hiệu chỉnh ngưỡng (§4.6: mỗi lần bấm "Tôi ổn" là một mẫu
  * báo động giả, ghi lại để hiệu chỉnh).
  *
- * ⚠️ KHÔNG LƯU: số điện thoại thô, số tài khoản thô, OTP, evidence gốc.
- * Nội dung tin nhắn chỉ có mặt khi `chiaSeNoiDung` bật.
+ * ⚠️ KHÔNG LƯU XUỐNG KHO: số điện thoại thô, số tài khoản thô, OTP, evidence gốc, `noiDung`.
  */
-function taoKhoCanhBao() {
+function taoKhoCanhBao({ khoGoc = null, gioiHanBoNho = 2000 } = {}) {
   const banGhi = new Map();
+  let khoLuu = khoGoc;
+  let daTai = false;
+
+  const datGioiHan = (id, giaTri) => {
+    if (!banGhi.has(id) && banGhi.size >= gioiHanBoNho) {
+      const cuNhat = banGhi.keys().next().value;
+      if (cuNhat !== undefined) banGhi.delete(cuNhat);
+    }
+    banGhi.set(id, giaTri);
+  };
+
+  const luuXuongKho = (ghi) => {
+    if (!khoLuu || typeof khoLuu.luu !== 'function') return;
+    const sach = lamSachGhiKho(ghi);
+    if (sach && sach.id) {
+      void khoLuu.luu(BANG_CANH_BAO, sach.id, sach).catch(() => {});
+    }
+  };
 
   return {
+    async taiTuKho(khoMoi) {
+      if (khoMoi) khoLuu = khoMoi;
+      if (daTai || !khoLuu || typeof khoLuu.liet !== 'function') return 0;
+      daTai = true;
+      try {
+        const ds = await khoLuu.liet(BANG_CANH_BAO);
+        let n = 0;
+        for (const g of Array.isArray(ds) ? ds : []) {
+          if (g && g.id && !banGhi.has(g.id)) {
+            datGioiHan(g.id, { ...g, noiDung: null });
+            n += 1;
+          }
+        }
+        return n;
+      } catch {
+        return 0;
+      }
+    },
+    ganKho(khoMoi) {
+      khoLuu = khoMoi;
+    },
     them(ghi) {
-      banGhi.set(ghi.id, ghi);
+      datGioiHan(ghi.id, ghi);
+      luuXuongKho(ghi);
       return ghi;
     },
     lay: (id) => banGhi.get(id) || null,
-    tatCa: () => [...banGhi.values()],
-    trongKhoang(tu, den) {
-      return [...banGhi.values()].filter((g) => g.thoiDiem >= tu && g.thoiDiem < den);
+    tatCa: (chuTaiKhoanId = undefined) => {
+      const all = [...banGhi.values()];
+      if (chuTaiKhoanId === undefined) return all;
+      if (chuTaiKhoanId === null) return all.filter((g) => !g.chuTaiKhoanId);
+      return all.filter((g) => g.chuTaiKhoanId === chuTaiKhoanId);
+    },
+    trongKhoang(tu, den, chuTaiKhoanId = undefined) {
+      return this.tatCa(chuTaiKhoanId).filter((g) => g.thoiDiem >= tu && g.thoiDiem < den);
     },
     capNhat(id, vaLai) {
       const g = banGhi.get(id);
       if (!g) return null;
       const moi = { ...g, ...vaLai };
       banGhi.set(id, moi);
+      luuXuongKho(moi);
       return moi;
     },
     coBaoNhieu: () => banGhi.size,
@@ -229,14 +283,22 @@ function pushNguoiThan(kq, { canhBaoId, tenNguoiCaoTuoi = null, thoiDiem }) {
  */
 async function phatCanhBao({ kq, vongTron, kho, guiPush, ...tuyChon }) {
   const thoiDiem = Number(tuyChon.thoiDiem) || Date.now();
+  const nhanChuan = NHAN_HOP_LE.has(kq?.nhan) ? kq.nhan : 'CHUA_THAY';
+  const hoKichBanSach = typeof kq?.hoKichBan === 'string' && /^[a-z0-9_]{2,50}$/.test(kq.hoKichBan)
+    ? kq.hoKichBan
+    : null;
+  const maGiaiThichSach = typeof kq?.maGiaiThich === 'string' && /^[A-Za-z0-9_]{1,40}$/.test(kq.maGiaiThich)
+    ? kq.maGiaiThich
+    : null;
+  const kqSach = { ...kq, nhan: nhanChuan, hoKichBan: hoKichBanSach, maGiaiThich: maGiaiThichSach };
 
   // Nhãn CHUA_THAY không phát cảnh báo — nhưng vẫn được đếm ở báo cáo tuần.
-  if (kq.nhan === 'CHUA_THAY') {
+  if (kqSach.nhan === 'CHUA_THAY') {
     return { phat: false, ly: 'nhan_chua_thay', canhBaoId: null };
   }
 
   const cong = nenTuDongCanhBao(vongTron, {
-    canThiep: kq.canThiep,
+    canThiep: kqSach.canThiep,
     huyLanNay: tuyChon.huyLanNay === true,
   });
 
@@ -253,7 +315,7 @@ async function phatCanhBao({ kq, vongTron, kho, guiPush, ...tuyChon }) {
   let payloadNguoiThan = null;
 
   if (cong.gui) {
-    payloadNguoiThan = pushNguoiThan(kq, {
+    payloadNguoiThan = pushNguoiThan(kqSach, {
       canhBaoId: id, tenNguoiCaoTuoi: tuyChon.tenNguoiCaoTuoi ?? null, thoiDiem,
     });
     try {
@@ -274,16 +336,17 @@ async function phatCanhBao({ kq, vongTron, kho, guiPush, ...tuyChon }) {
   const ghi = kho.them({
     id,
     thoiDiem,
-    nhan: kq.nhan,
-    canThiep: kq.canThiep,
-    diem: kq.diem,
-    luatKhopVoi: kq.luatKhopVoi || [],
-    maLyDo: kq.maLyDo || [],
-    maGiaiThich: kq.maGiaiThich,
-    nguon: kq.nguon,
-    phienBanLuat: kq.phienBanLuat,
+    chuTaiKhoanId: tuyChon.chuTaiKhoanId ?? vongTron?.chuTaiKhoanId ?? null,
+    nhan: kqSach.nhan,
+    canThiep: kqSach.canThiep,
+    diem: kqSach.diem,
+    luatKhopVoi: Array.isArray(kqSach.luatKhopVoi) ? kqSach.luatKhopVoi.slice(0, 12) : [],
+    maLyDo: Array.isArray(kqSach.maLyDo) ? kqSach.maLyDo.slice(0, 12) : [],
+    maGiaiThich: kqSach.maGiaiThich,
+    nguon: kqSach.nguon,
+    phienBanLuat: kqSach.phienBanLuat,
     // §6.9 — người gửi đã được che ở tầng phát hiện; không lưu bản thô.
-    nguoiGuiDaChe: kq.nguoiGui ?? null,
+    nguoiGuiDaChe: kqSach.nguoiGui ?? null,
 
     // Ai nhận được gì
     nguoiCaoTuoiDaHien: true,
@@ -291,7 +354,7 @@ async function phatCanhBao({ kq, vongTron, kho, guiPush, ...tuyChon }) {
     nguoiThanDaDay: cong.gui ? endpointOk : false,
     nguoiThanDaMo: false,
     nguoiThanDaBamGoi: false,
-    hoKichBan: kq.hoKichBan || null,
+    hoKichBan: kqSach.hoKichBan || null,
     nguoiCaoTuoiBamGoi: false,
     trangThaiGiaoNhan: trangThai,
     lyKhongGui: cong.gui ? loiGui : cong.lyDo,
@@ -309,7 +372,7 @@ async function phatCanhBao({ kq, vongTron, kho, guiPush, ...tuyChon }) {
   return {
     phat: true,
     canhBaoId: id,
-    nguoiCaoTuoi: manNguoiCaoTuoi(kq, {
+    nguoiCaoTuoi: manNguoiCaoTuoi(kqSach, {
       tenNguoiThan: tuyChon.tenNguoiThan ?? nguoiNhan?.ten ?? null,
       trangThai,
       coQuyTac: cong.gui,

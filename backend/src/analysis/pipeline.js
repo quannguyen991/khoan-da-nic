@@ -13,7 +13,8 @@ const { directPrecheck } = require('./direct-precheck');
 const { decide } = require('./decision-engine');
 const { evaluateOverrides } = require('./critical-overrides');
 const { locTheoEvidence, locTheoScopeChiTiet } = require('./evidence-validator');
-const { phanTichUrl, trichUrl } = require('./url-analyzer');
+const { phanTichUrl, trichUrlChiTiet } = require('./url-analyzer');
+const { phanTichChuoiQr } = require('./vietqr-analyzer');
 const { laTinHieu } = require('./signal-registry');
 const { coDinhCuocGoi } = require('./co-dinh-cuoc-goi');
 const { nhanHopDong } = require('../risk-labels');
@@ -406,14 +407,26 @@ function analyze(input = {}, nguCanhTinCay = {}) {
   const chuTrongAnh = typeof input.ocrText === 'string'
     ? input.ocrText.slice(0, GIOI_HAN_VAN_BAN).trim() : '';
   const vanBan = [vanBanGoc, chuTrongAnh].filter(Boolean).join(String.fromCharCode(10));
+  const qrChuoi = typeof input.qrChuoi === 'string'
+    ? input.qrChuoi.slice(0, 6000).trim() : '';
+  const urlMoRong = Array.isArray(input.urlMoRong)
+    ? input.urlMoRong.filter((u) => typeof u === 'string' && u.trim()).slice(0, 5)
+    : [];
+  const nguonWeb = [vanBan, qrChuoi, ...urlMoRong].filter(Boolean).join(String.fromCharCode(10));
 
-  // §6.1 bước 3 — có URL thì phân tích DETERMINISTIC. KHÔNG tự mở link.
-  const urlList = trichUrl(vanBan);
-  const san = unreadableInputFloor({ ...input, url: urlList });
+  // §6.1 bước 3 — có URL hoặc chuỗi QR thì phân tích DETERMINISTIC. KHÔNG tự mở link.
+  const { docDuoc: urlList, khongDocDuoc: urlHong } = trichUrlChiTiet(nguonWeb);
+  const qrPhanTich = phanTichChuoiQr([vanBan, qrChuoi].filter(Boolean).join(String.fromCharCode(10)));
+  const urlUnresolvedHop = [
+    ...(Array.isArray(input.urlUnresolved) ? input.urlUnresolved : []),
+    ...urlHong,
+    ...(qrPhanTich.qrKhongToanVen ? ['vietqr_crc_khong_hop_le'] : []),
+  ];
+  const san = unreadableInputFloor({ ...input, url: urlList, urlUnresolved: urlUnresolvedHop });
 
   const ctx = buildContext(vanBan, { sourceId: 'van_ban' });
   const direct = directPrecheck(ctx, docNguCanhTinCay(nguCanhTinCay));
-  const web = phanTichUrl(vanBan);
+  const web = [...phanTichUrl(nguonWeb), ...qrPhanTich.signals];
 
   /**
    * ⚠️ "AI ĐÃ ĐỌC, KHÔNG THẤY GÌ" ≠ "AI KHÔNG CHẠY" — §4.3, LẦN THỨ NĂM.

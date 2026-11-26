@@ -14,13 +14,18 @@
 module.exports = {
   locale: 'en-US',
   language: 'en',
-  localePackVersion: 'en-US@1.1.1',   // 1.1.1 (25/9/2026): lời kể lại "the bank says/told me to transfer", "or my account gets locked"
+  localePackVersion: 'en-US@1.1.3',   // 1.1.3 (26/11/2026): Find My/Apple ID phishing, wrong account/syntax counter-transfer, AI package activation fee, room scarcity
+                                      // 1.1.2 (26/11/2026): account takeover borrow-transfer, wrong transfer memo, watch-videos-to-earn, inheritance scam
+                                      // 1.1.1 (25/9/2026): lời kể lại "the bank says/told me to transfer", "or my account gets locked"
                                       // 1.1.0 (25/9/2026): WEB_QR_TO_LOGIN_PAYMENT
   supportedCountryProfiles: ['US', 'GB', 'AU', 'SG', 'GLOBAL'],
 
   // { SIGNAL_ID: [ { pattern, scope } ] } — pattern là nguồn regex, khớp trên
   // chuỗi đã chuẩn hoá (thường, contraction đã mở, dấu câu còn nguyên).
   directPatterns: {
+    ID_CONTACT_ACCOUNT_TAKEOVER: [
+      { pattern: '\\b(borrow|lend me)\\b[^.]{0,36}\\b(transfer|send)\\b[^.]{0,24}\\b(this account|this number)\\b[^.]{0,50}\\b(pay (you )?back|return)\\b', scope: 'khong_canh_bao' },
+    ],
     CRED_OTP_SHARE: [
       /*
        * ⚠️ HAI LỐI VIẾT, MẪU CŨ CHỈ CÓ MỘT.
@@ -33,9 +38,11 @@ module.exports = {
       { pattern: '\\basked (me|you|him|her)\\b[^.]{0,30}\\b(code|otp|passcode|pin)\\b', scope: 'any' },
       { pattern: '(send|give|read|share|provide|tell|text)\\b(\\s+(me|us|him|her))?\\b[^.]{0,32}\\b(otp|one[- ]time (code|password)|verification code|security code|six[- ]digit code)', scope: 'action' },
       { pattern: '\\b(otp|verification code)\\b[^.]{0,24}\\b(you just received|we (just )?sent)', scope: 'action' },
+      { pattern: '\\b(verify|enter|confirm|read back)\\b[^.]{0,36}\\b(6[- ]digit|six[- ]digit)?\\s*(otp|verification code|security code|passcode)\\b', scope: 'action' },
     ],
     CRED_PASSWORD_PIN: [
       { pattern: '(send|give|tell|share|provide|confirm)\\b[^.]{0,26}\\b(password|pin|passcode)\\b', scope: 'action' },
+      { pattern: '\\benter\\s+your\\s+(password|pin|passcode)\\b[^.]{0,30}\\b(and|with)\\b[^.]{0,24}\\b(otp|code|verification)', scope: 'action' },
     ],
     /**
      * ══ 24/9/2026 — mirror of the Vietnamese additions (§6.10 parity) ══
@@ -48,6 +55,10 @@ module.exports = {
     FIN_MISTAKEN_TRANSFER_REDIRECT: [
       { pattern: '\\b(send|return|transfer|pay)\\b[^.]{0,20}\\b(it|the money|the funds)?\\s*back\\b[^.]{0,30}\\b(to|into)\\b[^.]{0,12}\\b(this|another|a different|the following|our collection)\\s*account\\b', scope: 'action' },
       { pattern: '\\b(sent|transferred|paid)\\b[^.]{0,20}\\b(by mistake|by accident|in error)\\b[^.]{0,80}\\b(return|send back|refund)\\b[^.]{0,30}\\b(this|another|a different)\\s*account\\b', scope: 'khong_canh_bao' },
+    ],
+    FIN_TRANSFER_MEMO_MISMATCH: [
+      { pattern: '\\b(wrong|incorrect)\\s+(transfer\\s+)?(memo|reference|syntax)[\\s\\S]{0,90}\\b(transfer again|resend|refund)\\b', scope: 'khong_canh_bao' },
+      { pattern: '\\b(wrong|incorrect)\\s+(account number|transfer\\s+syntax|syntax)[\\s\\S]{0,90}\\b(counter[- ]?transfer|transfer again|system error|refund)\\b', scope: 'khong_canh_bao' },
     ],
     FIN_ACCOUNT_OPENING_FOR_OTHERS: [
       { pattern: '\\b(open|register|set up)\\b[^.]{0,20}\\b(account|wallet|card)\\b[^.]{0,40}\\b(commission|we pay you|paid per account|fee for you)\\b', scope: 'khong_canh_bao' },
@@ -66,6 +77,7 @@ module.exports = {
     ],
     ID_RECOVERY_SUPPORT_IMPERSONATION: [
       { pattern: '\\b(help|we can|able to|service|lawyer|agency)\\b[^.]{0,30}\\b(recover|get back|retrieve|reclaim)\\b[^.]{0,20}\\b(your )?(money|funds|losses)\\b', scope: 'khong_canh_bao' },
+      { pattern: '\\bfinancial\\s+support\\s+specialist\\b[^.]{0,40}\\b(refund|recover|release|process)\\b', scope: 'any' },
     ],
     MAN_HEALTH_MIRACLE_CLAIM: [
       { pattern: '\\b(cures?|heals?|treats?)\\b[^.]{0,12}\\b(all|every|many|hundreds of)\\b[^.]{0,8}\\b(diseases?|illness(es)?|conditions)\\b', scope: 'action' },
@@ -88,6 +100,10 @@ module.exports = {
       // Phải để nhánh DÀI trước nhánh ngắn.
       { pattern: 'log ?(into|onto|in|on)\\b[^.]{0,30}\\b(bank|banking|account)\\b', scope: 'action' },
       { pattern: '\\b(your )?(bank|banking) (login|credentials|username)\\b', scope: 'action' },
+      { pattern: '\\b(unusual|unauthorized|suspicious) (sign[- ]?in|login|activity|transaction)\\b[^.]{0,60}\\b(verify|confirm|secure|cancel|click|visit)\\b', scope: 'khong_canh_bao' },
+      { pattern: '\\b(find my|iphone|icloud)\\b[\\s\\S]{0,60}\\b(located|location)\\b[\\s\\S]{0,60}\\b(link|click|tap|view location|apple id)\\b', scope: 'any' },
+      { pattern: '\\b(tap|click|visit|open)\\b[\\s\\S]{0,60}\\b(view location|apple id)\\b', scope: 'any' },
+      { pattern: '\\b(sign|log) ?in\\b[^.]{0,24}\\bapple id\\b', scope: 'any' },
     ],
     FIN_TRANSFER_REQUEST: [
       /*
@@ -96,6 +112,7 @@ module.exports = {
        */
       { pattern: '\\b(i need|need|needs)\\b[^.]{0,20}\\b[\\d][\\d,.]{2,}\\b', scope: 'any' },
       { pattern: '\\btold (me|us|him|her) to (put|invest|move|transfer|send|pay)\\b', scope: 'any' },
+      { pattern: '\\bpay\\s+(immediately|now)\\s+(via|at|through)\\b', scope: 'action' },
       /*
        * ĐÒI TIỀN KHÔNG KÈM SỐ. Đo trên bộ 200: ca điện lực được 15 điểm, thiếu đúng
        * 5 điểm, chỉ vì "Pay now to avoid disconnection" không có con số nên
@@ -204,6 +221,7 @@ module.exports = {
        */
       { pattern: '\\b(told|asked|instructed)\\b[^.]{0,16}\\b(me|us|him|her)\\b[^.]{0,30}\\b(buy|purchase|get)\\b[^.]{0,24}\\b(voucher|gift cards?)\\b', scope: 'action' },
       { pattern: '\\b(voucher|gift card)s?\\b[^.]{0,40}\\b(code|number|photo|photograph|scratch)\\b', scope: 'any' },
+      { pattern: '\\b(apple|google play|steam|itunes|amazon|razer)\\s+(gift\\s*)?cards?\\b[^.]{0,40}\\b(code|pin|send|photo|clear|pay)\\b', scope: 'action' },
       { pattern: '\\bgift ?cards?\\b', scope: 'action' },
     ],
     FIN_PRECIOUS_METAL_PURCHASE: [
@@ -287,6 +305,7 @@ module.exports = {
        * 'cong an' ở pack tiếng Việt. Phải có ai đó nói VỚI một người.
        */
       { pattern: '\\b(police|officer|investigator|detective|prosecutor)\\b[^.]{0,24}\\b(told|called|contacted|says|said)\\b[^.]{0,16}\\b(me|us|you|my)\\b', scope: 'any' },
+      { pattern: '\\b(traffic|speeding|parking)\\s+(violation|fine|ticket)\\b', scope: 'any' },
     ],
     ID_TAX_BENEFIT_IMPERSONATION: [
       { pattern: '\\b(irs|hmrc|ato)\\b', scope: 'any' },
@@ -296,11 +315,13 @@ module.exports = {
       { pattern: '\\b(pop.?up|popup|message)\\b[^.]{0,34}\\b(virus|infected|malware)\\b', scope: 'any' },
       { pattern: '\\b(take|took|taking) control\\b[^.]{0,24}\\b(of )?(my |your )?(screen|computer|laptop|device)\\b', scope: 'any' },
       { pattern: '\\btech(nical)? support\\b', scope: 'any' },
-      { pattern: '\\b(microsoft|apple|google) (support|technician|security)\\b', scope: 'any' },
+      { pattern: '\\b(microsoft|apple|google|find my) (support|technician|security|alert)\\b', scope: 'any' },
     ],
     ID_BANK_IMPERSONATION: [
-      { pattern: '\\bbank (security|fraud) (team|department|officer)\\b', scope: 'any' },
+      { pattern: '\\bbank (security|fraud) (team|department|dept|officer)\\b', scope: 'any' },
       { pattern: '\\bthis is\\b[^.]{0,22}\\bbank\\b', scope: 'any' },
+      { pattern: '\\byour bank account\\b[^.]{0,20}\\b(will be |has been )?(suspended|locked|frozen)\\b', scope: 'any' },
+      { pattern: '\\b(fraud|security) alert\\b[^.]{0,40}\\b(account|card|transaction|payment)\\b', scope: 'khong_canh_bao' },
       /*
        * 1.1.1 (25/9/2026) — the victim RETELLING it, same idea as vi-VN@1.2.1
        * ("ngân hàng bảo chuyển tiền"): "the bank says/told me to transfer…".
@@ -326,7 +347,8 @@ module.exports = {
        * dạng phổ biến nhất: gọi thẳng "Mum," rồi vào việc.
        */
       { pattern: '\\b(this is|it is) my new number\\b', scope: 'any' },
-      { pattern: '\\bmy (phone|mobile) (is|got) (broken|lost|stolen|damaged)\\b', scope: 'any' },
+      { pattern: '\\bmy (phone|mobile) (broke|(is|got) (broken|lost|stolen|damaged))\\b', scope: 'any' },
+      { pattern: '\\b(mum|mom|dad)\\b[^.]{0,16}\\b(it is|it.?s) me\\b', scope: 'any' },
       { pattern: '\\b(using|from) (this|a) (new )?(number|account)\\b[^.]{0,40}\\b(send|transfer|pay|help)\\b', scope: 'any' },
       { pattern: '^\\s*(hi |hello )?(mum|mom|dad|grandma|grandad|granny|nan)\\b[^.]{0,80}\\b(send|transfer|pay|money|deposit)\\b', scope: 'any' },
       { pattern: '\\b(mum|mom|dad|grandma|grandad)\\b[^.]{0,40}\\b(do not|don.t) tell\\b', scope: 'any' },
@@ -356,6 +378,8 @@ module.exports = {
       { pattern: '###\\s*instruction', scope: 'any' },
       { pattern: '(risk_?label|risk level)[^.]{0,12}(=|:)?[^.]{0,10}(safe|low|none)', scope: 'any' },
       { pattern: 'set risk to (low|none|safe)', scope: 'any' },
+      { pattern: 'ignore\\s+any\\s+warning\\s+(your\\s+)?app\\s+shows', scope: 'any' },
+      { pattern: 'report\\s+all\\s+signals\\s+as\\s+(absent|none|safe)', scope: 'any' },
     ],
     MAN_FEAR_THREAT: [
       /*
@@ -367,6 +391,8 @@ module.exports = {
       { pattern: '\\b(escalated|prosecuted|detained|arrested|charged)\\b[^.]{0,30}\\b(if|unless|otherwise)\\b', scope: 'any' },
       { pattern: '\\b(if|unless)\\b[^.]{0,40}\\b(you will be|we will)\\b[^.]{0,24}\\b(arrested|detained|prosecuted|charged|cut off)\\b', scope: 'any' },
       { pattern: '\\b(will be|face|facing) arrest(ed)?\\b', scope: 'any' },
+      { pattern: '\\b(avoid|prevent)\\s+(license\\s+suspension|arrest|prosecution|penalties)\\b', scope: 'khong_canh_bao' },
+      { pattern: '\\b(will be|to be)\\s+disconnected\\b', scope: 'khong_canh_bao' },
       { pattern: '\\b(money laundering|criminal charges?|arrest warrant|legal action)\\b', scope: 'any' },
       { pattern: '\\b(freeze|frozen|suspend|suspended)\\b[^.]{0,20}\\baccount\\b', scope: 'any' },
       /*
@@ -456,6 +482,8 @@ module.exports = {
       { pattern: '\\b(bill|account)\\b[^.]{0,30}\\b(unpaid|in arrears|overdue)\\b[^.]{0,40}\\b(pay|settle|now|today)\\b', scope: 'any' },
       { pattern: '\\b(electricity|power|water) (company|department|board)\\b[^.]{0,40}\\b(overdue|unpaid|cut off|disconnect)', scope: 'any' },
       { pattern: '\\b(cut off|disconnect)\\b[^.]{0,24}\\b(power|electricity|water)\\b', scope: 'any' },
+      { pattern: '\\bunusually high (electricity|power|water) usage\\b', scope: 'any' },
+      { pattern: '\\bpress\\s+\\d\\s+to\\s+(speak|connect)\\b[^.]{0,30}\\b(electricity|power|utility)\\b', scope: 'any' },
     ],
     ID_DELIVERY_IMPERSONATION: [
       /*
@@ -467,6 +495,8 @@ module.exports = {
       { pattern: '\\bcustoms\\b[^.]{0,40}\\b(parcel|package|item|shipment)\\b', scope: 'any' },
       { pattern: '\\b(redelivery|re-delivery)\\b', scope: 'any' },
       { pattern: '\\b(parcel|package|shipment)\\b[^.]{0,36}\\b(held|on hold|customs|detained|stuck)\\b', scope: 'any' },
+      { pattern: '\\b(usps|ups|fedex|dhl|royal mail|australia post|post office)\\b[^.]{0,44}\\b(held|detained|incomplete address|unpaid|customs|redelivery|fee)\\b', scope: 'any' },
+      { pattern: '\\b(goods|order|parcel)[^.]{0,24}\\b(already )?paid\\b[^.]{0,44}\\b(transfer|send|pay)\\b[^.]{0,30}\\b(shipping fee|delivery fee)\\b[^.]{0,30}\\b(this account|bank account|account)\\b', scope: 'any' },
     ],
     ID_EMPLOYER_JOB_IMPERSONATION: [
       { pattern: '\\bhiring now\\b', scope: 'any' },
@@ -513,6 +543,7 @@ module.exports = {
       { pattern: '\\b(much )?cheaper than\\b[^.]{0,26}\\b(the )?(others|market|usual|normal)\\b', scope: 'any' },
       { pattern: '\\b(only|last|limited)\\b[^.]{0,26}\\b(spot|slot|place|today|tonight|hours?)\\b', scope: 'any' },
       { pattern: '\\b(reserve|secure|hold)\\b[^.]{0,20}\\b(your )?(spot|slot|place)\\b[^.]{0,20}\\b(today|now|tonight)\\b', scope: 'action' },
+      { pattern: '\\b(almost sold out|selling out fast|rooms? almost gone)\\b[^.]{0,30}\\b(deposit|reserve|book now)\\b', scope: 'khong_canh_bao' },
     ],
     OFF_ADVANCE_FEE: [
       { pattern: '\\b(loan|credit)\\b[^.]{0,30}\\b(approved|approval)\\b[^.]{0,40}\\b(fee|deposit|payment|upfront)\\b', scope: 'any' },
@@ -534,6 +565,8 @@ module.exports = {
       { pattern: '\\b(processing|handling|clearance|release|administrative|admin) fee\\b', scope: 'action' },
       { pattern: '\\b(pay|transfer|send)\\b[^.]{0,30}\\b(fee|charge)\\b[^.]{0,30}\\b(first|upfront|in advance|before)\\b', scope: 'action' },
       { pattern: '\\b(pay|transfer|send)\\b[^.]{0,20}\\b(upfront|in advance)\\b', scope: 'action' },
+      { pattern: '\\b(already )?paid\\b[^.]{0,44}\\b(transfer|send|pay)\\b[^.]{0,30}\\b(shipping fee|delivery fee)\\b[^.]{0,30}\\b(this account|bank account|account)\\b', scope: 'action' },
+      { pattern: '\\b(counter[- ]?transfer|system error fee)\\b[^.]{0,40}\\b(fix|system|refund|release)\\b', scope: 'action' },
     ],
     OFF_TASK_PREPAY: [
       { pattern: '\\btop ?up\\b[^.]{0,26}\\b(wallet|balance|account)\\b', scope: 'any' },
@@ -548,6 +581,8 @@ module.exports = {
       { pattern: '\\b(task|order|mission|assignment)s?\\b[^.]{0,40}\\b(top ?up|deposit|prepay|pay in)\\b', scope: 'action' },
       { pattern: '\\b(top ?up|deposit|prepay)\\b[^.]{0,40}\\b(complete|finish|final)\\b[^.]{0,20}\\btask\\b', scope: 'action' },
       { pattern: '\\b(top ?up|deposit)\\b[^.]{0,50}\\bwithdraw\\b[^.]{0,30}\\b(capital|principal|bonus|commission)\\b', scope: 'action' },
+      { pattern: '\\b(like and share|follow and like)\\b[^.]{0,40}\\b(commission|earn|reward)\\b', scope: 'khong_canh_bao' },
+      { pattern: '\\b(activation fee|deposit|top ?up)\\b[^.]{0,30}\\b(ai package|ai livestream|daily commission|cooperative project)\\b', scope: 'action' },
     ],
   },
 

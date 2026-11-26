@@ -48,6 +48,9 @@ const {
 } = require('./src/push');
 const { guiThatFcmV1 } = require('./src/gui-fcm');
 const { docToMayChu, chuanHoaYeuCau, LoiDocTo } = require('./src/doc-to-may-chu');
+const { taoRouterThuKy } = require('./src/routes/thu-ky-routes');
+const { guiPushHaiPhia } = require('./src/push-hai-phia');
+const { bocLinkRutGonAnToan } = require('./src/link-expander');
 
 const CONG = Number(process.env.PORT) || 8089;
 const GIOI_HAN_VAN_BAN = 5000;          // §6.10
@@ -227,7 +230,7 @@ app.use((req, res, next) => {
   if (o && ORIGIN_CHO_PHEP.has(o)) {
     res.setHeader('access-control-allow-origin', o);
     res.setHeader('vary', 'Origin');
-    res.setHeader('access-control-allow-headers', 'content-type, authorization');
+    res.setHeader('access-control-allow-headers', 'content-type, authorization, x-thu-ky-session');
     /*
      * ⚠️ PATCH PHẢI CÓ Ở ĐÂY. `app.patch('/api/tai-khoan/toi')` là đường
      * DUY NHẤT để sửa hồ sơ, và thiếu nó trong danh sách này thì trình duyệt
@@ -311,6 +314,11 @@ const soLuot = new Map();
 const gioiHanTanSuat = (ngan) => function chan(req, res, next) {
   const khoa = `${ngan}|${req.ip || 'khong_ro'}`;
   const gio = Date.now();
+  if (soLuot.size > 5000) {
+    for (const [k, v] of soLuot) {
+      if (gio - v.moc > CUA_SO_RATE) soLuot.delete(k);
+    }
+  }
   const muc = soLuot.get(khoa) || { dem: 0, moc: gio };
   if (gio - muc.moc > CUA_SO_RATE) { muc.dem = 0; muc.moc = gio; }
   muc.dem += 1;
@@ -450,12 +458,13 @@ function locTrangThaiNguoiDung(raw) {
 
 async function xuLyPhanTich(req, res) {
   const {
-    vanBan, anh, ghiAm, ghiAmConfidence, ghiAmFailed, ghiAmMaLoi,
+    vanBan, anh, qrChuoi: qrChuoiRaw, ghiAm, ghiAmConfidence, ghiAmFailed, ghiAmMaLoi,
     traLoiBoHoiNhanh: traLoiBoHoiNhanhRaw,
     trangThaiMay: trangThaiMayRaw,
     trangThaiNguoiDung: trangThaiNguoiDungRaw,
   } = req.body || {};
   const caseContext = locTrangThaiNguoiDung(trangThaiNguoiDungRaw);
+  const qrChuoi = typeof qrChuoiRaw === 'string' ? qrChuoiRaw.slice(0, 6000).trim() : '';
 
   const traLoiBoHoiNhanh = locTraLoiBoHoiNhanh(traLoiBoHoiNhanhRaw);
   const trangThaiMay = locTrangThaiMay(trangThaiMayRaw);
@@ -485,7 +494,7 @@ async function xuLyPhanTich(req, res) {
    * là biến một trạng thái CẦN NÓI RA thành một lỗi im lặng — bác bấm trả lời,
    * rồi màn hình báo "thiếu đầu vào" như thể bác chưa làm gì. Đúng dạng lỗi §4.3.
    */
-  if (!coVanBan && !anh && !ghiAm && !coBoHoiNhanh) {
+  if (!coVanBan && !anh && !qrChuoi && !ghiAm && !coBoHoiNhanh) {
     return res.status(400).json({ maLoi: 'THIEU_DAU_VAO' });
   }
   const nguonGhiAm = { ghiAm, ghiAmConfidence, ghiAmFailed, ghiAmMaLoi };
@@ -499,9 +508,21 @@ async function xuLyPhanTich(req, res) {
    * lừa đảo thúc trên điện thoại ngồi chờ gateway là đánh đổi sai. 60 giây đã
    * mất thì không lấy lại được.
    */
-  const soBo = analyze({ vanBan: coVanBan ? vanBan : '', anh, traLoiBoHoiNhanh, trangThaiMay, caseContext, ...nguonGhiAm });
+  const soBo = analyze({ vanBan: coVanBan ? vanBan : '', anh, qrChuoi, traLoiBoHoiNhanh, trangThaiMay, caseContext, ...nguonGhiAm });
   if (soBo.overrides.length > 0) {
     return res.json(toHopDong(soBo));
+  }
+
+  let urlMoRong = [];
+  if (!KHONG_GOI_AI || process.env.KHOAN_DA_BOC_LINK === '1') {
+    const kqLink = await bocLinkRutGonAnToan([coVanBan ? vanBan : '', qrChuoi].filter(Boolean).join('\n')).catch(() => ({ urlMoRong: [] }));
+    urlMoRong = kqLink.urlMoRong || [];
+    if (urlMoRong.length > 0) {
+      const soBoMoRong = analyze({ vanBan: coVanBan ? vanBan : '', anh, qrChuoi, urlMoRong, traLoiBoHoiNhanh, trangThaiMay, caseContext, ...nguonGhiAm });
+      if (soBoMoRong.overrides.length > 0) {
+        return res.json(toHopDong(soBoMoRong));
+      }
+    }
   }
 
   // §6.1 bước 6 — gọi lớp trích tín hiệu. Hỏng thì rơi về bộ luật, KHÔNG sập.
@@ -595,7 +616,7 @@ async function xuLyPhanTich(req, res) {
   }
 
   const envelope = analyze({
-    vanBan: coVanBan ? vanBan : '', anh, llmSignals, aiError, traLoiBoHoiNhanh, trangThaiMay, caseContext,
+    vanBan: coVanBan ? vanBan : '', anh, qrChuoi, urlMoRong, llmSignals, aiError, traLoiBoHoiNhanh, trangThaiMay, caseContext,
     ocrText: chuTrongAnh,
     /*
      * ⚠️ §4.3 — HAI CÁCH KHÔNG ĐỌC ĐƯỢC ẢNH, CẢ HAI ĐỀU PHẢI KHAI.
@@ -705,12 +726,13 @@ app.post('/api/analyze/so-bo', chanPhanTich, (req, res) => {
    * test/ghi-am-than-yeu-cau.test.js và test/so-bo-khong-cao-hon-ket-qua.test.js.
    */
   const {
-    vanBan, anh, ghiAm, ghiAmConfidence, ghiAmFailed, ghiAmMaLoi,
+    vanBan, anh, qrChuoi: qrChuoiRaw, ghiAm, ghiAmConfidence, ghiAmFailed, ghiAmMaLoi,
     traLoiBoHoiNhanh: traLoiBoHoiNhanhRaw,
     trangThaiMay: trangThaiMayRaw,
     trangThaiNguoiDung: trangThaiNguoiDungRaw,
   } = req.body || {};
   const caseContext = locTrangThaiNguoiDung(trangThaiNguoiDungRaw);
+  const qrChuoi = typeof qrChuoiRaw === 'string' ? qrChuoiRaw.slice(0, 6000).trim() : '';
 
   const traLoiBoHoiNhanh = locTraLoiBoHoiNhanh(traLoiBoHoiNhanhRaw);
   /*
@@ -736,10 +758,10 @@ app.post('/api/analyze/so-bo', chanPhanTich, (req, res) => {
   }
   const coVanBan = typeof vanBan === 'string' && vanBan.trim().length > 0;
   const coBoHoiNhanh = Boolean(traLoiBoHoiNhanh && Object.keys(traLoiBoHoiNhanh).length > 0);
-  if (!coVanBan && !anh && !ghiAm && !coBoHoiNhanh) return res.status(400).json({ maLoi: 'THIEU_DAU_VAO' });
+  if (!coVanBan && !anh && !qrChuoi && !ghiAm && !coBoHoiNhanh) return res.status(400).json({ maLoi: 'THIEU_DAU_VAO' });
 
   return res.json(toHopDong(analyze({
-    vanBan: coVanBan ? vanBan : '', anh, ghiAm, ghiAmConfidence, ghiAmFailed, ghiAmMaLoi, traLoiBoHoiNhanh, trangThaiMay, caseContext,
+    vanBan: coVanBan ? vanBan : '', anh, qrChuoi, ghiAm, ghiAmConfidence, ghiAmFailed, ghiAmMaLoi, traLoiBoHoiNhanh, trangThaiMay, caseContext,
     /*
      * ⚠️ ĐƯỜNG NÀY KHÔNG BAO GIỜ ĐỌC ẢNH — PHẢI KHAI RA (§4.3).
      *
@@ -1421,7 +1443,7 @@ app.post('/api/cong-dong/canh-giac/:id/duyet', chanDoc, (req, res) => {
  * Tệ nhất có thể xảy ra khi bỏ giới hạn: người dùng làm phiền chính gia đình
  * mình. Tệ nhất khi giữ giới hạn: không ai trong nhà biết bác đang bị lừa.
  */
-app.post('/api/canh-bao-nguoi-than', (req, res) => {
+app.post('/api/canh-bao-nguoi-than', async (req, res) => {
   const { vongTron, vanBan, soTien, huyLanNay, thoiDiem } = req.body || {};
   if (!vongTron || typeof vongTron !== 'object') {
     return res.status(400).json({ maLoi: 'THIEU_VONG_TRON' });
@@ -1433,12 +1455,25 @@ app.post('/api/canh-bao-nguoi-than', (req, res) => {
   const payload = TC.dungPayloadCanhBao(vongTron, {
     envelope: env, soTien, thoiDiem: Number.isFinite(thoiDiem) ? thoiDiem : Date.now(),
   });
-  // Chưa có hạ tầng push thật ⇒ NÓI THẬT là không xác nhận được, không giả vờ.
+  let endpointOk = false;
+  try {
+    const kho = await KP.khoChung();
+    const gui = await guiPushHaiPhia({
+      kho,
+      nguoiNhanId: quyet.nguoiNhanId,
+      payloadNguoiThan: { nhan: env.nhan, canhBaoId: `nt_${Date.now()}` },
+      guiThat: req.app.get('guiPushThay') || guiThatWebPush,
+      guiThatNative: req.app.get('guiNativeThay') || guiThatFcmV1,
+    });
+    endpointOk = gui.endpointOk === true;
+  } catch {
+    endpointOk = false;
+  }
   return res.json({
     daGui: true,
     nguoiNhanId: quyet.nguoiNhanId,
     payload,
-    trangThai: TC.trangThaiGiaoNhan({ endpointOk: false, coSuKienMo: false }),
+    trangThai: TC.trangThaiGiaoNhan({ endpointOk, coSuKienMo: false }),
   });
 });
 
@@ -1546,16 +1581,27 @@ app.post('/api/detect/canh-bao', async (req, res, next) => {
     if (!ketQua || typeof ketQua !== 'object') return res.status(400).json({ maLoi: 'THIEU_KET_QUA' });
     if (!vongTron || typeof vongTron !== 'object') return res.status(400).json({ maLoi: 'THIEU_VONG_TRON' });
 
+    let taiKhoanXacThuc = null;
+    try {
+      taiKhoanXacThuc = await KP.docPhien(req.headers.authorization);
+    } catch {
+      taiKhoanXacThuc = null;
+    }
+    const kho = await KP.khoChung();
+    khoCanhBao.ganKho(kho);
+
     const ra = await CB.phatCanhBao({
       kq: ketQua,
       vongTron,
       kho: khoCanhBao,
-      /*
-       * Chưa cắm nhà cung cấp push ⇒ NÓI THẬT là không xác nhận được (§6.7),
-       * không giả lập thành công. Màn của bác sẽ hiện "chưa gửi được cho …",
-       * và đó là câu đúng.
-       */
-      guiPush: async () => ({ endpointOk: false, ma: 'CHUA_CAU_HINH_PUSH' }),
+      guiPush: (payloadNguoiThan, nguoiNhanId) => guiPushHaiPhia({
+        kho,
+        nguoiNhanId,
+        payloadNguoiThan,
+        guiThat: req.app.get('guiPushThay') || guiThatWebPush,
+        guiThatNative: req.app.get('guiNativeThay') || guiThatFcmV1,
+      }),
+      chuTaiKhoanId: taiKhoanXacThuc || null,
       tenNguoiCaoTuoi,
       tenNguoiThan,
       chiaSeNoiDung,
@@ -1564,6 +1610,43 @@ app.post('/api/detect/canh-bao', async (req, res, next) => {
     });
     return res.json(ra);
   } catch (e) { return next(e); }
+});
+
+/**
+ * GET /api/detect/canh-bao/:id — màn Guardian đọc chi tiết tối thiểu của cảnh báo hai phía (`cb_...`).
+ * §6.9 & §9.8: chỉ chủ tài khoản, người nhận cảnh báo hoặc con cháu đang trong vòng ghép mới đọc được;
+ * người lạ / người đã bị thu hồi nhận 404. Khi người thân mở, tự ghi nhận `da_mo` (§9.4).
+ */
+app.get('/api/detect/canh-bao/:id', canPhien, chanDoc, async (req, res) => {
+  const kho = await KP.khoChung();
+  await khoCanhBao.taiTuKho(kho);
+  const banGhi = khoCanhBao.lay(req.params.id);
+  if (!banGhi) return res.status(404).json({ maLoi: 'KHONG_CO_CANH_BAO' });
+
+  const laChu = Boolean(banGhi.chuTaiKhoanId && banGhi.chuTaiKhoanId === req.taiKhoanId);
+  const dsGhep = banGhi.chuTaiKhoanId ? await KP.danhSachDaGhep(banGhi.chuTaiKhoanId) : [];
+  const laConDaGhep = dsGhep.includes(req.taiKhoanId);
+  const laNguoiNhanKhongTaiKhoan = Boolean(!banGhi.chuTaiKhoanId && banGhi.nguoiThanId === req.taiKhoanId);
+
+  if (!laChu && !laConDaGhep && !laNguoiNhanKhongTaiKhoan) {
+    return res.status(404).json({ maLoi: 'KHONG_CO_CANH_BAO' });
+  }
+
+  if (!laChu && !banGhi.nguoiThanDaMo) {
+    CB.ghiNhanMo(khoCanhBao, banGhi.id, Date.now());
+  }
+
+  let tenBoMe = null;
+  if (banGhi.chuTaiKhoanId) {
+    const hs = await TK.layHoSo(kho, banGhi.chuTaiKhoanId).catch(() => null);
+    tenBoMe = hs?.ten || null;
+  }
+  const capNhat = khoCanhBao.lay(banGhi.id) || banGhi;
+  return res.json({
+    ...CB.tinhTrangChoNguoiThan(capNhat),
+    ketQua: capNhat.ketQua || 'chua_ro',
+    tenBoMe,
+  });
 });
 
 /** Ghi hành vi trên một cảnh báo. Đây là dữ liệu hiệu chỉnh ngưỡng (§4.6). */
@@ -1612,22 +1695,26 @@ app.get('/api/dien-tap/kich-ban/:ma/giai-thich', chanDoc, (req, res) => {
   }
 });
 
-/** GET /api/bao-cao-tuan — gửi KỂ CẢ tuần không có sự kiện gì. */
-app.get('/api/bao-cao-tuan', chanDoc, (req, res) => {
+/** GET /api/bao-cao-tuan — gửi KỂ CẢ tuần không có sự kiện gì. Cô lập theo phiên tài khoản nếu có. */
+app.get('/api/bao-cao-tuan', chanDoc, async (req, res) => {
   const den = Date.now();
   const ky = BCT.kyBaoCao(req.query.tanSuat || 'tuan', den);
   if (!ky) return res.json({ gui: false, lyDo: 'nguoi_than_da_tat' });
 
+  let chuTaiKhoanId = null;
+  try {
+    chuTaiKhoanId = (await KP.docPhien(req.headers.authorization)) || null;
+  } catch {
+    chuTaiKhoanId = null;
+  }
+
   return res.json(BCT.dungBaoCaoTuan({
     ...ky,
-    canhBao: khoCanhBao.trongKhoang(ky.tu, ky.den),
+    canhBao: khoCanhBao.trongKhoang(ky.tu, ky.den, chuTaiKhoanId),
     soLuotQuet,
-    luotDienTap: khoDienTap.tatCa().filter((l) => l.guiLuc >= ky.tu && l.guiLuc < ky.den),
-    /*
-     * §4.3 — trạng thái hệ thống ĐỂ TRỐNG khi máy chủ không đo được. Chỉ lớp
-     * Android biết quyền đọc thông báo còn hiệu lực hay không; máy chủ đoán hộ
-     * là biến "chưa đo được" thành "vẫn tốt", đúng lỗi §4.3.
-     */
+    luotDienTap: khoDienTap.tatCa().filter((l) =>
+      l.guiLuc >= ky.tu && l.guiLuc < ky.den && (chuTaiKhoanId ? l.nguoiId === chuTaiKhoanId : true)
+    ),
     trangThaiHeThong: { phienBanLuat: boLuat().phienBan },
   }));
 });
@@ -1810,6 +1897,18 @@ app.post('/api/doc-to', chanDocTo, async (req, res) => {
 });
 
 /**
+ * ─────────────────── THƯ KÝ NGHE MÁY HỘ (ROUTER TÁCH MÔ-ĐUN, CÔ LẬP PHIÊN) ───────────────────
+ */
+app.use('/api/thu-ky', taoRouterThuKy({
+  KP,
+  TK,
+  chanDoc,
+  chanPhanTich,
+  guiPushHaiPhia,
+  guiThatFcmV1,
+}));
+
+/**
  * ─────────────────── THÔNG BÁO ĐẨY ───────────────────
  *
  * ⚠️ §11 — KHÔNG BAO GIỜ NÓI "ĐÃ GỬI CHO NGƯỜI THÂN" KHI CHƯA XÁC NHẬN ĐƯỢC.
@@ -1845,9 +1944,8 @@ app.post('/api/push/dang-ky', chanDoc, async (req, res) => {
     const tho = req.body?.dangKy;
     const laNative = tho?.loai === LOAI_DANG_KY.native;
     const dk = laNative ? chuanHoaDangKyNative(tho) : chuanHoaDangKy(tho);
-    const kho = await moKho();
-    // Khoá theo endpoint (web) hoặc token (native): cùng một máy đăng ký lại thì
-    // ghi đè, không nhân bản.
+    // Dùng chung một thực thể kho duy nhất `KP.khoChung()` (tránh tách hai Map khi chạy bộ nhớ tạm).
+    const kho = await KP.khoChung();
     await kho.luu(BANG_PUSH, laNative ? dk.token : dk.endpoint, dk);
     return res.json({ daDangKy: true });
   } catch (e) {
@@ -1966,7 +2064,9 @@ function taoServer(cong = CONG) {
  */
 async function khoiDongTuVung() {
   try {
-    const n = await TV.napLai(await KP.khoChung());
+    const kho = await KP.khoChung();
+    await khoCanhBao.taiTuKho(kho);
+    const n = await TV.napLai(kho);
     console.log(`[tu-vung] nạp ${n} mẫu đã duyệt`);
   } catch (e) {
     console.error('[tu-vung] không nạp được:', e?.message);

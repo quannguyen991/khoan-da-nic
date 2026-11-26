@@ -51,7 +51,7 @@ Hai nguyên tắc không đổi:
 
 ## Giới hạn, nói thẳng
 
-- Cảnh báo **chưa gửi tới được máy người thân**. App giúp bác tự gọi.
+- Cảnh báo tới máy người thân đi qua Web Push (bản Android có thêm đường FCM), **chỉ khi bác đã tự đặt quy tắc gia đình**; chưa đặt thì bác báo bằng một chạm. Thông báo đã đẩy đi **không có nghĩa người thân đã đọc**, và cần máy chủ đã cấu hình khoá VAPID/FCM.
 - App **không chặn được** cuộc gọi hay giao dịch ngân hàng.
 - App **không lấy lại được** tiền đã chuyển, chỉ giúp làm các bước tăng khả năng xử lý.
 - Phần AI cần mạng. Mất mạng thì phần luật vẫn chạy và kết quả nói rõ lượt này không có AI đọc.

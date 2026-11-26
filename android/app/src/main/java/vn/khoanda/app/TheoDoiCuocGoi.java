@@ -98,6 +98,8 @@ public class TheoDoiCuocGoi extends Service {
     private Runnable hen;
     /** Nhịp bảo vệ mỗi 6 giờ (23/9/2026) — chỉ gửi khi bác đã bật, xem NhipBaoVe. */
     private Runnable nhip;
+    /** Nhịp kiểm tra app đang mở bằng UsageStatsManager (F3 Co-Pilot) mỗi 5 giây trên máy. */
+    private Runnable nhipGiamSatApp;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -121,6 +123,7 @@ public class TheoDoiCuocGoi extends Service {
         }
         batDauNghe();
         dangKyNhanCaiApp();
+        henGiamSatApp();
     }
 
     /*
@@ -173,6 +176,7 @@ public class TheoDoiCuocGoi extends Service {
     public void onDestroy() {
         huyHen();
         huyNhipBaoVe();
+        huyGiamSatApp();
         if (nhanCaiApp != null) {
             try { unregisterReceiver(nhanCaiApp); } catch (Throwable t) { /* đã gỡ */ }
             nhanCaiApp = null;
@@ -218,6 +222,26 @@ public class TheoDoiCuocGoi extends Service {
 
     private void huyNhipBaoVe() {
         if (nhip != null) { tay.removeCallbacks(nhip); nhip = null; }
+    }
+
+    private void henGiamSatApp() {
+        huyGiamSatApp();
+        nhipGiamSatApp = new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    if (GiamSatUngDung.daBatQuyen(TheoDoiCuocGoi.this)) {
+                        GiamSatUngDung.kiemTraNhip(TheoDoiCuocGoi.this);
+                    }
+                } catch (Throwable ignored) { }
+                tay.postDelayed(this, 5000L);
+            }
+        };
+        tay.postDelayed(nhipGiamSatApp, 5000L);
+    }
+
+    private void huyGiamSatApp() {
+        if (nhipGiamSatApp != null) { tay.removeCallbacks(nhipGiamSatApp); nhipGiamSatApp = null; }
     }
 
     private void batDauNghe() {

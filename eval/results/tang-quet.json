@@ -1,8 +1,8 @@
 {
   "metadata": {
-    "commitSha": "3d5ff58",
+    "commitSha": "89895f1",
     "boMau": "test/fixtures/tin-nhan",
-    "chayLuc": "2026-09-06T07:51:49.114Z",
+    "chayLuc": "2026-11-26T09:53:44.788Z",
     "khongGoiAi": true,
     "khongGoiMang": true
   },
@@ -20,10 +20,10 @@
     "baoOan": []
   },
   "boLon": {
-    "batDuoc": 0.266839378238342,
-    "precisionCao": 0.8867924528301887,
-    "baoDoNhamTrenTinLanh": 0.06486486486486487,
-    "vuotTranTinLanh": 0.12432432432432433,
+    "batDuoc": 0.344559585492228,
+    "precisionCao": 0.968503937007874,
+    "baoDoNhamTrenTinLanh": 0.021621621621621623,
+    "vuotTranTinLanh": 0.08648648648648649,
     "soMau": {
       "nguyHiem": 386,
       "lanh": 185,

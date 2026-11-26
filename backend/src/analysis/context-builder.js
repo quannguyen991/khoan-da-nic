@@ -533,7 +533,9 @@ const KHUNG_GIAO_DUC = new RegExp([
   '(lừa đảo )?chiếm đoạt[^.]{0,20}(\\d|tiền|tài sản|số tiền)',
   // ⚠️ KHÔNG có "đã bị lừa" / "bị lừa mất": kẻ lừa "lấy lại tiền" nói đúng câu đó —
   // "hỗ trợ lấy lại số tiền anh chị ĐÃ BỊ LỪA". Đo 24/9: khung đó kéo ca này từ CAO xuống.
-  'có người[^.]{0,20}(giả danh|mạo danh|xưng là)',
+  '(có người|có kẻ|kẻ xấu|có số lạ)[^.]{0,24}(gọi\\s+|nhắn\\s+|gọi điện\\s+)?(giả danh|mạo danh|xưng là|tự xưng)',
+  '(nhóm|kênh|trang|ban)\\s+(cảnh báo|phòng chống)[^.]{0,24}(lừa đảo|tội phạm)',
+  '(tin nhắn|cuộc gọi|email|trang web)[^.]{0,90}(bắt|đòi|bảo|yêu cầu|dụ)[^.]{0,80}(là|dấu hiệu)\\s+lừa đảo',
   /*
    * 30/10/2026 — "Gần đây có HIỆN TƯỢNG giả danh công an, kiểm sát yêu cầu chuyển tiền vào tài khoản
    * tạm giữ": bài nhắc của chính quyền, rất hay được chuyển vào nhóm Zalo của người lớn tuổi. Đo: ra
@@ -574,6 +576,7 @@ const KHUNG_GIAO_DUC = new RegExp([
    */
   '(hồi|năm ngoái|tháng trước|tuần trước|hôm trước|dạo trước|trước đây)'
     + '[^.]{0,40}(bị|suýt|từng|đã)\\s*(một|có)?[^.]{0,16}(lừa|gọi|nhắn|xưng|giả danh)',
+  '^\\s*[^.,]{0,20}(kể là|kể lại là|kể lại)\\s+(hôm ấy|hôm đó|hôm qua|hôm trước|lúc đó|hồi đó)',
 
   // Cấu trúc ĐIỀU KIỆN — tương đương "if someone … hang up" của tiếng Anh.
   '\\bai\\s[^.]{0,60}thì[^.]{0,40}(lừa đảo|kẻ gian|đừng|không nên|hãy|dập máy|tắt máy|cúp máy)',

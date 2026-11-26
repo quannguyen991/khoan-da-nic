@@ -22,7 +22,7 @@
  *    worker chỉ hiển thị — nó KHÔNG tự soạn câu.
  */
 
-const PHIEN_BAN = 'khoan-da-v3';   // ⚠️ ĐỔI SỐ NÀY MỖI LẦN ĐỔI APP_SHELL, nếu không máy cũ giữ vỏ cũ.
+const PHIEN_BAN = 'khoan-da-v4';   // ⚠️ ĐỔI SỐ NÀY MỖI LẦN ĐỔI APP_SHELL, nếu không máy cũ giữ vỏ cũ.
 const KHO_VO = `vo-${PHIEN_BAN}`;
 
 /**

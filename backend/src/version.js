@@ -15,7 +15,27 @@ module.exports = {
                                //   FIN_ACCOUNT_OPENING_FOR_OTHERS, CRED_ID_BIOMETRIC_DOCS,
                                //   DEV_SIM_SWAP_ESIM (người dùng duyệt)
                                // 1.2.0 (24/9/2026): 64 — thêm MAN_HEALTH_MIRACLE_CLAIM
-  RULE_VERSION: '1.6.5',       // cap nhóm + 26 cộng hưởng + 1 suy ra + 20/45/69, Phụ lục B
+  RULE_VERSION: '1.6.12',      // cap nhóm + 26 cộng hưởng + 1 suy ra + 20/45/69, Phụ lục B
+                               // 1.6.12 (26/11/2026): mở rộng từ crawl 35 nhóm Facebook chống lừa đảo (vi-VN@1.3.5) —
+                               //   "card điện thoại", "mua hàng ảo / đặt thêm đơn hàng để rút", "thu hồi vốn bị treo",
+                               //   "chỉ cho chỗ lấy lại tiền", "đóng phí thông quan nhận quà".
+                               // 1.6.11 (26/11/2026): mở rộng trichUrlChiTiet nhận tên miền sát dấu ':' (:govdichvucongvn.com);
+                               //   bổ sung mẫu vi-VN@1.3.4 từ thu thập Facebook qua Chrome Debug (cài app qua file gửi kèm,
+                               //   cán bộ xã/địa chính đòi cập nhật VNeID, nạp tiền đặt đơn hàng hoa hồng, đóng phí xác minh nâng cấp rút vốn).
+                               // 1.6.10 (26/11/2026): sửa parity VI↔EN cho đóng phí giao lại vào STK (vi-VN)
+                               //   và các mẫu EN đa câu sai STK/cú pháp, chuyên viên hỗ trợ tài chính, shipper thu thêm cước (en-US).
+                               // 1.6.9 (26/11/2026): bổ sung shortener surl.vn + thương hiệu vietpost/facebook/apple/icloud
+                               //   trong url-analyzer.js; mẫu vi-VN/en-US cho shipper thu cước 35k, sai STK/cú pháp chuyển
+                               //   tiền đối ứng, Find My/Apple ID, tuyển dụng dự án hợp tác, cháy phòng & gói AI livestream.
+                               // 1.6.8 (26/11/2026): mở rộng mẫu cấu trúc từ tin thật `eval/bao-chi` (phạt nguội
+                               //   giao thông, vay online thu phí làm hồ sơ/bảo hiểm khoản vay, điện lực báo dùng
+                               //   điện cao bất thường + bấm phím, thu hồi tiền sàn đầu tư, nhiệm vụ like & share).
+                               // 1.6.7 (26/11/2026): chuẩn hoá kiểm chứng trích dẫn nối bằng "..." (đúng thứ tự,
+                               //   nguyên văn bản gốc), mở rộng khung cảnh báo "có số lạ gọi xưng là" và mẫu cấu
+                               //   trúc hủy phí tự động qua link / cọc giữ chỗ / gia công tại nhà / chống tiêm lệnh.
+                               // 1.6.6 (26/11/2026): mở rộng mẫu cố định thủ đoạn 2026 (vi-VN + en-US)
+                               //   và bổ sung khung cảnh báo cộng đồng / kể lại chuyện đã qua có lối thoát
+                               //   lệnh trực tiếp trong context-builder.js. Không đổi trọng số, ngưỡng, tổ hợp.
                                // 1.6.5 (21/11/2026): mẫu cố định từ bộ `eval/bao-chi` (31 tin lừa có thật
                                //   do báo chí trích) — phạt nguội, "nếu không phải bạn thì bấm link"/link
                                //   đổi mật khẩu, huỷ dịch vụ (nhận cả https://, www), doạ mất lương hưu,
@@ -61,7 +81,14 @@ module.exports = {
                                // 1.3.0 (2/9/2026): thêm extortion+transfer,
                                //   keepcall+fear+transfer, secrecy+isolation+transfer,
                                //   brandmismatch+pressure; coverstory+transfer 10->12
-  PROMPT_VERSION: '1.4.0',     // lời nhắc trong llm-extractor.js
+  PROMPT_VERSION: '1.4.2',     // lời nhắc trong llm-extractor.js
+                               // 1.4.2 (26/11/2026): bổ sung mô tả MAN_ANALYZER_INJECTION bị khuyết trong
+                               //   signal-descriptions.js và cấm rút gọn trích dẫn bằng "..." trong llm-extractor.js.
+                               // 1.4.1 (26/11/2026): làm rõ ranh giới chiều hành động & phủ định trong
+                               //   signal-descriptions.js và nguyên tắc ngữ cảnh trong llm-extractor.js
+                               //   (chỉnh cỡ chữ Trợ năng ≠ cấp quyền app, người gọi tự chia sẻ màn hình ≠
+                               //   đòi xem màn hình ngân hàng, "không cần chuyển lại" ≠ chuyển nhầm đòi trả,
+                               //   nhận tiền biếu bưu điện / COD kiểm hàng ≠ giao tiền mặt cho người lạ).
                                // 1.4.0 (25/9/2026): CRED_OTP_SHARE — tin CHỨA mã do
                                //   ngân hàng gửi không phải lời ĐÒI mã.
                                // 1.2.0 (24/9/2026): mô tả 4 tín hiệu mới; viết lại

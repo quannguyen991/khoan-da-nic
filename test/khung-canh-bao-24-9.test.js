@@ -182,3 +182,78 @@ test('⑤ quảng cáo sức khoẻ thần kỳ ra NGHI_NGO; lời khuyên phủ
     assert.ok(!cham(cau).maLyDo.includes('MAN_HEALTH_MIRACLE_CLAIM'), `bật oan: ${cau}`);
   }
 });
+
+// ── ⑥ Lượt 3 (rule 1.6.6): cảnh báo cộng đồng / kể lại quá khứ (hai chiều) ───
+
+test('⑥ cảnh báo nhóm khu dân cư và lời kể lại chuyện hôm ấy KHÔNG bật lệnh hành động', () => {
+  for (const cau of [
+    'Cảnh báo bà con: có kẻ gọi xưng là nhân viên bảo hiểm y tế bảo cập nhật thẻ qua đường link rồi xin mã OTP.',
+    'Nhóm cảnh báo lừa đảo phường 5: có người tự xưng công an bảo chuyển tiền vào tài khoản tạm giữ.',
+    'Tin nhắn nói bạn vi phạm giao thông và bắt nộp phạt qua đường link lạ có thể là lừa đảo.',
+    'Bà kể là hôm ấy nó bảo bà ra ngân hàng rút hết tiền đưa cho người tới lấy, may mà nhân viên ngân hàng giữ bà lại.',
+  ]) {
+    const r = cham(cau);
+    assert.strictEqual(r.nhan, 'CHUA_THAY', `${r.nhan} [${r.maLyDo}] — ${cau}`);
+  }
+  // Chiều ngược (§12): kẻ gian mượn đúng các khung trên rồi gài lệnh trực tiếp vẫn phải lên CAO.
+  for (const voBoc of [
+    'Có kẻ gọi xưng là bảo hiểm y tế, bác đọc mã OTP vừa gửi rồi chuyển 5 triệu vào tài khoản an toàn.',
+    'Nhóm cảnh báo lừa đảo thông báo, bác chuyển tiền vào tài khoản an toàn 1902xxxx ngay.',
+    'Tin nhắn đòi nộp phạt là lừa đảo, giờ bác chuyển tiền vào tài khoản an toàn bên em để xác minh.',
+    'Bà kể là hôm ấy suýt mất tiền, nên bác chuyển ngay 20 triệu vào tài khoản an toàn này nhé.',
+  ]) {
+    const r = cham(voBoc);
+    assert.strictEqual(r.nhan, 'CAO', `vỏ bọc lọt: ${r.nhan} [${r.maLyDo}] — ${voBoc}`);
+  }
+});
+
+// ── ⑦ Lượt 4 (rule 1.6.8): mở rộng từ tin thật `eval/bao-chi` (hai chiều) ─────
+
+test('⑦ mẫu thật báo chí: phạt nguội, vay online đóng bảo hiểm, điện cao bấm phím, thu hồi 100%, like&share', () => {
+  for (const cau of [
+    'Thông báo bạn đã vi phạm luật giao thông và bị phạt số tiền 50.000 VND. Vui lòng thanh toán khoản phạt này sớm.',
+    'Hồ sơ vay của chị đã được duyệt. Chị nộp tiền làm hồ sơ 300.000 vào tài khoản kế toán công ty để công ty xử lý và giải ngân.',
+    'Ví chưa được kích hoạt, chị đóng thêm 20% làm phí bảo hiểm cho khoản vay để kích hoạt ví và rút tiền về tài khoản.',
+    'Nếu bây giờ chị không đóng tiền bảo hiểm thì mình không rút tiền về tài khoản được.',
+    'Bạn đang sử dụng điện cao bất thường, chúng tôi sẽ cắt điện, vui lòng bấm số 9 để gặp nhân viên điện lực.',
+    'Thu hồi 100% tiền bị lừa, hỗ trợ lấy lại tiền từ sàn đầu tư.',
+  ]) {
+    const r = cham(cau);
+    assert.notStrictEqual(r.nhan, 'CHUA_THAY', `bỏ sót tin thật: [${r.maLyDo}] — ${cau}`);
+  }
+  const rTask = cham('Tham gia nhiệm vụ like và share video để nhận hoa hồng 100.000 đồng/giờ.');
+  assert.ok(rTask.maLyDo.includes('OFF_TASK_PREPAY') && rTask.maLyDo.includes('ID_EMPLOYER_JOB_IMPERSONATION'), `[${rTask.maLyDo}]`);
+  for (const lanh of [
+    'Cảnh sát giao thông khuyến cáo người dân cảnh giác tin nhắn giả mạo báo vi phạm luật giao thông.',
+    'Hóa đơn tiền điện tháng này của gia đình bác tăng cao hơn tháng trước, bác nhớ kiểm tra lại điều hòa nhé.',
+    'Chị ơi cho em thông tin liên hệ của bác bảo vệ để em gửi bưu phẩm nhé.',
+  ]) {
+    const r = cham(lanh);
+    assert.strictEqual(r.nhan, 'CHUA_THAY', `báo oan tin lành: ${r.nhan} [${r.maLyDo}] — ${lanh}`);
+  }
+});
+
+// ── ⑧ Lượt 5 (rule 1.6.11): thu thập Facebook qua Chrome Debug 9222 ──────────
+
+test('⑧ crawl Facebook 9222 (hai chiều): domain sau dấu hai chấm, cài app file gửi kèm, đặt đơn hoa hồng', () => {
+  const rPhat = cham('Thong bao : Quy khach con mot khoan phat giao thong chua duoc thanh toan. Vui long thanh toan som de tranh cac khoan phi phat phat sinh :govdichvucongvn.com');
+  assert.strictEqual(rPhat.nhan, 'CAO', `phat nguoi domain sau dau ':': [${rPhat.maLyDo}]`);
+  assert.ok(rPhat.maLyDo.includes('WEB_BRAND_DOMAIN_MISMATCH'), `[${rPhat.maLyDo}]`);
+
+  const rDatVneid = cham('Cán bộ xã gọi điện yêu cầu cài ứng dụng qua file gửi kèm để cấp quyền sử dụng đất trên VNeID, bác bấm vào link cập nhật ngay hôm nay.');
+  assert.strictEqual(rDatVneid.nhan, 'CAO', `can bo xa VNeID file gui kem: [${rDatVneid.maLyDo}]`);
+  assert.ok(rDatVneid.maLyDo.includes('DEV_INSTALL_APK_UNKNOWN') && rDatVneid.maLyDo.includes('ID_AUTHORITY_IMPERSONATION'), `[${rDatVneid.maLyDo}]`);
+
+  const rDonHoaHong = cham('Em tham gia nghe nhạc online kiếm tiền, nạp tiền đặt đơn hàng hưởng hoa hồng rồi đóng phí xác minh nâng cấp tài khoản để rút vốn.');
+  assert.notStrictEqual(rDonHoaHong.nhan, 'CHUA_THAY', `[${rDonHoaHong.maLyDo}]`);
+  assert.ok(rDonHoaHong.maLyDo.includes('OFF_TASK_PREPAY') && rDonHoaHong.maLyDo.includes('OFF_ADVANCE_FEE'), `[${rDonHoaHong.maLyDo}]`);
+
+  for (const lanh of [
+    'Cảnh báo lừa đảo: Tuyệt đối không cung cấp mã OTP, mật khẩu ngân hàng hay chuyển khoản trước cho người lạ tự xưng shipper hoặc cán bộ công an hướng dẫn qua Zalo.',
+    'Thông báo: Cán bộ xã mời các hộ gia đình mang sổ hộ khẩu ra hội trường thôn vào 8h30 sáng mai họp định kỳ.',
+    'Lưu ý từ cửa hàng: Quý khách chỉ thanh toán khi đã nhận hàng tận tay, không quét mã QR hoặc bấm vào đường link lạ.',
+  ]) {
+    const r = cham(lanh);
+    assert.strictEqual(r.nhan, 'CHUA_THAY', `báo oan tin lành Facebook: ${r.nhan} [${r.maLyDo}] — ${lanh}`);
+  }
+});

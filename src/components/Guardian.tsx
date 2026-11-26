@@ -21,9 +21,11 @@ import { api } from '../api-goc';
 import {
   dangNhap as dangNhapTaiKhoan, type HoSo as HoSoTaiKhoan, docPhien, docVongGhep, nhapMaGhep, LoiTaiKhoan,
   docSuKienBaoDong, baoConDaGoi, type SuKienBaoDong,
+  docCanhBaoHaiPhia, ghiHanhDongCanhBaoHaiPhia, type ChiTietCanhBaoHaiPhia,
+  docCuocGoiThuKyBoMe, danhDauCuocGoiThuKyBoMe, type CuocGoiThuKyBoMe,
 } from '../tai-khoan';
 import { batNhanCanhBao, dangNhanTrenMayNay, type MaBatNhan } from '../lib/nhan-canh-bao';
-import { MA_TAI_KHOAN } from '../catalog';
+import { MA_TAI_KHOAN, THU_KY_UI } from '../catalog';
 import { Lang, NHAN, CHUA_KIEM, MA_LY_DO, tra, traNhieu } from '../catalog';
 import { ThuTinhHuong } from './ThuTinhHuong';
 import { KyChiaKhoa } from './KyChiaKhoa';
@@ -411,23 +413,84 @@ export function GuardianView({
   const [suKienId] = useState<string | null>(() => {
     try { return new URLSearchParams(window.location.search).get('canhBao'); } catch { return null; }
   });
+  const laCanhBaoHaiPhia = Boolean(suKienId && suKienId.startsWith('cb_'));
   const [suKien, setSuKien] = useState<SuKienBaoDong | null>(null);
+  const [canhBaoHaiPhia, setCanhBaoHaiPhia] = useState<ChiTietCanhBaoHaiPhia | null>(null);
+  const [daBaoNham, setDaBaoNham] = useState(false);
   const [loiSuKien, setLoiSuKien] = useState(false);
+  const [cuocGoiThuKy, setCuocGoiThuKy] = useState<CuocGoiThuKyBoMe[]>([]);
+
   useEffect(() => {
     if (!suKienId || !coPhien) return;
     let huy = false;
-    const tai = () => docSuKienBaoDong(suKienId)
-      .then((s) => { if (!huy) { setSuKien(s); setLoiSuKien(false); } })
-      .catch(() => { if (!huy) setLoiSuKien(true); });
+    const tai = () => {
+      if (laCanhBaoHaiPhia) {
+        docCanhBaoHaiPhia(suKienId)
+          .then((cb) => {
+            if (!huy) {
+              setCanhBaoHaiPhia(cb);
+              setSuKien({
+                id: cb.canhBaoId,
+                loaiSuKien: cb.nhan === 'NGHI_NGO' ? 'ket_qua_nghi_ngo' : 'ket_qua_kiem',
+                nhan: cb.nhan,
+                hoKichBan: cb.hoKichBan,
+                luc: cb.thoiDiem,
+                tenBoMe: cb.tenBoMe || '',
+                conDaGoi: false,
+                hanhDong: cb.nguoiCaoTuoiDaLam
+                  .filter((m) => m !== 'chua_thao_tac')
+                  .map((m) => ({
+                    ma: m === 'da_bam_goi_nguoi_than' ? 'bam_goi_nguoi_than' : m === 'da_bam_toi_on' ? 'toi_on' : m,
+                    luc: cb.thoiDiem,
+                  })),
+              });
+              if (cb.ketQua === 'bao_nham') setDaBaoNham(true);
+              setLoiSuKien(false);
+            }
+          })
+          .catch(() => { if (!huy) setLoiSuKien(true); });
+      } else {
+        docSuKienBaoDong(suKienId)
+          .then((s) => { if (!huy) { setSuKien(s); setLoiSuKien(false); } })
+          .catch(() => { if (!huy) setLoiSuKien(true); });
+      }
+    };
     void tai();
     // Bố mẹ bấm gì thì con thấy trong vài giây — hỏi lại mỗi 5 giây khi thẻ còn mở.
     const id = window.setInterval(() => { void tai(); }, 5000);
     return () => { huy = true; window.clearInterval(id); };
-  }, [suKienId, coPhien]);
+  }, [suKienId, coPhien, laCanhBaoHaiPhia]);
+
+  useEffect(() => {
+    if (!laThat || !coPhien) return;
+    let huy = false;
+    const taiCuocGoi = () => {
+      docCuocGoiThuKyBoMe()
+        .then((d) => { if (!huy && Array.isArray(d.cuocGoi)) setCuocGoiThuKy(d.cuocGoi); })
+        .catch(() => undefined);
+    };
+    taiCuocGoi();
+    const id = window.setInterval(taiCuocGoi, 15_000);
+    return () => { huy = true; window.clearInterval(id); };
+  }, [laThat, coPhien]);
+
   /** Ghi "con đã gọi" TRƯỚC khi mở trình gọi — để bậc leo thang không báo thừa cho người khác. */
   const goiNgayTuCanhBao = () => {
-    if (suKienId) void baoConDaGoi(suKienId).catch(() => undefined);
+    if (suKienId) {
+      if (laCanhBaoHaiPhia) void ghiHanhDongCanhBaoHaiPhia(suKienId, 'goi').catch(() => undefined);
+      else void baoConDaGoi(suKienId).catch(() => undefined);
+    }
     if (parentData?.phone) window.open(`tel:${parentData.phone.replace(/\s/g, '')}`, '_self');
+  };
+
+  const danhDauBaoNhamHaiPhia = async () => {
+    if (!suKienId || !laCanhBaoHaiPhia) return;
+    try {
+      await ghiHanhDongCanhBaoHaiPhia(suKienId, 'ket-qua', { ketQua: 'bao_nham', boi: 'nguoi_than' });
+      setDaBaoNham(true);
+    } catch {
+      // §6.7
+    }
   };
 
   const [guardianEvents, setGuardianEvents] = useState<GuardianEvent[]>(() => {
@@ -564,16 +627,35 @@ export function GuardianView({
       <TraLoiHoiCon t={tr} coPhien={coPhien} soBoMe={laThat ? parentData?.phone : undefined} />
       <KyChiaKhoa t={tr} coPhien={coPhien} soBoMe={laThat ? parentData?.phone : undefined} />
       {suKienId && (
-        <TheCanhBaoCon
-          t={tr}
-          lang={lang === 'en' ? 'en' : 'vi'}
-          tenBoMe={suKien?.tenBoMe || parentData?.name || tr('Bố mẹ')}
-          loaiSuKien={suKien?.loaiSuKien}
-          hanhDong={suKien ? suKien.hanhDong : null}
-          soBoMe={parentData?.phone}
-          onGoiNgay={goiNgayTuCanhBao}
-          loiTai={loiSuKien}
-        />
+        <div className="flex flex-col gap-2">
+          <TheCanhBaoCon
+            t={tr}
+            lang={lang === 'en' ? 'en' : 'vi'}
+            tenBoMe={suKien?.tenBoMe || parentData?.name || tr('Bố mẹ')}
+            loaiSuKien={suKien?.loaiSuKien}
+            hanhDong={suKien ? suKien.hanhDong : null}
+            soBoMe={parentData?.phone}
+            onGoiNgay={goiNgayTuCanhBao}
+            loiTai={loiSuKien}
+          />
+          {laCanhBaoHaiPhia && canhBaoHaiPhia && (
+            <div className="flex items-center justify-end">
+              {daBaoNham ? (
+                <span className="text-[14px] font-semibold text-slate-600 px-2">
+                  {tra(THU_KY_UI, 'GD_DA_GHI_BAO_NHAM', lang)}
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => { void danhDauBaoNhamHaiPhia(); }}
+                  className="min-h-[52px] px-4 rounded-2xl bg-white border border-slate-300 text-slate-700 font-bold text-[14px] hover:bg-slate-50"
+                >
+                  {tra(THU_KY_UI, 'GD_BAO_NHAM_NUT', lang)}
+                </button>
+              )}
+            </div>
+          )}
+        </div>
       )}
 
       {/* Toast Notification when reminder sent */}
@@ -919,7 +1001,7 @@ export function GuardianView({
             Rỗng là một KẾT QUẢ và nó trung thực. Khi có đường dữ liệu thật thì
             đổ vào đây, đừng lấp chỗ trống bằng ví dụ.
           */}
-          {guardianEvents.length === 0 ? (
+          {guardianEvents.length === 0 && cuocGoiThuKy.length === 0 ? (
             <div className="flex flex-col items-center justify-center text-center py-8 px-4 bg-slate-50 border border-dashed border-slate-300 rounded-2xl">
               <EyeOff size={28} className="text-slate-400 mb-2" />
               <p className="text-[16px] font-bold text-slate-700 mb-1">{tr('Chưa có thông báo từ máy bố mẹ')}</p>
@@ -927,6 +1009,54 @@ export function GuardianView({
             </div>
           ) : (
             <div className="flex flex-col gap-2.5">
+              {cuocGoiThuKy.slice(0, 4).map((cg) => (
+                <div
+                  key={`tk-${cg.id}`}
+                  className={`rounded-2xl px-3.5 py-3 border ${
+                    cg.nhanRuiRo === 'CAO' || cg.trangThaiPhanLoai === 'khan_cap'
+                      ? 'bg-red-50 border-red-200'
+                      : 'bg-slate-50 border-slate-200'
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <p className="font-bold text-[15px] text-slate-900 leading-snug">
+                      {tra(THU_KY_UI, 'GD_TIEU_DE_CUOC_GOI', lang)} · {cg.soNguoiGoi}
+                    </p>
+                    <span className="text-[14px] font-semibold text-slate-500 shrink-0">
+                      {new Date(cg.batDauLuc).toLocaleTimeString(lang === 'en' ? 'en-GB' : 'vi-VN', { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
+                  <p className="text-[14px] text-slate-700 leading-snug mt-1">{cg.summary}</p>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        void danhDauCuocGoiThuKyBoMe(cg.chuTaiKhoanId, cg.id, 'dang_ngo').then(() => docCuocGoiThuKyBoMe().then((d) => setCuocGoiThuKy(d.cuocGoi)));
+                      }}
+                      className={`min-h-[52px] px-3 rounded-xl text-[14px] font-bold border ${
+                        cg.danhDau === 'dang_ngo'
+                          ? 'bg-red-700 text-white border-red-700'
+                          : 'bg-white text-slate-700 border-slate-300'
+                      }`}
+                    >
+                      {tra(THU_KY_UI, 'DANH_DAU_DANG_NGO', lang)}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        void danhDauCuocGoiThuKyBoMe(cg.chuTaiKhoanId, cg.id, 'hop_le').then(() => docCuocGoiThuKyBoMe().then((d) => setCuocGoiThuKy(d.cuocGoi)));
+                      }}
+                      className={`min-h-[52px] px-3 rounded-xl text-[14px] font-bold border ${
+                        cg.danhDau === 'hop_le'
+                          ? 'bg-indigo-700 text-white border-indigo-700'
+                          : 'bg-white text-slate-700 border-slate-300'
+                      }`}
+                    >
+                      {tra(THU_KY_UI, 'DA_KIEM_CHUNG', lang)}
+                    </button>
+                  </div>
+                </div>
+              ))}
               {guardianEvents.slice(0, 4).map((event) => (
                 <div key={event.id} className={`rounded-2xl px-3.5 py-3 border ${event.kind === 'warning' ? 'bg-red-50 border-red-200' : 'bg-slate-50 border-slate-200'}`}>
                   <div className="flex items-start justify-between gap-3">

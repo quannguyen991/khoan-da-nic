@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
     <application
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
@@ -192,6 +193,20 @@
             <property
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
                 android:value="Nhac nguoi cao tuoi khi mot cuoc goi keo dai bat thuong. Khong ghi am, khong doc nhat ky cuoc goi, khong doc so dien thoai." />
+        </service>
+
+        <!-- Local DNS-only VPN: chi loc truy van ten miền cuc bo tren may, khong thu thap luu luong. -->
+        <service
+            android:name=".VpnLocDns"
+            android:permission="android.permission.BIND_VPN_SERVICE"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <intent-filter>
+                <action android:name="android.net.VpnService" />
+            </intent-filter>
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Loc truy van ten mien DNS cuc bo tren may, khong gui luu luong ra ngoai." />
         </service>
 
         <receiver
@@ -406,6 +421,16 @@
       ⚠️ Khai báo `telephony` không bắt buộc: máy bảng không có SIM vẫn cài được.
     -->
     <uses-permission android:name="android.permission.SEND_SMS" />
+
+    <!--
+      USAGE ACCESS (F3 In-Call Banking Co-Pilot) & NFC (F1).
+      PACKAGE_USAGE_STATS la quyen he thong do nguoi dung tu bat trong Cai dat; KHONG dung
+      AccessibilityService. NFC chi de doc trang thai bat/tat cua chip NFC (NfcAdapter.isEnabled()).
+    -->
+    <uses-permission
+        android:name="android.permission.PACKAGE_USAGE_STATS"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.NFC" />
 
     <!--
       ⚠️ CỐ Ý KHÔNG XIN, và đừng thêm vào:

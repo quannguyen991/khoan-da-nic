@@ -57,7 +57,7 @@ import { translations, Lang, t as translate } from './i18n';
  * Backend trả ENUM và MÃ; chữ tiếng Việt / tiếng Anh nằm ở `catalog.ts`, và
  * CHỈ ở đó. Hệ quả cố ý: đổi ngôn ngữ KHÔNG THỂ làm đổi kết luận.
  */
-import { NHAN, MA_LY_DO, CHUA_KIEM, CHUA_LAY_TIN, NOI_CHAY_AI, tra, traNhieu, CHU_NATIVE , TRANG_THAI_MAY, NHAC_CUOC_GOI, MA_TAI_KHOAN, KHUNG_KICH_BAN, KET_KICH_BAN, MA_BUOC, KHUNG_PHUC_HOI, BUOC_PHUC_HOI, CANH_BAO_PHUC_HOI, QUY_TAC_KHUNG, MAN_HO_SO, MAN_RA_DA, DOI_PHAN_UNG, SO_NGAN_HANG } from './catalog';
+import { NHAN, MA_LY_DO, CHUA_KIEM, CHUA_LAY_TIN, NOI_CHAY_AI, tra, traNhieu, CHU_NATIVE , TRANG_THAI_MAY, NHAC_CUOC_GOI, MA_TAI_KHOAN, KHUNG_KICH_BAN, KET_KICH_BAN, MA_BUOC, KHUNG_PHUC_HOI, BUOC_PHUC_HOI, CANH_BAO_PHUC_HOI, QUY_TAC_KHUNG, MAN_HO_SO, MAN_RA_DA, DOI_PHAN_UNG, SO_NGAN_HANG, VIETQR_UI } from './catalog';
 import { api } from './api-goc';
 import {
   dangKy as dangKyTaiKhoan, dangNhap as dangNhapTaiKhoan,
@@ -76,9 +76,12 @@ import {
   napChuCuocGoi, trangThaiTheoDoiCuocGoi, datTheoDoiCuocGoi, docTo, dungDocTo, dayAppXuong,
   goiDienThoai, guiSms,
   batBongBong, tatBongBong, trangThaiBongBong,
-  ngheCuChiCuuGiu,
-  type QuyenNative, type TrangThaiMay,
+  ngheCuChiCuuGiu, ocrAnhTaiMay,
+  trangThaiAppTinNhanMacDinh, quyenUsageStats, xinQuyenUsageStats,
+  kiemTraNfc, trangThaiVpnDns, batVpnDns, tatVpnDns,
+  type QuyenNative, type TrangThaiMay, type TrangThaiSmsMacDinh,
 } from './native';
+import { sangLocTinDenTaiMay } from './lib/tang-0-cuc-bo';
 import { TrungTamBaoVe, ManCuuGiu } from './components/TrungTamBaoVe';
 import { BanPhimKhoanDa } from './components/BanPhimKhoanDa';
 import { GuardianIntroView, GuardianAuthView, GuardianView } from './components/Guardian';
@@ -90,6 +93,7 @@ import { CanhBaoChinhThuc } from './components/CanhBaoChinhThuc';
 import { TroLyNoi } from './components/TroLyNoi';
 import { TroLyPhanHoiTaiCho } from './components/TroLyPhanHoiTaiCho';
 import { QuaCauNoi } from './components/QuaCauNoi';
+import { phanTichVietQR, type KetQuaVietQR } from './lib/vietqr-inspector';
 import {
   docVongTron, vongTronRong, chonQuyTac, duocHienQuyTac, thuTuGoi, tinhHuongGoi, vaiChoTinhHuong, nguoiGoiDauTien,
 } from './lib/vong-tron-gia-dinh';
@@ -98,8 +102,6 @@ import { ManSoNganHang, DanhSachSoNganHang } from './components/SoNganHang';
 import { DaiTheoDoi72Gio, ManTheoDoi72Gio, chuNhac72Gio } from './components/TheoDoi72Gio';
 import { batDauTheoDoi } from './lib/theo-doi-72-gio';
 import { ManHoSoVuViec, ManRaDaThuDoan } from './components/HoSoVaRaDa';
-import { CongDongCanhGiac } from './components/CongDongCanhGiac';
-import { GopY } from './components/GopY';
 import { ManGhepConChau } from './components/GhepConChau';
 import { ManConCaiGiup } from './components/ConCaiGiup';
 import { dongBoNhipBaoVe } from './lib/nhip-bao-ve';
@@ -107,7 +109,6 @@ import {
   kiemVuViec, gopVuViec, khongGopVuViec, ghepKetQuaVuViec, type CauHoiGopVuViec,
 } from './lib/vu-viec';
 import { ManChiaKhoa } from './components/ChiaKhoaThuHai';
-import { ManNganHangMoPhong } from './components/NganHangMoPhong';
 import { hopNhatNguoiThan } from './lib/hop-nhat-nguoi-than';
 import { useLoiNhanCon, usePhatMotLan } from './lib/loi-nhan-giong';
 import { batDauDo, ketThucDo, ghiLuot } from './lib/do-thoi-gian-toi-nguoi-that';
@@ -176,6 +177,26 @@ const LearnView = lazy<React.ComponentType<PropsBaiHoc>>(() => import('./compone
   .then((m) => ({ default: m.LearnView as React.ComponentType<PropsBaiHoc> }))
   .catch(() => ({ default: KhongTaiDuocBaiHoc as React.ComponentType<PropsBaiHoc> })));
 
+type PropsThuKy = { onVeTrangChu: () => void; coThanhDuoi?: boolean; lang?: Lang };
+const ThuKyNgheMay = lazy<React.ComponentType<PropsThuKy>>(() => import('./components/ThuKyNgheMay')
+  .then((m) => ({ default: m.ThuKyNgheMay as React.ComponentType<PropsThuKy> }))
+  .catch(() => ({
+    default: (({ onVeTrangChu }: PropsThuKy) => (
+      <KhongTaiDuocBaiHoc t={(s: string) => s} setView={() => onVeTrangChu()} />
+    )) as React.ComponentType<PropsThuKy>,
+  })));
+
+type PropsManPhu = { t: any; setView: (v: ViewState) => void };
+const CongDongCanhGiac = lazy<React.ComponentType<PropsManPhu>>(() => import('./components/CongDongCanhGiac')
+  .then((m) => ({ default: m.CongDongCanhGiac as React.ComponentType<PropsManPhu> }))
+  .catch(() => ({ default: KhongTaiDuocBaiHoc as React.ComponentType<PropsManPhu> })));
+const GopY = lazy<React.ComponentType<PropsManPhu>>(() => import('./components/GopY')
+  .then((m) => ({ default: m.GopY as React.ComponentType<PropsManPhu> }))
+  .catch(() => ({ default: KhongTaiDuocBaiHoc as React.ComponentType<PropsManPhu> })));
+const ManNganHangMoPhong = lazy<React.ComponentType<PropsManPhu>>(() => import('./components/NganHangMoPhong')
+  .then((m) => ({ default: m.ManNganHangMoPhong as React.ComponentType<PropsManPhu> }))
+  .catch(() => ({ default: KhongTaiDuocBaiHoc as React.ComponentType<PropsManPhu> })));
+
 function KhungTaiTre({ t, children }: { t: any; children: React.ReactNode }) {
   return (
     <Suspense
@@ -191,7 +212,7 @@ function KhungTaiTre({ t, children }: { t: any; children: React.ReactNode }) {
 }
 import { EMERGENCY_NUMBERS } from './data/so-khan-cap';
 
-export type ViewState = 'intro' | 'home' | 'voice' | 'phone' | 'link' | 'qr' | 'learn' | 'profile' | 'settings' | 'history' | 'family' | 'search' | 'login' | 'add_family' | 'warning' | 'guardian' | 'account' | 'privacy' | 'notifications' | 'device_data' | 'hoi_nhanh' | 'mat_khau_gia_dinh' | 'quy_tac_gia_dinh' | 'ho_so_vu_viec' | 'ra_da_thu_doan' | 'cong_dong' | 'doi_phan_ung' | 'so_ngan_hang' | 'theo_doi_72h' | 'tro_ly' | 'ghep_con_chau' | 'con_cai_giup' | 'chia_khoa' | 'ngan_hang_mo_phong' | 'trung_tam_bao_ve' | 'cuu_giu' | 'thoat_an_toan' | 'ban_phim' | 'gop_y';
+export type ViewState = 'intro' | 'home' | 'voice' | 'phone' | 'link' | 'qr' | 'learn' | 'profile' | 'settings' | 'history' | 'family' | 'search' | 'login' | 'add_family' | 'warning' | 'guardian' | 'account' | 'privacy' | 'notifications' | 'device_data' | 'hoi_nhanh' | 'mat_khau_gia_dinh' | 'quy_tac_gia_dinh' | 'ho_so_vu_viec' | 'ra_da_thu_doan' | 'cong_dong' | 'doi_phan_ung' | 'so_ngan_hang' | 'theo_doi_72h' | 'tro_ly' | 'ghep_con_chau' | 'con_cai_giup' | 'chia_khoa' | 'ngan_hang_mo_phong' | 'trung_tam_bao_ve' | 'cuu_giu' | 'thoat_an_toan' | 'ban_phim' | 'gop_y' | 'thu_ky';
 
 /**
  * MỘT NGƯỜI THÂN TRONG VÒNG TRÒN GIA ĐÌNH.
@@ -267,6 +288,8 @@ export interface KetQuaPhanTich {
    * kết quả đã xét CẢ VỤ. Giá trị là thời điểm của tin gần nhất trong vụ cũ.
    */
   daXetCaVu?: number;
+  /** Kết quả giải mã mã QR cục bộ (offline-first, jsQR + VietQR EMVCo). */
+  vietQr?: KetQuaVietQR | null;
   queryText?: string;
   queryImage?: string | null;
   /** Bác tự khai đã chuyển tiền / đọc mã — gửi lên máy chủ để BỘ LUẬT chọn màn. */
@@ -790,12 +813,65 @@ export default function App() {
     });
   };
 
+  const docQRTuAnhOffline = async (dataUrl: string): Promise<string | null> => {
+    if (typeof document === 'undefined' || typeof Image === 'undefined') return null;
+    let giaiMaQr: ((data: Uint8ClampedArray, w: number, h: number, opts?: any) => { data?: string } | null) | null = null;
+    try {
+      const mod = await import('jsqr');
+      giaiMaQr = mod.default;
+    } catch {
+      return null;
+    }
+    return new Promise((resolve) => {
+      try {
+        const img = new Image();
+        img.onload = () => {
+          try {
+            const nw = img.naturalWidth || img.width;
+            const nh = img.naturalHeight || img.height;
+            if (!nw || !nh) { resolve(null); return; }
+            const scale = Math.min(1, 1600 / Math.max(nw, nh));
+            const w = Math.max(1, Math.round(nw * scale));
+            const h = Math.max(1, Math.round(nh * scale));
+            const canvas = document.createElement('canvas');
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            if (!ctx || !giaiMaQr) { resolve(null); return; }
+            ctx.drawImage(img, 0, 0, w, h);
+            const imgData = ctx.getImageData(0, 0, w, h);
+            const code = giaiMaQr(imgData.data, w, h, { inversionAttempts: 'attemptBoth' });
+            resolve(code?.data ? code.data.trim() : null);
+          } catch {
+            resolve(null);
+          }
+        };
+        img.onerror = () => resolve(null);
+        img.src = dataUrl;
+      } catch {
+        resolve(null);
+      }
+    });
+  };
+
   const handleAnalyze = async (text: string, image?: string | null, trangThaiNguoiDung?: 'da_chuyen_hoac_doc_ma') => {
     if (!text.trim() && !image) return;
     setIsAnalyzing(true);
     setCauHoiVuViec(null);
     setBuocDangLam(image ? 'doc_anh' : 'doc_chu');
     let finalResult: any = null;
+    const qrRaw = image ? await docQRTuAnhOffline(image) : null;
+    const vietQr = qrRaw ? phanTichVietQR(qrRaw, lang) : null;
+    const qrChuoi = qrRaw ? qrRaw.slice(0, 6000) : undefined;
+    const ocrLocal = image && !text.trim() && !qrRaw ? await ocrAnhTaiMay(image) : null;
+    const vanBanOcr = ocrLocal?.docDuoc && ocrLocal.vanBan.trim() ? ocrLocal.vanBan.trim().slice(0, 5000) : '';
+    const vanBanGui = text.trim()
+      ? text
+      : vietQr?.url
+        ? vietQr.url
+        : qrRaw
+          ? `${qrRaw}\n[QR] ${vietQr?.tomTatChoBac || ''}`.trim()
+          : vanBanOcr;
 
     /*
      * ═════ TRẦN CHỜ: ẢNH ĐƯỢC CHỜ LÂU HƠN CHỮ — 21/8/2026 ═════
@@ -832,8 +908,9 @@ export default function App() {
          * backend biết là KHÔNG CÓ DỮ LIỆU chứ không phải "đã xem, máy sạch".
          */
         body: JSON.stringify({
-          vanBan: text || '',
+          vanBan: vanBanGui || '',
           anh: image || undefined,
+          qrChuoi,
           trangThaiMay: tomTatChoMayChu(mayCoUngDungLa),
           trangThaiNguoiDung,
         })
@@ -842,7 +919,7 @@ export default function App() {
         throw new Error(`Server returned ${res.status}`);
       }
       const data = await res.json();
-      finalResult = { ...data, queryText: text, queryImage: image, trangThaiNguoiDung };
+      finalResult = { ...data, queryText: text, queryImage: image, trangThaiNguoiDung, vietQr };
     } catch (err) {
       console.warn('Full AI route fallback to preliminary rule check:', err);
       try {
@@ -850,10 +927,10 @@ export default function App() {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           // Đường dự phòng PHẢI mang cùng trạng thái — thiếu nó thì sơ bộ ra màn khác kết quả cuối.
-          body: JSON.stringify({ vanBan: text || '', anh: image || undefined, trangThaiNguoiDung })
+          body: JSON.stringify({ vanBan: vanBanGui || '', anh: image || undefined, qrChuoi, trangThaiNguoiDung })
         });
         const data2 = await res2.json();
-        finalResult = { ...data2, queryText: text, queryImage: image, trangThaiNguoiDung };
+        finalResult = { ...data2, queryText: text, queryImage: image, trangThaiNguoiDung, vietQr };
       } catch (err2) {
         console.error(err2);
         /**
@@ -867,14 +944,21 @@ export default function App() {
          * Không có `nhan` ở đây là ĐÚNG: frontend không có quyền ra mức (§4.2).
          * Màn kết quả đọc `khongGoiDuocMayChu` và nói ra giới hạn đó.
          */
+        const tang0Offline = vanBanGui ? sangLocTinDenTaiMay(vanBanGui) : null;
         finalResult = {
+          ...(tang0Offline?.coDauHieu ? {
+            nhan: tang0Offline.nhanDeXuat,
+            canThiep: tang0Offline.canThiep,
+            hoKichBan: tang0Offline.hoKichBan,
+          } : {}),
           khongGoiDuocMayChu: true,
-          maLyDo: [],
-          daKiem: [],
+          maLyDo: tang0Offline?.coDauHieu ? tang0Offline.maLyDo : [],
+          daKiem: vanBanOcr ? ['anh_ocr'] : [],
           chuaKiem: ['khong_goi_duoc_may_chu'],
           aiDaChay: false,
           queryText: text,
           queryImage: image,
+          vietQr,
         };
       }
     } finally {
@@ -1097,10 +1181,11 @@ export default function App() {
           return;
         }
         setView(d.loiTat === 'dang-bi-goi' ? 'voice'
-          : d.loiTat === 'goi-nguoi-than' ? 'family'
-            // Lời nhắc 72 giờ trên Android — mở thẳng màn theo dõi, không phải trang con cháu.
-            : d.loiTat === 'theo-doi-72-gio' ? 'theo_doi_72h'
-              : 'guardian');
+          : d.loiTat === 'thu-ky-nghe-may' ? 'thu_ky'
+            : d.loiTat === 'goi-nguoi-than' ? 'family'
+              // Lời nhắc 72 giờ trên Android — mở thẳng màn theo dõi, không phải trang con cháu.
+              : d.loiTat === 'theo-doi-72-gio' ? 'theo_doi_72h'
+                : 'guardian');
         return;
       }
 
@@ -1585,6 +1670,15 @@ export default function App() {
                 coThanhDuoi={sieuDonGian}
               />
             )}
+            {view === 'thu_ky' && (
+              <KhungTaiTre t={t}>
+                <ThuKyNgheMay
+                  lang={lang}
+                  onVeTrangChu={() => setView('home')}
+                  coThanhDuoi={sieuDonGian}
+                />
+              </KhungTaiTre>
+            )}
             {view === 'search' && <SearchView setView={setView} t={t} lang={lang} onAnalyze={handleAnalyze} isAnalyzing={isAnalyzing} superBasic={sieuDonGian} />}
             {view === 'history' && <HistoryView setView={setView} t={t} lang={lang} isLoggedIn={isLoggedIn} historyItems={historyItems} setHistoryItems={setHistoryItems} setAnalyzeResult={setAnalyzeResult} />}
             {view === 'profile' && <ProfileView setView={setView} t={t} isLoggedIn={isLoggedIn} hoSo={hoSo} onDangXuat={dangXuat} />}
@@ -1596,24 +1690,25 @@ export default function App() {
             {view === 'learn' && <KhungTaiTre t={t}><LearnView setView={setView} t={t} lang={lang} onTriggerEmergency={triggerEmergencyAlert} /></KhungTaiTre>}
             {view === 'login' && <LoginView setView={setView} t={t} lang={lang} onDangNhapXong={setHoSo} userRole={userRole} setUserRole={setUserRole} />}
             {view === 'add_family' && <AddFamilyView setView={setView} t={t} setFamilyMembers={setFamilyMembers} />}
-            {view === 'mat_khau_gia_dinh' && <MatKhauGiaDinh setView={setView} t={t} />}
+            {view === 'mat_khau_gia_dinh' && <MatKhauGiaDinh setView={setView} t={t} lang={lang} />}
             {view === 'quy_tac_gia_dinh' && <ManDatQuyTac setView={setView} t={t} lang={lang} />}
             {view === 'doi_phan_ung' && <ManDoiPhanUng setView={setView} t={t} lang={lang} />}
             {view === 'so_ngan_hang' && <ManSoNganHang setView={setView} t={t} lang={lang} />}
             {view === 'theo_doi_72h' && <ManTheoDoi72Gio setView={setView} t={t} lang={lang} />}
             {view === 'ho_so_vu_viec' && <ManHoSoVuViec setView={setView} t={t} lang={lang} lichSu={historyItems} />}
             {view === 'ra_da_thu_doan' && <ManRaDaThuDoan setView={setView} t={t} lang={lang} lichSu={historyItems} />}
-            {view === 'cong_dong' && <CongDongCanhGiac t={t} setView={setView} />}
-            {view === 'gop_y' && <GopY t={t} setView={setView} />}
+            {view === 'cong_dong' && <KhungTaiTre t={t}><CongDongCanhGiac t={t} setView={setView} /></KhungTaiTre>}
+            {view === 'gop_y' && <KhungTaiTre t={t}><GopY t={t} setView={setView} /></KhungTaiTre>}
             {view === 'ghep_con_chau' && <ManGhepConChau t={t} setView={setView} onDanhSach={hopNhatDaGhep} />}
             {view === 'chia_khoa' && <ManChiaKhoa t={t} setView={setView} />}
-            {view === 'ngan_hang_mo_phong' && <ManNganHangMoPhong t={t} setView={setView} />}
+            {view === 'ngan_hang_mo_phong' && <KhungTaiTre t={t}><ManNganHangMoPhong t={t} setView={setView} /></KhungTaiTre>}
             {view === 'con_cai_giup' && (
               <ManConCaiGiup t={t} setView={setView} onDangNhapXong={setHoSo} onDanhSachGhep={hopNhatDaGhep} onDienTap={triggerDienTap} />
             )}
             {view === 'warning' && <WarningView setView={setView} t={t} lang={lang} result={analyzeResult} familyMembers={familyMembers} noiChayAi={noiChayAi} mayCoUngDungLa={mayCoUngDungLa}
               cauHoiVuViec={cauHoiVuViec}
               onTraLoiVuViec={(dung) => { void traLoiVuViec(dung); }}
+              onMoThuKy={() => setView('thu_ky')}
               onBaoDaChuyen={() => {
                 // Không có chữ hay ảnh (bác tự bấm "Khẩn cấp") thì không có gì để gửi lại —
                 // khối phục hồi phía trình duyệt vẫn đã hiện rồi.
@@ -4494,10 +4589,14 @@ function TinDangCho({ t, onAnalyze }: { t: any; onAnalyze?: (text: string) => vo
 
 function DocTinNhanNative({ t, onAnalyze }: { t: any; onAnalyze?: (text: string) => void }) {
   const [quyen, setQuyen] = useState<QuyenNative>('chua_bat');
+  const [smsMacDinh, setSmsMacDinh] = useState<TrangThaiSmsMacDinh | null>(null);
   const [dangLay, setDangLay] = useState(false);
   const [khongCoTin, setKhongCoTin] = useState(false);
 
-  const doLai = () => { void quyenDocThongBao().then(setQuyen); };
+  const doLai = () => {
+    void quyenDocThongBao().then(setQuyen);
+    void trangThaiAppTinNhanMacDinh().then(setSmsMacDinh);
+  };
 
   useEffect(() => {
     doLai();
@@ -4555,6 +4654,16 @@ function DocTinNhanNative({ t, onAnalyze }: { t: any; onAnalyze?: (text: string)
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0"></span>
             <span className="text-[14px] font-extrabold text-emerald-900">{t("Đang bật")}</span>
           </div>
+
+          {smsMacDinh && (
+            <div className={`p-3 rounded-2xl mb-3 border ${smsMacDinh.hoTroSmsQuaThongBao ? 'bg-emerald-50/70 border-emerald-200' : 'bg-amber-50 border-amber-300'}`}>
+              <p className={`text-[14px] leading-snug ${smsMacDinh.hoTroSmsQuaThongBao ? 'text-emerald-900' : 'text-amber-900'}`}>
+                {smsMacDinh.hoTroSmsQuaThongBao
+                  ? t("App Tin nhắn mặc định đang được lọc qua thông báo.")
+                  : t("App Tin nhắn mặc định chưa bật thông báo hệ thống — tin SMS đến sẽ không hiện để sàng lọc.")}
+              </p>
+            </div>
+          )}
 
           {khongCoTin && (
             <div className="p-3 bg-slate-100 border border-slate-300 rounded-2xl mb-3">
@@ -4722,6 +4831,110 @@ function NhacCuocGoiDai({ t, lang }: { t: any; lang: Lang }) {
           {t('Bác đã bật, nhưng máy vừa rút quyền — lời nhắc sẽ không hiện.')}
         </p>
       )}
+    </div>
+  );
+}
+
+function BaoVeNangCaoNative({ t }: { t: any }) {
+  const [usage, setUsage] = useState<QuyenNative>('chua_bat');
+  const [nfc, setNfc] = useState<{ hoTro: boolean; dangBat: boolean } | null>(null);
+  const [vpn, setVpn] = useState<{ dangChay: boolean; daCapQuyen: boolean; soTenMienDaChan: number }>({
+    dangChay: false, daCapQuyen: false, soTenMienDaChan: 0,
+  });
+  const [loiVpn, setLoiVpn] = useState(false);
+
+  const doLai = () => {
+    void quyenUsageStats().then(setUsage);
+    void kiemTraNfc().then((r) => { if (r) setNfc(r); });
+    void trangThaiVpnDns().then((r) => { if (r) setVpn(r); });
+  };
+
+  useEffect(() => {
+    doLai();
+    const khiHien = () => { if (document.visibilityState === 'visible') doLai(); };
+    document.addEventListener('visibilitychange', khiHien);
+    return () => document.removeEventListener('visibilitychange', khiHien);
+  }, []);
+
+  const doiVpn = async () => {
+    setLoiVpn(false);
+    if (vpn.dangChay) {
+      await tatVpnDns();
+    } else {
+      const kq = await batVpnDns();
+      if (!kq?.dangChay) setLoiVpn(true);
+    }
+    doLai();
+  };
+
+  return (
+    <div className="w-full max-w-[420px] bg-white rounded-[26px] p-5 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] mb-5">
+      <h3 className="font-black text-[16px] text-[#311068] mb-1 flex items-center gap-2">
+        <ShieldCheck size={18} className="text-[#6d28d9]" />
+        {t('Trợ lý ngân hàng & Lọc tên miền cục bộ')}
+      </h3>
+      <p className="text-[14px] text-slate-600 leading-relaxed mb-3">
+        {t('Nhắc khi mở app ngân hàng hoặc Cài đặt trong lúc đang gọi, và lọc tên miền giả mạo ngay trên máy (không dùng Trợ năng, không gửi lưu lượng ra ngoài).')}
+      </p>
+
+      <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 mb-3">
+        <div className="flex items-center justify-between gap-2 mb-2">
+          <span className="text-[14px] font-bold text-[#1e1b4b]">{t('Trợ lý khi mở app ngân hàng (Usage Access)')}</span>
+          <span className={`text-[14px] font-extrabold ${usage === 'da_bat' ? 'text-emerald-800' : 'text-amber-800'}`}>
+            {usage === 'da_bat' ? t('Đang bật') : t('Đang tắt')}
+          </span>
+        </div>
+        {usage !== 'da_bat' && usage !== 'khong_ho_tro' && (
+          <button
+            type="button"
+            onClick={() => { void xinQuyenUsageStats(); }}
+            className="w-full min-h-[52px] px-4 bg-gradient-to-r from-amber-400 to-orange-400 hover:opacity-95 active:scale-95 text-[#3b1f00] font-extrabold rounded-2xl text-[14px] transition-all"
+          >
+            {t('Cấp quyền xem app đang mở')}
+          </button>
+        )}
+      </div>
+
+      {nfc && (
+        <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 mb-3 flex items-center justify-between gap-2">
+          <span className="text-[14px] font-bold text-[#1e1b4b]">{t('Trạng thái NFC của máy')}</span>
+          <span className="text-[14px] font-bold text-slate-700 text-right">
+            {!nfc.hoTro ? t('Máy không có NFC') : nfc.dangBat ? t('Đang bật (cẩn thận khi chạm thẻ lạ)') : t('Đang tắt')}
+          </span>
+        </div>
+      )}
+
+      <div className="p-3.5 bg-purple-50 rounded-2xl border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065]">
+        <div className="flex items-center justify-between gap-3 mb-1.5">
+          <span className="text-[15px] font-extrabold text-[#311068]">{t('Lọc tên miền cục bộ (Local DNS VPN)')}</span>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={vpn.dangChay}
+            aria-label={vpn.dangChay ? t('Tắt lọc tên miền cục bộ') : t('Bật lọc tên miền cục bộ')}
+            onClick={() => { void doiVpn(); }}
+            className={`w-16 h-9 rounded-full transition-colors relative shadow-inner p-1 shrink-0 ${vpn.dangChay ? 'bg-emerald-500' : 'bg-slate-300'}`}
+          >
+            <motion.div
+              className="w-7 h-7 bg-white rounded-full shadow-md flex items-center justify-center text-emerald-700"
+              animate={{ x: vpn.dangChay ? 28 : 0 }}
+              transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+            >
+              {vpn.dangChay ? <CheckCircle2 size={16} /> : null}
+            </motion.div>
+          </button>
+        </div>
+        <p className="text-[14px] text-slate-700 leading-snug">
+          {vpn.dangChay
+            ? `${t('Đang lọc tên miền trên máy')} (${vpn.soTenMienDaChan})`
+            : t('Chỉ định tuyến truy vấn tên miền ảo trên máy, không thu thập hay gửi lưu lượng ra ngoài.')}
+        </p>
+        {loiVpn && (
+          <p role="status" className="text-[14px] font-bold text-amber-900 mt-1.5">
+            {t('Chưa bật được bộ lọc tên miền cục bộ.')}
+          </p>
+        )}
+      </div>
     </div>
   );
 }
@@ -5247,6 +5460,7 @@ function NotificationsView({
         nên có — bày ra công tắc này ở bản web là hứa một thứ không tồn tại.
       */}
       {dangChayApk && <NhacCuocGoiDai t={t} lang={lang} />}
+      {dangChayApk && <BaoVeNangCaoNative t={t} />}
 
       {/* 4. Action Mode Selector */}
       <div className="w-full max-w-[420px] bg-white rounded-[26px] p-5 border-2 border-[#2e1065] shadow-[3px_3px_0_#2e1065] mb-5">
@@ -7037,6 +7251,7 @@ export function WarningView({
   mayCoUngDungLa,
   onBaoDaChuyen,
   onHanhDongMoPhong,
+  onMoThuKy,
   cauHoiVuViec,
   onTraLoiVuViec,
 }: {
@@ -7057,6 +7272,8 @@ export function WarningView({
   noiChayAi?: string | null,
   /** Bác khai đã chuyển tiền / đọc mã ⇒ gửi lại cho bộ luật chọn màn (việc #2). */
   onBaoDaChuyen?: () => void,
+  /** Mở thẳng Thư ký nghe máy hộ từ màn cảnh báo cuộc gọi. */
+  onMoThuKy?: () => void,
   /** Chỉ màn trình diễn truyền vào: hành động của bác → máy con GIẢ LẬP. */
   onHanhDongMoPhong?: (hanhDong: HanhDong) => void,
 }) {
@@ -7875,6 +8092,15 @@ export function WarningView({
                 Tiền vừa ra trong lúc gọi ⇒ một lối THẲNG vào các bước phục hồi. App không
                 biết khoản đó có phải do bị lừa không — bác nói, không phải app đoán (§4.2).
               */}
+              {lyDoTuBat && onMoThuKy && (
+                <button
+                  type="button"
+                  onClick={onMoThuKy}
+                  className="w-full min-h-[52px] rounded-[18px] bg-white/15 text-white border-2 border-white/40 font-bold text-[16px] px-3 leading-snug flex items-center justify-center gap-2"
+                >
+                  <PhoneIncoming size={18} className="shrink-0" /> {tra(TRANG_THAI_MAY, 'OPEN_THU_KY', lang)}
+                </button>
+              )}
               {lyDoTuBat === 'tien_ra_trong_cuoc_goi' && !canRecovery && (
                 <button
                   type="button"
@@ -8188,6 +8414,29 @@ export function WarningView({
           bị xoá, nó nằm dưới "Xem thêm" ngay bên dưới. Ở các mức khác vẫn tám
           dòng như cũ.
         */}
+        {result?.vietQr && (
+          <div className="w-full rounded-[20px] bg-white/95 border-2 border-[#2e1065] p-3.5 mb-2 text-left text-[color:var(--color-ink)] shadow-sm">
+            <p className="text-[14px] font-black text-[#311068] mb-1">
+              {tra(
+                VIETQR_UI,
+                result.vietQr.loaiQR === 'url'
+                  ? 'TIEU_DE_URL'
+                  : result.vietQr.loaiQR === 'scheme_la'
+                    ? 'TIEU_DE_SCHEME'
+                    : 'TIEU_DE_VIETQR',
+                lang
+              )}
+            </p>
+            <p className="text-[14px] text-slate-800 leading-snug">{result.vietQr.tomTatChoBac}</p>
+            {result.vietQr.canhBaoNoiDung.length > 0 && (
+              <ul className="mt-1.5 list-disc pl-5 text-[14px] font-bold text-red-800 space-y-0.5">
+                {result.vietQr.canhBaoNoiDung.map((cb: string, idx: number) => (
+                  <li key={idx}>{cb}</li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
         {lyDoHien.length > 0 && (
           laChuaThay ? (
             <details className="w-full mb-2 rounded-2xl border border-white/20 bg-black/15 px-3 py-2 text-white/90">

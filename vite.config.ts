@@ -137,6 +137,7 @@ export default defineConfig(() => {
             react: ['react', 'react-dom', 'react-dom/client', 'react/jsx-runtime'],
             motion: ['motion/react'],
             icon: ['lucide-react'],
+            tu_dien: ['./src/catalog.ts', './src/i18n.ts'],
           },
         },
       },

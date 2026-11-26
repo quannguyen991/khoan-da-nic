@@ -422,3 +422,61 @@ export interface TrangThaiBaoVeBoMe { tenBoMe: string; choXem: boolean; nhip: (N
 export async function docNhipBaoVeBoMe(): Promise<{ boMe: TrangThaiBaoVeBoMe[] }> {
   return goi('/api/gia-dinh/nhip-bao-ve/bo-me', {}, true);
 }
+
+// ─────────── Cảnh báo hai phía (`cb_...`) & Thư ký nghe máy hộ cho Guardian ───────────
+
+export interface ChiTietCanhBaoHaiPhia {
+  canhBaoId: string;
+  thoiDiem: number;
+  nhan: 'CAO' | 'NGHI_NGO';
+  hoKichBan: string | null;
+  maGiaiThich: string | null;
+  canLamGi: 'goi_ngay' | 'theo_doi';
+  nguoiCaoTuoiDaLam: string[];
+  ketQua?: 'chua_ro' | 'that' | 'bao_nham';
+  tenBoMe?: string | null;
+}
+
+export async function docCanhBaoHaiPhia(id: string): Promise<ChiTietCanhBaoHaiPhia> {
+  return goi(`/api/detect/canh-bao/${encodeURIComponent(id)}`, {}, true);
+}
+
+export async function ghiHanhDongCanhBaoHaiPhia(
+  id: string,
+  hanhDong: 'goi' | 'ket-qua',
+  body: Record<string, unknown> = {}
+): Promise<unknown> {
+  return goi(`/api/detect/canh-bao/${encodeURIComponent(id)}/${hanhDong}`, {
+    method: 'POST',
+    body: JSON.stringify(body),
+  }, true);
+}
+
+export interface CuocGoiThuKyBoMe {
+  id: string;
+  chuTaiKhoanId: string;
+  tenBoMe: string;
+  soNguoiGoi: string;
+  batDauLuc: number;
+  trangThaiPhanLoai: 'nguoi_quen' | 'thong_thuong' | 'khan_cap' | 'dang_ngo' | 'khong_du_thong_tin' | 'loi_he_thong';
+  nhanRuiRo: 'CAO' | 'NGHI_NGO' | 'CHUA_THAY';
+  summary: string;
+  claimedBy: string | null;
+  danhDau: 'hop_le' | 'dang_ngo' | 'khong_ro' | null;
+}
+
+export async function docCuocGoiThuKyBoMe(): Promise<{ cuocGoi: CuocGoiThuKyBoMe[] }> {
+  return goi('/api/thu-ky/gia-dinh/cuoc-goi', {}, true);
+}
+
+export async function danhDauCuocGoiThuKyBoMe(
+  chuTaiKhoanId: string,
+  id: string,
+  ketQua: 'hop_le' | 'dang_ngo' | 'khong_ro'
+): Promise<unknown> {
+  return goi(
+    `/api/thu-ky/gia-dinh/${encodeURIComponent(chuTaiKhoanId)}/cuoc-goi/${encodeURIComponent(id)}/danh-dau`,
+    { method: 'POST', body: JSON.stringify({ ketQua }) },
+    true
+  );
+}

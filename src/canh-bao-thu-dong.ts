@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { api } from './api-goc';
 import { tinMoiNhat, appVuaCai, laApk } from './native';
 import type { ManCanhBao } from './components/CanhBaoToanManHinh';
+import { dongBoBoLuatTang0, sangLocTinDenTaiMay } from './lib/tang-0-cuc-bo';
 
 /**
  * VÒNG PHÁT HIỆN THỤ ĐỘNG — người dùng không phải thao tác gì.
@@ -134,7 +135,10 @@ export function useCanhBaoThuDong({
     if (!bat) { setDangCanh(false); return undefined; }
     let song = true;
 
-    (async () => { setDangCanh(await laApk()); })();
+    (async () => {
+      setDangCanh(await laApk());
+      void dongBoBoLuatTang0();
+    })();
 
     const nhip = window.setInterval(async () => {
       if (!song || dangChay.current) return;
@@ -157,10 +161,27 @@ export function useCanhBaoThuDong({
           if (manRef.current) return;
         }
 
-        // Xem `TU_GUI_TIN_NHAN_LEN_MAY_CHU` — chưa được phép thì dừng ở đây.
+        // Xem `TU_GUI_TIN_NHAN_LEN_MAY_CHU` — cổng chặn phải đứng trước lượt đọc tin mới nhất (PERMISSIONS-AND-POLICY.md).
         if (!TU_GUI_TIN_NHAN_LEN_MAY_CHU) return;
         const tin = await tinMoiNhat();
-        if (!tin?.co) return;
+        if (!tin?.co || !tin.noiDung) return;
+
+        // Sàng lọc Tầng 0 tại máy trước; chỉ gọi máy chủ nếu qua cổng cho phép.
+        const cucBo = sangLocTinDenTaiMay(tin.noiDung);
+        if (cucBo.coDauHieu) {
+          await phatCanhBao({
+            nhan: cucBo.nhanDeXuat,
+            canThiep: cucBo.canThiep,
+            luatKhopVoi: cucBo.luatKhopVoi,
+            maLyDo: cucBo.maLyDo,
+            maGiaiThich: cucBo.maGiaiThich,
+            hoKichBan: cucBo.hoKichBan,
+            nguon: 'thong_bao',
+            phienBanLuat: cucBo.phienBanLuat,
+            chuaKiem: tin.maChuaKiem === 'chi_doc_duoc_mot_phan_tin' ? ['chi_doc_duoc_mot_phan_tin'] : [],
+          });
+          return;
+        }
 
         const kq = await goiApi<any>('/api/detect', {
           nguon: 'thong_bao',

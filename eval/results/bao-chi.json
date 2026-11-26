@@ -1,0 +1,92 @@
+{
+  "metadata": {
+    "commitSha": "89895f1",
+    "analysisVersion": "1.0.0",
+    "registryVersion": "1.2.0",
+    "ruleVersion": "1.6.11",
+    "promptVersion": "1.4.2",
+    "datasetVersion": "81875a40dfed",
+    "datasetSize": 51,
+    "aiDaChay": true,
+    "model": "qwen3.8-flash",
+    "apiBase": "https://home.ai-box.vn/v1",
+    "cheDo": "bo_luat_va_ai",
+    "tinHieuTuDem": 43,
+    "tinHieuGoiMoi": 8
+  },
+  "chiSo": {
+    "tongMau": 51,
+    "dat": 26,
+    "tyLeDat": 0.5098039215686274,
+    "dangerousRecall": 0.7,
+    "soNguyHiem": 20,
+    "highRiskFP": null,
+    "soLanh": 0,
+    "fpTrenLatChat": null,
+    "soLanhChat": 0,
+    "vuotTranToiDa": 0,
+    "tutDuoiMucDo": 0.49019607843137253,
+    "confusion": {
+      "CHUA_THAY->CHUA_THAY": 0,
+      "CHUA_THAY->NGHI_NGO": 0,
+      "CHUA_THAY->CAO": 0,
+      "NGHI_NGO->CHUA_THAY": 19,
+      "NGHI_NGO->NGHI_NGO": 7,
+      "NGHI_NGO->CAO": 5,
+      "CAO->CHUA_THAY": 0,
+      "CAO->NGHI_NGO": 6,
+      "CAO->CAO": 14
+    }
+  },
+  "parity": {
+    "theoNgonNgu": {
+      "vi": {
+        "tongMau": 51,
+        "dat": 26,
+        "tyLeDat": 0.5098039215686274,
+        "dangerousRecall": 0.7,
+        "soNguyHiem": 20,
+        "highRiskFP": null,
+        "soLanh": 0,
+        "fpTrenLatChat": null,
+        "soLanhChat": 0,
+        "vuotTranToiDa": 0,
+        "tutDuoiMucDo": 0.49019607843137253,
+        "confusion": {
+          "CHUA_THAY->CHUA_THAY": 0,
+          "CHUA_THAY->NGHI_NGO": 0,
+          "CHUA_THAY->CAO": 0,
+          "NGHI_NGO->CHUA_THAY": 19,
+          "NGHI_NGO->NGHI_NGO": 7,
+          "NGHI_NGO->CAO": 5,
+          "CAO->CHUA_THAY": 0,
+          "CAO->NGHI_NGO": 6,
+          "CAO->CAO": 14
+        }
+      }
+    },
+    "lechRecall": null,
+    "lechFP": null
+  },
+  "mauThat": {
+    "coMauThat": false,
+    "tong": 0,
+    "dat": 0,
+    "nguyHiemBatDuoc": 0,
+    "nguyHiemTong": 0
+  },
+  "latCatDanXuat": {},
+  "tranHong": {
+    "soHong": 0,
+    "tyLeHong": 0,
+    "tran": 0.1,
+    "vuotTran": false,
+    "vuotTranToanCuc": false,
+    "loVuotTran": [],
+    "lyDoHong": [],
+    "theoStatus": {},
+    "viDu": null
+  },
+  "thoiGianGiay": 7.7,
+  "bo": "bao-chi"
+}

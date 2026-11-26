@@ -109,4 +109,19 @@
     <string name="chup_noi_dung">Chỉ chụp một lần rồi tự tắt. Không quay video.</string>
     <string name="chup_loi">Chưa chụp được màn hình. Bác thử lại, hoặc tự chụp rồi chia sẻ vào Khoan Đã nhé.</string>
     <string name="bb_dong">Đóng</string>
+
+    <!-- ─── Trợ lý ngân hàng & chuyển cảnh (F3 / Lớp 2) — không buộc tội (§11) ─── -->
+    <string name="tb_ngan_hang_cuoc_goi_tieu_de">Bác đang gọi điện và mở ngân hàng?</string>
+    <string name="tb_ngan_hang_cuoc_goi_noi_dung">Đừng chuyển tiền theo lời người lạ trên điện thoại. Hỏi con cháu trước nhé. Chạm để mở.</string>
+    <string name="tb_cai_dat_cuoc_goi_tieu_de">Khoan đã, đừng bật quyền lạ lúc đang gọi</string>
+    <string name="tb_cai_dat_cuoc_goi_noi_dung">Ai gọi mà bảo bác vào Cài đặt hoặc cài tệp ngoài là dấu hiệu thường gặp của lừa đảo. Chạm để mở.</string>
+    <string name="tb_chat_sang_ngan_hang_tieu_de">Kiểm tra lại trước khi chuyển</string>
+    <string name="tb_chat_sang_ngan_hang_noi_dung">Bác vừa xem tin có nhắc tiền hoặc số tài khoản rồi mở ngân hàng. Dừng một nhịp hỏi người nhà nếu chưa chắc nhé.</string>
+
+    <!-- ─── Local DNS VPN (chạy cục bộ trên máy) ─── -->
+    <string name="vpn_kenh">Lọc tên miền cục bộ</string>
+    <string name="vpn_thuong_truc_tieu_de">Khoan Đã đang lọc tên miền trên máy</string>
+    <string name="vpn_thuong_truc_noi_dung">Chỉ kiểm tra tên miền ngay trên máy, không gửi lưu lượng ra ngoài.</string>
+    <string name="vpn_chan_tieu_de">Khoan Đã đã chặn một tên miền đáng ngờ</string>
+    <string name="vpn_chan_noi_dung">Tên miền vừa truy cập có dấu hiệu mạo danh hoặc lừa đảo. Chạm để kiểm tra lại.</string>
 </resources>

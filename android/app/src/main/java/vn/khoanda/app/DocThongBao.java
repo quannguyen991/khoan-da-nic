@@ -6,14 +6,22 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.provider.Telephony;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
 
+import androidx.core.app.NotificationManagerCompat;
+
+import java.text.Normalizer;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Deque;
 import java.util.List;
+import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * ĐỌC THÔNG BÁO TIN NHẮN ĐẾN — §15.4, nguồn đầu vào thứ tư.
@@ -136,6 +144,32 @@ public class DocThongBao extends NotificationListenerService {
      */
     private static final Deque<Tin> HANG = new ArrayDeque<>();
 
+    /** Mốc thời gian gần nhất có thông báo chat/SMS mang tín hiệu tiền/STK/link (chỉ giữ timestamp, KHÔNG giữ nội dung). */
+    static volatile long tinNhanTienStkGanDayLuc = 0L;
+
+    static boolean laAppNhanTin(Context ctx, String pkg) {
+        if (pkg == null) return false;
+        if (GOI_NHAN_TIN.contains(pkg)) return true;
+        String smsMacDinh = appTinNhanMacDinh(ctx);
+        return smsMacDinh != null && smsMacDinh.equals(pkg);
+    }
+
+    public static String appTinNhanMacDinh(Context ctx) {
+        try {
+            return Telephony.Sms.getDefaultSmsPackage(ctx);
+        } catch (Throwable t) {
+            return null;
+        }
+    }
+
+    public static boolean thongBaoHeThongDangBat(Context ctx) {
+        try {
+            return NotificationManagerCompat.from(ctx).areNotificationsEnabled();
+        } catch (Throwable t) {
+            return false;
+        }
+    }
+
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {
         if (sbn == null) return;
@@ -143,7 +177,7 @@ public class DocThongBao extends NotificationListenerService {
             kiemThongBaoNganHang(sbn.getNotification());
             return;
         }
-        if (!GOI_NHAN_TIN.contains(sbn.getPackageName())) return;
+        if (!laAppNhanTin(this, sbn.getPackageName())) return;
 
         Notification n = sbn.getNotification();
         if (n == null || n.extras == null) {
@@ -294,41 +328,148 @@ public class DocThongBao extends NotificationListenerService {
      * thì mới đáng gọi bác. Cùng bài học với pack tiếng Việt: cụm phải nói về
      * THỦ ĐOẠN, không phải về chủ đề.
      */
-    private static final java.util.regex.Pattern DAU_HIEU_MA =
-            java.util.regex.Pattern.compile(
-                    "\\b(otp|m\u00e3 x\u00e1c th\u1ef1c|m\u00e3 giao d\u1ecbch|ma xac thuc|ma otp)\\b",
-                    java.util.regex.Pattern.CASE_INSENSITIVE);
+    private static final Pattern DAU_HIEU_MA =
+            Pattern.compile(
+                    "\\b(otp|m\u00e3 x\u00e1c th\u1ef1c|m\u00e3 giao d\u1ecbch|ma xac thuc|ma xac nhan|ma otp|mat khau|ma pin|ma cvv)\\b",
+                    Pattern.CASE_INSENSITIVE);
 
-    private static final java.util.regex.Pattern DAU_HIEU_TIEN =
-            java.util.regex.Pattern.compile(
+    private static final Pattern DAU_HIEU_TIEN =
+            Pattern.compile(
                     "(chuy\u1ec3n kho\u1ea3n|chuy\u1ec3n ti\u1ec1n|chuyen tien|chuyen khoan"
-                    + "|t\u00e0i kho\u1ea3n an to\u00e0n|tai khoan an toan|n\u1ed9p ti\u1ec1n|nop tien)",
-                    java.util.regex.Pattern.CASE_INSENSITIVE);
+                    + "|t\u00e0i kho\u1ea3n an to\u00e0n|tai khoan an toan|n\u1ed9p ti\u1ec1n|nop tien|so tai khoan|\\bstk\\b)",
+                    Pattern.CASE_INSENSITIVE);
 
-    private static final java.util.regex.Pattern DAU_HIEU_EP =
-            java.util.regex.Pattern.compile(
+    private static final Pattern DAU_HIEU_EP =
+            Pattern.compile(
                     "(cung c\u1ea5p|\u0111\u1ecdc m\u00e3|doc ma|g\u1eedi m\u00e3|gui ma|nh\u1eadp m\u00e3|nhap ma"
                     + "|ngay|g\u1ea5p|gap|trong v\u00f2ng|trong vong|n\u1ebfu kh\u00f4ng|neu khong"
                     + "|\u0111\u1eebng n\u00f3i|dung noi|kh\u00f4ng \u0111\u01b0\u1ee3c k\u1ec3|khong duoc ke)",
-                    java.util.regex.Pattern.CASE_INSENSITIVE);
+                    Pattern.CASE_INSENSITIVE);
 
-    private static final java.util.regex.Pattern DAU_HIEU_CO_QUAN =
-            java.util.regex.Pattern.compile(
+    private static final Pattern DAU_HIEU_CO_QUAN =
+            Pattern.compile(
                     "(c\u00f4ng an|cong an|c\u1ea3nh s\u00e1t|canh sat|vi\u1ec7n ki\u1ec3m s\u00e1t|vien kiem sat"
-                    + "|to\u00e0 \u00e1n|toa an|c\u1ee5c thu\u1ebf|cuc thue|\u0111i\u1ec7n l\u1ef1c|dien luc)",
-                    java.util.regex.Pattern.CASE_INSENSITIVE);
+                    + "|to\u00e0 \u00e1n|t\u00f2a \u00e1n|toa an|c\u1ee5c thu\u1ebf|cuc thue|\u0111i\u1ec7n l\u1ef1c|dien luc"
+                    + "|b\u1ed9 c\u00f4ng an|bo cong an|ph\u1ea1t ngu\u1ed9i|phat nguoi|csgt|bhxh|vneid|vssid|etax)",
+                    Pattern.CASE_INSENSITIVE);
+
+    private static final List<String> ALLOWLIST_TEN_MIEN = Arrays.asList(
+            "dichvucong.gov.vn", "bocongan.gov.vn", "csgt.vn", "gdt.gov.vn",
+            "baohiemxahoi.gov.vn", "evn.com.vn", "vietcombank.com.vn", "bidv.com.vn",
+            "vietinbank.vn", "agribank.com.vn", "techcombank.com.vn", "mbbank.com.vn",
+            "vpbank.com.vn", "acb.com.vn", "tpbank.vn", "sacombank.com.vn"
+    );
+    private static final List<String> ALLOWLIST_HAU_TO = Arrays.asList("gov.vn", "chinhphu.vn");
+    private static final List<String> DUOI_MIEN_RUI_RO = Arrays.asList(
+            "top", "xyz", "vip", "icu", "buzz", "click", "link", "tk", "ml", "ga", "cf", "gq", "loan"
+    );
+    private static final List<String> CUM_CAI_APP = Arrays.asList(
+            "cai dat file", "tai ung dung", "cai app", "file apk", ".apk", "quyen tro nang",
+            "anydesk", "teamviewer", "ultraview"
+    );
+    private static final List<String> CUM_BI_MAT = Arrays.asList(
+            "giu bi mat", "khong duoc noi", "dung noi voi ai", "dung cho ai biet", "khong bao gia dinh"
+    );
+    private static final Pattern CANH_BAO_NGAN_HANG_THAT = Pattern.compile(
+            "\\b(khong chia se|khong cung cap|tuyet doi khong|canh bao|khuyen cao)\\b");
+    private static final Pattern URL_HOST_PATTERN = Pattern.compile(
+            "\\b(?:https?://)?((?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.)+[a-z]{2,24})(/[^\\s<>\"')\\]]*)?",
+            Pattern.CASE_INSENSITIVE);
+
+    static String boDau(String s) {
+        if (s == null) return "";
+        String nfd = Normalizer.normalize(s, Normalizer.Form.NFD);
+        return nfd.replaceAll("\\p{InCombiningDiacriticalMarks}+", "")
+                .replace('\u0111', 'd').replace('\u0110', 'D')
+                .toLowerCase(Locale.ROOT);
+    }
+
+    private static boolean trongAllowlist(String host) {
+        for (String d : ALLOWLIST_TEN_MIEN) {
+            if (host.equals(d) || host.endsWith("." + d)) return true;
+        }
+        for (String h : ALLOWLIST_HAU_TO) {
+            if (host.equals(h) || host.endsWith("." + h)) return true;
+        }
+        return false;
+    }
+
+    /**
+     * Sàng lọc Tầng 0 100% offline trên máy (khớp `tang-0-cuc-bo.ts` + hàng rào phủ định).
+     * Hàm thuần — KHÔNG gọi mạng, KHÔNG ra nhãn rủi ro (§4.2).
+     */
+    public static boolean laTinDangKiem(String noiDung) {
+        if (noiDung == null || noiDung.trim().length() < 12) return false;
+        String kd = boDau(noiDung);
+
+        boolean coMaoDanh = DAU_HIEU_CO_QUAN.matcher(noiDung).find() || DAU_HIEU_CO_QUAN.matcher(kd).find();
+        boolean coTien = DAU_HIEU_TIEN.matcher(noiDung).find() || DAU_HIEU_TIEN.matcher(kd).find();
+        boolean coEp = DAU_HIEU_EP.matcher(noiDung).find() || DAU_HIEU_EP.matcher(kd).find();
+
+        boolean coMa = false;
+        if (!CANH_BAO_NGAN_HANG_THAT.matcher(kd).find()) {
+            coMa = DAU_HIEU_MA.matcher(noiDung).find() || DAU_HIEU_MA.matcher(kd).find();
+        }
+
+        boolean coLinkNgoai = false;
+        boolean coDuoiRuiRo = false;
+        boolean coUrlApk = false;
+        boolean coUrl = false;
+        Matcher um = URL_HOST_PATTERN.matcher(noiDung);
+        while (um.find()) {
+            coUrl = true;
+            String host = um.group(1) == null ? "" : um.group(1).toLowerCase(Locale.ROOT);
+            String full = um.group(0) == null ? "" : um.group(0).toLowerCase(Locale.ROOT);
+            if (full.matches(".*\\.apk(\\?|#|$).*")) coUrlApk = true;
+            if (!host.isEmpty() && !trongAllowlist(host)) {
+                coLinkNgoai = true;
+                int dot = host.lastIndexOf('.');
+                if (dot >= 0 && DUOI_MIEN_RUI_RO.contains(host.substring(dot + 1))) {
+                    coDuoiRuiRo = true;
+                }
+            }
+        }
+
+        boolean coCaiApp = coUrlApk;
+        if (!coCaiApp) {
+            for (String c : CUM_CAI_APP) {
+                if (kd.contains(c)) { coCaiApp = true; break; }
+            }
+        }
+        boolean coBiMat = false;
+        for (String c : CUM_BI_MAT) {
+            if (kd.contains(c)) { coBiMat = true; break; }
+        }
+
+        boolean r1 = coMaoDanh && coLinkNgoai;
+        boolean r2 = coCaiApp && (coUrl || kd.contains("apk") || kd.contains("anydesk")
+                || kd.contains("teamviewer") || kd.contains("ultraview") || kd.contains("tro nang"));
+        boolean r8 = coMa && coEp;
+        boolean r5 = coDuoiRuiRo && (coMaoDanh || coTien || coEp);
+        boolean r7 = coBiMat && (coMaoDanh || coTien || coMa);
+        boolean coDien = (coTien && coEp) || (coMaoDanh && (coTien || coMa));
+
+        return r1 || r2 || r8 || r5 || r7 || coDien;
+    }
+
+    /** Kiểm tra nhanh xem tin nhắn chat/SMS có tín hiệu tiền / STK / link ngoài hay không (chỉ dùng cho co-pilot trên máy). */
+    public static boolean coTinHieuTienHoacLink(String noiDung) {
+        if (noiDung == null || noiDung.trim().length() < 8) return false;
+        String kd = boDau(noiDung);
+        if (DAU_HIEU_TIEN.matcher(noiDung).find() || DAU_HIEU_TIEN.matcher(kd).find()) return true;
+        Matcher um = URL_HOST_PATTERN.matcher(noiDung);
+        while (um.find()) {
+            String host = um.group(1) == null ? "" : um.group(1).toLowerCase(Locale.ROOT);
+            if (!host.isEmpty() && !trongAllowlist(host)) return true;
+        }
+        return false;
+    }
 
     private void sangLocTaiCho(String noiDung) {
-        if (noiDung == null || noiDung.trim().length() < 12) return;
-
-        boolean coMa = DAU_HIEU_MA.matcher(noiDung).find();
-        boolean coTien = DAU_HIEU_TIEN.matcher(noiDung).find();
-        boolean coEp = DAU_HIEU_EP.matcher(noiDung).find();
-        boolean coCoQuan = DAU_HIEU_CO_QUAN.matcher(noiDung).find();
-
-        // Hai vế trở lên mới gọi bác. Một vế là chưa đủ để làm phiền.
-        boolean dangKiem = (coMa && coEp) || (coTien && coEp) || (coCoQuan && (coTien || coMa));
-        if (!dangKiem) return;
+        if (coTinHieuTienHoacLink(noiDung)) {
+            tinNhanTienStkGanDayLuc = System.currentTimeMillis();
+        }
+        if (!laTinDangKiem(noiDung)) return;
 
         try {
             /*
@@ -358,7 +499,7 @@ public class DocThongBao extends NotificationListenerService {
      */
     @Override
     public void onNotificationRemoved(StatusBarNotification sbn) {
-        if (sbn == null || !GOI_NHAN_TIN.contains(sbn.getPackageName())) return;
+        if (sbn == null || !laAppNhanTin(this, sbn.getPackageName())) return;
         synchronized (HANG) {
             for (Tin t : HANG) {
                 if (t.luc == sbn.getPostTime() && t.tuApp.equals(sbn.getPackageName())) return;
