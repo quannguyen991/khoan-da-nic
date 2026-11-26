@@ -34,6 +34,9 @@ test('1. SMS/Thông báo Hướng A: đọc app SMS mặc định qua Notificati
   assert.match(dtb, /ALLOWLIST_TEN_MIEN/, 'phải có allowlist tên miền chính thức');
   assert.match(dtb, /DUOI_MIEN_RUI_RO/, 'phải có danh sách đuôi miền rủi ro');
   assert.match(dtb, /CANH_BAO_NGAN_HANG_THAT/, 'phải có hàng rào phủ định tránh báo nhầm SMS ngân hàng');
+  assert.match(dtb, /viettelpost/, 'DocThongBao phải nhận diện mạo danh giao hàng');
+  assert.match(dtb, /rustdesk/, 'DocThongBao phải nhận diện công cụ điều khiển từ xa');
+  assert.match(dtb, /hoan thue/, 'DocThongBao phải nhận diện bẫy hoàn thuế');
   assert.ok(!/Log\.[dvie]\(/.test(dtb), '§6.9 — không được ghi log nội dung thông báo');
   assert.match(PLUGIN, /trangThaiAppTinNhanMacDinh/);
   assert.match(NATIVE_TS, /trangThaiAppTinNhanMacDinh/);

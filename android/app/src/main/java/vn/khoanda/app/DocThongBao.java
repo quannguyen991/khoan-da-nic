@@ -336,39 +336,57 @@ public class DocThongBao extends NotificationListenerService {
     private static final Pattern DAU_HIEU_TIEN =
             Pattern.compile(
                     "(chuy\u1ec3n kho\u1ea3n|chuy\u1ec3n ti\u1ec1n|chuyen tien|chuyen khoan"
-                    + "|t\u00e0i kho\u1ea3n an to\u00e0n|tai khoan an toan|n\u1ed9p ti\u1ec1n|nop tien|so tai khoan|\\bstk\\b)",
+                    + "|t\u00e0i kho\u1ea3n an to\u00e0n|tai khoan an toan|n\u1ed9p ti\u1ec1n|nop tien|so tai khoan|\\bstk\\b"
+                    + "|\u0111\u00f3ng ph\u00ed|dong phi|ti\u1ec1n c\u1ecdc|tien coc|ph\u00ed h\u1ed3 s\u01a1|phi ho so"
+                    + "|t\u1ea1m gi\u1eef|tam giu|b\u1ea3o l\u00e3nh|bao lanh|ho\u00e0n thu\u1ebf|hoan thue"
+                    + "|c\u1eaft \u0111i\u1ec7n|cat dien|gi\u1ea3i ng\u00e2n|giai ngan|n\u00e2ng h\u1ea1n m\u1ee9c|nang han muc)",
                     Pattern.CASE_INSENSITIVE);
 
     private static final Pattern DAU_HIEU_EP =
             Pattern.compile(
                     "(cung c\u1ea5p|\u0111\u1ecdc m\u00e3|doc ma|g\u1eedi m\u00e3|gui ma|nh\u1eadp m\u00e3|nhap ma"
                     + "|ngay|g\u1ea5p|gap|trong v\u00f2ng|trong vong|n\u1ebfu kh\u00f4ng|neu khong"
+                    + "|c\u1eadp nh\u1eadt|cap nhat|x\u00e1c th\u1ef1c|xac thuc|\u0111\u1ed3ng b\u1ed9|dong bo"
+                    + "|kh\u1ea9n c\u1ea5p|khan cap|t\u1ea1m kh\u00f3a|tam khoa|phong t\u1ecfa|phong toa"
+                    + "|kh\u1edfi t\u1ed1|khoi to|l\u1ec7nh b\u1eaft|lenh bat|tri\u1ec7u t\u1eadp|trieu tap"
                     + "|\u0111\u1eebng n\u00f3i|dung noi|kh\u00f4ng \u0111\u01b0\u1ee3c k\u1ec3|khong duoc ke)",
                     Pattern.CASE_INSENSITIVE);
 
     private static final Pattern DAU_HIEU_CO_QUAN =
             Pattern.compile(
                     "(c\u00f4ng an|cong an|c\u1ea3nh s\u00e1t|canh sat|vi\u1ec7n ki\u1ec3m s\u00e1t|vien kiem sat"
-                    + "|to\u00e0 \u00e1n|t\u00f2a \u00e1n|toa an|c\u1ee5c thu\u1ebf|cuc thue|\u0111i\u1ec7n l\u1ef1c|dien luc"
-                    + "|b\u1ed9 c\u00f4ng an|bo cong an|ph\u1ea1t ngu\u1ed9i|phat nguoi|csgt|bhxh|vneid|vssid|etax)",
+                    + "|to\u00e0 \u00e1n|t\u00f2a \u00e1n|toa an|c\u1ee5c thu\u1ebf|cuc thue|t\u1ed5ng c\u1ee5c thu\u1ebf|tong cuc thue"
+                    + "|\u0111i\u1ec7n l\u1ef1c|dien luc|evn|h\u1ea3i quan|hai quan"
+                    + "|b\u1ed9 c\u00f4ng an|bo cong an|ph\u1ea1t ngu\u1ed9i|phat nguoi|csgt|bhxh|vneid|vssid|etax"
+                    + "|vietnampost|vnpost|viettelpost|viettel post|\\bghn\\b|\\bghtk\\b"
+                    + "|vietcombank|bidv|vietinbank|agribank|techcombank|mbbank|vpbank|sacombank|hdbank|tpbank|vib|seabank"
+                    + "|momo|zalopay|vnpay|viettelmoney)",
                     Pattern.CASE_INSENSITIVE);
 
     private static final List<String> ALLOWLIST_TEN_MIEN = Arrays.asList(
-            "dichvucong.gov.vn", "bocongan.gov.vn", "csgt.vn", "gdt.gov.vn",
-            "baohiemxahoi.gov.vn", "evn.com.vn", "vietcombank.com.vn", "bidv.com.vn",
-            "vietinbank.vn", "agribank.com.vn", "techcombank.com.vn", "mbbank.com.vn",
-            "vpbank.com.vn", "acb.com.vn", "tpbank.vn", "sacombank.com.vn"
+            "dichvucong.gov.vn", "bocongan.gov.vn", "csgt.vn", "gdt.gov.vn", "thuedientu.gdt.gov.vn",
+            "baohiemxahoi.gov.vn", "evn.com.vn", "evnhanoi.vn", "evnspc.vn",
+            "vietcombank.com.vn", "bidv.com.vn", "vietinbank.vn", "agribank.com.vn",
+            "techcombank.com.vn", "mbbank.com.vn", "vpbank.com.vn", "acb.com.vn",
+            "tpbank.vn", "sacombank.com.vn", "hdbank.com.vn", "vib.com.vn",
+            "msb.com.vn", "ocb.com.vn", "shb.com.vn", "seabank.com.vn",
+            "momo.vn", "zalopay.vn", "vnpay.vn", "viettelmoney.vn",
+            "vietnampost.vn", "vnpost.vn", "viettelpost.com.vn", "ghn.vn", "ghtk.vn", "shopee.vn"
     );
     private static final List<String> ALLOWLIST_HAU_TO = Arrays.asList("gov.vn", "chinhphu.vn");
     private static final List<String> DUOI_MIEN_RUI_RO = Arrays.asList(
-            "top", "xyz", "vip", "icu", "buzz", "click", "link", "tk", "ml", "ga", "cf", "gq", "loan"
+            "top", "xyz", "vip", "icu", "buzz", "click", "link", "tk", "ml", "ga", "cf", "gq", "loan",
+            "rest", "cyou", "shop", "online", "site", "website", "space", "fun", "live", "work",
+            "monster", "quest", "sbs", "cfd", "bond", "pro", "store", "life", "help", "asia"
     );
     private static final List<String> CUM_CAI_APP = Arrays.asList(
             "cai dat file", "tai ung dung", "cai app", "file apk", ".apk", "quyen tro nang",
-            "anydesk", "teamviewer", "ultraview"
+            "anydesk", "teamviewer", "ultraview", "rustdesk", "airdroid", "chia se man hinh",
+            "cai dat apk", "cap nhat sinh trac hoc"
     );
     private static final List<String> CUM_BI_MAT = Arrays.asList(
-            "giu bi mat", "khong duoc noi", "dung noi voi ai", "dung cho ai biet", "khong bao gia dinh"
+            "giu bi mat", "khong duoc noi", "dung noi voi ai", "dung cho ai biet", "khong bao gia dinh",
+            "khong noi voi nguoi than", "khong noi voi con cai", "tuyet doi giu bi mat"
     );
     private static final Pattern CANH_BAO_NGAN_HANG_THAT = Pattern.compile(
             "\\b(khong chia se|khong cung cap|tuyet doi khong|canh bao|khuyen cao)\\b");

@@ -71,6 +71,7 @@ const RUT_GON = new Set([
   'bit.ly', 'tinyurl.com', 't.co', 'goo.gl', 'ow.ly', 'is.gd', 'buff.ly',
   'rb.gy', 'cutt.ly', 'shorturl.at', 'rebrand.ly', 's.id', 'tiny.cc',
   's.net.vn', 'bom.so', 'bom.to', 'rg.link', 'surl.vn',
+  't.ly', 'v.gd', 'short.io', 'bit.do', 'clck.ru', 'gg.gg', 'ln.run', 'dub.sh', 'urlis.net',
 ]);
 
 const KHO_APP_CHINH_THUC = new Set([
@@ -291,11 +292,24 @@ function phanTichUrl(text = '') {
     if (!daBatNhai && !TEN_MIEN_CHINH_CHU.includes(reg)) {
       const tokens = host.split(/[.-]/);
       const tld = tokens[tokens.length - 1] || '';
-      const laTldRuiRo = ['top', 'xyz', 'icu', 'cc', 'buzz', 'click', 'link', 'tk', 'ml', 'ga', 'cf', 'gq', 'site', 'online', 'vip', 'loan'].includes(tld);
+      const laTldRuiRo = [
+        'top', 'xyz', 'icu', 'cc', 'buzz', 'click', 'link', 'tk', 'ml', 'ga', 'cf', 'gq',
+        'site', 'online', 'vip', 'loan', 'rest', 'cyou', 'shop', 'website', 'space',
+        'fun', 'live', 'work', 'monster', 'quest', 'sbs', 'cfd', 'bond', 'pro', 'store', 'life', 'help', 'asia',
+      ].includes(tld);
       if (tokens.includes('vcb') && !reg.endsWith('vietcombank.com.vn')) {
         them('WEB_BRAND_DOMAIN_MISMATCH', host);
         daBatNhai = true;
-      } else if (tokens.includes('gov') && !host.endsWith('.gov') && !host.includes('.gov.') && laTldRuiRo) {
+      } else if (tokens.includes('tcb') && !reg.endsWith('techcombank.com.vn')) {
+        them('WEB_BRAND_DOMAIN_MISMATCH', host);
+        daBatNhai = true;
+      } else if (tokens.includes('vtb') && !reg.endsWith('vietinbank.vn')) {
+        them('WEB_BRAND_DOMAIN_MISMATCH', host);
+        daBatNhai = true;
+      } else if (tokens.includes('bhxh') && !reg.endsWith('baohiemxahoi.gov.vn')) {
+        them('WEB_BRAND_DOMAIN_MISMATCH', host);
+        daBatNhai = true;
+      } else if ((tokens.includes('gov') || tokens.includes('bca')) && !host.endsWith('.gov') && !host.includes('.gov.') && laTldRuiRo) {
         them('WEB_BRAND_DOMAIN_MISMATCH', host);
         daBatNhai = true;
       }
@@ -320,7 +334,7 @@ function phanTichUrl(text = '') {
       }
     }
 
-    if (/\.apk(\?|$|#)/i.test(url) && !KHO_APP_CHINH_THUC.has(host) && !KHO_APP_CHINH_THUC.has(reg)) {
+    if (/\.(apk|exe|msi|scr|bat|ipa|mobileconfig)(\?|$|#)/i.test(url) && !KHO_APP_CHINH_THUC.has(host) && !KHO_APP_CHINH_THUC.has(reg)) {
       them('WEB_NONOFFICIAL_APP_SOURCE', url);
     }
   }

@@ -46,6 +46,10 @@ const GOI_MAC_DINH: GoiLuatCucBo = {
     'bhxh', 'vneid', 'vssid', 'etax', 'điện lực', 'evn',
     'vietnampost', 'vnpost', 'viettel post', 'giao hàng nhanh', 'giao hàng tiết kiệm',
     'hải quan', 'hoàn thuế', 'cắt điện', 'chuyển tiền đối ứng',
+    'lệnh bắt', 'triệu tập', 'khởi tố', 'phong tỏa',
+    'vietcombank', 'bidv', 'vietinbank', 'agribank', 'techcombank', 'mbbank',
+    'vpbank', 'acb', 'sacombank', 'tpbank', 'hdbank', 'vib', 'msb', 'ocb', 'shb', 'seabank',
+    'momo', 'zalopay', 'vnpay', 'viettel money',
   ],
   allowlistTenMien: [
     'dichvucong.gov.vn', 'bocongan.gov.vn', 'csgt.vn', 'gdt.gov.vn', 'thuedientu.gdt.gov.vn',
@@ -63,8 +67,15 @@ const GOI_MAC_DINH: GoiLuatCucBo = {
     'rest', 'cyou', 'shop', 'online', 'site', 'website', 'space', 'fun', 'live', 'work',
     'monster', 'quest', 'sbs', 'cfd', 'bond', 'pro', 'store', 'life', 'help', 'asia',
   ],
-  caiApp: ['cài đặt file', 'tải ứng dụng', 'cài app', 'file apk', '.apk', 'quyền trợ năng', 'anydesk', 'teamviewer', 'ultraview'],
-  biMat: ['giữ bí mật', 'không được nói', 'đừng nói với ai', 'đừng cho ai biết', 'không báo gia đình'],
+  caiApp: [
+    'cài đặt file', 'tải ứng dụng', 'cài app', 'file apk', '.apk', 'quyền trợ năng',
+    'anydesk', 'teamviewer', 'ultraview', 'rustdesk', 'airdroid', 'chia sẻ màn hình',
+    'cài đặt apk', 'cập nhật sinh trắc học',
+  ],
+  biMat: [
+    'giữ bí mật', 'không được nói', 'đừng nói với ai', 'đừng cho ai biết', 'không báo gia đình',
+    'không nói với người thân', 'không nói với con cái', 'tuyệt đối giữ bí mật',
+  ],
   maXacThucYeuCau: ['đọc', 'gửi', 'cung cấp', 'nhập', 'cho tôi', 'nhắn', 'cho em', 'cho cháu'],
   maXacThucDoiTuong: ['mã otp', 'otp', 'mã xác thực', 'mã xác nhận', 'mật khẩu', 'mã pin', 'mã cvv'],
 };
@@ -145,10 +156,14 @@ export async function dongBoBoLuatTang0(): Promise<boolean> {
 }
 
 function trichTenMienTaiMay(vanBan: string): Array<{ url: string; host: string; laApk: boolean }> {
+  const sachChe = String(vanBan || '')
+    .replace(/\bhxxps:\/\//gi, 'https://')
+    .replace(/\bhxxp:\/\//gi, 'http://')
+    .replace(/\[\.\]|\(\.\)|\{\.\}/g, '.');
   const kq: Array<{ url: string; host: string; laApk: boolean }> = [];
   const re = /\b(?:https?:\/\/)?((?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,24})(\/[^\s<>"')\]]*)?/gi;
   let m: RegExpExecArray | null;
-  while ((m = re.exec(vanBan)) !== null) {
+  while ((m = re.exec(sachChe)) !== null) {
     const host = (m[1] || '').toLowerCase().replace(/\.$/, '');
     const full = m[0].replace(/[.,;:!?)]+$/, '');
     if (!host) continue;

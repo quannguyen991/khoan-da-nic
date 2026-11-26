@@ -128,5 +128,15 @@ describe('Bộ sàng lọc Tầng 0 tại máy (`tang-0-cuc-bo.ts`)', () => {
     const evnFake = sangLocTinDenTaiMay('Thông báo cắt điện khẩn cấp EVN, xem hóa đơn tại evn-hoadon.online');
     assert.equal(evnFake.coDauHieu, true);
     assert.equal(evnFake.nhanDeXuat, 'CAO');
+
+    const cheLink = sangLocTinDenTaiMay('Vietcombank yêu cầu xác thực tại hxxps://vietcombank-login[.]shop/xac-thuc');
+    assert.equal(cheLink.coDauHieu, true);
+    assert.equal(cheLink.nhanDeXuat, 'CAO');
+    assert.ok(cheLink.luatKhopVoi.includes('R1'));
+
+    const rustDesk = sangLocTinDenTaiMay('Bác cài đặt phần mềm RustDesk tại rustdesk-hotro.top để cập nhật sinh trắc học');
+    assert.equal(rustDesk.coDauHieu, true);
+    assert.equal(rustDesk.nhanDeXuat, 'CAO');
+    assert.equal(rustDesk.canThiep, 'PROTECTED_CRITICAL');
   });
 });

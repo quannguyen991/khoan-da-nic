@@ -93,9 +93,17 @@ test('mở rộng thương hiệu Việt Nam: phát hiện giả mạo MoMo, eTa
     { vanBan: 'EVN thông báo cắt điện, xem tại https://evn-thanhtoan.xyz/bill' },
     { vanBan: 'ViettelPost giao hàng thất bại, xác nhận tại https://viettelpost-giaohang.shop/don' },
     { vanBan: 'HDBank yêu cầu xác thực tại https://hdbank-baomat.site/login' },
+    { vanBan: 'Xác thực TCB tại https://tcb-xacthuc.top/otp' },
+    { vanBan: 'Đồng bộ BHXH tại https://bhxh-capnhat.online/ho-so' },
   ];
   for (const c of cases) {
     const r = analyze(c);
     assert.ok(r.maLyDo.includes('WEB_BRAND_DOMAIN_MISMATCH'), `Thiếu WEB_BRAND_DOMAIN_MISMATCH cho: ${c.vanBan} -> [${r.maLyDo}]`);
   }
+
+  const rShort = analyze({ vanBan: 'Bác bấm vào https://t.ly/check-nhanh để nhận tiền' });
+  assert.ok(rShort.maLyDo.includes('WEB_SHORTENER_REDIRECT'));
+
+  const rExe = analyze({ vanBan: 'Tải file cấu hình tại https://vneid-capnhat.top/profile.mobileconfig' });
+  assert.ok(rExe.maLyDo.includes('WEB_NONOFFICIAL_APP_SOURCE'));
 });
