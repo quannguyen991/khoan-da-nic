@@ -257,3 +257,34 @@ test('⑧ crawl Facebook 9222 (hai chiều): domain sau dấu hai chấm, cài a
     assert.strictEqual(r.nhan, 'CHUA_THAY', `báo oan tin lành Facebook: ${r.nhan} [${r.maLyDo}] — ${lanh}`);
   }
 });
+
+// ── ⑨ Lượt 6 (rule 1.6.12): thu thập 35 nhóm Facebook chống lừa đảo ───────────
+
+test('⑨ crawl 35 nhóm Facebook (hai chiều): mua hàng ảo, card điện thoại, phí thông quan, thu hồi vốn treo', () => {
+  const rAo = cham('Để được miễn phí khóa học, chị hỗ trợ tập đoàn mua hàng ảo trên app, thanh toán đơn hàng xong sẽ được hoàn tiền và nhận thêm 10% hoa hồng ngay, nếu hệ thống báo lỗi chỉ cần đặt thêm 1 đơn hàng nữa để rút hết vốn.');
+  assert.strictEqual(rAo.nhan, 'CAO', `mua hang ao dat them don: [${rAo.maLyDo}]`);
+  assert.ok(rAo.maLyDo.includes('OFF_TASK_PREPAY') && rAo.maLyDo.includes('FIN_RECOVERY_FEE'), `[${rAo.maLyDo}]`);
+
+  const rCard = cham('Anh mua cho em 1 card điện thoại đi rồi em cám ơn anh bằng cách gửi cho anh 1 video riêng tư nhé.');
+  assert.strictEqual(rCard.nhan, 'NGHI_NGO', `card dien thoai: [${rCard.maLyDo}]`);
+  assert.ok(rCard.maLyDo.includes('FIN_GIFT_CARD_PAYMENT'), `[${rCard.maLyDo}]`);
+
+  const rThongQuan = cham('Tôi đang chiến đấu tại chiến trường nước ngoài, muốn nhờ bạn nhận giùm một thùng quà và số tiền lớn qua đường bưu điện quốc tế, đóng phí thông quan nhận quà.');
+  assert.strictEqual(rThongQuan.nhan, 'NGHI_NGO', `phi thong quan: [${rThongQuan.maLyDo}]`);
+  assert.ok(rThongQuan.maLyDo.includes('OFF_ADVANCE_FEE') && rThongQuan.maLyDo.includes('ID_FAMILY_IMPERSONATION'), `[${rThongQuan.maLyDo}]`);
+
+  const rSeeding1 = cham('THU HỒI VỐN BỊ TREO TRÊN CÁC SÀN APP TIKI, LAZADA, TAOBAO, IB ĐỂ ĐƯỢC TƯ VẤN VÀ HỖ TRỢ.');
+  assert.ok(rSeeding1.maLyDo.includes('ID_RECOVERY_SUPPORT_IMPERSONATION'), `thu hoi von bi treo: [${rSeeding1.maLyDo}]`);
+
+  const rSeeding2 = cham('Mình bị lừa mất tiền nhưng may lấy lại được rồi, ai cần thì nhắn mình chỉ cho chỗ lấy lại nhé.');
+  assert.ok(rSeeding2.maLyDo.includes('ID_RECOVERY_SUPPORT_IMPERSONATION'), `chi cho cho lay lai: [${rSeeding2.maLyDo}]`);
+
+  for (const lanh of [
+    'Cháu mua tặng bác 1 card điện thoại mừng sinh nhật nhé.',
+    'Shop mình đang có chương trình tặng thẻ hội viên miễn phí khi mua hàng trực tiếp tại cửa hàng, không cần chuyển khoản trước.',
+    'Lưu ý cả nhà ơi: Bọn lừa đảo hay giả danh shipper hoặc luật sư hỗ trợ thu hồi tiền treo trên mạng, tuyệt đối không nhắn tin hay chuyển tiền trước cho ai cả.',
+  ]) {
+    const r = cham(lanh);
+    assert.strictEqual(r.nhan, 'CHUA_THAY', `báo oan tin lành nhóm FB: ${r.nhan} [${r.maLyDo}] — ${lanh}`);
+  }
+});

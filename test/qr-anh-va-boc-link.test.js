@@ -106,4 +106,13 @@ test('mở rộng thương hiệu Việt Nam: phát hiện giả mạo MoMo, eTa
 
   const rExe = analyze({ vanBan: 'Tải file cấu hình tại https://vneid-capnhat.top/profile.mobileconfig' });
   assert.ok(rExe.maLyDo.includes('WEB_NONOFFICIAL_APP_SOURCE'));
+
+  const rVssid = analyze({ vanBan: 'Cơ quan thông báo VssID của bác bị tạm dừng, cập nhật đồng bộ ngay tại https://vssid-capnhat.top' });
+  assert.ok(rVssid.maLyDo.includes('ID_TAX_BENEFIT_IMPERSONATION'));
+
+  const rShip = analyze({ vanBan: 'ViettelPost thông báo đơn hàng lưu kho sai địa chỉ, đóng phí nhận hoàn tiền tại https://viettelpost-donhang.shop' });
+  assert.ok(rShip.maLyDo.includes('ID_DELIVERY_IMPERSONATION'));
+
+  const rTask = analyze({ vanBan: 'Hệ thống báo sai thao tác bị đóng băng, bác cần nạp thêm tiền làm lại đơn mới rút được' });
+  assert.ok(rTask.maLyDo.includes('OFF_TASK_PREPAY'));
 });

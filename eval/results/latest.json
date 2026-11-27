@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "commitSha": "89895f1",
+    "commitSha": "13316cf",
     "analysisVersion": "1.0.0",
     "registryVersion": "1.2.0",
-    "ruleVersion": "1.6.11",
+    "ruleVersion": "1.6.12",
     "promptVersion": "1.4.2",
     "datasetVersion": "d12ba1bd284f",
     "datasetSize": 571,
@@ -142,6 +142,6 @@
     "theoStatus": {},
     "viDu": null
   },
-  "thoiGianGiay": 6.5,
+  "thoiGianGiay": 9.7,
   "bo": "chinh"
 }
