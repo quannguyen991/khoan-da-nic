@@ -434,11 +434,31 @@ function layCacDuong(env = process.env) {
    * Dự phòng Gemini: chỉ khi đường chính KHÔNG phải Gemini (tránh thử lại đúng
    * nhà cung cấp vừa chết) và có khoá riêng.
    */
-  if (env.GEMINI_API_KEY && !ds.some((d) => d.noiChay === 'gemini')) {
-    ds.push({
+  /*
+   * ═════ NHIỀU KHOÁ GEMINI — MỖI KHOÁ MỘT ĐƯỜNG, CÓ NGẮT RIÊNG (27/11/2026) ═════
+   *
+   * `GEMINI_API_KEY` + `GOOGLE_AI_STUDIO_KEY_1..5` (cùng một nhà cung cấp). Khoá này
+   * hết hạn mức thì khoá kia còn chạy. Mỗi khoá là một đường riêng để `ghiHong`
+   * (khoá = base::model) không ngắt cả năm khoá vì một khoá. Thứ tự: khoá chính trước.
+   */
+  const khoaGemini = [...new Set([
+    env.GEMINI_API_KEY,
+    ...Object.keys(env).filter((t) => /^GOOGLE_AI_STUDIO_KEY_\d+$/.test(t)).sort().map((t) => env[t]),
+  ].filter(Boolean))];
+  khoaGemini.forEach((key, i) => {
+    if (ds.some((d) => d.noiChay === 'gemini' && d.key === key)) return;
+    ds.push(duongGemini(env, key, i));
+  });
+
+  return ds;
+}
+
+function duongGemini(env, key, i) {
+  return {
       daCauHinh: true,
       base: GEMINI_BASE,
-      key: env.GEMINI_API_KEY,
+      key,
+      nhanKhoa: `gemini#${i}`,
       model: env.GEMINI_MODEL || 'gemini-3.6-flash',
       mucSuyLuan: env.LLM_REASONING_EFFORT || 'low',
       noiChay: 'gemini',
@@ -461,10 +481,7 @@ function layCacDuong(env = process.env) {
        */
       timeout: Number(env.GEMINI_TIMEOUT_MS) || TIMEOUT_DU_PHONG_CUOI,
       laDuPhong: true,
-    });
-  }
-
-  return ds;
+  };
 }
 
 /**
@@ -503,7 +520,7 @@ const NGAT_TRONG_MS = 5 * 60_000;
 /** khoá = base + model. Một model hỏng không nên làm tội model khác cùng gateway. */
 const soHong = new Map();
 
-function khoaDuong(c) { return `${c.base}::${c.model}`; }
+function khoaDuong(c) { return `${c.base}::${c.model}${c.nhanKhoa ? `::${c.nhanKhoa}` : ''}`; }
 
 function dangNgat(c, bayGio) {
   const t = soHong.get(khoaDuong(c));
