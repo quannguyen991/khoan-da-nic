@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Khoan Đã — Tờ rơi A5</title>
+<style>
+  @font-face { font-family: 'QS'; font-weight: 400; src: url('../../public/phong-chu/quicksand-vietnamese-400-normal.woff2') format('woff2'); unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+1EA0-1EF9, U+20AB; }
+  @font-face { font-family: 'QS'; font-weight: 400; src: url('../../public/phong-chu/quicksand-latin-400-normal.woff2') format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+  @font-face { font-family: 'QS'; font-weight: 700; src: url('../../public/phong-chu/quicksand-vietnamese-700-normal.woff2') format('woff2'); unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+1EA0-1EF9, U+20AB; }
+  @font-face { font-family: 'QS'; font-weight: 700; src: url('../../public/phong-chu/quicksand-latin-700-normal.woff2') format('woff2'); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+
+  @page { size: A5 portrait; margin: 0; }
+  :root { --tim: #5b3fa0; --tim-nhat: #ad8af0; --nen: #faf8ff; --chu: #1f1733; --phu: #4a3f63; --do: #b42318; --vang: #fff4d6; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #ddd; font-family: 'QS', system-ui, sans-serif; color: var(--chu); -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .trang { width: 148mm; height: 210mm; background: var(--nen); position: relative; overflow: hidden; padding: 9mm 9mm 8mm; page-break-after: always; break-after: page; }
+  .trang:last-child { page-break-after: auto; break-after: auto; }
+  @media screen { .trang { margin: 10px auto; box-shadow: 0 2px 12px rgba(0,0,0,.2); } }
+
+  .dau { display: flex; align-items: center; gap: 3mm; }
+  .dau img.logo { width: 13mm; height: 13mm; border-radius: 3mm; }
+  .dau .ten { font-size: 15pt; font-weight: 700; color: var(--tim); line-height: 1.3; }
+  .dau .khau-hieu { font-size: 8.5pt; color: var(--phu); line-height: 1.4; }
+
+  h1 { font-size: 19pt; line-height: 1.3; color: var(--chu); margin: 5mm 0 2mm; }
+  h2 { font-size: 11.5pt; line-height: 1.35; color: var(--tim); margin: 4mm 0 1.5mm; }
+  p, li { font-size: 9.5pt; line-height: 1.55; color: var(--chu); }
+  ul { padding-left: 4mm; }
+  li + li { margin-top: 1mm; }
+
+  .the { background: #fff; border: 0.3mm solid #d9cdf2; border-radius: 4mm; padding: 3mm 3.5mm; }
+
+  .qr-hang { display: flex; gap: 4mm; align-items: center; }
+  .qr-hang img { width: 26mm; height: 26mm; flex: none; }
+  .qr-hang .nhan { font-size: 9pt; line-height: 1.45; color: var(--phu); }
+  .qr-hang .nhan b { display: block; font-size: 12pt; color: var(--chu); line-height: 1.3; margin-bottom: 1mm; }
+
+  .hang-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 3mm; }
+
+  .mo-ta { font-size: 10pt; font-weight: 700; color: var(--tim); line-height: 1.5; margin-top: 3mm; }
+
+  .buoc { display: grid; grid-template-columns: 8mm 1fr; gap: 2.5mm; margin-top: 2.2mm; align-items: start; }
+  .so { width: 8mm; height: 8mm; border-radius: 50%; background: var(--tim); color: #fff; font-weight: 700; font-size: 11pt; text-align: center; line-height: 8mm; }
+  .buoc p { font-size: 9.3pt; line-height: 1.5; }
+  .buoc b { color: var(--chu); }
+
+  .anh { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3mm; margin-top: 3mm; }
+  .anh figure { text-align: center; }
+  .anh img { width: 100%; height: 58mm; object-fit: cover; object-position: top; border-radius: 4mm; display: block; box-shadow: 0 1.2mm 3mm rgba(91,63,160,.22); border: 0.4mm solid #fff; }
+  .anh figcaption { font-size: 7.6pt; line-height: 1.35; color: var(--phu); margin-top: 1.8mm; }
+
+  .canh-bao { background: var(--vang); border-radius: 3mm; padding: 2.5mm 3mm; margin-top: 3mm; font-size: 8.8pt; line-height: 1.5; color: #4a3500; }
+
+  .chan { position: absolute; left: 9mm; right: 9mm; bottom: 6mm; display: flex; justify-content: space-between; font-size: 7.8pt; color: var(--phu); line-height: 1.4; border-top: 0.3mm solid #d9cdf2; padding-top: 1.5mm; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════ MẶT 1 ═══════════ -->
+<section class="trang">
+  <div class="dau">
+    <img class="logo" src="img/logo-512.png" alt="">
+    <div>
+      <div class="ten">Khoan Đã</div>
+      <div class="khau-hieu">Pause. Verify. Protect.</div>
+    </div>
+  </div>
+
+  <h1>Về ứng dụng Khoan Đã</h1>
+  <p>Khoan Đã là trợ lý cảnh giác cho cả gia đình. Khi có ai gọi điện hay nhắn tin yêu cầu chuyển tiền, đưa mã OTP hay cài ứng dụng, Khoan Đã giúp bác <b>dừng lại 60 giây</b>, kiểm tra những dấu hiệu quen thuộc của lừa đảo, và kéo một người thân vào cuộc trước khi làm theo.</p>
+
+  <div class="the" style="margin-top:3.5mm">
+    <div class="qr-hang">
+      <img src="qr-khoanda.png" alt="Mã QR khoanda.com">
+      <div class="nhan">
+        <b>Truy cập trang web</b>
+        Quét mã QR để xem giới thiệu và hướng dẫn tính năng<br><b style="display:inline;font-size:10.5pt;color:var(--tim)">khoanda.com/gioi-thieu</b>
+      </div>
+    </div>
+  </div>
+
+  <h2>Sứ mệnh</h2>
+  <p>Làm cho mọi người, đặc biệt là người lớn tuổi và con cháu của họ, có thêm một khoảng dừng để suy nghĩ trước những cuộc gọi và tin nhắn lừa đảo.</p>
+
+  <h2>Mục tiêu</h2>
+  <ul>
+    <li>Giúp người dùng nhận ra dấu hiệu lừa đảo trong lúc đang bị gọi hoặc nhắn tin.</li>
+    <li>Kết nối bố mẹ với con cháu để cùng xác nhận trước khi chuyển tiền.</li>
+    <li>Nói rõ những gì Khoan Đã <i>chưa kiểm được</i>, để không ai hiểu nhầm là đã an toàn.</li>
+  </ul>
+
+  <div class="the" style="margin-top:3.5mm">
+    <div class="qr-hang">
+      <img src="qr-fanpage.png" alt="Mã QR fanpage Facebook Khoan Đã">
+      <div class="nhan">
+        <b>Fanpage Facebook</b>
+        Quét mã QR để theo dõi và trao đổi cùng chúng tôi.
+      </div>
+    </div>
+  </div>
+
+  <p class="mo-ta">Lan toả, nâng cao nhận thức người dùng về lừa đảo trực tuyến.</p>
+
+  <div class="chan"><span>khoanda.com</span><span>Mặt 1 / 2</span></div>
+</section>
+
+<!-- ═══════════ MẶT 2 ═══════════ -->
+<section class="trang">
+  <div class="dau">
+    <img class="logo" src="img/logo-512.png" alt="">
+    <div>
+      <div class="ten">Cách sử dụng Khoan Đã</div>
+      <div class="khau-hieu">Pause. Verify. Protect.</div>
+    </div>
+  </div>
+
+  <h2 style="margin-top:4.5mm">Bốn bước khi bị gọi hoặc nhắn tin</h2>
+  <div class="buoc"><div class="so">1</div><p><b>Mở Khoan Đã</b> và chạm <b>"Someone calling you?"</b> (hoặc ô nhập để dán nội dung tin nhắn).</p></div>
+  <div class="buoc"><div class="so">2</div><p><b>Trả lời vài câu hỏi ngắn</b>: họ đang yêu cầu bác chuyển tiền, đọc mã OTP, hay cài ứng dụng? Chỉ cần chạm vào lựa chọn có sẵn.</p></div>
+  <div class="buoc"><div class="so">3</div><p><b>Đọc kết quả</b>: <b>Nguy hiểm cao</b> thì dừng ngay và không làm theo. <b>Nghi ngờ</b> thì xác minh qua số điện thoại chính thức. <b>Chưa thấy dấu hiệu rủi ro</b> chỉ có nghĩa là trong những gì bác đưa vào chưa thấy dấu hiệu, không phải lời hứa an toàn.</p></div>
+  <div class="buoc"><div class="so">4</div><p><b>Bấm "Call Family"</b> để con cháu cùng xem trước khi làm bất cứ việc gì liên quan đến tiền.</p></div>
+
+  <div class="canh-bao"><b>Nhớ:</b> Khoan Đã không chặn được cuộc gọi hay giao dịch ngân hàng, và không thể lấy lại tiền đã chuyển. Điều app làm là cho bác thêm một khoảng dừng 60 giây để suy nghĩ và hỏi người thân.</div>
+
+  <h2 style="margin-top:3.5mm">Ảnh sản phẩm</h2>
+  <div class="anh">
+    <figure><img src="img/03-question-1.jpg" alt=""><figcaption>Câu hỏi từng bước</figcaption></figure>
+    <figure><img src="img/05-result-high-risk.jpg" alt=""><figcaption>Kết quả "Nguy hiểm cao"</figcaption></figure>
+    <figure><img src="img/07-pause-60s.jpg" alt=""><figcaption>Dừng 60 giây</figcaption></figure>
+    <figure><img src="img/10-family-loved-ones.jpg" alt=""><figcaption>Người thân và con cháu</figcaption></figure>
+  </div>
+
+  <div class="chan"><span>khoanda.com · facebook: Khoan Đã</span><span>Mặt 2 / 2</span></div>
+</section>
+
+</body>
+</html>
