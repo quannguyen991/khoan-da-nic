@@ -1613,6 +1613,19 @@ app.post('/api/detect/canh-bao', async (req, res, next) => {
 });
 
 /**
+ * Ai được đụng vào một cảnh báo hai phía: chủ tài khoản, con cháu đang trong vòng
+ * ghép, hoặc người nhận khi cảnh báo không gắn tài khoản. Người lạ ⇒ coi như
+ * không tồn tại (404), không lộ việc mã `cb_…` có thật.
+ */
+async function quyenCanhBaoHaiPhia(banGhi, taiKhoanId) {
+  const laChu = Boolean(banGhi.chuTaiKhoanId && banGhi.chuTaiKhoanId === taiKhoanId);
+  const dsGhep = banGhi.chuTaiKhoanId ? await KP.danhSachDaGhep(banGhi.chuTaiKhoanId) : [];
+  const laConDaGhep = dsGhep.includes(taiKhoanId);
+  const laNguoiNhanKhongTaiKhoan = Boolean(!banGhi.chuTaiKhoanId && banGhi.nguoiThanId === taiKhoanId);
+  return { duocXem: laChu || laConDaGhep || laNguoiNhanKhongTaiKhoan, laChu };
+}
+
+/**
  * GET /api/detect/canh-bao/:id — màn Guardian đọc chi tiết tối thiểu của cảnh báo hai phía (`cb_...`).
  * §6.9 & §9.8: chỉ chủ tài khoản, người nhận cảnh báo hoặc con cháu đang trong vòng ghép mới đọc được;
  * người lạ / người đã bị thu hồi nhận 404. Khi người thân mở, tự ghi nhận `da_mo` (§9.4).
@@ -1623,14 +1636,8 @@ app.get('/api/detect/canh-bao/:id', canPhien, chanDoc, async (req, res) => {
   const banGhi = khoCanhBao.lay(req.params.id);
   if (!banGhi) return res.status(404).json({ maLoi: 'KHONG_CO_CANH_BAO' });
 
-  const laChu = Boolean(banGhi.chuTaiKhoanId && banGhi.chuTaiKhoanId === req.taiKhoanId);
-  const dsGhep = banGhi.chuTaiKhoanId ? await KP.danhSachDaGhep(banGhi.chuTaiKhoanId) : [];
-  const laConDaGhep = dsGhep.includes(req.taiKhoanId);
-  const laNguoiNhanKhongTaiKhoan = Boolean(!banGhi.chuTaiKhoanId && banGhi.nguoiThanId === req.taiKhoanId);
-
-  if (!laChu && !laConDaGhep && !laNguoiNhanKhongTaiKhoan) {
-    return res.status(404).json({ maLoi: 'KHONG_CO_CANH_BAO' });
-  }
+  const { duocXem, laChu } = await quyenCanhBaoHaiPhia(banGhi, req.taiKhoanId);
+  if (!duocXem) return res.status(404).json({ maLoi: 'KHONG_CO_CANH_BAO' });
 
   if (!laChu && !banGhi.nguoiThanDaMo) {
     CB.ghiNhanMo(khoCanhBao, banGhi.id, Date.now());
@@ -1649,10 +1656,29 @@ app.get('/api/detect/canh-bao/:id', canPhien, chanDoc, async (req, res) => {
   });
 });
 
-/** Ghi hành vi trên một cảnh báo. Đây là dữ liệu hiệu chỉnh ngưỡng (§4.6). */
-app.post('/api/detect/canh-bao/:id/:hanhDong', (req, res) => {
+/**
+ * Ghi hành vi trên một cảnh báo. Đây là dữ liệu hiệu chỉnh ngưỡng (§4.6).
+ *
+ * 27/11/2026 — hai hành động PHÍA CON CHÁU (`goi`, `ket-qua`) đòi phiên đăng nhập
+ * và cùng quyền với route GET ở trên. Trước đây ai biết mã `cb_…` cũng ghi được
+ * "báo nhầm" vào dữ liệu hiệu chỉnh và vào màn của bố mẹ. Ba hành động PHÍA BÁC
+ * (`mo`, `toi-on`, `bac-goi`) giữ mở: máy bác có thể chưa đăng nhập (§5.3).
+ * `boi` của `ket-qua` lấy từ máy chủ, không tin chữ người gọi tự khai.
+ */
+const HANH_DONG_PHIA_CON = new Set(['goi', 'ket-qua']);
+app.post('/api/detect/canh-bao/:id/:hanhDong', chanDoc, async (req, res, next) => {
+  try {
   const { id, hanhDong } = req.params;
-  if (!khoCanhBao.lay(id)) return res.status(404).json({ maLoi: 'KHONG_CO_CANH_BAO' });
+  const banGhi = khoCanhBao.lay(id);
+  if (!banGhi) return res.status(404).json({ maLoi: 'KHONG_CO_CANH_BAO' });
+  let boiMayChu = null;
+  if (HANH_DONG_PHIA_CON.has(hanhDong)) {
+    const taiKhoanId = await KP.docPhien(req.headers.authorization).catch(() => null);
+    if (!taiKhoanId) return res.status(401).json({ maLoi: 'CHUA_DANG_NHAP' });
+    const { duocXem, laChu } = await quyenCanhBaoHaiPhia(banGhi, taiKhoanId);
+    if (!duocXem) return res.status(404).json({ maLoi: 'KHONG_CO_CANH_BAO' });
+    boiMayChu = laChu ? 'nguoi_cao_tuoi' : 'nguoi_than';
+  }
   const luc = Date.now();
   switch (hanhDong) {
     case 'mo': return res.json(CB.ghiNhanMo(khoCanhBao, id, luc));
@@ -1664,10 +1690,11 @@ app.post('/api/detect/canh-bao/:id/:hanhDong', (req, res) => {
     case 'toi-on': return res.json(CB.ghiNhanToiOn(khoCanhBao, id, luc));
     case 'ket-qua':
       try {
-        return res.json(CB.danhDauKetQua(khoCanhBao, id, req.body?.ketQua, req.body?.boi ?? null));
+        return res.json(CB.danhDauKetQua(khoCanhBao, id, req.body?.ketQua, boiMayChu));
       } catch { return res.status(400).json({ maLoi: 'KET_QUA_KHONG_HOP_LE' }); }
     default: return res.status(404).json({ maLoi: 'HANH_DONG_LA' });
   }
+  } catch (e) { return next(e); }
 });
 
 /** POST /api/dien-tap/phat — phiếu đồng ý là CỔNG CỨNG. */
