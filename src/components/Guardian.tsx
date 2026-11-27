@@ -19,7 +19,7 @@ import {
 import { ViewState, NguoiThan } from '../App';
 import { api } from '../api-goc';
 import {
-  dangNhap as dangNhapTaiKhoan, type HoSo as HoSoTaiKhoan, docPhien, docVongGhep, nhapMaGhep, LoiTaiKhoan,
+  dangNhap as dangNhapTaiKhoan, dangKy as dangKyTaiKhoan, type HoSo as HoSoTaiKhoan, docPhien, docVongGhep, nhapMaGhep, LoiTaiKhoan,
   docSuKienBaoDong, baoConDaGoi, type SuKienBaoDong,
   docCanhBaoHaiPhia, ghiHanhDongCanhBaoHaiPhia, type ChiTietCanhBaoHaiPhia,
   docCuocGoiThuKyBoMe, danhDauCuocGoiThuKyBoMe, type CuocGoiThuKyBoMe,
@@ -156,6 +156,13 @@ export function GuardianAuthView({
 }) {
   const [phone, setPhone] = useState('');
   const [matKhau, setMatKhau] = useState('');
+  const [ten, setTen] = useState('');
+  /*
+   * 27/11/2026 — màn này từng CHỈ có đăng nhập. Người con mới cài app, chọn vai
+   * "Con cháu", thì không có đường nào tạo tài khoản — nên không nối được máy bố
+   * mẹ, tức cả tính năng con cháu đứng im với người dùng mới.
+   */
+  const [dangTao, setDangTao] = useState(false);
   const [loi, setLoi] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const tr = (k: string) => (t ? t(k) : k);
@@ -168,10 +175,12 @@ export function GuardianAuthView({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoi(null);
-    if (!phone.trim() || !matKhau) { setLoi('THIEU_THONG_TIN'); return; }
+    if (!phone.trim() || !matKhau || (dangTao && !ten.trim())) { setLoi('THIEU_THONG_TIN'); return; }
     setLoading(true);
     try {
-      const hs = await dangNhapTaiKhoan(phone.trim(), matKhau);
+      const hs = dangTao
+        ? await dangKyTaiKhoan(phone.trim(), matKhau, ten.trim())
+        : await dangNhapTaiKhoan(phone.trim(), matKhau);
       onDangNhapXong(hs);
       if (setUserRole) setUserRole('guardian');
       setView('guardian');
@@ -187,19 +196,33 @@ export function GuardianAuthView({
       initial={{ opacity: 0, scale: 0.98 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.98 }}
-      className="flex-1 flex flex-col items-center justify-center w-full px-6 py-10 max-w-md mx-auto"
+      className="flex-1 flex flex-col items-center justify-start sm:justify-center w-full px-4 sm:px-6 py-6 sm:py-10 max-w-md mx-auto"
     >
-      <div className="w-full bg-white rounded-3xl p-8 shadow-xl border border-sky-100">
+      <div className="w-full bg-white rounded-3xl p-6 sm:p-8 shadow-[0_10px_28px_rgba(30,41,59,0.08)] border border-sky-100">
         <div className="flex justify-center mb-4">
           <div className="w-12 h-12 bg-sky-100 rounded-2xl flex items-center justify-center text-sky-600">
             <ShieldCheck size={28} />
           </div>
         </div>
 
-        <h2 className="text-2xl font-black text-slate-900 text-center mb-1">{tr("Đăng nhập Guardian")}</h2>
+        <h2 className="text-2xl font-black text-slate-900 text-center mb-1">{dangTao ? tr("Tạo tài khoản") : tr("Đăng nhập Guardian")}</h2>
         <p className="text-[14px] text-slate-500 text-center mb-6">{tr("Kết nối để quản lý và bảo vệ thiết bị của Bố/Mẹ")}</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {dangTao && (
+            <div>
+              <label htmlFor="g-ten" className="text-[14px] font-bold text-slate-600 mb-1.5 block">{tr("Tên của con cháu")}</label>
+              <input
+                id="g-ten"
+                value={ten}
+                onChange={(e) => setTen(e.target.value)}
+                placeholder={tr("Ví dụ: Nguyễn Văn An")}
+                maxLength={60}
+                autoComplete="name"
+                className="w-full min-h-[52px] bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-[16px] font-medium text-slate-900 outline-none focus:border-sky-500 focus:bg-white transition-colors"
+              />
+            </div>
+          )}
           <div>
             <label className="text-[14px] font-bold text-slate-600 mb-1.5 block">{tr("Số điện thoại của bạn")}</label>
             <input
@@ -208,7 +231,8 @@ export function GuardianAuthView({
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               placeholder={tr("Ví dụ: 0988 123 456")}
-              className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm font-medium text-slate-900 outline-none focus:border-sky-500 focus:bg-white transition-all"
+              autoComplete="tel"
+              className="w-full min-h-[52px] bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-[16px] font-medium text-slate-900 outline-none focus:border-sky-500 focus:bg-white transition-colors"
             />
           </div>
 
@@ -225,8 +249,9 @@ export function GuardianAuthView({
               required
               value={matKhau}
               onChange={(e) => setMatKhau(e.target.value)}
-              autoComplete="current-password"
-              className="w-full min-h-[52px] bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-[16px] font-medium text-slate-900 outline-none focus:border-sky-500 focus:bg-white transition-all"
+              autoComplete={dangTao ? 'new-password' : 'current-password'}
+              placeholder={dangTao ? tr("Ít nhất 6 ký tự") : undefined}
+              className="w-full min-h-[52px] bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-[16px] font-medium text-slate-900 outline-none focus:border-sky-500 focus:bg-white transition-colors"
             />
           </div>
 
@@ -241,13 +266,20 @@ export function GuardianAuthView({
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-sky-600 hover:bg-sky-700 active:scale-95 text-white py-3 rounded-2xl font-bold text-sm shadow-md transition-all flex items-center justify-center"
+            className="w-full min-h-[52px] bg-sky-600 hover:bg-sky-700 active:scale-[0.98] text-white py-3 rounded-2xl font-bold text-[16px] shadow-md transition-transform flex items-center justify-center disabled:opacity-60"
           >
             {loading ? (
               <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
             ) : (
-              tr("Đăng nhập & Tiếp tục")
+              dangTao ? tr("Tạo tài khoản") : tr("Đăng nhập & Tiếp tục")
             )}
+          </button>
+          <button
+            type="button"
+            onClick={() => { setDangTao((x) => !x); setLoi(null); }}
+            className="w-full min-h-[48px] rounded-2xl border border-sky-200 bg-sky-50 text-sky-800 font-bold text-[15px] hover:bg-sky-100 transition-colors"
+          >
+            {dangTao ? tr("Tôi đã có tài khoản") : tr("Chưa có tài khoản? Tạo mới")}
           </button>
         </form>
 
@@ -340,7 +372,17 @@ export function GuardianView({
    */
   const [taiGhep, setTaiGhep] = useState<'dang_tai' | 'loi' | 'xong'>(coPhien ? 'dang_tai' : 'xong');
   useEffect(() => {
-    if (!coPhien) { setTaiGhep('xong'); return undefined; }
+    if (!coPhien) {
+      setTaiGhep('xong');
+      /*
+       * 27/11/2026 — ĐĂNG XUẤT THÌ BỎ TÊN VÀ SỐ CỦA BỐ MẸ. Bản trước giữ nguyên
+       * "Đã nối · <tên> · <số>" sau khi bấm Đăng xuất: người cầm máy sau vẫn đọc
+       * được, và màn khai một mối nối mà tài khoản hiện tại không có (§4.3).
+       */
+      setParentData((cu) => (cu?.network === 'that' ? null : cu));
+      setCuocGoiThuKy([]);
+      return undefined;
+    }
     let huy = false;
     let hen: number | undefined;
     let lan = 0;
@@ -457,7 +499,8 @@ export function GuardianView({
     };
     void tai();
     // Bố mẹ bấm gì thì con thấy trong vài giây — hỏi lại mỗi 5 giây khi thẻ còn mở.
-    const id = window.setInterval(() => { void tai(); }, 5000);
+    // 27/11/2026: tab ẩn thì thôi hỏi — đỡ tốn pin và mạng của máy con cháu.
+    const id = window.setInterval(() => { if (!document.hidden) void tai(); }, 5000);
     return () => { huy = true; window.clearInterval(id); };
   }, [suKienId, coPhien, laCanhBaoHaiPhia]);
 
@@ -470,7 +513,7 @@ export function GuardianView({
         .catch(() => undefined);
     };
     taiCuocGoi();
-    const id = window.setInterval(taiCuocGoi, 15_000);
+    const id = window.setInterval(() => { if (!document.hidden) taiCuocGoi(); }, 15_000);
     return () => { huy = true; window.clearInterval(id); };
   }, [laThat, coPhien]);
 
@@ -511,10 +554,6 @@ export function GuardianView({
     pinNotification: false,
   });
 
-  // Fast AI Situation Check Input
-  const [queryInput, setQueryInput] = useState('');
-  const [queryResult, setQueryResult] = useState<KetQuaKiem | null>(null);
-  const [isChecking, setIsChecking] = useState(false);
   const [sentAlertToast, setSentAlertToast] = useState(false);
   const [messageDraft, setMessageDraft] = useState<string | null>(null);
 
@@ -552,39 +591,6 @@ export function GuardianView({
     setRules(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
-  /**
-   * §4.2 — BỘ LUẬT DUY NHẤT LÀ `src/analysis/decision-engine.js`.
-   *
-   * ⚠️ BẢN TRƯỚC TỰ CHẤM ĐIỂM NGAY TRONG TRÌNH DUYỆT: một chuỗi `text.includes()`
-   * rồi tự đặt CAO / NGHI_NGO / CHUA_THAY, kèm câu "An toàn: Chưa phát hiện dấu
-   * hiệu lừa đảo phổ biến" — vừa là nhãn thứ tư bị §4.1 cấm tuyệt đối, vừa là
-   * một kết luận KHÔNG ai kiểm. Và đây là màn con cháu nhìn để yên tâm về bố mẹ,
-   * nên nó là chỗ tệ nhất để đặt một kết luận bịa.
-   *
-   * Giờ nó hỏi đúng đường mà bác dùng: `/api/analyze`, rồi hiện đúng thứ máy chủ
-   * trả — kể cả `chuaKiem`.
-   */
-  const handleQuickAiCheck = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!queryInput.trim()) return;
-
-    setIsChecking(true);
-    setQueryResult(null);
-    try {
-      const res = await fetch(api('/api/analyze'), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ vanBan: queryInput }),
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      setQueryResult(await res.json());
-    } catch {
-      // §4.3 — hỏng mạng thì nói là hỏng mạng, KHÔNG đoán lấy một mức.
-      setQueryResult({ khongGoiDuocMayChu: true });
-    } finally {
-      setIsChecking(false);
-    }
-  };
 
   /**
    * ⚠️ §11 CẤM CÂU "đã gửi cho người thân" KHI MỚI CHỈ MỞ BẢNG CHIA SẺ.
@@ -714,28 +720,6 @@ export function GuardianView({
         </p>
       )}
       {!laThat && taiGhep === 'xong' && (
-      <div className="flex flex-col lg:flex-row lg:items-center gap-3">
-        <div className="flex-1 bg-white border border-amber-200 rounded-2xl px-4 py-3 flex items-center gap-3 shadow-[0_6px_20px_rgba(120,53,15,0.05)]">
-          <span className="w-9 h-9 rounded-xl bg-amber-100 flex items-center justify-center shrink-0">
-            <Info size={18} className="text-amber-700" />
-          </span>
-          <p className="text-[14px] font-semibold text-slate-700 leading-snug">
-            {tr('Máy bố mẹ đang ở chế độ xem thử. Số liệu mẫu không phải trạng thái thật.')}
-          </p>
-        </div>
-
-        <button
-          type="button"
-          onClick={napDuLieuMau}
-          className="shrink-0 min-h-[52px] px-5 py-3 bg-sky-600 hover:bg-sky-700 text-white rounded-2xl font-bold text-[14px] flex items-center justify-center gap-2 active:scale-95 transition-transform shadow-[0_8px_18px_rgba(2,132,199,0.18)]"
-        >
-          <ShieldCheck size={18} />
-          {tr('Nạp tài khoản & máy mẫu')}
-        </button>
-      </div>
-      )}
-
-      {!laThat && taiGhep === 'xong' && (
         <form onSubmit={noiBangMa} className="bg-white rounded-[24px] p-5 border border-slate-200/80 shadow-[0_10px_28px_rgba(30,41,59,0.06)] flex flex-col gap-3">
           <h2 className="text-[17px] font-black text-slate-900">{tr('Nối với máy bố mẹ')}</h2>
           <p className="text-[14px] text-slate-600 leading-snug">
@@ -772,6 +756,33 @@ export function GuardianView({
             </button>
           )}
         </form>
+      )}
+
+      {/*
+        27/11/2026 — băng xem thử nằm DƯỚI ô nối máy và gọn lại: việc chính của người
+        con là nối máy thật. Nút nạp máy mẫu chỉ hiện khi CHƯA đăng nhập — đã có tài
+        khoản mà bấm nạp máy mẫu thì màn trộn số mẫu với tài khoản thật.
+      */}
+      {!laThat && taiGhep === 'xong' && (
+      <div className="flex flex-col sm:flex-row sm:items-center gap-2 bg-amber-50/70 border border-amber-200 rounded-2xl px-4 py-3">
+        <div className="flex-1 flex items-start gap-2.5">
+          <Info size={18} className="text-amber-700 shrink-0 mt-0.5" />
+          <p className="text-[14px] font-semibold text-slate-700 leading-snug">
+            {tr('Máy bố mẹ đang ở chế độ xem thử. Số liệu mẫu không phải trạng thái thật.')}
+          </p>
+        </div>
+
+        {!coPhien && !parentData && (
+        <button
+          type="button"
+          onClick={napDuLieuMau}
+          className="shrink-0 min-h-[48px] px-4 bg-white hover:bg-sky-50 text-sky-800 border border-sky-200 rounded-xl font-bold text-[14px] flex items-center justify-center gap-2 transition-colors"
+        >
+          <ShieldCheck size={16} />
+          {tr('Nạp tài khoản & máy mẫu')}
+        </button>
+        )}
+      </div>
       )}
 
       {/* PHẦN 3 — bật nhận cảnh báo của bố mẹ trên máy này (chỉ khi đã nối thật). */}
@@ -841,8 +852,12 @@ export function GuardianView({
                 </div>
               </div>
 
-              {/* Ví dụ hiển thị — có nhãn "ví dụ" ngay trên, xem băng ở đầu màn. */}
-              <div className="flex items-center gap-3 bg-slate-50 border border-slate-200 p-2.5 rounded-2xl shrink-0">
+              {/*
+                Ví dụ hiển thị — có nhãn "ví dụ" ngay trên, xem băng ở đầu màn.
+                27/11/2026: đã nối thật thì ẩn cả dải — ba dấu "—" chiếm chỗ mà không nói gì.
+              */}
+              {!laThat && (
+              <div className="flex items-center gap-3 bg-slate-50 border border-slate-200 p-2.5 rounded-2xl shrink-0 self-start sm:self-auto">
                 <div className="flex items-center gap-1 text-[14px] font-bold text-slate-500">
                   <BatteryMedium size={16} className="text-slate-400" />
                   <span>{parentData && !laThat ? '74%' : '—'}</span>
@@ -858,6 +873,7 @@ export function GuardianView({
                   <span>{parentData && !laThat ? tr('Vị trí mẫu') : '—'}</span>
                 </div>
               </div>
+              )}
             </div>
             {/* Nhịp bảo vệ (23/9/2026): chỉ khi đã nối THẬT; bố mẹ chưa bật thì nói đúng thế. */}
             {laThat && coPhien && <TrangThaiBaoVeBoMeView t={tr} />}
@@ -876,15 +892,17 @@ export function GuardianView({
             <a
               href={parentData?.phone ? `tel:${parentData.phone.replace(/\s/g, '')}` : undefined}
               aria-disabled={!parentData?.phone}
-              className="min-h-[48px] py-2.5 px-3 bg-slate-900 hover:bg-slate-800 active:scale-95 text-white rounded-2xl font-bold text-[14px] flex items-center justify-center gap-1.5 transition-transform"
+              className="aria-disabled:opacity-40 aria-disabled:pointer-events-none min-h-[48px] py-2.5 px-3 bg-slate-900 hover:bg-slate-800 active:scale-95 text-white rounded-2xl font-bold text-[14px] flex items-center justify-center gap-1.5 transition-transform"
             >
               <Phone size={14} className="text-sky-400" />
               {tr("Gọi điện")}
             </a>
 
             <button
+              type="button"
               onClick={sendSafetyReminderToParent}
-              className="min-h-[48px] py-2.5 px-3 bg-sky-50 hover:bg-sky-100 active:scale-95 text-sky-800 border border-sky-200 rounded-2xl font-bold text-[14px] flex items-center justify-center gap-1.5 transition-transform"
+              disabled={!parentData?.phone}
+              className="disabled:opacity-40 min-h-[48px] py-2.5 px-3 bg-sky-50 hover:bg-sky-100 active:scale-95 text-sky-800 border border-sky-200 rounded-2xl font-bold text-[14px] flex items-center justify-center gap-1.5 transition-transform"
             >
               <MessageSquare size={14} />
               {/* 25/9/2026: bỏ chữ "an toàn" (§4.1/§11) — nút gửi một lời nhắc, không hứa gì. */}
@@ -920,9 +938,12 @@ export function GuardianView({
             {/* 3 Core Toggles */}
             <div className="space-y-3.5">
               {/* Toggle 1: Block Unknown Numbers */}
-              <div 
+              <button
+                type="button"
+                role="switch"
+                aria-checked={rules.blockUnknown}
                 onClick={() => toggleRule('blockUnknown')}
-                className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 hover:bg-slate-100/80 cursor-pointer transition-colors border border-slate-100"
+                className="w-full text-left gap-3 flex items-center justify-between p-3 rounded-2xl bg-slate-50 hover:bg-slate-100/80 transition-colors border border-slate-100"
               >
                 {/*
                   ⚠️ §12 CẤM TỰ HỨA CHẶN CUỘC GỌI. Bản trước ghi "Chặn số lạ
@@ -932,13 +953,13 @@ export function GuardianView({
                   làm là HIỆN THẺ NHẮC trước khi bác bắt máy.
                 */}
                 <div>
-                  <h4 className="font-bold text-slate-900 text-[14px] sm:text-sm">{tr("Nhắc khi có số lạ gọi")}</h4>
-                  <p className="text-[14px] text-slate-500">{tr("Hiện thẻ nhắc trước khi bắt máy. Khoan Đã không chặn cuộc gọi.")}</p>
+                  <span className="block font-bold text-slate-900 text-[15px]">{tr("Nhắc khi có số lạ gọi")}</span>
+                  <span className="block text-[14px] text-slate-500">{tr("Hiện thẻ nhắc trước khi bắt máy. Khoan Đã không chặn cuộc gọi.")}</span>
                 </div>
                 <div className={`w-11 h-6 rounded-full transition-colors relative p-0.5 shrink-0 ${rules.blockUnknown ? 'bg-sky-600' : 'bg-slate-300'}`}>
                   <div className={`w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${rules.blockUnknown ? 'translate-x-5' : 'translate-x-0'}`} />
                 </div>
-              </div>
+              </button>
 
               {/*
                 ⚠️ 25/9/2026 — BỎ CÔNG TẮC "Cảnh báo chuyển khoản > 5 triệu — Nhắc dừng 60s
@@ -956,18 +977,21 @@ export function GuardianView({
               </div>
 
               {/* Toggle 3: Pinned Lockscreen Alert */}
-              <div 
+              <button
+                type="button"
+                role="switch"
+                aria-checked={rules.pinNotification}
                 onClick={() => toggleRule('pinNotification')}
-                className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 hover:bg-slate-100/80 cursor-pointer transition-colors border border-slate-100"
+                className="w-full text-left gap-3 flex items-center justify-between p-3 rounded-2xl bg-slate-50 hover:bg-slate-100/80 transition-colors border border-slate-100"
               >
                 <div>
-                  <h4 className="font-bold text-slate-900 text-[14px] sm:text-sm">{tr("Ghim nút cảnh giác trên máy bố mẹ")}</h4>
-                  <p className="text-[14px] text-slate-500">{tr("Hiển thị thanh công cụ khẩn cấp liên tục")}</p>
+                  <span className="block font-bold text-slate-900 text-[15px]">{tr("Ghim nút cảnh giác trên máy bố mẹ")}</span>
+                  <span className="block text-[14px] text-slate-500">{tr("Hiển thị thanh công cụ khẩn cấp liên tục")}</span>
                 </div>
                 <div className={`w-11 h-6 rounded-full transition-colors relative p-0.5 shrink-0 ${rules.pinNotification ? 'bg-sky-600' : 'bg-slate-300'}`}>
                   <div className={`w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${rules.pinNotification ? 'translate-x-5' : 'translate-x-0'}`} />
                 </div>
-              </div>
+              </button>
             </div>
           </div>
 
@@ -1070,135 +1094,8 @@ export function GuardianView({
           )}
         </div>
 
-        {/* Card 4: FAST SITUATION AI CHECK (Cols: 6) */}
-        <div className="lg:col-span-6 bg-white rounded-[28px] p-5 sm:p-6 border border-slate-200/80 shadow-[0_14px_35px_rgba(30,41,59,0.07)] flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
-              <span className="text-[14px] font-extrabold text-slate-700 flex items-center gap-1.5">
-                <Sparkles size={14} className="text-purple-600" />
-                {tr("Quét nhanh tình huống / Số điện thoại")}
-              </span>
-              <span className="text-[14px] font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded-md">
-                AI
-              </span>
-            </div>
-
-            <form onSubmit={handleQuickAiCheck} className="space-y-3">
-              <div className="relative">
-                <input
-                  type="text"
-                  value={queryInput}
-                  onChange={(e) => {
-                    setQueryInput(e.target.value);
-                    if (queryResult) setQueryResult(null);
-                  }}
-                  placeholder={tr("Nhập tin nhắn, số điện thoại hoặc tình huống bố mẹ gặp phải...")}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-4 pr-24 py-3 text-[14px] font-medium text-slate-900 outline-none focus:border-purple-500 focus:bg-white transition-all"
-                />
-                <button
-                  type="submit"
-                  disabled={!queryInput.trim() || isChecking}
-                  className="absolute right-1.5 top-1.5 bottom-1.5 px-3 bg-purple-600 hover:bg-purple-700 disabled:opacity-40 text-white rounded-2xl text-[14px] font-bold transition-all flex items-center gap-1"
-                >
-                  {isChecking ? (
-                    <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  ) : (
-                    <>
-                      <span>{tr("Kiểm tra")}</span>
-                      <Send size={12} />
-                    </>
-                  )}
-                </button>
-              </div>
-            </form>
-
-            {/*
-              KẾT QUẢ TỪ MÁY CHỦ — nhãn nguyên văn từ catalog, lý do tra từ MÃ.
-
-              §HĐ luật 3: `chuaKiem` không rỗng ⇒ BẮT BUỘC hiện, cùng cỡ chữ với
-              nhãn. Đây là màn con cháu đọc rồi yên tâm — giấu phần "chưa kiểm
-              được" ở đây là giấu đúng chỗ nguy hiểm nhất.
-            */}
-            {queryResult && (() => {
-              const nhan = queryResult.nhan;
-              const laCao = nhan === 'CAO';
-              const laNghiNgo = nhan === 'NGHI_NGO';
-              const khongGoiDuoc = queryResult.khongGoiDuocMayChu === true;
-
-              const maChuaKiem = [...(queryResult.chuaKiem ?? [])];
-              if (queryResult.aiDaChay === false && !maChuaKiem.includes('ai_khong_chay')) {
-                maChuaKiem.push('ai_khong_chay');
-              }
-              const chuaKiem = traNhieu(CHUA_KIEM, maChuaKiem, lang);
-              const lyDo = traNhieu(MA_LY_DO, queryResult.maLyDo ?? [], lang);
-
-              return (
-                <motion.div
-                  animate={{ y: 0 }}
-                  initial={{ y: 5 }}
-                  className={`mt-3 p-3.5 rounded-2xl border-2 text-[16px] font-medium flex flex-col gap-2 ${
-                    khongGoiDuoc
-                      ? 'bg-slate-50 border-slate-300 text-slate-900'
-                      : laCao
-                        ? 'bg-red-50 border-red-400 text-red-950'
-                        : laNghiNgo
-                          ? 'bg-amber-50 border-amber-400 text-amber-950'
-                          : 'bg-slate-50 border-slate-300 text-slate-900'
-                  }`}
-                >
-                  <div className="flex items-start gap-2.5">
-                    {laCao ? (
-                      <ShieldAlert size={20} className="text-red-700 shrink-0 mt-0.5" />
-                    ) : laNghiNgo ? (
-                      <AlertTriangle size={20} className="text-amber-700 shrink-0 mt-0.5" />
-                    ) : (
-                      <Info size={20} className="text-slate-600 shrink-0 mt-0.5" />
-                    )}
-                    <p className="font-black text-[18px] leading-snug">
-                      {khongGoiDuoc
-                        ? tr('Chưa gửi đi kiểm được — mạng không đi.')
-                        : (nhan ? tra(NHAN, nhan, lang) : tr('Chưa có kết quả'))}
-                    </p>
-                  </div>
-
-                  {lyDo.length > 0 && (
-                    <ul className="pl-1 flex flex-col gap-1">
-                      {lyDo.slice(0, 6).map((cau) => (
-                        <li key={cau} className="text-[16px] leading-snug">• {cau}</li>
-                      ))}
-                    </ul>
-                  )}
-
-                  {chuaKiem.length > 0 && (
-                    <div className="border-t-2 border-slate-300 pt-2 mt-1">
-                      <p className="text-[16px] font-black mb-1 flex items-center gap-1.5">
-                        <EyeOff size={18} /> {tr('Những thứ chưa kiểm được')}
-                      </p>
-                      <ul className="pl-1 flex flex-col gap-1">
-                        {chuaKiem.map((cau) => (
-                          <li key={cau} className="text-[16px] leading-snug">• {cau}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </motion.div>
-              );
-            })()}
-          </div>
-
-          <div className="flex items-center justify-between pt-4 border-t border-slate-100 mt-4 text-[14px] text-slate-500">
-            <span>💡 {tr("Tin tức lừa đảo")}</span>
-            <button
-              type="button"
-              onClick={() => {
-                setQueryInput(tr('Số lạ gọi yêu cầu chuyển tiền gấp để nộp phạt bưu kiện'));
-              }}
-              className="text-purple-700 font-bold hover:underline"
-            >
-              {tr("Thử các tình huống mẫu")}
-            </button>
-          </div>
-        </div>
+        {/* Card 4: tách thành component riêng — gõ phím chỉ vẽ lại thẻ này (27/11/2026). */}
+        <KiemNhanhTinhHuong tr={tr} lang={lang} />
 
       </div>
 
@@ -1210,6 +1107,183 @@ export function GuardianView({
         chưa tốt, không chỉ chỗ nó làm được.
       */}
       <ThuTinhHuong t={tr} lang={lang} />
+    </div>
+  );
+}
+
+/**
+ * Thẻ "Quét nhanh tình huống" của màn con cháu.
+ *
+ * ⚠️ TÁCH RIÊNG ĐỂ GÕ KHÔNG GIẬT — 27/11/2026. Trước đây ô nhập nằm thẳng trong
+ * `GuardianView`, nên mỗi phím gõ vẽ lại cả bảng điều khiển (thẻ bố mẹ, công tắc,
+ * nhật ký, 10 tình huống thử). Đo với CPU chậm gấp 4: 33–57 ms một phím.
+ */
+function KiemNhanhTinhHuong({ tr, lang }: { tr: (k: string) => string; lang: Lang }) {
+  const [queryInput, setQueryInput] = useState('');
+  const [queryResult, setQueryResult] = useState<KetQuaKiem | null>(null);
+  const [isChecking, setIsChecking] = useState(false);
+
+  /**
+   * §4.2 — BỘ LUẬT DUY NHẤT LÀ `src/analysis/decision-engine.js`.
+   *
+   * ⚠️ BẢN TRƯỚC TỰ CHẤM ĐIỂM NGAY TRONG TRÌNH DUYỆT: một chuỗi `text.includes()`
+   * rồi tự đặt CAO / NGHI_NGO / CHUA_THAY, kèm câu "An toàn: Chưa phát hiện dấu
+   * hiệu lừa đảo phổ biến" — vừa là nhãn thứ tư bị §4.1 cấm tuyệt đối, vừa là
+   * một kết luận KHÔNG ai kiểm. Và đây là màn con cháu nhìn để yên tâm về bố mẹ,
+   * nên nó là chỗ tệ nhất để đặt một kết luận bịa.
+   *
+   * Giờ nó hỏi đúng đường mà bác dùng: `/api/analyze`, rồi hiện đúng thứ máy chủ
+   * trả — kể cả `chuaKiem`.
+   */
+  const handleQuickAiCheck = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!queryInput.trim()) return;
+
+    setIsChecking(true);
+    setQueryResult(null);
+    try {
+      const res = await fetch(api('/api/analyze'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ vanBan: queryInput }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      setQueryResult(await res.json());
+    } catch {
+      // §4.3 — hỏng mạng thì nói là hỏng mạng, KHÔNG đoán lấy một mức.
+      setQueryResult({ khongGoiDuocMayChu: true });
+    } finally {
+      setIsChecking(false);
+    }
+  };
+
+  return (
+    <div className="lg:col-span-6 bg-white rounded-[28px] p-5 sm:p-6 border border-slate-200/80 shadow-[0_14px_35px_rgba(30,41,59,0.07)] flex flex-col justify-between">
+      <div>
+        <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+          <span className="text-[14px] font-extrabold text-slate-700 flex items-center gap-1.5">
+            <Sparkles size={14} className="text-purple-600" />
+            {tr("Quét nhanh tình huống / Số điện thoại")}
+          </span>
+          <span className="text-[14px] font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded-md">
+            AI
+          </span>
+        </div>
+
+        <form onSubmit={handleQuickAiCheck} className="space-y-3">
+          <div className="relative">
+            <input
+              type="text"
+              value={queryInput}
+              onChange={(e) => {
+                setQueryInput(e.target.value);
+                if (queryResult) setQueryResult(null);
+              }}
+              placeholder={tr("Nhập tin nhắn, số điện thoại hoặc tình huống bố mẹ gặp phải...")}
+              className="w-full min-h-[52px] bg-slate-50 border border-slate-200 rounded-2xl pl-4 pr-28 py-3 text-[16px] font-medium text-slate-900 outline-none focus:border-purple-500 focus:bg-white transition-colors"
+            />
+            <button
+              type="submit"
+              disabled={!queryInput.trim() || isChecking}
+              className="absolute right-1.5 top-1.5 bottom-1.5 px-3 bg-purple-600 hover:bg-purple-700 disabled:opacity-40 text-white rounded-2xl text-[14px] font-bold transition-all flex items-center gap-1"
+            >
+              {isChecking ? (
+                <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              ) : (
+                <>
+                  <span>{tr("Kiểm tra")}</span>
+                  <Send size={12} />
+                </>
+              )}
+            </button>
+          </div>
+        </form>
+
+        {/*
+          KẾT QUẢ TỪ MÁY CHỦ — nhãn nguyên văn từ catalog, lý do tra từ MÃ.
+
+          §HĐ luật 3: `chuaKiem` không rỗng ⇒ BẮT BUỘC hiện, cùng cỡ chữ với
+          nhãn. Đây là màn con cháu đọc rồi yên tâm — giấu phần "chưa kiểm
+          được" ở đây là giấu đúng chỗ nguy hiểm nhất.
+        */}
+        {queryResult && (() => {
+          const nhan = queryResult.nhan;
+          const laCao = nhan === 'CAO';
+          const laNghiNgo = nhan === 'NGHI_NGO';
+          const khongGoiDuoc = queryResult.khongGoiDuocMayChu === true;
+
+          const maChuaKiem = [...(queryResult.chuaKiem ?? [])];
+          if (queryResult.aiDaChay === false && !maChuaKiem.includes('ai_khong_chay')) {
+            maChuaKiem.push('ai_khong_chay');
+          }
+          const chuaKiem = traNhieu(CHUA_KIEM, maChuaKiem, lang);
+          const lyDo = traNhieu(MA_LY_DO, queryResult.maLyDo ?? [], lang);
+
+          return (
+            <motion.div
+              animate={{ y: 0 }}
+              initial={{ y: 5 }}
+              className={`mt-3 p-3.5 rounded-2xl border-2 text-[16px] font-medium flex flex-col gap-2 ${
+                khongGoiDuoc
+                  ? 'bg-slate-50 border-slate-300 text-slate-900'
+                  : laCao
+                    ? 'bg-red-50 border-red-400 text-red-950'
+                    : laNghiNgo
+                      ? 'bg-amber-50 border-amber-400 text-amber-950'
+                      : 'bg-slate-50 border-slate-300 text-slate-900'
+              }`}
+            >
+              <div className="flex items-start gap-2.5">
+                {laCao ? (
+                  <ShieldAlert size={20} className="text-red-700 shrink-0 mt-0.5" />
+                ) : laNghiNgo ? (
+                  <AlertTriangle size={20} className="text-amber-700 shrink-0 mt-0.5" />
+                ) : (
+                  <Info size={20} className="text-slate-600 shrink-0 mt-0.5" />
+                )}
+                <p className="font-black text-[18px] leading-snug">
+                  {khongGoiDuoc
+                    ? tr('Chưa gửi đi kiểm được — mạng không đi.')
+                    : (nhan ? tra(NHAN, nhan, lang) : tr('Chưa có kết quả'))}
+                </p>
+              </div>
+
+              {lyDo.length > 0 && (
+                <ul className="pl-1 flex flex-col gap-1">
+                  {lyDo.slice(0, 6).map((cau) => (
+                    <li key={cau} className="text-[16px] leading-snug">• {cau}</li>
+                  ))}
+                </ul>
+              )}
+
+              {chuaKiem.length > 0 && (
+                <div className="border-t-2 border-slate-300 pt-2 mt-1">
+                  <p className="text-[16px] font-black mb-1 flex items-center gap-1.5">
+                    <EyeOff size={18} /> {tr('Những thứ chưa kiểm được')}
+                  </p>
+                  <ul className="pl-1 flex flex-col gap-1">
+                    {chuaKiem.map((cau) => (
+                      <li key={cau} className="text-[16px] leading-snug">• {cau}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </motion.div>
+          );
+        })()}
+      </div>
+
+      <div className="flex items-center justify-end pt-4 border-t border-slate-100 mt-4 text-[14px] text-slate-500">
+        <button
+          type="button"
+          onClick={() => {
+            setQueryInput(tr('Số lạ gọi yêu cầu chuyển tiền gấp để nộp phạt bưu kiện'));
+          }}
+          className="min-h-[44px] px-2 text-purple-700 font-bold hover:underline"
+        >
+          {tr("Thử các tình huống mẫu")}
+        </button>
+      </div>
     </div>
   );
 }

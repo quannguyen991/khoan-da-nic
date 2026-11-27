@@ -1923,24 +1923,44 @@ export default function App() {
         </div>
       ) : (
         /* DESKTOP GUARDIAN DASHBOARD (Optimized for Child / Guardian) */
-        <div className="flex w-full h-full min-h-screen max-h-full relative flex-col overflow-y-auto overscroll-contain touch-pan-y bg-[#f7f8fc]">
+        /*
+          ⚠️ CHIỀU CAO PHẢI XÁC ĐỊNH — sửa 27/11/2026. html/body/#root đều
+          `overflow: hidden`, còn khung ngoài chỉ có `min-h-screen` (không phải chiều
+          cao cố định), nên `h-full max-h-full` cũ không chặn được gì: khung này cao
+          bằng cả nội dung (~4.500px), không bao giờ tràn, và cả bảng điều khiển con
+          cháu KHÔNG cuộn được — kẹt ở màn đầu, trên cả điện thoại lẫn máy tính.
+        */
+        <div className="flex w-full h-[100dvh] max-h-[100dvh] relative flex-col overflow-y-auto overscroll-contain touch-pan-y bg-[#f7f8fc]">
            {/* Desktop Topbar for Guardian */}
-           <header className="flex flex-col gap-4 px-5 sm:px-8 lg:px-12 py-4 relative z-20 bg-white border-b border-slate-200/80 sticky top-0">
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex items-center gap-3 min-w-0">
-                 <div className="w-10 h-10 bg-sky-600 rounded-2xl flex items-center justify-center shadow-sm text-white shrink-0">
+           {/*
+             27/11/2026 — MỘT HÀNG. Bản cũ hai hàng, nút Đăng nhập/Đăng xuất rộng hết
+             bề ngang và dính trên cùng: ở khổ 375px thanh này ăn ~150px mỗi lần cuộn.
+             Thêm nút về vai bố mẹ — trước đây vào vai con cháu rồi là không có lối ra
+             (chỉ màn giới thiệu và màn đăng nhập có nút đổi vai).
+           */}
+           <header className="flex items-center justify-between gap-2 px-4 sm:px-8 lg:px-12 py-2.5 relative z-20 bg-white/95 border-b border-slate-200/80 sticky top-0">
+                <div className="flex items-center gap-2.5 min-w-0">
+                 <div className="w-9 h-9 bg-sky-600 rounded-xl flex items-center justify-center shadow-sm text-white shrink-0">
                     <ShieldCheck className="w-5 h-5" strokeWidth={2.5} />
                  </div>
                  <div className="min-w-0">
-                    <h1 className="font-black text-[18px] text-slate-900 leading-tight flex items-center gap-2">
-                      Khoan Đã <span className="text-sky-700 text-[14px] font-bold bg-sky-50 px-2 py-0.5 rounded-md">Guardian</span>
+                    <h1 className="font-black text-[17px] text-slate-900 leading-tight flex items-center gap-1.5 whitespace-nowrap">
+                      Khoan Đã <span className="hidden min-[420px]:inline text-sky-700 text-[14px] font-bold bg-sky-50 px-1.5 py-0.5 rounded-md">Guardian</span>
                     </h1>
-                    <p className="text-[14px] text-slate-500 font-medium truncate">{t("Bảng điều khiển an toàn dành cho con cháu")}</p>
+                    <p className="hidden sm:block text-[14px] text-slate-500 font-medium truncate">{t("Bảng điều khiển an toàn dành cho con cháu")}</p>
                  </div>
                 </div>
-              </div>
-              <div className="flex justify-end w-full">
-                 <button onClick={() => { if (isLoggedIn) { void dangXuat(); } else { setView('login'); } }} className="min-h-[48px] w-full sm:w-auto flex items-center justify-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-xl font-bold text-[14px] transition-opacity active:scale-[0.98]">
+              <div className="flex items-center gap-1.5 shrink-0">
+                 <button
+                   type="button"
+                   onClick={() => { setUserRole('elder'); setView('home'); }}
+                   aria-label={t("Chuyển sang giao diện Người cao tuổi")}
+                   title={t("Chuyển sang giao diện Người cao tuổi")}
+                   className="min-h-[44px] min-w-[44px] flex items-center justify-center gap-1.5 px-2.5 rounded-xl border border-slate-200 bg-white text-purple-700 font-bold text-[14px] hover:bg-purple-50 transition-colors"
+                 >
+                   <Smartphone className="w-4 h-4" /><span className="hidden sm:inline">{t("Chuyển sang vai Bác (Người già)")}</span>
+                 </button>
+                 <button onClick={() => { if (isLoggedIn) { void dangXuat(); } else { setView('login'); } }} className="min-h-[44px] flex items-center justify-center gap-1.5 bg-slate-900 hover:bg-slate-800 text-white px-3 rounded-xl font-bold text-[14px] transition-colors active:scale-[0.98]">
                    {isLoggedIn ? <><LogOut className="w-4 h-4" /> <span className="text-[14px]">{t("Đăng xuất")}</span></> : <><UserCircle className="w-4 h-4" /> <span className="text-[14px]">{t("Đăng nhập")}</span></>}
                  </button>
               </div>
